@@ -1,0 +1,1606 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Thinking in Erlang</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20130322" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<link href="ui/sh/sh99s.css" rel="stylesheet"/>
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+<!-- syntax highlighter JS -->
+<script type="text/javascript" src="ui/sh/shCore.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushErlang.js"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+    <div id="sub_header"></div>
+    <div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>One day Erlang training</h1>
+<h2>Thinking in Erlang, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>Thinking in Erlang</h1>
+<h2>One day Erlang training</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>Erlang installation</h1>
+</div>
+
+
+<div class="slide">
+<h1>Where to find Erlang</h1>
+<ul>
+<li>Website: http://erlang.org</li>
+<li>Source: https://github.com/erlang/otp</li>
+<li>Arch Linux package: pacman</li>
+<li>Other packages: http://www.erlang.org/download.html</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Installing</h1>
+<ul>
+<li>Arch Linux: pacman -S erlang</li>
+<li>Other platforms: see installer</li>
+<li>Ad-hoc install: https://github.com/spawngrid/kerl</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Where to find help</h1>
+<ul>
+<li>Official documentation: http://www.erlang.org/erldoc</li>
+<li>Command line: erl -man &lt;module&gt;</li>
+<li>Books: Programming Erlang, LYSE</li>
+<li>Mailing lists: http://erlang.org/community.html</li>
+<li>IRC: #erlang on Freenode</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang the Movie</h1>
+<ul>
+<li>http://www.youtube.com/watch?v=xrIjfIjssLE</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>The shell</h1>
+<ul>
+<li>erl</li>
+<li>Ctrl+G</li>
+<li>Ctrl+C</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Hello world</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> "Hello world!".
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>What's Erlang?</h1>
+</div>
+
+
+<div class="slide">
+<h1>The question</h1>
+<ul>
+<li>"How do we make reliable systems from components which fail?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Black boxes</h1>
+<ul>
+<li>We build systems of many isolated black boxes that communicate by talking to each other</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang black boxes</h1>
+<ul>
+<li>Nodes</li>
+<li>Processes</li>
+<li>Ports</li>
+<li>ets tables</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Concurrent programming language</h1>
+<ul>
+<li>Large number of processes</li>
+<li>Complete isolation of processes</li>
+<li>No sharing of data</li>
+<li>Location transparency</li>
+<li>Pure message passing</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Concurrency?</h1>
+<ul>
+<li>You already understand concurrency</li>
+<li>The world is parallel</li>
+<li>The world is made of many black boxes</li>
+<li>You need concurrency to model the real-world</li>
+<li>Concurrency makes it easy to build scalable, distributed applications</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Modeling the real world</h1>
+<ul>
+<li>"Making a real-world application is based on observation of the concurrency patterns and message channels of the application"</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Black boxes fail</h1>
+<ul>
+<li>Hardware failure (just replace the component)</li>
+<li>Software failure (depends on the error reason)</li>
+<li>Concurrency and isolation ensures only one black box fails instead of the whole system</li>
+<li>Erlang processes can detect and identify failure to repair the system</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Fault detection</h1>
+<ul>
+<li>Processes can be explicitly linked</li>
+<li>All linked processes are alerted when a process dies</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Fault identification</h1>
+<ul>
+<li>Processes say why they die</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Let it crash</h1>
+<ul>
+<li>Use links to detect and identify errors</li>
+<li>Linked process then decides whether to restart the dead process</li>
+<li>Restarting = starting a new process with the same initial arguments</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Software evolves</h1>
+<ul>
+<li>Reliable systems must be able to be upgraded without being stopped</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang in 6 key points</h1>
+<ul>
+<li>Concurrency (processes)</li>
+<li>Error encapsulation (isolation)</li>
+<li>Fault detection (what failed)</li>
+<li>Fault identification (why it failed)</li>
+<li>Live code upgrade (evolving systems)</li>
+<li>Stable storage (crash recovery)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>What's OTP?</h1>
+</div>
+
+
+<div class="slide">
+<h1>OTP</h1>
+<ul>
+<li>A framework for building fault tolerant distributed applications</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>OTP provides middlewares</h1>
+<ul>
+<li>Releases (packaging, upgrades)</li>
+<li>Applications</li>
+<li>Supervisors</li>
+<li>Client/server processes</li>
+<li>Finite state machines</li>
+<li>Event handlers</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>OTP provides tools</h1>
+<ul>
+<li>Development</li>
+<li>Testing</li>
+<li>Debugging</li>
+<li>Monitoring</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Overview of an Erlang system</h1>
+</div>
+
+
+<div class="slide">
+<h1>Release</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> application:start(sasl).
+ok
+
+...
+=PROGRESS REPORT==== 9-Oct-2013::06:51:45 ===
+         application: sasl
+          started_at: nonode@nohost
+
+2> release_handler:which_releases().
+[{"OTP  APN 181 01","R16B02",
+  ["kernel-2.16.3","stdlib-1.19.3","sasl-2.3.3"],
+  permanent}]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Nodes</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> node().
+nonode@nohost
+2> nodes().
+[]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Nodes (distributed mode)</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+(a@localhost)1> net_adm:ping(b@localhost).
+pong
+(a@localhost)2> nodes().
+[b@localhost]
+
+(b@localhost)1> nodes().
+[a@localhost]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Processes</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> i().
+Pid                   Initial Call                          Heap     Reds Msgs
+Registered            Current Function                     Stack              
+<0.0.0>               otp_ring0:start/2                     1598     3339    0
+init                  init:loop/1                              2              
+<0.3.0>               erlang:apply/2                        2586   136197    0
+erl_prim_loader       erl_prim_loader:loop/3                   6              
+<0.6.0>               gen_event:init_it/6                    376      220    0
+error_logger          gen_event:fetch_msg/5                    9              
+<0.7.0>               erlang:apply/2                        1598      434    0
+application_controlle gen_server:loop/6                        7              
+...
+Total                                                      39469   310325    0
+                                                             220              
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Registered processes</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> erlang:registered().
+[application_controller,user_drv,kernel_safe_sup,rex,
+ standard_error,kernel_sup,global_group,standard_error_sup,
+ global_name_server,inet_db,file_server_2,user,init,
+ code_server,erl_prim_loader,error_logger]
+2> global:registered_names().
+[]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Ets tables</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> ets:i().
+ id              name              type  size   mem      owner
+ ----------------------------------------------------------------------------
+ 13              code              set   262    9659     code_server
+ 4110            code_names        set   54     6687     code_server
+ 8207            shell_records     ordered_set 0      89       <0.27.0>
+ ac_tab          ac_tab            set   6      841      application_controller
+ file_io_servers file_io_servers   set   0      299      file_server_2
+ global_locks    global_locks      set   0      299      global_name_server
+ global_names    global_names      set   0      299      global_name_server
+ global_names_ext global_names_ext  set   0      299      global_name_server
+ global_pid_ids  global_pid_ids    bag   0      299      global_name_server
+ global_pid_names global_pid_names  bag   0      299      global_name_server
+ inet_cache      inet_cache        bag   0      299      inet_db
+ inet_db         inet_db           set   29     622      inet_db
+ inet_hosts_byaddr inet_hosts_byaddr bag   0      299      inet_db
+ inet_hosts_byname inet_hosts_byname bag   0      299      inet_db
+ inet_hosts_file_byaddr inet_hosts_file_byaddr bag   0      299      inet_db
+ inet_hosts_file_byname inet_hosts_file_byname bag   0      299      inet_db
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Applications</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> application:info().
+[{loaded,[{kernel,"ERTS  CXC 138 10","2.16.3"},
+          {stdlib,"ERTS  CXC 138 10","1.19.3"}]},
+ {loading,[]},
+ {started,[{stdlib,permanent},{kernel,permanent}]},
+ {start_p_false,[]},
+ {running,[{stdlib,undefined},{kernel,<0.9.0>}]},
+ {starting,[]}]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Modules</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> erlang:loaded().
+[erl_internal,otp_internal,erl_parse,erl_scan,io,sets,dict,
+ ordsets,erl_lint,file_io_server,orddict,erl_eval,c,
+ error_logger_tty_h,kernel_config,shell,io_lib_format,
+ proplists,io_lib,edlin,group,user_drv,user_sup,
+ supervisor_bridge,standard_error,ram_file,file,beam_lib,
+ code_server|...]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>GUI</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> observer:start().
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>The building blocks</h1>
+</div>
+
+
+<div class="slide">
+<h1>Code and data</h1>
+<ul>
+<li>Two types of building blocks</li>
+<li>The code that the programs in the system execute</li>
+<li>The programs themselves and their associated state</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Sounds familiar?</h1>
+<ul>
+<li>Erlang is an operating system for your code</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Code</h1>
+<img src="pics/building_blocks_code.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Releases</h1>
+<ul>
+<li>A self-contained package for running your node</li>
+<li>Contains the full Erlang VM and all files needed</li>
+<li>Can be deployed and ran directly on target machines</li>
+<li>Capable of being fully upgraded live (release upgrades)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Applications 1</h1>
+<ul>
+<li>A library application is a set of related modules and files</li>
+<li>An application is the above plus a set of running processes (when started)</li>
+<li>Allows grouping dependent modules together</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Modules</h1>
+<ul>
+<li>A box where we put related functions</li>
+<li>Modules can be upgraded live</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Functions</h1>
+<ul>
+<li>A small program</li>
+<li>Functions may take parameters and always return a value</li>
+<li>Only exported functions can be called from outside a module</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Data</h1>
+<img src="pics/building_blocks_data.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Nodes</h1>
+<ul>
+<li>A running instance of the Erlang VM</li>
+<li>Using more than one enables scaling, distribution and fault tolerance</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Application 2</h1>
+<ul>
+<li>An instance of a running application</li>
+<li>Allows grouping dependent processes together</li>
+<li>Applications should have a single overall purpose</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Processes</h1>
+<ul>
+<li>An instance of a program being executed</li>
+<li>Processes should have a single purpose</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Process registry</h1>
+<ul>
+<li>A mechanism to name processes</li>
+<li>Use it to quickly find important processes and simplify your code</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Ets tables</h1>
+<ul>
+<li>A process-like in-memory key-value store</li>
+<li>Always linked to a certain process</li>
+<li>Table can be inherited by another process on failure</li>
+<li>Much faster concurrent access than normal processes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 1</h1>
+<ul>
+<li>Write a simplified diagram of a fault tolerant system using the above building blocks</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 2</h1>
+<ul>
+<li>Add a Web layer to the previous example so that browsers can access your system</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Types</h1>
+</div>
+
+
+<div class="slide">
+<h1>Integer</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> 42.
+42
+2> 1 + 1.
+2
+3> 3 * 3.
+9
+4> 9 div 3.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Atom 1</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> blue.
+blue
+2> erlang.
+erlang
+3> 'quoted form'.
+'quoted form'
+4> erlang =:= 'erlang'.
+true
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Atom 2</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+5> M = io. 
+io
+6> F = format.
+format
+7> M:F("Hello world!").
+Hello world!
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>List 1</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> [].
+[]
+2> [1, 2, 3].
+[1,2,3]
+3> [42, [blue, red], cats].
+[42,[blue,red],cats]
+4> [1|[2|[3]]].
+[1,2,3]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>List 2</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+5> Str = "Hello world!".
+"Hello world!"
+6> [$H, $e|Str].
+"HeHello world!"
+7> [0|Str].
+[0,72,101,108,108,111,32,119,111,114,108,100,33]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>List 3</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> Str = "123".
+"123"
+2> list_to_integer(Str).
+123
+3> list_to_atom(Str).
+'123'
+4> integer_to_list(123).
+"123"
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>List 4</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> list_to_existing_atom("ok").
+ok
+2> list_to_existing_atom("hehehe").
+** exception error: bad argument
+     in function  list_to_existing_atom/1
+        called as list_to_existing_atom("hehehe")
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Tuple</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> {}.
+{}
+2> {ok, 42}.
+{ok,42}
+3> {error, "Can't connect", [{file, "..."}, {line, 42}]}.
+{error,"Can't connect",[{file,"..."},{line,42}]}
+4> element(2, {ok, 42}).
+42
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Pid</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> self().
+<0.33.0>
+2> spawn(fun() -> ok end).
+<0.36.0>
+3> spawn(fun() -> ok end).
+<0.38.0>
+4> spawn(fun() -> ok end).
+<0.40.0>
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Reference</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> make_ref().
+#Ref<0.0.0.32>
+2> R1 = make_ref().
+#Ref<0.0.0.37>
+3> R2 = make_ref().
+#Ref<0.0.0.42>
+4> R1 =:= R2.
+false
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Fun</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> F = fun() -> ok end.
+#Fun<erl_eval.20.80484245>
+2> F().
+ok
+3> G = fun(true) -> happy; (false) -> sad end.
+#Fun<erl_eval.6.80484245>
+4> G(true).
+happy
+5> G(false).
+sad
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Type identification</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> is_integer("123").
+false
+2> is_integer(123).  
+true
+3> is_integer(ok).  
+false
+4> is_atom(ok).   
+true
+5> is_tuple(ok).
+false
+6> is_tuple({ok, 123}).
+true
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Other types</h1>
+<ul>
+<li>Float</li>
+<li>Binary</li>
+<li>Maps (R17+)</li>
+<li>Improper lists</li>
+<li>Port</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Modules and functions</h1>
+</div>
+
+
+<div class="slide">
+<h1>Structure of a module</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+-module(my_module).
+-export([f/0, g/2, ...]).
+
+f() ->
+    %% @todo Implement this function!!
+    ok.
+
+g(A, B) when is_integer(A), is_integer(B) ->
+    A * B.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Exports</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+-export([f/0, g/2, ...]).
+-export([h/1]).
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Function definition</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f() ->
+    ok.
+
+g(A, B) ->
+    A * B.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Guards</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+g(A, B) when is_integer(A), is_integer(B) ->
+    A * B.
+
+h(C) when C > 0 ->
+    ok.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Where can guards be used?</h1>
+<ul>
+<li>Function clauses</li>
+<li>Case clauses</li>
+<li>Receive clauses</li>
+<li>if</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Pattern matching in function clauses</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+is_blue(blue) ->
+    true.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Function clauses</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+is_blue(blue) ->
+    true;
+is_blue(_) ->
+    false.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>case .. of</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+is_blue(Color) ->
+    case Color of
+        blue ->
+            true;
+        _ ->
+            false
+    end.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Local function call</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+paint(Color) ->
+    case is_blue(Color) of
+        true -> paint_window();
+        false -> paint_wall()
+    end.
+
+is_blue(blue) ->
+    true;
+is_blue(_) ->
+    false.
+
+%% ...
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Remote function call</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+get_data(Filename) ->
+    {ok, Data} = file:read_file(Filename),
+    Data.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Pattern matching with =</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f(Color) ->
+    blue = Color,
+    ok.
+
+get_data(Filename) ->
+    {ok, Data} = file:read_file(Filename),
+    Data.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Expressions</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+get_data(Filename) ->
+    {ok, Data} = file:read_file(Filename),
+    io:format("~s~n", [Data]),
+    Data.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Function return value</h1>
+<ul>
+<li>When they return, all functions return a value</li>
+<li>It is always the result of the last expression</li>
+<li>Some functions never return</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Recursion</h1>
+</div>
+
+
+<div class="slide">
+<h1>Recursion explained</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f() ->
+    f().
+]]></script></div>
+<ul>
+<li>"This will make the VM run out of memory!"</li>
+<li>Will it? Try it.</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Recursing through a list</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f([]) ->
+    ok;
+f([H|T]) ->
+    io:format("~p", [H]),
+    f(T).
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Transforming a list 1</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f([]) ->
+    [];
+f([H|T]) ->
+    [H * 2|f(T)].
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Accumulator</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f(List) ->
+    f(List, []).
+
+f([], Acc) ->
+    Acc;
+f([H|T], Acc) ->
+    f(T, [H|Acc]).
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Transforming a list 2</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f(List) ->
+    f(List, []).
+
+f([], Acc) ->
+    lists:reverse(Acc);
+f([H|T], Acc) ->
+    f(T, [H * 2|Acc]).
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 3</h1>
+<ul>
+<li>Write a function that applies a fun over all elements of a list and returns it</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Transforming a list 3</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f(List) ->
+    map(fun (N) -> N * 2 end, List).
+
+map(Fun, List) ->
+	map(Fun, List, []).
+
+map(_, [], Acc) ->
+    lists:reverse(Acc);
+map(Fun, [H|T], Acc) ->
+    map(T, [Fun(H)|Acc]).
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Transforming a list 4</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+f(List) ->
+    [N * 2 || N <- List].
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 4</h1>
+<ul>
+<li>Implement a function that sorts a list of Erlang terms</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 5</h1>
+<ul>
+<li>Implement a function that removes all non-prime numbers from a list</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Concurrency and message passing</h1>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 6</h1>
+<ul>
+<li>What's a process?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Spawn</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> spawn(fun() -> ok end).
+<0.35.0>
+2> spawn(fun() -> timer:sleep(10000) end).
+<0.37.0>
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Order of execution is undefined</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+8> [spawn(fun () -> erlang:display(N) end) || N <- lists:seq(1, 100)].
+1
+2
+3
+4
+6
+5
+7
+...
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Processes are cheap</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> L = lists:seq(1, 10000).
+[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,
+ 23,24,25,26,27,28,29|...]
+2> [spawn(fun () -> receive ok -> ok end end) || _ <- L].
+[<0.36.0>,<0.37.0>,<0.38.0>,<0.39.0>,<0.40.0>,<0.41.0>,
+ <0.42.0>,<0.43.0>,<0.44.0>,<0.45.0>,<0.46.0>,<0.47.0>,
+ <0.48.0>,<0.49.0>,<0.50.0>,<0.51.0>,<0.52.0>,<0.53.0>,
+ <0.54.0>,<0.55.0>,<0.56.0>,<0.57.0>,<0.58.0>,<0.59.0>,
+ <0.60.0>,<0.61.0>,<0.62.0>,<0.63.0>,<0.64.0>|...]
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Processes are isolated</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> spawn(fun () -> 1 div 0 end).
+<0.35.0>
+
+=ERROR REPORT==== 11-Oct-2013::13:19:07 ===
+Error in process <0.35.0> with exit value: {badarith,[{erlang,div,[1,0],[]}]}
+
+2>
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Message passing</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> self() ! hello.
+hello
+2> flush().
+Shell got hello
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive 1</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> self() ! hello.
+hello
+2> receive V -> V end.
+hello
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive 2</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> Pid = spawn(fun () -> receive V -> io:format("yay! ~p~n", [V]) end end).
+<0.35.0>
+2> Pid ! hello.
+yay! hello
+hello
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive 3</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> self() ! hello.
+hello
+2> receive hello -> how_are_you; Any -> please_dont_be_impolite end.
+how_are_you
+3> self() ! yo.                                                     
+yo
+4> receive hello -> how_are_you; Any -> please_dont_be_impolite end.
+please_dont_be_impolite
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive .. after 1</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> receive V -> V after 1000 -> nothing end.
+nothing
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive .. after 2</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+2> self() ! something.
+something
+3> receive V -> V after 1000 -> nothing end.
+something
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive .. after 3</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+4> receive after 1000 -> timeout end.
+timeout
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive .. after 4</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+5> receive V -> V after infinity -> nothing end.
+
+User switch command
+ --> i 
+ --> c
+** exception exit: killed
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive .. after 5</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+6> spawn(fun () -> receive V -> io:format("yay! ~p~n", [V]) after 1000 -> io:format("nothing :(~n") end end).      
+<0.41.0>
+nothing :(
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>receive .. after 6</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+7> Pid = spawn(fun () -> receive M -> io:format("yay! ~p~n", [M]) after 10000 -> io:format("nothing :(~n") end end).
+<0.35.0>
+8> Pid ! yay.
+yay! yay
+yay
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Selective receive</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> self() ! blue.
+blue
+2> receive red -> ok after 1000 -> timeout end.
+timeout
+3> flush().
+Shell got blue
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Receive loop 1</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+-module(recv_loop).
+-export([start/0, loop/0]).
+
+start() ->
+    spawn(fun loop/0).
+
+loop() ->
+    receive
+        Msg ->
+            io:format("yay! ~p~n", [Msg])
+    end,
+    loop().
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Receive loop 2</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> c(recv_loop).
+{ok,recv_loop}
+2> Pid = recv_loop:start().
+<0.41.0>
+3> Pid ! hello.
+yay! hello
+hello
+4> Pid ! world.
+yay! world
+world
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 7</h1>
+<ul>
+<li>Add a function to stop recv_loop processes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Process state</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+loop() ->
+    loop(0).
+
+loop(Counter) ->
+    receive
+        Msg ->
+            io:format("yay ~p! ~p~n", [Counter, Msg])
+    end,
+    loop(Counter + 1).
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 8</h1>
+<ul>
+<li>Make a function for incrementing a value in the recv_loop process</li>
+<li>Make a function for retrieving this value</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>In the previous episode</h1>
+<ul>
+<li>A function that sends a message and doesn't expect a message in response is called a cast</li>
+<li>A function that sends a message and expect a message in response is called a call</li>
+<li>A process keeps state by passing it in function arguments</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Cast</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+cast(Pid, Msg) ->
+    Pid ! {cast, Msg},
+    ok.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Call</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+call(Pid, Msg) ->
+    call(Pid, Msg, 5000).
+
+call(Pid, Msg, Timeout) ->
+    Pid ! {call, Msg},
+    receive
+        {call_response, Response} ->
+            Response
+    after Timeout ->
+        exit(timeout)
+    end.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Process registry</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> register(myself, self()).
+true
+2> myself ! hello.
+hello
+3> flush().
+Shell got hello
+ok
+4> whereis(myself).
+<0.33.0>
+5> self().
+<0.33.0>
+6> spawn(fun () -> register(myself, self()) end).
+<0.40.0>
+=ERROR REPORT==== 11-Oct-2013::14:40:47 ===
+Error in process <0.40.0> with exit value: {badarg,[{erlang,register,[myself,<0.40.0>],[]}]}
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Remote error handling</h1>
+</div>
+
+
+<div class="slide">
+<h1>Unexpected consequences</h1>
+<ul>
+<li>What happens if the process you call crashes?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Monitors 1</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> Pid = spawn(fun () -> receive stop -> ok end end).
+<0.36.0>
+2> monitor(process, Pid).
+#Ref<0.0.0.38>
+3> Pid ! stop.
+stop
+4> flush().
+Shell got {'DOWN',#Ref<0.0.0.38>,process,<0.36.0>,normal}
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Monitors 2</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> Pid = spawn(fun () -> receive stop -> 1 = 2 end end).
+<0.35.0>
+2> Ref = monitor(process, Pid).
+#Ref<0.0.0.36>
+3> Pid ! stop.
+stop
+=ERROR REPORT==== 11-Oct-2013::16:10:59 ===
+Error in process <0.35.0> with exit value: {{badmatch,2},[{erl_eval,expr,3,[]}]} 
+
+4> receive {'DOWN', Ref, process, Pid, Reason} -> Reason end.
+{{badmatch,2},[{erl_eval,expr,3,[]}]}
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 9</h1>
+<ul>
+<li>Modify the call function to detect process failure</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Is that really necessary?</h1>
+<ul>
+<li>"My programs never have bugs!"</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 10</h1>
+<ul>
+<li>Identify more potential issues that may happen when performing a call</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Safe RPC</h1>
+<ul>
+<li>Let's learn from Erlang/OTP itself</li>
+<li>Take a look at gen.erl</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Links 1</h1>
+<img src="pics/links_crash_1.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Links 2</h1>
+<img src="pics/links_crash_2.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Links 3</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> Pid = self().
+<0.33.0>
+2> Child = spawn(fun () -> link(Pid), receive _ -> exit(booya) end end).
+<0.36.0>
+3> Child ! bye.
+** exception exit: booya
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Links 4</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> Child = spawn_link(fun () -> receive _ -> exit(booya) end end).
+<0.35.0>
+2> Child ! bye.
+** exception exit: booya
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Links 5</h1>
+<img src="pics/links_trap_exit_1.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Links 6</h1>
+<img src="pics/links_trap_exit_2.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Links 7</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+1> erlang:process_flag(trap_exit, true).
+false
+2> Child = spawn_link(fun () -> receive _ -> exit(booya) end end).
+<0.36.0>
+3> Child ! bye.
+bye
+4> flush().
+Shell got {'EXIT',<0.36.0>,booya}
+ok
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Monitors vs links</h1>
+<ul>
+<li>Monitors are unidirectional</li>
+<li>Links are bidirectional</li>
+<li>Monitors just send a message</li>
+<li>Links send an exit signal</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Manage the unexpected</h1>
+<ul>
+<li>What should you do when a process crash?</li>
+<li>Why do processes crash, anyway?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 11</h1>
+<ul>
+<li>Create a process that will always restart crashing processes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Exercise 12</h1>
+<ul>
+<li>Is this method truly fault tolerant?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Supervision tree</h1>
+<ul>
+<li>Let's take a quick look at OTP applications and supervision trees again</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Food for thoughts</h1>
+<ul>
+<li>OTP comes with everything we just saw</li>
+<li>The gen_server behavior implements client/server as a process (calls and casts)</li>
+<li>The supervisor behavior implements supervision with tons of options and safety included</li>
+<li>The application behavior implements the starting and stopping of OTP applications</li>
+<li>They are battle tested and make upgrading your code easy</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Final exercise</h1>
+</div>
+
+
+<div class="slide">
+<h1>Erlang chat</h1>
+<ul>
+<li>Write a program that allows different Erlang shells to communicate in a common chat room</li>
+<li>Bonus: Make that program fault tolerant</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Questions</h1>
+<ul>
+<li><a href="http://ninenines.eu">http://ninenines.eu</a></li>
+<li>Twitter: @lhoguin</li>
+<li>IRC: #erlang and #ninenines on Freenode</li>
+</ul>
+</div>
+
+
+</div>
+
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+</body>
+</html>
