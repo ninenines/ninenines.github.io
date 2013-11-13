@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Article: Build an FTP Server with Ranch in 30 Minutes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feed/atom" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li class="active"><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li><a title="Official support" href="/support">Pricing & Support</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>Build an FTP Server with Ranch in 30 Minutes</span></h1>
+	<p class="date">
+		<span class="day">14</span>
+		<span class="month">Nov</span>
+	</p>
+</header>
+
+<p>Last week I was speaking at the
+<a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">London Erlang Factory Lite</a>
+where I presented a live demonstration of building an FTP server using
+<a href="http://ninenines.eu/docs/en/ranch/HEAD/README">Ranch</a>.
+As there was no slide, you should use this article as a reference instead.</p>
+
+<p>The goal of this article is to showcase how to use Ranch for writing
+a network protocol implementation, how Ranch gets out of the way to let
+you write the code that matters, and the common techniques used when
+writing servers.</p>
+
+<p>Let's start by creating an empty project. Create a new directory and
+then open a terminal into that directory. The first step is to add Ranch
+as a dependency. Create the <code>rebar.config</code> file and add the
+following 3 lines.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{deps, [
+    {ranch, ".*", {git, "git://github.com/extend/ranch.git", "master"}}
+]}.
+]]></script>
+
+<p>This makes your application depend on the last Ranch version available
+on the <em>master</em> branch. This is fine for development, however when
+you start pushing your application to production you will want to revisit
+this file to hardcode the exact version you are using, to make sure you
+run the same version of dependencies in production.</p>
+
+<p>You can now fetch the dependencies.</p>
+
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+$ rebar get-deps
+==> ranch_ftp (get-deps)
+Pulling ranch from {git,"git://github.com/extend/ranch.git","master"}
+Cloning into 'ranch'...
+==> ranch (get-deps)
+]]></script>
+
+<p>This will create a <code>deps/</code> folder containing Ranch.</p>
+
+<p>We don't actually need anything else to write the protocol code.
+We could make an application for it, but this isn't the purpose of this
+article so let's just move on to writing the protocol itself. Create
+the file <code>ranch_ftp_protocol.erl</code> and open it in your favorite
+editor.</p>
+
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+$ vim ranch_ftp_protocol.erl
+]]></script>
+
+<p>Let's start with a blank protocol module.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+-module(ranch_ftp_protocol).
+-export([start_link/4, init/3]).
+
+start_link(ListenerPid, Socket, Transport, Opts) ->
+    Pid = spawn_link(?MODULE, init, [ListenerPid, Socket, Transport]),
+    {ok, Pid}.
+
+init(ListenerPid, Socket, Transport) ->
+    io:format("Got a connection!~n"),
+    ok.
+]]></script>
+
+<p>When Ranch receives a connection, it will call the <code>start_link/4</code>
+function with the listener's pid, socket, transport module to be used,
+and the options we define when starting the listener. We don't need options
+for the purpose of this article, so we don't pass them to the process we are
+creating.</p>
+
+<p>Let's open a shell and start a Ranch listener to begin accepting
+connections. We only need to call one function. You should probably open
+it in another terminal and keep it open for convenience. If you quit
+the shell you will have to repeat the commands to proceed.</p>
+
+<p>Also note that you need to type <code>c(ranch_ftp_protocol).</code>
+to recompile and reload the code for the protocol. You do not need to
+restart any process however.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+$ erl -pa ebin deps/*/ebin
+Erlang R15B02 (erts-5.9.2) [source] [64-bit] [smp:4:4] [async-threads:0] [hipe] [kernel-poll:false]
+
+Eshell V5.9.2  (abort with ^G)
+1> application:start(ranch).
+ok
+2> ranch:start_listener(my_ftp, 10,
+       ranch_tcp, [{port, 2121}],
+       ranch_ftp_protocol, []).
+{ok,<0.40.0>}
+]]></script>
+
+<p>This starts a listener named <code>my_ftp</code> that runs your very own
+<code>ranch_ftp_protocol</code> over TCP, listening on port <code>2121</code>.
+The last argument is the options given to the protocol that we ignored
+earlier.</p>
+
+<p>To try your code, you can use the following command. It should be able
+to connect, the server will print a message in the console, and then
+the client will print an error.</p>
+
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+$ ftp localhost 2121
+]]></script>
+
+<p>Let's move on to actually writing the protocol.</p>
+
+<p>Once you have created the new process and returned the pid, Ranch will
+give ownership of the socket to you. This requires a synchronization
+step though.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init(ListenerPid, Socket, Transport) ->
+    ok = ranch:accept_ack(ListenerPid),
+    ok.
+]]></script>
+
+<p>Now that you acknowledged the new connection, you can use it safely.</p>
+
+<p>When an FTP server accepts a connection, it starts by sending a
+welcome message which can be one or more lines starting with the
+code <code>200</code>. Then the server will wait for the client
+to authenticate the user, and if the authentication went successfully,
+which it will always do for the purpose of this article, it will reply
+with a <code>230</code> code.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init(ListenerPid, Socket, Transport) ->
+    ok = ranch:accept_ack(ListenerPid),
+    Transport:send(Socket, <<"200 My cool FTP server welcomes you!\r\n">>),
+    {ok, Data} = Transport:recv(Socket, 0, 30000),
+    auth(Socket, Transport, Data).
+
+auth(Socket, Transport, <<"USER ", Rest/bits>>) ->
+    io:format("User authenticated! ~p~n", [Rest]),
+    Transport:send(Socket, <<"230 Auth OK\r\n">>),
+    ok.
+]]></script>
+
+<p>As you can see we don't need complex parsing code. We can simply
+match on the binary in the argument!</p>
+
+<p>Next we need to loop receiving data commands and optionally
+execute them, if we want our server to become useful.</p>
+
+<p>We will replace the <code>ok.</code> line with the call to
+the following function. The new function is recursive, each call
+receiving data from the socket and sending a response. For now
+we will send an error response for all commands the client sends.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+loop(Socket, Transport) ->
+    case Transport:recv(Socket, 0, 30000) of
+        {ok, Data} ->
+            handle(Socket, Transport, Data),
+            loop(Socket, Transport);
+        {error, _} ->
+            io:format("The client disconnected~n")
+    end.
+
+handle(Socket, Transport, Data) ->
+    io:format("Command received ~p~n", [Data]),
+    Transport:send(Socket, <<"500 Bad command\r\n">>).
+]]></script>
+
+<p>With this we are almost ready to start implementing commands.
+But with code like this we might have errors if the client doesn't
+send just one command per packet, or if the packets arrive too fast,
+or if a command is split over multiple packets.</p>
+
+<p>To solve this, we need to use a buffer. Each time we receive data,
+we will append to the buffer, and then check if we have received a
+command fully before running it. The code could look similar to the
+following.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+loop(Socket, Transport, Buffer) ->
+    case Transport:recv(Socket, 0, 30000) of
+        {ok, Data} ->
+			Buffer2 = << Buffer/binary, Data/binary >>,
+			{Commands, Rest} = split(Buffer2),
+			[handle(Socket, Transport, C) || C <- Commands],
+            loop(Socket, Transport);
+        {error, _} ->
+            io:format("The client disconnected~n")
+    end.
+]]></script>
+
+<p>The implementation of <code>split/1</code> is left as an exercice
+to the reader. You will also probably want to handle the <code>QUIT</code>
+command, which must stop any processing and close the connection.</p>
+
+<p>The attentive reader will also take note that in the case of text-
+based protocols where commands are separated by line breaks, you can
+set an option using <code>Transport:setopts/2</code> and have all the
+buffering done for you for free by Erlang itself.</p>
+
+<p>As you can surely notice by now, Ranch allows us to build network
+applications by getting out of our way entirely past the initial setup.
+It lets you use the power of binary pattern matching to write text and
+binary protocol implementations in just a few lines of code.</p>
+
+<ul><li><a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">Watch the talk</a></li></ul>
+
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul class="extra_margin">
+	
+		<li><a href="/articles/farwest-funded">farwest-funded</a></li>
+	
+		<li><a href="/articles/erlang.mk-and-relx">erlang.mk-and-relx</a></li>
+	
+		<li><a href="/articles/xerl-0.5-intermediate-module">xerl-0.5-intermediate-module</a></li>
+	
+		<li><a href="/articles/xerl-0.4-expression-separator">xerl-0.4-expression-separator</a></li>
+	
+		<li><a href="/articles/xerl-0.3-atomic-expressions">xerl-0.3-atomic-expressions</a></li>
+	
+		<li><a href="/articles/erlang-scalability">erlang-scalability</a></li>
+	
+		<li><a href="/articles/xerl-0.2-two-modules">xerl-0.2-two-modules</a></li>
+	
+		<li><a href="/articles/xerl-0.1-empty-modules">xerl-0.1-empty-modules</a></li>
+	
+		<li><a href="/articles/ranch-ftp">ranch-ftp</a></li>
+	
+		<li><a href="/articles/tictactoe">tictactoe</a></li>
+	
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us"> Contact us</a></li>
+                  <!-- <li><a href="#" title="Legal information and privacy policy"> Legal information</a></li> -->
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2013</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+  </body>
+</html>

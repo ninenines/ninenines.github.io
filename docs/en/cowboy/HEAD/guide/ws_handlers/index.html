@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support:  </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feed/atom" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Official support" href="/support">Pricing & Support</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<h1 class="lined-header"><span>Websocket handlers</span></h1>
+<div class="service-description">
+<h2>Purpose</h2>
+<p>Websocket is an extension to HTTP to emulate plain TCP connections between the user's browser and the server. Requests that are upgraded are then handled by websocket handlers.</p>
+<p>Both sides of the socket can send data at any time asynchronously.</p>
+<p>Websocket is an IETF standard. Cowboy supports the standard and all the drafts that were previously implemented by browsers. Websocket is implemented by most browsers today, although for backward compatibility reasons a solution like <a href="https://github.com/extend/bullet">Bullet</a> might be preferred.</p>
+<h2>Usage</h2>
+<p>Websocket handlers are a bridge between the client and your system. They can receive data from the client, through <code>websocket_handle/3</code>, or from the system, through <code>websocket_info/3</code>. It is up to the handler to decide to process this data, and optionally send a reply to the client.</p>
+<p>The first thing to do to be able to handle websockets is to tell Cowboy that it should upgrade the connection to use the Websocket protocol, as follow.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init({tcp, http}, Req, Opts) ->
+    {upgrade, protocol, cowboy_websocket}.
+]]></script>
+<p>Cowboy will then switch the protocol and call <code>websocket_init</code>, followed by zero or more calls to <code>websocket_handle</code> and <code>websocket_info</code>. Then, when the connection is shutting down, <code>websocket_terminate</code> will be called.</p>
+<p>The following handler sends a message every second. It also echoes back what it receives.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+-module(my_ws_handler).
+-behaviour(cowboy_websocket_handler).
+
+-export([init/3]).
+-export([websocket_init/3]).
+-export([websocket_handle/3]).
+-export([websocket_info/3]).
+-export([websocket_terminate/3]).
+
+init({tcp, http}, Req, Opts) ->
+    {upgrade, protocol, cowboy_websocket}.
+
+websocket_init(TransportName, Req, _Opts) ->
+    erlang:start_timer(1000, self(), <<"Hello!">>),
+    {ok, Req, undefined_state}.
+
+websocket_handle({text, Msg}, Req, State) ->
+    {reply, {text, << "That's what she said! ", Msg/binary >>}, Req, State};
+websocket_handle(_Data, Req, State) ->
+    {ok, Req, State}.
+
+websocket_info({timeout, _Ref, Msg}, Req, State) ->
+    erlang:start_timer(1000, self(), <<"How' you doin'?">>),
+    {reply, {text, Msg}, Req, State};
+websocket_info(_Info, Req, State) ->
+    {ok, Req, State}.
+
+websocket_terminate(_Reason, _Req, _State) ->
+    ok.
+]]></script>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<!-- <div class="input-append">
+<form class="form-search">
+	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div> -->
+
+
+
+<h3>Version select</h3>
+<ul>
+	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
+<!--	<li><a href="#">older</a></li> -->
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us"> Contact us</a></li>
+                  <!-- <li><a href="#" title="Legal information and privacy policy"> Legal information</a></li> -->
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2013</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+<script type="text/javascript">
+$("div.sidecol ol.doc-list li a").filter(function(){return $(this).text() == $("h1.lined-header").text();}).addClass("active");
+</script>
+
+  </body>
+</html>

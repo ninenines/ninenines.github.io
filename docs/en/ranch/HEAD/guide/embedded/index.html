@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support:  </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feed/atom" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Official support" href="/support">Pricing & Support</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<h1 class="lined-header"><span>Embedded mode</span></h1>
+<div class="service-description">
+<h2>Purpose</h2>
+<p>Embedded mode allows you to insert Ranch listeners directly in your supervision tree. This allows for greater fault tolerance control by permitting the shutdown of a listener due to the failure of another part of the application and vice versa.</p>
+<h2>Embedding</h2>
+<p>To embed Ranch in your application you can simply add the child specs to your supervision tree. This can all be done in the <code>init/1</code> function of one of your application supervisors.</p>
+<p>Ranch requires at the minimum two kinds of child specs for embedding. First, you need to add <code>ranch_sup</code> to your supervision tree, only once, regardless of the number of listeners you will use. Then you need to add the child specs for each listener.</p>
+<p>Ranch has a convenience function for getting the listeners child specs called <code>ranch:child_spec/6</code>, that works like <code>ranch:start_listener/6</code>, except that it doesn't start anything, it only returns child specs.</p>
+<p>As for <code>ranch_sup</code>, the child spec is simple enough to not require a convenience function.</p>
+<p>The following example adds both <code>ranch_sup</code> and one listener to another application's supervision tree.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init([]) ->
+    RanchSupSpec = {ranch_sup, {ranch_sup, start_link, []},
+        permanent, 5000, supervisor, [ranch_sup]},
+    ListenerSpec = ranch:child_spec(echo, 100,
+        ranch_tcp, [{port, 5555}],
+        echo_protocol, []
+    ),
+    {ok, {{one_for_one, 10, 10}, [RanchSupSpec, ListenerSpec]}}.
+]]></script>
+<p>Remember, you can add as many listener child specs as needed, but only one <code>ranch_sup</code> spec!</p>
+<p>It is recommended that your architecture makes sure that all listeners are restarted if <code>ranch_sup</code> fails. See the Ranch internals chapter for more details on how Ranch does it.</p>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<!-- <div class="input-append">
+<form class="form-search">
+	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div> -->
+
+
+
+<h3>Version select</h3>
+<ul>
+	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
+<!--	<li><a href="#">older</a></li> -->
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us"> Contact us</a></li>
+                  <!-- <li><a href="#" title="Legal information and privacy policy"> Legal information</a></li> -->
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2013</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+<script type="text/javascript">
+$("div.sidecol ol.doc-list li a").filter(function(){return $(this).text() == $("h1.lined-header").text();}).addClass("active");
+</script>
+
+  </body>
+</html>

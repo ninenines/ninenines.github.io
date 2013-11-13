@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support:  </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feed/atom" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Official support" href="/support">Pricing & Support</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_rest</span></h1>
+<div class="service-description">
+<p>The <code>cowboy_rest</code> module implements REST semantics on top of the HTTP protocol.</p>
+<p>This module cannot be described as a behaviour due to most of the callbacks it defines being optional. It has the same semantics as a behaviour otherwise.</p>
+<p>The only mandatory callback is <code>init/3</code>, needed to perform the protocol upgrade.</p>
+<h2>Types</h2>
+<p>None.</p>
+<h2>Meta values</h2>
+<h4>charset</h4>
+<blockquote> Type: binary()<br/><br/> Negotiated charset.<br/><br/> This value may not be defined if no charset was negotiated.</blockquote>
+<h4>language</h4>
+<blockquote> Type: binary()<br/><br/> Negotiated language.<br/><br/> This value may not be defined if no language was negotiated.</blockquote>
+<h4>media_type</h4>
+<blockquote> Type: {binary(), binary(), '*' | [{binary(), binary()}]}<br/><br/> Negotiated media-type.<br/><br/> The media-type is the content-type, excluding the charset.<br/><br/> This value is always defined after the call to <code>content_types_provided/2</code>.</blockquote>
+<h2>Callbacks</h2>
+<h4>init({TransportName, ProtocolName}, Req, Opts)	-> {upgrade, protocol, cowboy_rest}	| {upgrade, protocol, cowboy_rest, Req, Opts}</h4>
+<blockquote> Types:<ul>
+<li>TransportName = tcp | ssl | atom()</li>
+<li>ProtocolName = http | atom()</li>
+<li>Req = cowboy_req:req()</li>
+<li>Opts = any()</li>
+</ul>
+ Upgrade the protocol to <code>cowboy_rest</code>.<br/><br/> This is the only mandatory callback.</blockquote>
+<h4>rest_init(Req, Opts) -> {ok, Req, State}</h4>
+<blockquote> Types:<ul>
+<li>Req = cowboy_req:req()</li>
+<li>Opts = any()</li>
+<li>State = any()</li>
+</ul>
+ Initialize the state for this request.</blockquote>
+<h4>rest_terminate(Req, State) -> ok</h4>
+<blockquote> Types:<ul>
+<li>Req = cowboy_req:req()</li>
+<li>State = any()</li>
+</ul>
+ Perform any necessary cleanup of the state.<br/><br/> This callback should release any resource currently in use, clear any active timer and reset the process to its original state, as it might be reused for future requests sent on the same connection.</blockquote>
+<h4>Callback(Req, State) -> {Value, Req, State} | {halt, Req, State}</h4>
+<blockquote> Types:<ul>
+<li>Callback - one of the REST callbacks described below</li>
+<li>Req = cowboy_req:req()</li>
+<li>State = any()</li>
+<li>Value - see the REST callbacks description below</li>
+</ul>
+ Please see the REST callbacks description below for details on the <code>Value</code> type, the default value if the callback is not defined, and more general information on when the callback is called and what its intended use is.<br/><br/> The <code>halt</code> tuple can be returned to stop REST processing. It is up to the resource code to send a reply before that, otherwise a <code>204 No Content</code> will be sent.</blockquote>
+<h2>REST callbacks description</h2>
+<h4>allowed_methods</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: [binary()]</li>
+<li>Default value: [<<"GET">>, <<"HEAD">>, <<"OPTIONS">>]</li>
+</ul>
+ Return the list of allowed methods.<br/><br/> Methods are case sensitive. Standard methods are always uppercase.</blockquote>
+<h4>allow_missing_post</h4>
+<blockquote><ul>
+<li>Methods: POST</li>
+<li>Value type: boolean()</li>
+<li>Default value: true</li>
+</ul>
+ Return whether POST is allowed when the resource doesn't exist.<br/><br/> Returning <code>true</code> here means that a new resource will be created. The URL to the created resource should also be returned from the <code>AcceptResource</code> callback.</blockquote>
+<h4>charsets_provided</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: [binary()]</li>
+<li>Skip to the next step if undefined</li>
+</ul>
+ Return the list of charsets the resource provides.<br/><br/> The list must be ordered in order of preference.<br/><br/> If the accept-charset header was not sent, the first charset in the list will be selected. Otherwise Cowboy will select the most appropriate charset from the list.<br/><br/> The chosen charset will be set in the <code>Req</code> object as the meta value <code>charset</code>.<br/><br/> While charsets are case insensitive, this callback is expected to return them as lowercase binary.</blockquote>
+<h4>content_types_accepted</h4>
+<blockquote><ul>
+<li>Methods: POST, PUT, PATCH</li>
+<li>No default</li>
+</ul>
+ Types:<ul>
+<li>Value = [{binary() | {Type, SubType, Params}, AcceptResource}]</li>
+<li>Type = SubType = binary()</li>
+<li>Params = '*' | [{binary(), binary()}]</li>
+<li>AcceptResource = atom()</li>
+</ul>
+ Return the list of content-types the resource accepts.<br/><br/> The list must be ordered in order of preference.<br/><br/> Each content-type can be given either as a binary string or as a tuple containing the type, subtype and parameters.<br/><br/> Cowboy will select the most appropriate content-type from the list. If any parameter is acceptable, then the tuple form should be used with parameters set to <code>'*'</code>. If the parameters value is set to <code>[]</code> only content-type values with no parameters will be accepted. All parameter values are treated in a case sensitive manner except the <code>charset</code> parameter, if present, which is case insensitive.<br/><br/> This function will be called for POST, PUT and PATCH requests. It is entirely possible to define different callbacks for different methods if the handling of the request differs. Simply verify what the method is with <code>cowboy_req:method/1</code> and return a different list for each methods.<br/><br/> The <code>AcceptResource</code> value is the name of the callback that will be called if the content-type matches. It is defined as follow.<br/><br/><ul>
+<li>Value type: true | {true, URL} | false</li>
+<li>No default</li>
+</ul>
+ Process the request body.<br/><br/> This function should create or update the resource with the information contained in the request body. This information may be full or partial depending on the request method.<br/><br/> If the request body was processed successfully, <code>true</code> or <code>{true, URL}</code> may be returned. If an URL is provided, the response will redirect the client to the location of the resource.<br/><br/> If a response body must be sent, the appropriate media-type, charset and language can be retrieved using the <code>cowboy_req:meta/{2,3}</code> functions. The respective keys are <code>media_type</code>, <code>charset</code> and <code>language</code>. The body can be set using <code>cowboy_req:set_resp_body/2</code>.</blockquote>
+<h4>content_types_provided</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD</li>
+<li>Default value: [{{<<"text">>, <<"html">>, '*'}, to_html}]</li>
+</ul>
+ Types:<ul>
+<li>Value = [{binary() | {Type, SubType, Params}, ProvideResource}]</li>
+<li>Type = SubType = binary()</li>
+<li>Params = '*' | [{binary(), binary()}]</li>
+<li>ProvideResource = atom()</li>
+</ul>
+ Return the list of content-types the resource provides.<br/><br/> The list must be ordered in order of preference.<br/><br/> Each content-type can be given either as a binary string or as a tuple containing the type, subtype and parameters.<br/><br/> Cowboy will select the most appropriate content-type from the list. If any parameter is acceptable, then the tuple form should be used with parameters set to <code>'*'</code>. If the parameters value is set to <code>[]</code> only content-type values with no parameters will be accepted. All parameter values are treated in a case sensitive manner except the <code>charset</code> parameter, if present, which is case insensitive.<br/><br/> The <code>ProvideResource</code> value is the name of the callback that will be called if the content-type matches. It is defined as follow.<br/><br/><ul>
+<li>Value type: iodata() | {stream, Fun} | {stream, Len, Fun} | {chunked, ChunkedFun}</li>
+<li>No default</li>
+</ul>
+ Return the response body.<br/><br/> The response body may be provided directly or through a fun. If a fun tuple is returned, the appropriate <code>set_resp_body_fun</code> function will be called. Please refer to the documentation for these functions for more information about the types.<br/><br/> The call to this callback happens a good time after the call to <code>content_types_provided/2</code>, when it is time to start rendering the response body.</blockquote>
+<h4>delete_completed</h4>
+<blockquote><ul>
+<li>Methods: DELETE</li>
+<li>Value type: boolean()</li>
+<li>Default value: true</li>
+</ul>
+ Return whether the delete action has been completed.<br/><br/> This function should return <code>false</code> if there is no guarantee that the resource gets deleted immediately from the system, including from any internal cache.<br/><br/> When this function returns <code>false</code>, a <code>202 Accepted</code> response will be sent instead of a <code>200 OK</code> or <code>204 No Content</code>.</blockquote>
+<h4>delete_resource</h4>
+<blockquote><ul>
+<li>Methods: DELETE</li>
+<li>Value type: boolean()</li>
+<li>Default value: false</li>
+</ul>
+ Delete the resource.<br/><br/> The value returned indicates if the action was successful, regardless of whether the resource is immediately deleted from the system.</blockquote>
+<h4>expires</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD</li>
+<li>Value type: calendar:datetime() | undefined</li>
+<li>Default value: undefined</li>
+</ul>
+ Return the date of expiration of the resource.<br/><br/> This date will be sent as the value of the expires header.</blockquote>
+<h4>forbidden</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: boolean()</li>
+<li>Default value: false</li>
+</ul>
+ Return whether access to the resource is forbidden.<br/><br/> A <code>403 Forbidden</code> response will be sent if this function returns <code>true</code>. This status code means that access is forbidden regardless of authentication, and that the request shouldn't be repeated.</blockquote>
+<h4>generate_etag</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: binary() | {weak | strong, binary()}</li>
+<li>Default value: undefined</li>
+</ul>
+ Return the entity tag of the resource.<br/><br/> This value will be sent as the value of the etag header.<br/><br/> If a binary is returned, then the value will be parsed to the tuple form automatically. The value must be in the same format as the etag header, including quotes.</blockquote>
+<h4>is_authorized</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: true | {false, AuthHeader}</li>
+<li>Default value: true</li>
+</ul>
+ Return whether the user is authorized to perform the action.<br/><br/> This function should be used to perform any necessary authentication of the user before attempting to perform any action on the resource.<br/><br/> If the authentication fails, the value returned will be sent as the value for the www-authenticate header in the <code>401 Unauthorized</code> response.</blockquote>
+<h4>is_conflict</h4>
+<blockquote><ul>
+<li>Methods: PUT</li>
+<li>Value type: boolean()</li>
+<li>Default value: false</li>
+</ul>
+ Return whether the put action results in a conflict.<br/><br/> A <code>409 Conflict</code> response will be sent if this function returns <code>true</code>.</blockquote>
+<h4>known_content_type</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: boolean()</li>
+<li>Default value: true</li>
+</ul>
+ Return whether the content-type is known.<br/><br/> This function determines if the server understands the content-type, regardless of its use by the resource.</blockquote>
+<h4>known_methods</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: [binary()]</li>
+<li>Default value: [<<"GET">>, <<"HEAD">>, <<"POST">>, <<"PUT">>, <<"PATCH">>, <<"DELETE">>, <<"OPTIONS">>]</li>
+</ul>
+ Return the list of known methods.<br/><br/> The full list of methods known by the server should be returned, regardless of their use in the resource.<br/><br/> The default value lists the methods Cowboy knows and implement in <code>cowboy_rest</code>.<br/><br/> Methods are case sensitive. Standard methods are always uppercase.</blockquote>
+<h4>languages_provided</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: [binary()]</li>
+<li>Skip to the next step if undefined</li>
+</ul>
+ Return the list of languages the resource provides.<br/><br/> The list must be ordered in order of preference.<br/><br/> If the accept-language header was not sent, the first language in the list will be selected. Otherwise Cowboy will select the most appropriate language from the list.<br/><br/> The chosen language will be set in the <code>Req</code> object as the meta value <code>language</code>.<br/><br/> While languages are case insensitive, this callback is expected to return them as lowercase binary.</blockquote>
+<h4>last_modified</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: calendar:datetime()</li>
+<li>Default value: undefined</li>
+</ul>
+ Return the date of last modification of the resource.<br/><br/> This date will be used to test against the if-modified-since and if-unmodified-since headers, and sent as the last-modified header in the response of GET and HEAD requests.</blockquote>
+<h4>malformed_request</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: boolean()</li>
+<li>Default value: false</li>
+</ul>
+ Return whether the request is malformed.<br/><br/> Cowboy has already performed all the necessary checks by the time this function is called, so few resources are expected to implement it.<br/><br/> The check is to be done on the request itself, not on the request body, which is processed later.</blockquote>
+<h4>moved_permanently</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: {true, URL} | false</li>
+<li>Default value: false</li>
+</ul>
+ Return whether the resource was permanently moved.<br/><br/> If it was, its new URL is also returned and sent in the location header in the response.</blockquote>
+<h4>moved_temporarily</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PATCH, DELETE</li>
+<li>Value type: {true, URL} | false</li>
+<li>Default value: false</li>
+</ul>
+ Return whether the resource was temporarily moved.<br/><br/> If it was, its new URL is also returned and sent in the location header in the response.</blockquote>
+<h4>multiple_choices</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: boolean()</li>
+<li>Default value: false</li>
+</ul>
+ Return whether there are multiple representations of the resource.<br/><br/> This function should be used to inform the client if there are different representations of the resource, for example different content-type. If this function returns <code>true</code>, the response body should include information about these different representations using <code>cowboy_req:set_resp_body/2</code>. The content-type of the response should be the one previously negociated and that can be obtained by calling <code>cowboy_req:meta(media_type, Req)</code>.</blockquote>
+<h4>options</h4>
+<blockquote><ul>
+<li>Methods: OPTIONS</li>
+<li>Value type: ok</li>
+<li>Default value: ok</li>
+</ul>
+ Handle a request for information.<br/><br/> The response should inform the client the communication options available for this resource.<br/><br/> By default, Cowboy will send a <code>200 OK</code> response with the allow header set.</blockquote>
+<h4>previously_existed</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PATCH, DELETE</li>
+<li>Value type: boolean()</li>
+<li>Default value: false</li>
+</ul>
+ Return whether the resource existed previously.</blockquote>
+<h4>resource_exists</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: boolean()</li>
+<li>Default value: true</li>
+</ul>
+ Return whether the resource exists.<br/><br/> If it exists, conditional headers will be tested before attempting to perform the action. Otherwise, Cowboy will check if the resource previously existed first.</blockquote>
+<h4>service_available</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: boolean()</li>
+<li>Default value: true</li>
+</ul>
+ Return whether the service is available.<br/><br/> This function can be used to test that all relevant backend systems are up and able to handle requests.<br/><br/> A <code>503 Service Unavailable</code> response will be sent if this function returns <code>false</code>.</blockquote>
+<h4>uri_too_long</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: boolean()</li>
+<li>Default value: false</li>
+</ul>
+ Return whether the requested URI is too long.<br/><br/> Cowboy has already performed all the necessary checks by the time this function is called, so few resources are expected to implement it.<br/><br/> A <code>414 Request-URI Too Long</code> response will be sent if this function returns <code>true</code>.</blockquote>
+<h4>valid_content_headers</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: boolean()</li>
+<li>Default value: true</li>
+</ul>
+ Return whether the content-* headers are valid.<br/><br/> This also applies to the transfer-encoding header. This function must return <code>false</code> for any unknown content-* headers, or if the headers can't be understood. The function <code>cowboy_req:parse_header/2</code> can be used to quickly check the headers can be parsed.<br/><br/> A <code>501 Not Implemented</code> response will be sent if this function returns <code>false</code>.</blockquote>
+<h4>valid_entity_length</h4>
+<blockquote><ul>
+<li>Methods: all</li>
+<li>Value type: boolean()</li>
+<li>Default value: true</li>
+</ul>
+ Return whether the request body length is within acceptable boundaries.<br/><br/> A <code>413 Request Entity Too Large</code> response will be sent if this function returns <code>false</code>.</blockquote>
+<h4>variances</h4>
+<blockquote><ul>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
+<li>Value type: [binary()]</li>
+<li>Default value: []</li>
+</ul>
+ Return the list of headers that affect the representation of the resource.<br/><br/> These request headers return the same resource but with different parameters, like another language or a different content-type.<br/><br/> Cowboy will automatically add the accept, accept-language and accept-charset headers to the list if the respective functions were defined in the resource.<br/><br/> This operation is performed right before the <code>resource_exists/2</code> callback. All responses past that point will contain the vary header which holds this list.</blockquote>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<!-- <div class="input-append">
+<form class="form-search">
+	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div> -->
+
+
+
+<h3>Version select</h3>
+<ul>
+	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
+<!--	<li><a href="#">older</a></li> -->
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us"> Contact us</a></li>
+                  <!-- <li><a href="#" title="Legal information and privacy policy"> Legal information</a></li> -->
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2013</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+<script type="text/javascript">
+$("div.sidecol ol.doc-list li a").filter(function(){return $(this).text() == $("h1.lined-header").text();}).addClass("active");
+</script>
+
+  </body>
+</html>

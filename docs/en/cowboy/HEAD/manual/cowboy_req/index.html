@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support:  </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feed/atom" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Official support" href="/support">Pricing & Support</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req</span></h1>
+<div class="service-description">
+<p>The <code>cowboy_req</code> module provides functions to access, manipulate and respond to requests.</p>
+<p>The functions in this module follow patterns for their return types, based on the kind of function.</p>
+<ul>
+<li>access: <code>{Value, Req}</code></li>
+<li>action: <code>{Result, Req} | {Result, Value, Req} | {error, atom()}</code></li>
+<li>modification: <code>Req</code></li>
+<li>question: <code>boolean()</code></li>
+</ul>
+<p>The only exception is the <code>chunk/2</code> function which may return <code>ok</code>.</p>
+<p>Whenever <code>Req</code> is returned, you must use this returned value and ignore any previous you may have had. This value contains various state informations which are necessary for Cowboy to do some lazy evaluation or cache results where appropriate.</p>
+<h2>Types</h2>
+<h4>cookie_opts() = [{max_age, non_neg_integer()}	| {domain, binary()} | {path, binary()}	| {secure, boolean()} | {http_only, boolean()}]</h4>
+<blockquote> Cookie options.</blockquote>
+<h4>req() - opaque to the user</h4>
+<blockquote> The <code>Req</code> object.<br/><br/> All functions in this module receive a <code>Req</code> as argument, and most of them return a new object labelled <code>Req2</code> in the function descriptions below.</blockquote>
+<h2>Request related exports</h2>
+<h4>binding(Name, Req) -> binding(Name, Req, undefined)</h4>
+<h4>binding(Name, Req, Default) -> {Value, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = atom()</li>
+<li>Default = any()</li>
+<li>Value = binary() | Default</li>
+</ul>
+ Return the value for the given binding.</blockquote>
+<h4>bindings(Req) -> {[{Name, Value}], Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = atom()</li>
+<li>Value = binary()</li>
+</ul>
+ Return all bindings.</blockquote>
+<h4>cookie(Name, Req) -> cookie(Name, Req, undefined)</h4>
+<h4>cookie(Name, Req, Default) -> {Value, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+<li>Default = any()</li>
+<li>Value = binary() | Default</li>
+</ul>
+ Return the value for the given cookie.<br/><br/> Cookie names are case sensitive.</blockquote>
+<h4>cookies(Req) -> {[{Name, Value}], Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+<li>Value = binary()</li>
+</ul>
+ Return all cookies.</blockquote>
+<h4>header(Name, Req) -> header(Name, Req, undefined)</h4>
+<h4>header(Name, Req, Default) -> {Value, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+<li>Default = any()</li>
+<li>Value = binary() | Default</li>
+</ul>
+ Return the value for the given header.<br/><br/> While header names are case insensitive, this function expects the name to be a lowercase binary.</blockquote>
+<h4>headers(Req) -> {Headers, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Headers = cowboy:http_headers()</li>
+</ul>
+ Return all headers.</blockquote>
+<h4>host(Req) -> {Host, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Host = binary()</li>
+</ul>
+ Return the requested host.</blockquote>
+<h4>host_info(Req) -> {HostInfo, Req2}</h4>
+<blockquote> Types:<ul>
+<li>HostInfo = cowboy_router:tokens() | undefined</li>
+</ul>
+ Return the extra tokens from matching against <code>...</code> during routing.</blockquote>
+<h4>host_url(Req) -> {HostURL, Req2}</h4>
+<blockquote> Types:<ul>
+<li>HostURL = binary() | undefined</li>
+</ul>
+ Return the requested URL excluding the path component.<br/><br/> This function will always return <code>undefined</code> until the <code>cowboy_router</code> middleware has been executed. This includes the <code>onrequest</code> hook.</blockquote>
+<h4>meta(Name, Req) -> meta(Name, Req, undefined)</h4>
+<h4>meta(Name, Req, Default) -> {Value, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = atom()</li>
+<li>Default = any()</li>
+<li>Value = any()</li>
+</ul>
+ Return metadata about the request.</blockquote>
+<h4>method(Req) -> {Method, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Method = binary()</li>
+</ul>
+ Return the method.<br/><br/> Methods are case sensitive. Standard methods are always uppercase.</blockquote>
+<h4>parse_header(Name, Req) -></h4>
+<h4>parse_header(Name, Req, Default) -> {ok, ParsedValue, Req2}	| {undefined, Value, Req2} | {error, badarg}</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+<li>Default = any()</li>
+<li>ParsedValue - see below</li>
+<li>Value = any()</li>
+</ul>
+ Parse the given header.<br/><br/> While header names are case insensitive, this function expects the name to be a lowercase binary.<br/><br/> The <code>parse_header/2</code> function will call <code>parser_header/3</code> with a different default value depending on the header being parsed. The following table summarizes the default values used.<br/><br/><table class="table-bordered table-condensed table-striped"><thead><tr><th>Header name       </th><th> Default value      </th></tr></thead><tbody><tr><td>transfer-encoding </td><td> <code>[<<"identity">>]</code> </td></tr><tr><td>Any other header  </td><td> <code>undefined</code>        </td></tr></tbody></table> The parsed value differs depending on the header being parsed. The following table summarizes the different types returned.<br/><br/><table class="table-bordered table-condensed table-striped"><thead><tr><th>Header name            </th><th> Type                                              </th></tr></thead><tbody><tr><td>accept                 </td><td> <code>[{{Type, SubType, Params}, Quality, AcceptExt}]</code> </td></tr><tr><td>accept-charset         </td><td> <code>[{Charset, Quality}]</code>                            </td></tr><tr><td>accept-encoding        </td><td> <code>[{Encoding, Quality}]</code>                           </td></tr><tr><td>accept-language        </td><td> <code>[{LanguageTag, Quality}]</code>                        </td></tr><tr><td>authorization          </td><td> <code>{AuthType, Credentials}</code>                         </td></tr><tr><td>content-length         </td><td> <code>non_neg_integer()</code>                               </td></tr><tr><td>content-type           </td><td> <code>{Type, SubType, ContentTypeParams}</code>              </td></tr><tr><td>cookie                 </td><td> <code>[{binary(), binary()}]</code>                          </td></tr><tr><td>expect                 </td><td> <code>[Expect  |  {Expect, ExpectValue, Params}]</code>        </td></tr><tr><td>if-match               </td><td> <code>'*'  |  [{weak  |  strong, OpaqueTag}]</code>              </td></tr><tr><td>if-modified-since      </td><td> <code>calendar:datetime()</code>                             </td></tr><tr><td>if-none-match          </td><td> <code>'*'  |  [{weak  |  strong, OpaqueTag}]</code>              </td></tr><tr><td>if-unmodified-since    </td><td> <code>calendar:datetime()</code>                             </td></tr><tr><td>range                  </td><td> <code>{Unit, [Range]}</code>                                 </td></tr><tr><td>sec-websocket-protocol </td><td> <code>[binary()]</code>                                      </td></tr><tr><td>transfer-encoding      </td><td> <code>[binary()]</code>                                      </td></tr><tr><td>upgrade                </td><td> <code>[binary()]</code>                                      </td></tr><tr><td>x-forwarded-for        </td><td> <code>[binary()]</code>                                      </td></tr></tbody></table> Types for the above table:<ul>
+<li>Type = SubType = Charset = Encoding = LanguageTag = binary()</li>
+<li>AuthType = Expect = OpaqueTag = Unit = binary()</li>
+<li>Params = ContentTypeParams = [{binary(), binary()}]</li>
+<li>Quality = 0..1000</li>
+<li>AcceptExt = [{binary(), binary()} | binary()]</li>
+<li>Credentials - see below</li>
+<li>Range = {non_neg_integer(), non_neg_integer() | infinity} | neg_integer()</li>
+</ul>
+ The cookie names and values, the values of the sec-websocket-protocol and x-forwarded-for headers, the values in <code>AcceptExt</code> and <code>Params</code>, the authorization <code>Credentials</code>, the <code>ExpectValue</code> and <code>OpaqueTag</code> are case sensitive. All values in <code>ContentTypeParams</code> are case sensitive except the value of the charset parameter, which is case insensitive. All other values are case insensitive and will be returned as lowercase.<br/><br/> The headers accept, accept-encoding and cookie headers can return an empty list. Others will return <code>{error, badarg}</code> if the header value is empty.<br/><br/> The authorization header parsing code currently only supports basic HTTP authentication. The <code>Credentials</code> type is thus <code>{Username, Password}</code> with <code>Username</code> and <code>Password</code> being <code>binary()</code>.<br/><br/> The range header value <code>Range</code> can take three forms:<ul>
+<li><code>{From, To}</code>: from <code>From</code> to <code>To</code> units</li>
+<li><code>{From, infinity}</code>: everything after <code>From</code> units</li>
+<li><code>-Final</code>: the final <code>Final</code> units</li>
+</ul>
+ An <code>undefined</code> tuple will be returned if Cowboy doesn't know how to parse the requested header.</blockquote>
+<h4>path(Req) -> {Path, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Path = binary()</li>
+</ul>
+ Return the requested path.</blockquote>
+<h4>path_info(Req) -> {PathInfo, Req2}</h4>
+<blockquote> Types:<ul>
+<li>PathInfo = cowboy_router:tokens() | undefined</li>
+</ul>
+ Return the extra tokens from matching against <code>...</code> during routing.</blockquote>
+<h4>peer(Req) -> {Peer, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Peer = {inet:ip_address(), inet:port_number()}</li>
+</ul>
+ Return the client's IP address and port number.</blockquote>
+<h4>port(Req) -> {Port, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Port = inet:port_number()</li>
+</ul>
+ Return the request's port.<br/><br/> The port returned by this function is obtained by parsing the host header. It may be different than the actual port the client used to connect to the Cowboy server.</blockquote>
+<h4>qs(Req) -> {QueryString, Req2}</h4>
+<blockquote> Types:<ul>
+<li>QueryString = binary()</li>
+</ul>
+ Return the request's query string.</blockquote>
+<h4>qs_val(Name, Req) -> qs_val(Name, Req, undefined)</h4>
+<h4>qs_val(Name, Req, Default) -> {Value, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+<li>Default = any()</li>
+<li>Value = binary() | true</li>
+</ul>
+ Return a value from the request's query string.<br/><br/> The value <code>true</code> will be returned when the name was found in the query string without an associated value.</blockquote>
+<h4>qs_vals(Req) -> {[{Name, Value}], Req2}</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+<li>Value = binary() | true</li>
+</ul>
+ Return the request's query string as a list of tuples.<br/><br/> The value <code>true</code> will be returned when a name was found in the query string without an associated value.</blockquote>
+<h4>set_meta(Name, Value, Req) -> Req2</h4>
+<blockquote> Types:<ul>
+<li>Name = atom()</li>
+<li>Value = any()</li>
+</ul>
+ Set metadata about the request.<br/><br/> An existing value will be overwritten.</blockquote>
+<h4>url(Req) -> {URL, Req2}</h4>
+<blockquote> Types:<ul>
+<li>URL = binary() | undefined</li>
+</ul>
+ Return the requested URL.<br/><br/> This function will always return <code>undefined</code> until the <code>cowboy_router</code> middleware has been executed. This includes the <code>onrequest</code> hook.</blockquote>
+<h4>version(Req) -> {Version, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Version = cowboy:http_version()</li>
+</ul>
+ Return the HTTP version used for this request.</blockquote>
+<h2>Request body related exports</h2>
+<h4>body(Req) -> body(8000000, Req)</h4>
+<h4>body(MaxLength, Req) -> {ok, Data, Req2} | {error, Reason}</h4>
+<blockquote> Types:<ul>
+<li>MaxLength = non_neg_integer() | infinity</li>
+<li>Data = binary()</li>
+<li>Reason = chunked | badlength | atom()</li>
+</ul>
+ Return the request body.<br/><br/> This function will return <code>{error, chunked}</code> if the request body was sent using the chunked transfer-encoding. It will also return <code>{error, badlength}</code> if the length of the body exceeds the given <code>MaxLength</code>, which is 8MB by default.</blockquote>
+<h4>body_length(Req) -> {Length, Req2}</h4>
+<blockquote> Types:<ul>
+<li>Length = non_neg_integer() | undefined</li>
+</ul>
+ Return the length of the request body.<br/><br/> The length will only be returned if the request does not use any transfer-encoding and if the content-length header is present.</blockquote>
+<h4>body_qs(Req) -> body_qs(16000, Req)</h4>
+<h4>body_qs(MaxLength, Req) -> {ok, [{Name, Value}], Req2} | {error, Reason}</h4>
+<blockquote> Types:<ul>
+<li>MaxLength = non_neg_integer() | infinity</li>
+<li>Name = binary()</li>
+<li>Value = binary() | true</li>
+<li>Reason = chunked | badlength | atom()</li>
+</ul>
+ Return the request body as a list of tuples.<br/><br/> This function will parse the body assuming the content-type application/x-www-form-urlencoded, commonly used for the query string.<br/><br/> This function will return <code>{error, chunked}</code> if the request body was sent using the chunked transfer-encoding. It will also return <code>{error, badlength}</code> if the length of the body exceeds the given <code>MaxLength</code>, which is 16KB by default.</blockquote>
+<h4>has_body(Req) -> boolean()</h4>
+<blockquote> Return whether the request has a body.</blockquote>
+<h4>init_stream(TransferDecode, TransferState, ContentDecode, Req) -> {ok, Req2}</h4>
+<blockquote> Types:<ul>
+<li>TransferDecode = fun((Encoded, TransferState) -> OK | More | Done | {error, Reason})</li>
+<li>Encoded = Decoded = Rest = binary()</li>
+<li>TransferState = any()</li>
+<li>OK = {ok, Decoded, Rest, TransferState}</li>
+<li>More = more | {more, Length, Decoded, TransferState}</li>
+<li>Done = {done, TotalLength, Rest} | {done, Decoded, TotalLength, Rest}</li>
+<li>Length = TotalLength = non_neg_integer()</li>
+<li>ContentDecode = fun((Encoded) -> {ok, Decoded} | {error, Reason})</li>
+<li>Reason = atom()</li>
+</ul>
+ Initialize streaming of the request body.<br/><br/> This function can be used to specify what function to use for decoding the request body, generally specified in the transfer-encoding and content-encoding request headers.<br/><br/> Cowboy will properly handle chunked transfer-encoding by default. You do not need to call this function if you do not need to decode other encodings, <code>stream_body/{1,2}</code> will perform all the required initialization when it is called the first time.</blockquote>
+<h4>skip_body(Req) -> {ok, Req2} | {error, Reason}</h4>
+<blockquote> Types:<ul>
+<li>Reason = atom()</li>
+</ul>
+ Skip the request body.<br/><br/> This function will skip the body even if it was partially read before.</blockquote>
+<h4>stream_body(Req) -> stream_body(1000000, Req)</h4>
+<h4>stream_body(MaxSegmentSize, Req) -> {ok, Data, Req2}	| {done, Req2} | {error, Reason}</h4>
+<blockquote> Types:<ul>
+<li>MaxSegmentSize = non_neg_integer()</li>
+<li>Data = binary()</li>
+<li>Reason = atom()</li>
+</ul>
+ Stream the request body.<br/><br/> This function will return a segment of the request body with a size of up to <code>MaxSegmentSize</code>, or 1MB by default. This function can be called repeatedly until a <code>done</code> tuple is returned, indicating the body has been fully received.<br/><br/> Cowboy will properly handle chunked transfer-encoding by default. If any other transfer-encoding or content-encoding has been used for the request, custom decoding functions can be used. They must be specified using <code>init_stream/4</code>.<br/><br/> After the body has been streamed fully, Cowboy will remove the transfer-encoding header from the <code>Req</code> object, and add the content-length header if it wasn't already there.</blockquote>
+<h2>Response related exports</h2>
+<h4>chunk(Data, Req) -> ok | {error, Reason}</h4>
+<blockquote> Types:<ul>
+<li>Data = iodata()</li>
+<li>Reason = atom()</li>
+</ul>
+ Send a chunk of data.<br/><br/> This function should be called as many times as needed to send data chunks after calling <code>chunked_reply/{2,3}</code>.<br/><br/> When the method is HEAD, no data will actually be sent.<br/><br/> If the request uses HTTP/1.0, the data is sent directly without wrapping it in an HTTP/1.1 chunk, providing compatibility with older clients.</blockquote>
+<h4>chunked_reply(StatusCode, Req) -> chunked_reply(StatusCode, [], Req)</h4>
+<h4>chunked_reply(StatusCode, Headers, Req) -> {ok, Req2}</h4>
+<blockquote> Types:<ul>
+<li>StatusCode = cowboy:http_status()</li>
+<li>Headers = cowboy:http_headers()</li>
+</ul>
+ Send a response using chunked transfer-encoding.<br/><br/> This function effectively sends the response status line and headers to the client.<br/><br/> This function will not send any body set previously. After this call the handler must use the <code>chunk/2</code> function repeatedly to send the body in as many chunks as needed.<br/><br/> If the request uses HTTP/1.0, the data is sent directly without wrapping it in an HTTP/1.1 chunk, providing compatibility with older clients.</blockquote>
+<h4>delete_resp_header(Name, Req) -> Req2</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+</ul>
+ Delete the given response header.<br/><br/> While header names are case insensitive, this function expects the name to be a lowercase binary.</blockquote>
+<h4>has_resp_body(Req) -> boolean()</h4>
+<blockquote> Return whether a response body has been set.<br/><br/> This function will return false if a response body has been set with a length of 0.</blockquote>
+<h4>has_resp_header(Name, Req) -> boolean()</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+</ul>
+ Return whether the given response header has been set.<br/><br/> While header names are case insensitive, this function expects the name to be a lowercase binary.</blockquote>
+<h4>reply(StatusCode, Req) -> reply(StatusCode, [], Req)</h4>
+<h4>reply(StatusCode, Headers, Req) - see below</h4>
+<h4>reply(StatusCode, Headers, Body, Req) -> {ok, Req2}</h4>
+<blockquote> Types:<ul>
+<li>StatusCode = cowboy:http_status()</li>
+<li>Headers = cowboy:http_headers()</li>
+<li>Body = iodata()</li>
+</ul>
+ Send a response.<br/><br/> This function effectively sends the response status line, headers and body to the client, in a single send function call.<br/><br/> The <code>reply/2</code> and <code>reply/3</code> functions will send the body set previously, if any. The <code>reply/4</code> function overrides any body set previously and sends <code>Body</code> instead.<br/><br/> If a body function was set, and <code>reply/2</code> or <code>reply/3</code> was used, it will be called before returning.<br/><br/> No more data can be sent to the client after this function returns.</blockquote>
+<h4>set_resp_body(Body, Req) -> Req2</h4>
+<blockquote> Types:<ul>
+<li>Body = iodata()</li>
+</ul>
+ Set a response body.<br/><br/> This body will not be sent if <code>chunked_reply/{2,3}</code> or <code>reply/4</code> is used, as they override it.</blockquote>
+<h4>set_resp_body_fun(Fun, Req) -> Req2</h4>
+<h4>set_resp_body_fun(Length, Fun, Req) -> Req2</h4>
+<blockquote> Types:<ul>
+<li>Fun = fun((Socket, Transport) -> ok)</li>
+<li>Socket = inet:socket()</li>
+<li>Transport = module()</li>
+<li>Length = non_neg_integer()</li>
+</ul>
+ Set a fun for sending the response body.<br/><br/> If a <code>Length</code> is provided, it will be sent in the content-length header in the response. It is recommended to set the length if it can be known in advance.<br/><br/> This function will only be called if the response is sent using the <code>reply/2</code> or <code>reply/3</code> function.<br/><br/> The fun will receive the Ranch <code>Socket</code> and <code>Transport</code> as arguments. Only send and sendfile operations are supported.</blockquote>
+<h4>set_resp_body_fun(chunked, Fun, Req) -> Req2</h4>
+<blockquote> Types:<ul>
+<li>Fun = fun((ChunkFun) -> ok)</li>
+<li>ChunkFun = fun((iodata()) -> ok | {error, atom()})</li>
+</ul>
+ Set a fun for sending the response body using chunked transfer-encoding.<br/><br/> This function will only be called if the response is sent using the <code>reply/2</code> or <code>reply/3</code> function.<br/><br/> The fun will receive another fun as argument. This fun is to be used to send chunks in a similar way to the <code>chunk/2</code> function, except the fun only takes one argument, the data to be sent in the chunk.</blockquote>
+<h4>set_resp_cookie(Name, Value, Opts, Req) -> Req2</h4>
+<blockquote> Types:<ul>
+<li>Name = iodata()</li>
+<li>Value = iodata()</li>
+<li>Opts = cookie_opts()</li>
+</ul>
+ Set a cookie in the response.<br/><br/> Cookie names are case sensitive.</blockquote>
+<h4>set_resp_header(Name, Value, Req) -> Req2</h4>
+<blockquote> Types:<ul>
+<li>Name = binary()</li>
+<li>Value = iodata()</li>
+</ul>
+ Set a response header.<br/><br/> You should use <code>set_resp_cookie/4</code> instead of this function to set cookies.</blockquote>
+<h2>Misc. exports</h2>
+<h4>compact(Req) -> Req2</h4>
+<blockquote> Remove any non-essential data from the <code>Req</code> object.<br/><br/> Long-lived connections usually only need to manipulate the <code>Req</code> object at initialization. Compacting allows saving up memory by discarding extraneous information.</blockquote>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<!-- <div class="input-append">
+<form class="form-search">
+	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div> -->
+
+
+
+<h3>Version select</h3>
+<ul>
+	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
+<!--	<li><a href="#">older</a></li> -->
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us"> Contact us</a></li>
+                  <!-- <li><a href="#" title="Legal information and privacy policy"> Legal information</a></li> -->
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2013</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+<script type="text/javascript">
+$("div.sidecol ol.doc-list li a").filter(function(){return $(this).text() == $("h1.lined-header").text();}).addClass("active");
+</script>
+
+  </body>
+</html>
