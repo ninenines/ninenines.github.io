@@ -2,22 +2,22 @@
 
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title>Nine Nines Feed</title>
-	<link href="http://ninenines.eu/feed/atom" rel="self"/>
+	<link href="http://ninenines.eu/feeds/atom.xml" rel="self"/>
 	<link href="http://ninenines.eu/"/>
-	<id>http://ninenines.eu/feed/atom</id>
+	<id>http://ninenines.eu/feeds/atom.xml</id>
 	<updated>{{ updated|date:"c" }}Z</updated>
 
-	{% for title, url, entry_updated, summary in entries %}
+	{% for entry in entries %}
 		<entry>
-			<title>{{ title }}</title>
+			<title>{{ entry.title }}</title>
 			<author>
 				  <name>Nine Nines</name>
 				  <email>contact@ninenines.eu</email>
 			</author>
-			<link type="text/html" href="{{ url }}" />
-			<id>{{ url }}</id>
-			<updated>{{ entry_updated|date:"c" }}Z</updated>
-			<summary>{{ summary }}</summary>
+			<link type="text/html" href="{{ entry.link }}" />
+			<id>{{ entry.link }}</id>
+			<updated>{{ entry.updated|date:"c" }}Z</updated>
+			<summary>{{ entry.summary }}</summary>
 		</entry>
 	{% endfor %}
 </feed>

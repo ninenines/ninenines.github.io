@@ -14,7 +14,7 @@ build: clean-build all
 	@erl -pa ebin deps/*/ebin -noshell -eval 'ninenines:build(), init:stop().'
 
 clean-build:
-	@rm -rf ../index.html ../articles/ ../docs/ ../support/ \
+	@rm -rf ../index.html ../articles/ ../docs/ ../feeds/ ../support/ \
 		../talks/index.html ../training/
 
 run:

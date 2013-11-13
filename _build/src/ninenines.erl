@@ -11,10 +11,9 @@ build() ->
 	[Articles] = clean(yamerl:decode_file("../_data/articles.conf")),
 	[Projects] = clean(yamerl:decode_file("../_data/projects.conf")),
 	[Talks] = clean(yamerl:decode_file("../_data/talks.conf")),
-	io:format("~p~n~p~n~p~n", [Articles, Projects, Talks]),
 	pages:build(Articles, Projects, Talks),
 	docs:build(Projects),
-	%% @todo feeds:build(Articles, Talks),
+	feeds:build(Articles, Talks),
 	ok.
 
 clean(Data) ->
