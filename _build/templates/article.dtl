@@ -1,0 +1,50 @@
+{% extends "base.dtl" %}
+
+{% block title %} Article: {{ title }}{% endblock %}
+
+{% block nav_articles %} class="active"{% endblock %}
+
+{% block content %}
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>{{ title }}</span></h1>
+	<p class="date">
+		<span class="day">{{ date|date:"j" }}</span>
+		<span class="month">{{ date|date:"M" }}</span>
+	</p>
+</header>
+
+{{ contents }}
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul class="extra_margin">
+	{% for a in articles %}
+		<li><a href="/articles/{{ a.name }}">{{ a.name }}</a></li>
+	{% endfor %}
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.dtl" %}
+
+{% block title %} Support: {{ info.name }} {% if type == "guide" %}User Guide{% else %}{% if type == "readme" %}README{% endif %}{% endif %}{% endblock %}
+
+{% block body_class %}big_text docs{% endblock %}
+
+{% block nav_support %} class="active"{% endblock %}
+
+{% block content %}
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+{{ contents }}
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<!-- <div class="input-append">
+<form class="form-search">
+	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div> -->
+
+{{ toc }}
+
+<h3>Version select</h3>
+<ul>
+	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
+<!--	<li><a href="#">older</a></li> -->
+</ul>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+<script type="text/javascript">
+$("div.sidecol ol.doc-list li a").filter(function(){return $(this).text() == $("h1.lined-header").text();}).addClass("active");
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends "base.dtl" %}
+
+{% block body_class %}home big_text{% endblock %}
+
+{% block header_end %}
+<div class="navbar">
+<div class="navbar-inner">
+<div class="container">
+	<em class="brand">Our products</em>
+	<div class="nav-collapse">
+	<ul class="nav">
+		{% for p in projects %}
+			<li><a data-slide="{{ forloop.counter0 }}" href="#">{{ p.title }}</a></li>
+		{% endfor %}
+	</ul>
+	</div>
+</div>
+</div>
+</div>
+{% endblock %} 
+
+{% block content %}
+<div id="contents" class="home">
+<div class="container">
+
+<div id="home-carousel" class="carousel row">
+<div class="carousel-inner">
+	{% for p in projects %}
+		<div class="{% if forloop.first %}active {% endif %}item">
+		<div class="span5">
+			<h1>{{ p.title }}</h1>
+			<h2>{{ p.desc }}</h2>
+			<p>{{ p.longdesc }}</p>
+			<p class="right-buttons">
+				<!-- <a class="btn btn-success btn-large">Learn More &raquo;</a> -->
+				<a class="btn btn-large" href="https://github.com/extend/{{ p.name }}">Source Code</a>
+				{% if p.guide %}
+					<a class="btn btn-large" href="/docs/en/{{ p.name }}/HEAD/guide/">User Guide</a>
+				{% endif %}
+				{% if p.manual %}
+					<a class="btn btn-large" href="/docs/en/{{ p.name }}/HEAD/manual/">Manual</a>
+				{% endif %}
+			</p>
+		</div>
+		<div class="span7">
+			<img src="img/projects/{{ p.name }}-home.png" class="{{ p.name }}-logo"></img>
+		</div>
+		</div>
+	{% endfor %}
+</div>
+</div>
+
+        <!-- Slogan-->
+        <div class="row" id="company-description">
+          <div class="span12">
+             <p><span>Nine Nines is an open-source Erlang company specialized in building highly concurrent and fault tolerant web applications.</span></p>
+          </div>
+        </div>
+
+        <section id="services" class="row">
+
+          <!-- Services -->
+          <article class="span4">
+            <header class="training">
+              <h2>Training</h2>
+              <p>Learn Erlang and Cowboy</p>
+            </header>
+            <div class="service-description">
+              <p>
+                 The Erlang and OTP courses allow beginners to quickly get up to speed using the language, the standard OTP library and the modern open source projects.
+              </p>
+              <p>
+                The Cowboy course allows confirmed Erlang developers to learn how to use the web server and related libraries to build powerful web applications.
+              </p>
+            </div>
+            <p class="right-buttons"><a class="btn" href="/training">Learn more &raquo;</a></p>
+          </article>
+
+          <article class="span4">
+            <header class="support">
+              <h2>Support</h2>
+              <p>Direct access to our developers</p>
+            </header>
+            <div class="service-description">
+              <p>
+                Get direct email or phone access to our developers. We can help you use our products and extend them to fit the current and future needs of your business, allowing you to grow without having to worry about scaling your platform.
+              </p>
+              <p>
+                We also provide support for more traditional Erlang or OTP applications.
+              </p>
+            </div>
+            <p class="right-buttons"><a class="btn" href="/support">Learn more &raquo;</a></p>
+          </article>
+
+          <article class="span4">
+            <header class="consulting">
+              <h2>Consulting</h2>
+              <p>At your side when you need it</p>
+            </header>
+            <div class="service-description">
+              <p>
+                We provide consulting services for any kind of Erlang project. If you need help migrating to Cowboy, scaling your applications to millions of users, or are simply starting out with Erlang, we can help you.
+              </p>
+              <p>
+                We can provide these services in-house anywhere in the world if you need us at your side.
+              </p>
+            </div>
+            <p class="right-buttons"><a class="btn" href="/support">Learn more &raquo;</a></p>
+          </article>
+        </section>
+
+<section class="row" id="events">
+	<div class="span6 eventslist">
+	<div class="article-container">
+		<h2><span>Upcoming Talks</span></h2>
+
+		{% for t in upcoming_talks %}
+			{% include "sub_upcoming_talk.dtl" %}
+		{% endfor %}
+
+		<p class="right-buttons"><a class="btn btn-success" href="/talks">More Talks &raquo;</a></p>
+	</div>
+	</div>
+
+	<div class="span6 grey newsitems">
+	<div class="article-container">
+		<h2><span>Latest Articles</span></h2>
+
+		{% for a in articles %}
+			<article>
+				<h3><a href="/articles/{{ a.name }}">{{ a.title }}</a></h3>
+				<p>{{ a.desc }}</p>
+				<p>{{ a.date|date:"Y-m-d" }}</p>
+			</article>
+		{% endfor %}
+
+		<p class="right-buttons"><a class="btn btn-success" href="/articles">More Articles &raquo;</a></p>
+	<div>
+	</div>
+</section>
+
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+<p>We will be adding atomic integer expressions to our language.
+These look as follow in Erlang:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+42.
+]]></script>
+
+<p>And the result of this expression is of course 42.</p>
+
+<p>We will be running this expression at compile time, since we
+don't have the means to run code at runtime yet. This will of
+course result in no module being compiled, but that's OK, it will
+allow us to discuss a few important things we'll have to plan for
+later on.</p>
+
+<p>First, we must of course accept integers in the tokenizer.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{D}+ : {token, {integer, TokenLine, list_to_integer(TokenChars)}}.
+]]></script>
+
+<p>We must then accept atomic integer expressions in the parser.
+This is a simple change. The integer token is terminal so we need
+to add it to the list of terminals, and then we only need to add
+it as a possible expression.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+expr -> integer : '$1'.
+]]></script>
+
+<p>A file containing only the number 42 (with no terminating dot)
+will give the following result when parsing it. This is incidentally
+the same result as when tokenizing.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+[{integer,1,42}]
+]]></script>
+
+<p>We must then evaluate it. We're going to interpret it for now.
+Since the result of this expression is not stored in a variable,
+we are going to simply print it on the screen and discard it.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+execute(Filename, [{integer, _, Int}|Tail], Modules) ->
+    io:format("integer ~p~n", [Int]),
+    execute(Filename, Tail, Modules).
+]]></script>
+
+<p>You might think by now that what we've done so far this time
+is useless. It brings up many interesting questions though.</p>
+
+<ul>
+	<li>What happens if a file contains two integers?</li>
+	<li>Can we live without expression separators?</li>
+	<li>Do we need an interpreter for the compile step?</li>
+</ul>
+
+<p>This is what happens when we create a file that contains two
+integers on two separate lines:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+[{integer,1,42},{integer,2,43}]
+]]></script>
+
+<p>And on the same lines:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+[{integer,1,42},{integer,1,43}]
+]]></script>
+
+<p>Does this mean we do not need separators between expressions?
+Not quite. The <code>+</code> and <code>-</code> operators are an
+example of why we can't have nice things. They are ambiguous. They
+have two different meanings: make an atomic integer positive or
+negative, or perform an addition or a substraction between two
+integers. Without a separator you won't be able to know if the
+following snippet is one or two expressions:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+42 - 12
+]]></script>
+
+<p>Can we use the line ending as an expression separator then?
+Some languages make whitespace important, often the line
+separator becomes the expression separator. I do not think this
+is the best idea, it can lead to errors. For example the following
+snippet would be two expressions:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+Var = some_module:some_function() + some_module:other_function()
+    + another_module:another_function()
+]]></script>
+
+<p>It is not obvious what would happen unless you are a veteran
+of the language, and so we will not go down that road. We will use
+an expression separator just like in Erlang: the comma. We will
+however allow a trailing comma to make copy pasting code easier,
+even if this means some old academics guy will go nuts about it
+later on. This trailing comma will be optional and simply discarded
+by the parser when encountered. We will implement this next.</p>
+
+<p>The question as to how we will handle running expressions
+remains. We have two choices here: we can write an interpreter,
+or we can compile the code and run it. Writing an interpreter
+would require us to do twice the work, and we are lazy, so we will
+not do that.</p>
+
+<p>You might already know that Erlang does not use the same code
+for compiling and for evaluating commands in the shell. The main
+reason for this is that in Erlang everything isn't an expression.
+Indeed, the compiler compiles forms which contain expressions,
+but you can't have forms in the shell.</p>
+
+<p>How are we going to compile the code that isn't part of a module
+then? What do we need to run at compile-time, anyway? The body of
+the file itself, of course. The body of module declarations. That's
+about it.</p>
+
+<p>For the file itself, we can simply compile it as a big function
+that will be executed. Then, everytime we encounter a module
+declaration, we will run the compiler on its body, making its body
+essentially a big function that will be executed. The same mechanism
+will be applied when we encounter a module declaration at runtime.</p>
+
+<p>At runtime there's nothing else for us to do, the result of this
+operation will load all the compiled modules. At compile time we
+will also want to save them to a file. We'll see later how we can
+do that.</p>
+
+<p><a href="https://github.com/extend/xerl/blob/0.3/">View the source</a></p>
