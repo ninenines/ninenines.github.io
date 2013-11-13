@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Build custom protocols with Ranch and msgpack</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20130209" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+	<div id="sub_header"></div>
+	<div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>Build custom protocols with Ranch and msgpack</h1>
+<h2>Erlang Factory Lite Munich 2013, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>Build custom protocols with Ranch and msgpack</h1>
+<h2>Building protocols is fun!</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>Essentials</h1>
+</div>
+
+
+<div class="slide">
+<h1>Ranch</h1>
+<ul>
+<li>Spin-off from Cowboy</li>
+<li>Transport and protocol agnostic acceptor pool</li>
+<li>Fully dynamic</li>
+<li>Well documented</li>
+<li>Production ready</li>
+<li>Tested with &gt; 1 million Websocket connections</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>msgpack 1/2</h1>
+<ul>
+<li>"It's like JSON. but fast and small."</li>
+<li>Binary serialization library</li>
+<li>Deserialization is streamable</li>
+<li>http://msgpack.org</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>msgpack 2/2</h1>
+<ul>
+<li>Available for Ruby, Python, Perl, C/C++, Java, Scala, PHP, Lua, JavaScript, Node.js, Haskell, C#, Objective-C, Erlang, D, OCaml, Go, LabVIEW, Smalltalk</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Using msgpack with Ranch</h1>
+<ul>
+<li>PASTE LIVE DEMO HERE</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Guide to building a msgpack RPC service</h1>
+<ul>
+<li>You most likely won't need async, sync is easier to pull off</li>
+<li>You most likely don't need connection pooling</li>
+<li>Follow the HTTP request/response model</li>
+<li>Send a request, expect a response, continue if successful</li>
+<li>Don't forget to close the connection when done</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>The future of Ranch</h1>
+</div>
+
+
+<div class="slide">
+<h1>Custom connections supervisor</h1>
+<ul>
+<li>Remove the need to monitor processes twice</li>
+<li>Reduce the overhead to a minimal</li>
+<li>No gen.erl, gen_server.erl</li>
+<li>No options to take care of, no restart strategy</li>
+<li>Bare minimum</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Minimal supervisor</h1>
+<ul>
+<li>Special process</li>
+<li>Traps exits</li>
+<li>Exit when parent exits</li>
+<li>Handle '$gen_call' messages</li>
+<li>Reply properly to which_children message</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Results</h1>
+<ul>
+<li>About 100LOCs for the supervisor</li>
+<li>Greatly simplified architecture of the project</li>
+<li>Much improved performance, especially with many connections</li>
+<li>Still OTP</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Thanks!</h1>
+<ul>
+<li>http://ninenines.eu</li>
+<li>https://github.com/extend/ranch</li>
+<li>#ninenines on Freenode</li>
+<li>@lhoguin on Twitter</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Questions?</h1>
+</div>
+
+
+</div>
+
+</body>
+</html>

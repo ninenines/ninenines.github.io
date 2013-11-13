@@ -1,0 +1,562 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Beyond OTP</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20130322" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<link href="ui/sh/sh99s.css" rel="stylesheet"/>
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+<!-- syntax highlighter JS -->
+<script type="text/javascript" src="ui/sh/shCore.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushErlang.js"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+    <div id="sub_header"></div>
+    <div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>EUC 2013</h1>
+<h2>Beyond OTP, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>Beyond OTP</h1>
+<h2>All about the Psychobitch!</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>OTP</h1>
+</div>
+
+
+<div class="slide">
+<h1>OTP?</h1>
+<ul>
+<li>Erlang is concurrent</li>
+<li>Erlang is fault tolerant</li>
+<li>Erlang is transparently distributed</li>
+<li>Erlang provides hot upgrades</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Why would I need OTP?</h1>
+<ul>
+<li>I'm no psycho, bitch!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>You need OTP.</h1>
+<ul>
+<li>Because Francesco says so.</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>OTP gives you...</h1>
+<ul>
+<li>Architecture patterns</li>
+<li>Middlewares</li>
+<li>Libraries</li>
+<li>Tools</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>OTP is built on top of Erlang</h1>
+<ul>
+<li>You could use Erlang without OTP</li>
+<li>But you would have to reimplement most of it</li>
+<li>OTP comes with the Erlang distribution</li>
+<li>OTP is closely tied to the Erlang VM</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>VM boot sequence</h1>
+<ol>
+<li>Load a few very important modules</li>
+<li>Load the modules for kernel and stdlib</li>
+<li>Start the heart process</li>
+<li>Start the error_logger process</li>
+<li>Start the application_controller process</li>
+<li>Load and start OTP applications</li>
+</ol>
+</div>
+
+
+<div class="slide">
+<h1>Two types of applications</h1>
+<ul>
+<li>OTP library applications</li>
+<li>OTP applications</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>OTP library applications</h1>
+<ul>
+<li>Set of modules</li>
+<li>No process can ever belong to this application</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>OTP applications</h1>
+<ul>
+<li>Set of modules</li>
+<li>Set of processes running in the application's supervision tree</li>
+<li>Implements the application behaviour</li>
+<li>Has one top-level supervisor and possibly more child supervisors</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Application behaviour</h1>
+<ul>
+<li>Middleware for starting and stopping applications</li>
+<li>Pretty much just starts the top-level supervisor</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Supervisor behaviour</h1>
+<ul>
+<li>Middleware for starting and supervising processes</li>
+<li>Restarts processes automatically</li>
+<li>Also keeps track of processes for code upgrades</li>
+<li>Key component of Erlang's fault tolerance claims</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Great, but my application does nothing!</h1>
+<ul>
+<li>There's more behaviours for that!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Generic server behaviour</h1>
+<ul>
+<li>Erlang processes are isolated</li>
+<li>Communication occurs through a user-defined client-server protocol</li>
+<li>gen_server implements all the client-server communication logic</li>
+<li>gen_server also implements the server's receive loop</li>
+<li>gen_server provides a callback for updating the state data during code upgrades</li>
+<li>Experienced developers use gen_server 90% of the time</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Other behaviours</h1>
+<ul>
+<li>gen_fsm is a generic finite state machine</li>
+<li>gen_event is a generic event handler</li>
+<li>They are more specialized but just as useful as gen_server</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Great, I'll use behaviours then!</h1>
+<ul>
+<li>You should!</li>
+<li>People expect you to respect OTP principles by using behaviours</li>
+<li>But...</li>
+<li>They're no silver bullet</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Sometimes a supervisor isn't enough</h1>
+<ul>
+<li>Common case is having a supervisor + another process that monitors the same processes to maintain some kind of state</li>
+<li>The supervisor already keeps track of processes, why duplicate the work?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Sometimes a gen_server is too much</h1>
+<ul>
+<li>Common case is needing LOLSPEED for a crucial part of the program</li>
+<li>Sometimes the convenience of gen_server gives too much overhead</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Time to follow Joe Armstrong's advice</h1>
+<ul>
+<li>Condensed quote</li>
+<li>"When the abstraction is inappropriate, you should ditch the gen_server and roll your own."</li>
+<li>And when you do, you should roll special processes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Special processes</h1>
+</div>
+
+
+<div class="slide">
+<h1>Special processes?</h1>
+<ul>
+<li>They are implemented using sys and proc_lib</li>
+<li>They comply to the OTP design principles</li>
+<li>They are familiar</li>
+<li>Other behaviours are implemented the same</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>proc_lib</h1>
+<ul>
+<li>Ensures new processes are started properly (init_ack)</li>
+<li>Identifies the current process (initial call)</li>
+<li>Identifies the process' parent and ancestors</li>
+<li>Prints a crash log on failure if SASL is available</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>sys</h1>
+<ul>
+<li>Debug and trace special processes</li>
+<li>Access and modify special processes state</li>
+<li>Suspend and resume special processes</li>
+<li>Safe hot code upgrade (code_change)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Using special processes</h1>
+<ol>
+<li>Start your process with proc_lib:start_link/3</li>
+<li>Call proc_lib:init_ack/1 from the newly started process</li>
+<li>Write a receive loop</li>
+<li>Die if the parent process dies</li>
+<li>Handle system messages</li>
+<li>Implement system_continue/3, system_terminate/4 and system_code_change/4</li>
+</ol>
+</div>
+
+
+<div class="slide">
+<h1>Template</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+start_link() -> proc_lib:start_link(?MODULE, init, [self()]).
+init(Parent) -> proc_lib:init_ack({ok, self()}), loop(Parent).
+loop() ->
+    receive
+		%% If you enable trap_exit, you also want this clause.
+        {'EXIT', Parent, Reason} ->
+            exit(Reason);
+        {system, From, Request} ->
+            sys:handle_system_msg(Request, From, Parent, ?MODULE, [], {state, Parent})
+    end.
+system_continue(_, _, {state, Parent}) -> loop(Parent).
+system_terminate(Reason, _, _, _) -> exit(Reason).
+system_code_change(Misc, _, _, _) -> {ok, Misc}.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Not quite a gen_server yet</h1>
+<ul>
+<li>Our process fits OTP Design Principles</li>
+<li>Our process can receive and send messages</li>
+<li>Some processes need synchronized calls</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Anatomy of a call</h1>
+</div>
+
+
+<div class="slide">
+<h1>I know that!</h1>
+<ul>
+<li>Right, that's usually explained when you learn Erlang</li>
+<li>Forget everything you learnt</li>
+<li>Let's look at OTP directly</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>General steps</h1>
+<ol>
+<li>Find the Pid (if named locally, globally, is remote...)</li>
+<li>Try monitoring the process</li>
+<li>If monitor returns, continue to next slide</li>
+<li>Otherwise we have a C/Java node that might not support monitors</li>
+<li>Monitor the node instead and hope for the best</li>
+</ol>
+</div>
+
+
+<div class="slide">
+<h1>General steps, after monitor</h1>
+<ol>
+<li>Send the message, noconnect (monitor did), catch exceptions (remote pid or port process)</li>
+<li>Receive either a reply, a node down, a process down or timeout</li>
+<li>Down? Exit with appropriate reason</li>
+<li>Timeout? Demonitor and exit(timeout)</li>
+<li>Reply? Demonitor and return {ok, Reply}</li>
+</ol>
+</div>
+
+
+<div class="slide">
+<h1>In the code</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+try erlang:monitor(process, Pid) of
+Mref ->
+	catch erlang:send(Pid, {Label, {self(), Mref}, Req}, [noconnect]),
+	receive
+		{Mref, Reply} ->
+			erlang:demonitor(Mref, [flush]),
+			{ok, Reply};
+		{'DOWN', Mref, _, _, noconnection} ->
+			Node = get_node(Pid),
+			exit({nodedown, Node});
+		{'DOWN', Mref, _, _, Reason} ->
+			exit(Reason)
+		after Timeout ->
+			erlang:demonitor(Mref, [flush]),
+			exit(timeout)
+	end
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>In the code, continued</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+catch error:_ ->
+	Node = get_node(Pid),
+	monitor_node(Node, true),
+	receive {nodedown, Node} -> 
+		monitor_node(Node, false),
+		exit({nodedown, Node})
+	after 0 -> 
+		Tag = make_ref(),
+		Pid ! {Label, {self(), Tag}, Request},
+		wait_resp(Node, Tag, Timeout)
+	end
+end.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Do I need all this?</h1>
+<ul>
+<li>No!</li>
+<li>Can't be a registered name? Skip the resolve part!</li>
+<li>Can't be a C/Java node? Cut that part</li>
+<li>Can't be a remote pid or a port? No exceptions will occur, nothing to catch</li>
+<li>Supervisor strategy restarts calling process if server process crashes? No need for monitor nor timeout</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Make your own call</h1>
+<ul>
+<li>Pick and choose what you need</li>
+<li>Discard the rest</li>
+<li>Get more performance for your bucks</li>
+<li>Remember, only do this if you really need it!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Case study: custom supervisor</h1>
+</div>
+
+
+<div class="slide">
+<h1>Ranch connections supervisor</h1>
+<ul>
+<li>Closely tied to acceptors</li>
+<li>When this process dies, acceptors die</li>
+<li>Acceptor creates connection processes with this supervisor</li>
+<li>Must limit the connections accept rate</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Two processes</h1>
+<ul>
+<li>Supervisor process links all connection processes</li>
+<li>Extra process used for rate limiting</li>
+<li>Extra process monitors all connection processes</li>
+<li>Two processes doing the same thing, waste of resources</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>One custom supervisor</h1>
+<ul>
+<li>Supervisor process links all connection processes</li>
+<li>Supervisor process used for rate limiting</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>More savings</h1>
+<ul>
+<li>start_protocol call is always local</li>
+<li>start_protocol call doesn't need a monitor or timeout</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>start_protocol</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+start_protocol(SupPid, Socket) ->
+    SupPid ! {?MODULE, start_protocol, self(), Socket},
+    receive SupPid -> ok end.
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Is that really safe?</h1>
+<ul>
+<li>Yes</li>
+<li>We don't have to make any assumptions</li>
+<li>We KNOW what to expect</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Even more savings</h1>
+<ul>
+<li>Acceptors don't need to pass around all parameters</li>
+<li>Supervisor can keep them and use them when needed</li>
+<li>Supervisor can send {shoot, Ref} itself directly</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Supervisor savings</h1>
+<ul>
+<li>We only need to handle which_children and count_children</li>
+<li>No need for child specs</li>
+<li>No need for strategies, they're all temporary!</li>
+<li>Only need to keep the Pid around</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>With all these savings we must be rich!</h1>
+<ul>
+<li>Benchmarking shows Cowboy able to handle +10% requests/s</li>
+<li>Also shows latency reduced by 20%</li>
+<li>We also recover much better when it all goes to hell (too many connections or too many processes dying)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Conclusion</h1>
+</div>
+
+
+<div class="slide">
+<h1>Keep it smart</h1>
+<ul>
+<li>Start with gen_server and supervisor</li>
+<li>See if they're good enough</li>
+<li>Go custom otherwise</li>
+<li>(Make it work, make it pretty, make it fast)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Links</h1>
+<ul>
+<li><a href="http://ninenines.eu">http://ninenines.eu</a></li>
+<li><a href="https://github.com/extend/ranch/blob/master/src/ranch_conns_sup.erl">https://github.com/extend/ranch/blob/master/src/ranch_conns_sup.erl</a></li>
+<li>Twitter: @lhoguin</li>
+<li>IRC: #ninenines on Freenode</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Questions</h1>
+</div>
+
+
+</div>
+
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+</body>
+</html>

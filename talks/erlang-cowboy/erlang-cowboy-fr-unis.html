@@ -1,0 +1,469 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Applications web performantes avec Erlang et Cowboy</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20120522" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+	<div id="sub_header"></div>
+	<div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>EPITA 2012</h1>
+<h2>Erlang et Cowboy, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>Applications web performantes avec Erlang et Cowboy</h1>
+<h2>Nine Nines and beyond...</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>Nine Nines</h1>
+</div>
+
+
+<div class="slide">
+<h1>La société</h1>
+<ul>
+<li>Fondée en janvier 2012</li>
+<li>Société open-source</li>
+<li>Petite structure</li>
+<li>0 financement</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Principale activité</h1>
+<ul>
+<li>Dev open-source Erlang</li>
+<li>Projet Cowboy (HTTP server)</li>
+<li>Projets Farwest, Sheriff, Bullet...</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Les services offerts</h1>
+<ul>
+<li>Training</li>
+<li>Consulting</li>
+<li>Support</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Conférences</h1>
+<ul>
+<li>Erlang Factory (San Francisco, Londres)</li>
+<li>Erlang User Conference (Stockholm)</li>
+<li>OSCON (Portland)</li>
+<li>Diverses écoles et universités</li>
+<li>Organise la Erlang Factory Lite Paris</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang Factory Lite Paris</h1>
+<ul>
+<li>Prévue fin septembre 2012</li>
+<li>Gratuite</li>
+<li>En français</li>
+<li>Ouverte à tous et pour tous les niveaux</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang</h1>
+</div>
+
+
+<div class="slide">
+<h1>Origines</h1>
+<ul>
+<li>Language fonctionnel</li>
+<li>Inspiré par Prolog</li>
+<li>Créé pour les télécommunications</li>
+<li>Inventé par Joe Armstrong à Ericsson</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Orienté messages</h1>
+<ul>
+<li>Processes natifs Erlang (pas de threads !)</li>
+<li>Rien de partagé</li>
+<li>Echanges possibles via l'envoi de messages</li>
+<li>Processes légers et peu coûteux</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>[DEMO]</h1>
+<ul>
+<li>Echange de messages</li>
+<li>Création de 10000 processes en < 1s</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Résistant aux pannes</h1>
+<ul>
+<li>Si 1 process crash, seul celui-ci est interrompu</li>
+<li>Possibilité de link ou monitorer les processes</li>
+<li>Méchanismes pour relancer automatiquement les processes</li>
+<li>Si une node Erlang crash, celle-ci est redémarrée (heart)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Let it crash</h1>
+<ul>
+<li>Il est plus efficace de laisser crash</li>
+<li>On ne peut pas prévoir tous les types d'erreur</li>
+<li>Le pattern matching d'Erlang permet de crash facilement</li>
+<li>On peut toujours catch les exceptions localement si besoin</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>[DEMO]</h1>
+<ul>
+<li>Pattern matching</li>
+<li>Crash d'1 process</li>
+<li>Crash de processes linkés</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Distribué</h1>
+<ul>
+<li>Nodes découvertes automatiquement</li>
+<li>"Plug and play"</li>
+<li>Aucun changement à apporter au code</li>
+<li>RPC</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>[DEMO]</h1>
+<ul>
+<li>2 nodes</li>
+<li>RPC</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Upgrades live</h1>
+<ul>
+<li>Aucune interruption</li>
+<li>Aucune connexion fermée ou perdue</li>
+<li>Un court délai suivant la taille du système</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>En résumé</h1>
+<ul>
+<li>Tous les éléments requis pour atteindre Nine Nines</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Qui utilise Erlang ?</h1>
+<ul>
+<li>Facebook, Google, Amazon, Apple</li>
+<li>Les serveurs Call of Duty</li>
+<li>WhatsApp (2+ millions de connexions !)</li>
+<li>Rackspace, Github, Heroku...</li>
+<li>Serveurs NoSQL : Riak, CouchDB...</li>
+<li>L'Europe</li>
+<li>Orange, EDF, Meetic, AdopteUnMec</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Popularité en augmentation</h1>
+<ul>
+<li>Participation doublée chaque année aux conférences</li>
+<li>Mise en place de cours du soir dans diverses villes</li>
+<li>Utilisation par nombre de grandes compagnies</li>
+<li>Pénurie de développeurs</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Le web</h1>
+</div>
+
+
+<div class="slide">
+<h1>Le web aujourd'hui</h1>
+<ul>
+<li>Peu de sites statiques</li>
+<li>Sites à contenu généré par l'utilisateur</li>
+<li>Applications à caractère "temps réel"</li>
+<li>API pour applications mobiles</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Nouvelles technologies</h1>
+<ul>
+<li>XMLHTTPRequest</li>
+<li>Websockets</li>
+<li>Server Sent Events</li>
+<li>SPDY</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Les besoins</h1>
+<ul>
+<li>Excellent temps de réponse</li>
+<li>Nombreux utilisateurs simultanés</li>
+<li>Toujours disponible</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang est adapté</h1>
+<ul>
+<li>Il n'y a pas meilleure base qu'Erlang pour le web</li>
+<li>C'est pourquoi Cowboy a été écrit en Erlang</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Cowboy</h1>
+</div>
+
+
+<div class="slide">
+<h1>Un serveur en Erlang, pour Erlang</h1>
+<ul>
+<li>Code 100% Erlang</li>
+<li>Facile à lire et à comprendre</li>
+<li>1 connexion = 1 process</li>
+<li>Connexion -&gt; HTTP -&gt; Handler -&gt; HTTP</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Features clés</h1>
+<ul>
+<li>REST</li>
+<li>Websocket</li>
+<li>Long polling</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Performances</h1>
+<ul>
+<li>Testé avec plus de 1 million de connexions simultanées</li>
+<li>Temps de réponse inchangé avec un grand nombre de connexions</li>
+<li>Faible usage mémoire (500 K connexions = 10 GB)</li>
+<li>Pas ou peu d'optimisations</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>[DEMO]</h1>
+<ul>
+<li>Petit benchmark</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Juste Erlang</h1>
+<ul>
+<li>Cowboy fait le minimum par défaut</li>
+<li>Hibernation de websocket ou long-polling</li>
+<li>Utilisation de binaries plutôt que de lists</li>
+<li>Date/heure générée toutes les secondes par un process dédié</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Futures améliorations</h1>
+<ul>
+<li>Projet Horse : benchmarking commit par commit</li>
+<li>Sujet de stage d'été de 2 étudiantes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Intégration</h1>
+<ul>
+<li>PHP via cowboy_fcgi</li>
+<li>Ruby on Rails via Rack</li>
+<li>Possibilité d'appliquer seulement à certaines requêtes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Historique</h1>
+<ul>
+<li>Premier commit le 7 mars 2011</li>
+<li>Présentation publique en Novembre à Stockholm</li>
+<li>Utilisé pour du financier, publicitaire...</li>
+<li>500+ watchers sur Github aujourd'hui</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Et après ?</h1>
+</div>
+
+
+<div class="slide">
+<h1>Farwest</h1>
+<ul>
+<li>Un "framework" pour le dev côté client</li>
+<li>Fait pour les intégrateurs et devs JS</li>
+<li>Permet de créer des applications Erlang, sans connaitre Erlang</li>
+<li>Séparation claire entre côtés client et serveur</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Autres projets</h1>
+<ul>
+<li>Ranch : accepteur de connexions</li>
+<li>Bullet : connexion websocket permanente</li>
+<li>Sheriff : validation de données entrantes automatisée</li>
+<li>Goldrush : monitoring et remote debugging de nodes Erlang</li>
+<li>Et d'autres à venir...</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>En conclusion</h1>
+</div>
+
+
+<div class="slide">
+<h1>Erlang est prêt</h1>
+<ul>
+<li>Le nombre de coeurs par CPU augmente</li>
+<li>Tous les languages doivent s'adapter</li>
+<li>La plupart des solutions sont inefficaces</li>
+<li>Erlang est déjà prêt</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Cowboy est prêt</h1>
+<ul>
+<li>Utilise pleinement toutes les capacités de Erlang</li>
+<li>Intègre les technologies de pointe</li>
+<li>Peut complémenter un système déja existant facilement</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Etes-vous prêt ?</h1>
+<ul>
+<li>Initiez-vous dès aujourd'hui</li>
+<li>Venez à la conférence en septembre</li>
+<li>Participez aux Erlounge tous les mois</li>
+<li>Faites passer le message</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Liens</h1>
+<ul>
+<li>http://erlang.org</li>
+<li>http://learnyousomeerlang.com</li>
+<li>https://github.com/extend</li>
+<li>http://ninenines.eu</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Communauté</h1>
+<ul>
+<li>erlang-questions ML sur http://erlang.org</li>
+<li>https://groups.google.com/group/erlang-paris</li>
+<li>#erlang et #erlounge sur irc.freenode.net</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Questions ?</h1>
+</div>
+
+
+</div>
+
+</body>
+</html>
