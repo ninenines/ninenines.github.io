@@ -86,7 +86,7 @@
 <p>As you already know, HTTP clients connect to the server and send a request for a resource; the server then sends a response containing the resource if it could obtain it.</p>
 <p>Before the server can send the resource, however, it needs to perform many different operations to read the request, find the resource, prepare the response being sent and often other related operations the user can add like writing logs.</p>
 <p>Requests take the following route in Cowboy:</p>
-<p><img alt="HTTP request/response flowchart" src="http_req_resp.png"/></p>
+<p><img alt="HTTP request/response flowchart" src="/docs/en/cowboy/HEAD/guide/http_req_resp.png"/></p>
 <p>This shows the default middlewares, but they may be configured differently in your setup. The dark green indicates the points where you can hook your own code, the light green is the Cowboy code that you can of course configure as needed.</p>
 <p>The <code>acceptor</code> is the part of the server that accepts the connection and create an Erlang process to handle it. The <code>parser</code> then starts reading from the socket and handling requests as they come until the socket is closed.</p>
 <p>A response may be sent at many different points in the life of the request. If Cowboy can't parse the request, it gives up with an error response. If the router can't find the resource, it sends a not found error. Your own code can of course send a response at any time.</p>

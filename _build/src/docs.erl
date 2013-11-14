@@ -40,7 +40,8 @@ build_file(Filename, P, T, Type, F, Suffix) ->
 			io:format("  ~s: down ~s~n", [P, Filename]),
 			{ok, Data} = file:read_file(Filename),
 			OutPath = "../docs/en/" ++ P ++ "/HEAD" ++ Suffix,
-			Html = docs_parser:convert(Data),
+			Html = docs_parser:convert(Data,
+				"/docs/en/" ++ P ++ "/HEAD" ++ Suffix),
 			{ok, Body} = docs_dtl:render([
 				{contents, Html},
 				{type, Type},
@@ -69,7 +70,8 @@ readme(P, T) ->
 	Path = "deps/" ++ P ++ "/README.md",
 	{ok, Data} = file:read_file(Path),
 	OutPath = "../docs/en/" ++ P ++ "/HEAD/index.html",
-	Html = docs_parser:convert(Data),
+	Html = docs_parser:convert(Data,
+		"/docs/en/" ++ P ++ "/HEAD/"),
 	{ok, Body} = docs_dtl:render([
 		{contents, Html},
 		{type, readme},

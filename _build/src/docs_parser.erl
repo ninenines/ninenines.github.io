@@ -1,68 +1,68 @@
 -module(docs_parser).
--export([convert/1]).
+-export([convert/2]).
 
-convert(DocumentBin) ->
+convert(DocumentBin, Path) ->
 	Lines = binary:split(DocumentBin, <<"\n">>, [global]),
-	[no_context(Lines, []), "</div>\n"].
+	[no_context(Lines, Path, []), "</div>\n"].
 
-no_context([], Acc) ->
+no_context([], _, Acc) ->
 	iolist_to_binary(lists:reverse(Acc));
-no_context([<<>>|Tail], Acc) ->
-	no_context(Tail, Acc);
-no_context([<<"* * *">>|Tail], Acc) ->
-	no_context(Tail, [separator()|Acc]);
-no_context(Quote = [<<"> ", _/binary>>|_], Acc) ->
-	quote(Quote, Acc, []);
-no_context([<<"```">>|Tail], Acc) ->
-	block(Tail, Acc, <<"plain">>, []);
-no_context([<<"``` Makefile">>|Tail], Acc) ->
-	block(Tail, Acc, <<"plain">>, []);
-no_context([<<"``` ", Language/binary>>|Tail], Acc) ->
-	block(Tail, Acc, Language, []);
-no_context([<<" *  ", Text/binary>>|Tail], Acc) ->
-	list1(Tail, Acc, [inline(Text)]);
-no_context(Lines = [<<" -  ", _/binary>>|_], Acc) ->
-	dl(Lines, Acc, []);
+no_context([<<>>|Tail], Path, Acc) ->
+	no_context(Tail, Path, Acc);
+no_context([<<"* * *">>|Tail], Path, Acc) ->
+	no_context(Tail, Path, [separator()|Acc]);
+no_context(Quote = [<<"> ", _/binary>>|_], Path, Acc) ->
+	quote(Quote, Path, Acc, []);
+no_context([<<"```">>|Tail], Path, Acc) ->
+	block(Tail, Path, Acc, <<"plain">>, []);
+no_context([<<"``` Makefile">>|Tail], Path, Acc) ->
+	block(Tail, Path, Acc, <<"plain">>, []);
+no_context([<<"``` ", Language/binary>>|Tail], Path, Acc) ->
+	block(Tail, Path, Acc, Language, []);
+no_context([<<" *  ", Text/binary>>|Tail], Path, Acc) ->
+	list1(Tail, Path, Acc, [inline(Text, Path)]);
+no_context(Lines = [<<" -  ", _/binary>>|_], Path, Acc) ->
+	dl(Lines, Path, Acc, []);
 %% We ignore the separator line between th and tr here.
-no_context([<<"| ", Header/binary>>, _|Tail], Acc) ->
-	th(Header, Tail, Acc);
-no_context([<<"### ", Spec/binary>>|Tail], Acc) ->
-	spec(Spec, Tail, Acc);
-no_context([Text|Tail], Acc) ->
-	text(Tail, Acc, [inline(Text)]).
+no_context([<<"| ", Header/binary>>, _|Tail], Path, Acc) ->
+	th(Header, Tail, Path, Acc);
+no_context([<<"### ", Spec/binary>>|Tail], Path, Acc) ->
+	spec(Spec, Tail, Path, Acc);
+no_context([Text|Tail], Path, Acc) ->
+	text(Tail, Path, Acc, [inline(Text, Path)]).
 
-quote([<<">  *  ", Text/binary>>|Tail], Acc, QuoteAcc) ->
-	quote_list(Tail, Acc, QuoteAcc, [inline(Text)]);
+quote([<<">  *  ", Text/binary>>|Tail], Path, Acc, QuoteAcc) ->
+	quote_list(Tail, Path, Acc, QuoteAcc, [inline(Text, Path)]);
 %% We ignore the separator line between th and tr here.
-quote([<<"> | ", Header/binary>>, _|Tail], Acc, QuoteAcc) ->
-	quote_th(Header, Tail, Acc, QuoteAcc);
-quote([<<">">>|Tail], Acc, QuoteAcc) ->
-	quote(Tail, Acc, ["<br/><br/>"|QuoteAcc]);
-quote([<<">", Text/binary>>|Tail], Acc, QuoteAcc) ->
-	quote(Tail, Acc, [inline(Text)|QuoteAcc]);
-quote(Lines, Acc, QuoteAcc) ->
-	no_context(Lines, [blockquote(lists:reverse(QuoteAcc))|Acc]).
+quote([<<"> | ", Header/binary>>, _|Tail], Path, Acc, QuoteAcc) ->
+	quote_th(Header, Tail, Path, Acc, QuoteAcc);
+quote([<<">">>|Tail], Path, Acc, QuoteAcc) ->
+	quote(Tail, Path, Acc, ["<br/><br/>"|QuoteAcc]);
+quote([<<">", Text/binary>>|Tail], Path, Acc, QuoteAcc) ->
+	quote(Tail, Path, Acc, [inline(Text, Path)|QuoteAcc]);
+quote(Lines, Path, Acc, QuoteAcc) ->
+	no_context(Lines, Path, [blockquote(lists:reverse(QuoteAcc))|Acc]).
 
-quote_list([<<">  *  ", Text/binary>>|Tail], Acc, QuoteAcc, Items) ->
-	quote_list(Tail, Acc, QuoteAcc, [inline(Text)|Items]);
-quote_list([<<">">>|Tail], Acc, QuoteAcc, Items) ->
-	quote(Tail, Acc, [make_list(Items)|QuoteAcc]);
-quote_list(Lines = [<<">", _/binary>>|_], Acc, QuoteAcc, Items) ->
-	quote(Lines, Acc, [make_list(Items)|QuoteAcc]);
-quote_list(Lines, Acc, QuoteAcc, Items) ->
-	no_context(Lines,
+quote_list([<<">  *  ", Text/binary>>|Tail], Path, Acc, QuoteAcc, Items) ->
+	quote_list(Tail, Path, Acc, QuoteAcc, [inline(Text, Path)|Items]);
+quote_list([<<">">>|Tail], Path, Acc, QuoteAcc, Items) ->
+	quote(Tail, Path, Acc, [make_list(Items)|QuoteAcc]);
+quote_list(Lines = [<<">", _/binary>>|_], Path, Acc, QuoteAcc, Items) ->
+	quote(Lines, Path, Acc, [make_list(Items)|QuoteAcc]);
+quote_list(Lines, Path, Acc, QuoteAcc, Items) ->
+	no_context(Lines, Path,
 		[blockquote(lists:reverse([make_list(Items)|QuoteAcc]))|Acc]).
 
-quote_th(HeaderBin, Lines, Acc, QuoteAcc) ->
+quote_th(HeaderBin, Lines, Path, Acc, QuoteAcc) ->
 	Headers = binary:split(HeaderBin, <<"|">>, [trim, global]),
-	quote_tr(Headers, Lines, Acc, QuoteAcc, []).
+	quote_tr(Headers, Lines, Path, Acc, QuoteAcc, []).
 
-quote_tr(Headers, [<<">">>|Tail], Acc, QuoteAcc, RowsAcc) ->
-	quote(Tail, Acc, [table(Headers, lists:reverse(RowsAcc))|QuoteAcc]);
-quote_tr(Headers, [<<>>|Tail], Acc, QuoteAcc, RowsAcc) ->
-	no_context(Tail, [blockquote(lists:reverse(
+quote_tr(Headers, [<<">">>|Tail], Path, Acc, QuoteAcc, RowsAcc) ->
+	quote(Tail, Path, Acc, [table(Headers, lists:reverse(RowsAcc))|QuoteAcc]);
+quote_tr(Headers, [<<>>|Tail], Path, Acc, QuoteAcc, RowsAcc) ->
+	no_context(Tail, Path, [blockquote(lists:reverse(
 		[table(Headers, lists:reverse(RowsAcc))|QuoteAcc]))|Acc]);
-quote_tr(Headers, [<<"> | ", Row/binary>>|Tail], Acc, QuoteAcc, RowsAcc) ->
+quote_tr(Headers, [<<"> | ", Row/binary>>|Tail], Path, Acc, QuoteAcc, RowsAcc) ->
 	Cols = binary:split(Row, <<"|">>, [trim, global]),
 	Cols2 = case length(Cols) of
 		2 -> Cols;
@@ -71,67 +71,67 @@ quote_tr(Headers, [<<"> | ", Row/binary>>|Tail], Acc, QuoteAcc, RowsAcc) ->
 			T2 = [binary_to_list(S) || S <- T],
 			[H, iolist_to_binary(string:join(T2, " | "))]
 	end,
-	Cols3 = [inline(Text) || Text <- Cols2],
-	quote_tr(Headers, Tail, Acc, QuoteAcc, [table_row(Cols3)|RowsAcc]).
+	Cols3 = [inline(Text, Path) || Text <- Cols2],
+	quote_tr(Headers, Tail, Path, Acc, QuoteAcc, [table_row(Cols3)|RowsAcc]).
 
-block([<<"```">>|Tail], Acc, Language, BlockAcc) ->
-	no_context(Tail, [block(lists:reverse(BlockAcc), Language)|Acc]);
-block([Text|Tail], Acc, Language, BlockAcc) ->
-	block(Tail, Acc, Language, [<<"\n">>, Text|BlockAcc]).
+block([<<"```">>|Tail], Path, Acc, Language, BlockAcc) ->
+	no_context(Tail, Path, [block(lists:reverse(BlockAcc), Language)|Acc]);
+block([Text|Tail], Path, Acc, Language, BlockAcc) ->
+	block(Tail, Path, Acc, Language, [<<"\n">>, Text|BlockAcc]).
 
-list1([<<>>|Tail], Acc, Items) ->
-	no_context(Tail, [make_list(Items)|Acc]);
-list1([<<" *  ", Text/binary>>|Tail], Acc, Items) ->
-	list1(Tail, Acc, [inline(Text)|Items]);
-list1([<<"   *  ", Text/binary>>|Tail], Acc, Items) ->
-	list2(Tail, Acc, Items, [inline(Text)]).
+list1([<<>>|Tail], Path, Acc, Items) ->
+	no_context(Tail, Path, [make_list(Items)|Acc]);
+list1([<<" *  ", Text/binary>>|Tail], Path, Acc, Items) ->
+	list1(Tail, Path, Acc, [inline(Text, Path)|Items]);
+list1([<<"   *  ", Text/binary>>|Tail], Path, Acc, Items) ->
+	list2(Tail, Path, Acc, Items, [inline(Text, Path)]).
 
-list2([<<>>|Tail], Acc, Items, SubItems) ->
-	no_context(Tail, [make_list([make_list(SubItems)|Items])|Acc]);
-list2([<<" *  ", Text/binary>>|Tail], Acc, Items, SubItems) ->
-	list1(Tail, Acc, [inline(Text), make_list(SubItems)|Items]);
-list2([<<"   *  ", Text/binary>>|Tail], Acc, Items, SubItems) ->
-	list2(Tail, Acc, Items, [inline(Text)|SubItems]).
+list2([<<>>|Tail], Path, Acc, Items, SubItems) ->
+	no_context(Tail, Path, [make_list([make_list(SubItems)|Items])|Acc]);
+list2([<<" *  ", Text/binary>>|Tail], Path, Acc, Items, SubItems) ->
+	list1(Tail, Path, Acc, [inline(Text, Path), make_list(SubItems)|Items]);
+list2([<<"   *  ", Text/binary>>|Tail], Path, Acc, Items, SubItems) ->
+	list2(Tail, Path, Acc, Items, [inline(Text, Path)|SubItems]).
 
 make_list(Items) ->
 	Items2 = [list_item(I) || I <- lists:reverse(Items)],
 	list(Items2).
 
-dl([<<" -  ", DT/binary>>, <<"   -  ", DD/binary>>|Tail], Acc, Defs) ->
-	dl(Tail, Acc, [def(DT, DD)|Defs]);
-dl(Lines, Acc, Defs) ->
-	no_context(Lines, [def_block(lists:reverse(Defs))|Acc]).
+dl([<<" -  ", DT/binary>>, <<"   -  ", DD/binary>>|Tail], Path, Acc, Defs) ->
+	dl(Tail, Path, Acc, [def(DT, DD)|Defs]);
+dl(Lines, Path, Acc, Defs) ->
+	no_context(Lines, Path, [def_block(lists:reverse(Defs))|Acc]).
 
-th(HeaderBin, Lines, Acc) ->
+th(HeaderBin, Lines, Path, Acc) ->
 	Headers = binary:split(HeaderBin, <<"|">>, [trim, global]),
-	tr(Headers, Lines, Acc, []).
+	tr(Headers, Lines, Path, Acc, []).
 
-tr(Headers, Tail=[], Acc, RowsAcc) ->
-	no_context(Tail, [table(Headers, lists:reverse(RowsAcc))|Acc]);
-tr(Headers, [<<>>|Tail], Acc, RowsAcc) ->
-	no_context(Tail, [table(Headers, lists:reverse(RowsAcc))|Acc]);
-tr(Headers, [<<"| ", Row/binary>>|Tail], Acc, RowsAcc) ->
+tr(Headers, Tail=[], Path, Acc, RowsAcc) ->
+	no_context(Tail, Path, [table(Headers, lists:reverse(RowsAcc))|Acc]);
+tr(Headers, [<<>>|Tail], Path, Acc, RowsAcc) ->
+	no_context(Tail, Path, [table(Headers, lists:reverse(RowsAcc))|Acc]);
+tr(Headers, [<<"| ", Row/binary>>|Tail], Path, Acc, RowsAcc) ->
 	Cols = binary:split(Row, <<"|">>, [trim, global]),
-	Cols2 = [inline(Text) || Text <- Cols],
-	tr(Headers, Tail, Acc, [table_row(Cols2)|RowsAcc]).
+	Cols2 = [inline(Text, Path) || Text <- Cols],
+	tr(Headers, Tail, Path, Acc, [table_row(Cols2)|RowsAcc]).
 
-spec(Spec, [<<>>|Tail], Acc) ->
-	no_context(Tail, [spec(Spec)|Acc]);
-spec(Spec, [<<"### ", NewSpec/binary>>|Tail], Acc) ->
-	spec(NewSpec, Tail, [spec(Spec)|Acc]);
-spec(Spec, [Line|Tail], Acc) ->
-	spec(<< Spec/binary, Line/binary >>, Tail, Acc).
+spec(Spec, [<<>>|Tail], Path, Acc) ->
+	no_context(Tail, Path, [spec(Spec)|Acc]);
+spec(Spec, [<<"### ", NewSpec/binary>>|Tail], Path, Acc) ->
+	spec(NewSpec, Tail, Path, [spec(Spec)|Acc]);
+spec(Spec, [Line|Tail], Path, Acc) ->
+	spec(<< Spec/binary, Line/binary >>, Tail, Path, Acc).
 
-text([<<>>|Tail], Acc, TextAcc) ->
-	no_context(Tail, [text(lists:reverse(TextAcc))|Acc]);
-text([<<"====", _/binary>>, <<>>|Tail], Acc, [Title]) ->
-	no_context(Tail, [title1(Title)|Acc]);
-text([<<"----", _/binary>>, <<>>|Tail], Acc, [Title]) ->
-	no_context(Tail, [title2(Title)|Acc]);
-text([<<" *  ", Text/binary>>|Tail], Acc, TextAcc) ->
-	list1(Tail, [text(lists:reverse(TextAcc))|Acc], [inline(Text)]);
-text([Text|Tail], Acc, TextAcc) ->
-	text(Tail, Acc, [inline(Text), " "|TextAcc]).
+text([<<>>|Tail], Path, Acc, TextAcc) ->
+	no_context(Tail, Path, [text(lists:reverse(TextAcc))|Acc]);
+text([<<"====", _/binary>>, <<>>|Tail], Path, Acc, [Title]) ->
+	no_context(Tail, Path, [title1(Title)|Acc]);
+text([<<"----", _/binary>>, <<>>|Tail], Path, Acc, [Title]) ->
+	no_context(Tail, Path, [title2(Title)|Acc]);
+text([<<" *  ", Text/binary>>|Tail], Path, Acc, TextAcc) ->
+	list1(Tail, Path, [text(lists:reverse(TextAcc))|Acc], [inline(Text, Path)]);
+text([Text|Tail], Path, Acc, TextAcc) ->
+	text(Tail, Path, Acc, [inline(Text, Path), " "|TextAcc]).
 
 blockquote(Text) ->
 	["<blockquote>", Text, "</blockquote>\n"].
@@ -181,13 +181,13 @@ title2(Text) ->
 spec(Text) ->
 	["<h4>", Text, "</h4>\n"].
 
-inline(Text) ->
+inline(Text, Path) ->
 	Text2 = re:replace(Text, "`(.+?)`",
 		"<code>\\1</code>", [global]),
 	Text3 = re:replace(Text2, "!\\[(.+?)\\]\\((.+?)\\)",
-		"<img alt=\"\\1\" src=\"\\2\"/>", [global]),
+		"<img alt=\"\\1\" src=\"" ++ Path ++ "\\2\"/>", [global]),
 	Text4 = re:replace(Text3, "\\[(.+?)\\]\\((.+?)\\.md\\)",
-		"<a href=\"\\2\">\\1</a>", [global]),
+		"<a href=\"" ++ Path ++ "\\2\">\\1</a>", [global]),
 	Text5 = re:replace(Text4, "\\[(.+?)\\]\\((.+?)\\)",
 		"<a href=\"\\2\">\\1</a>", [global]),
 	Text6 = re:replace(Text5, "\\*\\*(.+?)\\*\\*",
