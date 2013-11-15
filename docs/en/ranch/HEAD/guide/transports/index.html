@@ -77,23 +77,23 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Transports</span></h1>
 <div class="service-description">
-<h2>Purpose</h2>
+<h2 id="purpose">Purpose</h2>
 <p>A transport defines the interface to interact with a socket.</p>
 <p>Transports can be used for connecting, listening and accepting connections, but also for receiving and sending data. Both passive and active mode are supported, although all sockets are initialized as passive.</p>
-<h2>TCP transport</h2>
+<h2 id="tcp_transport">TCP transport</h2>
 <p>The TCP transport is a thin wrapper around <code>gen_tcp</code>.</p>
-<h2>SSL transport</h2>
+<h2 id="ssl_transport">SSL transport</h2>
 <p>The SSL transport is a thin wrapper around <code>ssl</code>. It requires the <code>crypto</code>, <code>asn1</code>, <code>public_key</code> and <code>ssl</code> applications to be started. When starting an SSL listener, Ranch will attempt to automatically start them. It will not try to stop them when the listener is removed, however.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 ssl:start().
 ]]></script>
 <p>In a proper OTP setting, you will need to make your application depend on the <code>crypto</code>, <code>public_key</code> and <code>ssl</code> applications. They will be started automatically when starting your release.</p>
 <p>The SSL transport <code>accept/2</code> function performs both transport and SSL accepts. Errors occurring during the SSL accept phase are returned as <code>{error, {ssl_accept, atom()}}</code> to differentiate on which socket the problem occurred.</p>
-<h2>Sending and receiving data</h2>
+<h2 id="sending_and_receiving_data">Sending and receiving data</h2>
 <p>This section assumes that <code>Transport</code> is a valid transport handler (like <code>ranch_tcp</code> or <code>ranch_ssl</code>) and <code>Socket</code> is a connected socket obtained through the listener.</p>
 <p>You can send data to a socket by calling the <code>Transport:send/2</code> function. The data can be given as <code>iodata()</code>, which is defined as <code>binary() | iolist()</code>. All the following calls will work:</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -135,7 +135,7 @@ receive
 end.
 ]]></script>
 <p>You can easily integrate active sockets with existing Erlang code as all you really need is just a few more clauses when receiving messages.</p>
-<h2>Sending files</h2>
+<h2 id="sending_files">Sending files</h2>
 <p>As in the previous section it is assumed <code>Transport</code> is a valid transport handler and <code>Socket</code> is a connected socket obtained through the listener.</p>
 <p>To send a whole file, with name <code>Filename</code>, over a socket:</p>
 <p><code>`</code>erlang {ok, SentBytes} = Transport:sendfile(Socket, Filename). <code>`</code></p>
@@ -143,7 +143,7 @@ end.
 <p><code>`</code>erlang Opts = [{chunk_size, ChunkSize}], {ok, SentBytes} = Transport:sendfile(Socket, Filename, Offset, Bytes, Opts). <code>`</code></p>
 <p>To improve efficiency when sending multiple parts of the same file it is also possible to use a file descriptor opened in raw mode:</p>
 <p><code>`</code>erlang {ok, RawFile} = file:open(Filename, [raw, read, binary]), {ok, SentBytes} = Transport:sendfile(Socket, RawFile, Offset, Bytes, Opts). <code>`</code></p>
-<h2>Writing a transport handler</h2>
+<h2 id="writing_a_transport_handler">Writing a transport handler</h2>
 <p>A transport handler is a module implementing the <code>ranch_transport</code> behavior. It defines a certain number of callbacks that must be written in order to allow transparent usage of the transport handler.</p>
 <p>The behavior doesn't define the socket options available when opening a socket. These do not need to be common to all transports as it's easy enough to write different initialization functions for the different transports that will be used. With one exception though. The <code>setopts/2</code> function *must* implement the <code>{active, once}</code> and the <code>{active, true}</code> options.</p>
 <p>If the transport handler doesn't have a native implementation of <code>sendfile/5</code> a fallback is available, <code>ranch_transport:sendfile/6</code>. The extra first argument is the transport's module. See <code>ranch_ssl</code> for an example.</p>
@@ -162,6 +162,8 @@ end.
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

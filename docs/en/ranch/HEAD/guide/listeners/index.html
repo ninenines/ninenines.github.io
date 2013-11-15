@@ -77,14 +77,14 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Listeners</span></h1>
 <div class="service-description">
-<h2>Purpose</h2>
+<h2 id="purpose">Purpose</h2>
 <p>A listener is a set of processes whose role is to listen on a port for new connections. It manages a pool of acceptor processes, each of them indefinitely accepting connections. When it does, it starts a new process executing the protocol handler code. All the socket programming is abstracted through the user of transport handlers.</p>
 <p>The listener takes care of supervising all the acceptor and connection processes, allowing developers to focus on building their application.</p>
-<h2>Starting and stopping</h2>
+<h2 id="starting_and_stopping">Starting and stopping</h2>
 <p>Ranch does nothing by default. It is up to the application developer to request that Ranch listens for connections.</p>
 <p>A listener can be started and stopped at will.</p>
 <p>When starting a listener, a number of different settings are required:</p>
@@ -128,10 +128,10 @@ It works!
 telnet> quit
 Connection closed.
 ]]></script>
-<h2>Default transport options</h2>
+<h2 id="default_transport_options">Default transport options</h2>
 <p>By default the socket will be set to return <code>binary</code> data, with the options <code>{active, false}</code>, <code>{packet, raw}</code>, <code>{reuseaddr, true}</code> set. These values can't be overriden when starting the listener, but they can be overriden using <code>Transport:setopts/2</code> in the protocol.</p>
 <p>It will also set <code>{backlog, 1024}</code> and <code>{nodelay, true}</code>, which can be overriden at listener startup.</p>
-<h2>Listening on a random port</h2>
+<h2 id="listening_on_a_random_port">Listening on a random port</h2>
 <p>You do not have to specify a specific port to listen on. If you give the port number 0, or if you omit the port number entirely, Ranch will start listening on a random port.</p>
 <p>You can retrieve this port number by calling <code>ranch:get_port/1</code>. The argument is the name of the listener you gave in <code>ranch:start_listener/6</code>.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -141,14 +141,14 @@ Connection closed.
 ).
 Port = ranch:get_port(tcp_echo).
 ]]></script>
-<h2>Listening on privileged ports</h2>
+<h2 id="listening_on_privileged_ports">Listening on privileged ports</h2>
 <p>Some systems limit access to ports below 1024 for security reasons. This can easily be identified by an <code>{error, eacces}</code> error when trying to open a listening socket on such a port.</p>
 <p>The methods for listening on privileged ports vary between systems, please refer to your system's documentation for more information.</p>
 <p>We recommend the use of port rewriting for systems with a single server, and load balancing for systems with multiple servers. Documenting these solutions is however out of the scope of this guide.</p>
-<h2>Accepting connections on an existing socket</h2>
+<h2 id="accepting_connections_on_an_existing_socket">Accepting connections on an existing socket</h2>
 <p>If you want to accept connections on an existing socket, you can use the <code>socket</code> transport option, which should just be the relevant data returned from the connect function for the transport or the underlying socket library (<code>gen_tcp:connect</code>, <code>ssl:connect</code>). The accept function will then be called on the passed in socket. You should connect the socket in <code>{active, false}</code> mode, as well.</p>
 <p>Note, however, that because of a bug in SSL, you cannot change ownership of an SSL listen socket prior to R16. Ranch will catch the error thrown, but the owner of the SSL socket will remain as whatever process created the socket. However, this will not affect accept behaviour unless the owner process dies, in which case the socket is closed. Therefore, to use this feature with SSL with an erlang release prior to R16, ensure that the SSL socket is opened in a persistant process.</p>
-<h2>Limiting the number of concurrent connections</h2>
+<h2 id="limiting_the_number_of_concurrent_connections">Limiting the number of concurrent connections</h2>
 <p>The <code>max_connections</code> transport option allows you to limit the number of concurrent connections. It defaults to 1024. Its purpose is to prevent your system from being overloaded and ensuring all the connections are handled optimally.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, _} = ranch:start_listener(tcp_echo, 100,
@@ -174,7 +174,7 @@ ranch:remove_connection(Ref).
 ranch:set_max_connections(tcp_echo, MaxConns).
 ]]></script>
 <p>The change will occur immediately.</p>
-<h2>Upgrading</h2>
+<h2 id="upgrading">Upgrading</h2>
 <p>Ranch allows you to upgrade the protocol options. This takes effect immediately and for all subsequent connections.</p>
 <p>To upgrade the protocol options, call <code>ranch:set_protocol_options/2</code> with the name of the listener as first argument and the new options as the second.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -200,6 +200,8 @@ Opts = ranch:get_protocol_options(tcp_echo).
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

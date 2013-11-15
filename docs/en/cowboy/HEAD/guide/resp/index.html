@@ -77,14 +77,14 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Sending a response</span></h1>
 <div class="service-description">
 <p>The Req object also allows you to send a response.</p>
 <p>You can only send one response. Any other attempt will trigger a crash. The response may be sent in one go or with its body streamed by chunks of arbitrary size.</p>
 <p>You can also set headers or the response body in advance and Cowboy will use them when you finally do reply.</p>
-<h2>Reply</h2>
+<h2 id="reply">Reply</h2>
 <p>You can send a reply with no particular headers or body. Cowboy will make sure to send the mandatory headers with the response.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:reply(200, Req).
@@ -115,7 +115,7 @@
 ], "<html><head>Hello world!</head><body><p>Hats off!</p></body></html>", Req).
 ]]></script>
 <p>Note that the reply is sent immediately.</p>
-<h2>Chunked reply</h2>
+<h2 id="chunked_reply">Chunked reply</h2>
 <p>You can also stream the response body. First, you need to initiate the reply by sending the response status code. Then you can send the body in chunks of arbitrary size.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:chunked_reply(200, Req),
@@ -133,7 +133,7 @@ ok = cowboy_req:chunk("<html><head>Hello world!</head>", Req2),
 ok = cowboy_req:chunk("<body><p>Hats off!</p></body></html>", Req2).
 ]]></script>
 <p>Note that the reply and each chunk following it are sent immediately.</p>
-<h2>Preset response headers</h2>
+<h2 id="preset_response_headers">Preset response headers</h2>
 <p>You can define response headers in advance. They will be merged into the headers given in the reply call. Headers in the reply call override preset response headers which override the default Cowboy headers.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:set_resp_header(<<"allow">>, "GET", Req).
@@ -147,7 +147,7 @@ cowboy_req:has_resp_header(<<"allow">>, Req).
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:delete_resp_header(<<"allow">>, Req).
 ]]></script>
-<h2>Preset response body</h2>
+<h2 id="preset_response_body">Preset response body</h2>
 <p>You can set the response body in advance. Note that this body will be ignored if you then choose to send a chunked reply, or if you send a reply with an explicit body.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:set_resp_body("Hello world!", Req).
@@ -176,7 +176,7 @@ F = fun (Socket, Transport) ->
 end,
 Req2 = cowboy_req:set_resp_body_fun(F, Req).
 ]]></script>
-<h2>Sending files</h2>
+<h2 id="sending_files">Sending files</h2>
 <p>You can send files directly from disk without having to read them. Cowboy will use the <code>sendfile</code> syscall when possible, which means that the file is sent to the socket directly from the kernel, which is a lot more performant than doing it from userland.</p>
 <p>Again, it is recommended to set the size of the file if it can be known in advance.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -201,6 +201,8 @@ Req2 = cowboy_req:set_resp_body_fun(FileSize, F, Req).
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

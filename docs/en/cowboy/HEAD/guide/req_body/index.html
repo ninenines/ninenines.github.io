@@ -77,27 +77,27 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Reading the request body</span></h1>
 <div class="service-description">
 <p>The Req object also allows you to read the request body.</p>
 <p>Because the request body can be of any size, all body reading operations will only work once, as Cowboy will not cache the result of these operations.</p>
 <p>Cowboy will not attempt to read the body until you do. If handler execution ends without reading it, Cowboy will simply skip it.</p>
-<h2>Check for request body</h2>
+<h2 id="check_for_request_body">Check for request body</h2>
 <p>You can check whether a body was sent with the request.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 cowboy_req:has_body(Req).
 ]]></script>
 <p>It will return <code>true</code> if there is a request body, and <code>false</code> otherwise.</p>
 <p>Note that it is generally safe to assume that a body is sent for <code>POST</code>, <code>PUT</code> and <code>PATCH</code> requests, without having to explicitly check for it.</p>
-<h2>Request body length</h2>
+<h2 id="request_body_length">Request body length</h2>
 <p>You can obtain the body length if it was sent with the request.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {Length, Req2} = cowboy_req:body_length(Req).
 ]]></script>
 <p>The value returned will be <code>undefined</code> if the length couldn't be figured out from the request headers. If there's a body but no length is given, this means that the chunked transfer-encoding was used. You can read chunked bodies by using the stream functions.</p>
-<h2>Reading the body</h2>
+<h2 id="reading_the_body">Reading the body</h2>
 <p>If a content-length header was sent with the request, you can read the whole body directly.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Body, Req2} = cowboy_req:body(Req).
@@ -112,7 +112,7 @@ cowboy_req:has_body(Req).
 {ok, Body, Req2} = cowboy_req:body(infinity, Req).
 ]]></script>
 <p>It is recommended that you do not disable it for public facing websites.</p>
-<h2>Reading a body sent from an HTML form</h2>
+<h2 id="reading_a_body_sent_from_an_html_form">Reading a body sent from an HTML form</h2>
 <p>You can directly obtain a list of key/value pairs if the body was sent using the application/x-www-form-urlencoded content-type.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, KeyValues, Req2} = cowboy_req:body_qs(Req).
@@ -127,7 +127,7 @@ cowboy_req:has_body(Req).
 {ok, KeyValues, Req2} = cowboy_req:body_qs(500000, Req).
 ]]></script>
 <p>You can also disable it by passing the atom <code>infinity</code>, although it is not recommended.</p>
-<h2>Streaming the body</h2>
+<h2 id="streaming_the_body">Streaming the body</h2>
 <p>You can stream the request body by chunks.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Chunk, Req2} = cowboy_req:stream_body(Req).
@@ -147,7 +147,7 @@ body_to_console(Req) ->
             Req2
     end.
 ]]></script>
-<h2>Advanced streaming</h2>
+<h2 id="advanced_streaming">Advanced streaming</h2>
 <p>Cowboy will by default decode the chunked transfer-encoding if any. It will not decode any content-encoding by default.</p>
 <p>Before starting to stream, you can configure the functions that will be used for decoding both transfer-encoding and content-encoding.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -155,7 +155,7 @@ body_to_console(Req) ->
     TransferStartState, fun content_decode/1, Req).
 ]]></script>
 <p>Note that you do not need to call this function generally, as Cowboy will happily initialize the stream on its own.</p>
-<h2>Skipping the body</h2>
+<h2 id="skipping_the_body">Skipping the body</h2>
 <p>If you do not need the body, or if you started streaming the body but do not need the rest of it, you can skip it.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:skip_body(Req).
@@ -176,6 +176,8 @@ body_to_console(Req) ->
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

@@ -77,15 +77,15 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Middlewares</span></h1>
 <div class="service-description">
-<h2>Purpose</h2>
+<h2 id="purpose">Purpose</h2>
 <p>Cowboy delegates the request processing to middleware components. By default, two middlewares are defined, for the routing and handling of the request, as is detailed in most of this guide.</p>
 <p>Middlewares give you complete control over how requests are to be processed. You can add your own middlewares to the mix or completely change the chain of middlewares as needed.</p>
 <p>Cowboy will execute all middlewares in the given order, unless one of them decides to stop processing.</p>
-<h2>Usage</h2>
+<h2 id="usage">Usage</h2>
 <p>Middlewares only need to implement a single callback: <code>execute/2</code>. It is defined in the <code>cowboy_middleware</code> behavior.</p>
 <p>This callback has two arguments. The first is the <code>Req</code> object. The second is the environment.</p>
 <p>Middlewares can return one of four different values:</p>
@@ -97,7 +97,7 @@
 </ul>
 <p>Of note is that when hibernating, processing will resume on the given MFA, discarding all previous stacktrace. Make sure you keep the <code>Req</code> and <code>Env</code> in the arguments of this MFA for later use.</p>
 <p>If an error happens during middleware processing, Cowboy will not try to send an error back to the socket, the process will just crash. It is up to the middleware to make sure that a reply is sent if something goes wrong.</p>
-<h2>Configuration</h2>
+<h2 id="configuration">Configuration</h2>
 <p>The middleware environment is defined as the <code>env</code> protocol option. In the previous chapters we saw it briefly when we needed to pass the routing information. It is a list of tuples with the first element being an atom and the second any Erlang term.</p>
 <p>Two values in the environment are reserved:</p>
 <ul>
@@ -107,9 +107,9 @@
 <p>The <code>listener</code> value is always defined. The <code>result</code> value can be set by any middleware. If set to anything other than <code>ok</code>, Cowboy will not process any subsequent requests on this connection.</p>
 <p>The middlewares that come with Cowboy may define or require other environment values to perform.</p>
 <p>You can update the environment by calling the <code>cowboy:set_env/3</code> convenience function, adding or replacing a value in the environment.</p>
-<h2>Routing middleware</h2>
+<h2 id="routing_middleware">Routing middleware</h2>
 <p>The routing middleware requires the <code>dispatch</code> value. If routing succeeds, it will put the handler name and options in the <code>handler</code> and <code>handler_opts</code> values of the environment, respectively.</p>
-<h2>Handler middleware</h2>
+<h2 id="handler_middleware">Handler middleware</h2>
 <p>The handler middleware requires the <code>handler</code> and <code>handler_opts</code> values. It puts the result of the request handling into <code>result</code>.</p>
 </div>
 
@@ -126,6 +126,8 @@
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

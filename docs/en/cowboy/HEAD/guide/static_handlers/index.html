@@ -77,7 +77,7 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Static handler</span></h1>
 <div class="service-description">
@@ -85,7 +85,7 @@
 <p>For systems in production, consider using one of the many Content Distribution Network (CDN) available on the market, as they are the best solution for serving files. They are covered in the next chapter. If you decide against using a CDN solution, then please look at the chapter after that, as it explains how to efficiently serve static files on your own.</p>
 <p>The static handler can serve either one file or all files from a given directory. It can also send etag headers for client-side caching.</p>
 <p>To use the static file handler, simply add routes for it with the appropriate options.</p>
-<h2>Serve one file</h2>
+<h2 id="serve_one_file">Serve one file</h2>
 <p>You can use the static handler to serve one specific file from an application's private directory. This is particularly useful to serve an <code>index.html</code> file when the client requests the <code>/</code> path, for example. The path configured is relative to the given application's private directory.</p>
 <p>The following rule will serve the file <code>static/index.html</code> from the application <code>my_app</code>'s priv directory whenever the path <code>/</code> is accessed.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -95,7 +95,7 @@
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {"/", cowboy_static, {file, "/var/www/index.html"}}
 ]]></script>
-<h2>Serve all files from a directory</h2>
+<h2 id="serve_all_files_from_a_directory">Serve all files from a directory</h2>
 <p>You can also use the static handler to serve all files that can be found in the configured directory. The handler will use the <code>path_info</code> information to resolve the file location, which means that your route must end with a <code>[...]</code> pattern for it to work. All files are served, including the ones that may be found in subfolders.</p>
 <p>You can specify the directory relative to an application's private directory.</p>
 <p>The following rule will serve any file found in the application <code>my_app</code>'s priv directory inside the <code>static/assets</code> folder whenever the requested path begins with <code>/assets/</code>.</p>
@@ -106,7 +106,7 @@
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {"/assets/[...]", cowboy_static, {dir, "/var/www/assets"}}
 ]]></script>
-<h2>Customize the mimetype detection</h2>
+<h2 id="customize_the_mimetype_detection">Customize the mimetype detection</h2>
 <p>By default, Cowboy will attempt to recognize the mimetype of your static files by looking at the extension.</p>
 <p>You can override the function that figures out the mimetype of the static files. It can be useful when Cowboy is missing a mimetype you need to handle, or when you want to reduce the list to make lookups faster. You can also give a hard-coded mimetype that will be used unconditionally.</p>
 <p>Cowboy comes with two functions built-in. The default function only handles common file types used when building Web applications. The other function is an extensive list of hundreds of mimetypes that should cover almost any need you may have. You can of course create your own function.</p>
@@ -133,7 +133,7 @@
 {"/", cowboy_static, {priv_file, my_app, "static/index.html",
     [{mimetypes, {<<"text">>, <<"html">>, []}}]}}
 ]]></script>
-<h2>Generate an etag</h2>
+<h2 id="generate_an_etag">Generate an etag</h2>
 <p>By default, the static handler will generate an etag header value based on the size and modified time. This solution can not be applied to all systems though. It would perform rather poorly over a cluster of nodes, for example, as the file metadata will vary from server to server, giving a different etag on each server.</p>
 <p>You can however change the way the etag is calculated.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -161,6 +161,8 @@
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

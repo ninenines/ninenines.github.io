@@ -176,7 +176,9 @@ title1(Text) ->
 		"<div class=\"service-description\">\n"].
 
 title2(Text) ->
-	["<h2>", Text, "</h2>\n"].
+	["<h2 id=\"",
+		binary:replace(cowboy_bstr:to_lower(Text), <<" ">>, <<"_">>, [global]),
+		"\">", Text, "</h2>\n"].
 
 spec(Text) ->
 	["<h4>", Text, "</h4>\n"].

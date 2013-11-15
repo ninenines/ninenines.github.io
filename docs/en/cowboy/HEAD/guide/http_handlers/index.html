@@ -77,12 +77,12 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Handling plain HTTP requests</span></h1>
 <div class="service-description">
 <p>The simplest way to handle a request is by writing a plain HTTP handler. It is modeled after Erlang/OTP's gen_server behaviour, although simplified, as Cowboy will simply call the three callbacks sequentially.</p>
-<h2>Initialization</h2>
+<h2 id="initialization">Initialization</h2>
 <p>The first callback, <code>init/3</code>, is common to all handlers, as it is used to identify the type of handler. Plain HTTP handlers just return <code>ok</code>.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 init(_Type, Req, _Opts) ->
@@ -129,7 +129,7 @@ init(_Type, Req, Opts) ->
     {_, Lang} = lists:keyfind(lang, 1, Opts),
     {ok, Req, #state{lang=Lang}}.
 ]]></script>
-<h2>Handling the request</h2>
+<h2 id="handling_the_request">Handling the request</h2>
 <p>The second callback, <code>handle/2</code>, is specific to plain HTTP handlers. It's where you, wait for it, handle the request.</p>
 <p>A handle function that does nothing would look like this:</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -145,7 +145,7 @@ handle(Req, State) ->
     ], <<"Hello World!">>, Req),
     {ok, Req2, State}.
 ]]></script>
-<h2>Cleaning up</h2>
+<h2 id="cleaning_up">Cleaning up</h2>
 <p>The third and last callback, <code>terminate/3</code>, will most likely be empty in your handler.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 terminate(_Reason, Req, State) ->
@@ -170,6 +170,8 @@ terminate(_Reason, Req, State) ->
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

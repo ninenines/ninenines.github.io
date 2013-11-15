@@ -77,7 +77,7 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>cowboy_req</span></h1>
 <div class="service-description">
@@ -91,12 +91,12 @@
 </ul>
 <p>The only exception is the <code>chunk/2</code> function which may return <code>ok</code>.</p>
 <p>Whenever <code>Req</code> is returned, you must use this returned value and ignore any previous you may have had. This value contains various state informations which are necessary for Cowboy to do some lazy evaluation or cache results where appropriate.</p>
-<h2>Types</h2>
+<h2 id="types">Types</h2>
 <h4>cookie_opts() = [{max_age, non_neg_integer()}	| {domain, binary()} | {path, binary()}	| {secure, boolean()} | {http_only, boolean()}]</h4>
 <blockquote> Cookie options.</blockquote>
 <h4>req() - opaque to the user</h4>
 <blockquote> The <code>Req</code> object.<br/><br/> All functions in this module receive a <code>Req</code> as argument, and most of them return a new object labelled <code>Req2</code> in the function descriptions below.</blockquote>
-<h2>Request related exports</h2>
+<h2 id="request_related_exports">Request related exports</h2>
 <h4>binding(Name, Req) -> binding(Name, Req, undefined)</h4>
 <h4>binding(Name, Req, Default) -> {Value, Req2}</h4>
 <blockquote> Types:<ul>
@@ -244,7 +244,7 @@
 <li>Version = cowboy:http_version()</li>
 </ul>
  Return the HTTP version used for this request.</blockquote>
-<h2>Request body related exports</h2>
+<h2 id="request_body_related_exports">Request body related exports</h2>
 <h4>body(Req) -> body(8000000, Req)</h4>
 <h4>body(MaxLength, Req) -> {ok, Data, Req2} | {error, Reason}</h4>
 <blockquote> Types:<ul>
@@ -295,7 +295,7 @@
 <li>Reason = atom()</li>
 </ul>
  Stream the request body.<br/><br/> This function will return a segment of the request body with a size of up to <code>MaxSegmentSize</code>, or 1MB by default. This function can be called repeatedly until a <code>done</code> tuple is returned, indicating the body has been fully received.<br/><br/> Cowboy will properly handle chunked transfer-encoding by default. If any other transfer-encoding or content-encoding has been used for the request, custom decoding functions can be used. They must be specified using <code>init_stream/4</code>.<br/><br/> After the body has been streamed fully, Cowboy will remove the transfer-encoding header from the <code>Req</code> object, and add the content-length header if it wasn't already there.</blockquote>
-<h2>Response related exports</h2>
+<h2 id="response_related_exports">Response related exports</h2>
 <h4>chunk(Data, Req) -> ok | {error, Reason}</h4>
 <blockquote> Types:<ul>
 <li>Data = iodata()</li>
@@ -363,7 +363,7 @@
 <li>Value = iodata()</li>
 </ul>
  Set a response header.<br/><br/> You should use <code>set_resp_cookie/4</code> instead of this function to set cookies.</blockquote>
-<h2>Misc. exports</h2>
+<h2 id="misc._exports">Misc. exports</h2>
 <h4>compact(Req) -> Req2</h4>
 <blockquote> Remove any non-essential data from the <code>Req</code> object.<br/><br/> Long-lived connections usually only need to manipulate the <code>Req</code> object at initialization. Compacting allows saving up memory by discarding extraneous information.</blockquote>
 </div>
@@ -381,6 +381,8 @@
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

@@ -77,7 +77,7 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Routing</span></h1>
 <div class="service-description">
@@ -86,7 +86,7 @@
 <p>When Cowboy receives a request, it tries to match the requested host and path to the resources given in the dispatch rules. If it matches, then the associated Erlang code will be executed.</p>
 <p>Routing rules are given per host. Cowboy will first match on the host, and then try to find a matching path.</p>
 <p>Routes need to be compiled before they can be used by Cowboy.</p>
-<h2>Structure</h2>
+<h2 id="structure">Structure</h2>
 <p>The general structure for the routes is defined as follow.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Routes = [Host1, Host2, ... HostN].
@@ -106,7 +106,7 @@ Path1 = {PathMatch, Handler, Opts}.
 Path2 = {PathMatch, Constraints, Handler, Opts}.
 ]]></script>
 <p>Continue reading to learn more about the match syntax and the optional constraints.</p>
-<h2>Match syntax</h2>
+<h2 id="match_syntax">Match syntax</h2>
 <p>The match syntax is used to associate host names and paths with their respective handlers.</p>
 <p>The match syntax is the same for host and path with a few subtleties. Indeed, the segments separator is different, and the host is matched starting from the last segment going to the first. All examples will feature both host and path match rules and explain the differences when encountered.</p>
 <p>Excluding special values that we will explain at the end of this section, the simplest match value is a host or a path. It can be given as either a <code>string()</code> or a <code>binary()</code>.</p>
@@ -174,7 +174,7 @@ HostMatch = '_'.
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 HostMatch = "*".
 ]]></script>
-<h2>Constraints</h2>
+<h2 id="constraints">Constraints</h2>
 <p>After the matching has completed, the resulting bindings can be tested against a set of constraints. Constraints are only tested when the binding is defined. They run in the order you defined them. The match will succeed only if they all succeed.</p>
 <p>They are always given as a two or three elements tuple, where the first element is the name of the binding, the second element is the constraint's name, and the optional third element is the constraint's arguments.</p>
 <p>The following constraints are currently defined:</p>
@@ -185,7 +185,7 @@ HostMatch = "*".
 <p>The <code>int</code> constraint will check if the binding is a binary string representing an integer, and if it is, will convert the value to integer.</p>
 <p>The <code>function</code> constraint will pass the binding value to a user specified function that receives the binary value as its only argument and must return whether it fulfills the constraint, optionally modifying the value. The value thus returned can be of any type.</p>
 <p>Note that constraint functions SHOULD be pure and MUST NOT crash.</p>
-<h2>Compilation</h2>
+<h2 id="compilation">Compilation</h2>
 <p>The structure defined in this chapter needs to be compiled before it is passed to Cowboy. This allows Cowboy to efficiently lookup the correct handler to run instead of having to parse the routes repeatedly.</p>
 <p>This can be done with a simple call to <code>cowboy_router:compile/1</code>.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -200,7 +200,7 @@ cowboy:start_http(my_http_listener, 100,
 ).
 ]]></script>
 <p>Note that this function will return <code>{error, badarg}</code> if the structure given is incorrect.</p>
-<h2>Live update</h2>
+<h2 id="live_update">Live update</h2>
 <p>You can use the <code>cowboy:set_env/3</code> function for updating the dispatch list used by routing. This will apply to all new connections accepted by the listener.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 cowboy:set_env(my_http_listener, dispatch,
@@ -222,6 +222,8 @@ cowboy:set_env(my_http_listener, dispatch,
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

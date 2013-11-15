@@ -77,24 +77,24 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>The Req object</span></h1>
 <div class="service-description">
 <p>The Req object is this variable that you will use to obtain information about a request, read the body of the request and send a response.</p>
-<h2>A special variable</h2>
+<h2 id="a_special_variable">A special variable</h2>
 <p>While we call it an "object", it is not an object in the OOP sense of the term. In fact it is completely opaque to you and the only way you can perform operations using it is by calling the functions from the <code>cowboy_req</code> module.</p>
 <p>Almost all the calls to the <code>cowboy_req</code> module will return an updated request object. Just like you would keep the updated <code>State</code> variable in a gen_server, you MUST keep the updated <code>Req</code> variable in a Cowboy handler. Cowboy will use this object to know whether a response has been sent when the handler has finished executing.</p>
 <p>The Req object allows accessing both immutable and mutable state. This means that calling some of the functions twice will not produce the same result. For example, when streaming the request body, the function will return the body by chunks, one at a time, until there is none left.</p>
 <p>It also caches the result of operations performed on the immutable state. That means that some calls will give a result much faster when called many times.</p>
-<h2>Overview of the cowboy_req interface</h2>
+<h2 id="overview_of_the_cowboy_req_interface">Overview of the cowboy_req interface</h2>
 <p>The <code>cowboy_req</code> interface is divided in four groups of functions, each having a well defined return type signature common to the entire group.</p>
 <p>The first group, access functions, will always return <code>{Value, Req}</code>. The group includes all the following functions: <code>binding/{2,3}</code>, <code>bindings/1</code>, <code>body_length/1</code>, <code>cookie/{2,3}</code>, <code>cookies/1</code>, <code>header/{2,3}</code>, <code>headers/1</code>, <code>host/1</code>, <code>host_info/1</code>, <code>host_url/1</code>, <code>meta/{2,3}</code>, <code>method/1</code>, <code>path/1</code>, <code>path_info/1</code>, <code>peer/1</code>, <code>port/1</code>, <code>qs/1</code>, <code>qs_val/{2,3}</code>, <code>qs_vals/1</code>, <code>url/1</code>, <code>version/1</code>.</p>
 <p>The second group, question functions, will always return a <code>boolean()</code>. The group includes the following three functions: <code>has_body/1</code>, <code>has_resp_body/1</code>, <code>has_resp_header/2</code>.</p>
 <p>The third group contains the functions that manipulate the socket or perform operations that may legitimately fail. They may return <code>{Result, Req}</code>, <code>{Result, Value, Req}</code> or <code>{error, atom()}</code>. This includes the following functions: <code>body/{1,2}</code>, <code>body_qs/{1,2}</code>, <code>chunked_reply/{2,3}</code>, <code>init_stream/4</code>, <code>parse_header/{2,3}</code>, <code>reply/{2,3,4}</code>, <code>skip_body/1</code>, <code>stream_body/{1,2}</code>. Finally, the group also includes the <code>chunk/2</code> function which always returns <code>ok</code>.</p>
 <p>The final group modifies the Req object, so it always return a new <code>Req</code>. It includes the following functions: <code>compact/1</code>, <code>delete_resp_header/2</code>, <code>set_meta/3</code>, <code>set_resp_body/2</code>, <code>set_resp_body_fun/{2,3}</code>, <code>set_resp_cookie/4</code>, <code>set_resp_header/3</code>.</p>
 <p>This chapter covers most of the first group, plus a few other functions. The next few chapters cover cookies handling, reading the request body and sending a response.</p>
-<h2>Request</h2>
+<h2 id="request">Request</h2>
 <p>When a client performs a request, it first sends a few required values. They are sent differently depending on the protocol being used, but the intent is the same. They indicate to the server the type of action it wants to do and how to locate the resource to perform it on.</p>
 <p>The method identifies the action. Standard methods include GET, HEAD, OPTIONS, PATCH, POST, PUT, DELETE. Method names are case sensitive.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -111,7 +111,7 @@
 {Version, Req2} = cowboy_req:version(Req).
 ]]></script>
 <p>Do note however that clients claiming to implement one version of the protocol does not mean they implement it fully, or even properly.</p>
-<h2>Bindings</h2>
+<h2 id="bindings">Bindings</h2>
 <p>After routing the request, bindings are available. Bindings are these parts of the host or path that you chose to extract when defining the routes of your application.</p>
 <p>You can fetch a single binding. The value will be <code>undefined</code> if the binding doesn't exist.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -133,7 +133,7 @@
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {PathInfo, Req2} = cowboy_req:path_info(Req).
 ]]></script>
-<h2>Query string</h2>
+<h2 id="query_string">Query string</h2>
 <p>The query string can be obtained directly.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {Qs, Req2} = cowboy_req:qs(Req).
@@ -150,7 +150,7 @@
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {AllValues, Req2} = cowboy_req:qs_vals(Req).
 ]]></script>
-<h2>Request URL</h2>
+<h2 id="request_url">Request URL</h2>
 <p>You can reconstruct the full URL of the resource.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {URL, Req2} = cowboy_req:url(Req).
@@ -159,7 +159,7 @@
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {BaseURL, Req2} = cowboy_req:host_url(Req).
 ]]></script>
-<h2>Headers</h2>
+<h2 id="headers">Headers</h2>
 <p>Cowboy allows you to obtain the header values as string, or parsed into a more meaningful representation.</p>
 <p>This will get the string value of a header.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -191,7 +191,7 @@
     {<<"text">>, <<"plain">>, []}).
 ]]></script>
 <p>The list of known headers and default values is defined in the manual. Also note that the result of parsing is cached, so calling this function multiple times for the same values will not have a significant performance impact.</p>
-<h2>Meta</h2>
+<h2 id="meta">Meta</h2>
 <p>Cowboy will sometimes associate some meta information with the request. Built-in meta values are listed in the manual for their respective modules.</p>
 <p>This will get a meta value. The returned value will be <code>undefined</code> if it isn't defined.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -205,12 +205,12 @@
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:set_meta(the_answer, 42, Req).
 ]]></script>
-<h2>Peer</h2>
+<h2 id="peer">Peer</h2>
 <p>You can obtain the peer address and port number. This is not necessarily the actual IP and port of the client, but rather the one of the machine that connected to the server.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {{IP, Port}, Req2} = cowboy_req:peer(Req).
 ]]></script>
-<h2>Reducing the memory footprint</h2>
+<h2 id="reducing_the_memory_footprint">Reducing the memory footprint</h2>
 <p>When you are done reading information from the request object and know you are not going to access it anymore, for example when using long-polling or Websocket, you can use the <code>compact/1</code> function to remove most of the data from the request object and free memory.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:compact(Req).
@@ -231,6 +231,8 @@ Req2 = cowboy_req:compact(Req).
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

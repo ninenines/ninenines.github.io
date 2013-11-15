@@ -31,4 +31,13 @@ $(document).ready(function() {;
       carousel.unbind('slide');
     });
   });
+
+	if ($("#docs h2").length == 0){
+		$("#docs-nav").remove();
+	}else{
+		$("<ul/>").insertAfter("#docs-nav");
+		$("#docs h2").each(function(){
+			$("<li><a href=\"#" + $(this).attr("id") + "\">" + $(this).text() + "</a></li>").appendTo("#docs-nav+ul");
+		});
+	}
 });

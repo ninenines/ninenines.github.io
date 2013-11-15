@@ -77,14 +77,14 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Bullet</span></h1>
 <div class="service-description">
 <p>Bullet is a Cowboy handler and associated Javascript library for maintaining a persistent connection between a client and a server.</p>
 <p>Bullet abstracts a general transport protocol similar to WebSockets. Bullet will use a WebSocket if possible but will fallback to other transports when necessary. If the client supports EventSource connections then Bullet will use EventSource to send messages from the server to the client and XHR for messages from the client to the server. If EventSource is not available then Bullet will use XHR for both directions, using long-polling for server-to-client messages.</p>
 <p>A common interface is defined for both client and server to easily facilitate the handling of such connections. Bullet additionally takes care of reconnecting automatically whenever a connection is lost, and also provides an optional heartbeat which is managed on the client side.</p>
-<h2>Dispatch options</h2>
+<h2 id="dispatch_options">Dispatch options</h2>
 <p>Similar to any other handler, you need to setup the dispatch list before you can access your Bullet handlers. Bullet itself is a Cowboy HTTP handler that translates some of the lower-level functions into a simplified higher-level interface.</p>
 <p>The dispatch options for a Bullet handler looks as follow:</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -92,7 +92,7 @@
 	[{handler, my_stream}]}
 ]]></script>
 <p>Simply define this in your dispatch list and your handler will be available and handled by Bullet properly.</p>
-<h2>Cowboy handler</h2>
+<h2 id="cowboy_handler">Cowboy handler</h2>
 <p>Similar to websocket handlers, you need to define 4 functions. A very simple bullet handler would look like the following:</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 -module(stream_handler).
@@ -115,7 +115,7 @@ terminate(_Req, _State) ->
 <p>You might have noticed the odd Active argument to init/4. It indicates what type of connection we have. When Active == once, we have a temporary connection that only allows one reply before terminating. When Active == true, the connection allows any number of replies. You can use this information to inform your session process that it should send only 1 message, in the case of Active == once, or that it can send messages whenever in the case of Active == true.</p>
 <p>You would typically use init/4 to inform your session process that it can send you messages. In the same manner you can use terminate/2 to inform it that the connection is going down.</p>
 <p>Bullet handlers should only contain transport related code, logic should be done in your session process if any, or other parts of your application. Bullet processes should be considered temporary as you never know when a connection is going to close and therefore lose your State.</p>
-<h2>Client-side javascript</h2>
+<h2 id="client-side_javascript">Client-side javascript</h2>
 <p>Bullet requires the jQuery library to be used. Initializing a bullet connection is quite simple and can be done directly from a document.ready function like this:</p>
 <script type="syntaxhighlighter" class="brush: js"><![CDATA[
 $(document).ready(function(){
@@ -168,6 +168,8 @@ bullet.send($.toJSON({type: 'event', data: 'hats!'}));
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

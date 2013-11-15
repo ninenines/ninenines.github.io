@@ -77,30 +77,30 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>REST handlers</span></h1>
 <div class="service-description">
-<h2>Purpose</h2>
+<h2 id="purpose">Purpose</h2>
 <p>REST is a set of constraints that, when applied to HTTP, dictates how resources must behave. It is the recommended way to handle requests with Cowboy.</p>
 <p>REST is implemented in Cowboy as a protocol upgrade. Once upgraded, the request is handled as a state machine with many optional callbacks describing the resource and modifying the machine's behavior.</p>
 <p>As the REST handler is still subject to change, the documentation is still thin. This state of affair will be improved in the coming weeks.</p>
-<h2>Usage</h2>
+<h2 id="usage">Usage</h2>
 <p>Like Websocket, REST is a sub-protocol of HTTP. It therefore requires a protocol upgrade.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 init({tcp, http}, Req, Opts) ->
     {upgrade, protocol, cowboy_rest}.
 ]]></script>
 <p>Cowboy will then switch to the REST protocol and start executing the flow diagram, starting from <code>rest_init/2</code> if it's defined, and ending with <code>rest_terminate/2</code> also if defined.</p>
-<h2>Flow diagram</h2>
+<h2 id="flow_diagram">Flow diagram</h2>
 <p>Not done yet. Feel free to use the one that is currently being worked on.</p>
 <ul>
 <li>https://github.com/extend/cowboy/pull/364</li>
 </ul>
-<h2>Methods</h2>
+<h2 id="methods">Methods</h2>
 <p>The REST component has code for handling the following HTTP methods: HEAD, GET, POST, PATCH, PUT, DELETE and OPTIONS.</p>
 <p>Other methods can be accepted, however they have no specific callback defined for them at this time.</p>
-<h2>Callbacks</h2>
+<h2 id="callbacks">Callbacks</h2>
 <p>All callbacks are optional. Some may become mandatory depending on what other defined callbacks return. The flow diagram should be a pretty good resource to determine which callbacks you need.</p>
 <p>When the request starts being processed, Cowboy will call the <code>rest_init/2</code> function if it is defined, with the Req object and the handler options as arguments. This function must return <code>{ok, Req, State}</code> where <code>State</code> is the handler's state that all subsequent callbacks will receive.</p>
 <p>At the end of every request, the special callback <code>rest_terminate/2</code> will be called if it is defined. It cannot be used to send a reply, and must always return <code>ok</code>.</p>
@@ -110,10 +110,10 @@ init({tcp, http}, Req, Opts) ->
 <p>In the following table, "skip" means the callback is entirely skipped if it is undefined, moving directly to the next step. Similarly, an empty column means there is no default value for this callback.</p>
 <table class="table-bordered table-condensed table-striped"><thead><tr><th>Callback name          </th><th> Default value             </th></tr></thead><tbody><tr><td>allowed_methods        </td><td> <code>[<<"GET">>, <<"HEAD">>, <<"OPTIONS">>]</code> </td></tr><tr><td>allow_missing_post     </td><td> <code>true</code>                    </td></tr><tr><td>charsets_provided      </td><td> skip                      </td></tr><tr><td>content_types_accepted </td><td>                           </td></tr><tr><td>content_types_provided </td><td> <code>[{{<<"text">>, <<"html">>, '*'}, to_html}] </code> </td></tr><tr><td>delete_completed       </td><td> <code>true</code>                    </td></tr><tr><td>delete_resource        </td><td> <code>false</code>                   </td></tr><tr><td>expires                </td><td> <code>undefined</code>               </td></tr><tr><td>forbidden              </td><td> <code>false</code>                   </td></tr><tr><td>generate_etag          </td><td> <code>undefined</code>               </td></tr><tr><td>is_authorized          </td><td> <code>true</code>                    </td></tr><tr><td>is_conflict            </td><td> <code>false</code>                   </td></tr><tr><td>known_content_type     </td><td> <code>true</code>                    </td></tr><tr><td>known_methods          </td><td> <code>[<<"GET">>, <<"HEAD">>, <<"POST">>, <<"PUT">>, <<"PATCH">>, <<"DELETE">>, <<"OPTIONS">>]</code> </td></tr><tr><td>languages_provided     </td><td> skip                      </td></tr><tr><td>last_modified          </td><td> <code>undefined</code>               </td></tr><tr><td>malformed_request      </td><td> <code>false</code>                   </td></tr><tr><td>moved_permanently      </td><td> <code>false</code>                   </td></tr><tr><td>moved_temporarily      </td><td> <code>false</code>                   </td></tr><tr><td>multiple_choices       </td><td> <code>false</code>                   </td></tr><tr><td>options                </td><td> <code>ok</code>                      </td></tr><tr><td>previously_existed     </td><td> <code>false</code>                   </td></tr><tr><td>resource_exists        </td><td> <code>true</code>                    </td></tr><tr><td>service_available      </td><td> <code>true</code>                    </td></tr><tr><td>uri_too_long           </td><td> <code>false</code>                   </td></tr><tr><td>valid_content_headers  </td><td> <code>true</code>                    </td></tr><tr><td>valid_entity_length    </td><td> <code>true</code>                    </td></tr><tr><td>variances              </td><td> <code>[]</code>                      </td></tr></tbody></table><p>As you can see, Cowboy tries to move on with the request whenever possible by using well thought out default values.</p>
 <p>In addition to these, there can be any number of user-defined callbacks that are specified through <code>content_types_accepted/2</code> and <code>content_types_provided/2</code>. They can take any name, however it is recommended to use a separate prefix for the callbacks of each function. For example, <code>from_html</code> and <code>to_html</code> indicate in the first case that we're accepting a resource given as HTML, and in the second case that we send one as HTML.</p>
-<h2>Meta data</h2>
+<h2 id="meta_data">Meta data</h2>
 <p>Cowboy will set informative meta values at various points of the execution. You can retrieve them using <code>cowboy_req:meta/{2,3}</code>. The values are defined in the following table.</p>
 <table class="table-bordered table-condensed table-striped"><thead><tr><th>Meta key   </th><th> Details                                              </th></tr></thead><tbody><tr><td>media_type </td><td> The content-type negotiated for the response entity. </td></tr><tr><td>language   </td><td> The language negotiated for the response entity.     </td></tr><tr><td>charset    </td><td> The charset negotiated for the response entity.      </td></tr></tbody></table><p>They can be used to send a proper body with the response to a request that used a method other than HEAD or GET.</p>
-<h2>Response headers</h2>
+<h2 id="response_headers">Response headers</h2>
 <p>Cowboy will set response headers automatically over the execution of the REST code. They are listed in the following table.</p>
 <table class="table-bordered table-condensed table-striped"><thead><tr><th>Header name      </th><th> Details                                            </th></tr></thead><tbody><tr><td>content-language </td><td> Language used in the response body                 </td></tr><tr><td>content-type     </td><td> Media type and charset of the response body        </td></tr><tr><td>etag             </td><td> Etag of the resource                               </td></tr><tr><td>expires          </td><td> Expiration date of the resource                    </td></tr><tr><td>last-modified    </td><td> Last modification date for the resource            </td></tr><tr><td>location         </td><td> Relative or absolute URI to the requested resource </td></tr><tr><td>vary             </td><td> List of headers that may change the representation of the resource </td></tr></tbody></table></div>
 
@@ -130,6 +130,8 @@ init({tcp, http}, Req, Opts) ->
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>

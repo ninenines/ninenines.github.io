@@ -77,15 +77,15 @@
 <div id="contents" class="two_col">
 <div class="container">
 <div class="row">
-<div class="span9 maincol">
+<div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Handlers</span></h1>
 <div class="service-description">
-<h2>Purpose</h2>
+<h2 id="purpose">Purpose</h2>
 <p>Handlers are Erlang modules that represent a resource.</p>
 <p>Handlers must process the request and send a reply. The nature of the reply will vary between handlers.</p>
 <p>Different kinds of handlers can be combined in a single module. This allows a module to handle both websocket and long-polling code in a single place, for example.</p>
-<h2>Protocol upgrades</h2>
+<h2 id="protocol_upgrades">Protocol upgrades</h2>
 <p>Cowboy features many different handlers: HTTP handlers, loop handlers, websocket handlers, REST handlers and static handlers. All of them have a common entry point: the <code>init/3</code> function.</p>
 <p>By default, Cowboy considers your handler to be an HTTP handler.</p>
 <p>To switch to a different protocol, like, for example, Websocket, you must perform a protocol upgrade. This is done by returning a protocol upgrade tuple at the end of <code>init/3</code>.</p>
@@ -95,7 +95,7 @@ init(_Any, _Req, _Opts) ->
     {upgrade, protocol, my_protocol}.
 ]]></script>
 <p>Cowboy comes with two protocol upgrades: <code>cowboy_rest</code> and <code>cowboy_websocket</code>. Use these values in place of <code>my_protocol</code> to use them.</p>
-<h2>Custom protocol upgrades</h2>
+<h2 id="custom_protocol_upgrades">Custom protocol upgrades</h2>
 <p>The <code>my_protocol</code> module above will be used for further processing of the request. It should use the <code>cowboy_sub_protocol</code> behaviour, which requires only one callback, <code>upgrade/4</code>.</p>
 <p>It receives the request object, the middleware environment, and the handler this request has been routed to along with its options.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -118,6 +118,8 @@ upgrade(Req, Env, Handler, HandlerOpts) ->
 </div> -->
 
 
+
+<h3 id="docs-nav">Navigation</h3>
 
 <h3>Version select</h3>
 <ul>
