@@ -10,12 +10,15 @@ dep_yamerl = https://github.com/yakaz/yamerl 261da0ee
 
 .PHONY: build clean-build run
 
-build: clean-build all
+build: clean-build deps/erlang.mk all
 	@erl -pa ebin deps/*/ebin -noshell -eval 'ninenines:build(), init:stop().'
 
 clean-build:
 	@rm -rf ../index.html ../articles/ ../docs/ ../feeds/ ../support/ \
 		../talks/index.html ../training/
+
+deps/erlang.mk:
+	git clone https://github.com/extend/erlang.mk deps/erlang.mk
 
 run:
 	@erl -pa ebin deps/*/ebin -noshell -eval 'ninenines:run().'

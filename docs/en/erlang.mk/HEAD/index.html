@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Erlang.mk README</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Official support" href="/support">Pricing & Support</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>erlang.mk</span></h1>
+<div class="service-description">
+<p>Common Makefile rules for building and testing Erlang applications.</p>
+<p>Also features support for dependencies and a package index.</p>
+<h2 id="requirements">Requirements</h2>
+<p><code>erlang.mk</code> requires GNU Make and expects to be ran in a standard unix environment with Erlang installed and in the <code>$PATH</code>.</p>
+<p><code>erlang.mk</code> uses <code>wget</code> for downloading the package index file when the <code>pkg://</code> scheme is used.</p>
+<h2 id="usage">Usage</h2>
+<p>Add the file <code>erlang.mk</code> to your project, then use the following base Makefile:</p>
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+PROJECT = my_project
+
+include erlang.mk
+]]></script>
+<h2 id="dependencies">Dependencies</h2>
+<p>Erlang projects often depend on other projects to run. Adding dependencies to the Makefile is easy. You need to create the variable <code>DEPS</code> listing the names of all the dependencies, along with one <code>dep_$(NAME)</code> variable per dependency giving the git repository and commit to retrieve.</p>
+<p>These variables should be defined before the include line.</p>
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+DEPS = cowboy bullet
+dep_cowboy = https://github.com/extend/cowboy.git 0.8.4
+dep_bullet = https://github.com/extend/bullet.git 0.4.1
+]]></script>
+<p>They will always be compiled using the command <code>make</code>. If the dependency does not feature a Makefile, then erlang.mk will be used for building.</p>
+<p>You can also specify test-only dependencies. These dependencies will only be downloaded when running <code>make tests</code>. The format is the same as above, except the variable <code>TEST_DEPS</code> holds the list of test-only dependencies.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+TEST_DEPS = ct_helper
+dep_ct_helper = https://github.com/extend/ct_helper.git master
+]]></script>
+<p>Please note that the test dependencies will only be compiled once when they are fetched, unlike the normal dependencies.</p>
+<h2 id="package_index">Package index</h2>
+<p>A very basic package index is included with erlang.mk. You can list all known packages with the <code>make pkg-list</code> command. You can search a package with the <code>make pkg-search q=STRING</code> command, replacing <code>STRING</code> with what you want to search. Use quotes around the string if needed.</p>
+<p>In addition, it is possible to specify dependencies in a simplified manner if they exist in the package index. The above example could instead read as:</p>
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+DEPS = cowboy bullet
+dep_cowboy = pkg://cowboy 0.8.4
+dep_bullet = pkg://bullet 0.4.1
+]]></script>
+<p>erlang.mk will look inside the index for the proper URL and use it for fetching the dependency.</p>
+<p>All packages featured in the index are compatible with erlang.mk with no extra work required.</p>
+<h2 id="releases">Releases</h2>
+<p>If a <code>relx.config</code> file is present, erlang.mk will download <code>relx</code> automatically and build the release into the <code>_rel</code> folder. This is the default command when the file exists.</p>
+<p>No special configuration is required for this to work.</p>
+<h2 id="compiled_files">Compiled files</h2>
+<p>The following files will be automatically compiled:</p>
+<table class="table-bordered table-condensed table-striped"><thead><tr><th>Wildcard                 </th><th> Description                   </th></tr></thead><tbody><tr><td><code>src/$(PROJECT).app.src</code> </td><td> OTP application resource file </td></tr><tr><td><code>src/*.erl</code>              </td><td> Erlang source files           </td></tr><tr><td><code>src/*.core</code>             </td><td> Core Erlang source files      </td></tr><tr><td><code>src/*.xrl</code>              </td><td> Leex source files             </td></tr><tr><td><code>src/*.yrl</code>              </td><td> Yecc source files             </td></tr><tr><td><code>templates/*.dtl</code>        </td><td> ErlyDTL template files        </td></tr></tbody></table><p>Only the <code>.app.src</code> file and at least one <code>.erl</code> file are required.</p>
+<h2 id="commands">Commands</h2>
+<p>The following targets are defined:</p>
+<table class="table-bordered table-condensed table-striped"><thead><tr><th>Targets      </th><th> Description                                  </th></tr></thead><tbody><tr><td><code>all</code>        </td><td> Compile the application and all dependencies </td></tr><tr><td><code>clean-all</code>  </td><td> Clean the application and all dependencies   </td></tr><tr><td><code>app</code>        </td><td> Compile the application                      </td></tr><tr><td><code>clean</code>      </td><td> Clean the application                        </td></tr><tr><td><code>deps</code>       </td><td> Compile the dependencies                     </td></tr><tr><td><code>clean-deps</code> </td><td> Clean the dependencies                       </td></tr><tr><td><code>docs</code>       </td><td> Generate the Edoc documentation              </td></tr><tr><td><code>clean-docs</code> </td><td> Clean the Edoc documentation                 </td></tr><tr><td><code>test_*</code>     </td><td> Run the common_test suite <code>*</code>                </td></tr><tr><td><code>tests</code>      </td><td> Run all the common_test suites               </td></tr><tr><td><code>build-plt</code>  </td><td> Generate the PLT needed by Dialyzer          </td></tr><tr><td><code>dialyze</code>    </td><td> Run Dialyzer on the application              </td></tr><tr><td><code>pkg-list</code>   </td><td> List packages in the index                   </td></tr><tr><td><code>pkg-search</code> </td><td> Search for packages in the index             </td></tr><tr><td><code>rel</code>        </td><td> Build a release                              </td></tr><tr><td><code>clean-rel</code>  </td><td> Delete the previously built release          </td></tr></tbody></table><p>Cleaning means removing all generated and temporary files.</p>
+<p>Dependencies are fetched as soon as a command involving them is invoked. This means that most of the targets will trigger a dependency fetch. It is only done once per dependency.</p>
+<p>You can run an individual test suite by using the special <code>test_*</code> targets. For example if you have a common_test suite named <code>spdy</code> and you want to run only this suite and not the others, you can use the <code>make test_spdy</code> command.</p>
+<p>The default target when calling <code>make</code> is <code>all</code> when no <code>relx.config</code> exists, and <code>rel</code> when it does exist.</p>
+<p>You can combine targets to perform many operations. For example, the shell command <code>make clean app</code> will have the effect of recompiling the application fully, without touching the dependencies.</p>
+<p>A common workflow when editing a file would be to run <code>make</code> regularly to see if it compiles (or less often <code>make clean app</code> if you want to recompile everything), followed by <code>make dialyze</code> to see if there are any type errors and then <code>make tests</code> to run the test suites. The result of the test runs can be browsed from the <code>logs/index.html</code> file.</p>
+<h2 id="options">Options</h2>
+<p>The following variables can be overriden:</p>
+<p><code>V</code> defines the verbosity of the commands. You can set it to an empty value to make commands verbose.</p>
+<p><code>ERLC_OPTS</code> allows you to change the <code>erlc</code> compilation options. You should always compile with at least the <code>+debug_info</code> set.</p>
+<p><code>COMPILE_FIRST</code> is a list of modules (not filenames) that should be compiled before all others.</p>
+<p><code>DEPS_DIR</code> is the path to the directory where the dependencies are downloaded to. It defaults to <code>deps</code>. It will be propagated into all the subsequent make calls, allowing all dependencies to use the same folder as expected.</p>
+<p><code>CT_SUITES</code> is the list of common_test suites to run when you use the <code>make tests</code> command. If your suite module is named <code>ponies_SUITE</code> then you only need to put <code>ponies</code> in the list.</p>
+<p><code>PLT_APPS</code> is the list of applications to include when building the <code>.plt</code> file for Dialyzer. You do not need to put <code>erts</code>, <code>kernel</code> or <code>stdlib</code> in there because they will always be included. The applications the project depends on will also be included.</p>
+<p><code>DIALYZER_OPTS</code> allows you to change the <code>dialyzer</code> options.</p>
+<p><code>PKG_FILE</code> allows you to change the location of the package index file on your system.</p>
+<p><code>PKG_FILE_URL</code> allows you to change the URL from which the package index file is fetched.</p>
+<p><code>RELX_CONFIG</code> is the location of the <code>relx.config</code> file, if any.</p>
+<p><code>RELX</code> is the location of the <code>relx</code> executable for building releases.</p>
+<p><code>RELX_URL</code> is the location where <code>relx</code> can be downloaded if it is not found locally.</p>
+<h2 id="extra_targets">Extra targets</h2>
+<p>If you need more functionality out of your Makefile, you can add extra targets after the include line.</p>
+<p>Defining a target before the include line will override the default target <code>all</code>.</p>
+<h2 id="support">Support</h2>
+<ul>
+<li>Official IRC Channel: #ninenines on irc.freenode.net</li>
+<li><a href="http://lists.ninenines.eu">Mailing Lists</a></li>
+</ul>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+
+
+<h3>Version select</h3>
+<ul>
+	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
+<!--	<li><a href="#">older</a></li> -->
+</ul>
+
+<h3>Sharing</h3>
+<span class='st_twitter_large' st_via='lhoguin' displayText='Tweet'></span>
+<span class='st_googleplus_large' displayText='Google +'></span>
+<span class='st_linkedin_large' displayText='LinkedIn'></span>
+<span class='st_email_large' displayText='Email'></span>
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2013</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "86681c5a-011b-481b-98b8-22b548283fe5", doNotHash: true, doNotCopy: true, hashAddressBar: false});</script>
+
+  </body>
+</html>
