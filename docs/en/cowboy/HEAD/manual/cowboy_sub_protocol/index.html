@@ -85,7 +85,7 @@
 <h2 id="types">Types</h2>
 <p>None.</p>
 <h2 id="callbacks">Callbacks</h2>
-<h4>upgrade(Req, Env, Handler, Opts)	-> {ok, Req, Env}	| {suspend, Module, Function, Args}	| {halt, Req}	| {error, StatusCode, Req}</h4>
+<h4 id="upgrade">upgrade(Req, Env, Handler, Opts)	-> {ok, Req, Env}	| {suspend, Module, Function, Args}	| {halt, Req}	| {error, StatusCode, Req}</h4>
 <blockquote> Types:<ul>
 <li>Req = cowboy_req:req()</li>
 <li>Env = env()</li>
@@ -104,12 +104,12 @@
 </div>
 
 <div class="span3 sidecol">
-<!-- <div class="input-append">
-<form class="form-search">
-	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
 	<button type="submit" class="btn btn-success">Go</button>
 </form>
-</div> -->
+</div>
 
 <h3 id="docs-nav">Navigation</h3>
 
@@ -164,6 +164,33 @@
 <script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
 <script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
 
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>

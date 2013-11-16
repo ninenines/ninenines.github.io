@@ -83,18 +83,18 @@
 <div class="service-description">
 <p>The <code>cowboy</code> module provides convenience functions for manipulating Ranch listeners.</p>
 <h2 id="types">Types</h2>
-<h4>http_headers() = [{binary(), iodata()}]</h4>
+<h4 id="http_headers">http_headers() = [{binary(), iodata()}]</h4>
 <blockquote> HTTP headers as a list of key/values.</blockquote>
-<h4>http_status() = non_neg_integer() | binary()</h4>
+<h4 id="http_status">http_status() = non_neg_integer() | binary()</h4>
 <blockquote> HTTP status.<br/><br/> A binary status can be used to set a custom message.</blockquote>
-<h4>http_version() = 'HTTP/1.1' | 'HTTP/1.0'</h4>
+<h4 id="http_version">http_version() = 'HTTP/1.1' | 'HTTP/1.0'</h4>
 <blockquote> HTTP version.</blockquote>
-<h4>onrequest_fun() = fun((cowboy_req:req()) -> cowboy_req:req())</h4>
+<h4 id="onrequest_fun">onrequest_fun() = fun((cowboy_req:req()) -> cowboy_req:req())</h4>
 <blockquote> Fun called immediately after receiving a request.<br/><br/> It can perform any operation on the <code>Req</code> object, including reading the request body or replying. If a reply is sent, the processing of the request ends here, before any middleware is executed.</blockquote>
-<h4>onresponse_fun() = fun((http_status(), http_headers(),	iodata(), cowboy_req:req()) -> cowboy_req:req())</h4>
+<h4 id="onresponse_fun">onresponse_fun() = fun((http_status(), http_headers(),	iodata(), cowboy_req:req()) -> cowboy_req:req())</h4>
 <blockquote> Fun called immediately before sending the response.<br/><br/> It can perform any operation on the <code>Req</code> object, including reading the request body or replying. If a reply is sent, it overrides the reply initially sent. The callback will not be called again for the new reply.</blockquote>
 <h2 id="exports">Exports</h2>
-<h4>start_http(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
+<h4 id="start_http">start_http(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
 <blockquote> Types:<ul>
 <li>Ref = ranch:ref()</li>
 <li>NbAcceptors = non_neg_integer()</li>
@@ -102,7 +102,7 @@
 <li>ProtoOpts = cowboy_protocol:opts()</li>
 </ul>
  Start listening for HTTP connections. Returns the pid for this listener's supervisor.</blockquote>
-<h4>start_https(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
+<h4 id="start_https">start_https(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
 <blockquote> Types:<ul>
 <li>Ref = ranch:ref()</li>
 <li>NbAcceptors = non_neg_integer()</li>
@@ -110,7 +110,7 @@
 <li>ProtoOpts = cowboy_protocol:opts()</li>
 </ul>
  Start listening for HTTPS connections. Returns the pid for this listener's supervisor.</blockquote>
-<h4>start_spdy(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
+<h4 id="start_spdy">start_spdy(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
 <blockquote> Types:<ul>
 <li>Ref = ranch:ref()</li>
 <li>NbAcceptors = non_neg_integer()</li>
@@ -118,12 +118,12 @@
 <li>ProtoOpts = cowboy_spdy:opts()</li>
 </ul>
  Start listening for SPDY connections. Returns the pid for this listener's supervisor.</blockquote>
-<h4>stop_listener(Ref) -> ok</h4>
+<h4 id="stop_listener">stop_listener(Ref) -> ok</h4>
 <blockquote> Types:<ul>
 <li>Ref = ranch:ref()</li>
 </ul>
  Stop a previously started listener.</blockquote>
-<h4>set_env(Ref, Name, Value) -> ok</h4>
+<h4 id="set_env">set_env(Ref, Name, Value) -> ok</h4>
 <blockquote> Types:<ul>
 <li>Ref = ranch:ref()</li>
 <li>Name = atom()</li>
@@ -139,12 +139,12 @@
 </div>
 
 <div class="span3 sidecol">
-<!-- <div class="input-append">
-<form class="form-search">
-	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
 	<button type="submit" class="btn btn-success">Go</button>
 </form>
-</div> -->
+</div>
 
 <h3 id="docs-nav">Navigation</h3>
 
@@ -199,6 +199,33 @@
 <script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
 <script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
 
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>

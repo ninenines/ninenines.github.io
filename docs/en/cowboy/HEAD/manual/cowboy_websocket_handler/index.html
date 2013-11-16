@@ -86,7 +86,7 @@
 <h2 id="types">Types</h2>
 <p>None.</p>
 <h2 id="callbacks">Callbacks</h2>
-<h4>init({TransportName, ProtocolName}, Req, Opts)	-> {upgrade, protocol, cowboy_websocket}	| {upgrade, protocol, cowboy_websocket, Req, Opts}</h4>
+<h4 id="init">init({TransportName, ProtocolName}, Req, Opts)	-> {upgrade, protocol, cowboy_websocket}	| {upgrade, protocol, cowboy_websocket, Req, Opts}</h4>
 <blockquote> Types:<ul>
 <li>TransportName = tcp | ssl | atom()</li>
 <li>ProtocolName = http | atom()</li>
@@ -94,7 +94,7 @@
 <li>Opts = any()</li>
 </ul>
  Upgrade the protocol to <code>cowboy_websocket</code>.</blockquote>
-<h4>websocket_init(TransportName, Req, Opts)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {ok, Req, State, Timeout}	| {ok, Req, State, Timeout, hibernate}	| {shutdown, Req}</h4>
+<h4 id="websocket_init">websocket_init(TransportName, Req, Opts)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {ok, Req, State, Timeout}	| {ok, Req, State, Timeout, hibernate}	| {shutdown, Req}</h4>
 <blockquote> Types:<ul>
 <li>TransportName = tcp | ssl | atom()</li>
 <li>Req = cowboy_req:req()</li>
@@ -103,7 +103,7 @@
 <li>Timeout = timeout()</li>
 </ul>
  Initialize the state for this session.<br/><br/> This function is called before the upgrade to Websocket occurs. It can be used to negotiate Websocket protocol extensions with the client. It will typically be used to register this process to an event manager or a message queue in order to receive the messages the handler wants to process.<br/><br/> The connection will stay up for a duration of up to <code>Timeout</code> milliseconds after it last received data from the socket, at which point it will stop and close the connection. By default this value is set to <code>infinity</code>. It is recommended to either set this value or ensure by any other mechanism that the handler will be closed after a certain period of inactivity.<br/><br/> The <code>hibernate</code> option will hibernate the process until it starts receiving either data from the Websocket connection or Erlang messages.<br/><br/> The <code>shutdown</code> return value can be used to close the connection before upgrading to Websocket.</blockquote>
-<h4>websocket_handle(InFrame, Req, State)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {reply, OutFrame | [OutFrame], Req, State}	| {reply, OutFrame | [OutFrame], Req, State, hibernate}	| {shutdown, Req, State}</h4>
+<h4 id="websocket_handle">websocket_handle(InFrame, Req, State)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {reply, OutFrame | [OutFrame], Req, State}	| {reply, OutFrame | [OutFrame], Req, State, hibernate}	| {shutdown, Req, State}</h4>
 <blockquote> Types:<ul>
 <li>InFrame = {text | binary | ping | pong, binary()}</li>
 <li>Req = cowboy_req:req()</li>
@@ -111,7 +111,7 @@
 <li>OutFrame = cowboy_websocket:frame()</li>
 </ul>
  Handle the data received from the Websocket connection.<br/><br/> This function will be called every time data is received from the Websocket connection.<br/><br/> The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.<br/><br/> The <code>hibernate</code> option will hibernate the process until it receives new data from the Websocket connection or an Erlang message.</blockquote>
-<h4>websocket_info(Info, Req, State)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {reply, OutFrame | [OutFrame], Req, State}	| {reply, OutFrame | [OutFrame], Req, State, hibernate}	| {shutdown, Req, State}</h4>
+<h4 id="websocket_info">websocket_info(Info, Req, State)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {reply, OutFrame | [OutFrame], Req, State}	| {reply, OutFrame | [OutFrame], Req, State, hibernate}	| {shutdown, Req, State}</h4>
 <blockquote> Types:<ul>
 <li>Info = any()</li>
 <li>Req = cowboy_req:req()</li>
@@ -119,7 +119,7 @@
 <li>OutFrame = cowboy_websocket:frame()</li>
 </ul>
  Handle the Erlang message received.<br/><br/> This function will be called every time an Erlang message has been received. The message can be any Erlang term.<br/><br/> The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.<br/><br/> The <code>hibernate</code> option will hibernate the process until it receives another message or new data from the Websocket connection.</blockquote>
-<h4>websocket_terminate(Reason, Req, State) -> ok</h4>
+<h4 id="websocket_terminate">websocket_terminate(Reason, Req, State) -> ok</h4>
 <blockquote> Types:<ul>
 <li>Reason = {normal, shutdown | timeout} | {remote, closed} | {remote, cowboy_websocket:close_code(), binary()} | {error, badencoding | badframe | closed | atom()}</li>
 <li>Req = cowboy_req:req()</li>
@@ -133,12 +133,12 @@
 </div>
 
 <div class="span3 sidecol">
-<!-- <div class="input-append">
-<form class="form-search">
-	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
 	<button type="submit" class="btn btn-success">Go</button>
 </form>
-</div> -->
+</div>
 
 <h3 id="docs-nav">Navigation</h3>
 
@@ -193,6 +193,33 @@
 <script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
 <script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
 
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>

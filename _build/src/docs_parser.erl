@@ -5,6 +5,8 @@ convert(DocumentBin, Path) ->
 	Lines = binary:split(DocumentBin, <<"\n">>, [global]),
 	[no_context(Lines, Path, []), "</div>\n"].
 
+%% Parser.
+
 no_context([], _, Acc) ->
 	iolist_to_binary(lists:reverse(Acc));
 no_context([<<>>|Tail], Path, Acc) ->
@@ -27,6 +29,7 @@ no_context(Lines = [<<" -  ", _/binary>>|_], Path, Acc) ->
 no_context([<<"| ", Header/binary>>, _|Tail], Path, Acc) ->
 	th(Header, Tail, Path, Acc);
 no_context([<<"### ", Spec/binary>>|Tail], Path, Acc) ->
+	specs_db(Spec),
 	spec(Spec, Tail, Path, Acc);
 no_context([Text|Tail], Path, Acc) ->
 	text(Tail, Path, Acc, [inline(Text, Path)]).
@@ -118,6 +121,7 @@ tr(Headers, [<<"| ", Row/binary>>|Tail], Path, Acc, RowsAcc) ->
 spec(Spec, [<<>>|Tail], Path, Acc) ->
 	no_context(Tail, Path, [spec(Spec)|Acc]);
 spec(Spec, [<<"### ", NewSpec/binary>>|Tail], Path, Acc) ->
+	specs_db(NewSpec),
 	spec(NewSpec, Tail, Path, [spec(Spec)|Acc]);
 spec(Spec, [Line|Tail], Path, Acc) ->
 	spec(<< Spec/binary, Line/binary >>, Tail, Path, Acc).
@@ -132,6 +136,8 @@ text([<<" *  ", Text/binary>>|Tail], Path, Acc, TextAcc) ->
 	list1(Tail, Path, [text(lists:reverse(TextAcc))|Acc], [inline(Text, Path)]);
 text([Text|Tail], Path, Acc, TextAcc) ->
 	text(Tail, Path, Acc, [inline(Text, Path), " "|TextAcc]).
+
+%% HTML.
 
 blockquote(Text) ->
 	["<blockquote>", Text, "</blockquote>\n"].
@@ -181,7 +187,9 @@ title2(Text) ->
 		"\">", Text, "</h2>\n"].
 
 spec(Text) ->
-	["<h4>", Text, "</h4>\n"].
+	[Name|_] = binary:split(Text, <<"(">>),
+	Name2 = cowboy_bstr:to_lower(Name),
+	["<h4 id=\"", Name2, "\">", Text, "</h4>\n"].
 
 inline(Text, Path) ->
 	Text2 = re:replace(Text, "`(.+?)`",
@@ -195,3 +203,9 @@ inline(Text, Path) ->
 	Text6 = re:replace(Text5, "\\*\\*(.+?)\\*\\*",
 		"<strong>\\1</strong>", [global]),
 	Text6.
+
+%% Specs database.
+
+specs_db(Spec) ->
+	[Name|_] = binary:split(Spec, <<"(">>),
+	put(Name, specs_db).

@@ -83,7 +83,7 @@
 <div class="service-description">
 <p>The <code>cowboy_protocol</code> module implements HTTP/1.1 and HTTP/1.0  as a Ranch protocol.</p>
 <h2 id="types">Types</h2>
-<h4>opts() = [{compress, boolean()}	| {env, cowboy_middleware:env()}	| {max_empty_lines, non_neg_integer()}	| {max_header_name_length, non_neg_integer()}	| {max_header_value_length, non_neg_integer()}	| {max_headers, non_neg_integer()}	| {max_keepalive, non_neg_integer()}	| {max_request_line_length, non_neg_integer()}	| {middlewares, [module()]}	| {onrequest, cowboy:onrequest_fun()}	| {onresponse, cowboy:onresponse_fun()}	| {timeout, timeout()}]</h4>
+<h4 id="opts">opts() = [{compress, boolean()}	| {env, cowboy_middleware:env()}	| {max_empty_lines, non_neg_integer()}	| {max_header_name_length, non_neg_integer()}	| {max_header_value_length, non_neg_integer()}	| {max_headers, non_neg_integer()}	| {max_keepalive, non_neg_integer()}	| {max_request_line_length, non_neg_integer()}	| {middlewares, [module()]}	| {onrequest, cowboy:onrequest_fun()}	| {onresponse, cowboy:onresponse_fun()}	| {timeout, timeout()}]</h4>
 <blockquote> Configuration for the HTTP protocol handler.<br/><br/> This configuration is passed to Cowboy when starting listeners using <code>cowboy:start_http/4</code> or <code>cowboy:start_https/4</code> functions.<br/><br/> It can be updated without restarting listeners using the Ranch functions <code>ranch:get_protocol_options/1</code> and <code>ranch:set_protocol_options/2</code>.</blockquote>
 <h2 id="option_descriptions">Option descriptions</h2>
 <p>The default value is given next to the option name.</p>
@@ -96,12 +96,12 @@
 </div>
 
 <div class="span3 sidecol">
-<!-- <div class="input-append">
-<form class="form-search">
-	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
 	<button type="submit" class="btn btn-success">Go</button>
 </form>
-</div> -->
+</div>
 
 <h3 id="docs-nav">Navigation</h3>
 
@@ -156,6 +156,33 @@
 <script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
 <script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
 
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>

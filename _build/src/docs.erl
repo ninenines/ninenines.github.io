@@ -3,7 +3,11 @@
 
 build(Projects) ->
 	_ = [project(P) || P <- Projects],
-	ok.
+	{ok, SpecsDB} = file:read_file("../docs/db.json.tmp"),
+	S = byte_size(SpecsDB) - 1,
+	<< SpecsDB2:S/binary, _/bits >> = SpecsDB,
+	ok = file:write_file("../docs/db.json", ["[", SpecsDB2, "]"]),
+	ok = file:delete("../docs/db.json.tmp").
 
 project(P) ->
 	{_, Name} = lists:keyfind(name, 1, P),
@@ -50,18 +54,30 @@ build_file(Filename, P, N, T, Type, F, Suffix) ->
 			]),
 			case filename:basename(F, ".md") of
 				"toc" ->
-					filelib:ensure_dir(OutPath),
-					file:write_file(OutPath ++ "index.html", Body);
+					OutPath2 = OutPath ++ "index.html",
+					filelib:ensure_dir(OutPath2),
+					ok = file:write_file(OutPath2, Body);
 				_ ->
-					filelib:ensure_dir(OutPath ++ filename:rootname(F) ++ "/"),
-					file:write_file(OutPath ++ filename:rootname(F)
-						++ "/index.html", Body)
+					OutPath2 = OutPath ++ filename:rootname(F) ++ "/index.html",
+					filelib:ensure_dir(OutPath2),
+					ok = file:write_file(OutPath2, Body),
+					specs_db(filename:rootname(F),
+						"/docs/en/" ++ N ++ "/HEAD" ++ Suffix
+							++ filename:rootname(F) ++ "/index.html")
 			end;
 		_ ->
 			OutPath = "../docs/en/" ++ N ++ "/HEAD" ++ Suffix,
 			{ok, _} = file:copy(Filename, OutPath ++ F),
 			ok
 	end.
+
+specs_db(M, L) ->
+	Dict = erase(),
+	J = ["{\"n\":\"" ++ M ++ ":" ++ binary_to_list(N) ++ "\",\"l\":\""
+		++ L ++ "#" ++ binary_to_list(cowboy_bstr:to_lower(N)) ++ "\"},"
+		|| {N, specs_db} <- Dict],
+	ok = file:write_file("../docs/db.json.tmp", J, [append]),
+	ok.
 
 %% README.
 
@@ -79,7 +95,7 @@ readme(P, N, T) ->
 		{project, T}
 	]),
 	filelib:ensure_dir(OutPath),
-	file:write_file(OutPath, Body).
+	ok = file:write_file(OutPath, Body).
 
 %% Resource select.
 

@@ -42,7 +42,8 @@ run() ->
 		[
 			{middlewares, [ninenines, cowboy_router, cowboy_handler]},
 			{env, [{dispatch, cowboy_router:compile([{'_', [
-				{"/[...]", cowboy_static, {dir, "../"}}
+				{"/[...]", cowboy_static, {dir, "../",
+					[{mimetypes, cow_mimetypes, all}]}}
 			]}])}]}
 		]),
 	io:format("Test URL: http://localhost:9999/~n"),

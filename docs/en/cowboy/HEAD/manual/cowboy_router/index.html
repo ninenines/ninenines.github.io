@@ -92,18 +92,18 @@
 <li>handler_opts = any()</li>
 </ul>
 <h2 id="types">Types</h2>
-<h4>bindings() = [{atom(), binary()}]</h4>
+<h4 id="bindings">bindings() = [{atom(), binary()}]</h4>
 <blockquote> List of bindings found during routing.</blockquote>
-<h4>constraints() = [IntConstraint | FunConstraint]</h4>
+<h4 id="constraints">constraints() = [IntConstraint | FunConstraint]</h4>
 <blockquote> Types:<ul>
 <li>IntConstraint = {atom(), int}</li>
 <li>FunConstraint = {atom(), function, Fun}</li>
 <li>Fun = fun((binary()) -> true | {true, any()} | false)</li>
 </ul>
  List of constraints to apply to the bindings.<br/><br/> The int constraint will convert the binding to an integer. The fun constraint allows writing custom code for checking the bindings. Returning a new value from that fun allows replacing the current binding with a new value.</blockquote>
-<h4>dispatch_rules() - opaque to the user</h4>
+<h4 id="dispatch_rules">dispatch_rules() - opaque to the user</h4>
 <blockquote> Rules for dispatching request used by Cowboy.</blockquote>
-<h4>routes() = [{Host, Paths} | {Host, constraints(), Paths}]</h4>
+<h4 id="routes">routes() = [{Host, Paths} | {Host, constraints(), Paths}]</h4>
 <blockquote> Types:<ul>
 <li>Host = Path = '_' | iodata()</li>
 <li>Paths = [{Path, Handler, Opts} | {Path, constraints(), Handler, Opts}]</li>
@@ -111,10 +111,10 @@
 <li>Opts = any()</li>
 </ul>
  Human readable list of routes mapping hosts and paths to handlers.<br/><br/> The syntax for routes is defined in the user guide.</blockquote>
-<h4>tokens() = [binary()]</h4>
+<h4 id="tokens">tokens() = [binary()]</h4>
 <blockquote> List of host_info and path_info tokens found during routing.</blockquote>
 <h2 id="exports">Exports</h2>
-<h4>compile(Routes) -> Dispatch</h4>
+<h4 id="compile">compile(Routes) -> Dispatch</h4>
 <blockquote> Types:<ul>
 <li>Routes = routes()</li>
 <li>Dispatch = dispatch_rules()</li>
@@ -127,12 +127,12 @@
 </div>
 
 <div class="span3 sidecol">
-<!-- <div class="input-append">
-<form class="form-search">
-	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
 	<button type="submit" class="btn btn-success">Go</button>
 </form>
-</div> -->
+</div>
 
 <h3 id="docs-nav">Navigation</h3>
 
@@ -187,6 +187,33 @@
 <script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
 <script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
 
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>

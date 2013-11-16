@@ -87,7 +87,7 @@
 <h2 id="types">Types</h2>
 <p>None.</p>
 <h2 id="callbacks">Callbacks</h2>
-<h4>init({TransportName, ProtocolName}, Req, Opts)	-> {loop, Req, State}	| {loop, Req, State, hibernate}	| {loop, Req, State, Timeout}	| {loop, Req, State, Timeout, hibernate}	| {shutdown, Req, State}</h4>
+<h4 id="init">init({TransportName, ProtocolName}, Req, Opts)	-> {loop, Req, State}	| {loop, Req, State, hibernate}	| {loop, Req, State, Timeout}	| {loop, Req, State, Timeout, hibernate}	| {shutdown, Req, State}</h4>
 <blockquote> Types:<ul>
 <li>TransportName = tcp | ssl | atom()</li>
 <li>ProtocolName = http | atom()</li>
@@ -97,14 +97,14 @@
 <li>Timeout = timeout()</li>
 </ul>
  Initialize the state for this request.<br/><br/> This callback will typically be used to register this process to an event manager or a message queue in order to receive the messages the handler wants to process.<br/><br/> The receive loop will run for a duration of up to <code>Timeout</code> milliseconds after it last received data from the socket, at which point it will stop and send a <code>204 No Content</code> reply. By default this value is set to <code>infinity</code>. It is recommended to either set this value or ensure by any other mechanism that the handler will be closed after a certain period of inactivity.<br/><br/> The <code>hibernate</code> option will hibernate the process until it starts receiving messages.<br/><br/> The <code>shutdown</code> return value can be used to skip the receive loop entirely.</blockquote>
-<h4>info(Info, Req, State) -> {ok, Req, State} | {loop, Req, State}	| {loop, Req, State, hibernate}</h4>
+<h4 id="info">info(Info, Req, State) -> {ok, Req, State} | {loop, Req, State}	| {loop, Req, State, hibernate}</h4>
 <blockquote> Types:<ul>
 <li>Info = any()</li>
 <li>Req = cowboy_req:req()</li>
 <li>State = any()</li>
 </ul>
  Handle the Erlang message received.<br/><br/> This function will be called every time an Erlang message has been received. The message can be any Erlang term.<br/><br/> The <code>ok</code> return value can be used to stop the receive loop, typically because a response has been sent.<br/><br/> The <code>hibernate</code> option will hibernate the process until it receives another message.</blockquote>
-<h4>terminate(Reason, Req, State) -> ok</h4>
+<h4 id="terminate">terminate(Reason, Req, State) -> ok</h4>
 <blockquote> Types:<ul>
 <li>Reason = {normal, shutdown} | {normal, timeout} | {error, closed} | {error, overflow} | {error, atom()}</li>
 <li>Req = cowboy_req:req()</li>
@@ -118,12 +118,12 @@
 </div>
 
 <div class="span3 sidecol">
-<!-- <div class="input-append">
-<form class="form-search">
-	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
 	<button type="submit" class="btn btn-success">Go</button>
 </form>
-</div> -->
+</div>
 
 <h3 id="docs-nav">Navigation</h3>
 
@@ -178,6 +178,33 @@
 <script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
 <script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
 
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>

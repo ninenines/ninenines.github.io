@@ -83,11 +83,11 @@
 <div class="service-description">
 <p>The <code>cowboy_static</code> module implements file serving capabilities by using the REST semantics provided by <code>cowboy_rest</code>.</p>
 <h2 id="types">Types</h2>
-<h4>opts() = {priv_file, atom(), string() | binary()}	| {priv_file, atom(), string() | binary(), extra()}	| {file, string() | binary()}	| {file, string() | binary(), extra()}	| {priv_dir, atom(), string() | binary()}	| {priv_dir, atom(), string() | binary(), extra()}	| {dir, atom(), string() | binary()}	| {dir, atom(), string() | binary(), extra()}</h4>
+<h4 id="opts">opts() = {priv_file, atom(), string() | binary()}	| {priv_file, atom(), string() | binary(), extra()}	| {file, string() | binary()}	| {file, string() | binary(), extra()}	| {priv_dir, atom(), string() | binary()}	| {priv_dir, atom(), string() | binary(), extra()}	| {dir, atom(), string() | binary()}	| {dir, atom(), string() | binary(), extra()}</h4>
 <blockquote> Configuration for the static handler.<br/><br/> The handler can be configured for sending either one file or a directory (including its subdirectories).<br/><br/> Extra options allow you to define how the etag should be calculated and how the mimetype of files should be detected. They are defined as follow, but do note that these types are not exported, only the <code>opts/0</code> type is public.</blockquote>
-<h4>extra() = [extra_etag() | extra_mimetypes()]</h4>
-<h4>extra_etag() = {etag, module(), function()} | {etag, false}</h4>
-<h4>extra_mimetypes() = {mimetypes, module(), function()}	| {mimetypes, binary() | {binary(), binary(), [{binary(), binary()}]}}</h4>
+<h4 id="extra">extra() = [extra_etag() | extra_mimetypes()]</h4>
+<h4 id="extra_etag">extra_etag() = {etag, module(), function()} | {etag, false}</h4>
+<h4 id="extra_mimetypes">extra_mimetypes() = {mimetypes, module(), function()}	| {mimetypes, binary() | {binary(), binary(), [{binary(), binary()}]}}</h4>
 </div>
 
 
@@ -95,12 +95,12 @@
 </div>
 
 <div class="span3 sidecol">
-<!-- <div class="input-append">
-<form class="form-search">
-	<input type="text" placeholder="Full text doc search" class="input-medium search-query span2">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
 	<button type="submit" class="btn btn-success">Go</button>
 </form>
-</div> -->
+</div>
 
 <h3 id="docs-nav">Navigation</h3>
 
@@ -155,6 +155,33 @@
 <script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
 <script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
 
 <script type="text/javascript">var switchTo5x=true;</script>
 <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
