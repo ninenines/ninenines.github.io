@@ -79,26 +79,56 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Ranch User Guide</span></h1>
+<h1 class="lined-header"><span>Writing parsers</span></h1>
 <div class="service-description">
-<p>The Ranch User Guide explores how to make best use of Ranch for writing powerful TCP applications.</p>
-<h2 id="introducing_ranch">Introducing Ranch</h2>
+<p>There are three kinds of protocols:</p>
 <ul>
-<li><a href="/docs/en/ranch/HEAD/guide/introduction">Introduction</a></li>
+<li>Text protocols</li>
+<li>Schema-less binary protocols</li>
+<li>Schema-based binary protocols</li>
 </ul>
-<h2 id="using_ranch">Using Ranch</h2>
-<ul>
-<li><a href="/docs/en/ranch/HEAD/guide/listeners">Listeners</a></li>
-<li><a href="/docs/en/ranch/HEAD/guide/transports">Transports</a></li>
-<li><a href="/docs/en/ranch/HEAD/guide/protocols">Protocols</a></li>
-<li><a href="/docs/en/ranch/HEAD/guide/parsers">Writing parsers</a></li>
-</ul>
-<h2 id="advanced_topics">Advanced topics</h2>
-<ul>
-<li><a href="/docs/en/ranch/HEAD/guide/ssl_auth">SSL client authentication</a></li>
-<li><a href="/docs/en/ranch/HEAD/guide/embedded">Embedded mode</a></li>
-<li><a href="/docs/en/ranch/HEAD/guide/internals">Internals</a></li>
-</ul>
+<p>This chapter introduces the first two kinds. It will not cover more advanced topics such as continuations or parser generators.</p>
+<p>This chapter isn't specifically about Ranch, we assume here that you know how to read data from the socket. The data you read and the data that hasn't been parsed is saved in a buffer. Every time you read from the socket, the data read is appended to the buffer. What happens next depends on the kind of protocol. We will only cover the first two.</p>
+<h2 id="parsing_text">Parsing text</h2>
+<p>Text protocols are generally line based. This means that we can't do anything with them until we receive the full line.</p>
+<p>A simple way to get a full line is to use <code>binary:split/{2,3}</code>.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+case binary:split(Buffer, <<"\n">>) of
+    [_] ->
+        get_more_data(Buffer);
+    [Line, Rest] ->
+        handle_line(Line, Rest)
+end.
+]]></script>
+<p>In the above example, we can have two results. Either there was a line break in the buffer and we get it split into two parts, the line and the rest of the buffer; or there was no line break in the buffer and we need to get more data from the socket.</p>
+<p>Next, we need to parse the line. The simplest way is to again split, here on space. The difference is that we want to split on all spaces character, as we want to tokenize the whole string.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+case binary:split(Line, <<" ">>, [global]) of
+    [<<"HELLO">>] ->
+        be_polite();
+    [<<"AUTH">>, User, Password] ->
+        authenticate_user(User, Password);
+    [<<"QUIT">>, Reason] ->
+        quit(Reason)
+    %% ...
+end.
+]]></script>
+<p>Pretty simple, right? Match on the command name, get the rest of the tokens in variables and call the respective functions.</p>
+<p>After doing this, you will want to check if there is another line in the buffer, and handle it immediately if any. Otherwise wait for more data.</p>
+<h2 id="parsing_binary">Parsing binary</h2>
+<p>Binary protocols can be more varied, although most of them are pretty similar. The first four bytes of a frame tend to be the size of the frame, which is followed by a certain number of bytes for the type of frame and then various parameters.</p>
+<p>Sometimes the size of the frame includes the first four bytes, sometimes not. Other times this size is encoded over two bytes. And even other times little-endian is used instead of big-endian.</p>
+<p>The general idea stays the same though.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+<< Size:32, _/bits >> = Buffer,
+case Buffer of
+    << Frame:Size/binary, Rest/bits >> ->
+        handle_frame(Frame, Buffer);
+    _ ->
+        get_more_data(Buffer)
+end.
+]]></script>
+<p>You will then need to parse this frame using binary pattern matching, and handle it. Then you will want to check if there is another frame fully received in the buffer, and handle it immediately if any. Otherwise wait for more data.</p>
 </div>
 
 
