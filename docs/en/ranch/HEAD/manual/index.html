@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Nine Nines Support: Ranch User Guide</title>
+    <title>Nine Nines Support: Ranch Function Reference</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Change them or set them up as you like -->
     <meta name="description" content="">
@@ -79,64 +79,17 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>SSL client authentication</span></h1>
+<h1 class="lined-header"><span>Ranch Function Reference</span></h1>
 <div class="service-description">
-<h2 id="purpose">Purpose</h2>
-<p>SSL client authentication is a mechanism allowing applications to identify certificates. This allows your application to make sure that the client is an authorized certificate, but makes no claim about whether the user can be trusted. This can be combined with a password based authentication to attain greater security.</p>
-<p>The server only needs to retain the certificate serial number and the certificate issuer to authenticate the certificate. Together, they can be used to uniquely identify a certicate.</p>
-<p>As Ranch allows the same protocol code to be used for both SSL and non-SSL transports, you need to make sure you are in an SSL context before attempting to perform an SSL client authentication. This can be done by checking the return value of <code>Transport:name/0</code>.</p>
-<h2 id="obtaining_client_certificates">Obtaining client certificates</h2>
-<p>You can obtain client certificates from various sources. You can generate them yourself, or you can use a service like CAcert.org which allows you to generate client and server certificates for free.</p>
-<p>Following are the steps you need to take to create a CAcert.org account, generate a certificate and install it in your favorite browser.</p>
+<p>The function reference documents the public interface of Ranch.</p>
 <ul>
-<li>Open <a href="http://cacert.org">CAcert.org</a> in your favorite browser</li>
-<li>Root Certificate link: install both certificates</li>
-<li>Join (Register an account)</li>
-<li>Verify your account (check your email inbox!)</li>
-<li>Log in</li>
-<li>Client Certificates: New</li>
-<li>Follow instructions to create the certificate</li>
-<li>Install the certificate in your browser</li>
+<li><a href="/docs/en/ranch/HEAD/manual/ranch_app">The Ranch Application</a></li>
+<li><a href="/docs/en/ranch/HEAD/manual/ranch">ranch</a></li>
+<li><a href="/docs/en/ranch/HEAD/manual/ranch_protocol">ranch_protocol</a></li>
+<li><a href="/docs/en/ranch/HEAD/manual/ranch_ssl">ranch_ssl</a></li>
+<li><a href="/docs/en/ranch/HEAD/manual/ranch_tcp">ranch_tcp</a></li>
+<li><a href="/docs/en/ranch/HEAD/manual/ranch_transport">ranch_transport</a></li>
 </ul>
-<p>You can optionally save the certificate for later use, for example to extract the <code>IssuerID</code> information as will be detailed later on.</p>
-<h2 id="transport_configuration">Transport configuration</h2>
-<p>The SSL transport does not request a client certificate by default. You need to specify the <code>{verify, verify_peer}</code> option when starting the listener to enable this behavior.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, _} = ranch:start_listener(my_ssl, 100,
-	ranch_ssl, [
-		{port, SSLPort},
-		{certfile, PathToCertfile},
-		{cacertfile, PathToCACertfile},
-		{verify, verify_peer}
-	],
-	my_protocol, []
-).
-]]></script>
-<p>In this example we set the required <code>port</code> and <code>certfile</code>, but also the <code>cacertfile</code> containing the CACert.org root certificate, and the option to request the client certificate.</p>
-<p>If you enable the <code>{verify, verify_peer}</code> option and the client does not have a client certificate configured for your domain, then no certificate will be sent. This allows you to use SSL for more than just authenticated clients.</p>
-<h2 id="authentication">Authentication</h2>
-<p>To authenticate users, you must first save the certificate information required. If you have your users' certificate files, you can simply load the certificate and retrieve the information directly.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-certfile_to_issuer_id(Filename) ->
-	{ok, Data} = file:read_file(Filename),
-	[{'Certificate', Cert, not_encrypted}] = public_key:pem_decode(Data),
-	{ok, IssuerID} = public_key:pkix_issuer_id(Cert, self),
-	IssuerID.
-]]></script>
-<p>The <code>IssuerID</code> variable contains both the certificate serial number and the certificate issuer stored in a tuple, so this value alone can be used to uniquely identify the user certificate. You can save this value in a database, a configuration file or any other place where an Erlang term can be stored and retrieved.</p>
-<p>To retrieve the <code>IssuerID</code> from a running connection, you need to first retrieve the client certificate and then extract this information from it. Ranch does not provide a function to retrieve the client certificate. Instead you can use the <code>ssl:peercert/1</code> function. Once you have the certificate, you can again use the <code>public_key:pkix_issuer_id/2</code> to extract the <code>IssuerID</code> value.</p>
-<p>The following function returns the <code>IssuerID</code> or <code>false</code> if no client certificate was found. This snippet is intended to be used from your protocol code.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-socket_to_issuer_id(Socket) ->
-	case ssl:peercert(Socket) of
-		{error, no_peercert} ->
-			false;
-		{ok, Cert} ->
-			{ok, IssuerID} = public_key:pkix_issuer_id(Cert, self),
-			IssuerID
-	end.
-]]></script>
-<p>You then only need to match the <code>IssuerID</code> value to authenticate the user.</p>
 </div>
 
 
@@ -153,7 +106,7 @@ socket_to_issuer_id(Socket) ->
 
 <h3 id="docs-nav">Navigation</h3>
 
-<h3>See also</h3><ul><li><a href="/docs/en/ranch/HEAD/manual/">Function Reference</a></li><li><a href="/docs/en/ranch/HEAD/index.html">README</a></li></ul>
+<h3>See also</h3><ul><li><a href="/docs/en/ranch/HEAD/guide/">User Guide</a></li><li><a href="/docs/en/ranch/HEAD/index.html">README</a></li></ul>
 
 <h3>Version select</h3>
 <ul>

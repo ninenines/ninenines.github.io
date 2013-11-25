@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Nine Nines Support: Ranch User Guide</title>
+    <title>Nine Nines Support: Ranch Function Reference</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Change them or set them up as you like -->
     <meta name="description" content="">
@@ -79,64 +79,108 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>SSL client authentication</span></h1>
+<h1 class="lined-header"><span>ranch_transport</span></h1>
 <div class="service-description">
-<h2 id="purpose">Purpose</h2>
-<p>SSL client authentication is a mechanism allowing applications to identify certificates. This allows your application to make sure that the client is an authorized certificate, but makes no claim about whether the user can be trusted. This can be combined with a password based authentication to attain greater security.</p>
-<p>The server only needs to retain the certificate serial number and the certificate issuer to authenticate the certificate. Together, they can be used to uniquely identify a certicate.</p>
-<p>As Ranch allows the same protocol code to be used for both SSL and non-SSL transports, you need to make sure you are in an SSL context before attempting to perform an SSL client authentication. This can be done by checking the return value of <code>Transport:name/0</code>.</p>
-<h2 id="obtaining_client_certificates">Obtaining client certificates</h2>
-<p>You can obtain client certificates from various sources. You can generate them yourself, or you can use a service like CAcert.org which allows you to generate client and server certificates for free.</p>
-<p>Following are the steps you need to take to create a CAcert.org account, generate a certificate and install it in your favorite browser.</p>
-<ul>
-<li>Open <a href="http://cacert.org">CAcert.org</a> in your favorite browser</li>
-<li>Root Certificate link: install both certificates</li>
-<li>Join (Register an account)</li>
-<li>Verify your account (check your email inbox!)</li>
-<li>Log in</li>
-<li>Client Certificates: New</li>
-<li>Follow instructions to create the certificate</li>
-<li>Install the certificate in your browser</li>
+<p>The <code>ranch_transport</code> behaviour defines the interface used by Ranch transports.</p>
+<h2 id="types">Types</h2>
+<h4 id="sendfile_opts">sendfile_opts() = [{chunk_size, non_neg_integer()}]</h4>
+<blockquote> Options used by the sendfile function and callbacks.<br/><br/> Allows configuring the chunk size, in bytes. Defaults to 8191 bytes.</blockquote>
+<h2 id="callbacks">Callbacks</h2>
+<h4 id="accept">accept(LSocket, Timeout)	-> {ok, CSocket} | {error, closed | timeout | atom() | tuple()}</h4>
+<blockquote> Types:<ul>
+<li>LSocket = CSocket = any()</li>
+<li>Timeout = timeout()</li>
 </ul>
-<p>You can optionally save the certificate for later use, for example to extract the <code>IssuerID</code> information as will be detailed later on.</p>
-<h2 id="transport_configuration">Transport configuration</h2>
-<p>The SSL transport does not request a client certificate by default. You need to specify the <code>{verify, verify_peer}</code> option when starting the listener to enable this behavior.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, _} = ranch:start_listener(my_ssl, 100,
-	ranch_ssl, [
-		{port, SSLPort},
-		{certfile, PathToCertfile},
-		{cacertfile, PathToCACertfile},
-		{verify, verify_peer}
-	],
-	my_protocol, []
-).
-]]></script>
-<p>In this example we set the required <code>port</code> and <code>certfile</code>, but also the <code>cacertfile</code> containing the CACert.org root certificate, and the option to request the client certificate.</p>
-<p>If you enable the <code>{verify, verify_peer}</code> option and the client does not have a client certificate configured for your domain, then no certificate will be sent. This allows you to use SSL for more than just authenticated clients.</p>
-<h2 id="authentication">Authentication</h2>
-<p>To authenticate users, you must first save the certificate information required. If you have your users' certificate files, you can simply load the certificate and retrieve the information directly.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-certfile_to_issuer_id(Filename) ->
-	{ok, Data} = file:read_file(Filename),
-	[{'Certificate', Cert, not_encrypted}] = public_key:pem_decode(Data),
-	{ok, IssuerID} = public_key:pkix_issuer_id(Cert, self),
-	IssuerID.
-]]></script>
-<p>The <code>IssuerID</code> variable contains both the certificate serial number and the certificate issuer stored in a tuple, so this value alone can be used to uniquely identify the user certificate. You can save this value in a database, a configuration file or any other place where an Erlang term can be stored and retrieved.</p>
-<p>To retrieve the <code>IssuerID</code> from a running connection, you need to first retrieve the client certificate and then extract this information from it. Ranch does not provide a function to retrieve the client certificate. Instead you can use the <code>ssl:peercert/1</code> function. Once you have the certificate, you can again use the <code>public_key:pkix_issuer_id/2</code> to extract the <code>IssuerID</code> value.</p>
-<p>The following function returns the <code>IssuerID</code> or <code>false</code> if no client certificate was found. This snippet is intended to be used from your protocol code.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-socket_to_issuer_id(Socket) ->
-	case ssl:peercert(Socket) of
-		{error, no_peercert} ->
-			false;
-		{ok, Cert} ->
-			{ok, IssuerID} = public_key:pkix_issuer_id(Cert, self),
-			IssuerID
-	end.
-]]></script>
-<p>You then only need to match the <code>IssuerID</code> value to authenticate the user.</p>
+ Accept a connection on the given listening socket.<br/><br/> The <code>accept_ack</code> callback will be used to initialize the socket after accepting the connection. This is most useful when the transport is not raw TCP, like with SSL for example.</blockquote>
+<h4 id="accept_ack">accept_ack(CSocket, Timeout) -> ok</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>Timeout = timeout()</li>
+</ul>
+ Perform post-accept initialization of the connection.<br/><br/> This function will be called by connection processes before performing any socket operation. It allows transports that require extra initialization to perform their task and make the socket ready to use.</blockquote>
+<h4 id="close">close(CSocket) -> ok</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+</ul>
+ Close the given socket.</blockquote>
+<h4 id="controlling_process">controlling_process(CSocket, Pid)	-> ok | {error, closed | not_owner | atom()}</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>Pid = pid()</li>
+</ul>
+ Change the controlling process for the given socket.<br/><br/> The controlling process is the process that is allowed to perform operations on the socket, and that will receive messages from the socket when active mode is used. When the controlling process dies, the socket is closed.</blockquote>
+<h4 id="listen">listen(TransOpts) -> {ok, LSocket} | {error, atom()}</h4>
+<blockquote> Types:<ul>
+<li>TransOpts = any()</li>
+<li>LSocket = any()</li>
+</ul>
+ Listen for connections on the given port.<br/><br/> The port is given as part of the transport options under the key <code>port</code>. Any other option is transport dependent.<br/><br/> The socket returned by this call can then be used to accept connections. It is not possible to send or receive data from the listening socket.</blockquote>
+<h4 id="messages">messages() -> {OK, Closed, Error}</h4>
+<blockquote> Types:<ul>
+<li>OK = Closed = Error = atom()</li>
+</ul>
+ Return the atoms used to identify messages sent in active mode.</blockquote>
+<h4 id="name">name() -> Name</h4>
+<blockquote> Types:<ul>
+<li>Name = atom()</li>
+</ul>
+ Return the name of the transport.</blockquote>
+<h4 id="peername">peername(CSocket) -> {ok, {IP, Port}} | {error, atom()}</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>IP = inet:ip_address()</li>
+<li>Port = inet:port_number()</li>
+</ul>
+ Return the IP and port of the remote endpoint.</blockquote>
+<h4 id="recv">recv(CSocket, Length, Timeout)	-> {ok, Packet} | {error, closed | timeout | atom()}</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>Length = non_neg_integer()</li>
+<li>Timeout = timeout()</li>
+<li>Packet = iodata() | any()</li>
+</ul>
+ Receive data from the given socket when in passive mode.<br/><br/> Trying to receive data from a socket that is in active mode will return an error.<br/><br/> A length of 0 will return any data available on the socket.<br/><br/> While it is possible to use the timeout value <code>infinity</code>, this is highly discouraged as this could cause your process to get stuck waiting for data that will never come. This may happen when a socket becomes half-open due to a crash of the remote endpoint. Wi-Fi going down is another common culprit of this issue.</blockquote>
+<h4 id="send">send(CSocket, Packet) -> ok | {error, atom()}</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>Packet = iodata()</li>
+</ul>
+ Send data to the given socket.</blockquote>
+<h4 id="sendfile">sendfile(CSocket, File)	-> sendfile(CSocket, File, 0, 0, [])</h4>
+<h4 id="sendfile">sendfile(CSocket, File, Offset, Bytes)	-> sendfile(CSocket, File, Offset, Bytes, [])</h4>
+<h4 id="sendfile">sendfile(CSocket, File, Offset, Bytes, SfOpts)	-> {ok, SentBytes} | {error, atom()}</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>File = file:filename_all() | file:fd()</li>
+<li>Offset = non_neg_integer()</li>
+<li>Bytes = SentBytes = non_neg_integer()</li>
+<li>SfOpts = sendfile_opts()</li>
+</ul>
+ Send data from a file to the given socket.<br/><br/> The file may be sent full or in parts, and may be specified by its filename or by an already open file descriptor.<br/><br/> Transports that manipulate TCP directly may use the <code>file:sendfile/{2,4,5}</code> function, which calls the sendfile syscall where applicable (on Linux, for example). Other transports can use the <code>sendfile/6</code> function exported from this module.</blockquote>
+<h4 id="setopts">setopts(CSocket, TransOpts) -> ok | {error, atom()}</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>TransOpts = any()</li>
+</ul>
+ Change transport options for the given socket.<br/><br/> This is mainly useful for switching to active or passive mode.</blockquote>
+<h4 id="sockname">sockname(CSocket) -> {ok, {IP, Port}} | {error, atom()}</h4>
+<blockquote> Types:<ul>
+<li>CSocket = any()</li>
+<li>IP = inet:ip_address()</li>
+<li>Port = inet:port_number()</li>
+</ul>
+ Return the IP and port of the local endpoint.</blockquote>
+<h2 id="exports">Exports</h2>
+<h4 id="sendfile">sendfile(Transport, CSocket, File, Offset, Bytes, SfOpts)	-> {ok, SentBytes} | {error, atom()}</h4>
+<blockquote> Types:<ul>
+<li>Transport = module()</li>
+<li>CSocket = any()</li>
+<li>File = file:filename_all() | file:fd()</li>
+<li>Offset = non_neg_integer()</li>
+<li>Bytes = SentBytes = non_neg_integer()</li>
+<li>SfOpts = sendfile_opts()</li>
+</ul>
+ Send data from a file to the given socket.<br/><br/> This function emulates the function <code>file:sendfile/{2,4,5}</code> and may be used when transports are not manipulating TCP directly.</blockquote>
 </div>
 
 
@@ -153,7 +197,7 @@ socket_to_issuer_id(Socket) ->
 
 <h3 id="docs-nav">Navigation</h3>
 
-<h3>See also</h3><ul><li><a href="/docs/en/ranch/HEAD/manual/">Function Reference</a></li><li><a href="/docs/en/ranch/HEAD/index.html">README</a></li></ul>
+<h3>See also</h3><ul><li><a href="/docs/en/ranch/HEAD/guide/">User Guide</a></li><li><a href="/docs/en/ranch/HEAD/index.html">README</a></li></ul>
 
 <h3>Version select</h3>
 <ul>
