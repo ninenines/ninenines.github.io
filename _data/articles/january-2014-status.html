@@ -1,0 +1,153 @@
+<p>I will now be regularly writing posts about project status, plans
+and hopes for the future.</p>
+
+<p>Before that though, there's one important news to share.</p>
+
+<p>Until a year ago all development was financed through consulting
+and development services. This worked alright but too much time was
+spent doing things that didn't benefit the open source projects.
+And that didn't make me happy at all. Because I like being happy
+I stopped that for the most part and spent the year figuring things
+out, experimenting and discussing with people about it.</p>
+
+<p>What makes me happy is answering these "what if" questions.
+Ranch and Cowboy are a direct product of that, as they originate
+from the "what if we could have a server running different protocols
+on different ports but all part of the same application?"; erlang.mk
+is a bit different: "this works great for me, what if it could
+become the standard solution for building Erlang applications?".</p>
+
+<p>When I successfully answer the question, this becomes a project
+that may end up largely benefiting the Erlang community. I love
+Erlang and I love enabling people to build awesome products based
+on my projects. It's a lot more rewarding than activities like
+consulting where you only help one company at a time. And it's
+also a much better use of my time as this has a bigger impact on
+the community.</p>
+
+<p>The hard part is to figure out how to be able to spend 100%
+of the time on projects that you basically give away for free,
+and still be able to afford living.</p>
+
+<p>The immediate solution was getting work sponsored by the
+<a href="http://www.leofs.org/">LeoFS project</a>. LeoFS is a great
+distributed file storage that I can only recommend to anyone who
+needs to store files or large pieces of data. The sponsorship
+works pretty great, and spurred development of the SPDY code in
+Cowboy amongst other things, plus a couple upcoming projects
+done more recently and getting a final touch before release.</p>
+
+<p>It turns out sponsoring works great. So I'm thinking of
+expanding on it and hopefully get enough sponsoring for fulltime
+open source development. So I figured out a few things that
+can give incentive to companies willing to sponsor.</p>
+
+<p>Sponsors can <em>request that a particular version of Cowboy
+be maintained indefinitely</em> (as long as they're sponsoring).
+This means fixes will be backported. This doesn't include
+features although I can take requests depending on feasability.</p>
+
+<p>Sponsors can <em>have a direct, private line of communication</em>,
+useful when they need help debugging or optimizing their product.</p>
+
+<p>Sponsors can <em>get their name associated with one of the
+project</em> and get a good standing in the community thanks
+to this. They would be featured in the README of the project
+which is viewed by hundreds of developers daily.</p>
+
+<p>Sponsors can <em>be listed on this website</em>. I will modify
+the front page when we get a few more sponsors, they will be
+featured below the carousel of projects.</p>
+
+<p>Please <a href="mailto:contact@ninenines.eu">contact us</a> if
+you are interested in sponsoring, and say how much you are willing
+to sponsor. The goal here is only to have enough money to make a
+living and attend a few conferences. There's an upper limit in the
+amount needed per year, so the more sponsors there are the cheaper
+it becomes to everyone.</p>
+
+<p>The upper limit stems from the new legal entity that will replace
+the current Nine Nines. This is mostly to lower the legal costs and
+simplify the administrative stuff and allow me to dedicate all my
+time on what's important. From your point of view it's business as
+usual.</p>
+
+<p>Now on to project statuses and future works.</p>
+
+<h2>Cowboy</h2>
+
+<p>Cowboy is getting ready for a 1.0 release. Once multipart support
+is in, all that's left is finishing the guide, improving tests and
+finishing moving code to the cowlib project. I hope everything will
+be ready around the time R17B is released.</p>
+
+<p>I already dream of some API breaking changes after 1.0, which
+would essentially become 2.0 when they're done. An extensive survey
+will be setup after the 1.0 release to get more information on what
+people like and don't like about the API.</p>
+
+<p>And of course, when clients start implementing HTTP/2.0 then we
+will too.</p>
+
+<h2>Ranch</h2>
+
+<p>Ranch is also getting close to 1.0. I am currently writing a
+test suite for upgrades. After that I also would like to write
+a chaos_monkey test suite and add a getting started chapter to the
+guide.</p>
+
+<p>Ranch is pretty solid otherwise, it's hard to foresee new
+features at this point.</p>
+
+<h2>erlang.mk</h2>
+
+<p>I didn't expect this project to become popular. Glad it did though.</p>
+
+<p>Windows support is planned, but will require GNU Make 4.
+Thankfully, it's available at least through cygwin. Make,
+Git and Erlang will be the only required dependencies
+because the rest of the external calls will be converted to
+using Guile, a Scheme included since GNU Make 4. So it is
+Guile that will download the needed files, magically fill
+the list of modules in the .app file and so on, allowing
+us to provide a truly cross-platform solution without
+losing on the performance we benefit from using Make.</p>
+
+<p>Also note that it is possible to check whether Guile
+is available so we will be able to fallback to the current
+code for older systems.</p>
+
+<p>I am also thinking about adding an extra column to the package
+index, indicating the preferred tag or commit number to be used.
+This would allow us to skip the individual <code>dep</code> lines
+entirely if the information in the package index is good enough.
+And committing that file to your project would be the only thing
+needed to lock the dependencies. Of course if a <code>dep</code>
+line is specified this would instead override the file.</p>
+
+<h2>Alien Shaman</h2>
+
+<p>This is the two-parts project requested by the LeoFS team.
+This is essentially a "distributed bigwig". I am hoping to
+have a prototype up in a few days.</p>
+
+<p>Alien is the part that allows writing and enabling probes
+in your nodes. Probes send events which may get filtered before
+being forwarded to their destination. The events may be sent
+to a local process, a remote process, over UDP, TCP or SSL.
+Events may also be received by a process called a relay, which
+may be used to group or aggregate data before it is being sent
+over the network, reducing the footprint overall.</p>
+
+<p>Shaman is the UI for it. It will ultimately be able to display
+any event as long as it's configured to do so. Events may be logs,
+numeric values displayed on graphs updated in real time, lists of
+items like processes and so on.</p>
+
+<h2>Feedback</h2>
+
+<p>That's it for today! There will be another status update once
+Shaman is out. But for now I have to focus on it.</p>
+
+<p>As always, please send feedback on the projects, this post,
+the sponsoring idea, anything really! Thanks.</p>
