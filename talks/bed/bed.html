@@ -1,0 +1,767 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>D3 + Websocket for live Web applications</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20140609" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<link href="ui/sh/sh99s.css" rel="stylesheet"/>
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+<!-- syntax highlighter JS -->
+<script type="text/javascript" src="ui/sh/shCore.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushErlang.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushJScript.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushXml.js"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+    <div id="sub_header"></div>
+    <div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>EUC 2014</h1>
+<h2>The last REST client you will ever need, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>The last REST client you will ever need</h1>
+<h2>It's better to REST in BED.</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>Why this talk?</h1>
+</div>
+
+
+<div class="slide">
+<h1>REST is great</h1>
+<p><img src="pics/rest.jpg"/></p>
+</div>
+
+
+<div class="slide">
+<h1>The family business</h1>
+<p><img src="pics/family_business.jpg"/></p>
+</div>
+
+
+<div class="slide">
+<h1>Open your mind</h1>
+<p><img src="pics/mind_blown.jpg"/></p>
+</div>
+
+
+<div class="slide">
+<h1>REST constraints</h1>
+</div>
+
+
+<div class="slide">
+<h1>Client-server architecture</h1>
+<ul>
+<li>Different set of concerns</li>
+<li>Client cares about processing or rendering</li>
+<li>Server cares about storing and making information available efficiently</li>
+<li>Keeping concerns separate allow client and server to evolve independently</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Stateless</h1>
+<ul>
+<li>Messages always contain all data needed to process the request</li>
+<li>Including authentication information if required<ul>
+<li>That doesn't mean you can't use cookies!</li>
+<li>That means you must use them responsibly</li>
+</ul>
+</li>
+<li>The server keeps no session state around<ul>
+<li>The client may</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Cacheable</h1>
+<ul>
+<li>Resources may be cached by any component, including the client, the server and any intermediary</li>
+<li>All resources are explicitly or implicitly marked as (not) cacheable</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Uniform interface</h1>
+<ul>
+<li>All components use the same rules to speak to each other</li>
+<li>Makes it easy to understand the interactions</li>
+<li>A number of constraints are required to achieve this<ul>
+<li>We will see them in a few minutes!</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Layered system</h1>
+<ul>
+<li>Components only know about the components they talk to</li>
+<li>For example a proxy completely hides what's behind it<ul>
+<li>This is true for both directions</li>
+<li>There may be more proxies in one way or another</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Code on demand (optional)</h1>
+<ul>
+<li>Code may be downloaded to extend the client functionality</li>
+<li>This is optional, you can't assume the client will receive or be able to execute the code</li>
+<li>Javascript is a common example of this</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Uniform interface in details</h1>
+</div>
+
+
+<div class="slide">
+<h1>Resources and resource identifiers</h1>
+<ul>
+<li>Any information that can be named can be a resource</li>
+<li>A resource is a conceptual mapping to a set of entities<ul>
+<li>For example one user or a group of users</li>
+</ul>
+</li>
+<li>A resource is identified by a URI</li>
+<li>Typically we talk about resources and resource collections</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Resource representations</h1>
+<ul>
+<li>Sequence of bytes + metadata</li>
+<li>Representation metadata (media type, modification time...)</li>
+<li>Resource metadata (related resources, additional representations...)</li>
+<li>Control data (parameterized requests, handling instructions...)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Self-descriptive messages</h1>
+<ul>
+<li>Messages contain everything needed to decipher them</li>
+<li>All representations must have a media type in the message</li>
+<li>The media type must be agreed upon by both endpoints</li>
+<li>Negotiating the appropriate media type is a big part of REST</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Hypermedia as the engine of the application state</h1>
+<ul>
+<li>Interactions must be entirely driven by hypermedia</li>
+<li>A client only needs an entry point and basic understanding of the media types being used by the service</li>
+<li>Resources and functionality can be discovered at runtime</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>What media type should we use?</h1>
+</div>
+
+
+<div class="slide">
+<h1>Not just one media type</h1>
+<ul>
+<li>Each resource should have at least one media type</li>
+<li>The media type defines the structure and accepted values</li>
+<li>It's pretty much what you do when you document your API<ul>
+<li>So why not give them a name and use that in the protocol?</li>
+</ul>
+</li>
+<li>We still need a basic type to extend upon</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Why not JSON?</h1>
+<ul>
+<li>No concept of links or link relations</li>
+<li>Unable to deal with binary data</li>
+<li>Not very good with the map datatype</li>
+<li>Very slow and very expensive to parse</li>
+<li>Stop using JSON, save the planet!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Why not msgpack?</h1>
+<ul>
+<li>No concept of links or link relations</li>
+<li>No bignums</li>
+<li>No decimals</li>
+<li>Not very good with the map datatype</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Why not HTML?</h1>
+<ul>
+<li>Everything is a string</li>
+<li>Unable to deal with binary data</li>
+<li>No easy mapping of types onto HTML</li>
+<li>Different use case than what we are looking for really</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Why not XML?</h1>
+<ul>
+<li>Everything is a string</li>
+<li>Unable to deal with binary data</li>
+<li>No easy mapping of types onto XML<ul>
+<li>You can, but it's damn verbose</li>
+</ul>
+</li>
+<li>XML is probably slower and more expensive to parse than JSON<ul>
+<li>The planet is doomed!</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>What then?</h1>
+<p><img src="pics/wondering.jpg"/></p>
+</div>
+
+
+<div class="slide">
+<h1>BED</h1>
+</div>
+
+
+<div class="slide">
+<h1>Goals</h1>
+<ul>
+<li>Hyperlinks and link relations</li>
+<li>Binary, explicit sizes, efficient to parse</li>
+<li>Small, exponentially smaller the larger the data gets</li>
+<li>Good type coverage, extensible</li>
+<li>No NULL value</li>
+<li>Fully specified</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Media types 1/2</h1>
+<ul>
+<li>application/x-bed</li>
+<li>application/x-bed-stream<ul>
+<li>Great with Websockets</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Media types 2/2</h1>
+<ul>
+<li>Again, don't be shy, define your own media types!</li>
+<li>Make sure to advertise both your custom type and the basic type</li>
+<li>This way you can process the data even if you don't know its structure</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Hyperlink 1/2</h1>
+<ul>
+<li>Link without link relation</li>
+<li>Link with link relation<ul>
+<li>Better for automated processing</li>
+</ul>
+</li>
+<li>Link relations are standard but you may use custom relations</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Hyperlink 2/2</h1>
+<ul>
+<li>Link is a string</li>
+<li>Link relation is a symbol</li>
+<li>Highly recommended to only use fully qualified links<ul>
+<li>The client should not build links unless strictly required</li>
+<li>This is true with any media type</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 1/9</h1>
+<div><script type="syntaxhighlighter" class="brush: js"><![CDATA[
+{
+    "firstName": "John",
+    "lastName": "Smith",
+    "isAlive": true,
+    "age": 25,
+    "phoneNumbers": [
+        { "type": "home", "number": "212 555-1234" },
+        { "type": "office",  "number": "646 555-4567" }
+    ]
+}
+]]></script></div></div>
+
+
+<div class="slide">
+<h1>Symbol 2/9</h1>
+<ul>
+<li>A lot of data is sent as maps</li>
+<li>A lot of maps share the same keys</li>
+<li>Repeating these keys over and over is madness</li>
+<li>There's a better way</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 3/9</h1>
+<ul>
+<li>Keep track of symbols already sent</li>
+<li>Replace repeated symbols with a numerical value</li>
+<li>Continue doing that until the end of the message<ul>
+<li>Or the end of the stream!</li>
+</ul>
+</li>
+<li>It's just like atoms, isn't it?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 4/9</h1>
+<ul>
+<li>Symbol dictionary starts with <code>false</code> (0) and <code>true</code> (1)</li>
+<li>You can create a custom content-type that has more pre-defined</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 5/9</h1>
+<ul>
+<li>First message</li>
+<li>JSON: <code>{"compact":true,"schema":0}</code> (27 bytes)</li>
+<li>MsgPack: <code>82 A7 compact C3 A6 schema 00</code> (18 bytes)</li>
+<li>BED: <code>C2 27 compact 41 26 schema 80</code> (18 bytes)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 6/9</h1>
+<ul>
+<li>Subsequent messages</li>
+<li>JSON: <code>{"compact":true,"schema":0}</code> (27 bytes)</li>
+<li>MsgPack: <code>82 A7 compact C3 A6 schema 00</code> (18 bytes)</li>
+<li>BED: <code>C2 42 41 43 80</code> (5 bytes)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 7/9</h1>
+<ul>
+<li>We sacrifice a little CPU power for a large size gain<ul>
+<li>Especially for collections and large streams</li>
+</ul>
+</li>
+<li>We don't sacrifice too much<ul>
+<li>Even streams tend to use a limited number of symbols</li>
+<li>That means the lookup time is not significant</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 8/9</h1>
+<ul>
+<li>All this without compression</li>
+<li>All this without schemas</li>
+<li>Just call the encode function and you're done!<ul>
+<li>Okay some languages might need a little more wrapping than others...</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Symbol 9/9</h1>
+<ul>
+<li>The symbol string is limited to 255 bytes (not characters!)</li>
+<li>The first 32 symbols cost exactly 1 byte<ul>
+<li>This never changes, so choose these 32 symbols well!</li>
+</ul>
+</li>
+<li>Subsequent symbols cost 2 or 3 bytes<ul>
+<li>2 bytes when there are less than 8192 symbols defined total</li>
+<li>3 bytes when there are more</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Binary</h1>
+<ul>
+<li>Size followed by sequence of bytes</li>
+<li>Size may be encoded as 16-bit, 32-bit or 64-bit unsigned integer</li>
+<li>Minimal binary size: 3 bytes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>String</h1>
+<ul>
+<li>Must be valid UTF-8<ul>
+<li>Decoding validates UTF-8 by default (optionally can be disabled)</li>
+</ul>
+</li>
+<li>Size followed by sequence of bytes<ul>
+<li>Character-terminated strings are the devil!</li>
+</ul>
+</li>
+<li>Size may be encoded as 8-bit, 16-bit or 32-bit unsigned integer</li>
+<li>Minimal string size: 2 bytes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>RFC 3339 date</h1>
+<ul>
+<li>Why?</li>
+<li>Because they are a lot more common than you think</li>
+<li>By standardizing we avoid having tons of different formats<ul>
+<li>That means less bugs, especially when converting</li>
+</ul>
+</li>
+<li>RFC 3339 includes time, date and timezone information<ul>
+<li>It's a subset of ISO 8601</li>
+</ul>
+</li>
+<li>2 bytes followed by the date as a sequence of bytes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Integer</h1>
+<ul>
+<li>6-bit, 8-bit, 16-bit, 32-bit and 64-bit signed integer</li>
+<li>Positive and negative bignum integer<ul>
+<li>Same encoding as Erlang</li>
+</ul>
+</li>
+<li>Minimal integer size: 1 byte (-32 to 31)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Floating-point</h1>
+<ul>
+<li>IEEE 754 binary64 (double)</li>
+<li>IEEE 754 decimal64</li>
+<li>Both take 9 bytes</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Map</h1>
+<ul>
+<li>Size followed by unordered list of pairs of key/values<ul>
+<li>If any duplicate, only the last key/value is kept</li>
+</ul>
+</li>
+<li>Size may be encoded as 5-bit, 16-bit or 32-bit unsigned integer</li>
+<li>Minimal map size: 1 byte<ul>
+<li>Maps smaller than 32 keys take 1 byte + the size of pairs</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Array</h1>
+<ul>
+<li>Size followed by list of values</li>
+<li>Size may be encoded as 5-bit, 16-bit or 32-bit unsigned integer</li>
+<li>Minimal array size: 1 byte<ul>
+<li>Arrays smaller than 32 values take 1 byte + the size of the values</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>List</h1>
+<ul>
+<li>1 byte to indicate the start of a list</li>
+<li>1 byte to indicate the end</li>
+<li>For special cases only</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Extensions</h1>
+<ul>
+<li>Define up to 256 additional types<ul>
+<li>You can do that through custom media types</li>
+</ul>
+</li>
+<li>8-bit, 16-bit, 32-bit or 64-bit value</li>
+<li>Blob of 8-bit, 16-bit, 32-bit or 64-bit unsigned size</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Wrap-up</h1>
+<ul>
+<li>BED is...</li>
+<li>Great for REST (hypertext)</li>
+<li>Great for Websockets (exponentially smaller as time goes on)</li>
+<li>Comfy!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>But wait...</h1>
+<ul>
+<li>Doesn't binary make it harder to debug things?</li>
+<li>No</li>
+<li>A large enough JSON is as indecipherable as a large enough binary</li>
+<li>When debugging you can just add a well placed decode call</li>
+<li>Plus nothing is stopping you from providing JSON at the same time!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Writing a REST client</h1>
+</div>
+
+
+<div class="slide">
+<h1>Warning</h1>
+<ul>
+<li>This part has no code written for it at this point</li>
+<li>Sorry!</li>
+<li>The BED format was just too interesting to work on</li>
+<li>And we're probably running out of time anyway</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Goals</h1>
+<ul>
+<li>Manipulate resources<ul>
+<li>Only use URIs</li>
+<li>Don't look into or validate representations</li>
+<li>Don't parse representations (with exceptions)</li>
+</ul>
+</li>
+<li>Automatic caching<ul>
+<li>Provide a default but replaceable implementation</li>
+<li>Again, URI based!</li>
+</ul>
+</li>
+<li>Automatic discovery of service capabilities</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>HTTP client</h1>
+<ul>
+<li>Use <code>gun</code> as the client</li>
+<li>Always connected, so great for automation</li>
+<li>What do you call a <code>gun</code> based REST client?</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>HTTP client</h1>
+<ul>
+<li>Use <code>gun</code> as the client</li>
+<li>Always connected, so great for automation</li>
+<li>What do you call a <code>gun</code> based REST client?</li>
+<li><code>gunr</code> of course!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Service map 1/2</h1>
+<ul>
+<li>We don't want to hardcode URIs</li>
+<li>We want to obtain them directly from the service</li>
+<li>We can generate a wrapper using this information</li>
+<li>We could use "crawling" but it's impractical</li>
+<li>RSDL specifications do what we want</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Service map 2/2</h1>
+<ul>
+<li>RSDL is ugly XML though :(</li>
+<li>RSDL includes way more information than we need<ul>
+<li>It literally describes everything</li>
+<li>It's good, but life is too short</li>
+</ul>
+</li>
+<li>A subset of RSDL generated from a simpler DSL might be workable<ul>
+<li>Or just send that simpler DSL</li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Interface</h1>
+<div><script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+my_generated_api_users:get_all().
+my_generated_api_users:get(Key, MediaType).
+my_generated_api_users:put(Key, MediaType, Representation).
+...
+]]></script></div></div>
+
+
+<div class="slide">
+<h1>Cache</h1>
+<ul>
+<li>A <code>get</code> call first looks into the cache</li>
+<li>It builds a request based on cache contents<ul>
+<li>In some cases it may not</li>
+</ul>
+</li>
+<li>The server dictates the client how cache should be used</li>
+<li>So we can safely rely on it</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Going further</h1>
+<ul>
+<li>We could go further with RSDL</li>
+<li>Is it worth it, though?</li>
+<li>Would people really use this stuff to its full potential?</li>
+<li>I'm not so sure...</li>
+<li>Sounds like too much work for too little reward</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Putting it to rest</h1>
+</div>
+
+
+<div class="slide">
+<h1>Let's be lazy now!</h1>
+<ul>
+<li>BED: <a href="https://github.com/bed-project/">https://github.com/bed-project/</a><ul>
+<li>Help welcome!</li>
+</ul>
+</li>
+<li>gun: <a href="https://github.com/extend/gun">https://github.com/extend/gun</a><ul>
+<li>Yes, I promise, I'll add Websockets support soon</li>
+</ul>
+</li>
+<li>gunr: help welcome!</li>
+<li>Me<ul>
+<li>Twitter: @lhoguin</li>
+<li><a href="http://ninenines.eu">http://ninenines.eu</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+
+</div>
+
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+</body>
+</html>
