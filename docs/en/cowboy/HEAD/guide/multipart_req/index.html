@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Nine Nines Support: Cowboy README</title>
+    <title>Nine Nines Support: Cowboy User Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Change them or set them up as you like -->
     <meta name="description" content="">
@@ -79,29 +79,72 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Cowboy</span></h1>
+<h1 class="lined-header"><span>Multipart requests</span></h1>
 <div class="service-description">
-<p>Cowboy is a small, fast and modular HTTP server written in Erlang.</p>
-<h2 id="goals">Goals</h2>
-<p>Cowboy aims to provide a <strong>complete</strong> HTTP stack in a <strong>small</strong> code base. It is optimized for <strong>low latency</strong> and <strong>low memory usage</strong>, in part because it uses <strong>binary strings</strong>.</p>
-<p>Cowboy provides <strong>routing</strong> capabilities, selectively dispatching requests to handlers written in Erlang.</p>
-<p>Because it uses Ranch for managing connections, Cowboy can easily be <strong>embedded</strong> in any other application.</p>
-<p>No parameterized module. No process dictionary. <strong>Clean</strong> Erlang code.</p>
-<h2 id="sponsors">Sponsors</h2>
-<p>The SPDY implementation was sponsored by <a href="http://www.leofs.org">LeoFS Cloud Storage</a>.</p>
-<p>The project is currently sponsored by <a href="https://kato.im">Kato.im</a>.</p>
-<h2 id="getting_started">Getting Started</h2>
-<ul>
-<li><a href="http://ninenines.eu/docs/en/cowboy/HEAD/guide">Read the guide</a></li>
-<li><a href="http://ninenines.eu/docs/en/cowboy/HEAD/manual">Check the manual</a></li>
-<li>Look at the examples in the <code>examples/</code> directory</li>
-</ul>
-<h2 id="support">Support</h2>
-<ul>
-<li>Official IRC Channel: #ninenines on irc.freenode.net</li>
-<li><a href="http://lists.ninenines.eu">Mailing Lists</a></li>
-<li><a href="http://ninenines.eu/support">Commercial Support</a></li>
-</ul>
+<p>You can read and parse multipart messages using the Req object directly.</p>
+<p>Cowboy defines two functions that allows you to get information about each part and read their contents.</p>
+<h2 id="checking_the_content-type">Checking the content-type</h2>
+<p>While there is a variety of multipart messages, the most common on the Web is <code>multipart/form-data</code>. It's the type of message being sent when an HTML form allows uploading files.</p>
+<p>You can quickly figure out if a multipart message has been sent by parsing the <code>content-type</code> header.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{ok, {<<"multipart">>, <<"form-data">>, _}, Req2}
+    = cowboy_req:parse_header(<<"content-type">>, Req).
+]]></script>
+<h2 id="reading_a_multipart_message">Reading a multipart message</h2>
+<p>To read a message you have to iterate over all its parts. Then, for each part, you can inspect its headers and read its body.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+multipart(Req) ->
+    case cowboy_req:part(Req) of
+        {ok, _Headers, Req2} ->
+            {ok, _Body, Req3} = cowboy_req:part_body(Req2),
+            multipart(Req3);
+        {done, Req2} ->
+            Req2
+    end.
+]]></script>
+<p>Parts do not have a size limit. When a part body is too big, Cowboy will return what it read so far and allow you to continue if you wish to do so.</p>
+<p>The function <code>cow_multipart:form_data/1</code> can be used to quickly obtain information about a part from a <code>multipart/form-data</code> message. This function will tell you if the part is for a normal field or if it is a file being uploaded.</p>
+<p>This can be used for example to allow large part bodies for files but crash when a normal field is too large.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+multipart(Req) ->
+    case cowboy_req:part(Req) of
+        {ok, Headers, Req2} ->
+            Req4 = case cow_multipart:form_data(Headers) of
+                {data, _FieldName} ->
+                    {ok, _Body, Req3} = cowboy_req:part_body(Req2),
+                    Req3;
+                {file, _FieldName, _Filename, _CType, _CTransferEncoding} ->
+                    stream_file(Req2)
+            end,
+            multipart(Req4);
+        {done, Req2} ->
+            Req2
+    end.
+
+stream_file(Req) ->
+    case cowboy_req:part_body(Req) of
+        {ok, _Body, Req2} ->
+            Req2;
+        {more, _Body, Req2} ->
+            stream_file(Req2)
+    end.
+]]></script>
+<p>By default the body chunk Cowboy will return is limited to 8MB. This can of course be overriden. Both functions can take a second argument, the same list of options that will be passed to <code>cowboy_req:body/2</code> function.</p>
+<h2 id="skipping_unwanted_parts">Skipping unwanted parts</h2>
+<p>If you do not want to read a part's body, you can skip it. Skipping is easy. If you do not call the function to read the part's body, Cowboy will automatically skip it when you request the next part.</p>
+<p>The following snippet reads all part headers and skips all bodies:</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+multipart(Req) ->
+    case cowboy_req:part(Req) of
+        {ok, _Headers, Req2} ->
+            multipart(Req2);
+        {done, Req2} ->
+            Req2
+    end.
+]]></script>
+<p>Similarly, if you start reading the body and it ends up being too big, you can simply continue with the next part, Cowboy will automatically skip what remains.</p>
+<p>Note that the skipping rate may not be adequate for your application. If you observe poor performance when skipping, you might want to consider manually skipping by calling the <code>cowboy_req:part_body/1</code> function directly.</p>
+<p>And if you started reading the message but decide that you do not need the remaining parts, you can simply stop reading entirely and Cowboy will automatically figure out what to do.</p>
 </div>
 
 
@@ -118,7 +161,7 @@
 
 <h3 id="docs-nav">Navigation</h3>
 
-<h3>See also</h3><ul><li><a href="/docs/en/cowboy/HEAD/guide/">User Guide</a></li><li><a href="/docs/en/cowboy/HEAD/manual/">Function Reference</a></li></ul>
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/HEAD/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/HEAD/index.html">README</a></li></ul>
 
 <h3>Version select</h3>
 <ul>

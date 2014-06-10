@@ -163,7 +163,7 @@
  Process the request body.<br/><br/> This function should create or update the resource with the information contained in the request body. This information may be full or partial depending on the request method.<br/><br/> If the request body was processed successfully, <code>true</code> or <code>{true, URL}</code> may be returned. If an URL is provided, the response will redirect the client to the location of the resource.<br/><br/> If a response body must be sent, the appropriate media-type, charset and language can be retrieved using the <code>cowboy_req:meta/{2,3}</code> functions. The respective keys are <code>media_type</code>, <code>charset</code> and <code>language</code>. The body can be set using <code>cowboy_req:set_resp_body/2</code>.</blockquote>
 <h4 id="content_types_provided">content_types_provided</h4>
 <blockquote><ul>
-<li>Methods: GET, HEAD</li>
+<li>Methods: GET, HEAD, POST, PUT, PATCH, DELETE</li>
 <li>Default value: [{{<<"text">>, <<"html">>, '*'}, to_html}]</li>
 </ul>
  Types:<ul>
@@ -172,7 +172,8 @@
 <li>Params = '*' | [{binary(), binary()}]</li>
 <li>ProvideResource = atom()</li>
 </ul>
- Return the list of content-types the resource provides.<br/><br/> The list must be ordered in order of preference.<br/><br/> Each content-type can be given either as a binary string or as a tuple containing the type, subtype and parameters.<br/><br/> Cowboy will select the most appropriate content-type from the list. If any parameter is acceptable, then the tuple form should be used with parameters set to <code>'*'</code>. If the parameters value is set to <code>[]</code> only content-type values with no parameters will be accepted. All parameter values are treated in a case sensitive manner except the <code>charset</code> parameter, if present, which is case insensitive.<br/><br/> The <code>ProvideResource</code> value is the name of the callback that will be called if the content-type matches. It is defined as follow.<br/><br/><ul>
+ Return the list of content-types the resource provides.<br/><br/> The list must be ordered in order of preference.<br/><br/> Each content-type can be given either as a binary string or as a tuple containing the type, subtype and parameters.<br/><br/> Cowboy will select the most appropriate content-type from the list. If any parameter is acceptable, then the tuple form should be used with parameters set to <code>'*'</code>. If the parameters value is set to <code>[]</code> only content-type values with no parameters will be accepted. All parameter values are treated in a case sensitive manner except the <code>charset</code> parameter, if present, which is case insensitive.<br/><br/> The <code>ProvideResource</code> value is the name of the callback that will be called if the content-type matches. It will only be called when a representation of the resource needs to be returned. It is defined as follow.<br/><br/><ul>
+<li>Methods: GET, HEAD</li>
 <li>Value type: iodata() | {stream, Fun} | {stream, Len, Fun} | {chunked, ChunkedFun}</li>
 <li>No default</li>
 </ul>
@@ -194,7 +195,7 @@
 <h4 id="expires">expires</h4>
 <blockquote><ul>
 <li>Methods: GET, HEAD</li>
-<li>Value type: calendar:datetime() | undefined</li>
+<li>Value type: calendar:datetime() | binary() | undefined</li>
 <li>Default value: undefined</li>
 </ul>
  Return the date of expiration of the resource.<br/><br/> This date will be sent as the value of the expires header.</blockquote>

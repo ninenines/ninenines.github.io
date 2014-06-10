@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Nine Nines Support: Cowboy README</title>
+    <title>Nine Nines Support: Cowboy User Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Change them or set them up as you like -->
     <meta name="description" content="">
@@ -79,29 +79,17 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Cowboy</span></h1>
+<h1 class="lined-header"><span>The Websocket protocol</span></h1>
 <div class="service-description">
-<p>Cowboy is a small, fast and modular HTTP server written in Erlang.</p>
-<h2 id="goals">Goals</h2>
-<p>Cowboy aims to provide a <strong>complete</strong> HTTP stack in a <strong>small</strong> code base. It is optimized for <strong>low latency</strong> and <strong>low memory usage</strong>, in part because it uses <strong>binary strings</strong>.</p>
-<p>Cowboy provides <strong>routing</strong> capabilities, selectively dispatching requests to handlers written in Erlang.</p>
-<p>Because it uses Ranch for managing connections, Cowboy can easily be <strong>embedded</strong> in any other application.</p>
-<p>No parameterized module. No process dictionary. <strong>Clean</strong> Erlang code.</p>
-<h2 id="sponsors">Sponsors</h2>
-<p>The SPDY implementation was sponsored by <a href="http://www.leofs.org">LeoFS Cloud Storage</a>.</p>
-<p>The project is currently sponsored by <a href="https://kato.im">Kato.im</a>.</p>
-<h2 id="getting_started">Getting Started</h2>
-<ul>
-<li><a href="http://ninenines.eu/docs/en/cowboy/HEAD/guide">Read the guide</a></li>
-<li><a href="http://ninenines.eu/docs/en/cowboy/HEAD/manual">Check the manual</a></li>
-<li>Look at the examples in the <code>examples/</code> directory</li>
-</ul>
-<h2 id="support">Support</h2>
-<ul>
-<li>Official IRC Channel: #ninenines on irc.freenode.net</li>
-<li><a href="http://lists.ninenines.eu">Mailing Lists</a></li>
-<li><a href="http://ninenines.eu/support">Commercial Support</a></li>
-</ul>
+<p>This chapter explains what Websocket is and why it is a vital component of soft realtime Web applications.</p>
+<h2 id="description">Description</h2>
+<p>Websocket is an extension to HTTP that emulates plain TCP connections between the client, typically a Web browser, and the server. It uses the HTTP Upgrade mechanism to establish the connection.</p>
+<p>Websocket connections are asynchronous, unlike HTTP. This means that not only can the client send frames to the server at any time, but the server can also send frames to the client without the client initiating anything other than the Websocket connection itself. This allows the server to push data to the client directly.</p>
+<p>Websocket is an IETF standard. Cowboy supports the standard and all drafts that were previously implemented by browsers, excluding the initial flawed draft sometimes known as "version 0".</p>
+<h2 id="implementation">Implementation</h2>
+<p>Cowboy implements Websocket as a protocol upgrade. Once the upgrade is performed from the <code>init/3</code> callback, Cowboy switches to Websocket. Please consult the next chapter for more information on initiating and handling Websocket connections.</p>
+<p>The implementation of Websocket in Cowboy is validated using the Autobahn test suite, which is an extensive suite of tests covering all aspects of the protocol. Cowboy passes the suite with 100% success, including all optional tests.</p>
+<p>Cowboy's Websocket implementation also includes the x-webkit-deflate-frame compression draft which is being used by some browsers to reduce the size of data being transmitted. Cowboy will automatically use compression as long as the <code>compress</code> protocol option is set when starting the listener.</p>
 </div>
 
 
@@ -118,7 +106,7 @@
 
 <h3 id="docs-nav">Navigation</h3>
 
-<h3>See also</h3><ul><li><a href="/docs/en/cowboy/HEAD/guide/">User Guide</a></li><li><a href="/docs/en/cowboy/HEAD/manual/">Function Reference</a></li></ul>
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/HEAD/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/HEAD/index.html">README</a></li></ul>
 
 <h3>Version select</h3>
 <ul>
