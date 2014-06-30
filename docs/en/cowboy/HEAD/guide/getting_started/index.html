@@ -81,9 +81,9 @@
 
 <h1 class="lined-header"><span>Getting started</span></h1>
 <div class="service-description">
-<p>Setting up a working Erlang application is a little more complex than for most other languages. The reason is that Erlang is designed to build systems and not just simple applications.</p>
-<p>An Erlang system is typically comprised of many different nodes, each containing many different OTP applications, each containing many different modules and running many different processes. Nodes may or may not be identical depending on the nature of the system.</p>
-<p>To get started though, we only need one node that contains your own HTTP application, plus the dependencies that it needs, like Cowboy. To create our node, we need to build what is called a release. A release is a set of files that contain the Erlang VM plus all the applications required to run our node.</p>
+<p>Erlang is more than a language, it is also an operating system for your applications. Erlang developers rarely write standalone modules, they write libraries or applications, and then bundle those into what is called a release. A release contains the Erlang VM plus all applications required to run the node, so it can be pushed to production directly.</p>
+<p>This chapter walks you through all the steps of setting up Cowboy, writing your first application and generating your first release. At the end of this chapter you should know everything you need to push your first Cowboy application to production.</p>
+<h2 id="application_skeleton">Application skeleton</h2>
 <p>Let's start by creating this application. We will simply call it <code>hello_erlang</code>. This application will have the following directory structure:</p>
 <script type="syntaxhighlighter" class="brush: plain"><![CDATA[
 hello_erlang/
@@ -152,6 +152,7 @@ stop(_State) ->
     ok.
 ]]></script>
 <p>That's not enough however. Since we are building a Cowboy based application, we also need to initialize Cowboy when we start our application.</p>
+<h2 id="setting_up_cowboy">Setting up Cowboy</h2>
 <p>Cowboy does nothing by default.</p>
 <p>Cowboy uses Ranch for handling the connections and provides convenience functions to start Ranch listeners.</p>
 <p>The <code>cowboy:start_http/4</code> function starts a listener for HTTP connections using the TCP transport. The <code>cowboy:start_https/4</code> function starts a listener for HTTPS connections using the SSL transport.</p>
@@ -188,6 +189,7 @@ init([]) ->
     {ok, {{one_for_one, 10, 10}, []}}.
 ]]></script>
 <p>Finally, we need to write the code for handling incoming requests.</p>
+<h2 id="handling_http_requests">Handling HTTP requests</h2>
 <p>Cowboy features many kinds of handlers. For this simple example, we will just use the plain HTTP handler, which has three callback functions: <code>init/3</code>, <code>handle/2</code> and <code>terminate/3</code>. You can find more information about the arguments and possible return values of these callbacks in the <a href="http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_http_handler">cowboy_http_handler function reference</a>.</p>
 <p>Our handler will only send a friendly hello back to the client.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -212,6 +214,7 @@ terminate(_Reason, _Req, _State) ->
 ]]></script>
 <p>The <code>Req</code> variable above is the Req object, which allows the developer to obtain information about the request and to perform a reply. Its usage is documented in the <a href="http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req">cowboy_req function reference</a>.</p>
 <p>The code for our application is ready, so let's build a release!</p>
+<h2 id="compiling">Compiling</h2>
 <p>First we need to download <code>erlang.mk</code>.</p>
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
 $ wget https://raw.github.com/extend/erlang.mk/master/erlang.mk
@@ -233,6 +236,7 @@ include erlang.mk
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
 $ make
 ]]></script>
+<h2 id="generating_the_release">Generating the release</h2>
 <p>That's not all however, as we want to create a working release. For that purpose, we need to create a <code>relx.config</code> file. When this file exists, <code>erlang.mk</code> will automatically download <code>relx</code> and build the release when you type <code>make</code>.</p>
 <p>In the <code>relx.config</code> file, we only need to tell <code>relx</code> that we want the release to include the <code>hello_erlang</code> application, and that we want an extended start script for convenience. <code>relx</code> will figure out which other applications are required by looking into the <code>.app</code> files for dependencies.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
@@ -243,10 +247,9 @@ $ make
 <p>We can now build and start the release.</p>
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
 $ make
-$ ./_rel/bin/hello_erlang console
+$ ./_rel/hello_erlang/bin/hello_erlang console
 ]]></script>
 <p>If you then access <code>http://localhost:8080</code> using your browser, you should receive a nice greet!</p>
-<p>You can find many more examples in the <code>examples/</code> directory of the Cowboy repository.</p>
 </div>
 
 

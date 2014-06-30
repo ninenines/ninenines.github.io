@@ -81,7 +81,8 @@
 
 <h1 class="lined-header"><span>Hooks</span></h1>
 <div class="service-description">
-<h2 id="on_request">On request</h2>
+<p>Cowboy provides two hooks. <code>onrequest</code> is called once the request line and headers have been received. <code>onresponse</code> is called just before sending the response.</p>
+<h2 id="onrequest">Onrequest</h2>
 <p>The <code>onrequest</code> hook is called as soon as Cowboy finishes fetching the request headers. It occurs before any other processing, including routing. It can be used to perform any modification needed on the request object before continuing with the processing. If a reply is sent inside this hook, then Cowboy will move on to the next request, skipping any subsequent handling.</p>
 <p>This hook is a function that takes a request object as argument, and returns a request object. This function MUST NOT crash. Cowboy will not send any reply if a crash occurs in this function.</p>
 <p>You can specify the <code>onrequest</code> hook when creating the listener, inside the request options.</p>
@@ -101,10 +102,10 @@ debug_hook(Req) ->
     Req.
 ]]></script>
 <p>Make sure to always return the last request object obtained.</p>
-<h2 id="on_response">On response</h2>
+<h2 id="onresponse">Onresponse</h2>
 <p>The <code>onresponse</code> hook is called right before sending the response to the socket. It can be used for the purposes of logging responses, or for modifying the response headers or body. The best example is providing custom error pages.</p>
 <p>Note that like the <code>onrequest</code> hook, this function MUST NOT crash. Cowboy may or may not send a reply if this function crashes. If a reply is sent, the hook MUST explicitly provide all headers that are needed.</p>
-<p>You can specify the <code>onresponse</code> hook when creating the listener also.</p>
+<p>You can specify the <code>onresponse</code> hook when creating the listener.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 cowboy:start_http(my_http_listener, 100,
     [{port, 8080}],
