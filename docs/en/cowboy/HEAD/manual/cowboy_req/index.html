@@ -92,6 +92,7 @@
 <p>The only exception is the <code>chunk/2</code> function which may return <code>ok</code>.</p>
 <p>Whenever <code>Req</code> is returned, you must use this returned value and ignore any previous you may have had. This value contains various state informations which are necessary for Cowboy to do some lazy evaluation or cache results where appropriate.</p>
 <p>All functions which perform an action should only be called once. This includes reading the request body or replying. Cowboy will generally throw an error on the second call.</p>
+<p>It is highly discouraged to pass the Req object to another process. Doing so and calling <code>cowboy_req</code> functions from it leads to undefined behavior.</p>
 <h2 id="types">Types</h2>
 <h4 id="body_opts">body_opts() = [{continue, boolean()}	| {length, non_neg_integer()}	| {read_length, non_neg_integer()}	| {read_timeout, timeout()}	| {transfer_decode, transfer_decode_fun(), any()}	| {content_decode, content_decode_fun()}]</h4>
 <blockquote> Request body reading options.</blockquote>
