@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,13 +80,19 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Dealing with broken clients</span></h1>
-<div class="service-description">
+
 <p>There exists a very large number of implementations for the HTTP protocol. Most widely used clients, like browsers, follow the standard quite well, but others may not. In particular custom enterprise clients tend to be very badly written.</p>
+
 <p>Cowboy tries to follow the standard as much as possible, but is not trying to handle every possible special cases. Instead Cowboy focuses on the cases reported in the wild, on the public Web.</p>
+
 <p>That means clients that ignore the HTTP standard completely may fail to understand Cowboy's responses. There are of course workarounds. This chapter aims to cover them.</p>
+
 <h2 id="lowercase_headers">Lowercase headers</h2>
+
 <p>Cowboy converts all headers it receives to lowercase, and similarly sends back headers all in lowercase. Some broken HTTP clients have issues with that.</p>
+
 <p>A simple way to solve this is to create an <code>onresponse</code> hook that will format the header names with the expected case.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 capitalize_hook(Status, Headers, Body, Req) ->
     Headers2 = [{cowboy_bstr:capitalize_token(N), V}
@@ -94,16 +100,22 @@ capitalize_hook(Status, Headers, Body, Req) ->
     {ok, Req2} = cowboy_req:reply(Status, Headers2, Body, Req),
     Req2.
 ]]></script>
+
 <p>Note that SPDY clients do not have that particular issue because the specification explicitly says all headers are lowercase, unlike HTTP which allows any case but treats them as case insensitive.</p>
+
 <h2 id="camel-case_headers">Camel-case headers</h2>
+
 <p>Sometimes it is desirable to keep the actual case used by clients, for example when acting as a proxy between two broken implementations. There is no easy solution for this other than forking the project and editing the <code>cowboy_protocol</code> file directly.</p>
+
 <h2 id="chunked_transfer-encoding">Chunked transfer-encoding</h2>
+
 <p>Sometimes an HTTP client advertises itself as HTTP/1.1 but does not support chunked transfer-encoding. This is invalid behavior, as HTTP/1.1 clients are required to support it.</p>
+
 <p>A simple workaround exists in these cases. By changing the Req object response state to <code>waiting_stream</code>, Cowboy will understand that it must use the identity transfer-encoding when replying, just like if it was an HTTP/1.0 client.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:set(resp_state, waiting_stream).
 ]]></script>
-</div>
 
 
 <!-- a.code -->
@@ -123,8 +135,11 @@ Req2 = cowboy_req:set(resp_state, waiting_stream).
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

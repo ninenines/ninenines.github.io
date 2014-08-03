@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Cowboy User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Getting started</span></h1>
+
+<p>Erlang is more than a language, it is also an operating system for your applications. Erlang developers rarely write standalone modules, they write libraries or applications, and then bundle those into what is called a release. A release contains the Erlang VM plus all applications required to run the node, so it can be pushed to production directly.</p>
+
+<p>This chapter walks you through all the steps of setting up Cowboy, writing your first application and generating your first release. At the end of this chapter you should know everything you need to push your first Cowboy application to production.</p>
+
+<h2 id="bootstrap">Bootstrap</h2>
+
+<p>We are going to use the <a href="https://github.com/extend/erlang.mk">erlang.mk</a> build system. It also offers bootstrap features allowing us to quickly get started without having to deal with minute details.</p>
+
+<p>First, let's create the directory for our application.</p>
+
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ mkdir hello_erlang
+$ cd hello_erlang
+]]></script>
+
+<p>Then we need to download <code>erlang.mk</code>. Either use the following command or download it manually.</p>
+
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ wget https://raw.githubusercontent.com/extend/erlang.mk/master/erlang.mk
+]]></script>
+
+<p>We can now bootstrap our application. Since we are going to generate a release, we will also bootstrap it at the same time.</p>
+
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make -f erlang.mk bootstrap bootstrap-rel
+]]></script>
+
+<p>This creates a Makefile, a base application, and the release files necessary for creating the release. We can already build and start this release.</p>
+
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make
+...
+$ ./_rel/hello_erlang_release/bin/hello_erlang_release console
+...
+(hello_erlang@127.0.0.1)1>
+]]></script>
+
+<p>Entering the command <code>i().</code> will show the running processes, including one called <code>hello_erlang_sup</code>. This is the supervisor for our application.</p>
+
+<p>The release currently does nothing. In the rest of this chapter we will add Cowboy as a dependency and write a simple "Hello world!" handler.</p>
+
+<h2 id="cowboy_setup">Cowboy setup</h2>
+
+<p>To add Cowboy as a dependency of your application, we need to modify two files: the Makefile and the application resource file.</p>
+
+<p>Modifying the Makefile allows the build system to know it needs to fetch and compile Cowboy. To do that we simply need to add one line to our Makefile to make it look like this:</p>
+
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+PROJECT = hello_erlang
+DEPS = cowboy
+include erlang.mk
+]]></script>
+
+<p>Modifying the application resource file, <code>src/hello_erlang.app.src</code>, allows the build system to know it needs to include Cowboy in the release and start it automatically. This is a different step because some dependencies are only needed during development.</p>
+
+<p>We are simply going to add <code>cowboy</code> to the list of <code>applications</code>, right after <code>stdlib</code>. Don't forget the comma separator.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{application, hello_erlang, [
+	{description, "Hello Erlang!"},
+	{vsn, "0.1.0"},
+	{modules, []},
+	{registered, []},
+	{applications, [
+		kernel,
+		stdlib,
+		cowboy
+	]},
+	{mod, {hello_erlang_app, []}},
+	{env, []}
+]}.
+]]></script>
+
+<p>You may want to set a description for the application while you are editing the file.</p>
+
+<p>If you run <code>make</code> now and start the release, Cowboy will be included and started automatically. This is not enough however, as Cowboy doesn't do anything by default. We still need to tell Cowboy to listen for connections.</p>
+
+<h2 id="listening_for_connections">Listening for connections</h2>
+
+<p>We will do this when our application starts. It's a two step process. First we need to define and compile the dispatch list, a list of routes that Cowboy will use to map requests to handler modules. Then we tell Cowboy to listen for connections.</p>
+
+<p>Open the <code>src/hello_erlang_app.erl</code> file and add the necessary code to the <code>start/2</code> function to make it look like this:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+start(_Type, _Args) ->
+	Dispatch = cowboy_router:compile([
+		{'_', [{"/", hello_handler, []}]}
+	]),
+	cowboy:start_http(my_http_listener, 100, [{port, 8080}],
+		[{env, [{dispatch, Dispatch}]}]
+	),
+	hello_erlang_sup:start_link().
+]]></script>
+
+<p>The dispatch list is explained in great details in the <a href="routing">Routing</a> chapter. For this tutorial we map the path <code>/</code> to the handler module <code>hello_handler</code>. This module doesn't exist yet, we still have to write it.</p>
+
+<p>If you build the release, start it and open <a href="http://localhost:8080">http://localhost:8080</a> now, you will get an error because the module is missing. Any other URL, like <a href="http://localhost:8080/test">http://localhost:8080/test</a>, will result in a 404 error.</p>
+
+<h2 id="handling_requests">Handling requests</h2>
+
+<p>Cowboy features different kinds of handlers, including REST and Websocket handlers. For this tutorial we will use a plain HTTP handler.</p>
+
+<p>First, let's generate a handler from a template.</p>
+
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make new t=cowboy_http n=hello_handler
+]]></script>
+
+<p>You can then open the <code>src/hello_handler.erl</code> file and modify the <code>handle/2</code> function like this to send a reply.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+handle(Req, State=#state{}) ->
+	{ok, Req2} = cowboy_req:reply(200,
+		[{<<"content-type">>, <<"text/plain">>}],
+		<<"Hello Erlang!">>,
+		Req),
+	{ok, Req2, State}.
+]]></script>
+
+<p>What the above code does is send a <code>200 OK</code> reply, with the <code>content-type</code> header set to <code>text/plain</code> and the response body set to <code>Hello Erlang!</code>.</p>
+
+<p>If you build the release, start it and open <a href="http://localhost:8080">http://localhost:8080</a> in your browser, you should get a nice <code>Hello Erlang!</code> displayed!</p>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "86681c5a-011b-481b-98b8-22b548283fe5", doNotHash: true, doNotCopy: true, hashAddressBar: false});</script>
+
+  </body>
+</html>

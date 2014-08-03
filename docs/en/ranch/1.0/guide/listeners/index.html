@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Ranch User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Listeners</span></h1>
+<div class="service-description">
+<h2 id="purpose">Purpose</h2>
+<p>A listener is a set of processes whose role is to listen on a port for new connections. It manages a pool of acceptor processes, each of them indefinitely accepting connections. When it does, it starts a new process executing the protocol handler code. All the socket programming is abstracted through the user of transport handlers.</p>
+<p>The listener takes care of supervising all the acceptor and connection processes, allowing developers to focus on building their application.</p>
+<h2 id="starting_and_stopping">Starting and stopping</h2>
+<p>Ranch does nothing by default. It is up to the application developer to request that Ranch listens for connections.</p>
+<p>A listener can be started and stopped at will.</p>
+<p>When starting a listener, a number of different settings are required:</p>
+<ul>
+<li>A name to identify it locally and be able to interact with it.</li>
+<li>The number of acceptors in the pool.</li>
+<li>A transport handler and its associated options.</li>
+<li>A protocol handler and its associated options.</li>
+</ul>
+<p>Ranch includes both TCP and SSL transport handlers, respectively <code>ranch_tcp</code> and <code>ranch_ssl</code>.</p>
+<p>A listener can be started by calling the <code>ranch:start_listener/6</code> function. Before doing so however, you must ensure that the <code>ranch</code> application is started.</p>
+<p>To start the <code>ranch</code> application:</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+ok = application:start(ranch).
+]]></script>
+<p>You are then ready to start a listener. Let's call it <code>tcp_echo</code>. It will have a pool of 100 acceptors, use a TCP transport and forward connections to the <code>echo_protocol</code> handler.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{ok, _} = ranch:start_listener(tcp_echo, 100,
+    ranch_tcp, [{port, 5555}],
+    echo_protocol, []
+).
+]]></script>
+<p>You can try this out by compiling and running the <code>tcp_echo</code> example in the examples directory. To do so, open a shell in the <code>examples/tcp_echo/</code> directory and run the following commands:</p>
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make
+$ ./_rel/bin/tcp_echo console
+]]></script>
+<p>You can then connect to it using telnet and see the echo server reply everything you send to it. Then when you're done testing, you can use the <code>Ctrl+]</code> key to escape to the telnet command line and type <code>quit</code> to exit.</p>
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+$ telnet localhost 5555
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Hello!
+Hello!
+It works!
+It works!
+^]
+
+telnet> quit
+Connection closed.
+]]></script>
+<h2 id="default_transport_options">Default transport options</h2>
+<p>By default the socket will be set to return <code>binary</code> data, with the options <code>{active, false}</code>, <code>{packet, raw}</code>, <code>{reuseaddr, true}</code> set. These values can't be overriden when starting the listener, but they can be overriden using <code>Transport:setopts/2</code> in the protocol.</p>
+<p>It will also set <code>{backlog, 1024}</code> and <code>{nodelay, true}</code>, which can be overriden at listener startup.</p>
+<h2 id="listening_on_a_random_port">Listening on a random port</h2>
+<p>You do not have to specify a specific port to listen on. If you give the port number 0, or if you omit the port number entirely, Ranch will start listening on a random port.</p>
+<p>You can retrieve this port number by calling <code>ranch:get_port/1</code>. The argument is the name of the listener you gave in <code>ranch:start_listener/6</code>.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{ok, _} = ranch:start_listener(tcp_echo, 100,
+    ranch_tcp, [{port, 0}],
+    echo_protocol, []
+).
+Port = ranch:get_port(tcp_echo).
+]]></script>
+<h2 id="listening_on_privileged_ports">Listening on privileged ports</h2>
+<p>Some systems limit access to ports below 1024 for security reasons. This can easily be identified by an <code>{error, eacces}</code> error when trying to open a listening socket on such a port.</p>
+<p>The methods for listening on privileged ports vary between systems, please refer to your system's documentation for more information.</p>
+<p>We recommend the use of port rewriting for systems with a single server, and load balancing for systems with multiple servers. Documenting these solutions is however out of the scope of this guide.</p>
+<h2 id="accepting_connections_on_an_existing_socket">Accepting connections on an existing socket</h2>
+<p>If you want to accept connections on an existing socket, you can use the <code>socket</code> transport option, which should just be the relevant data returned from the connect function for the transport or the underlying socket library (<code>gen_tcp:connect</code>, <code>ssl:connect</code>). The accept function will then be called on the passed in socket. You should connect the socket in <code>{active, false}</code> mode, as well.</p>
+<p>Note, however, that because of a bug in SSL, you cannot change ownership of an SSL listen socket prior to R16. Ranch will catch the error thrown, but the owner of the SSL socket will remain as whatever process created the socket. However, this will not affect accept behaviour unless the owner process dies, in which case the socket is closed. Therefore, to use this feature with SSL with an erlang release prior to R16, ensure that the SSL socket is opened in a persistant process.</p>
+<h2 id="limiting_the_number_of_concurrent_connections">Limiting the number of concurrent connections</h2>
+<p>The <code>max_connections</code> transport option allows you to limit the number of concurrent connections. It defaults to 1024. Its purpose is to prevent your system from being overloaded and ensuring all the connections are handled optimally.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{ok, _} = ranch:start_listener(tcp_echo, 100,
+    ranch_tcp, [{port, 5555}, {max_connections, 100}],
+    echo_protocol, []
+).
+]]></script>
+<p>You can disable this limit by setting its value to the atom <code>infinity</code>.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{ok, _} = ranch:start_listener(tcp_echo, 100,
+    ranch_tcp, [{port, 5555}, {max_connections, infinity}],
+    echo_protocol, []
+).
+]]></script>
+<p>You may not always want connections to be counted when checking for <code>max_connections</code>. For example you might have a protocol where both short-lived and long-lived connections are possible. If the long-lived connections are mostly waiting for messages, then they don't consume much resources and can safely be removed from the count.</p>
+<p>To remove the connection from the count, you must call the <code>ranch:remove_connection/1</code> from within the connection process, with the name of the listener as the only argument.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+ranch:remove_connection(Ref).
+]]></script>
+<p>As seen in the chapter covering protocols, this pid is received as the first argument of the protocol's <code>start_link/4</code> callback.</p>
+<p>You can modify the <code>max_connections</code> value on a running listener by using the <code>ranch:set_max_connections/2</code> function, with the name of the listener as first argument and the new value as the second.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+ranch:set_max_connections(tcp_echo, MaxConns).
+]]></script>
+<p>The change will occur immediately.</p>
+<h2 id="upgrading">Upgrading</h2>
+<p>Ranch allows you to upgrade the protocol options. This takes effect immediately and for all subsequent connections.</p>
+<p>To upgrade the protocol options, call <code>ranch:set_protocol_options/2</code> with the name of the listener as first argument and the new options as the second.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+ranch:set_protocol_options(tcp_echo, NewOpts).
+]]></script>
+<p>All future connections will use the new options.</p>
+<p>You can also retrieve the current options similarly by calling <code>ranch:get_protocol_options/1</code>.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+Opts = ranch:get_protocol_options(tcp_echo).
+]]></script>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/ranch/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/ranch/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/ranch/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/ranch/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "86681c5a-011b-481b-98b8-22b548283fe5", doNotHash: true, doNotCopy: true, hashAddressBar: false});</script>
+
+  </body>
+</html>

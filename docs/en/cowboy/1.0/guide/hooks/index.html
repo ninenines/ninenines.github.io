@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Cowboy User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Hooks</span></h1>
+
+<p>Cowboy provides two hooks. <code>onrequest</code> is called once the request line and headers have been received. <code>onresponse</code> is called just before sending the response.</p>
+
+<h2 id="onrequest">Onrequest</h2>
+
+<p>The <code>onrequest</code> hook is called as soon as Cowboy finishes fetching the request headers. It occurs before any other processing, including routing. It can be used to perform any modification needed on the request object before continuing with the processing. If a reply is sent inside this hook, then Cowboy will move on to the next request, skipping any subsequent handling.</p>
+
+<p>This hook is a function that takes a request object as argument, and returns a request object. This function MUST NOT crash. Cowboy will not send any reply if a crash occurs in this function.</p>
+
+<p>You can specify the <code>onrequest</code> hook when creating the listener, inside the request options.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+cowboy:start_http(my_http_listener, 100,
+    [{port, 8080}],
+    [
+        {env, [{dispatch, Dispatch}]},
+        {onrequest, fun ?MODULE:debug_hook/1}
+    ]
+).
+]]></script>
+
+<p>The following hook function prints the request object everytime a request is received. This can be useful for debugging, for example.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+debug_hook(Req) ->
+    erlang:display(Req),
+    Req.
+]]></script>
+
+<p>Make sure to always return the last request object obtained.</p>
+
+<h2 id="onresponse">Onresponse</h2>
+
+<p>The <code>onresponse</code> hook is called right before sending the response to the socket. It can be used for the purposes of logging responses, or for modifying the response headers or body. The best example is providing custom error pages.</p>
+
+<p>Note that like the <code>onrequest</code> hook, this function MUST NOT crash. Cowboy may or may not send a reply if this function crashes. If a reply is sent, the hook MUST explicitly provide all headers that are needed.</p>
+
+<p>You can specify the <code>onresponse</code> hook when creating the listener.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+cowboy:start_http(my_http_listener, 100,
+    [{port, 8080}],
+    [
+        {env, [{dispatch, Dispatch}]},
+        {onresponse, fun ?MODULE:custom_404_hook/4}
+    ]
+).
+]]></script>
+
+<p>The following hook function will provide a custom body for 404 errors when it has not been provided before, and will let Cowboy proceed with the default response otherwise.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+custom_404_hook(404, Headers, <<>>, Req) ->
+    Body = <<"404 Not Found.">>,
+    Headers2 = lists:keyreplace(<<"content-length">>, 1, Headers,
+        {<<"content-length">>, integer_to_list(byte_size(Body))}),
+    {ok, Req2} = cowboy_req:reply(404, Headers2, Body, Req),
+    Req2;
+custom_404_hook(_, _, _, Req) ->
+    Req.
+]]></script>
+
+<p>Again, make sure to always return the last request object obtained.</p>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "86681c5a-011b-481b-98b8-22b548283fe5", doNotHash: true, doNotCopy: true, hashAddressBar: false});</script>
+
+  </body>
+</html>

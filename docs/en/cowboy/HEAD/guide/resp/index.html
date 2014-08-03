@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,51 +80,72 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Sending a response</span></h1>
-<div class="service-description">
+
 <p>The Req object also allows you to send a response.</p>
+
 <p>You can only send one response. Any other attempt will trigger a crash. The response may be sent in one go or with its body streamed by chunks of arbitrary size.</p>
+
 <p>You can also set headers or the response body in advance and Cowboy will use them when you finally do reply.</p>
+
 <h2 id="reply">Reply</h2>
+
 <p>You can send a reply with no particular headers or body. Cowboy will make sure to send the mandatory headers with the response.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:reply(200, Req).
 ]]></script>
+
 <p>You can define headers to be sent with the response. Note that header names must be lowercase. Again, Cowboy will make sure to send the mandatory headers with the response.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:reply(303, [
     {<<"location">>, <<"http://ninenines.eu">>}
 ], Req).
 ]]></script>
+
 <p>You can override headers that Cowboy would send otherwise. Any header set by the user will be used over the ones set by Cowboy. For example, you can advertise yourself as a different server.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:reply(200, [
     {<<"server">>, <<"yaws">>}
 ], Req).
 ]]></script>
+
 <p>We also saw earlier how to force close the connection by overriding the connection header.</p>
+
 <p>Finally, you can also send a body with the response. Cowboy will automatically set the content-length header if you do. We recommend that you set the content-type header so the client may know how to read the body.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:reply(200, [
     {<<"content-type">>, <<"text/plain">>}
 ], "Hello world!", Req).
 ]]></script>
+
 <p>Here is the same example but sending HTML this time.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:reply(200, [
     {<<"content-type">>, <<"text/html">>}
 ], "<html><head>Hello world!</head><body><p>Hats off!</p></body></html>", Req).
 ]]></script>
+
 <p>Note that the reply is sent immediately.</p>
+
 <h2 id="chunked_reply">Chunked reply</h2>
+
 <p>You can also stream the response body. First, you need to initiate the reply by sending the response status code. Then you can send the body in chunks of arbitrary size.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:chunked_reply(200, Req),
 ok = cowboy_req:chunk("Hello...", Req2),
 ok = cowboy_req:chunk("chunked...", Req2),
 ok = cowboy_req:chunk("world!!", Req2).
 ]]></script>
+
 <p>You should make sure to match on <code>ok</code> as an error may be returned.</p>
+
 <p>While it is possible to send a chunked response without a content-type header, it is still recommended. You can set this header or any other just like for normal replies.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:chunked_reply(200, [
     {<<"content-type">>, <<"text/html">>}
@@ -132,35 +153,52 @@ ok = cowboy_req:chunk("world!!", Req2).
 ok = cowboy_req:chunk("<html><head>Hello world!</head>", Req2),
 ok = cowboy_req:chunk("<body><p>Hats off!</p></body></html>", Req2).
 ]]></script>
+
 <p>Note that the reply and each chunk following it are sent immediately.</p>
+
 <h2 id="preset_response_headers">Preset response headers</h2>
+
 <p>You can define response headers in advance. They will be merged into the headers given in the reply call. Headers in the reply call override preset response headers which override the default Cowboy headers.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:set_resp_header(<<"allow">>, "GET", Req).
 ]]></script>
+
 <p>You can check if a response header has already been set. This will only check the response headers that you set, and not the ones Cowboy will add when actually sending the reply.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 cowboy_req:has_resp_header(<<"allow">>, Req).
 ]]></script>
+
 <p>It will return <code>true</code> if the header is defined, and <code>false</code> otherwise.</p>
+
 <p>Finally, you can also delete a preset response header if needed. If you do, it will not be sent.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:delete_resp_header(<<"allow">>, Req).
 ]]></script>
+
 <h2 id="preset_response_body">Preset response body</h2>
+
 <p>You can set the response body in advance. Note that this body will be ignored if you then choose to send a chunked reply, or if you send a reply with an explicit body.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Req2 = cowboy_req:set_resp_body("Hello world!", Req).
 ]]></script>
+
 <p>You can also set a fun that will be called when it is time to send the body. There are three different ways of doing that.</p>
+
 <p>If you know the length of the body that needs to be sent, you should specify it, as it will help clients determine the remaining download time and allow them to inform the user.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 F = fun (Socket, Transport) ->
     Transport:send(Socket, "Hello world!")
 end,
 Req2 = cowboy_req:set_resp_body_fun(12, F, Req).
 ]]></script>
+
 <p>If you do not know the length of the body, you should use a chunked response body fun instead.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 F = fun (SendChunk) ->
     Body = lists:duplicate(random:uniform(1024, $a)),
@@ -168,7 +206,9 @@ F = fun (SendChunk) ->
 end,
 Req2 = cowboy_req:set_resp_body_fun(chunked, F, Req).
 ]]></script>
+
 <p>Finally, you can also send data on the socket directly, without knowing the length in advance. Cowboy may be forced to close the connection at the end of the response though depending on the protocol capabilities.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 F = fun (Socket, Transport) ->
     Body = lists:duplicate(random:uniform(1024, $a)),
@@ -176,17 +216,21 @@ F = fun (Socket, Transport) ->
 end,
 Req2 = cowboy_req:set_resp_body_fun(F, Req).
 ]]></script>
+
 <h2 id="sending_files">Sending files</h2>
+
 <p>You can send files directly from disk without having to read them. Cowboy will use the <code>sendfile</code> syscall when possible, which means that the file is sent to the socket directly from the kernel, which is a lot more performant than doing it from userland.</p>
+
 <p>Again, it is recommended to set the size of the file if it can be known in advance.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 F = fun (Socket, Transport) ->
     Transport:sendfile(Socket, "priv/styles.css")
 end,
 Req2 = cowboy_req:set_resp_body_fun(FileSize, F, Req).
 ]]></script>
+
 <p>Please see the Ranch guide for more information about sending files.</p>
-</div>
 
 
 <!-- a.code -->
@@ -206,8 +250,11 @@ Req2 = cowboy_req:set_resp_body_fun(FileSize, F, Req).
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

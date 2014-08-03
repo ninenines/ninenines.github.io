@@ -12,44 +12,82 @@ build(Projects) ->
 project(P) ->
 	{_, Name} = lists:keyfind(name, 1, P),
 	{_, Title} = lists:keyfind(title, 1, P),
-	io:format("Building project: ~s~n", [Name]),
-	guide(P, Name, Title),
-	manual(P, Name, Title),
-	readme(P, Name, Title),
-	io:format("Done.~n"),
+	{_, Versions} = lists:keyfind(versions, 1, P),
+	{_, Tags} = lists:keyfind(tags, 1, P),
+	VT = lists:zip(Versions, Tags),
+	[begin
+		io:format("Building project: ~s/~s~n", [Name, V]),
+		os:cmd("cd deps/" ++ Name ++ " && git checkout " ++ T),
+		guide(P, Name, Title, V),
+		manual(P, Name, Title, V),
+		readme(P, Name, Title, V),
+		io:format("Done.~n")
+	end || {V, T} <- VT],
 	ok.
 
 %% Guide and manual.
 
-guide(P, N, T) ->
+guide(P, N, T, V) ->
 	io:format("  ~s: guide~n", [N]),
-	build_dir(P, N, T, guide, "/guide/").
+	build_dir(P, N, T, V, guide, "/doc/src/guide/", "/guide/"),
+	build_dir(P, N, T, V, guide, "/guide/", "/guide/").
 
-manual(P, N, T) ->
+manual(P, N, T, V) ->
 	io:format("  ~s: manual~n", [N]),
-	build_dir(P, N, T, manual, "/manual/").
+	build_dir(P, N, T, V, manual, "/doc/src/manual/", "/manual/"),
+	build_dir(P, N, T, V, manual, "/manual/", "/manual/").
 
-build_dir(P, N, T, Type, Suffix) ->
-	Path = "deps/" ++ N ++ Suffix,
+build_dir(P, N, T, V, Type, Location, Suffix) ->
+	Path = "deps/" ++ N ++ Location,
 	case file:list_dir(Path) of
 		{ok, Filenames} ->
-			[build_file(Path ++ F, P, N, T, Type, F, Suffix) || F <- Filenames];
+			[build_file(Path ++ F, P, N, T, V, Type, F, Suffix) || F <- Filenames];
 		{error, enoent} ->
 			ok
 	end.
 
-build_file(Filename, P, N, T, Type, F, Suffix) ->
+build_file(Filename, P, N, T, V, Type, F, Suffix) ->
+	{_, Versions} = lists:keyfind(versions, 1, P),
+	Prefix = "/docs/en/" ++ N ++ "/",
 	case filename:extension(Filename) of
+		".ezdoc" ->
+			io:format("  ~s: ezdoc ~s~n", [N, Filename]),
+			OutPath = "../docs/en/" ++ N ++ "/" ++ V ++ Suffix,
+			{ok, Body} = docs_dtl:render([
+				{contents, docs_html:export(ezdoc:parse_file(Filename))},
+				{type, Type},
+				{see_also, see_also(Type, P, N, V)},
+				{versions, Versions},
+				{prefix, Prefix},
+				{suffix, Suffix},
+				{project, T}
+			]),
+			case filename:basename(F, ".ezdoc") of
+				"index" ->
+					OutPath2 = OutPath ++ "index.html",
+					filelib:ensure_dir(OutPath2),
+					ok = file:write_file(OutPath2, Body);
+				_ ->
+					OutPath2 = OutPath ++ filename:rootname(F) ++ "/index.html",
+					filelib:ensure_dir(OutPath2),
+					ok = file:write_file(OutPath2, Body),
+					specs_db(filename:rootname(F),
+						"/docs/en/" ++ N ++ "/" ++ V ++ Suffix
+							++ filename:rootname(F) ++ "/index.html")
+			end;
 		".md" ->
 			io:format("  ~s: down ~s~n", [N, Filename]),
 			{ok, Data} = file:read_file(Filename),
-			OutPath = "../docs/en/" ++ N ++ "/HEAD" ++ Suffix,
+			OutPath = "../docs/en/" ++ N ++ "/" ++ V ++ Suffix,
 			Html = docs_parser:convert(Data,
-				"/docs/en/" ++ N ++ "/HEAD" ++ Suffix),
+				"/docs/en/" ++ N ++ "/" ++ V ++ Suffix),
 			{ok, Body} = docs_dtl:render([
 				{contents, Html},
 				{type, Type},
-				{see_also, see_also(Type, P, N)},
+				{see_also, see_also(Type, P, N, V)},
+				{versions, Versions},
+				{prefix, Prefix},
+				{suffix, Suffix},
 				{project, T}
 			]),
 			case filename:basename(F, ".md") of
@@ -62,11 +100,11 @@ build_file(Filename, P, N, T, Type, F, Suffix) ->
 					filelib:ensure_dir(OutPath2),
 					ok = file:write_file(OutPath2, Body),
 					specs_db(filename:rootname(F),
-						"/docs/en/" ++ N ++ "/HEAD" ++ Suffix
+						"/docs/en/" ++ N ++ "/" ++ V ++ Suffix
 							++ filename:rootname(F) ++ "/index.html")
 			end;
 		_ ->
-			OutPath = "../docs/en/" ++ N ++ "/HEAD" ++ Suffix,
+			OutPath = "../docs/en/" ++ N ++ "/" ++ V ++ Suffix,
 			{ok, _} = file:copy(Filename, OutPath ++ F),
 			ok
 	end.
@@ -81,17 +119,22 @@ specs_db(M, L) ->
 
 %% README.
 
-readme(P, N, T) ->
+readme(P, N, T, V) ->
 	io:format("  ~s: readme~n", [N]),
+	{_, Versions} = lists:keyfind(versions, 1, P),
 	Path = "deps/" ++ N ++ "/README.md",
 	{ok, Data} = file:read_file(Path),
-	OutPath = "../docs/en/" ++ N ++ "/HEAD/index.html",
+	OutPath = "../docs/en/" ++ N ++ "/" ++ V ++ "/index.html",
+	Prefix = "/docs/en/" ++ N ++ "/",
 	Html = docs_parser:convert(Data,
-		"/docs/en/" ++ N ++ "/HEAD/"),
+		"/docs/en/" ++ N ++ "/" ++ V ++ "/"),
 	{ok, Body} = docs_dtl:render([
 		{contents, Html},
 		{type, readme},
-		{see_also, see_also(readme, P, N)},
+		{see_also, see_also(readme, P, N, V)},
+		{versions, Versions},
+		{prefix, Prefix},
+		{suffix, <<"">>},
 		{project, T}
 	]),
 	filelib:ensure_dir(OutPath),
@@ -99,7 +142,7 @@ readme(P, N, T) ->
 
 %% Resource select.
 
-see_also(Type, P, N) ->
+see_also(Type, P, N, V) ->
 	{_, HasGuide} = lists:keyfind(guide, 1, P),
 	{_, HasManual} = lists:keyfind(manual, 1, P),
 	if
@@ -109,21 +152,21 @@ see_also(Type, P, N) ->
 			SeeGuide = if
 				HasGuide, Type =/= guide ->
 					"<li><a href=\"/docs/en/" ++ N
-						++ "/HEAD/guide/\">User Guide</a></li>";
+						++ "/" ++ V ++ "/guide/\">User Guide</a></li>";
 				true ->
 					""
 			end,
 			SeeManual = if
 				HasManual, Type =/= manual ->
 					"<li><a href=\"/docs/en/" ++ N
-						++ "/HEAD/manual/\">Function Reference</a></li>";
+						++ "/" ++ V ++ "/manual/\">Function Reference</a></li>";
 				true ->
 					""
 			end,
 			SeeReadme = if
 				Type =/= readme ->
 					"<li><a href=\"/docs/en/" ++ N
-						++ "/HEAD/index.html\">README</a></li>";
+						++ "/" ++ V ++ "/index.html\">README</a></li>";
 				true ->
 					""
 			end,

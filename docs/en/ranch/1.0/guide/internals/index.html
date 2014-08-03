@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Ranch User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Internals</span></h1>
+<div class="service-description">
+<p>This chapter may not apply to embedded Ranch as embedding allows you to use an architecture specific to your application, which may or may not be compatible with the description of the Ranch application.</p>
+<p>Note that for everything related to efficiency and performance, you should perform the benchmarks yourself to get the numbers that matter to you. Generic benchmarks found on the web may or may not be of use to you, you can never know until you benchmark your own system.</p>
+<h2 id="architecture">Architecture</h2>
+<p>Ranch is an OTP application.</p>
+<p>Like all OTP applications, Ranch has a top supervisor. It is responsible for supervising the <code>ranch_server</code> process and all the listeners that will be started.</p>
+<p>The <code>ranch_server</code> gen_server is a central process keeping track of the listeners and their acceptors. It does so through the use of a public ets table called <code>ranch_server</code>. The table is owned by the top supervisor to improve fault tolerance. This way if the <code>ranch_server</code> gen_server fails, it doesn't lose any information and the restarted process can continue as if nothing happened.</p>
+<p>Ranch uses a custom supervisor for managing connections. This supervisor keeps track of the number of connections and handles connection limits directly. While it is heavily optimized to perform the task of creating connection processes for accepted connections, it is still following the OTP principles and the usual <code>sys</code> and <code>supervisor</code> calls will work on it as expected.</p>
+<p>Listeners are grouped into the <code>ranch_listener_sup</code> supervisor and consist of three kinds of processes: the listener gen_server, the acceptor processes and the connection processes, both grouped under their own supervisor. All of these processes are registered to the <code>ranch_server</code> gen_server with varying amount of information.</p>
+<p>All socket operations, including listening for connections, go through transport handlers. Accepted connections are given to the protocol handler. Transport handlers are simple callback modules for performing operations on sockets. Protocol handlers start a new process, which receives socket ownership, with no requirements on how the code should be written inside that new process.</p>
+<h2 id="number_of_acceptors">Number of acceptors</h2>
+<p>The second argument to <code>ranch:start_listener/6</code> is the number of processes that will be accepting connections. Care should be taken when choosing this number.</p>
+<p>First of all, it should not be confused with the maximum number of connections. Acceptor processes are only used for accepting and have nothing else in common with connection processes. Therefore there is nothing to be gained from setting this number too high, in fact it can slow everything else down.</p>
+<p>Second, this number should be high enough to allow Ranch to accept connections concurrently. But the number of cores available doesn't seem to be the only factor for choosing this number, as we can observe faster accepts if we have more acceptors than cores. It might be entirely dependent on the protocol, however.</p>
+<p>Our observations suggest that using 100 acceptors on modern hardware is a good solution, as it's big enough to always have acceptors ready and it's low enough that it doesn't have a negative impact on the system's performances.</p>
+<h2 id="platform-specific_tcp_features">Platform-specific TCP features</h2>
+<p>Some socket options are platform-specific and not supported by <code>inet</code>. They can be of interest because they generally are related to optimizations provided by the underlying OS. They can still be enabled thanks to the <code>raw</code> option, for which we will see an example.</p>
+<p>One of these features is <code>TCP_DEFER_ACCEPT</code> on Linux. It is a simplified accept mechanism which will wait for application data to come in before handing out the connection to the Erlang process.</p>
+<p>This is especially useful if you expect many connections to be mostly idle, perhaps part of a connection pool. They can be handled by the kernel directly until they send any real data, instead of allocating resources to idle connections.</p>
+<p>To enable this mechanism, the following option can be used.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+    {raw, 6, 9, << 30:32/native >>}
+]]></script>
+<p>It means go on layer 6, turn on option 9 with the given integer parameter.</p>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/ranch/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/ranch/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/ranch/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/ranch/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "86681c5a-011b-481b-98b8-22b548283fe5", doNotHash: true, doNotCopy: true, hashAddressBar: false});</script>
+
+  </body>
+</html>

@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,177 +80,129 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Getting started</span></h1>
-<div class="service-description">
+
 <p>Erlang is more than a language, it is also an operating system for your applications. Erlang developers rarely write standalone modules, they write libraries or applications, and then bundle those into what is called a release. A release contains the Erlang VM plus all applications required to run the node, so it can be pushed to production directly.</p>
+
 <p>This chapter walks you through all the steps of setting up Cowboy, writing your first application and generating your first release. At the end of this chapter you should know everything you need to push your first Cowboy application to production.</p>
-<h2 id="application_skeleton">Application skeleton</h2>
-<p>Let's start by creating this application. We will simply call it <code>hello_erlang</code>. This application will have the following directory structure:</p>
-<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
-hello_erlang/
-    src/
-        hello_erlang.app.src
-        hello_erlang_app.erl
-        hello_erlang_sup.erl
-        hello_handler.erl
-    erlang.mk
-    Makefile
-    relx.config
-]]></script>
-<p>Once the release is generated, we will also have the following files added:</p>
-<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
-hello_erlang/
-    ebin/
-        hello_erlang.app
-        hello_erlang_app.beam
-        hello_erlang_sup.beam
-        hello_handler.beam
-    _rel/
-    relx
-]]></script>
-<p>As you can probably guess, the <code>.app.src</code> file end up becoming the <code>.app</code> file, and the <code>.erl</code> files are compiled into <code>.beam</code>. Then, the whole release will be copied into the <code>_rel/</code> directory.</p>
-<p>The <code>.app</code> file contains various informations about the application. It contains its name, a description, a version, a list of modules, default configuration and more.</p>
-<p>Using a build system like <a href="https://github.com/extend/erlang.mk">erlang.mk</a>, the list of modules will be included automatically in the <code>.app</code> file, so you don't need to manually put them in your <code>.app.src</code> file.</p>
-<p>For generating the release, we will use <a href="https://github.com/erlware/relx">relx</a> as it is a much simpler alternative to the tool coming with Erlang.</p>
-<p>First, create the <code>hello_erlang</code> directory. It should have the same name as the application within it. Then we create the <code>src</code> directory inside it, which will contain the source code for our application.</p>
+
+<h2 id="bootstrap">Bootstrap</h2>
+
+<p>We are going to use the <a href="https://github.com/extend/erlang.mk">erlang.mk</a> build system. It also offers bootstrap features allowing us to quickly get started without having to deal with minute details.</p>
+
+<p>First, let's create the directory for our application.</p>
+
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
 $ mkdir hello_erlang
 $ cd hello_erlang
-$ mkdir src
 ]]></script>
-<p>Let's first create the <code>hello_erlang.app.src</code> file. It should be pretty straightforward for the most part. You can use the following template and change what you like in it.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{application, hello_erlang, [
-    {description, "Hello world with Cowboy!"},
-    {vsn, "0.1.0"},
-    {modules, []},
-    {registered, [hello_erlang_sup]},
-    {applications, [
-        kernel,
-        stdlib,
-        cowboy
-    ]},
-    {mod, {hello_erlang_app, []}},
-    {env, []}
-]}.
-]]></script>
-<p>The <code>modules</code> line will be replaced with the list of modules during compilation. Make sure to leave this line even if you do not use it directly.</p>
-<p>The <code>registered</code> value indicates which processes are registered by this application. You will often only register the top-level supervisor of the application.</p>
-<p>The <code>applications</code> value lists the applications that must be started for this application to work. The Erlang release will start all the applications listed here automatically.</p>
-<p>The <code>mod</code> value defines how the application should be started. Erlang will use the <code>hello_erlang_app</code> module for starting the application.</p>
-<p>The <code>hello_erlang_app</code> module is what we call an application behavior. The application behavior must define two functions: <code>start/2</code> and <code>stop/1</code>, for starting and stopping the application. A typical application module would look like this:</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
--module(hello_erlang_app).
--behavior(application).
 
--export([start/2]).
--export([stop/1]).
+<p>Then we need to download <code>erlang.mk</code>. Either use the following command or download it manually.</p>
 
-start(_Type, _Args) ->
-    hello_erlang_sup:start_link().
-
-stop(_State) ->
-    ok.
-]]></script>
-<p>That's not enough however. Since we are building a Cowboy based application, we also need to initialize Cowboy when we start our application.</p>
-<h2 id="setting_up_cowboy">Setting up Cowboy</h2>
-<p>Cowboy does nothing by default.</p>
-<p>Cowboy uses Ranch for handling the connections and provides convenience functions to start Ranch listeners.</p>
-<p>The <code>cowboy:start_http/4</code> function starts a listener for HTTP connections using the TCP transport. The <code>cowboy:start_https/4</code> function starts a listener for HTTPS connections using the SSL transport.</p>
-<p>Listeners are a group of processes that are used to accept and manage connections. The processes used specifically for accepting connections are called acceptors. The number of acceptor processes is unrelated to the maximum number of connections Cowboy can handle. Please refer to the <a href="http://ninenines.eu/docs/en/ranch/HEAD/guide/">Ranch guide</a> for in-depth information.</p>
-<p>Listeners are named. They spawn a given number of acceptors, listen for connections using the given transport options and pass along the protocol options to the connection processes. The protocol options must include the dispatch list for routing requests to handlers.</p>
-<p>The dispatch list is explained in greater details in the <a href="/docs/en/cowboy/HEAD/guide/routing">Routing</a> chapter. For the purpose of this example we will simply map all URLs to our handler <code>hello_handler</code>, using the wildcard <code>_</code> for both the hostname and path parts of the URL.</p>
-<p>This is what the <code>hello_erlang_app:start/2</code> function looks like with Cowboy initialized.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-start(_Type, _Args) ->
-    Dispatch = cowboy_router:compile([
-        %% {URIHost, list({URIPath, Handler, Opts})}
-        {'_', [{'_', hello_handler, []}]}
-    ]),
-    %% Name, NbAcceptors, TransOpts, ProtoOpts
-    cowboy:start_http(my_http_listener, 100,
-        [{port, 8080}],
-        [{env, [{dispatch, Dispatch}]}]
-    ),
-    hello_erlang_sup:start_link().
-]]></script>
-<p>Do note that we told Cowboy to start listening on port 8080. You can change this value if needed.</p>
-<p>Our application doesn't need to start any process, as Cowboy will automatically start processes for every incoming connections. We are still required to have a top-level supervisor however, albeit a fairly small one.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
--module(hello_erlang_sup).
--behavior(supervisor).
-
--export([start_link/0]).
--export([init/1]).
-
-start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
-
-init([]) ->
-    {ok, {{one_for_one, 10, 10}, []}}.
-]]></script>
-<p>Finally, we need to write the code for handling incoming requests.</p>
-<h2 id="handling_http_requests">Handling HTTP requests</h2>
-<p>Cowboy features many kinds of handlers. For this simple example, we will just use the plain HTTP handler, which has three callback functions: <code>init/3</code>, <code>handle/2</code> and <code>terminate/3</code>. You can find more information about the arguments and possible return values of these callbacks in the <a href="http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_http_handler">cowboy_http_handler function reference</a>.</p>
-<p>Our handler will only send a friendly hello back to the client.</p>
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
--module(hello_handler).
--behavior(cowboy_http_handler).
-
--export([init/3]).
--export([handle/2]).
--export([terminate/3]).
-
-init(_Type, Req, _Opts) ->
-    {ok, Req, undefined_state}.
-
-handle(Req, State) ->
-    {ok, Req2} = cowboy_req:reply(200, [
-        {<<"content-type">>, <<"text/plain">>}
-    ], <<"Hello World!">>, Req),
-    {ok, Req2, State}.
-
-terminate(_Reason, _Req, _State) ->
-    ok.
-]]></script>
-<p>The <code>Req</code> variable above is the Req object, which allows the developer to obtain information about the request and to perform a reply. Its usage is documented in the <a href="http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req">cowboy_req function reference</a>.</p>
-<p>The code for our application is ready, so let's build a release!</p>
-<h2 id="compiling">Compiling</h2>
-<p>First we need to download <code>erlang.mk</code>.</p>
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
-$ wget https://raw.github.com/extend/erlang.mk/master/erlang.mk
-$ ls
-src/
-erlang.mk
+$ wget https://raw.githubusercontent.com/extend/erlang.mk/master/erlang.mk
 ]]></script>
-<p>Then we need to create a Makefile that will include <code>erlang.mk</code> for building our application. We need to define the Cowboy dependency in the Makefile. Thankfully <code>erlang.mk</code> already knows where to find Cowboy as it features a package index, so we can just tell it to look there.</p>
+
+<p>We can now bootstrap our application. Since we are going to generate a release, we will also bootstrap it at the same time.</p>
+
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make -f erlang.mk bootstrap bootstrap-rel
+]]></script>
+
+<p>This creates a Makefile, a base application, and the release files necessary for creating the release. We can already build and start this release.</p>
+
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make
+...
+$ ./_rel/hello_erlang_release/bin/hello_erlang_release console
+...
+(hello_erlang@127.0.0.1)1>
+]]></script>
+
+<p>Entering the command <code>i().</code> will show the running processes, including one called <code>hello_erlang_sup</code>. This is the supervisor for our application.</p>
+
+<p>The release currently does nothing. In the rest of this chapter we will add Cowboy as a dependency and write a simple "Hello world!" handler.</p>
+
+<h2 id="cowboy_setup">Cowboy setup</h2>
+
+<p>To add Cowboy as a dependency of your application, we need to modify two files: the Makefile and the application resource file.</p>
+
+<p>Modifying the Makefile allows the build system to know it needs to fetch and compile Cowboy. To do that we simply need to add one line to our Makefile to make it look like this:</p>
+
 <script type="syntaxhighlighter" class="brush: plain"><![CDATA[
 PROJECT = hello_erlang
-
 DEPS = cowboy
-dep_cowboy = pkg://cowboy master
-
 include erlang.mk
 ]]></script>
-<p>Note that when creating production nodes you will most likely want to use a specific version of Cowboy instead of <code>master</code>, and properly test your release every time you update Cowboy.</p>
-<p>If you type <code>make</code> in a shell now, your application should build as expected. If you get compilation errors, double check that you haven't made any typo when creating the previous files.</p>
-<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
-$ make
-]]></script>
-<h2 id="generating_the_release">Generating the release</h2>
-<p>That's not all however, as we want to create a working release. For that purpose, we need to create a <code>relx.config</code> file. When this file exists, <code>erlang.mk</code> will automatically download <code>relx</code> and build the release when you type <code>make</code>.</p>
-<p>In the <code>relx.config</code> file, we only need to tell <code>relx</code> that we want the release to include the <code>hello_erlang</code> application, and that we want an extended start script for convenience. <code>relx</code> will figure out which other applications are required by looking into the <code>.app</code> files for dependencies.</p>
+
+<p>Modifying the application resource file, <code>src/hello_erlang.app.src</code>, allows the build system to know it needs to include Cowboy in the release and start it automatically. This is a different step because some dependencies are only needed during development.</p>
+
+<p>We are simply going to add <code>cowboy</code> to the list of <code>applications</code>, right after <code>stdlib</code>. Don't forget the comma separator.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{release, {hello_erlang, "1"}, [hello_erlang]}.
-{extended_start_script, true}.
+{application, hello_erlang, [
+	{description, "Hello Erlang!"},
+	{vsn, "0.1.0"},
+	{modules, []},
+	{registered, []},
+	{applications, [
+		kernel,
+		stdlib,
+		cowboy
+	]},
+	{mod, {hello_erlang_app, []}},
+	{env, []}
+]}.
 ]]></script>
-<p>The <code>release</code> value is used to specify the release name, its version, and the applications to be included.</p>
-<p>We can now build and start the release.</p>
+
+<p>You may want to set a description for the application while you are editing the file.</p>
+
+<p>If you run <code>make</code> now and start the release, Cowboy will be included and started automatically. This is not enough however, as Cowboy doesn't do anything by default. We still need to tell Cowboy to listen for connections.</p>
+
+<h2 id="listening_for_connections">Listening for connections</h2>
+
+<p>We will do this when our application starts. It's a two step process. First we need to define and compile the dispatch list, a list of routes that Cowboy will use to map requests to handler modules. Then we tell Cowboy to listen for connections.</p>
+
+<p>Open the <code>src/hello_erlang_app.erl</code> file and add the necessary code to the <code>start/2</code> function to make it look like this:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+start(_Type, _Args) ->
+	Dispatch = cowboy_router:compile([
+		{'_', [{"/", hello_handler, []}]}
+	]),
+	cowboy:start_http(my_http_listener, 100, [{port, 8080}],
+		[{env, [{dispatch, Dispatch}]}]
+	),
+	hello_erlang_sup:start_link().
+]]></script>
+
+<p>The dispatch list is explained in great details in the <a href="routing">Routing</a> chapter. For this tutorial we map the path <code>/</code> to the handler module <code>hello_handler</code>. This module doesn't exist yet, we still have to write it.</p>
+
+<p>If you build the release, start it and open <a href="http://localhost:8080">http://localhost:8080</a> now, you will get an error because the module is missing. Any other URL, like <a href="http://localhost:8080/test">http://localhost:8080/test</a>, will result in a 404 error.</p>
+
+<h2 id="handling_requests">Handling requests</h2>
+
+<p>Cowboy features different kinds of handlers, including REST and Websocket handlers. For this tutorial we will use a plain HTTP handler.</p>
+
+<p>First, let's generate a handler from a template.</p>
+
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
-$ make
-$ ./_rel/hello_erlang/bin/hello_erlang console
+$ make new t=cowboy_http n=hello_handler
 ]]></script>
-<p>If you then access <code>http://localhost:8080</code> using your browser, you should receive a nice greet!</p>
-</div>
+
+<p>You can then open the <code>src/hello_handler.erl</code> file and modify the <code>handle/2</code> function like this to send a reply.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+handle(Req, State=#state{}) ->
+	{ok, Req2} = cowboy_req:reply(200,
+		[{<<"content-type">>, <<"text/plain">>}],
+		<<"Hello Erlang!">>,
+		Req),
+	{ok, Req2, State}.
+]]></script>
+
+<p>What the above code does is send a <code>200 OK</code> reply, with the <code>content-type</code> header set to <code>text/plain</code> and the response body set to <code>Hello Erlang!</code>.</p>
+
+<p>If you build the release, start it and open <a href="http://localhost:8080">http://localhost:8080</a> in your browser, you should get a nice <code>Hello Erlang!</code> displayed!</p>
 
 
 <!-- a.code -->
@@ -270,8 +222,11 @@ $ ./_rel/hello_erlang/bin/hello_erlang console
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

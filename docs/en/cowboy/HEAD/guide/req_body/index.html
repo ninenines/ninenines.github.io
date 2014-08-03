@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,42 +80,67 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Reading the request body</span></h1>
-<div class="service-description">
+
 <p>The Req object also allows you to read the request body.</p>
+
 <p>Because the request body can be of any size, all body reading operations will only work once, as Cowboy will not cache the result of these operations.</p>
+
 <p>Cowboy will not attempt to read the body until you do. If handler execution ends without reading it, Cowboy will simply skip it.</p>
+
 <p>Cowboy provides different ways to read the request body. You can read it directly, stream it, but also read and parse in a single call for form urlencoded formats or multipart. All of these except multipart are covered in this chapter. Multipart is covered later on in the guide.</p>
+
 <h2 id="check_for_request_body">Check for request body</h2>
+
 <p>You can check whether a body was sent with the request.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 cowboy_req:has_body(Req).
 ]]></script>
+
 <p>It will return <code>true</code> if there is a request body, and <code>false</code> otherwise.</p>
+
 <p>Note that it is generally safe to assume that a body is sent for <code>POST</code>, <code>PUT</code> and <code>PATCH</code> requests, without having to explicitly check for it.</p>
+
 <h2 id="request_body_length">Request body length</h2>
+
 <p>You can obtain the body length if it was sent with the request.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {Length, Req2} = cowboy_req:body_length(Req).
 ]]></script>
+
 <p>The value returned will be <code>undefined</code> if the length couldn't be figured out from the request headers. If there's a body but no length is given, this means that the chunked transfer-encoding was used. You can read chunked bodies by using the stream functions.</p>
+
 <h2 id="reading_the_body">Reading the body</h2>
+
 <p>You can read the whole body directly in one call.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Body, Req2} = cowboy_req:body(Req).
 ]]></script>
+
 <p>By default, Cowboy will attempt to read up to a size of 8MB. You can override this limit as needed.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Body, Req2} = cowboy_req:body(Req, [{length, 100000000}]).
 ]]></script>
+
 <p>You can also disable it.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Body, Req2} = cowboy_req:body(Req, [{length, infinity}]).
 ]]></script>
+
 <p>It is recommended that you do not disable it for public facing websites.</p>
+
 <p>If the body is larger than the limit, then Cowboy will return a <code>more</code> tuple instead, allowing you to stream it if you would like to.</p>
+
 <h2 id="streaming_the_body">Streaming the body</h2>
+
 <p>You can stream the request body by chunks.</p>
+
 <p>Cowboy returns a <code>more</code> tuple when there is more body to be read, and an <code>ok</code> tuple for the last chunk. This allows you to loop over all chunks.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 body_to_console(Req) ->
     case cowboy_req:body(Req) of
@@ -127,37 +152,54 @@ body_to_console(Req) ->
             body_to_console(Req2)
     end.
 ]]></script>
+
 <p>You can of course set the <code>length</code> option to configure the size of chunks.</p>
+
 <h2 id="rate_of_data_transmission">Rate of data transmission</h2>
+
 <p>You can control the rate of data transmission by setting options when calling body functions. This applies not only to the functions described in this chapter, but also to the multipart functions.</p>
+
 <p>The <code>read_length</code> option defines the maximum amount of data to be received from the socket at once, in bytes.</p>
+
 <p>The <code>read_timeout</code> option defines the time Cowboy waits before that amount is received, in milliseconds.</p>
+
 <h2 id="transfer_and_content_decoding">Transfer and content decoding</h2>
+
 <p>Cowboy will by default decode the chunked transfer-encoding if any. It will not decode any content-encoding by default.</p>
+
 <p>The first time you call a body function you can set the <code>transfer_decode</code> and <code>content_decode</code> options. If the body was already started being read these options are simply ignored.</p>
+
 <p>The following example shows how to set both options.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, Req2} = cowboy_req:body(Req, [
     {transfer_decode, fun transfer_decode/2, TransferState},
     {content_decode, fun content_decode/1}
 ]).
 ]]></script>
+
 <h2 id="reading_a_form_urlencoded_body">Reading a form urlencoded body</h2>
+
 <p>You can directly obtain a list of key/value pairs if the body was sent using the application/x-www-form-urlencoded content-type.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, KeyValues, Req2} = cowboy_req:body_qs(Req).
 ]]></script>
+
 <p>You can then retrieve an individual value from that list.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {_, Lang} = lists:keyfind(lang, 1, KeyValues).
 ]]></script>
+
 <p>You should not attempt to match on the list as the order of the values is undefined.</p>
+
 <p>By default Cowboy will reject bodies with a size above 64KB when using this function. You can override this limit by setting the <code>length</code> option.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, KeyValues, Req2} = cowboy_req:body_qs(Req,
     [{length, 2000000}]).
 ]]></script>
-</div>
 
 
 <!-- a.code -->
@@ -177,8 +219,11 @@ body_to_console(Req) ->
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

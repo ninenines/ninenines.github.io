@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,27 +80,41 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Loop handlers</span></h1>
-<div class="service-description">
+
 <p>Loop handlers are a special kind of HTTP handlers used when the response can not be sent right away. The handler enters instead a receive loop waiting for the right message before it can send a response.</p>
+
 <p>Loop handlers are used for requests where a response might not be immediately available, but where you would like to keep the connection open for a while in case the response arrives. The most known example of such practice is known as long-polling.</p>
+
 <p>Loop handlers can also be used for requests where a response is partially available and you need to stream the response body while the connection is open. The most known example of such practice is known as server-sent events.</p>
+
 <p>While the same can be accomplished using plain HTTP handlers, it is recommended to use loop handlers because they are well-tested and allow using built-in features like hibernation and timeouts.</p>
+
 <p>Loop handlers essentially wait for one or more Erlang messages and feed these messages to the <code>info/3</code> callback. It also features the <code>init/3</code> and <code>terminate/3</code> callbacks which work the same as for plain HTTP handlers.</p>
+
 <h2 id="initialization">Initialization</h2>
+
 <p>The <code>init/3</code> function must return a <code>loop</code> tuple to enable loop handler behavior. This tuple may optionally contain a timeout value and/or the atom <code>hibernate</code> to make the process enter hibernation until a message is received.</p>
+
 <p>This snippet enables the loop handler.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 init(_Type, Req, _Opts) ->
     {loop, Req, undefined_state}.
 ]]></script>
+
 <p>However it is largely recommended that you set a timeout value. The next example sets a timeout value of 30s and also makes the process hibernate.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 init(_Type, Req, _Opts) ->
     {loop, Req, undefined_state, 30000, hibernate}.
 ]]></script>
+
 <h2 id="receive_loop">Receive loop</h2>
+
 <p>Once initialized, Cowboy will wait for messages to arrive in the process' mailbox. When a message arrives, Cowboy calls the <code>info/3</code> function with the message, the Req object and the handler's state.</p>
+
 <p>The following snippet sends a reply when it receives a <code>reply</code> message from another process, or waits for another message otherwise.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 info({reply, Body}, Req, State) ->
     {ok, Req2} = cowboy_req:reply(200, [], Body, Req),
@@ -108,14 +122,23 @@ info({reply, Body}, Req, State) ->
 info(_Msg, Req, State) ->
     {loop, Req, State, hibernate}.
 ]]></script>
+
 <p>Do note that the <code>reply</code> tuple here may be any message and is simply an example.</p>
+
 <p>This callback may perform any necessary operation including sending all or parts of a reply, and will subsequently return a tuple indicating if more messages are to be expected.</p>
+
 <p>The callback may also choose to do nothing at all and just skip the message received.</p>
+
 <p>If a reply is sent, then the <code>ok</code> tuple should be returned. This will instruct Cowboy to end the request.</p>
+
 <p>Otherwise a <code>loop</code> tuple should be returned.</p>
+
 <h2 id="streaming_loop">Streaming loop</h2>
+
 <p>Another common case well suited for loop handlers is streaming data received in the form of Erlang messages. This can be done by initiating a chunked reply in the <code>init/3</code> callback and then using <code>cowboy_req:chunk/2</code> every time a message is received.</p>
+
 <p>The following snippet does exactly that. As you can see a chunk is sent every time a <code>chunk</code> message is received, and the loop is stopped by sending an <code>eof</code> message.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 init(_Type, Req, _Opts) ->
 	{ok, Req2} = cowboy_req:chunked_reply(200, [], Req),
@@ -129,15 +152,22 @@ info({chunk, Chunk}, Req, State) ->
 info(_Msg, Req, State) ->
     {loop, Req, State}.
 ]]></script>
+
 <h2 id="cleaning_up">Cleaning up</h2>
+
 <p>It is recommended that you set the connection header to <code>close</code> when replying, as this process may be reused for a subsequent request.</p>
-<p>Please refer to the <a href="/docs/en/cowboy/HEAD/guide/http_handlers">HTTP handlers chapter</a> for general instructions about cleaning up.</p>
+
+<p>Please refer to the <a href="http_handlers">HTTP handlers chapter</a> for general instructions about cleaning up.</p>
+
 <h2 id="timeout">Timeout</h2>
+
 <p>By default Cowboy will not attempt to close the connection if there is no activity from the client. This is not always desirable, which is why you can set a timeout. Cowboy will close the connection if no data was received from the client after the configured time. The timeout only needs to be set once and can't be modified afterwards.</p>
+
 <p>Because the request may have had a body, or may be followed by another request, Cowboy is forced to buffer all data it receives. This data may grow to become too large though, so there is a configurable limit for it. The default buffer size is of 5000 bytes, but it may be changed by setting the <code>loop_max_buffer</code> middleware environment value.</p>
+
 <h2 id="hibernate">Hibernate</h2>
+
 <p>To save memory, you may hibernate the process in between messages received. This is done by returning the atom <code>hibernate</code> as part of the <code>loop</code> tuple callbacks normally return. Just add the atom at the end and Cowboy will hibernate accordingly.</p>
-</div>
 
 
 <!-- a.code -->
@@ -157,8 +187,11 @@ info(_Msg, Req, State) ->
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

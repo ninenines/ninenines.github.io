@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,59 +80,103 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>cowboy</span></h1>
-<div class="service-description">
+
 <p>The <code>cowboy</code> module provides convenience functions for manipulating Ranch listeners.</p>
+
 <h2 id="types">Types</h2>
-<h4 id="http_headers">http_headers() = [{binary(), iodata()}]</h4>
-<blockquote> HTTP headers as a list of key/values.</blockquote>
-<h4 id="http_status">http_status() = non_neg_integer() | binary()</h4>
-<blockquote> HTTP status.<br/><br/> A binary status can be used to set a custom message.</blockquote>
-<h4 id="http_version">http_version() = 'HTTP/1.1' | 'HTTP/1.0'</h4>
-<blockquote> HTTP version.</blockquote>
-<h4 id="onrequest_fun">onrequest_fun() = fun((cowboy_req:req()) -> cowboy_req:req())</h4>
-<blockquote> Fun called immediately after receiving a request.<br/><br/> It can perform any operation on the <code>Req</code> object, including reading the request body or replying. If a reply is sent, the processing of the request ends here, before any middleware is executed.</blockquote>
-<h4 id="onresponse_fun">onresponse_fun() = fun((http_status(), http_headers(),	iodata(), cowboy_req:req()) -> cowboy_req:req())</h4>
-<blockquote> Fun called immediately before sending the response.<br/><br/> It can perform any operation on the <code>Req</code> object, including reading the request body or replying. If a reply is sent, it overrides the reply initially sent. The callback will not be called again for the new reply.</blockquote>
+
+<h3 id="http_headers">http_headers() = [{binary(), iodata()}]</h3>
+
+<p>HTTP headers as a list of key/values.</p>
+
+<h3 id="http_status">http_status() = non_neg_integer() | binary()</h3>
+
+<p>HTTP status.</p>
+
+<p>A binary status can be used to set a custom message.</p>
+
+<h3 id="http_version">http_version() = 'HTTP/1.1' | 'HTTP/1.0'</h3>
+
+<p>HTTP version.</p>
+
+<h3 id="onrequest_fun">onrequest_fun() = fun((cowboy_req:req()) -> cowboy_req:req())</h3>
+
+<p>Fun called immediately after receiving a request.</p>
+
+<p>It can perform any operation on the Req object, including reading the request body or replying. If a reply is sent, the processing of the request ends here, before any middleware is executed.</p>
+
+<h3 id="onresponse_fun">onresponse_fun() = fun((http_status(), http_headers(), iodata(), cowboy_req:req()) -> cowboy_req:req())</h3>
+
+<p>Fun called immediately before sending the response.</p>
+
+<p>It can perform any operation on the Req object, including reading the request body or replying. If a reply is sent, it overrides the reply initially sent. The callback will not be called again for the new reply.</p>
+
 <h2 id="exports">Exports</h2>
-<h4 id="start_http">start_http(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
-<blockquote> Types:<ul>
+
+<h3 id="start_http">start_http(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>Ref = ranch:ref()</li>
 <li>NbAcceptors = non_neg_integer()</li>
 <li>TransOpts = ranch_tcp:opts()</li>
 <li>ProtoOpts = cowboy_protocol:opts()</li>
 </ul>
- Start listening for HTTP connections. Returns the pid for this listener's supervisor.</blockquote>
-<h4 id="start_https">start_https(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
-<blockquote> Types:<ul>
+
+<p>Start listening for HTTP connections. Returns the pid for this listener's supervisor.</p>
+
+<h3 id="start_https">start_https(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>Ref = ranch:ref()</li>
 <li>NbAcceptors = non_neg_integer()</li>
 <li>TransOpts = ranch_ssl:opts()</li>
 <li>ProtoOpts = cowboy_protocol:opts()</li>
 </ul>
- Start listening for HTTPS connections. Returns the pid for this listener's supervisor.</blockquote>
-<h4 id="start_spdy">start_spdy(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h4>
-<blockquote> Types:<ul>
+
+<p>Start listening for HTTPS connections. Returns the pid for this listener's supervisor.</p>
+
+<h3 id="start_spdy">start_spdy(Ref, NbAcceptors, TransOpts, ProtoOpts) -> {ok, pid()}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>Ref = ranch:ref()</li>
 <li>NbAcceptors = non_neg_integer()</li>
 <li>TransOpts = ranch_ssl:opts()</li>
 <li>ProtoOpts = cowboy_spdy:opts()</li>
 </ul>
- Start listening for SPDY connections. Returns the pid for this listener's supervisor.</blockquote>
-<h4 id="stop_listener">stop_listener(Ref) -> ok | {error, not_found}</h4>
-<blockquote> Types:<ul>
+
+<p>Start listening for SPDY connections. Returns the pid for this listener's supervisor.</p>
+
+<h3 id="stop_listener">stop_listener(Ref) -> ok | {error, not_found}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>Ref = ranch:ref()</li>
 </ul>
- Stop a previously started listener.</blockquote>
-<h4 id="set_env">set_env(Ref, Name, Value) -> ok</h4>
-<blockquote> Types:<ul>
+
+<p>Stop a previously started listener.</p>
+
+<h3 id="set_env">set_env(Ref, Name, Value) -> ok</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>Ref = ranch:ref()</li>
 <li>Name = atom()</li>
 <li>Value = any()</li>
 </ul>
- Set or update an environment value for an already running listener. This will take effect on all subsequent connections.</blockquote>
+
+<p>Set or update an environment value for an already running listener. This will take effect on all subsequent connections.</p>
+
 <h2 id="see_also">See also</h2>
+
 <p>The <a href="http://ninenines.eu/docs/en/ranch/HEAD/guide">Ranch guide</a> provides detailed information about how listeners work.</p>
-</div>
 
 
 <!-- a.code -->
@@ -152,8 +196,11 @@
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/manual/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/manual/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

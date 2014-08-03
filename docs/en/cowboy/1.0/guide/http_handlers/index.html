@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Cowboy User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Handling plain HTTP requests</span></h1>
+
+<p>The simplest way to handle a request is by writing a plain HTTP handler. It is modeled after Erlang/OTP's gen_server behaviour, although simplified, as Cowboy will simply call the three callbacks sequentially.</p>
+
+<h2 id="initialization">Initialization</h2>
+
+<p>The first callback, <code>init/3</code>, is common to all handlers, as it is used to identify the type of handler. Plain HTTP handlers just return <code>ok</code>.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init(_Type, Req, _Opts) ->
+    {ok, Req, no_state}.
+]]></script>
+
+<p>This function receives the name of the transport and protocol modules used for processing the request. They can be used to quickly dismiss requests. For example the following handler will crash when accessed using TCP instead of SSL.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init({ssl, _}, Req, _Opts) ->
+    {ok, Req, no_state}.
+]]></script>
+
+<p>This function also receives the options associated with this route that you configured previously. If your handler does not use options, then it is recommended you match the value <code>[]</code> directly to quickly detect configuration errors.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init(_Type, Req, []) ->
+    {ok, Req, no_state}.
+]]></script>
+
+<p>You do not need to validate the options unless they are user configured. If they are, and there's a configuration error, you may choose to crash. For example, this will crash if the required <code>lang</code> option is not found.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init(_Type, Req, Opts) ->
+    {_, _Lang} = lists:keyfind(lang, 1, Opts),
+    {ok, Req, no_state}.
+]]></script>
+
+<p>If your users are unlikely to figure out the issue without explanations, then you should send a more meaningful error back to the user. Since we already replied to the user, there's no need for us to continue with the handler code, so we use the <code>shutdown</code> return value to stop early.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init(_Type, Req, Opts) ->
+    case lists:keyfind(lang, 1, Opts) of
+        false ->
+            {ok, Req2} = cowboy_req:reply(500, [
+                {<<"content-type">>, <<"text/plain">>}
+            ], "Missing option 'lang'.", Req),
+            {shutdown, Req2, no_state};
+        _ ->
+            {ok, Req, no_state}
+    end.
+]]></script>
+
+<p>Once the options have been validated, we can use them safely. So we need to pass them onward to the rest of the handler. That's what the third element of the return tuple, the state, is for.</p>
+
+<p>We recommend that you create a state record for this. The record will make your handler code clearer and will allow you to better use Dialyzer for type checking.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+-record(state, {
+    lang :: en | fr
+    %% More fields here.
+}).
+
+init(_Type, Req, Opts) ->
+    {_, Lang} = lists:keyfind(lang, 1, Opts),
+    {ok, Req, #state{lang=Lang}}.
+]]></script>
+
+<h2 id="handling_the_request">Handling the request</h2>
+
+<p>The second callback, <code>handle/2</code>, is specific to plain HTTP handlers. It's where you, wait for it, handle the request.</p>
+
+<p>A handle function that does nothing would look like this:</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+handle(Req, State) ->
+    {ok, Req, State}.
+]]></script>
+
+<p>There's no other return value. To obtain information about the request, or send a response, you would use the Req object here. The Req object is documented in its own chapter.</p>
+
+<p>The following handle function will send a fairly original response.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+handle(Req, State) ->
+    {ok, Req2} = cowboy_req:reply(200, [
+        {<<"content-type">>, <<"text/plain">>}
+    ], <<"Hello World!">>, Req),
+    {ok, Req2, State}.
+]]></script>
+
+<h2 id="cleaning_up">Cleaning up</h2>
+
+<p>The third and last callback, <code>terminate/3</code>, will most likely be empty in your handler.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+terminate(_Reason, Req, State) ->
+    ok.
+]]></script>
+
+<p>This callback is strictly reserved for any required cleanup. You cannot send a response from this function. There is no other return value.</p>
+
+<p>If you used the process dictionary, timers, monitors or may be receiving messages, then you can use this function to clean them up, as Cowboy might reuse the process for the next keep-alive request.</p>
+
+<p>The chances of any of this happening in your handler are pretty thin however. The use of the process dictionary is discouraged in Erlang code in general. And if you need to use timers, monitors or to receive messages, you are better off with a loop handler, a different kind of handler meant specifically for this use.</p>
+
+<p>This function is still available should you need it. It will always be called.</p>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "86681c5a-011b-481b-98b8-22b548283fe5", doNotHash: true, doNotCopy: true, hashAddressBar: false});</script>
+
+  </body>
+</html>

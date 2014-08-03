@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,114 +80,171 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Routing</span></h1>
-<div class="service-description">
+
 <p>Cowboy does nothing by default.</p>
+
 <p>To make Cowboy useful, you need to map URLs to Erlang modules that will handle the requests. This is called routing.</p>
+
 <p>When Cowboy receives a request, it tries to match the requested host and path to the resources given in the dispatch rules. If it matches, then the associated Erlang code will be executed.</p>
+
 <p>Routing rules are given per host. Cowboy will first match on the host, and then try to find a matching path.</p>
+
 <p>Routes need to be compiled before they can be used by Cowboy.</p>
+
 <h2 id="structure">Structure</h2>
+
 <p>The general structure for the routes is defined as follow.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Routes = [Host1, Host2, ... HostN].
 ]]></script>
+
 <p>Each host contains matching rules for the host along with optional constraints, and a list of routes for the path component.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Host1 = {HostMatch, PathsList}.
 Host2 = {HostMatch, Constraints, PathsList}.
 ]]></script>
+
 <p>The list of routes for the path component is defined similar to the list of hosts.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathsList = [Path1, Path2, ... PathN].
 ]]></script>
+
 <p>Finally, each path contains matching rules for the path along with optional constraints, and gives us the handler module to be used along with options that will be given to it on initialization.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Path1 = {PathMatch, Handler, Opts}.
 Path2 = {PathMatch, Constraints, Handler, Opts}.
 ]]></script>
+
 <p>Continue reading to learn more about the match syntax and the optional constraints.</p>
+
 <h2 id="match_syntax">Match syntax</h2>
+
 <p>The match syntax is used to associate host names and paths with their respective handlers.</p>
+
 <p>The match syntax is the same for host and path with a few subtleties. Indeed, the segments separator is different, and the host is matched starting from the last segment going to the first. All examples will feature both host and path match rules and explain the differences when encountered.</p>
+
 <p>Excluding special values that we will explain at the end of this section, the simplest match value is a host or a path. It can be given as either a <code>string()</code> or a <code>binary()</code>.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch1 = "/".
 PathMatch2 = "/path/to/resource".
 
 HostMatch1 = "cowboy.example.org".
 ]]></script>
+
 <p>As you can see, all paths defined this way must start with a slash character. Note that these two paths are identical as far as routing is concerned.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch2 = "/path/to/resource".
 PathMatch3 = "/path/to/resource/".
 ]]></script>
+
 <p>Hosts with and without a trailing dot are equivalent for routing. Similarly, hosts with and without a leading dot are also equivalent.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 HostMatch1 = "cowboy.example.org".
 HostMatch2 = "cowboy.example.org.".
 HostMatch3 = ".cowboy.example.org".
 ]]></script>
+
 <p>It is possible to extract segments of the host and path and to store the values in the <code>Req</code> object for later use. We call these kind of values bindings.</p>
+
 <p>The syntax for bindings is very simple. A segment that begins with the <code>:</code> character means that what follows until the end of the segment is the name of the binding in which the segment value will be stored.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = "/hats/:name/prices".
 HostMatch = ":subdomain.example.org".
 ]]></script>
+
 <p>If these two end up matching when routing, you will end up with two bindings defined, <code>subdomain</code> and <code>name</code>, each containing the segment value where they were defined. For example, the URL <code>http://test.example.org/hats/wild_cowboy_legendary/prices</code> will result in having the value <code>test</code> bound to the name <code>subdomain</code> and the value <code>wild_cowboy_legendary</code> bound to the name <code>name</code>. They can later be retrieved using <code>cowboy_req:binding/{2,3}</code>. The binding name must be given as an atom.</p>
+
 <p>There is a special binding name you can use to mimic the underscore variable in Erlang. Any match against the <code>_</code> binding will succeed but the data will be discarded. This is especially useful for matching against many domain names in one go.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 HostMatch = "ninenines.:_".
 ]]></script>
+
 <p>Similarly, it is possible to have optional segments. Anything between brackets is optional.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = "/hats/[page/:number]".
 HostMatch = "[www.]ninenines.eu".
 ]]></script>
+
 <p>You can also have imbricated optional segments.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = "/hats/[page/[:number]]".
 ]]></script>
+
 <p>You can retrieve the rest of the host or path using <code>[...]</code>. In the case of hosts it will match anything before, in the case of paths anything after the previously matched segments. It is a special case of optional segments, in that it can have zero, one or many segments. You can then find the segments using <code>cowboy_req:host_info/1</code> and <code>cowboy_req:path_info/1</code> respectively. They will be represented as a list of segments.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = "/hats/[...]".
 HostMatch = "[...]ninenines.eu".
 ]]></script>
+
 <p>If a binding appears twice in the routing rules, then the match will succeed only if they share the same value. This copies the Erlang pattern matching behavior.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = "/hats/:name/:name".
 ]]></script>
+
 <p>This is also true when an optional segment is present. In this case the two values must be identical only if the segment is available.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = "/hats/:name/[:name]".
 ]]></script>
+
 <p>If a binding is defined in both the host and path, then they must also share the same value.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = "/:user/[...]".
 HostMatch = ":user.github.com".
 ]]></script>
+
 <p>Finally, there are two special match values that can be used. The first is the atom <code>'_'</code> which will match any host or path.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 PathMatch = '_'.
 HostMatch = '_'.
 ]]></script>
+
 <p>The second is the special host match <code>"*"</code> which will match the wildcard path, generally used alongside the <code>OPTIONS</code> method.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 HostMatch = "*".
 ]]></script>
+
 <h2 id="constraints">Constraints</h2>
+
 <p>After the matching has completed, the resulting bindings can be tested against a set of constraints. Constraints are only tested when the binding is defined. They run in the order you defined them. The match will succeed only if they all succeed.</p>
+
 <p>They are always given as a two or three elements tuple, where the first element is the name of the binding, the second element is the constraint's name, and the optional third element is the constraint's arguments.</p>
+
 <p>The following constraints are currently defined:</p>
+
 <ul>
 <li>{Name, int}</li>
 <li>{Name, function, fun ((Value) -> true | {true, NewValue} | false)}</li>
 </ul>
+
 <p>The <code>int</code> constraint will check if the binding is a binary string representing an integer, and if it is, will convert the value to integer.</p>
+
 <p>The <code>function</code> constraint will pass the binding value to a user specified function that receives the binary value as its only argument and must return whether it fulfills the constraint, optionally modifying the value. The value thus returned can be of any type.</p>
+
 <p>Note that constraint functions SHOULD be pure and MUST NOT crash.</p>
+
 <h2 id="compilation">Compilation</h2>
+
 <p>The structure defined in this chapter needs to be compiled before it is passed to Cowboy. This allows Cowboy to efficiently lookup the correct handler to run instead of having to parse the routes repeatedly.</p>
+
 <p>This can be done with a simple call to <code>cowboy_router:compile/1</code>.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 Dispatch = cowboy_router:compile([
     %% {HostMatch, list({PathMatch, Handler, Opts})}
@@ -199,15 +256,19 @@ cowboy:start_http(my_http_listener, 100,
     [{env, [{dispatch, Dispatch}]}]
 ).
 ]]></script>
+
 <p>Note that this function will return <code>{error, badarg}</code> if the structure given is incorrect.</p>
+
 <h2 id="live_update">Live update</h2>
+
 <p>You can use the <code>cowboy:set_env/3</code> function for updating the dispatch list used by routing. This will apply to all new connections accepted by the listener.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 cowboy:set_env(my_http_listener, dispatch,
     cowboy_router:compile(Dispatch)).
 ]]></script>
+
 <p>Note that you need to compile the routes before updating.</p>
-</div>
 
 
 <!-- a.code -->
@@ -227,8 +288,11 @@ cowboy:set_env(my_http_listener, dispatch,
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

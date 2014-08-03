@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,18 +80,26 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Multipart requests</span></h1>
-<div class="service-description">
+
 <p>You can read and parse multipart messages using the Req object directly.</p>
+
 <p>Cowboy defines two functions that allows you to get information about each part and read their contents.</p>
+
 <h2 id="checking_the_content-type">Checking the content-type</h2>
+
 <p>While there is a variety of multipart messages, the most common on the Web is <code>multipart/form-data</code>. It's the type of message being sent when an HTML form allows uploading files.</p>
+
 <p>You can quickly figure out if a multipart message has been sent by parsing the <code>content-type</code> header.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 {ok, {<<"multipart">>, <<"form-data">>, _}, Req2}
     = cowboy_req:parse_header(<<"content-type">>, Req).
 ]]></script>
+
 <h2 id="reading_a_multipart_message">Reading a multipart message</h2>
+
 <p>To read a message you have to iterate over all its parts. Then, for each part, you can inspect its headers and read its body.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 multipart(Req) ->
     case cowboy_req:part(Req) of
@@ -102,9 +110,13 @@ multipart(Req) ->
             Req2
     end.
 ]]></script>
+
 <p>Parts do not have a size limit. When a part body is too big, Cowboy will return what it read so far and allow you to continue if you wish to do so.</p>
+
 <p>The function <code>cow_multipart:form_data/1</code> can be used to quickly obtain information about a part from a <code>multipart/form-data</code> message. This function will tell you if the part is for a normal field or if it is a file being uploaded.</p>
+
 <p>This can be used for example to allow large part bodies for files but crash when a normal field is too large.</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 multipart(Req) ->
     case cowboy_req:part(Req) of
@@ -129,10 +141,15 @@ stream_file(Req) ->
             stream_file(Req2)
     end.
 ]]></script>
+
 <p>By default the body chunk Cowboy will return is limited to 8MB. This can of course be overriden. Both functions can take a second argument, the same list of options that will be passed to <code>cowboy_req:body/2</code> function.</p>
+
 <h2 id="skipping_unwanted_parts">Skipping unwanted parts</h2>
+
 <p>If you do not want to read a part's body, you can skip it. Skipping is easy. If you do not call the function to read the part's body, Cowboy will automatically skip it when you request the next part.</p>
+
 <p>The following snippet reads all part headers and skips all bodies:</p>
+
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 multipart(Req) ->
     case cowboy_req:part(Req) of
@@ -142,10 +159,12 @@ multipart(Req) ->
             Req2
     end.
 ]]></script>
+
 <p>Similarly, if you start reading the body and it ends up being too big, you can simply continue with the next part, Cowboy will automatically skip what remains.</p>
+
 <p>Note that the skipping rate may not be adequate for your application. If you observe poor performance when skipping, you might want to consider manually skipping by calling the <code>cowboy_req:part_body/1</code> function directly.</p>
+
 <p>And if you started reading the message but decide that you do not need the remaining parts, you can simply stop reading entirely and Cowboy will automatically figure out what to do.</p>
-</div>
 
 
 <!-- a.code -->
@@ -165,8 +184,11 @@ multipart(Req) ->
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

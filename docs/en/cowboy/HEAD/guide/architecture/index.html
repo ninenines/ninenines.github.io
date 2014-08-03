@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,21 +80,32 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>Architecture</span></h1>
-<div class="service-description">
+
 <p>Cowboy is a lightweight HTTP server.</p>
+
 <p>It is built on top of Ranch. Please see the Ranch guide for more information.</p>
+
 <h2 id="one_process_per_connection">One process per connection</h2>
+
 <p>It uses only one process per connection. The process where your code runs is the process controlling the socket. Using one process instead of two allows for lower memory usage.</p>
+
 <p>Because there can be more than one request per connection with the keepalive feature of HTTP/1.1, that means the same process will be used to handle many requests.</p>
+
 <p>Because of this, you are expected to make sure your process cleans up before terminating the handling of the current request. This may include cleaning up the process dictionary, timers, monitoring and more.</p>
+
 <h2 id="binaries">Binaries</h2>
+
 <p>It uses binaries. Binaries are more efficient than lists for representing strings because they take less memory space. Processing performance can vary depending on the operation. Binaries are known for generally getting a great boost if the code is compiled natively. Please see the HiPE documentation for more details.</p>
+
 <h2 id="date_header">Date header</h2>
+
 <p>Because querying for the current date and time can be expensive, Cowboy generates one <code>Date</code> header value every second, shares it to all other processes, which then simply copy it in the response. This allows compliance with HTTP/1.1 with no actual performance loss.</p>
+
 <h2 id="max_connections">Max connections</h2>
+
 <p>By default the maximum number of active connections is set to a generally accepted big enough number. This is meant to prevent having too many processes performing potentially heavy work and slowing everything else down, or taking up all the memory.</p>
+
 <p>Disabling this feature, by setting the <code>{max_connections, infinity}</code> protocol option, would give you greater performance when you are only processing short-lived requests.</p>
-</div>
 
 
 <!-- a.code -->
@@ -114,8 +125,11 @@
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

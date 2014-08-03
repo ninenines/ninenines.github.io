@@ -49,7 +49,7 @@
                 </nav> 
                 <ul id="social">
                   <li>
-                    <a href="https://github.com/extend" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
                   </li>
                   <li class="dropdown" id="twitter-links">
                     <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
@@ -80,53 +80,103 @@
 <div id="docs" class="span9 maincol">
 
 <h1 class="lined-header"><span>cowboy_websocket_handler</span></h1>
-<div class="service-description">
+
 <p>The <code>cowboy_websocket_handler</code> behaviour defines the interface used by Websocket handlers.</p>
+
 <p>The <code>init/3</code> and <code>websocket_init/3</code> callbacks will always be called, followed by zero or more calls to <code>websocket_handle/3</code> and <code>websocket_info/3</code>. The <code>websocket_terminate/3</code> will always be called last.</p>
+
 <h2 id="types">Types</h2>
+
 <p>None.</p>
+
 <h2 id="callbacks">Callbacks</h2>
-<h4 id="init">init({TransportName, ProtocolName}, Req, Opts)	-> {upgrade, protocol, cowboy_websocket}	| {upgrade, protocol, cowboy_websocket, Req, Opts}</h4>
-<blockquote> Types:<ul>
+
+<h3 id="init">init({TransportName, ProtocolName}, Req, Opts) -> {upgrade, protocol, cowboy_websocket} | {upgrade, protocol, cowboy_websocket, Req, Opts}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>TransportName = tcp | ssl | atom()</li>
 <li>ProtocolName = http | atom()</li>
 <li>Req = cowboy_req:req()</li>
 <li>Opts = any()</li>
 </ul>
- Upgrade the protocol to <code>cowboy_websocket</code>.</blockquote>
-<h4 id="websocket_init">websocket_init(TransportName, Req, Opts)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {ok, Req, State, Timeout}	| {ok, Req, State, Timeout, hibernate}	| {shutdown, Req}</h4>
-<blockquote> Types:<ul>
+
+<p>Upgrade the protocol to <code>cowboy_websocket</code>.</p>
+
+<h3 id="websocket_init">websocket_init(TransportName, Req, Opts) -> {ok, Req, State} | {ok, Req, State, hibernate} | {ok, Req, State, Timeout} | {ok, Req, State, Timeout, hibernate} | {shutdown, Req}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>TransportName = tcp | ssl | atom()</li>
 <li>Req = cowboy_req:req()</li>
 <li>Opts = any()</li>
 <li>State = any()</li>
 <li>Timeout = timeout()</li>
 </ul>
- Initialize the state for this session.<br/><br/> This function is called before the upgrade to Websocket occurs. It can be used to negotiate Websocket protocol extensions with the client. It will typically be used to register this process to an event manager or a message queue in order to receive the messages the handler wants to process.<br/><br/> The connection will stay up for a duration of up to <code>Timeout</code> milliseconds after it last received data from the socket, at which point it will stop and close the connection. By default this value is set to <code>infinity</code>. It is recommended to either set this value or ensure by any other mechanism that the handler will be closed after a certain period of inactivity.<br/><br/> The <code>hibernate</code> option will hibernate the process until it starts receiving either data from the Websocket connection or Erlang messages.<br/><br/> The <code>shutdown</code> return value can be used to close the connection before upgrading to Websocket.</blockquote>
-<h4 id="websocket_handle">websocket_handle(InFrame, Req, State)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {reply, OutFrame | [OutFrame], Req, State}	| {reply, OutFrame | [OutFrame], Req, State, hibernate}	| {shutdown, Req, State}</h4>
-<blockquote> Types:<ul>
+
+<p>Initialize the state for this session.</p>
+
+<p>This function is called before the upgrade to Websocket occurs. It can be used to negotiate Websocket protocol extensions with the client. It will typically be used to register this process to an event manager or a message queue in order to receive the messages the handler wants to process.</p>
+
+<p>The connection will stay up for a duration of up to <code>Timeout</code> milliseconds after it last received data from the socket, at which point it will stop and close the connection. By default this value is set to <code>infinity</code>. It is recommended to either set this value or ensure by any other mechanism that the handler will be closed after a certain period of inactivity.</p>
+
+<p>The <code>hibernate</code> option will hibernate the process until it starts receiving either data from the Websocket connection or Erlang messages.</p>
+
+<p>The <code>shutdown</code> return value can be used to close the connection before upgrading to Websocket.</p>
+
+<h3 id="websocket_handle">websocket_handle(InFrame, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>InFrame = {text | binary | ping | pong, binary()}</li>
 <li>Req = cowboy_req:req()</li>
 <li>State = any()</li>
 <li>OutFrame = cowboy_websocket:frame()</li>
 </ul>
- Handle the data received from the Websocket connection.<br/><br/> This function will be called every time data is received from the Websocket connection.<br/><br/> The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.<br/><br/> The <code>hibernate</code> option will hibernate the process until it receives new data from the Websocket connection or an Erlang message.</blockquote>
-<h4 id="websocket_info">websocket_info(Info, Req, State)	-> {ok, Req, State}	| {ok, Req, State, hibernate}	| {reply, OutFrame | [OutFrame], Req, State}	| {reply, OutFrame | [OutFrame], Req, State, hibernate}	| {shutdown, Req, State}</h4>
-<blockquote> Types:<ul>
+
+<p>Handle the data received from the Websocket connection.</p>
+
+<p>This function will be called every time data is received from the Websocket connection.</p>
+
+<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+
+<p>The <code>hibernate</code> option will hibernate the process until it receives new data from the Websocket connection or an Erlang message.</p>
+
+<h3 id="websocket_info">websocket_info(Info, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>Info = any()</li>
 <li>Req = cowboy_req:req()</li>
 <li>State = any()</li>
 <li>OutFrame = cowboy_websocket:frame()</li>
 </ul>
- Handle the Erlang message received.<br/><br/> This function will be called every time an Erlang message has been received. The message can be any Erlang term.<br/><br/> The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.<br/><br/> The <code>hibernate</code> option will hibernate the process until it receives another message or new data from the Websocket connection.</blockquote>
-<h4 id="websocket_terminate">websocket_terminate(Reason, Req, State) -> ok</h4>
-<blockquote> Types:<ul>
+
+<p>Handle the Erlang message received.</p>
+
+<p>This function will be called every time an Erlang message has been received. The message can be any Erlang term.</p>
+
+<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+
+<p>The <code>hibernate</code> option will hibernate the process until it receives another message or new data from the Websocket connection.</p>
+
+<h3 id="websocket_terminate">websocket_terminate(Reason, Req, State) -> ok</h3>
+
+<p>Types:</p>
+
+<ul>
 <li>Reason = {normal, shutdown | timeout} | {remote, closed} | {remote, cowboy_websocket:close_code(), binary()} | {error, badencoding | badframe | closed | atom()}</li>
 <li>Req = cowboy_req:req()</li>
 <li>State = any()</li>
 </ul>
- Perform any necessary cleanup of the state.<br/><br/> The connection will be closed and the process stopped right after this call.</blockquote>
-</div>
+
+<p>Perform any necessary cleanup of the state.</p>
+
+<p>The connection will be closed and the process stopped right after this call.</p>
 
 
 <!-- a.code -->
@@ -146,8 +196,11 @@
 
 <h3>Version select</h3>
 <ul>
-	<li><a href="javascript:void(0)"><strong>HEAD</strong></a></li>
-<!--	<li><a href="#">older</a></li> -->
+
+	<li><a href="/docs/en/cowboy/1.0/manual/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/manual/"><strong>HEAD</strong></a></li>
+
 </ul>
 
 </div>

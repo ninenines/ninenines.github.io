@@ -1,12 +1,13 @@
 PROJECT = ninenines
 
-DEPS = cowboy ranch bullet sheriff erlydtl yamerl
-dep_cowboy = pkg://cowboy master
-dep_ranch = pkg://ranch master
-dep_bullet = pkg://bullet master
-dep_sheriff = pkg://sheriff master
-dep_erlydtl = https://github.com/evanmiller/erlydtl.git 4d0dc8fb
-dep_yamerl = https://github.com/yakaz/yamerl 261da0ee
+DEPS = cowboy ranch bullet sheriff erlydtl ezdoc yamerl
+dep_cowboy = git https://github.com/ninenines/cowboy master
+dep_ranch = git https://github.com/ninenines/ranch master
+dep_bullet = git https://github.com/extend/bullet master
+dep_sheriff = git https://github.com/extend/sheriff master
+dep_erlydtl = git https://github.com/evanmiller/erlydtl 4d0dc8fb
+dep_ezdoc = git https://github.com/ninenines/ezdoc master
+dep_yamerl = git https://github.com/yakaz/yamerl 261da0ee
 
 .PHONY: build clean-build run
 
