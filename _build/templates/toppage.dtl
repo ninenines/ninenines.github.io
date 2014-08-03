@@ -33,12 +33,16 @@
 			<p>{{ p.longdesc }}</p>
 			<p class="right-buttons">
 				<!-- <a class="btn btn-success btn-large">Learn More &raquo;</a> -->
-				<a class="btn btn-large" href="https://github.com/extend/{{ p.name }}">Source Code</a>
-				{% if p.guide %}
-					<a class="btn btn-large" href="/docs/en/{{ p.name }}/{{ p.versions|first }}/guide/">User Guide</a>
-				{% endif %}
-				{% if p.manual %}
-					<a class="btn btn-large" href="/docs/en/{{ p.name }}/{{ p.versions|first }}/manual/">Manual</a>
+				<a class="btn btn-large" href="{{ p.url }}">Source Code</a>
+				{% if p.guide or p.manual %}
+					{% if p.guide %}
+						<a class="btn btn-large" href="/docs/en/{{ p.name }}/{{ p.versions|first }}/guide/">User Guide</a>
+					{% endif %}
+					{% if p.manual %}
+						<a class="btn btn-large" href="/docs/en/{{ p.name }}/{{ p.versions|first }}/manual/">Manual</a>
+					{% endif %}
+				{% else %}
+					<a class="btn btn-large" href="/docs/en/{{ p.name }}/{{ p.versions|first }}/">README</a>
 				{% endif %}
 			</p>
 		</div>
