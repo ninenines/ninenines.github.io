@@ -73,9 +73,9 @@ inline({e, Text}) ->
 inline({ci, Text}) ->
 	["<code>", Text, "</code>"];
 inline({img, URL}) ->
-	["<img src=\"", URL, "\"/>"];
+	["<img src=\"", get(img_path), URL, "\"/>"];
 inline({img, URL, Description}) ->
-	["<img title=\"", Description, "\" src=\"", URL, "\"/>"];
+	["<img title=\"", Description, "\" src=\"", get(img_path), URL, "\"/>"];
 inline({l, URL}) ->
 	["<a href=\"", URL, "\">", URL, "</a>"];
 inline({l, URL, Description}) ->

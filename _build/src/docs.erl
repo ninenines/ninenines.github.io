@@ -53,6 +53,7 @@ build_file(Filename, P, N, T, V, Type, F, Suffix) ->
 		".ezdoc" ->
 			io:format("  ~s: ezdoc ~s~n", [N, Filename]),
 			OutPath = "../docs/en/" ++ N ++ "/" ++ V ++ Suffix,
+			put(img_path, "/docs/en/" ++ N ++ "/" ++ V ++ Suffix),
 			{ok, Body} = docs_dtl:render([
 				{contents, docs_html:export(ezdoc:parse_file(Filename))},
 				{type, Type},
