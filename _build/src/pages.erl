@@ -8,7 +8,7 @@ build(Articles, Projects, Talks) ->
 	articles(Articles),
 	support(Projects),
 	talks(Talks),
-	toppage(Articles, Projects, Talks),
+	toppage(Projects),
 	training(),
 	ok.
 
@@ -59,16 +59,9 @@ talks(Talks) ->
 
 %% Toppage.
 
-split2(List) ->
-	{List2, _} = lists:split(min(2, length(List)), List),
-	List2.
-
-toppage(Articles, Projects, Talks) ->
-	{_, UpcomingTalks} = lists:keyfind(upcoming, 1, Talks),
+toppage(Projects) ->
 	{ok, Page} = toppage_dtl:render([
-		{articles, split2(Articles)},
-		{projects, Projects},
-		{upcoming_talks, split2(UpcomingTalks)}
+		{projects, Projects}
 	]),
 	write("../index.html", Page).
 
