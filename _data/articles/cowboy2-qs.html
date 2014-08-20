@@ -1,0 +1,177 @@
+<p>Now that Cowboy 1.0 is out, I can spend some of my time thinking
+about Cowboy 2.0 that will be released soon after Erlang/OTP 18.0.
+This entry discusses the proposed changes to query string handling
+in Cowboy.</p>
+
+<p>Cowboy 2.0 will respond to user wishes by simplifying the interface
+of the <code>cowboy_req</code> module. Users want two things: less
+juggling with the Req variable, and more maps. Maps is the only
+dynamic key/value data structure in Erlang that we can match directly
+to extract values, allowing users to greatly simplify their code as
+they don't need to call functions to do everything anymore.</p>
+
+<p>Query strings are a good candidate for maps. It's a list of
+key/values, so it's pretty obvious we can win a lot by using maps.
+However query strings have one difference with maps: they can have
+duplicate keys.</p>
+
+<p>How are we expected to handle duplicate keys? There's no standard
+behavior. It's up to applications. And looking at what is done in
+the wild, there's no de facto standard either. While some ignore
+duplicate keys (keeping the first or the last they find), others
+require duplicate keys to end with <code>[]</code> to automatically
+put the values in a list, or even worse, languages like PHP even
+allow you to do things like <code>key[something][other]</code> and
+create a deep structure for it. Finally some allow any key to have
+duplicates and just gives you lists of key/values.</p>
+
+<p>Cowboy so far had functions to retrieve query string values one
+value at a time, and if there were duplicates it would return the
+first it finds. It also has a function returning the entire list
+with all duplicates, allowing you to filter it to get all of them,
+and another function that returns the raw query string.</p>
+
+<p>What are duplicates used for? Not that many things actually.</p>
+
+<p>One use of duplicate keys is with HTML forms. It is common practice
+to give all related checkboxes the same name so you get a list of
+what's been checked. When nothing is checked, nothing is sent at all,
+the key is not in the list.</p>
+
+<p>Another use of duplicate keys is when generating forms. A good
+example of that would be a form that allows uploading any number
+of files. When you add a file, client-side code adds another field
+to the form. Repeat up to a certain limit.</p>
+
+<p>And that's about it. Of note is that HTML radio elements share
+the same name too, but only one key/value is sent, so they are not
+relevant here.</p>
+
+<p>Normally this would be the part where I tell you how we solve
+this elegantly. But I had doubts. Why? Because there's no good
+solutions to solving only this particular problem.</p>
+
+<p>I then stopped thinking about duplicate keys for a minute and
+started to think about the larger problem.</p>
+
+<p>Query strings are input data. They take a particular form,
+and may be sent as part of the URI or as part of the request
+body. We have other kinds of input data. We have headers and
+cookies and the request body in various forms. We also have
+path segments in URIs.</p>
+
+<p>What do you do with input data? Well you use it to do
+something. But there is one thing that you almost always do
+(and if you don't, you really should): you validate it and
+you map it into Erlang terms.</p>
+
+<p>Cowboy left the user take care of validation and conversion
+into Erlang terms so far. Rather, it left the user take care
+of it everywhere except one place. Guess where? That's right,
+bindings.</p>
+
+<p>If you define routes with bindings then you have the option
+to provide constraints. Constraints can be used to do two things:
+validate the data and convert it in a more appropriate term. For
+example if you use the <code>int</code> constraint, Cowboy will
+make sure the binding is an integer, and will replace the value
+with the integer representation so that you can use it directly.
+In this particular case it not only routes the URI, but also
+validates and converts the bindings directly.</p>
+
+<p>This is very relevant in the case of our duplicate keys,
+because if we have a list with duplicates of a key, chances
+are we want to convert that into a list of Erlang terms, and
+also make sure that all the elements in this list are expected.</p>
+
+<p>The answer to this particular problem is simple. We need a
+function that will parse the query string and apply constraints.
+But this is not all, there is one other problem to be solved.</p>
+
+<p>The other problem is that for the user some keys are mandatory
+and some are optional. Optional keys include the ones that
+correspond to HTML checkboxes: if the key for one or more
+checkbox is missing from the query string, we still want to
+have an empty list in our map so we can easily match. Matching
+maps is great, but not so much when values might be missing,
+so we have to normalize this data a little.</p>
+
+<p>This problem is solved by allowing a default value. If the
+key is missing and a default exists, set it. If no default
+exists, then the key was mandatory and we want to crash.</p>
+
+<p>I therefore make a proposal for changing the query string
+interface to three functions.</p>
+
+<p>The first function already exists, it is <code>cowboy_req:qs(Req)</code>
+and it returns only the query string binary. No more Req returned.</p>
+
+<p>The second function is a renaming of <code>cowboy_req:qs_vals(Req)</code>
+to something more explicit: <code>cowboy_req:parse_qs(Req)</code>.
+The new name implies that a parsing operation is done. It was implicit
+and cached before. It will be explicit and not cached anymore now.
+Again, no more Req returned.</p>
+
+<p>The third function is the one I mentioned above. I think
+the interface <code>cowboy_req:match_qs(Req, Fields)</code> is
+most appropriate. It returns a normalized map that is the same
+regardless of optional fields being provided with the request,
+allowing for easy matching. It crashes if something went wrong.
+Still no Req returned.</p>
+
+<p>I feel that this three function interface provides everything
+one would need to comfortably write applications. You can get
+low level and get the query string directly; you can get a list
+of key/value binaries without any additional processing and do it
+on your own; or you can get a processed map that contains Erlang
+terms ready to be used.</p>
+
+<p>I strongly believe that by democratizing the constraints to
+more than just bindings, but also to query string, cookies and
+other key/values in Cowboy, we can allow the developer to quickly
+and easily go from HTTP request to Erlang function calls. The
+constraints are reusable functions that can serve as guards
+against unwanted data, providing convenience in the process.</p>
+
+<p>Your handlers will not look like an endless series of calls
+to get and convert the input data, they will instead be just
+one call at the beginning followed by the actual application
+logic, thanks to constraints and maps.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+handle(Req, State) ->
+    #{name:=Name, email:=Email, choices:=ChoicesList, remember_me:=RememberMe} =
+        cowboy_req:match_qs(Req, [
+            name, {email, [email]},
+            {choices, [fun check_choices/1], []},
+            {remember_me, [boolean], false}]),
+    save_choices(Name, Email, ChoicesList),
+    if RememberMe -> create_account(Name, Email); true -> ok end,
+    {ok, Req, State}.
+
+check_choices(<<"blue">>) -> {true, blue};
+check_choices(<<"red">>) -> {true, red};
+check_choices(_) -> false;
+]]></script>
+
+<p>(Don't look too closely at the structure yet.)</p>
+
+<p>As you can see in the above snippet, it becomes really easy
+to go from query string to values. You can also use the map
+directly as it is guaranteed to only contain the keys you
+specified, any extra key is not returned.</p>
+
+<p>This would I believe be a huge step up as we can now
+focus on writing applications instead of translating HTTP
+calls. Cowboy can now take care of it.</p>
+
+<p>And to conclude, this also solves our duplicate keys
+dilemma, as they now automatically become a list of binaries,
+and this list is then checked against constraints that
+will fail if they were not expecting a list. And in the
+example above, it even converts the values to atoms for
+easier manipulation.</p>
+
+<p>As usual, feedback is more than welcome, and I apologize
+for the rocky structure of this post as it contains all the
+thoughts that went into this rather than just the conclusion.</p>
