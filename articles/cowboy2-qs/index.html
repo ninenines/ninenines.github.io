@@ -232,9 +232,9 @@ logic, thanks to constraints and maps.</p>
 handle(Req, State) ->
     #{name:=Name, email:=Email, choices:=ChoicesList, remember_me:=RememberMe} =
         cowboy_req:match_qs(Req, [
-            name, {email, [email]},
-            {choices, [fun check_choices/1], []},
-            {remember_me, [boolean], false}]),
+            name, {email, email},
+            {choices, fun check_choices/1, []},
+            {remember_me, boolean, false}]),
     save_choices(Name, Email, ChoicesList),
     if RememberMe -> create_account(Name, Email); true -> ok end,
     {ok, Req, State}.
@@ -272,6 +272,8 @@ thoughts that went into this rather than just the conclusion.</p>
 <div class="span3 sidecol">
 <h3>More articles</h3>
 <ul id="articles-nav" class="extra_margin">
+	
+		<li><a href="/articles/the-story-so-far">The story so far</a></li>
 	
 		<li><a href="/articles/cowboy2-qs">Cowboy 2.0 and query strings</a></li>
 	
