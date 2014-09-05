@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Nine Nines Article: Xerl: intermediate module</title>
+    <title>Nine Nines Article: On open source</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Change them or set them up as you like -->
     <meta name="description" content="">
@@ -81,145 +81,144 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Xerl: intermediate module</span></h1>
+	<h1 class="lined-header"><span>On open source</span></h1>
 	<p class="date">
-		<span class="day">25</span>
-		<span class="month">Mar</span>
+		<span class="day">5</span>
+		<span class="month">Sep</span>
 	</p>
 </header>
 
-<p>Today we will start the work on the intermediate module
-that will be used to run the code for the expressions found
-in our file's body, replacing our interpreter.</p>
+<p>Last week I read a great article
+<a href="http://videlalvaro.github.io/2014/08/on-contributing-to-opensource.html">on
+contributing to open source</a> by Alvaro Videla. He makes
+many great points and I am in agreement with most of it.
+This made me want to properly explain my point of view with
+regard to open source and contributions. Unlike most open
+source evangelism articles I will not talk about ideals or
+any of that crap, but rather my personal feelings and
+experience.</p>
 
-<p>This is what we want to have when all the work is done:</p>
+<p>I have been doing open source work for quite some time.
+My very first open source project was a graphics driver
+for (the very early version of) the PCSX2 emulator. That
+was more than ten years ago, and there
+<a href="http://ngemu.com/threads/gstaris-0-6.30469/">isn't
+much left to look at today</a>. This was followed by a
+<a href="https://github.com/extend/wee">PHP framework</a>
+(started long before Zend Framework was even a thing) and
+a few other small projects. None of them really took off.
+It's alright, that's pretty much the fate of most open
+source projects. You spend a lot of work and sweat and
+get very little in return from others.</p>
 
-<pre>xerl -&gt; tokens -&gt; AST -&gt; intermediate -&gt; cerl</pre>
+<p>This sounds harsh but this is the reality of all open
+source projects. If you are thinking of building a project
+and releasing it as open source, you should be prepared
+for that. This is how most of your projects will feel like.
+Don't release a project as open source thinking everyone
+will pat you on the back and cheer, this won't happen. In
+fact if your project is a too small improvement over existing
+software, what many people will do is say you have NIH
+syndrome, regardless of the improvement you bring. So you
+need not to rely on other people in order to get your
+enjoyment out of building open source software.</p>
 
-<p>Today we will perform this work only on the atomic integer
-expression however, so we will not build any module at the end.
-We have a few more things to take care of before getting there.
-This does mean that we completely break compilation of modules
-though, so hopefully we can resolve that soon.</p>
+<p>In my case I get enjoyment from thinking about problems
+that need solving. Often times the problems are already
+solved, but nevermind that, I still think about them and
+sometimes come up with something I feel is better and then
+write code for it. Writing code is also fun, but not as
+fun as using my brain to imagine solutions.</p>
 
-<p>This intermediate representation is in the form of a module
-which contains a single function: <code>run/0</code>. This function
-contains all the expressions from our Xerl source file.</p>
+<p>You don't need thousands of users to do that. So are
+users worthless to me then? No, of course not. In fact
+they are an important component: they bring me problems
+that need solving. So users are very important to me.
+But that's not the only reason.</p>
 
-<p>In the case of a Xerl source file only containing the integer
-<code>42</code>, we will obtain the following module ready to
-be executed:</p>
+<p>I got lucky that the Cowboy project became popular.
+And seeing it be this popular, and some of my other projects
+also do quite well, made me believe I could perhaps work
+full time on open source. If I can work full time then
+I can produce better software. What I had one hour to
+work on before I can now spend a day on, and experiment
+until I am satisfied. This is very useful because that
+means I can get it almost right from the beginning, and
+avoid the million API breaking changes that occured
+before Cowboy 1.0 was released.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
--module('$xerl_intermediate').
--export([run/0]).
+<p>To be able to work full time on open source however,
+I need money. This is a largely unspoken topic of open
+source work. The work is never free. You can download the
+product for free, but someone has to pay for the work
+itself. Life is unfortunately not free.</p>
 
-run() ->
-    42.
-]]></script>
+<p>Large projects and some lucky people have their work
+sponsored by their employers. Everyone else has to deal
+with it differently. In my case I was sponsored for a
+while by the <a href="http://leo-project.net/leofs/">LeoFS</a>
+project, but that ended. I also had the Farwest fundraiser,
+which was a success, although the project stalled after that.
+(Fear not, as Farwest will make a comeback as a conglomerate
+of Web development projects in the future.) After that I set
+up the <a href="http://ninenines.eu/support/">sponsoring scheme</a>,
+which I can proudly say today brings in enough money to
+cover my food and shelter. Great!</p>
 
-<p>Running it will of course give us a result of <code>42</code>,
-the same we had when interpreting expressions.</p>
+<p>This is a start, but it's of course not enough. Life
+is a little more than food and shelter, and so I am still
+looking for sponsors. This is not a very glorious experience,
+as I am essentially looking for scraps that companies can
+throw away. Still, if a handful more companies were doing
+that, not only would I be able to live comfortably, but I
+would also be able to stop worrying about the future as I
+could put money on the side for when it gets rough.</p>
 
-<p>The resulting Core Erlang code looks like this:</p>
+<p>A few companies giving me some scrap money so I could
+live and work independently is by far the most important
+thing anyone can do to help my projects, including Cowboy.
+Yes, they're even more important than code contributions,
+bug reports and feedback. Because this money gives me the
+time I need to handle the code contributions, bug reports
+and feedback.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-module '$xerl_intermediate' ['run'/0]
-    attributes []
-'run'/0 =
-    fun () ->
-        42
-end
-]]></script>
+<p>If Cowboy or another project is a large part of your
+product or infrastructure, then the best thing you can do
+is become a sponsor. The second best is opening tickets
+and/or providing feedback. The third best is providing
+good code contributions.</p>
 
-<p>The nice thing about doing it like this is that other than the
-definition of the intermediate module and its <code>run/0</code>
-function, we can use the same code we are using for generating
-the final Beam file. It may also be faster than interpreting
-if you have complex modules.</p>
+<p>I will not expand on the feedback part. Feedback is
+very important, and even just a high five or a retweet
+is already good feedback. It's not very complicated.</p>
 
-<p>Of course this here only works for the simplest cases, as you
-cannot declare a module or a function inside another Erlang function.
-We will need to wrap these into function calls to the Xerl compiler
-that will take care of compiling them, making them available for
-any subsequent expression. We will also need to pass the environment
-to the <code>run</code> function to keep track of all this.</p>
+<p>I want to expand a little on code contributions
+however. Not long ago I ran across the term "patch bomb"
+which means dropping patches and expecting the project
+maintainers to merge them and maintain them. I receive
+a lot of patches, and often have to refuse them. Causes
+for refusal vary. Some patches only benefit the people
+who submitted them (or a very small number of people).
+Some patches are not refined enough to be included.
+Others are out of scope of the project. These are some
+of the reasons why I refuse patches. Having limited
+time and resources, I have to focus my efforts on the
+code used by the larger number of users. I have to
+prioritize patches from submitters who are reactive
+and address the issues pointed out. And I have to plainly
+refuse other patches.</p>
 
-<p>This does mean that we will have different code for compiling
-<code>fun</code> and <code>mod</code> expressions when creating
-the intermediate module. But the many other expressions don't need
-any special care.</p>
+<p>I believe this wraps up my thoughts on open source.
+Overall I had a great experience, the Erlang community
+being nice and understanding of the issues at hand in
+general. And if the money problem could be solved soon,
+then I would be one of the luckiest and happiest open
+source developer on Earth.</p>
 
-<p>Right now we've used the <code>'$xerl_intermediate'</code> atom
-for the intermediate module name because we only have one, but we
-will need to have a more random name later on when we'll implement
-modules this way.</p>
-
-<p>The attentive mind will know by now that when compiling a Xerl
-file containing one module, we will need to compile two intermediate
-modules: one for the file body, and one for the module's body. Worry
-not though, if we only detect <code>mod</code> instructions in the file
-body, we can just skip this phase.</p>
-
-<p>While we're at it, we'll modify our code generator to handle lists
-of expressions, which didn't actually work with integer literals
-before.</p>
-
-<p>We're going to use Core Erlang sequences for running the many
-expressions. Sequences work like <code>let</code>, except no value
-is actually bound. Perfect for our case, since we don't support
-binding values at this time anyway.</p>
-
-<p>Sequences have an argument and a body, both being Core Erlang
-expressions. The simplest way to have many expressions is to use
-a simple expression for the argument and a sequence for the rest
-of the expressions. When we encounter the last expression in the
-list, we do not create a sequence.</p>
-
-<p>The result is this very simple function:</p>
-
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-comp_body([Expr]) ->
-    expr(Expr);
-comp_body([Expr|Exprs]) ->
-    Arg = expr(Expr),
-    Body = comp_body(Exprs),
-    cerl:c_seq(Arg, Body).
-]]></script>
-
-<p>In the case of our example above, a sequence will not be created,
-we only have one expression. If we were to have <code>42, 43, 44</code>
-in our Xerl source file, we would have a result equivalent to the
-following before optimization:</p>
-
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
--module('$xerl_intermediate').
--export([run/0]).
-
-run() ->
-    42,
-    43,
-    44.
-]]></script>
-
-<p>And the result is of course <code>44</code>.</p>
-
-<p>The resulting Core Erlang code looks like this:</p>
-
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-module '$xerl_intermediate' ['run'/0]
-    attributes []
-'run'/0 =
-    fun () ->
-        do  42
-            do  43
-                44
-end
-]]></script>
-
-<p>Feels very lisp-y, right? Yep.</p>
-
-<p><a href="https://github.com/extend/xerl/blob/0.5/">View the source</a></p>
+<p>Think about it the next time you see a donation button
+or a request for funds or sponsoring. You can considerably
+improve an open source developer's life with very little
+of your company's money.</p>
 
 </article>
 </div>

@@ -142,9 +142,9 @@ logic, thanks to constraints and maps.</p>
 handle(Req, State) ->
     #{name:=Name, email:=Email, choices:=ChoicesList, remember_me:=RememberMe} =
         cowboy_req:match_qs(Req, [
-            name, {email, [email]},
-            {choices, [fun check_choices/1], []},
-            {remember_me, [boolean], false}]),
+            name, {email, email},
+            {choices, fun check_choices/1, []},
+            {remember_me, boolean, false}]),
     save_choices(Name, Email, ChoicesList),
     if RememberMe -> create_account(Name, Email); true -> ok end,
     {ok, Req, State}.
