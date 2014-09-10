@@ -66,6 +66,13 @@ list([{i, Item}, {u, List}|Tail]) ->
 list([{i, Item}|Tail]) ->
 	["<li>", inline(Item), "</li>\n", list(Tail)].
 
+process_url(URL = <<"http://", _/binary>>) ->
+	URL;
+process_url(URL = <<"https://", _/binary>>) ->
+	URL;
+process_url(URL) ->
+	get(path) ++ binary_to_list(URL).
+
 inline(Text) when is_binary(Text) ->
 	Text;
 inline({e, Text}) ->
@@ -73,13 +80,13 @@ inline({e, Text}) ->
 inline({ci, Text}) ->
 	["<code>", Text, "</code>"];
 inline({img, URL}) ->
-	["<img src=\"", get(path), URL, "\"/>"];
+	["<img src=\"", process_url(URL), "\"/>"];
 inline({img, URL, Description}) ->
-	["<img title=\"", Description, "\" src=\"", get(path), URL, "\"/>"];
+	["<img title=\"", Description, "\" src=\"", process_url(URL), "\"/>"];
 inline({l, URL}) ->
-	["<a href=\"", get(path), URL, "\">", URL, "</a>"];
+	["<a href=\"", process_url(URL), "\">", URL, "</a>"];
 inline({l, URL, Description}) ->
-	["<a href=\"", get(path), URL, "\">", Description, "</a>"];
+	["<a href=\"", process_url(URL), "\">", Description, "</a>"];
 inline(Text) ->
 	[inline(T) || T <- Text].
 
