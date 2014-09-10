@@ -66,13 +66,6 @@ list([{i, Item}, {u, List}|Tail]) ->
 list([{i, Item}|Tail]) ->
 	["<li>", inline(Item), "</li>\n", list(Tail)].
 
-process_url(URL = <<"http://", _/binary>>) ->
-	URL;
-process_url(URL = <<"https://", _/binary>>) ->
-	URL;
-process_url(URL) ->
-	get(path) ++ binary_to_list(URL).
-
 inline(Text) when is_binary(Text) ->
 	Text;
 inline({e, Text}) ->
@@ -80,15 +73,22 @@ inline({e, Text}) ->
 inline({ci, Text}) ->
 	["<code>", Text, "</code>"];
 inline({img, URL}) ->
-	["<img src=\"", process_url(URL), "\"/>"];
+	["<img src=\"", url(URL), "\"/>"];
 inline({img, URL, Description}) ->
-	["<img title=\"", Description, "\" src=\"", process_url(URL), "\"/>"];
+	["<img title=\"", Description, "\" src=\"", url(URL), "\"/>"];
 inline({l, URL}) ->
-	["<a href=\"", process_url(URL), "\">", URL, "</a>"];
+	["<a href=\"", url(URL), "\">", URL, "</a>"];
 inline({l, URL, Description}) ->
-	["<a href=\"", process_url(URL), "\">", Description, "</a>"];
+	["<a href=\"", url(URL), "\">", Description, "</a>"];
 inline(Text) ->
 	[inline(T) || T <- Text].
+
+url(URL = <<"http://", _/binary>>) ->
+	URL;
+url(URL = <<"https://", _/binary>>) ->
+	URL;
+url(URL) ->
+	get(path) ++ binary_to_list(URL).
 
 specs_db(Spec) ->
 	[Name|_] = binary:split(Spec, <<"(">>),
