@@ -73,15 +73,22 @@ inline({e, Text}) ->
 inline({ci, Text}) ->
 	["<code>", Text, "</code>"];
 inline({img, URL}) ->
-	["<img src=\"", get(path), URL, "\"/>"];
+	["<img src=\"", url(URL), "\"/>"];
 inline({img, URL, Description}) ->
-	["<img title=\"", Description, "\" src=\"", get(path), URL, "\"/>"];
+	["<img title=\"", Description, "\" src=\"", url(URL), "\"/>"];
 inline({l, URL}) ->
-	["<a href=\"", get(path), URL, "\">", URL, "</a>"];
+	["<a href=\"", url(URL), "\">", URL, "</a>"];
 inline({l, URL, Description}) ->
-	["<a href=\"", get(path), URL, "\">", Description, "</a>"];
+	["<a href=\"", url(URL), "\">", Description, "</a>"];
 inline(Text) ->
 	[inline(T) || T <- Text].
+
+url(URL = <<"http://", _/binary>>) ->
+	URL;
+url(URL = <<"https://", _/binary>>) ->
+	URL;
+url(URL) ->
+	get(path) ++ binary_to_list(URL).
 
 specs_db(Spec) ->
 	[Name|_] = binary:split(Spec, <<"(">>),
