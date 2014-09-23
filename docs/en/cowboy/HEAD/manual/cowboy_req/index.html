@@ -86,17 +86,15 @@
 <p>The functions in this module follow patterns for their return types, based on the kind of function.</p>
 
 <ul>
-<li>access: <code>{Value, Req}</code></li>
-<li>action: <code>{Result, Req} | {Result, Value, Req} | {error, atom()}</code></li>
+<li>access: <code>Value</code></li>
+<li>action: <code>ok | {Result, Req} | {Result, Value, Req}</code></li>
 <li>modification: <code>Req</code></li>
 <li>question: <code>boolean()</code></li>
 </ul>
 
-<p>The only exception is the <code>chunk/2</code> function which may return <code>ok</code>.</p>
+<p>Whenever <code>Req</code> is returned, you must use this returned value and ignore any previous you may have had. This value contains various values which are necessary for Cowboy to keep track of the request and response states.</p>
 
-<p>Whenever <code>Req</code> is returned, you must use this returned value and ignore any previous you may have had. This value contains various state informations which are necessary for Cowboy to do some lazy evaluation or cache results where appropriate.</p>
-
-<p>All functions which perform an action should only be called once. This includes reading the request body or replying. Cowboy will generally throw an error on the second call.</p>
+<p>All functions which perform an action should only be called once. This includes reading the request body or replying. Cowboy will throw an error on the second call when it detects suspicious behavior.</p>
 
 <p>It is highly discouraged to pass the Req object to another process. Doing so and calling <code>cowboy_req</code> functions from it leads to undefined behavior.</p>
 
@@ -120,7 +118,7 @@
 
 <h3 id="binding">binding(Name, Req) -> binding(Name, Req, undefined)</h3>
 
-<h3 id="binding">binding(Name, Req, Default) -> {Value, Req2}</h3>
+<h3 id="binding">binding(Name, Req, Default) -> Value</h3>
 
 <p>Types:</p>
 
@@ -134,7 +132,7 @@
 
 <p>By default the value is a binary, however constraints may change the type of this value (for example automatically converting numbers to integer).</p>
 
-<h3 id="bindings">bindings(Req) -> {[{Name, Value}], Req2}</h3>
+<h3 id="bindings">bindings(Req) -> [{Name, Value}]</h3>
 
 <p>Types:</p>
 
@@ -147,36 +145,9 @@
 
 <p>By default the value is a binary, however constraints may change the type of this value (for example automatically converting numbers to integer).</p>
 
-<h3 id="cookie">cookie(Name, Req) -> cookie(Name, Req, undefined)</h3>
-
-<h3 id="cookie">cookie(Name, Req, Default) -> {Value, Req2}</h3>
-
-<p>Types:</p>
-
-<ul>
-<li>Name = binary()</li>
-<li>Default = any()</li>
-<li>Value = binary() | Default</li>
-</ul>
-
-<p>Return the value for the given cookie.</p>
-
-<p>Cookie names are case sensitive.</p>
-
-<h3 id="cookies">cookies(Req) -> {[{Name, Value}], Req2}</h3>
-
-<p>Types:</p>
-
-<ul>
-<li>Name = binary()</li>
-<li>Value = binary()</li>
-</ul>
-
-<p>Return all cookies.</p>
-
 <h3 id="header">header(Name, Req) -> header(Name, Req, undefined)</h3>
 
-<h3 id="header">header(Name, Req, Default) -> {Value, Req2}</h3>
+<h3 id="header">header(Name, Req, Default) -> Value</h3>
 
 <p>Types:</p>
 
@@ -190,7 +161,7 @@
 
 <p>While header names are case insensitive, this function expects the name to be a lowercase binary.</p>
 
-<h3 id="headers">headers(Req) -> {Headers, Req2}</h3>
+<h3 id="headers">headers(Req) -> Headers</h3>
 
 <p>Types:</p>
 
@@ -200,7 +171,7 @@
 
 <p>Return all headers.</p>
 
-<h3 id="host">host(Req) -> {Host, Req2}</h3>
+<h3 id="host">host(Req) -> Host</h3>
 
 <p>Types:</p>
 
@@ -210,7 +181,7 @@
 
 <p>Return the requested host.</p>
 
-<h3 id="host_info">host_info(Req) -> {HostInfo, Req2}</h3>
+<h3 id="host_info">host_info(Req) -> HostInfo</h3>
 
 <p>Types:</p>
 
@@ -220,7 +191,7 @@
 
 <p>Return the extra tokens from matching against <code>...</code> during routing.</p>
 
-<h3 id="host_url">host_url(Req) -> {HostURL, Req2}</h3>
+<h3 id="host_url">host_url(Req) -> HostURL</h3>
 
 <p>Types:</p>
 
@@ -232,9 +203,43 @@
 
 <p>This function will always return <code>undefined</code> until the <code>cowboy_router</code> middleware has been executed. This includes the <code>onrequest</code> hook.</p>
 
+<h3 id="match_cookies">match_cookies(Req, Fields) -> Map</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>Fields = cowboy:fields()</li>
+<li>Map = map()</li>
+</ul>
+
+<p>Match cookies against the given fields.</p>
+
+<p>Cowboy will only return the cookie values specified in the fields list, and ignore all others. Fields can be either the name of the cookie requested; the name along with a list of constraints; or the name, a list of constraints and a default value in case the cookie is missing.</p>
+
+<p>This function will crash if the cookie is missing and no default value is provided. This function will also crash if a constraint fails.</p>
+
+<p>The name of the cookie must be provided as an atom. The key of the returned map will be that atom. The value may be converted through the use of constraints, making this function able to extract, validate and convert values all in one step.</p>
+
+<h3 id="match_qs">match_qs(Req, Fields) -> Map</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>Fields = cowboy:fields()</li>
+<li>Map = map()</li>
+</ul>
+
+<p>Match the query string against the given fields.</p>
+
+<p>Cowboy will only return the query string values specified in the fields list, and ignore all others. Fields can be either the key requested; the key along with a list of constraints; or the key, a list of constraints and a default value in case the key is missing.</p>
+
+<p>This function will crash if the key is missing and no default value is provided. This function will also crash if a constraint fails.</p>
+
+<p>The key must be provided as an atom. The key of the returned map will be that atom. The value may be converted through the use of constraints, making this function able to extract, validate and convert values all in one step.</p>
+
 <h3 id="meta">meta(Name, Req) -> meta(Name, Req, undefined)</h3>
 
-<h3 id="meta">meta(Name, Req, Default) -> {Value, Req2}</h3>
+<h3 id="meta">meta(Name, Req, Default) -> Value</h3>
 
 <p>Types:</p>
 
@@ -246,7 +251,7 @@
 
 <p>Return metadata about the request.</p>
 
-<h3 id="method">method(Req) -> {Method, Req2}</h3>
+<h3 id="method">method(Req) -> Method</h3>
 
 <p>Types:</p>
 
@@ -258,9 +263,22 @@
 
 <p>Methods are case sensitive. Standard methods are always uppercase.</p>
 
-<h3 id="parse_header">parse_header(Name, Req) -></h3>
+<h3 id="parse_cookies">parse_cookies(Req) -> [{Name, Value}]</h3>
 
-<h3 id="parse_header">parse_header(Name, Req, Default) -> {ok, ParsedValue, Req2} | {undefined, Value, Req2} | {error, badarg}</h3>
+<p>Types:</p>
+
+<ul>
+<li>Name = binary()</li>
+<li>Value = binary()</li>
+</ul>
+
+<p>Parse and return all cookies.</p>
+
+<p>Cookie names are case sensitive.</p>
+
+<h3 id="parse_header">parse_header(Name, Req) -> see below</h3>
+
+<h3 id="parse_header">parse_header(Name, Req, Default) -> ParsedValue | Default</h3>
 
 <p>Types:</p>
 
@@ -268,7 +286,6 @@
 <li>Name = binary()</li>
 <li>Default = any()</li>
 <li>ParsedValue - see below</li>
-<li>Value = any()</li>
 </ul>
 
 <p>Parse the given header.</p>
@@ -282,6 +299,8 @@
 <tr><th>Header name</th><th>Default value</th></tr>
 </thead>
 <tbody>
+<tr><td>content-length</td><td><code>0</code></td></tr>
+<tr><td>cookie</td><td><code>[]</code></td></tr>
 <tr><td>transfer-encoding</td><td><code>[<<"identity">>]</code></td></tr>
 <tr><td>Any other header</td><td><code>undefined</code></td></tr>
 </tbody>
@@ -329,7 +348,7 @@
 
 <p>The cookie names and values, the values of the sec-websocket-protocol and x-forwarded-for headers, the values in <code>AcceptExt</code> and <code>Params</code>, the authorization <code>Credentials</code>, the <code>ExpectValue</code> and <code>OpaqueTag</code> are case sensitive. All values in <code>ContentTypeParams</code> are case sensitive except the value of the charset parameter, which is case insensitive. All other values are case insensitive and will be returned as lowercase.</p>
 
-<p>The headers accept, accept-encoding and cookie headers can return an empty list. Others will return <code>{error, badarg}</code> if the header value is empty.</p>
+<p>The headers accept, accept-encoding and cookie headers can return an empty list. Some other headers are expected to have a value if provided and may crash if the value is missing.</p>
 
 <p>The authorization header parsing code currently only supports basic HTTP authentication. The <code>Credentials</code> type is thus <code>{Username, Password}</code> with <code>Username</code> and <code>Password</code> being <code>binary()</code>.</p>
 
@@ -343,7 +362,20 @@
 
 <p>An <code>undefined</code> tuple will be returned if Cowboy doesn't know how to parse the requested header.</p>
 
-<h3 id="path">path(Req) -> {Path, Req2}</h3>
+<h3 id="parse_qs">parse_qs(Req) -> [{Name, Value}]</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>Name = binary()</li>
+<li>Value = binary() | true</li>
+</ul>
+
+<p>Return the request's query string as a list of tuples.</p>
+
+<p>The atom <code>true</code> is returned for keys which have no value. Keys with no value are different from keys with an empty value in that they do not have a <code>=</code> indicating the presence of a value.</p>
+
+<h3 id="path">path(Req) -> Path</h3>
 
 <p>Types:</p>
 
@@ -353,7 +385,7 @@
 
 <p>Return the requested path.</p>
 
-<h3 id="path_info">path_info(Req) -> {PathInfo, Req2}</h3>
+<h3 id="path_info">path_info(Req) -> PathInfo</h3>
 
 <p>Types:</p>
 
@@ -363,7 +395,7 @@
 
 <p>Return the extra tokens from matching against <code>...</code> during routing.</p>
 
-<h3 id="peer">peer(Req) -> {Peer, Req2}</h3>
+<h3 id="peer">peer(Req) -> Peer</h3>
 
 <p>Types:</p>
 
@@ -373,7 +405,7 @@
 
 <p>Return the client's IP address and port number.</p>
 
-<h3 id="port">port(Req) -> {Port, Req2}</h3>
+<h3 id="port">port(Req) -> Port</h3>
 
 <p>Types:</p>
 
@@ -385,7 +417,7 @@
 
 <p>The port returned by this function is obtained by parsing the host header. It may be different than the actual port the client used to connect to the Cowboy server.</p>
 
-<h3 id="qs">qs(Req) -> {QueryString, Req2}</h3>
+<h3 id="qs">qs(Req) -> QueryString</h3>
 
 <p>Types:</p>
 
@@ -394,35 +426,6 @@
 </ul>
 
 <p>Return the request's query string.</p>
-
-<h3 id="qs_val">qs_val(Name, Req) -> qs_val(Name, Req, undefined)</h3>
-
-<h3 id="qs_val">qs_val(Name, Req, Default) -> {Value, Req2}</h3>
-
-<p>Types:</p>
-
-<ul>
-<li>Name = binary()</li>
-<li>Default = any()</li>
-<li>Value = binary() | true</li>
-</ul>
-
-<p>Return a value from the request's query string.</p>
-
-<p>The value <code>true</code> will be returned when the name was found in the query string without an associated value.</p>
-
-<h3 id="qs_vals">qs_vals(Req) -> {[{Name, Value}], Req2}</h3>
-
-<p>Types:</p>
-
-<ul>
-<li>Name = binary()</li>
-<li>Value = binary() | true</li>
-</ul>
-
-<p>Return the request's query string as a list of tuples.</p>
-
-<p>The value <code>true</code> will be returned when a name was found in the query string without an associated value.</p>
 
 <h3 id="set_meta">set_meta(Name, Value, Req) -> Req2</h3>
 
@@ -437,7 +440,7 @@
 
 <p>An existing value will be overwritten.</p>
 
-<h3 id="url">url(Req) -> {URL, Req2}</h3>
+<h3 id="url">url(Req) -> URL</h3>
 
 <p>Types:</p>
 
@@ -449,7 +452,7 @@
 
 <p>This function will always return <code>undefined</code> until the <code>cowboy_router</code> middleware has been executed. This includes the <code>onrequest</code> hook.</p>
 
-<h3 id="version">version(Req) -> {Version, Req2}</h3>
+<h3 id="version">version(Req) -> Version</h3>
 
 <p>Types:</p>
 
@@ -463,7 +466,7 @@
 
 <h3 id="body">body(Req) -> body(Req, [])</h3>
 
-<h3 id="body">body(Req, Opts) -> {ok, Data, Req2} | {more, Data, Req2} | {error, Reason}</h3>
+<h3 id="body">body(Req, Opts) -> {ok, Data, Req2} | {more, Data, Req2}</h3>
 
 <p>Types:</p>
 
@@ -487,7 +490,7 @@
 
 <p>This function can only be called once. Cowboy will not cache the result of this call.</p>
 
-<h3 id="body_length">body_length(Req) -> {Length, Req2}</h3>
+<h3 id="body_length">body_length(Req) -> Length</h3>
 
 <p>Types:</p>
 
@@ -501,7 +504,7 @@
 
 <h3 id="body_qs">body_qs(Req) -> body_qs(Req, [{length, 64000}, {read_length, 64000}, {read_timeout, 5000}])</h3>
 
-<h3 id="body_qs">body_qs(Req, Opts) -> {ok, [{Name, Value}], Req2} | {badlength, Req2} | {error, Reason}</h3>
+<h3 id="body_qs">body_qs(Req, Opts) -> {ok, [{Name, Value}], Req2} | {badlength, Req2}</h3>
 
 <p>Types:</p>
 
@@ -568,7 +571,7 @@
 
 <h2 id="response_related_exports">Response related exports</h2>
 
-<h3 id="chunk">chunk(Data, Req) -> ok | {error, Reason}</h3>
+<h3 id="chunk">chunk(Data, Req) -> ok</h3>
 
 <p>Types:</p>
 
@@ -587,7 +590,7 @@
 
 <h3 id="chunked_reply">chunked_reply(StatusCode, Req) -> chunked_reply(StatusCode, [], Req)</h3>
 
-<h3 id="chunked_reply">chunked_reply(StatusCode, Headers, Req) -> {ok, Req2}</h3>
+<h3 id="chunked_reply">chunked_reply(StatusCode, Headers, Req) -> Req2</h3>
 
 <p>Types:</p>
 
@@ -606,7 +609,7 @@
 
 <p>This function can only be called once, with the exception of overriding the response in the <code>onresponse</code> hook.</p>
 
-<h3 id="continue">continue(Req) -> ok | {error, Reason}</h3>
+<h3 id="continue">continue(Req) -> ok</h3>
 
 <p>Types:</p>
 
@@ -654,7 +657,7 @@
 
 <h3 id="reply">reply(StatusCode, Headers, Req) - see below</h3>
 
-<h3 id="reply">reply(StatusCode, Headers, Body, Req) -> {ok, Req2}</h3>
+<h3 id="reply">reply(StatusCode, Headers, Body, Req) -> Req2</h3>
 
 <p>Types:</p>
 
@@ -715,7 +718,7 @@
 
 <ul>
 <li>Fun = fun((ChunkFun) -> ok)</li>
-<li>ChunkFun = fun((iodata()) -> ok | {error, atom()})</li>
+<li>ChunkFun = fun((iodata()) -> ok)</li>
 </ul>
 
 <p>Set a fun for sending the response body using chunked transfer-encoding.</p>

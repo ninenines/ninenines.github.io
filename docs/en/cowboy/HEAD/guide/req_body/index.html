@@ -106,7 +106,7 @@ cowboy_req:has_body(Req).
 <p>You can obtain the body length if it was sent with the request.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{Length, Req2} = cowboy_req:body_length(Req).
+Length = cowboy_req:body_length(Req).
 ]]></script>
 
 <p>The value returned will be <code>undefined</code> if the length couldn't be figured out from the request headers. If there's a body but no length is given, this means that the chunked transfer-encoding was used. You can read chunked bodies by using the stream functions.</p>
@@ -172,7 +172,7 @@ body_to_console(Req) ->
 <p>The following example shows how to set both options.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:body(Req, [
+{ok, Data, Req2} = cowboy_req:body(Req, [
     {transfer_decode, fun transfer_decode/2, TransferState},
     {content_decode, fun content_decode/1}
 ]).

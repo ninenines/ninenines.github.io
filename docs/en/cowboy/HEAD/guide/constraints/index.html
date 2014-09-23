@@ -79,42 +79,43 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Dealing with broken clients</span></h1>
+<h1 class="lined-header"><span>Constraints</span></h1>
 
-<p>There exists a very large number of implementations for the HTTP protocol. Most widely used clients, like browsers, follow the standard quite well, but others may not. In particular custom enterprise clients tend to be very badly written.</p>
+<p>Cowboy provides an optional constraints based validation feature when interacting with user input.</p>
 
-<p>Cowboy tries to follow the standard as much as possible, but is not trying to handle every possible special cases. Instead Cowboy focuses on the cases reported in the wild, on the public Web.</p>
+<p>Constraints are first used during routing. The router uses constraints to more accurately match bound values, allowing to create routes where a segment is an integer for example, and rejecting the others.</p>
 
-<p>That means clients that ignore the HTTP standard completely may fail to understand Cowboy's responses. There are of course workarounds. This chapter aims to cover them.</p>
+<p>Constraints are also used when performing a match operation on input data, like the query string or cookies. There, a default value can also be provided for optional values.</p>
 
-<h2 id="lowercase_headers">Lowercase headers</h2>
+<p>Finally, constraints can be used to not only validate input, but also convert said input into proper Erlang terms, all in one step.</p>
 
-<p>Cowboy converts all headers it receives to lowercase, and similarly sends back headers all in lowercase. Some broken HTTP clients have issues with that.</p>
+<h2 id="structure">Structure</h2>
 
-<p>A simple way to solve this is to create an <code>onresponse</code> hook that will format the header names with the expected case.</p>
+<p>Constraints are provided as a list of fields and for each field a list of constraints for that field can be provided.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-capitalize_hook(Status, Headers, Body, Req) ->
-    Headers2 = [{cowboy_bstr:capitalize_token(N), V}
-        || {N, V} <- Headers],
-    cowboy_req:reply(Status, Headers2, Body, Req).
-]]></script>
+<p>Fields are either the name of the field; the name and one or more constraints; or the name, one or more constraints and a default value.</p>
 
-<p>Note that SPDY clients do not have that particular issue because the specification explicitly says all headers are lowercase, unlike HTTP which allows any case but treats them as case insensitive.</p>
+<p>When no default value is provided then the field is required. Otherwise the default value is used.</p>
 
-<h2 id="camel-case_headers">Camel-case headers</h2>
+<p>All constraints for a field will be used to match its value in the order they are given. If the value is modified by a constraint, the next constraint receives the updated value.</p>
 
-<p>Sometimes it is desirable to keep the actual case used by clients, for example when acting as a proxy between two broken implementations. There is no easy solution for this other than forking the project and editing the <code>cowboy_protocol</code> file directly.</p>
+<h2 id="built-in_constraints">Built-in constraints</h2>
 
-<h2 id="chunked_transfer-encoding">Chunked transfer-encoding</h2>
+<table class="table-bordered table-condensed table-striped">
+<thead>
+<tr><th>Constraint</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>int</td><td>Convert binary value to integer</td></tr>
+<tr><td>nonempty</td><td>Ensures the binary value is non-empty</td></tr>
+</tbody>
+</table>
 
-<p>Sometimes an HTTP client advertises itself as HTTP/1.1 but does not support chunked transfer-encoding. This is invalid behavior, as HTTP/1.1 clients are required to support it.</p>
+<h2 id="custom_constraint">Custom constraint</h2>
 
-<p>A simple workaround exists in these cases. By changing the Req object response state to <code>waiting_stream</code>, Cowboy will understand that it must use the identity transfer-encoding when replying, just like if it was an HTTP/1.0 client.</p>
+<p>In addition to the predefined constraints, Cowboy will accept a fun. This fun must accept one argument and return one of <code>true</code>, <code>{true, NewValue}</code> or <code>false</code>. The result indicates whether the value matches the constraint, and if it does it can optionally be modified. This allows converting the value to a more appropriate Erlang term.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-Req2 = cowboy_req:set(resp_state, waiting_stream).
-]]></script>
+<p>Note that constraint functions SHOULD be pure and MUST NOT crash.</p>
 
 
 <!-- a.code -->

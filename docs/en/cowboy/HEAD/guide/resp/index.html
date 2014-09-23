@@ -92,13 +92,13 @@
 <p>You can send a reply with no particular headers or body. Cowboy will make sure to send the mandatory headers with the response.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:reply(200, Req).
+Req2 = cowboy_req:reply(200, Req).
 ]]></script>
 
 <p>You can define headers to be sent with the response. Note that header names must be lowercase. Again, Cowboy will make sure to send the mandatory headers with the response.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:reply(303, [
+Req2 = cowboy_req:reply(303, [
     {<<"location">>, <<"http://ninenines.eu">>}
 ], Req).
 ]]></script>
@@ -106,7 +106,7 @@
 <p>You can override headers that Cowboy would send otherwise. Any header set by the user will be used over the ones set by Cowboy. For example, you can advertise yourself as a different server.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:reply(200, [
+Req2 = cowboy_req:reply(200, [
     {<<"server">>, <<"yaws">>}
 ], Req).
 ]]></script>
@@ -116,7 +116,7 @@
 <p>Finally, you can also send a body with the response. Cowboy will automatically set the content-length header if you do. We recommend that you set the content-type header so the client may know how to read the body.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:reply(200, [
+Req2 = cowboy_req:reply(200, [
     {<<"content-type">>, <<"text/plain">>}
 ], "Hello world!", Req).
 ]]></script>
@@ -124,7 +124,7 @@
 <p>Here is the same example but sending HTML this time.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:reply(200, [
+Req2 = cowboy_req:reply(200, [
     {<<"content-type">>, <<"text/html">>}
 ], "<html><head>Hello world!</head><body><p>Hats off!</p></body></html>", Req).
 ]]></script>
@@ -136,10 +136,10 @@
 <p>You can also stream the response body. First, you need to initiate the reply by sending the response status code. Then you can send the body in chunks of arbitrary size.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:chunked_reply(200, Req),
-ok = cowboy_req:chunk("Hello...", Req2),
-ok = cowboy_req:chunk("chunked...", Req2),
-ok = cowboy_req:chunk("world!!", Req2).
+Req2 = cowboy_req:chunked_reply(200, Req),
+cowboy_req:chunk("Hello...", Req2),
+cowboy_req:chunk("chunked...", Req2),
+cowboy_req:chunk("world!!", Req2).
 ]]></script>
 
 <p>You should make sure to match on <code>ok</code> as an error may be returned.</p>
@@ -147,11 +147,11 @@ ok = cowboy_req:chunk("world!!", Req2).
 <p>While it is possible to send a chunked response without a content-type header, it is still recommended. You can set this header or any other just like for normal replies.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{ok, Req2} = cowboy_req:chunked_reply(200, [
+Req2 = cowboy_req:chunked_reply(200, [
     {<<"content-type">>, <<"text/html">>}
 ], Req),
-ok = cowboy_req:chunk("<html><head>Hello world!</head>", Req2),
-ok = cowboy_req:chunk("<body><p>Hats off!</p></body></html>", Req2).
+cowboy_req:chunk("<html><head>Hello world!</head>", Req2),
+cowboy_req:chunk("<body><p>Hats off!</p></body></html>", Req2).
 ]]></script>
 
 <p>Note that the reply and each chunk following it are sent immediately.</p>

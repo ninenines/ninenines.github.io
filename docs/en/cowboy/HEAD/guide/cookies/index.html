@@ -160,23 +160,38 @@ Req2 = cowboy_req:set_resp_cookie(<<"sessionid">>, SessionID, [
 
 <p>As we said, the client sends cookies with every request. But unlike the server, the client only sends the cookie name and value.</p>
 
-<p>You can read the value of a cookie.</p>
+<p>Cowboy provides two different ways to read cookies. You can either parse them as a list of key/value pairs, or match them into a map, optionally applying constraints to the values or providing a default if they are missing.</p>
+
+<p>You can parse the cookies and then use standard library functions to access individual values.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{CookieVal, Req2} = cowboy_req:cookie(<<"lang">>, Req).
+Cookies = cowboy_req:parse_cookies(Req),
+{_, Lang} = lists:keyfind(<<"lang">>, 1, Cookies).
 ]]></script>
 
-<p>You can also get a default value returned when the cookie isn't set.</p>
+<p>You can match the cookies into a map.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{CookieVal, Req2} = cowboy_req:cookie(<<"lang">>, Req, <<"fr">>).
+#{id := ID, lang := Lang} = cowboy_req:match_cookies(Req, [id, lang]).
 ]]></script>
 
-<p>And you can obtain all cookies at once as a list of key/value tuples.</p>
+<p>You can use constraints to validate the values while matching them. The following snippet will crash if the <code>id</code> cookie is not an integer number or if the <code>lang</code> cookie is empty. Additionally the <code>id</code> cookie value will be converted to an integer term, saving you a conversion step.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-{AllCookies, Req2} = cowboy_req:cookies(Req).
+CookiesMap = cowboy_req:match_cookies(Req, [{id, int}, {lang, nonempty}]).
 ]]></script>
+
+<p>Note that if two cookies share the same name, then the map value will be a list of the two cookie values.</p>
+
+<p>Read more about <a href="/docs/en/cowboy/HEAD/guide/constraints">constraints</a>.</p>
+
+<p>A default value can be provided. The default will be used if the <code>lang</code> cookie is not found. It will not be used if the cookie is found but has an empty value.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+#{lang := Lang} = cowboy_req:match_cookies(Req, [{lang, [], <<"en-US">>}]).
+]]></script>
+
+<p>If no default is provided and the value is missing, the query string is deemed invalid and the process will crash.</p>
 
 
 <!-- a.code -->
