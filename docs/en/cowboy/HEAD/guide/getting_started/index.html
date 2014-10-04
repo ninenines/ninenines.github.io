@@ -189,15 +189,15 @@ start(_Type, _Args) ->
 $ make new t=cowboy_http n=hello_handler
 ]]></script>
 
-<p>You can then open the <code>src/hello_handler.erl</code> file and modify the <code>handle/2</code> function like this to send a reply.</p>
+<p>You can then open the <code>src/hello_handler.erl</code> file and modify the <code>init/2</code> function like this to send a reply.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-handle(Req, State=#state{}) ->
+init(Req, Opts) ->
 	Req2 = cowboy_req:reply(200,
 		[{<<"content-type">>, <<"text/plain">>}],
 		<<"Hello Erlang!">>,
 		Req),
-	{ok, Req2, State}.
+	{ok, Req2, Opts}.
 ]]></script>
 
 <p>What the above code does is send a <code>200 OK</code> reply, with the <code>content-type</code> header set to <code>text/plain</code> and the response body set to <code>Hello Erlang!</code>.</p>

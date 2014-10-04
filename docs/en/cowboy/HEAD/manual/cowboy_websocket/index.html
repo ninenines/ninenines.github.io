@@ -83,7 +83,13 @@
 
 <p>The <code>cowboy_websocket</code> module implements the Websocket protocol.</p>
 
-<p>The callbacks for websocket handlers are defined in the manual for the <code>cowboy_websocket_handler</code> behaviour.</p>
+<p>This module is a sub protocol that defines four callbacks to be implemented by handlers. The <code>init/2</code> and <code>terminate/3</code> callbacks are common to all handler types and are documented in the manual for the <a href="/docs/en/cowboy/HEAD/manual/cowboy_handler">cowboy_handler</a> module.</p>
+
+<p>The <code>websocket_handle/3</code> and <code>websocket_info/3</code> callbacks are specific to Websocket handlers and will be called as many times as necessary until the Websocket connection is closed.</p>
+
+<p>The <code>init/2</code> callback can be used to negotiate Websocket protocol extensions with the client. It is highly recommended to return a timeout value from this callback to ensure that the process is terminated when no data has been received during that timespan. The default timeout is <code>infinity</code>, which should only be used if you have alternate means of ending inactive connections.</p>
+
+<p>Cowboy will terminate the process right after closing the Websocket connection. This means that there is no real need to perform any cleanup in the optional <code>terminate/3</code> callback.</p>
 
 <h2 id="types">Types</h2>
 
@@ -109,9 +115,89 @@
 
 <p>The version of the Websocket protocol being used.</p>
 
-<h2 id="exports">Exports</h2>
+<h2 id="terminate_reasons">Terminate reasons</h2>
 
-<p>None.</p>
+<p>The following values may be received as the terminate reason in the optional <code>terminate/3</code> callback.</p>
+
+<h3 id="normal">normal</h3>
+
+<p>The connection was closed normally before establishing a Websocket connection. This typically happens if an <code>ok</code> tuple is returned from the <code>init/2</code> callback.</p>
+
+<h3 id="remote">remote</h3>
+
+<p>The remote endpoint closed the connection without giving any further details.</p>
+
+<h3 id="{remote, code, payload}">{remote, Code, Payload}</h3>
+
+<p>The remote endpoint closed the connection with the given <code>Code</code> and <code>Payload</code> as the reason.</p>
+
+<h3 id="shutdown">shutdown</h3>
+
+<p>The handler requested to close the connection, either by returning a <code>shutdown</code> tuple or by sending a <code>close</code> frame.</p>
+
+<h3 id="timeout">timeout</h3>
+
+<p>The connection has been closed due to inactivity. The timeout value can be configured from <code>init/2</code>.</p>
+
+<h3 id="{crash, class, reason}">{crash, Class, Reason}</h3>
+
+<p>A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be used to obtain more information about the crash. The function <code>erlang:get_stacktrace/0</code> can also be called to obtain the stacktrace of the process when the crash occurred.</p>
+
+<h3 id="{error, badencoding}">{error, badencoding}</h3>
+
+<p>A text frame was sent by the client with invalid encoding. All text frames must be valid UTF-8.</p>
+
+<h3 id="{error, badframe}">{error, badframe}</h3>
+
+<p>A protocol error has been detected.</p>
+
+<h3 id="{error, closed}">{error, closed}</h3>
+
+<p>The socket has been closed brutally without a close frame being received first.</p>
+
+<h3 id="{error, reason}">{error, Reason}</h3>
+
+<p>A socket error ocurred.</p>
+
+<h2 id="callbacks">Callbacks</h2>
+
+<h3 id="websocket_handle">websocket_handle(InFrame, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>InFrame = {text | binary | ping | pong, binary()}</li>
+<li>Req = cowboy_req:req()</li>
+<li>State = any()</li>
+<li>OutFrame = frame()</li>
+</ul>
+
+<p>Handle the data received from the Websocket connection.</p>
+
+<p>This function will be called every time data is received from the Websocket connection.</p>
+
+<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+
+<p>The <code>hibernate</code> option will hibernate the process until it receives new data from the Websocket connection or an Erlang message.</p>
+
+<h3 id="websocket_info">websocket_info(Info, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>Info = any()</li>
+<li>Req = cowboy_req:req()</li>
+<li>State = any()</li>
+<li>OutFrame = frame()</li>
+</ul>
+
+<p>Handle the Erlang message received.</p>
+
+<p>This function will be called every time an Erlang message has been received. The message can be any Erlang term.</p>
+
+<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+
+<p>The <code>hibernate</code> option will hibernate the process until it receives another message or new data from the Websocket connection.</p>
 
 
 <!-- a.code -->

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Nine Nines Support: Cowboy Function Reference</title>
+    <title>Nine Nines Support: Cowboy User Guide</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Change them or set them up as you like -->
     <meta name="description" content="">
@@ -79,104 +79,114 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>cowboy_websocket_handler</span></h1>
+<h1 class="lined-header"><span>Multipart requests</span></h1>
 
-<p>The <code>cowboy_websocket_handler</code> behaviour defines the interface used by Websocket handlers.</p>
+<p>Multipart originates from MIME, an Internet standard that extends the format of emails. Multipart messages are a container for parts of any content-type.</p>
 
-<p>The <code>init/3</code> and <code>websocket_init/3</code> callbacks will always be called, followed by zero or more calls to <code>websocket_handle/3</code> and <code>websocket_info/3</code>. The <code>websocket_terminate/3</code> will always be called last.</p>
+<p>For example, a multipart message may have a part containing text and a second part containing an image. This is what allows you to attach files to emails.</p>
 
-<h2 id="types">Types</h2>
+<p>In the context of HTTP, multipart is most often used with the <code>multipart/form-data</code> content-type. This is the content-type you have to use when you want browsers to be allowed to upload files through HTML forms.</p>
 
-<p>None.</p>
+<p>Multipart is of course not required for uploading files, it is only required when you want to do so through HTML forms.</p>
 
-<h2 id="callbacks">Callbacks</h2>
+<p>You can read and parse multipart messages using the Req object directly.</p>
 
-<h3 id="init">init({TransportName, ProtocolName}, Req, Opts) -> {upgrade, protocol, cowboy_websocket} | {upgrade, protocol, cowboy_websocket, Req, Opts}</h3>
+<p>Cowboy defines two functions that allows you to get information about each part and read their contents.</p>
 
-<p>Types:</p>
+<h2 id="structure">Structure</h2>
 
-<ul>
-<li>TransportName = tcp | ssl | atom()</li>
-<li>ProtocolName = http | atom()</li>
-<li>Req = cowboy_req:req()</li>
-<li>Opts = any()</li>
-</ul>
+<p>A multipart message is a list of parts. Parts may contain either a multipart message or a non-multipart content-type. This allows parts to be arranged in a tree structure, although this is a rare case as far as the Web is concerned.</p>
 
-<p>Upgrade the protocol to <code>cowboy_websocket</code>.</p>
+<h2 id="form-data">Form-data</h2>
 
-<h3 id="websocket_init">websocket_init(TransportName, Req, Opts) -> {ok, Req, State} | {ok, Req, State, hibernate} | {ok, Req, State, Timeout} | {ok, Req, State, Timeout, hibernate} | {shutdown, Req}</h3>
+<p>In the normal case, when a form is submitted, the browser will use the <code>application/x-www-form-urlencoded</code> content-type. This type is just a list of keys and values and is therefore not fit for uploading files.</p>
 
-<p>Types:</p>
+<p>That's where the <code>multipart/form-data</code> content-type comes in. When the form is configured to use this content-type, the browser will use one part of the message for each form field. This means that a file input field will be sent in its own part, but the same applies to all other kinds of fields.</p>
 
-<ul>
-<li>TransportName = tcp | ssl | atom()</li>
-<li>Req = cowboy_req:req()</li>
-<li>Opts = any()</li>
-<li>State = any()</li>
-<li>Timeout = timeout()</li>
-</ul>
+<p>A form with a text input, a file input and a select choice box will result in a multipart message with three parts, one for each field.</p>
 
-<p>Initialize the state for this session.</p>
+<p>The browser does its best to determine the content-type of the files it sends this way, but you should not rely on it for determining the contents of the file. Proper investigation of the contents is recommended.</p>
 
-<p>This function is called before the upgrade to Websocket occurs. It can be used to negotiate Websocket protocol extensions with the client. It will typically be used to register this process to an event manager or a message queue in order to receive the messages the handler wants to process.</p>
+<h2 id="checking_the_content-type">Checking the content-type</h2>
 
-<p>The connection will stay up for a duration of up to <code>Timeout</code> milliseconds after it last received data from the socket, at which point it will stop and close the connection. By default this value is set to <code>infinity</code>. It is recommended to either set this value or ensure by any other mechanism that the handler will be closed after a certain period of inactivity.</p>
+<p>While there is a variety of multipart messages, the most common on the Web is <code>multipart/form-data</code>. It's the type of message being sent when an HTML form allows uploading files.</p>
 
-<p>The <code>hibernate</code> option will hibernate the process until it starts receiving either data from the Websocket connection or Erlang messages.</p>
+<p>You can quickly figure out if a multipart message has been sent by parsing the <code>content-type</code> header.</p>
 
-<p>The <code>shutdown</code> return value can be used to close the connection before upgrading to Websocket.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{<<"multipart">>, <<"form-data">>, _}
+    = cowboy_req:parse_header(<<"content-type">>, Req).
+]]></script>
 
-<h3 id="websocket_handle">websocket_handle(InFrame, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+<h2 id="reading_a_multipart_message">Reading a multipart message</h2>
 
-<p>Types:</p>
+<p>To read a message you have to iterate over all its parts. Then, for each part, you can inspect its headers and read its body.</p>
 
-<ul>
-<li>InFrame = {text | binary | ping | pong, binary()}</li>
-<li>Req = cowboy_req:req()</li>
-<li>State = any()</li>
-<li>OutFrame = cowboy_websocket:frame()</li>
-</ul>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+multipart(Req) ->
+    case cowboy_req:part(Req) of
+        {ok, _Headers, Req2} ->
+            {ok, _Body, Req3} = cowboy_req:part_body(Req2),
+            multipart(Req3);
+        {done, Req2} ->
+            Req2
+    end.
+]]></script>
 
-<p>Handle the data received from the Websocket connection.</p>
+<p>Parts do not have a size limit. When a part body is too big, Cowboy will return what it read so far and allow you to continue if you wish to do so.</p>
 
-<p>This function will be called every time data is received from the Websocket connection.</p>
+<p>The function <code>cow_multipart:form_data/1</code> can be used to quickly obtain information about a part from a <code>multipart/form-data</code> message. This function will tell you if the part is for a normal field or if it is a file being uploaded.</p>
 
-<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+<p>This can be used for example to allow large part bodies for files but crash when a normal field is too large.</p>
 
-<p>The <code>hibernate</code> option will hibernate the process until it receives new data from the Websocket connection or an Erlang message.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+multipart(Req) ->
+    case cowboy_req:part(Req) of
+        {ok, Headers, Req2} ->
+            Req4 = case cow_multipart:form_data(Headers) of
+                {data, _FieldName} ->
+                    {ok, _Body, Req3} = cowboy_req:part_body(Req2),
+                    Req3;
+                {file, _FieldName, _Filename, _CType, _CTransferEncoding} ->
+                    stream_file(Req2)
+            end,
+            multipart(Req4);
+        {done, Req2} ->
+            Req2
+    end.
 
-<h3 id="websocket_info">websocket_info(Info, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+stream_file(Req) ->
+    case cowboy_req:part_body(Req) of
+        {ok, _Body, Req2} ->
+            Req2;
+        {more, _Body, Req2} ->
+            stream_file(Req2)
+    end.
+]]></script>
 
-<p>Types:</p>
+<p>By default the body chunk Cowboy will return is limited to 8MB. This can of course be overriden. Both functions can take a second argument, the same list of options that will be passed to <code>cowboy_req:body/2</code> function.</p>
 
-<ul>
-<li>Info = any()</li>
-<li>Req = cowboy_req:req()</li>
-<li>State = any()</li>
-<li>OutFrame = cowboy_websocket:frame()</li>
-</ul>
+<h2 id="skipping_unwanted_parts">Skipping unwanted parts</h2>
 
-<p>Handle the Erlang message received.</p>
+<p>If you do not want to read a part's body, you can skip it. Skipping is easy. If you do not call the function to read the part's body, Cowboy will automatically skip it when you request the next part.</p>
 
-<p>This function will be called every time an Erlang message has been received. The message can be any Erlang term.</p>
+<p>The following snippet reads all part headers and skips all bodies:</p>
 
-<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+multipart(Req) ->
+    case cowboy_req:part(Req) of
+        {ok, _Headers, Req2} ->
+            multipart(Req2);
+        {done, Req2} ->
+            Req2
+    end.
+]]></script>
 
-<p>The <code>hibernate</code> option will hibernate the process until it receives another message or new data from the Websocket connection.</p>
+<p>Similarly, if you start reading the body and it ends up being too big, you can simply continue with the next part, Cowboy will automatically skip what remains.</p>
 
-<h3 id="websocket_terminate">websocket_terminate(Reason, Req, State) -> ok</h3>
+<p>Note that the skipping rate may not be adequate for your application. If you observe poor performance when skipping, you might want to consider manually skipping by calling the <code>cowboy_req:part_body/1</code> function directly.</p>
 
-<p>Types:</p>
-
-<ul>
-<li>Reason = {normal, shutdown | timeout} | {remote, closed} | {remote, cowboy_websocket:close_code(), binary()} | {error, badencoding | badframe | closed | atom()}</li>
-<li>Req = cowboy_req:req()</li>
-<li>State = any()</li>
-</ul>
-
-<p>Perform any necessary cleanup of the state.</p>
-
-<p>The connection will be closed and the process stopped right after this call.</p>
+<p>And if you started reading the message but decide that you do not need the remaining parts, you can simply stop reading entirely and Cowboy will automatically figure out what to do.</p>
 
 
 <!-- a.code -->
@@ -192,14 +202,14 @@
 
 <h3 id="docs-nav">Navigation</h3>
 
-<h3>See also</h3><ul><li><a href="/docs/en/cowboy/HEAD/guide/">User Guide</a></li><li><a href="/docs/en/cowboy/HEAD/index.html">README</a></li></ul>
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/HEAD/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/HEAD/index.html">README</a></li></ul>
 
 <h3>Version select</h3>
 <ul>
 
-	<li><a href="/docs/en/cowboy/1.0/manual/"><strong>1.0</strong></a></li>
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
 
-	<li><a href="/docs/en/cowboy/HEAD/manual/"><strong>HEAD</strong></a></li>
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
 
 </ul>
 

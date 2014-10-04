@@ -81,20 +81,22 @@
 
 <h1 class="lined-header"><span>REST handlers</span></h1>
 
-<p>REST is implemented in Cowboy as a protocol upgrade. Once upgraded, the request is handled as a state machine with many optional callbacks describing the resource and modifying the machine's behavior.</p>
+<p>REST is implemented in Cowboy as a sub protocol. The request is handled as a state machine with many optional callbacks describing the resource and modifying the machine's behavior.</p>
 
-<p>The REST handler is the recommended way to handle requests.</p>
+<p>The REST handler is the recommended way to handle HTTP requests.</p>
 
 <h2 id="initialization">Initialization</h2>
 
-<p>First, the <code>init/3</code> callback is called. This callback is common to all handlers. To use REST for the current request, this function must return an <code>upgrade</code> tuple.</p>
+<p>First, the <code>init/2</code> callback is called. This callback is common to all handlers. To use REST for the current request, this function must return a <code>cowboy_rest</code> tuple.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init({tcp, http}, Req, Opts) ->
-    {upgrade, protocol, cowboy_rest}.
+init(Req, Opts) ->
+    {cowboy_rest, Req, Opts}.
 ]]></script>
 
-<p>Cowboy will then switch to the REST protocol and start executing the state machine, starting from <code>rest_init/2</code> if it's defined, and ending with <code>rest_terminate/2</code> also if defined.</p>
+<p>Cowboy will then switch to the REST protocol and start executing the state machine.</p>
+
+<p>After reaching the end of the flowchart, the <code>terminate/3</code> callback will be called if it is defined.</p>
 
 <h2 id="methods">Methods</h2>
 
@@ -106,15 +108,11 @@ init({tcp, http}, Req, Opts) ->
 
 <p>All callbacks are optional. Some may become mandatory depending on what other defined callbacks return. The various flowcharts in the next chapter should be a useful to determine which callbacks you need.</p>
 
-<p>When the request starts being processed, Cowboy will call the <code>rest_init/2</code> function if it is defined, with the Req object and the handler options as arguments. This function must return <code>{ok, Req, State}</code> where <code>State</code> is the handler's state that all subsequent callbacks will receive.</p>
+<p>All callbacks take two arguments, the Req object and the State, and return a three-element tuple of the form <code>{Value, Req, State}</code>.</p>
 
-<p>At the end of every request, the special callback <code>rest_terminate/2</code> will be called if it is defined. It cannot be used to send a reply, and must always return <code>ok</code>.</p>
-
-<p>All other callbacks are resource callbacks. They all take two arguments, the Req object and the State, and return a three-element tuple of the form <code>{Value, Req, State}</code>.</p>
+<p>All callbacks can also return <code>{halt, Req, State}</code> to stop execution of the request.</p>
 
 <p>The following table summarizes the callbacks and their default values. If the callback isn't defined, then the default value will be used. Please look at the flowcharts to find out the result of each return value.</p>
-
-<p>All callbacks can also return <code>{halt, Req, State}</code> to stop execution of the request, at which point <code>rest_terminate/2</code> will be called.</p>
 
 <p>In the following table, "skip" means the callback is entirely skipped if it is undefined, moving directly to the next step. Similarly, "none" means there is no default value for this callback.</p>
 
@@ -135,7 +133,6 @@ init({tcp, http}, Req, Opts) ->
 <tr><td>generate_etag</td><td><code>undefined</code></td></tr>
 <tr><td>is_authorized</td><td><code>true</code></td></tr>
 <tr><td>is_conflict</td><td><code>false</code></td></tr>
-<tr><td>known_content_type</td><td><code>true</code></td></tr>
 <tr><td>known_methods</td><td><code>[<<"GET">>, <<"HEAD">>, <<"POST">>, <<"PUT">>, <<"PATCH">>, <<"DELETE">>, <<"OPTIONS">>]</code></td></tr>
 <tr><td>languages_provided</td><td>skip</td></tr>
 <tr><td>last_modified</td><td><code>undefined</code></td></tr>

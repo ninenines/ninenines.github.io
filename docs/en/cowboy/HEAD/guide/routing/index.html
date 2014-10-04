@@ -222,22 +222,11 @@ HostMatch = "*".
 
 <h2 id="constraints">Constraints</h2>
 
-<p>After the matching has completed, the resulting bindings can be tested against a set of constraints. Constraints are only tested when the binding is defined. They run in the order you defined them. The match will succeed only if they all succeed.</p>
+<p>After the matching has completed, the resulting bindings can be tested against a set of constraints. Constraints are only tested when the binding is defined. They run in the order you defined them. The match will succeed only if they all succeed. If the match fails, then Cowboy tries the next route in the list.</p>
 
-<p>They are always given as a two or three elements tuple, where the first element is the name of the binding, the second element is the constraint's name, and the optional third element is the constraint's arguments.</p>
+<p>The format used for constraints is the same as match functions in <code>cowboy_req</code>: they are provided as a list of fields which may have one or more constraints. While the router accepts the same format, it will skip fields with no constraints and will also ignore default values, if any.</p>
 
-<p>The following constraints are currently defined:</p>
-
-<ul>
-<li>{Name, int}</li>
-<li>{Name, function, fun ((Value) -> true | {true, NewValue} | false)}</li>
-</ul>
-
-<p>The <code>int</code> constraint will check if the binding is a binary string representing an integer, and if it is, will convert the value to integer.</p>
-
-<p>The <code>function</code> constraint will pass the binding value to a user specified function that receives the binary value as its only argument and must return whether it fulfills the constraint, optionally modifying the value. The value thus returned can be of any type.</p>
-
-<p>Note that constraint functions SHOULD be pure and MUST NOT crash.</p>
+<p>Read more about <a href="/docs/en/cowboy/HEAD/guide/constraints">constraints</a>.</p>
 
 <h2 id="compilation">Compilation</h2>
 

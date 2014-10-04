@@ -83,13 +83,9 @@
 
 <p>The <code>cowboy_rest</code> module implements REST semantics on top of the HTTP protocol.</p>
 
-<p>This module cannot be described as a behaviour due to most of the callbacks it defines being optional. It has the same semantics as a behaviour otherwise.</p>
+<p>This module is a sub protocol that defines many callbacks be implemented by handlers. The <code>init/2</code> and <code>terminate/3</code> callbacks are common to all handler types and are documented in the manual for the <a href="/docs/en/cowboy/HEAD/manual/cowboy_handler">cowboy_handler</a> module.</p>
 
-<p>The only mandatory callback is <code>init/3</code>, needed to perform the protocol upgrade.</p>
-
-<h2 id="types">Types</h2>
-
-<p>None.</p>
+<p>All other callbacks are optional, though some may become required depending on the return value of previous callbacks.</p>
 
 <h2 id="meta_values">Meta values</h2>
 
@@ -119,47 +115,19 @@
 
 <p>This value is always defined after the call to <code>content_types_provided/2</code>.</p>
 
+<h2 id="terminate_reasons">Terminate reasons</h2>
+
+<p>The following values may be received as the terminate reason in the optional <code>terminate/3</code> callback.</p>
+
+<h3 id="normal">normal</h3>
+
+<p>The connection was closed normally.</p>
+
+<h3 id="{crash, class, reason}">{crash, Class, Reason}</h3>
+
+<p>A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be used to obtain more information about the crash. The function <code>erlang:get_stacktrace/0</code> can also be called to obtain the stacktrace of the process when the crash occurred.</p>
+
 <h2 id="callbacks">Callbacks</h2>
-
-<h3 id="init">init({TransportName, ProtocolName}, Req, Opts) -> {upgrade, protocol, cowboy_rest} | {upgrade, protocol, cowboy_rest, Req, Opts}</h3>
-
-<p>Types:</p>
-
-<ul>
-<li>TransportName = tcp | ssl | atom()</li>
-<li>ProtocolName = http | atom()</li>
-<li>Req = cowboy_req:req()</li>
-<li>Opts = any()</li>
-</ul>
-
-<p>Upgrade the protocol to <code>cowboy_rest</code>.</p>
-
-<p>This is the only mandatory callback.</p>
-
-<h3 id="rest_init">rest_init(Req, Opts) -> {ok, Req, State}</h3>
-
-<p>Types:</p>
-
-<ul>
-<li>Req = cowboy_req:req()</li>
-<li>Opts = any()</li>
-<li>State = any()</li>
-</ul>
-
-<p>Initialize the state for this request.</p>
-
-<h3 id="rest_terminate">rest_terminate(Req, State) -> ok</h3>
-
-<p>Types:</p>
-
-<ul>
-<li>Req = cowboy_req:req()</li>
-<li>State = any()</li>
-</ul>
-
-<p>Perform any necessary cleanup of the state.</p>
-
-<p>This callback should release any resource currently in use, clear any active timer and reset the process to its original state, as it might be reused for future requests sent on the same connection.</p>
 
 <h3 id="callback">Callback(Req, State) -> {Value, Req, State} | {halt, Req, State}</h3>
 
@@ -388,18 +356,6 @@
 <p>Return whether the put action results in a conflict.</p>
 
 <p>A <code>409 Conflict</code> response will be sent if this function returns <code>true</code>.</p>
-
-<h3 id="known_content_type">known_content_type</h3>
-
-<ul>
-<li>Methods: all</li>
-<li>Value type: boolean()</li>
-<li>Default value: true</li>
-</ul>
-
-<p>Return whether the content-type is known.</p>
-
-<p>This function determines if the server understands the content-type, regardless of its use by the resource.</p>
 
 <h3 id="known_methods">known_methods</h3>
 

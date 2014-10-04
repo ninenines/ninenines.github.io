@@ -79,110 +79,111 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Handling plain HTTP requests</span></h1>
+<h1 class="lined-header"><span>Static files</span></h1>
 
-<p>The simplest way to handle a request is by writing a plain HTTP handler. It is modeled after Erlang/OTP's gen_server behaviour, although simplified, as Cowboy will simply call the three callbacks sequentially.</p>
+<p>Cowboy comes with a special handler built as a REST handler and designed specifically for serving static files. It is provided as a convenience and provides a quick solution for serving files during development.</p>
 
-<h2 id="initialization">Initialization</h2>
+<p>For systems in production, consider using one of the many Content Distribution Network (CDN) available on the market, as they are the best solution for serving files. They are covered in the next chapter. If you decide against using a CDN solution, then please look at the chapter after that, as it explains how to efficiently serve static files on your own.</p>
 
-<p>The first callback, <code>init/3</code>, is common to all handlers, as it is used to identify the type of handler. Plain HTTP handlers just return <code>ok</code>.</p>
+<p>The static handler can serve either one file or all files from a given directory. It can also send etag headers for client-side caching.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(_Type, Req, _Opts) ->
-    {ok, Req, no_state}.
-]]></script>
+<p>To use the static file handler, simply add routes for it with the appropriate options.</p>
 
-<p>This function receives the name of the transport and protocol modules used for processing the request. They can be used to quickly dismiss requests. For example the following handler will crash when accessed using TCP instead of SSL.</p>
+<h2 id="serve_one_file">Serve one file</h2>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init({ssl, _}, Req, _Opts) ->
-    {ok, Req, no_state}.
-]]></script>
+<p>You can use the static handler to serve one specific file from an application's private directory. This is particularly useful to serve an <code>index.html</code> file when the client requests the <code>/</code> path, for example. The path configured is relative to the given application's private directory.</p>
 
-<p>This function also receives the options associated with this route that you configured previously. If your handler does not use options, then it is recommended you match the value <code>[]</code> directly to quickly detect configuration errors.</p>
+<p>The following rule will serve the file <code>static/index.html</code> from the application <code>my_app</code>'s priv directory whenever the path <code>/</code> is accessed.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(_Type, Req, []) ->
-    {ok, Req, no_state}.
+{"/", cowboy_static, {priv_file, my_app, "static/index.html"}}
 ]]></script>
 
-<p>You do not need to validate the options unless they are user configured. If they are, and there's a configuration error, you may choose to crash. For example, this will crash if the required <code>lang</code> option is not found.</p>
+<p>You can also specify the absolute path to a file, or the path to the file relative to the current directory.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(_Type, Req, Opts) ->
-    {_, _Lang} = lists:keyfind(lang, 1, Opts),
-    {ok, Req, no_state}.
+{"/", cowboy_static, {file, "/var/www/index.html"}}
 ]]></script>
 
-<p>If your users are unlikely to figure out the issue without explanations, then you should send a more meaningful error back to the user. Since we already replied to the user, there's no need for us to continue with the handler code, so we use the <code>shutdown</code> return value to stop early.</p>
+<h2 id="serve_all_files_from_a_directory">Serve all files from a directory</h2>
+
+<p>You can also use the static handler to serve all files that can be found in the configured directory. The handler will use the <code>path_info</code> information to resolve the file location, which means that your route must end with a <code>[...]</code> pattern for it to work. All files are served, including the ones that may be found in subfolders.</p>
+
+<p>You can specify the directory relative to an application's private directory.</p>
+
+<p>The following rule will serve any file found in the application <code>my_app</code>'s priv directory inside the <code>static/assets</code> folder whenever the requested path begins with <code>/assets/</code>.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(_Type, Req, Opts) ->
-    case lists:keyfind(lang, 1, Opts) of
-        false ->
-            Req2 = cowboy_req:reply(500, [
-                {<<"content-type">>, <<"text/plain">>}
-            ], "Missing option 'lang'.", Req),
-            {shutdown, Req2, no_state};
-        _ ->
-            {ok, Req, no_state}
-    end.
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets"}}
 ]]></script>
 
-<p>Once the options have been validated, we can use them safely. So we need to pass them onward to the rest of the handler. That's what the third element of the return tuple, the state, is for.</p>
-
-<p>We recommend that you create a state record for this. The record will make your handler code clearer and will allow you to better use Dialyzer for type checking.</p>
+<p>You can also specify the absolute path to the directory or set it relative to the current directory.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
--record(state, {
-    lang :: en | fr
-    %% More fields here.
-}).
-
-init(_Type, Req, Opts) ->
-    {_, Lang} = lists:keyfind(lang, 1, Opts),
-    {ok, Req, #state{lang=Lang}}.
+{"/assets/[...]", cowboy_static, {dir, "/var/www/assets"}}
 ]]></script>
 
-<h2 id="handling_the_request">Handling the request</h2>
+<h2 id="customize_the_mimetype_detection">Customize the mimetype detection</h2>
 
-<p>The second callback, <code>handle/2</code>, is specific to plain HTTP handlers. It's where you, wait for it, handle the request.</p>
+<p>By default, Cowboy will attempt to recognize the mimetype of your static files by looking at the extension.</p>
 
-<p>A handle function that does nothing would look like this:</p>
+<p>You can override the function that figures out the mimetype of the static files. It can be useful when Cowboy is missing a mimetype you need to handle, or when you want to reduce the list to make lookups faster. You can also give a hard-coded mimetype that will be used unconditionally.</p>
+
+<p>Cowboy comes with two functions built-in. The default function only handles common file types used when building Web applications. The other function is an extensive list of hundreds of mimetypes that should cover almost any need you may have. You can of course create your own function.</p>
+
+<p>To use the default function, you should not have to configure anything, as it is the default. If you insist, though, the following will do the job.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-handle(Req, State) ->
-    {ok, Req, State}.
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{mimetypes, cow_mimetypes, web}]}}
 ]]></script>
 
-<p>There's no other return value. To obtain information about the request, or send a response, you would use the Req object here. The Req object is documented in its own chapter.</p>
+<p>As you can see, there is an optional field that may contain a list of less used options, like mimetypes or etag. All option types have this optional field.</p>
 
-<p>The following handle function will send a fairly original response.</p>
+<p>To use the function that will detect almost any mimetype, the following configuration will do.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-handle(Req, State) ->
-    Req2 = cowboy_req:reply(200, [
-        {<<"content-type">>, <<"text/plain">>}
-    ], <<"Hello World!">>, Req),
-    {ok, Req2, State}.
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{mimetypes, cow_mimetypes, all}]}}
 ]]></script>
 
-<h2 id="cleaning_up">Cleaning up</h2>
-
-<p>The third and last callback, <code>terminate/3</code>, will most likely be empty in your handler.</p>
+<p>You probably noticed the pattern by now. The configuration expects a module and a function name, so you can use any of your own functions instead.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-terminate(_Reason, Req, State) ->
-    ok.
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{mimetypes, Module, Function}]}}
 ]]></script>
 
-<p>This callback is strictly reserved for any required cleanup. You cannot send a response from this function. There is no other return value.</p>
+<p>The function that performs the mimetype detection receives a single argument that is the path to the file on disk. It is recommended to return the mimetype in tuple form, although a binary string is also allowed (but will require extra processing). If the function can't figure out the mimetype, then it should return <code>{<<"application">>, <<"octet-stream">>, []}</code>.</p>
 
-<p>If you used the process dictionary, timers, monitors or may be receiving messages, then you can use this function to clean them up, as Cowboy might reuse the process for the next keep-alive request.</p>
+<p>When the static handler fails to find the extension in the list, it will send the file as <code>application/octet-stream</code>. A browser receiving such file will attempt to download it directly to disk.</p>
 
-<p>The chances of any of this happening in your handler are pretty thin however. The use of the process dictionary is discouraged in Erlang code in general. And if you need to use timers, monitors or to receive messages, you are better off with a loop handler, a different kind of handler meant specifically for this use.</p>
+<p>Finally, the mimetype can be hard-coded for all files. This is especially useful in combination with the <code>file</code> and <code>priv_file</code> options as it avoids needless computation.</p>
 
-<p>This function is still available should you need it. It will always be called.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/", cowboy_static, {priv_file, my_app, "static/index.html",
+    [{mimetypes, {<<"text">>, <<"html">>, []}}]}}
+]]></script>
+
+<h2 id="generate_an_etag">Generate an etag</h2>
+
+<p>By default, the static handler will generate an etag header value based on the size and modified time. This solution can not be applied to all systems though. It would perform rather poorly over a cluster of nodes, for example, as the file metadata will vary from server to server, giving a different etag on each server.</p>
+
+<p>You can however change the way the etag is calculated.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{etag, Module, Function}]}}
+]]></script>
+
+<p>This function will receive three arguments: the path to the file on disk, the size of the file and the last modification time. In a distributed setup, you would typically use the file path to retrieve an etag value that is identical across all your servers.</p>
+
+<p>You can also completely disable etag handling.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{etag, false}]}}
+]]></script>
 
 
 <!-- a.code -->

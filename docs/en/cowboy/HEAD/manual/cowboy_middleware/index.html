@@ -95,7 +95,7 @@
 
 <h2 id="callbacks">Callbacks</h2>
 
-<h3 id="execute">execute(Req, Env) -> {ok, Req, Env} | {suspend, Module, Function, Args} | {halt, Req} | {error, StatusCode, Req}</h3>
+<h3 id="execute">execute(Req, Env) -> {ok, Req, Env} | {suspend, Module, Function, Args} | {halt, Req}</h3>
 
 <p>Types:</p>
 
@@ -105,7 +105,6 @@
 <li>Module = module()</li>
 <li>Function = atom()</li>
 <li>Args = [any()]</li>
-<li>StatusCode = cowboy:http_status()</li>
 </ul>
 
 <p>Execute the middleware.</p>
@@ -115,8 +114,6 @@
 <p>The <code>suspend</code> return value will hibernate the process until an Erlang message is received. Note that when resuming, any previous stacktrace information will be gone.</p>
 
 <p>The <code>halt</code> return value stops Cowboy from doing any further processing of the request, even if there are middlewares that haven't been executed yet. The connection may be left open to receive more requests from the client.</p>
-
-<p>The <code>error</code> return value sends an error response identified by the <code>StatusCode</code> and then proceeds to terminate the connection. Middlewares that haven't been executed yet will not be called.</p>
 
 
 <!-- a.code -->

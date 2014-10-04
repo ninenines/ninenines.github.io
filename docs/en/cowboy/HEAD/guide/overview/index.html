@@ -79,31 +79,82 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Protocol upgrades</span></h1>
+<h1 class="lined-header"><span>Request overview</span></h1>
 
-<p>Cowboy features many different handlers, each for different purposes. All handlers have a common entry point: the <code>init/3</code> function.</p>
+<p>This chapter explains the different steps a request goes through until a response is sent, along with details of the Cowboy implementation.</p>
 
-<p>The default handler type is the simple HTTP handler.</p>
+<h2 id="request/response">Request/response</h2>
 
-<p>To switch to a different protocol, you must perform a protocol upgrade. This is what is done for Websocket and REST and is explained in details in the respective chapters.</p>
+<p>As you already know, HTTP clients connect to the server and send a request for a resource; the server then sends a response containing the resource if it could obtain it.</p>
 
-<p>You can also create your own protocol on top of Cowboy and use the protocol upgrade mechanism to switch to it.</p>
+<p>Before the server can send the resource, however, it needs to perform many different operations to read the request, find the resource, prepare the response being sent and often other related operations the user can add like writing logs.</p>
 
-<p>For example, if you create the <code>my_protocol</code> module implementing the <code>cowboy_sub_protocol</code> behavior, then you can upgrade to it by simply returning the module name from <code>init/3</code>.</p>
+<p>Requests take the following route in Cowboy:</p>
+
+<p><img title="HTTP request/response flowchart" src="/docs/en/cowboy/HEAD/guide/http_req_resp.png"/></p>
+
+<p>This shows the default middlewares, but they may be configured differently in your setup. The dark green indicates the points where you can hook your own code, the light green is the Cowboy code that you can of course configure as needed.</p>
+
+<p>The <code>acceptor</code> is the part of the server that accepts the connection and create an Erlang process to handle it. The <code>parser</code> then starts reading from the socket and handling requests as they come until the socket is closed.</p>
+
+<p>A response may be sent at many different points in the life of the request. If Cowboy can't parse the request, it gives up with an error response. If the router can't find the resource, it sends a not found error. Your own code can of course send a response at any time.</p>
+
+<p>When a response is sent, you can optionally modify it or act upon it by enabling the <code>onresponse</code> hook. By default the response is sent directly to the client.</p>
+
+<h2 id="and_then?">And then?</h2>
+
+<p>Behavior depends on what protocol is in use.</p>
+
+<p>HTTP/1.0 can only process one request per connection, so Cowboy will close the connection immediately after it sends the response.</p>
+
+<p>HTTP/1.1 allows the client to request that the server keeps the connection alive. This mechanism is described in the next section.</p>
+
+<p>SPDY is designed to allow sending multiple requests asynchronously on the same connection. Details on what this means for your application is described in this chapter.</p>
+
+<h2 id="keep-alive_(http/1.1)">Keep-alive (HTTP/1.1)</h2>
+
+<p>With HTTP/1.1, the connection may be left open for subsequent requests to come. This mechanism is called <code>keep-alive</code>.</p>
+
+<p>When the client sends a request to the server, it includes a header indicating whether it would like to leave the socket open. The server may or may not accept, indicating its choice by sending the same header in the response.</p>
+
+<p>Cowboy will include this header automatically in all responses to HTTP/1.1 requests. You can however force the closing of the socket if you want. When Cowboy sees you want to send a <code>connection: close</code> header, it will not override it and will close the connection as soon as the reply is sent.</p>
+
+<p>This snippet will force Cowboy to close the connection.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(_, _, _Opts) ->
-    {upgrade, protocol, my_protocol}.
+Req2 = cowboy_req:reply(200, [
+    {<<"connection">>, <<"close">>},
+], <<"Closing the socket in 3.. 2.. 1..">>, Req).
 ]]></script>
 
-<p>The <code>cowboy_sub_protocol</code> behavior only requires one callback, <code>upgrade/4</code>. It receives the Req object, the middleware environment, and the handler and options for this request. This is the same module as the <code>init/3</code> function and the same options that were passed to it.</p>
+<p>Cowboy will only accept a certain number of new requests on the same connection. By default it will run up to 100 requests. This number can be changed by setting the <code>max_keepalive</code> configuration value when starting an HTTP listener.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-upgrade(Req, Env, Handler, HandlerOpts) ->
-    %% ...
+cowboy:start_http(my_http_listener, 100, [{port, 8080}], [
+        {env, [{dispatch, Dispatch}]},
+        {max_keepalive, 5}
+]).
 ]]></script>
 
-<p>This callback is expected to behave like a middleware. Please see the corresponding chapter for more information.</p>
+<p>Cowboy implements the keep-alive mechanism by reusing the same process for all requests. This allows Cowboy to save memory. This works well because most code will not have any side effect impacting subsequent requests. But it also means you need to clean up if you do have code with side effects. The <code>terminate/3</code> function can be used for this purpose.</p>
+
+<h2 id="pipelining_(http/1.1)">Pipelining (HTTP/1.1)</h2>
+
+<p>While HTTP is designed as a sequential protocol, with the client sending a request and then waiting for the response from the server, nothing prevents the client from sending more requests to the server without waiting for the response, due to how sockets work. The server still handles the requests sequentially and sends the responses in the same order.</p>
+
+<p>This mechanism is called pipelining. It allows reducing latency when a client needs to request many resources at the same time. This is used by browsers when requesting static files for example.</p>
+
+<p>This is handled automatically by the server.</p>
+
+<h2 id="asynchronous_requests_(spdy)">Asynchronous requests (SPDY)</h2>
+
+<p>In SPDY, the client can send a request at any time. And the server can send a response at any time too.</p>
+
+<p>This means for example that the client does not need to wait for a request to be fully sent to send another, it is possible to interleave a request with the request body of another request. The same is true with responses. Responses may also be sent in a different order.</p>
+
+<p>Because requests and responses are fully asynchronous, Cowboy creates a new process for each request, and these processes are managed by another process that handles the connection itself.</p>
+
+<p>SPDY servers may also decide to send resources to the client before the client requests them. This is especially useful for sending static files associated with the HTML page requested, as this reduces the latency of the overall response. Cowboy does not support this particular mechanism at this point, however.</p>
 
 
 <!-- a.code -->

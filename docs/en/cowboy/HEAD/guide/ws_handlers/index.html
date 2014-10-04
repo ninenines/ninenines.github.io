@@ -87,44 +87,19 @@
 
 <h2 id="initialization">Initialization</h2>
 
-<p>First, the <code>init/3</code> callback is called. This callback is common to all handlers. To establish a Websocket connection, this function must return an <code>upgrade</code> tuple.</p>
+<p>First, the <code>init/2</code> callback is called. This callback is common to all handlers. To establish a Websocket connection, this function must return a <code>ws</code> tuple.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(_, Req, Opts) ->
-	{upgrade, protocol, cowboy_websocket}.
+init(Req, Opts) ->
+	{cowboy_websocket, Req, Opts}.
 ]]></script>
 
-<p>It is also possible to return an update Req object and options using the longer form of this tuple.</p>
-
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(_Type, Req, Opts) ->
-	{upgrade, protocol, cowboy_websocket, Req, Opts}.
-]]></script>
-
-<p>Upon receiving this tuple, Cowboy will switch to the code that handles Websocket connections. It does not immediately perform the handshake however. First, it calls the <code>websocket_init/3</code> callback.</p>
-
-<p>This function must be used to initialize the state, and can also be used to register the process, start a timer, etc. As long as the function returns an <code>ok</code> tuple, then Cowboy performs the Websocket handshake.</p>
-
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-websocket_init(_Type, Req, _Opts) ->
-    {ok, Req, #state{}}.
-]]></script>
-
-<p>A <code>shutdown</code> tuple can be returned to refuse to perform the handshake. When doing so, Cowboy will send a <code>400 Bad Request</code> response to the client and close the connection.</p>
-
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-websocket_init(_Type, Req, _Opts) ->
-	{shutdown, Req}.
-]]></script>
-
-<p>It is also possible to perform a <code>cowboy_req:reply/{2,3,4}</code> before returning a <code>shutdown</code> tuple, allowing you to override the response sent back to the client.</p>
-
-<p>Note that browser support for handling Websocket connection failures may vary.</p>
+<p>Upon receiving this tuple, Cowboy will switch to the code that handles Websocket connections and perform the handshake immediately.</p>
 
 <p>If the sec-websocket-protocol header was sent with the request for establishing a Websocket connection, then the Websocket handler <em>must</em> select one of these subprotocol and send it back to the client, otherwise the client might decide to close the connection, assuming no correct subprotocol was found.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-websocket_init(_Type, Req, _Opts) ->
+init(Req, _Opts) ->
 	case cowboy_req:parse_header(<<"sec-websocket-protocol">>, Req) of
 		undefined ->
 			{ok, Req, #state{}};
@@ -135,20 +110,20 @@ websocket_init(_Type, Req, _Opts) ->
 						<<"mychat2">>, Req),
 					{ok, Req2, #state{}};
 				false ->
-					{shutdown, Req}
+					{shutdown, Req, undefined}
 			end
 	end.
 ]]></script>
 
-<p>It is not recommended to wait too long inside the <code>websocket_init/3</code> function. Any extra initialization may be done after returning by sending yourself a message before doing anything. Any message sent to <code>self()</code> from <code>websocket_init/3</code> is guaranteed to arrive before any frames from the client.</p>
+<p>It is not recommended to wait too long inside the <code>init/2</code> function. Any extra initialization may be done after returning by sending yourself a message before doing anything. Any message sent to <code>self()</code> from <code>init/2</code> is guaranteed to arrive before any frames from the client.</p>
 
 <p>It is also very easy to ensure that this message arrives before any message from other processes by sending it before registering or enabling timers.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-websocket_init(_Type, Req, _Opts) ->
+init(Req, _Opts) ->
 	self() ! post_init,
 	%% Register process here...
-	{ok, Req, #state{}}.
+	{cowboy_websocket, Req, #state{}}.
 
 websocket_info(post_init, Req, State) ->
 	%% Perform post_init initialization here...
@@ -216,8 +191,8 @@ websocket_info(hello_world, Req, State) ->
 <p>A good timeout value is 60 seconds.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-websocket_init(_Type, Req, _Opts) ->
-	{ok, Req, #state{}, 60000}.
+init(Req, _Opts) ->
+	{cowboy_websocket, Req, #state{}, 60000}.
 ]]></script>
 
 <p>This value cannot be changed once it is set. It defaults to <code>infinity</code>.</p>

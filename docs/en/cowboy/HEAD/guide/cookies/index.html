@@ -172,13 +172,13 @@ Cookies = cowboy_req:parse_cookies(Req),
 <p>You can match the cookies into a map.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-#{id := ID, lang := Lang} = cowboy_req:match_cookies(Req, [id, lang]).
+#{id := ID, lang := Lang} = cowboy_req:match_cookies([id, lang], Req).
 ]]></script>
 
 <p>You can use constraints to validate the values while matching them. The following snippet will crash if the <code>id</code> cookie is not an integer number or if the <code>lang</code> cookie is empty. Additionally the <code>id</code> cookie value will be converted to an integer term, saving you a conversion step.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-CookiesMap = cowboy_req:match_cookies(Req, [{id, int}, {lang, nonempty}]).
+CookiesMap = cowboy_req:match_cookies([{id, int}, {lang, nonempty}], Req).
 ]]></script>
 
 <p>Note that if two cookies share the same name, then the map value will be a list of the two cookie values.</p>
@@ -188,7 +188,7 @@ CookiesMap = cowboy_req:match_cookies(Req, [{id, int}, {lang, nonempty}]).
 <p>A default value can be provided. The default will be used if the <code>lang</code> cookie is not found. It will not be used if the cookie is found but has an empty value.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-#{lang := Lang} = cowboy_req:match_cookies(Req, [{lang, [], <<"en-US">>}]).
+#{lang := Lang} = cowboy_req:match_cookies([{lang, [], <<"en-US">>}], Req).
 ]]></script>
 
 <p>If no default is provided and the value is missing, the query string is deemed invalid and the process will crash.</p>

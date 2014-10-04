@@ -96,13 +96,74 @@
 <li>result = ok</li>
 </ul>
 
-<h2 id="types">Types</h2>
+<p>This module also defines the <code>cowboy_handler</code> behaviour that defines the basic interface for handlers. All Cowboy handlers implement at least the <code>init/2</code> callback, and may implement the <code>terminate/3</code> callback optionally.</p>
 
-<p>None.</p>
+<h2 id="terminate_reasons">Terminate reasons</h2>
+
+<p>The following values may be received as the terminate reason in the optional <code>terminate/3</code> callback. Different handler types may define additional terminate reasons.</p>
+
+<h3 id="normal">normal</h3>
+
+<p>The connection was closed normally.</p>
+
+<h3 id="{crash, class, reason}">{crash, Class, Reason}</h3>
+
+<p>A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be used to obtain more information about the crash. The function <code>erlang:get_stacktrace/0</code> can also be called to obtain the stacktrace of the process when the crash occurred.</p>
+
+<h2 id="callbacks">Callbacks</h2>
+
+<h3 id="init">init(Req, Opts) -> {ok, Req, State} | {Module, Req, State} | {Module, Req, State, hibernate} | {Module, Req, State, Timeout} | {Module, Req, State, Timeout, hibernate}</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>Req = cowboy_req:req()</li>
+<li>Opts = any()</li>
+<li>State = any()</li>
+<li>Module = module()</li>
+<li>Timeout = timeout()</li>
+</ul>
+
+<p>Process the request.</p>
+
+<p>This function can be used to switch to an alternate handler type by returning the name of the module to be used, along with a few options.</p>
+
+<p>For basic handlers this is the function where the response should be sent. If no response is sent, Cowboy will ensure that a <code>204 No Content</code> response is sent.</p>
+
+<p>A crash in this callback will result in <code>terminate/3</code> being called if it is defined, with the <code>State</code> argument set to the value of <code>Opts</code> originally given to the <code>init/2</code> callback.</p>
+
+<h3 id="terminate">terminate(Reason, Req, State) -> ok</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>Reason = any()</li>
+<li>Req = cowboy_req:req()</li>
+<li>State = any()</li>
+</ul>
+
+<p>Perform any necessary cleanup of the state.</p>
+
+<p>This callback should release any resource currently in use, clear any active timer and reset the process to its original state, as it might be reused for future requests sent on the same connection. Typical plain HTTP handlers rarely need to use it.</p>
+
+<p>A crash in this callback or an invalid return value will result in the closing of the connection and the termination of the process.</p>
 
 <h2 id="exports">Exports</h2>
 
-<p>None.</p>
+<h3 id="terminate">terminate(Reason, Req, State, Handler) -> ok</h3>
+
+<p>Types:</p>
+
+<ul>
+<li>Reason = any()</li>
+<li>Req = cowboy_req:req()</li>
+<li>State = any()</li>
+<li>Handler = module()</li>
+</ul>
+
+<p>Call the optional <code>terminate/3</code> callback if it exists.</p>
+
+<p>This function should always be called at the end of the execution of a handler, to give it a chance to clean up or perform miscellaneous operations.</p>
 
 
 <!-- a.code -->
