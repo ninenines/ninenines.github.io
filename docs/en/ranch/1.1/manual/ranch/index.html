@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Ranch Function Reference</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch</span></h1>
+<div class="service-description">
+<p>The <code>ranch</code> module provides functions for starting and manipulating Ranch listeners.</p>
+<h2 id="types">Types</h2>
+<h4 id="max_conns">max_conns() = non_neg_integer() | infinity</h4>
+<blockquote> Maximum number of connections allowed on this listener.<br/><br/> This is a soft limit. The actual number of connections might be slightly above the limit due to concurrency when accepting new connections. Some connections may also be removed from this count explicitly by the user code.</blockquote>
+<h4 id="ref">ref() = any()</h4>
+<blockquote> Unique name used to refer to a listener.</blockquote>
+<h2 id="exports">Exports</h2>
+<h4 id="accept_ack">accept_ack(Ref) -> ok</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+</ul>
+ Acknowledge that the connection is accepted.<br/><br/> This function MUST be used by a connection process to inform Ranch that it initialized properly and let it perform any additional operations before the socket can be safely used.</blockquote>
+<h4 id="child_spec">child_spec(Ref, NbAcceptors, Transport, TransOpts, Protocol, ProtoOpts)	-> supervisor:child_spec()</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+<li>NbAcceptors = non_neg_integer()</li>
+<li>Transport = module()</li>
+<li>TransOpts = any()</li>
+<li>Protocol = module()</li>
+<li>ProtoOpts = any()</li>
+</ul>
+ Return child specifications for a new listener.<br/><br/> This function can be used to embed a listener directly in an application instead of letting Ranch handle it.</blockquote>
+<h4 id="get_max_connections">get_max_connections(Ref) -> MaxConns</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+<li>MaxConns = max_conns()</li>
+</ul>
+ Return the max number of connections allowed for the given listener.</blockquote>
+<h4 id="get_port">get_port(Ref) -> Port</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+<li>Port = inet:port_number()</li>
+</ul>
+ Return the port for the given listener.</blockquote>
+<h4 id="get_protocol_options">get_protocol_options(Ref) -> ProtoOpts</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+<li>ProtoOpts = any()</li>
+</ul>
+ Return the protocol options set for the given listener.</blockquote>
+<h4 id="remove_connection">remove_connection(Ref) -> ok</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+</ul>
+ Do not count this connection when limiting the number of connections.<br/><br/> You can use this function for long-running connection processes which spend most of their time idling rather than consuming resources. This allows Ranch to accept a lot more connections without sacrificing the latency of the system.<br/><br/> This function may only be called from a connection process.</blockquote>
+<h4 id="set_max_connections">set_max_connections(Ref, MaxConns) -> ok</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+<li>MaxConns = max_conns()</li>
+</ul>
+ Set the max number of connections for the given listener.<br/><br/> The change will be applied immediately. If the new value is smaller than the previous one, Ranch will not kill the extra connections, but will wait for them to terminate properly.</blockquote>
+<h4 id="set_protocol_options">set_protocol_options(Ref, ProtoOpts) -> ok</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+<li>ProtoOpts = any()</li>
+</ul>
+ Set the protocol options for the given listener.<br/><br/> The change will be applied immediately for all new connections. Old connections will not receive the new options.</blockquote>
+<h4 id="start_listener">start_listener(Ref, NbAcceptors, Transport, TransOpts, Protocol, ProtoOpts)	-> {ok, pid()} | {error, badarg}</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+<li>NbAcceptors = non_neg_integer()</li>
+<li>Transport = module()</li>
+<li>TransOpts = any()</li>
+<li>Protocol = module()</li>
+<li>ProtoOpts = any()</li>
+</ul>
+ Start listening for connections using the given transport and protocol. Returns the pid for this listener's supervisor.<br/><br/> There are five additional transport options that apply regardless of transport. They allow configuring how the connections are supervised, rate limited and allow using an already open listening socket.<br/><br/> The <code>ack_timeout</code> option defines how long post-accept socket initialization should take at a maximum. It defaults to <code>5000</code>.<br/><br/> The <code>connection_type</code> option defines the type of process that will handle the connection. It can be either <code>worker</code> or <code>supervisor</code>. It defaults to <code>worker</code>.<br/><br/> The <code>max_connections</code> option determines how many active connections are allowed before Ranch starts throttling the accept rate. This is a soft limit. It defaults to <code>1024</code>. Using the value <code>infinity</code> will disable this functionality entirely.<br/><br/> The <code>shutdown</code> option determines the policy used with regards to connection processes when shutting down the listener. It can be either a positive integer indicating the max number of ms the supervisor will wait before forcibly killing the children, or the atom <code>brutal_kill</code>. It defaults to <code>5000</code>.<br/><br/> The <code>socket</code> option allow passing an already open listening socket. In this case, Ranch will not call <code>Transport:listen/1</code> and so none of the transport specific options apply.</blockquote>
+<h4 id="stop_listener">stop_listener(Ref) -> ok | {error, not_found}</h4>
+<blockquote> Types:<ul>
+<li>Ref = ref()</li>
+</ul>
+ Stop the given listener.<br/><br/> The listener is stopped gracefully, first by closing the listening port, then by stopping the connection processes. These processes are stopped according to the <code>shutdown</code> transport option, which may be set to brutally kill all connection processes or give them some time to stop properly.<br/><br/> This function does not return until the listener is completely stopped.</blockquote>
+</div>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/ranch/1.1/guide/">User Guide</a></li><li><a href="/docs/en/ranch/1.1/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/ranch/1.1/manual/"><strong>1.1</strong></a></li>
+
+	<li><a href="/docs/en/ranch/1.0/manual/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/ranch/HEAD/manual/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+<script type="text/javascript">var switchTo5x=true;</script>
+<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher: "86681c5a-011b-481b-98b8-22b548283fe5", doNotHash: true, doNotCopy: true, hashAddressBar: false});</script>
+
+  </body>
+</html>

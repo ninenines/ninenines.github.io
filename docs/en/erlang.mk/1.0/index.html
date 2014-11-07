@@ -114,12 +114,18 @@ PROJECT = my_project
 DEPS = cowboy
 include erlang.mk
 ]]></script>
+<p>If you need to specify multiple dependencies, you can specify each of them separated by spaces:</p>
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+PROJECT = my_project
+DEPS = cowboy gun
+include erlang.mk
+]]></script>
 <p>If the project you want is not included in the package index, or if you want a different version, a few options are available. You can edit the package file and contribute to it by opening a pull request. You can use a custom package file, in which case you will probably want to set the <code>PKG_FILE2</code> variable to its location. Or you can put the project information directly in the Makefile.</p>
-<p>In the latter case you need to create a variable <code>dep_*</code> with the asterisk replaced by the project name, for example <code>cowboy</code>. This variable must contain three things: the fetching method used, the URL and the version requested.</p>
+<p>In the latter case you need to create a variable <code>dep_*</code> with the asterisk replaced by the project name, for example <code>cowboy</code>. This variable must contain three things: the fetching method used, the URL and the version requested. These lines must be defined before the erlang.mk include line.</p>
 <p>The following snippet overrides the Cowboy version required:</p>
 <script type="syntaxhighlighter" class="brush: plain"><![CDATA[
 DEPS = cowboy
-dep_cowboy = git https://github.com/extend/cowboy 1.0.0
+dep_cowboy = git https://github.com/ninenines/cowboy 1.0.0
 ]]></script>
 <p>They will always be compiled using the command <code>make</code>. If the dependency does not feature a Makefile, then erlang.mk will be used for building.</p>
 <p>You can also specify test-only dependencies. These dependencies will only be downloaded when running <code>make tests</code>. The format is the same as above, except the variable <code>TEST_DEPS</code> holds the list of test-only dependencies.</p>
@@ -166,6 +172,12 @@ $ V=1 make
 <p>erlang.mk will automatically compile the OTP application resource file found in <code>src/$(PROJECT).app.src</code> (do note it requires an empty <code>modules</code> line); Erlang source files found in <code>src/*.erl</code> or any subdirectory; Core Erlang source files found in <code>src/*.core</code> or any subdirectory; Leex source files found in <code>src/*.xrl</code> or any subdirectory; and Yecc source files found in <code>src/*.yrl</code> or any subdirectory.</p>
 <p>You can change compilation options by setting the <code>ERLC_OPTS</code> variable. It takes the arguments that will then be passed to <code>erlc</code>. For more information, please see <code>erl -man erlc</code>.</p>
 <p>You can specify a list of modules to be compiled first using the <code>COMPILE_FIRST</code> variable.</p>
+<p>If <code>{id, "git"},</code> is found in your project's <code>.app.src</code>, the extended output of <code>git describe ...</code> will replace it. This can be retrieved at runtime via <code>application:get_key/2</code>.</p>
+<h2 id="updating_erlang.mk">Updating erlang.mk</h2>
+<p>You can update erlang.mk by running <code>make erlang-mk</code>. This automated update will always take the latest erlang.mk version, compile it and replace the erlang.mk of your project with the updated version.</p>
+<p>If your project includes a <code>build.config</code>, erlang.mk will use it when building the updated version.</p>
+<p>The <code>ERLANG_MK_BUILD_CONFIG</code> variable can be used to rename the <code>build.config</code> file.</p>
+<p>The <code>ERLANG_MK_BUILD_DIR</code> variable contains the path to the temporary directory used to build the updated erlang.mk.</p>
 <h2 id="bootstrap_plugin">Bootstrap plugin</h2>
 <p>This plugin is available by default. It adds the following targets:</p>
 <p><code>bootstrap</code> generates a skeleton of an OTP application.</p>
@@ -192,10 +204,14 @@ $ V=1 make
 <p><code>dialyze</code> runs Dialyzer.</p>
 <p>The PLT file is built in <code>./$(PROJECT).plt</code> by default. You can override this location by setting the <code>DIALYZER_PLT</code> variable.</p>
 <p>The <code>PLT_APPS</code> variable lists the applications that will be included in the PLT file. There is no need to specify <code>erts</code>, <code>kernel</code>, <code>stdlib</code> or the project's dependencies here, as they are automatically added.</p>
-<p>Dialyzer options can be modified by defining the <code>DIALYZER_OPTS</code> variable. For more information please see <code>erl -man dialyzer</code>.</p>
+<p>Dialyzer options can be modified by defining the <code>DIALYZER_OPTS</code> variable. The directories to be analyzed can be overriden using the <code>DIALYZER_DIRS</code> variable. It defaults to analyzing source files recursively found in <code>src/</code>. For more information please see <code>erl -man dialyzer</code>.</p>
 <h2 id="edoc_plugin">EDoc plugin</h2>
 <p>This plugin is available by default.</p>
 <p>EDoc options can be specified in Erlang format by defining the <code>EDOC_OPTS</code> variable. For more information please see <code>erl -man edoc</code>.</p>
+<h2 id="elvis_plugin">Elvis plugin</h2>
+<p>This plugin is available by default. It adds the following target:</p>
+<p><code>elvis</code> runs Elvis style checker for this application.</p>
+<p>The <code>ELVIS_CONFIG</code> variable specifies the location of the configuration file which holds the rules to be applied. If there's no <code>elvis.config</code> file the default one will be downloaded. When the <code>ELVIS</code> variable points to a non-existing file then the <code>elvis</code> executable will be downloaded as well. Any other option should go in the <code>ELVIS_OPTS</code> variable.</p>
 <h2 id="erlydtl_plugin">ErlyDTL plugin</h2>
 <p>This plugin is available by default. It adds automatic compilation of ErlyDTL templates found in <code>templates/*.dtl</code> or any subdirectory.</p>
 <h2 id="relx_plugin">Relx plugin</h2>
@@ -203,6 +219,25 @@ $ V=1 make
 <p>You can change the location of the <code>relx</code> executable (downloaded automatically) by defining the <code>RELX</code> variable, and the location of the configuration file by defining the <code>RELX_CONFIG</code> variable.</p>
 <p>The URL used to download <code>relx</code> can be overriden by setting the <code>RELX_URL</code> variable.</p>
 <p>You can change the generated releases location by setting the <code>RELX_OUTPUT_DIR</code> variable. Any other option should go in the <code>RELX_OPTS</code> variable.</p>
+<p>If <code>RELX_OPTS</code> includes the <code>-o</code> option (instead of using <code>RELX_OUTPUT_DIR</code>, then that option must be the first in the list, otherwise erlang.mk will fail to find it and will not be able to clean up the release directory.</p>
+<h2 id="shell_plugin">Shell plugin</h2>
+<p>This plugin is available by default.</p>
+<p><code>SHELL_DEPS</code> adds the specified modules only when <code>make shell</code> or <code>make build-shell-deps</code> is run. For example, to include a module reloader and TDD test runner, one might add <code>SHELL_DEPS = tddreloader</code> to the Makefile.</p>
+<p>You can add extra <code>erl</code> options by defining the <code>SHELL_OPTS</code> variable. For more information please see <code>erl -man erl</code>.</p>
+<p><code>SHELL_PATH</code> adds paths to the shell's library search path. By default this option sets the paths to <code>-pa ../$(PROJECT)/ebin $(DEPS_DIR)/*/ebin</code>.</p>
+<h2 id="contributing">Contributing</h2>
+<p>You can contribute by providing feedback, creating patches, adding packages to the index or new features as plugins.</p>
+<p>To add a package to the index, please use the <code>pkg_add.sh</code> script. To use it, first fork the repository, then please follow the example below:</p>
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ git clone https://github.com/$YOURUSERNAME/erlang.mk
+$ cd erlang.mk
+$ ./pkg_add.sh cowboy git https://github.com/ninenines/cowboy 1.0.0 http://ninenines.eu "Small, fast and modular HTTP server."
+$ git push origin master
+]]></script>
+<p>Then open a pull request. The arguments given to the script are, in order, the project name, the download method used, the repository URL, the commit/tag/branch/version to pull, a link to the package's website and finally its description. Make sure to put double quotes around the description.</p>
+<p>You can submit as many packages as you want in one pull request as long as you follow the instructions above.</p>
+<p>For patches or plugins, you have to edit the <code>core/*.mk</code> or <code>plugins/*.mk</code> files and then run <code>make</code> to create an updated <code>erlang.mk</code>. If you submit a new plugin, you also need to add it to the <code>build.config</code> file.</p>
+<p>Make sure to keep the commit title short, to have a single commit per package/feature/fix and you're good to submit a pull request! And again, please don't forget to run make and to commit the updated erlang.mk or index files along with your other changes. Thanks!</p>
 <h2 id="support">Support</h2>
 <ul>
 <li>Official IRC Channel: #ninenines on irc.freenode.net</li>

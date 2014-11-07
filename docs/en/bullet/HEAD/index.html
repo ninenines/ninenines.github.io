@@ -92,6 +92,17 @@
 	[{handler, my_stream}]}
 ]]></script>
 <p>Simply define this in your dispatch list and your handler will be available and handled by Bullet properly.</p>
+<p>The third element in the tuple ([{handler, my_stream}]) will be passed  to init/4 as Opts, you can add your own options and get them using lists:keyfind, for example if we define our handler as:</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{[<<"path">>, <<"to">>, <<"bullet">>], bullet_handler,
+	[{handler, my_stream}, {channel, "my channel"}]}
+]]></script>
+<p>you can retrieve the channel value as follows:</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init(_Transport, Req, Opts, _Active) ->
+	{channel, Channel} = lists:keyfind(channel, 1, Opts),
+	{ok, Req, #state{channel=Channel}}.
+]]></script>
 <h2 id="cowboy_handler">Cowboy handler</h2>
 <p>Similar to websocket handlers, you need to define 4 functions. A very simple bullet handler would look like the following:</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
