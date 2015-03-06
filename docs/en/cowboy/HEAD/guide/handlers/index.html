@@ -92,8 +92,8 @@
 <p>A handler that does nothing would look like this:</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
-    {ok, Req, Opts}.
+init(Req, _Opts) ->
+    {ok, Req, #state{}}.
 ]]></script>
 
 <p>Despite sending no reply, a <code>204 No Content</code> reply will be sent to the client, as Cowboy makes sure that a reply is sent for every request.</p>
@@ -101,11 +101,11 @@ init(Req, Opts) ->
 <p>We need to use the Req object for sending a reply.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
+init(Req, _Opts) ->
     Req2 = cowboy_req:reply(200, [
         {<<"content-type">>, <<"text/plain">>}
     ], <<"Hello World!">>, Req),
-    {ok, Req2, Opts}.
+    {ok, Req2, #state{}}.
 ]]></script>
 
 <p>As you can see we return a 3-tuple. <code>ok</code> means that the handler ran successfully. The Req object is returned as it may have been modified as is the case here: replying returns a modified Req object that you need to return back to Cowboy for proper operations.</p>
@@ -121,15 +121,15 @@ init(Req, Opts) ->
 <p>Switching is simple. Instead of returning <code>ok</code>, you simply return the name of the handler type you want to use. The following snippet switches to a Websocket handler:</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
-	{cowboy_websocket, Req, Opts}.
+init(Req, _Opts) ->
+	{cowboy_websocket, Req, #state{}}.
 ]]></script>
 
 <p>You can also switch to your own custom handler type:</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
-	{my_handler_type, Req, Opts}.
+init(Req, _Opts) ->
+	{my_handler_type, Req, #state{}}.
 ]]></script>
 
 <p>How to implement a custom handler type is described in the <a href="/docs/en/cowboy/HEAD/guide/sub_protocols">Sub protocols</a> chapter.</p>

@@ -90,8 +90,8 @@
 <p>To switch to a sub protocol, the <code>init/2</code> callback must return the name of the sub protocol module. Everything past this point is handled by the sub protocol.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
-	{cowboy_websocket, Req, Opts}.
+init(Req, _Opts) ->
+	{cowboy_websocket, Req, #state{}}.
 ]]></script>
 
 <p>The return value may also have a <code>Timeout</code> value and/or the atom <code>hibernate</code>. These options are useful for long living connections. When they are not provided, the timeout value defaults to <code>infinity</code> and the hibernate value to <code>run</code>.</p>
@@ -99,8 +99,8 @@ init(Req, Opts) ->
 <p>The following snippet switches to the <code>my_protocol</code> sub protocol, sets the timeout value to 5 seconds and enables hibernation:</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
-	{my_protocol, Req, Opts, 5000, hibernate}.
+init(Req, _Opts) ->
+	{my_protocol, Req, #state{}, 5000, hibernate}.
 ]]></script>
 
 <p>If a sub protocol does not make use of these options, it should crash if it receives anything other than the default values.</p>

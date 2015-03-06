@@ -91,16 +91,6 @@
 
 <p>Cowboy will terminate the process right after closing the Websocket connection. This means that there is no real need to perform any cleanup in the optional <code>terminate/3</code> callback.</p>
 
-<h2 id="types">Types</h2>
-
-<h3 id="close_code">close_code() = 1000..4999</h3>
-
-<p>Reason for closing the connection.</p>
-
-<h3 id="frame">frame() = close | ping | pong | {text | binary | close | ping | pong, iodata()} | {close, close_code(), iodata()}</h3>
-
-<p>Frames that can be sent to the client.</p>
-
 <h2 id="meta_values">Meta values</h2>
 
 <h3 id="websocket_compress">websocket_compress</h3>
@@ -131,9 +121,9 @@
 
 <p>The remote endpoint closed the connection with the given <code>Code</code> and <code>Payload</code> as the reason.</p>
 
-<h3 id="shutdown">shutdown</h3>
+<h3 id="stop">stop</h3>
 
-<p>The handler requested to close the connection, either by returning a <code>shutdown</code> tuple or by sending a <code>close</code> frame.</p>
+<p>The handler requested to close the connection, either by returning a <code>stop</code> tuple or by sending a <code>close</code> frame.</p>
 
 <h3 id="timeout">timeout</h3>
 
@@ -161,7 +151,7 @@
 
 <h2 id="callbacks">Callbacks</h2>
 
-<h3 id="websocket_handle">websocket_handle(InFrame, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+<h3 id="websocket_handle">websocket_handle(InFrame, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {stop, Req, State}</h3>
 
 <p>Types:</p>
 
@@ -169,18 +159,18 @@
 <li>InFrame = {text | binary | ping | pong, binary()}</li>
 <li>Req = cowboy_req:req()</li>
 <li>State = any()</li>
-<li>OutFrame = frame()</li>
+<li>OutFrame = cow_ws:frame()</li>
 </ul>
 
 <p>Handle the data received from the Websocket connection.</p>
 
 <p>This function will be called every time data is received from the Websocket connection.</p>
 
-<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+<p>The <code>stop</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
 
 <p>The <code>hibernate</code> option will hibernate the process until it receives new data from the Websocket connection or an Erlang message.</p>
 
-<h3 id="websocket_info">websocket_info(Info, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {shutdown, Req, State}</h3>
+<h3 id="websocket_info">websocket_info(Info, Req, State) -> {ok, Req, State} | {ok, Req, State, hibernate} | {reply, OutFrame | [OutFrame], Req, State} | {reply, OutFrame | [OutFrame], Req, State, hibernate} | {stop, Req, State}</h3>
 
 <p>Types:</p>
 
@@ -188,14 +178,14 @@
 <li>Info = any()</li>
 <li>Req = cowboy_req:req()</li>
 <li>State = any()</li>
-<li>OutFrame = frame()</li>
+<li>OutFrame = cow_ws:frame()</li>
 </ul>
 
 <p>Handle the Erlang message received.</p>
 
 <p>This function will be called every time an Erlang message has been received. The message can be any Erlang term.</p>
 
-<p>The <code>shutdown</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
+<p>The <code>stop</code> return value can be used to close the connection. A close reply will also result in the connection being closed.</p>
 
 <p>The <code>hibernate</code> option will hibernate the process until it receives another message or new data from the Websocket connection.</p>
 

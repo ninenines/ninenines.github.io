@@ -90,8 +90,8 @@
 <p>First, the <code>init/2</code> callback is called. This callback is common to all handlers. To use REST for the current request, this function must return a <code>cowboy_rest</code> tuple.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
-    {cowboy_rest, Req, Opts}.
+init(Req, _Opts) ->
+    {cowboy_rest, Req, #state{}}.
 ]]></script>
 
 <p>Cowboy will then switch to the REST protocol and start executing the state machine.</p>
@@ -110,7 +110,7 @@ init(Req, Opts) ->
 
 <p>All callbacks take two arguments, the Req object and the State, and return a three-element tuple of the form <code>{Value, Req, State}</code>.</p>
 
-<p>All callbacks can also return <code>{halt, Req, State}</code> to stop execution of the request.</p>
+<p>All callbacks can also return <code>{stop, Req, State}</code> to stop execution of the request.</p>
 
 <p>The following table summarizes the callbacks and their default values. If the callback isn't defined, then the default value will be used. Please look at the flowcharts to find out the result of each return value.</p>
 

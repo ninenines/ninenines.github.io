@@ -83,6 +83,14 @@
 <div class="service-description">
 <p>Common Makefile rules for building and testing Erlang applications.</p>
 <p>Also features support for dependencies and a package index.</p>
+<h2 id="why_erlang.mk?">Why erlang.mk?</h2>
+<p>A number of reasons might push someone to use erlang.mk instead of an Erlang-based build tool, including but not limited to the following:</p>
+<ul>
+<li>You want a very fast compilation and test cycle</li>
+<li>You want the full power of Unix at your disposal when hooking into your build tool</li>
+<li>You want to use the deps mechanism with non-Erlang Makefile-based projects</li>
+<li>Your project will be part of a larger make or automake based environment</li>
+</ul>
 <h2 id="requirements">Requirements</h2>
 <p><code>erlang.mk</code> requires GNU Make and expects to be ran in a standard unix environment with Erlang installed and in the <code>$PATH</code>.</p>
 <p><code>erlang.mk</code> uses <code>wget</code> for downloading the package index file.</p>
@@ -128,12 +136,25 @@ DEPS = cowboy
 dep_cowboy = git https://github.com/ninenines/cowboy 1.0.0
 ]]></script>
 <p>They will always be compiled using the command <code>make</code>. If the dependency does not feature a Makefile, then erlang.mk will be used for building.</p>
+<p>For subversion dependencies, the url specifies trunk, branch or tag. To specify a particular revision, use <code>@revision</code> at the end of the url. No separate specification of branch, tag, or revision is required or possible.</p>
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+DEPS = ex1 ex2
+dep_ex1 = svn https://example.com/svn/trunk/project/ex1
+dep_ex2 = svn svn://example.com/svn/branches/erlang-proj/ex2@264
+]]></script>
 <p>You can also specify test-only dependencies. These dependencies will only be downloaded when running <code>make tests</code>. The format is the same as above, except the variable <code>TEST_DEPS</code> holds the list of test-only dependencies.</p>
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
 TEST_DEPS = ct_helper
 dep_ct_helper = git https://github.com/extend/ct_helper.git master
 ]]></script>
 <p>Please note that the test dependencies will only be compiled once when they are fetched, unlike the normal dependencies.</p>
+<h2 id="autopatch">Autopatch</h2>
+<p>The autopatch features allows you to automatically fix packages that are not compatible with erlang.mk. It can also be used to convert compatible packages to use erlang.mk itself for building when used as dependency.</p>
+<p>The patching occurs only once, immediately after the package has been fetched.</p>
+<p>erlang.mk defines a number of packages to be patched. You can add more packages to the list by appending the <code>AUTOPATCH</code> variable.</p>
+<script type="syntaxhighlighter" class="brush: plain"><![CDATA[
+AUTOPATCH += gproc
+]]></script>
 <h2 id="releases">Releases</h2>
 <p>If a <code>relx.config</code> file is present, erlang.mk will download <code>relx</code> automatically and build the release into the <code>_rel</code> folder. This is the default command when the file exists.</p>
 <p>No special configuration is required for this to work.</p>
@@ -162,6 +183,17 @@ clean::
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
 $ V=1 make
 ]]></script>
+<p>Parallel execution can be enabled through the use of the <code>-j</code> option. The following output showcases concurrent downloading of dependencies.</p>
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make -j32
+Cloning into '/home/essen/ninenines/cowboy/deps/ranch'...
+Cloning into '/home/essen/ninenines/cowboy/deps/cowlib'...
+]]></script>
+<p>The <code>-O</code> option will ensure that output from different targets is grouped, which is particularly useful when running tests with different frameworks at the same time. The disadvantage of this option however is that there is no output until the target is completed.</p>
+<p>The<code>`MAKEFLAGS</code> variable can be used to set it permanently on your system. It can be set in your <code>.zshrc</code>, <code>.bashrc</code> or equivalent file.</p>
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+MAKEFLAGS="-j32 -O"
+]]></script>
 <h2 id="core_package_functionality">Core package functionality</h2>
 <p>The following targets are specific to packages:</p>
 <p><code>pkg-list</code> lists all packages in the index.</p>
@@ -171,7 +203,9 @@ $ V=1 make
 <h2 id="core_compiler_functionality">Core compiler functionality</h2>
 <p>erlang.mk will automatically compile the OTP application resource file found in <code>src/$(PROJECT).app.src</code> (do note it requires an empty <code>modules</code> line); Erlang source files found in <code>src/*.erl</code> or any subdirectory; Core Erlang source files found in <code>src/*.core</code> or any subdirectory; Leex source files found in <code>src/*.xrl</code> or any subdirectory; and Yecc source files found in <code>src/*.yrl</code> or any subdirectory.</p>
 <p>You can change compilation options by setting the <code>ERLC_OPTS</code> variable. It takes the arguments that will then be passed to <code>erlc</code>. For more information, please see <code>erl -man erlc</code>.</p>
+<p>Test target compilation options can be specified in <code>TEST_ERLC_OPTS</code>. It will override <code>ERLC_OPTS</code>.</p>
 <p>You can specify a list of modules to be compiled first using the <code>COMPILE_FIRST</code> variable.</p>
+<p>You can also use the <code>ERLC_EXCLUDE</code> variable to prevent some modules from being compiled by the core compiler. Note that <code>ERLC_EXCLUDE</code> is a list of module names (i.e., no file extension is required).</p>
 <p>If <code>{id, "git"},</code> is found in your project's <code>.app.src</code>, the extended output of <code>git describe ...</code> will replace it. This can be retrieved at runtime via <code>application:get_key/2</code>.</p>
 <h2 id="updating_erlang.mk">Updating erlang.mk</h2>
 <p>You can update erlang.mk by running <code>make erlang-mk</code>. This automated update will always take the latest erlang.mk version, compile it and replace the erlang.mk of your project with the updated version.</p>
@@ -185,15 +219,16 @@ $ V=1 make
 <p><code>bootstrap-rel</code> generates the files needed to build a release.</p>
 <p><code>new</code> generate a skeleton module based on one of the available templates.</p>
 <p><code>list-templates</code> lists the available templates.</p>
-<h2 id="c_compiler_plugin">C compiler plugin</h2>
-<p>This plugin is not included by default. It is meant to simplify the management of projects that include C source code, like NIFs.</p>
+<h2 id="c/c++_compiler_plugin">C/C++ compiler plugin</h2>
+<p>This plugin is available by default. It is meant to simplify the management of projects that include C and/or C++ source code, like NIFs for example.</p>
 <p>If the file <code>$(C_SRC_DIR)/Makefile</code> exists, then the plugin simply calls it when needed. Otherwise it tries to compile it directly.</p>
 <p>You can use a different directory than <code>./c_src</code> by setting the <code>C_SRC_DIR</code> variable.</p>
 <p>You can override the output file by setting the <code>C_SRC_OUTPUT</code> variable.</p>
 <p>You can override the temporary file containing information about Erlang's environment by setting the <code>C_SRC_ENV</code> variable. This file is automatically generated on first run.</p>
-<p>Finally you can add extra compiler options using the <code>C_SRC_OPTS</code> variable. You can also override the defaults <code>CC</code> and <code>CFLAGS</code> if required.</p>
+<p>The <code>CC</code>, <code>CXX</code>, <code>CFLAGS</code>, <code>CXXFLAGS</code>, <code>LDLIBS</code> and <code>LDFLAGS</code> variables may be modified or replaced with any value of your choosing. The defaults are system dependent.</p>
 <h2 id="common_test_plugin">Common_test plugin</h2>
-<p>This plugin is available by default.</p>
+<p>This plugin is available by default. It adds the following target:</p>
+<p><code>ct</code> runs all test suites for this application.</p>
 <p>There is nothing to configure to use it, simply create your test suites in the <code>./test/</code> directory and erlang.mk will figure everything out automatically.</p>
 <p>You can override the list of suites that will run when using <code>make tests</code> by setting the <code>CT_SUITES</code> variable.</p>
 <p>You can add extra <code>ct_run</code> options by defining the <code>CT_OPTS</code> variable. For more information please see <code>erl -man ct_run</code>.</p>
@@ -213,7 +248,19 @@ $ V=1 make
 <p><code>elvis</code> runs Elvis style checker for this application.</p>
 <p>The <code>ELVIS_CONFIG</code> variable specifies the location of the configuration file which holds the rules to be applied. If there's no <code>elvis.config</code> file the default one will be downloaded. When the <code>ELVIS</code> variable points to a non-existing file then the <code>elvis</code> executable will be downloaded as well. Any other option should go in the <code>ELVIS_OPTS</code> variable.</p>
 <h2 id="erlydtl_plugin">ErlyDTL plugin</h2>
-<p>This plugin is available by default. It adds automatic compilation of ErlyDTL templates found in <code>templates/*.dtl</code> or any subdirectory.</p>
+<p>This plugin is available by default. It adds automatic compilation of ErlyDTL templates found in <code>templates/*.dtl</code> or any subdirectory. </p>
+<p>By default it ignores names of subdirectories and compiles  <code>a/b/templatename.dtl</code> into <code>templatename_dtl.beam</code>. To include  subdirectories names in the compiled module name add  <code>DTL_FULL_PATH=1</code> into your Makefile - <code>a/b/templatename.dtl</code> will be compiled into <code>a_b_templatename_dtl.beam</code>.</p>
+<h2 id="escript_plugin">Escript plugin</h2>
+<p>This plugin is available by default. It adds the following target:</p>
+<p><code>escript</code> which creates a shell-executable archive named the same as your <code>$(PROJECT)</code>, containing the following files from your application and its dependencies:</p>
+<p>* <code>*.beam</code> * contents of <code>priv/</code> * <code>sys.config</code> for your application</p>
+<p>There are a number of optional configuration parameters:</p>
+<p>* <code>ESCRIPT_NAME</code> if a different output file is required * <code>ESCRIPT_COMMENT</code> to alter the comment line in the escript header * <code>ESCRIPT_BEAMS</code> for the paths searched for <code>*.beam</code> files to include * <code>ESCRIPT_SYS_CONFIG</code> defaults to <code>rel/sys.config</code> * <code>ESCRIPT_EMU_ARGS</code> for the parameters used to start the VM * <code>ESCRIPT_SHEBANG</code> for the line used by your shell to start <code>escript</code> * <code>ESCRIPT_STATIC</code> for non-beam directories to be included as well</p>
+<p>Refer to http://www.erlang.org/doc/man/escript.html for more information on <code>escript</code> functionality in general.</p>
+<h2 id="eunit_plugin">EUnit plugin</h2>
+<p>This plugin is available by default. It adds the following target:</p>
+<p><code>eunit</code> which runs all the EUnit tests found in <code>ebin</code> or the test directory specified in <code>TEST_DIR</code>.</p>
+<p><code>EUNIT_OPTS</code> can be used to specify EUnit-specific options (e.g. <code>verbose</code>) that will be used when calling <code>eunit:test/2</code>. This configuration parameter defaults to <code>verbose</code>. Note that EUnit options are specified as a comma-separated list of options.</p>
 <h2 id="relx_plugin">Relx plugin</h2>
 <p>This plugin is available by default.</p>
 <p>You can change the location of the <code>relx</code> executable (downloaded automatically) by defining the <code>RELX</code> variable, and the location of the configuration file by defining the <code>RELX_CONFIG</code> variable.</p>
@@ -225,6 +272,17 @@ $ V=1 make
 <p><code>SHELL_DEPS</code> adds the specified modules only when <code>make shell</code> or <code>make build-shell-deps</code> is run. For example, to include a module reloader and TDD test runner, one might add <code>SHELL_DEPS = tddreloader</code> to the Makefile.</p>
 <p>You can add extra <code>erl</code> options by defining the <code>SHELL_OPTS</code> variable. For more information please see <code>erl -man erl</code>.</p>
 <p><code>SHELL_PATH</code> adds paths to the shell's library search path. By default this option sets the paths to <code>-pa ../$(PROJECT)/ebin $(DEPS_DIR)/*/ebin</code>.</p>
+<h2 id="triq_plugin">Triq plugin</h2>
+<p>This plugin is available by default. It adds the following target:</p>
+<p><code>triq</code> will check all the properties found in <code>ebin</code> or the test directory specified in <code>TEST_DIR</code>.</p>
+<p>You can use the <code>t</code> variable to give a specific module or function to run, for example:</p>
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make triq t=cow_http_hd
+]]></script>
+<p>Or:</p>
+<script type="syntaxhighlighter" class="brush: bash"><![CDATA[
+$ make triq t=cow_http_hd:prop_parse_accept
+]]></script>
 <h2 id="contributing">Contributing</h2>
 <p>You can contribute by providing feedback, creating patches, adding packages to the index or new features as plugins.</p>
 <p>To add a package to the index, please use the <code>pkg_add.sh</code> script. To use it, first fork the repository, then please follow the example below:</p>

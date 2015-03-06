@@ -90,8 +90,8 @@
 <p>First, the <code>init/2</code> callback is called. This callback is common to all handlers. To establish a Websocket connection, this function must return a <code>ws</code> tuple.</p>
 
 <script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-init(Req, Opts) ->
-	{cowboy_websocket, Req, Opts}.
+init(Req, _Opts) ->
+	{cowboy_websocket, Req, #state{}}.
 ]]></script>
 
 <p>Upon receiving this tuple, Cowboy will switch to the code that handles Websocket connections and perform the handshake immediately.</p>
@@ -110,7 +110,7 @@ init(Req, _Opts) ->
 						<<"mychat2">>, Req),
 					{ok, Req2, #state{}};
 				false ->
-					{shutdown, Req, undefined}
+					{stop, Req, undefined}
 			end
 	end.
 ]]></script>
@@ -134,7 +134,7 @@ websocket_info(post_init, Req, State) ->
 
 <p>Cowboy will call <code>websocket_handle/3</code> whenever a text, binary, ping or pong frame arrives from the client. Note that in the case of ping and pong frames, no action is expected as Cowboy automatically replies to ping frames.</p>
 
-<p>The handler can decide to send frames to the socket, shutdown or just continue without sending anything.</p>
+<p>The handler can decide to send frames to the socket, stop or just continue without sending anything.</p>
 
 <p>The following snippet echoes back any text frame received and ignores all others.</p>
 
@@ -149,7 +149,7 @@ websocket_handle(_Frame, Req, State) ->
 
 <p>Cowboy will call <code>websocket_info/3</code> whenever an Erlang message arrives.</p>
 
-<p>The handler can decide to send frames to the socket, shutdown or just continue without sending anything.</p>
+<p>The handler can decide to send frames to the socket, stop or just continue without sending anything.</p>
 
 <p>The following snippet forwards any <code>log</code> message to the socket and ignores all others.</p>
 
@@ -162,7 +162,7 @@ websocket_info(_Info, Req, State) ->
 
 <h2 id="sending_frames_to_the_socket">Sending frames to the socket</h2>
 
-<p>Cowboy allows sending either a single frame or a list of frames to the socket. Any frame can be sent: text, binary, ping, pong or close frames.</p>
+<p>Cowboy allows sending either a single frame or a list of frames to the socket, in which case the frames are sent sequentially. Any frame can be sent: text, binary, ping, pong or close frames.</p>
 
 <p>The following example sends three frames using a single <code>reply</code> tuple.</p>
 
