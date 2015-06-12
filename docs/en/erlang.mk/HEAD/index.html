@@ -88,6 +88,7 @@
 <ul>
 <li>You want a very fast compilation and test cycle</li>
 <li>You want the full power of Unix at your disposal when hooking into your build tool</li>
+<li>You want to be able to easily edit the damn build tool and fix it when it fails</li>
 <li>You want to use the deps mechanism with non-Erlang Makefile-based projects</li>
 <li>Your project will be part of a larger make or automake based environment</li>
 </ul>
@@ -197,7 +198,7 @@ MAKEFLAGS="-j32 -O"
 <h2 id="core_package_functionality">Core package functionality</h2>
 <p>The following targets are specific to packages:</p>
 <p><code>pkg-list</code> lists all packages in the index.</p>
-<p><code>pkg-search n=STRING</code> searches the index for STRING.</p>
+<p><code>pkg-search q=STRING</code> searches the index for STRING.</p>
 <p>Packages are downloaded into <code>DEPS_DIR</code> (<code>./deps/</code> by default).</p>
 <p>The package index file is downloaded from <code>PKG_FILE_URL</code> and saved in <code>PKG_FILE2</code>.</p>
 <h2 id="core_compiler_functionality">Core compiler functionality</h2>
@@ -260,7 +261,7 @@ MAKEFLAGS="-j32 -O"
 <h2 id="eunit_plugin">EUnit plugin</h2>
 <p>This plugin is available by default. It adds the following target:</p>
 <p><code>eunit</code> which runs all the EUnit tests found in <code>ebin</code> or the test directory specified in <code>TEST_DIR</code>.</p>
-<p><code>EUNIT_OPTS</code> can be used to specify EUnit-specific options (e.g. <code>verbose</code>) that will be used when calling <code>eunit:test/2</code>. This configuration parameter defaults to <code>verbose</code>. Note that EUnit options are specified as a comma-separated list of options.</p>
+<p><code>EUNIT_OPTS</code> can be used to specify EUnit-specific options (e.g. <code>verbose</code>) that will be used when calling <code>eunit:test/2</code>. This configuration parameter is empty by default.. Note that EUnit options are specified as a comma-separated list of options.</p>
 <h2 id="relx_plugin">Relx plugin</h2>
 <p>This plugin is available by default.</p>
 <p>You can change the location of the <code>relx</code> executable (downloaded automatically) by defining the <code>RELX</code> variable, and the location of the configuration file by defining the <code>RELX_CONFIG</code> variable.</p>
@@ -283,6 +284,10 @@ $ make triq t=cow_http_hd
 <script type="syntaxhighlighter" class="brush: bash"><![CDATA[
 $ make triq t=cow_http_hd:prop_parse_accept
 ]]></script>
+<h2 id="xref_plugin">Xref plugin</h2>
+<p>This plugin is available by default. It adds the following target:</p>
+<p><code>xref</code> Erlang Xref Runner (inspired in rebar's rebar_xref)</p>
+<p>The <code>XREF_CONFIG</code> variable specifies the location of the configuration file which holds the checks to be applied. If there is no <code>xref.config</code> all <code>xref</code> checks will be applied to the binaries located in the <code>/ebin</code> directory.</p>
 <h2 id="contributing">Contributing</h2>
 <p>You can contribute by providing feedback, creating patches, adding packages to the index or new features as plugins.</p>
 <p>To add a package to the index, please use the <code>pkg_add.sh</code> script. To use it, first fork the repository, then please follow the example below:</p>
@@ -294,7 +299,7 @@ $ git push origin master
 ]]></script>
 <p>Then open a pull request. The arguments given to the script are, in order, the project name, the download method used, the repository URL, the commit/tag/branch/version to pull, a link to the package's website and finally its description. Make sure to put double quotes around the description.</p>
 <p>You can submit as many packages as you want in one pull request as long as you follow the instructions above.</p>
-<p>For patches or plugins, you have to edit the <code>core/*.mk</code> or <code>plugins/*.mk</code> files and then run <code>make</code> to create an updated <code>erlang.mk</code>. If you submit a new plugin, you also need to add it to the <code>build.config</code> file.</p>
+<p>For patches or plugins, you have to edit the <code>core/*.mk</code> or <code>plugins/*.mk</code> files. If you submit a new plugin, you also need to add it to the <code>build.config</code> file.</p>
 <p>Make sure to keep the commit title short, to have a single commit per package/feature/fix and you're good to submit a pull request! And again, please don't forget to run make and to commit the updated erlang.mk or index files along with your other changes. Thanks!</p>
 <h2 id="support">Support</h2>
 <ul>
