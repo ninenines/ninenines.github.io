@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Nine Nines Article: Xerl: expression separator</title>
+    <title>Nine Nines Article: The Erlanger Playbook September 2015 Update</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Change them or set them up as you like -->
     <meta name="description" content="">
@@ -81,59 +81,32 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Xerl: expression separator</span></h1>
+	<h1 class="lined-header"><span>The Erlanger Playbook September 2015 Update</span></h1>
 	<p class="date">
-		<span class="day">1</span>
-		<span class="month">Mar</span>
+		<span class="day">18</span>
+		<span class="month">Jun</span>
 	</p>
 </header>
 
-<p>As promised we are adding an expression separator this time.
-This will be short and easy.</p>
+<p>An update to The Erlanger Playbook is now available!</p>
 
-<p>In the tokenizer we only need to add a line recognizing the
-comma as a valid token.</p>
+<p>The Erlanger Playbook is a book about software development using
+Erlang. It currently covers all areas from the conception, design,
+the writing of code, documentation and tests.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-, : {token, {',', TokenLine}}.
-]]></script>
+<p>The book is still a work in progress. Future topics will include
+refactoring, debugging and tracing, benchmarking, releases, community
+management (for open source projects).</p>
 
-<p>Then we need to change the following lines in the parser:</p>
+<p>This update fixes a number of things and adds two chapters: IOlists
+and Erlang building blocks.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-exprs -> expr : ['$1'].
-exprs -> expr exprs : ['$1' | '$2'].
-]]></script>
+<p>Learn more about <a href="/articles/erlanger-playbook">The Erlanger Playbook</a>!</p>
 
-<p>And add a comma between the expressions on the second line:</p>
+<p>This is a self-published book. The base price is 50€. All proceeds
+will be used to allow me to work on open source full time.</p>
 
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-exprs -> expr : ['$1'].
-exprs -> expr ',' exprs : ['$1' | '$3'].
-]]></script>
-
-<p>That takes care of everything except the optional trailing
-comma at the end of our lists of expressions. We just need an
-additional rule to take care of this.</p>
-
-<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
-exprs -> expr ',' : ['$1'].
-]]></script>
-
-<p>That's it.</p>
-
-<p>Wondering why we don't have this optional trailing comma in
-Erlang considering how easy it was and the number of people
-complaining about it? Yeah, me too. But that's for someone else
-to answer.</p>
-
-<p>Another change I want to talk about is a simple modification
-of the compiler code to use an <code>#env{}</code> record for
-tracking state instead of passing around individual variables.
-This will be required later on when we make modules into proper
-expressions so I thought it was a good idea to anticipate.</p>
-
-<p><a href="https://github.com/extend/xerl/blob/0.4/">View the source</a></p>
+<p>Thank you for helping me helping you help us all!</p>
 
 </article>
 </div>
