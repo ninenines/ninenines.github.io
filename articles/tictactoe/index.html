@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Erlang Tic Tac Toe</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>Erlang Tic Tac Toe</span></h1>
+	<p class="date">
+		<span class="day">17</span>
+		<span class="month">Oct</span>
+	</p>
+</header>
+
+<div class="paragraph"><p>Everyone knows <a href="http://en.wikipedia.org/wiki/Tic-tac-toe">Tic Tac Toe</a>,
+right?</p></div>
+<div class="paragraph"><p>Players choose either to be the Xs or the Os, then place their symbol
+on a 3x3 board one after another, trying to create a line of 3 of them.</p></div>
+<div class="paragraph"><p>Writing an algorithm to check for victory sounds easy, right? It&#8217;s
+easily tested, considering there&#8217;s only 8 possible winning rows (3 horizontal,
+3 vertical and 2 diagonal).</p></div>
+<div class="paragraph"><p>In Erlang though, you probably wouldn&#8217;t want an algorithm. Erlang has
+this cool feature called pattern matching which will allow us to completely
+avoid writing the algorithm by instead letting us match directly on the
+solutions.</p></div>
+<div class="paragraph"><p>Let&#8217;s first create a board. A board is a list of 3 rows each containing
+3 columns. It can also be thought of as a tuple containing 9 elements.
+A tuple is easier to manipulate so this is what we are going to use.
+Each position can either contain an <code>x</code>, an <code>o</code>,
+or be <code>undefined</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">new</span></span>() <span style="color: #990000">-&gt;</span>
+    {<span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>,
+     <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>,
+     <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Now that we have a board, if we want to play, we need a function that
+will allow players to, you know, actually play their moves. Rows and
+columns are numbered 1 to 3 so we need a little math to correctly
+deduce the element&#8217;s position.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">play</span></span>(<span style="color: #009900">Who</span>, <span style="color: #009900">X</span>, <span style="color: #009900">Y</span>, <span style="color: #009900">Board</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-weight: bold"><span style="color: #000080">setelement</span></span>((<span style="color: #009900">Y</span> <span style="color: #990000">-</span> <span style="color: #993399">1</span>) <span style="color: #990000">*</span> <span style="color: #993399">3</span> <span style="color: #990000">+</span> <span style="color: #009900">X</span>, <span style="color: #009900">Board</span>, <span style="color: #009900">Who</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>This function returns the board with the element modified. Of course,
+as you probably noticed, we aren&#8217;t checking that the arguments are correct,
+or that the element was already set. This is left as an exercise to the
+reader.</p></div>
+<div class="paragraph"><p>After playing the move, we need to check whether someone won. That&#8217;s
+where you&#8217;d write an algorithm, and that&#8217;s where I wouldn&#8217;t. Let&#8217;s just
+pattern match all of them!</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">check</span></span>(<span style="color: #009900">Board</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="color: #009900">Board</span> <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+        {<span style="color: #FF6600">x</span>, <span style="color: #FF6600">x</span>, <span style="color: #FF6600">x</span>,
+         <span style="color: #990000">_</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
+         <span style="color: #990000">_</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>} <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">victory</span>, <span style="color: #FF6600">x</span>};
+
+        {<span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
+         <span style="color: #990000">_</span>, <span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>,
+         <span style="color: #990000">_</span>, <span style="color: #990000">_</span>, <span style="color: #FF6600">x</span>} <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">victory</span>, <span style="color: #FF6600">x</span>};
+
+        {<span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
+         <span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
+         <span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>} <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">victory</span>, <span style="color: #FF6600">x</span>};
+
+        <span style="font-style: italic"><span style="color: #9A1900">%% [snip]</span></span>
+
+        <span style="color: #990000">_</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Pattern matching allows us to simply <em>draw</em> the solutions
+directly inside our code, and if the board matches any of them, then we
+have a victory or a draw, otherwise the game can continue.</p></div>
+<div class="paragraph"><p>The <code>_</code> variable is special in that it always matches,
+allowing us to focus strictly on the winning row. And because it&#8217;s very
+graphical, if we were to have messed up somewhere, then we&#8217;d only need
+take a quick glance to be sure the winning solutions are the right ones.</p></div>
+<div class="paragraph"><p>Erlang allows us to transform algorithms into very graphical code thanks
+to its pattern matching feature, and let us focus on doing things instead
+of writing algorithms to do things.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="/res/tictactoe.erl">tictactoe.erl</a>
+</p>
+</li>
+</ul></div>
+
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul id="articles-nav" class="extra_margin">
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/on-open-source/">On open source</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+	
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+

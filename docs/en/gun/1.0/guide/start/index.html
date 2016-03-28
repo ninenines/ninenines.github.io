@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Starting and stopping</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Starting and stopping</span></h1>
+
+<div class="paragraph"><p>This chapter describes how to start and stop the Gun application.</p></div>
+<div class="sect1">
+<h2 id="_setting_up">Setting up</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Before Gun can be used it needs to be in Erlang&#8217;s <code>ERL_LIBS</code> path variable.
+If you use <code>erlang.mk</code> or a similar build tool, you only need to specify
+Gun as a dependency to your application and the tool will take care
+of downloading Gun and setting up paths.</p></div>
+<div class="paragraph"><p>With <code>erlang.mk</code> this is done by adding <code>gun</code> to the <code>DEPS</code> variable
+in your Makefile.</p></div>
+<div class="listingblock">
+<div class="title">Adding Gun as an erlang.mk dependency</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> gun</tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_starting">Starting</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Gun is an <em>OTP application</em>. It needs to be started before you can
+use it.</p></div>
+<div class="listingblock">
+<div class="title">Starting Gun in an Erlang shell</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #993399">1</span><span style="color: #990000">&gt;</span> <span style="font-weight: bold"><span style="color: #000000">application:ensure_all_started</span></span>(<span style="color: #FF6600">gun</span>)<span style="color: #990000">.</span>
+{<span style="color: #FF6600">ok</span>,[<span style="color: #FF6600">ranch</span>,<span style="color: #FF6600">crypto</span>,<span style="color: #FF6600">cowlib</span>,<span style="color: #FF6600">asn1</span>,<span style="color: #FF6600">public_key</span>,<span style="color: #FF6600">ssl</span>,<span style="color: #FF6600">gun</span>]}</tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stopping">Stopping</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can stop Gun using the <code>application:stop/1</code> function, however
+only Gun will be stopped. This is the equivalent of <code>application:start/1</code>.
+The <code>application_ensure_all_started/1</code> function has no equivalent for
+stopping all applications.</p></div>
+<div class="listingblock">
+<div class="title">Stopping Gun</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">application:stop</span></span>(<span style="color: #FF6600">gun</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_gun_with_releases">Using Gun with releases</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>An <em>OTP release</em> starts applications automatically. All you need
+to do is to set up your application resource file so that Gun can
+be included in the release. The application resource file can be
+found in <code>ebin/your_application.app</code>, or in <code>src/your_application.app.src</code>
+if you are using a build tool like <code>erlang.mk</code>.</p></div>
+<div class="paragraph"><p>The key you need to change is the <code>applications</code> key. By default
+it only includes <code>kernel</code> and <code>stdlib</code>. You need to add <code>gun</code> to
+that list.</p></div>
+<div class="listingblock">
+<div class="title">Adding Gun to the application resource file</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #FF6600">applications</span>, [
+        <span style="color: #FF6600">kernel</span>,
+        <span style="color: #FF6600">stdlib</span>,
+        <span style="color: #FF6600">gun</span>
+]}</tt></pre></div></div>
+<div class="paragraph"><p>Do not put an extra comma at the end, the comma is a separator
+between the elements of the list.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	1.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/1.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/1.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Sending a response</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Sending a response</span></h1>
+
+<div class="paragraph"><p>The Req object also allows you to send a response.</p></div>
+<div class="paragraph"><p>You can only send one response. Any other attempt will
+trigger a crash. The response may be sent in one go or
+with its body streamed by chunks of arbitrary size.</p></div>
+<div class="paragraph"><p>You can also set headers or the response body in advance
+and Cowboy will use them when you finally do reply.</p></div>
+<div class="sect1">
+<h2 id="_reply">Reply</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can send a reply with no particular headers or body.
+Cowboy will make sure to send the mandatory headers with
+the response.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can define headers to be sent with the response. Note
+that header names must be lowercase. Again, Cowboy will
+make sure to send the mandatory headers with the response.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">303</span>, [
+    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"location"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"http://ninenines.eu"</span><span style="color: #990000">&gt;&gt;</span>}
+], <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can override headers that Cowboy would send otherwise.
+Any header set by the user will be used over the ones set
+by Cowboy. For example, you can advertise yourself as a
+different server.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [
+    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"server"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"yaws"</span><span style="color: #990000">&gt;&gt;</span>}
+], <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>We also saw earlier how to force close the connection by
+overriding the connection header.</p></div>
+<div class="paragraph"><p>Finally, you can also send a body with the response. Cowboy
+will automatically set the content-length header if you do.
+We recommend that you set the content-type header so the
+client may know how to read the body.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [
+    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>}
+], <span style="color: #FF0000">"Hello world!"</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Here is the same example but sending HTML this time.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [
+    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/html"</span><span style="color: #990000">&gt;&gt;</span>}
+], <span style="color: #FF0000">"&lt;html&gt;&lt;head&gt;Hello world!&lt;/head&gt;&lt;body&gt;&lt;p&gt;Hats off!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Note that the reply is sent immediately.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_chunked_reply">Chunked reply</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can also stream the response body. First, you need to
+initiate the reply by sending the response status code.
+Then you can send the body in chunks of arbitrary size.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunked_reply</span></span>(<span style="color: #993399">200</span>, <span style="color: #009900">Req</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunk</span></span>(<span style="color: #FF0000">"Hello..."</span>, <span style="color: #009900">Req2</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunk</span></span>(<span style="color: #FF0000">"chunked..."</span>, <span style="color: #009900">Req2</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunk</span></span>(<span style="color: #FF0000">"world!!"</span>, <span style="color: #009900">Req2</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You should make sure to match on <code>ok</code> as an error may be
+returned.</p></div>
+<div class="paragraph"><p>While it is possible to send a chunked response without
+a content-type header, it is still recommended. You can
+set this header or any other just like for normal replies.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunked_reply</span></span>(<span style="color: #993399">200</span>, [
+    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/html"</span><span style="color: #990000">&gt;&gt;</span>}
+], <span style="color: #009900">Req</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunk</span></span>(<span style="color: #FF0000">"&lt;html&gt;&lt;head&gt;Hello world!&lt;/head&gt;"</span>, <span style="color: #009900">Req2</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunk</span></span>(<span style="color: #FF0000">"&lt;body&gt;&lt;p&gt;Hats off!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"</span>, <span style="color: #009900">Req2</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Note that the reply and each chunk following it are sent
+immediately.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preset_response_headers">Preset response headers</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can define response headers in advance. They will be
+merged into the headers given in the reply call. Headers
+in the reply call override preset response headers which
+override the default Cowboy headers.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"allow"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"GET"</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can check if a response header has already been set.
+This will only check the response headers that you set,
+and not the ones Cowboy will add when actually sending
+the reply.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">cowboy_req:has_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"allow"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>It will return <code>true</code> if the header is defined, and <code>false</code>
+otherwise.</p></div>
+<div class="paragraph"><p>Finally, you can also delete a preset response header if
+needed. If you do, it will not be sent.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:delete_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"allow"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preset_response_body">Preset response body</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can set the response body in advance. Note that this
+body will be ignored if you then choose to send a chunked
+reply, or if you send a reply with an explicit body.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body</span></span>(<span style="color: #FF0000">"Hello world!"</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can also set a fun that will be called when it is time
+to send the body. There are three different ways of doing
+that.</p></div>
+<div class="paragraph"><p>If you know the length of the body that needs to be sent,
+you should specify it, as it will help clients determine
+the remaining download time and allow them to inform the
+user.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">F</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #FF0000">"Hello world!"</span>)
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>,
+<span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body_fun</span></span>(<span style="color: #993399">12</span>, <span style="color: #009900">F</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>If you do not know the length of the body, you should use
+a chunked response body fun instead.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">F</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">SendChunk</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Body</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">lists:duplicate</span></span>(<span style="font-weight: bold"><span style="color: #000000">random:uniform</span></span>(<span style="color: #993399">1024</span>, <span style="color: #FF0000">$a</span>)),
+    <span style="color: #009900">SendChunk</span>(<span style="color: #009900">Body</span>)
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>,
+<span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body_fun</span></span>(<span style="color: #FF6600">chunked</span>, <span style="color: #009900">F</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Finally, you can also send data on the socket directly,
+without knowing the length in advance. Cowboy may be
+forced to close the connection at the end of the response
+though depending on the protocol capabilities.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">F</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Body</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">lists:duplicate</span></span>(<span style="font-weight: bold"><span style="color: #000000">random:uniform</span></span>(<span style="color: #993399">1024</span>, <span style="color: #FF0000">$a</span>)),
+    <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Body</span>)
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>,
+<span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body_fun</span></span>(<span style="color: #009900">F</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sending_files">Sending files</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can send files directly from disk without having to
+read them. Cowboy will use the <code>sendfile</code> syscall when
+possible, which means that the file is sent to the socket
+directly from the kernel, which is a lot more performant
+than doing it from userland.</p></div>
+<div class="paragraph"><p>Again, it is recommended to set the size of the file if it
+can be known in advance.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">F</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">sendfile</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #FF0000">"priv/styles.css"</span>)
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>,
+<span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body_fun</span></span>(<span style="color: #009900">FileSize</span>, <span style="color: #009900">F</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Please see the Ranch guide for more information about
+sending files.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

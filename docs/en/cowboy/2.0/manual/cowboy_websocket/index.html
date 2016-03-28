@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: cowboy_websocket(3)</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_websocket(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>cowboy_websocket - Websocket protocol</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <code>cowboy_websocket</code> module implements the Websocket protocol.</p></div>
+<div class="paragraph"><p>This module is a sub protocol that defines four callbacks to
+be implemented by handlers. The <code>init/2</code> and <code>terminate/3</code>
+callbacks are common to all handler types and are documented
+in the manual for the <a href="cowboy_handler.asciidoc">cowboy_handler</a> module.</p></div>
+<div class="paragraph"><p>The <code>websocket_handle/3</code> and <code>websocket_info/3</code> callbacks are
+specific to Websocket handlers and will be called as many times
+as necessary until the Websocket connection is closed.</p></div>
+<div class="paragraph"><p>The <code>init/2</code> callback can be used to negotiate Websocket protocol
+extensions with the client. It is highly recommended to return a
+timeout value from this callback to ensure that the process is
+terminated when no data has been received during that timespan.
+The default timeout is <code>infinity</code>, which should only be used if
+you have alternate means of ending inactive connections.</p></div>
+<div class="paragraph"><p>Cowboy will terminate the process right after closing the
+Websocket connection. This means that there is no real need to
+perform any cleanup in the optional <code>terminate/3</code> callback.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_meta_values">Meta values</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+websocket_compress = boolean()
+</dt>
+<dd>
+<p>
+        Whether a websocket compression extension in in use.
+</p>
+</dd>
+<dt class="hdlist1">
+websocket_version = 7 | 8 | 13
+</dt>
+<dd>
+<p>
+        The version of the Websocket protocol being used.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_terminate_reasons">Terminate reasons</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The following values may be received as the terminate reason
+in the optional <code>terminate/3</code> callback.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+normal
+</dt>
+<dd>
+<p>
+        The connection was closed normally before establishing a Websocket
+        connection. This typically happens if an <code>ok</code> tuple is returned
+        from the <code>init/2</code> callback.
+</p>
+</dd>
+<dt class="hdlist1">
+remote
+</dt>
+<dd>
+<p>
+        The remote endpoint closed the connection without giving any
+        further details.
+</p>
+</dd>
+<dt class="hdlist1">
+{remote, Code, Payload}
+</dt>
+<dd>
+<p>
+        The remote endpoint closed the connection with the given
+        <code>Code</code> and <code>Payload</code> as the reason.
+</p>
+</dd>
+<dt class="hdlist1">
+stop
+</dt>
+<dd>
+<p>
+        The handler requested to close the connection, either by returning
+        a <code>stop</code> tuple or by sending a <code>close</code> frame.
+</p>
+</dd>
+<dt class="hdlist1">
+timeout
+</dt>
+<dd>
+<p>
+        The connection has been closed due to inactivity. The timeout
+        value can be configured from <code>init/2</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+{crash, Class, Reason}
+</dt>
+<dd>
+<p>
+        A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be
+        used to obtain more information about the crash. The function
+        <code>erlang:get_stacktrace/0</code> can also be called to obtain the
+        stacktrace of the process when the crash occurred.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, badencoding}
+</dt>
+<dd>
+<p>
+        A text frame was sent by the client with invalid encoding. All
+        text frames must be valid UTF-8.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, badframe}
+</dt>
+<dd>
+<p>
+        A protocol error has been detected.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, closed}
+</dt>
+<dd>
+<p>
+        The socket has been closed brutally without a close frame being
+        received first.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, Reason}
+</dt>
+<dd>
+<p>
+        A socket error ocurred.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callbacks">Callbacks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_websocket_handle_inframe_req_state_8594_ret">websocket_handle(InFrame, Req, State) &#8594; Ret</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Ret</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">InFrame</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">text</span> | <span style="font-weight: bold"><span style="color: #000080">binary</span></span> | <span style="color: #FF6600">ping</span> | <span style="color: #FF6600">pong</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
+<span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
+<span style="color: #009900">State</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">OutFrame</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()</tt></pre></div></div>
+<div class="paragraph"><p>Handle the data received from the Websocket connection.</p></div>
+<div class="paragraph"><p>This function will be called every time data is received
+from the Websocket connection.</p></div>
+<div class="paragraph"><p>The <code>stop</code> return value can be used to close the
+connection. A close reply will also result in the connection
+being closed.</p></div>
+<div class="paragraph"><p>The <code>hibernate</code> option will hibernate the process until
+it receives new data from the Websocket connection or an
+Erlang message.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_websocket_info_info_req_state_8594_ret">websocket_info(Info, Req, State) &#8594; Ret</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Ret</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Info</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
+<span style="color: #009900">State</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">OutFrame</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()</tt></pre></div></div>
+<div class="paragraph"><p>Handle the Erlang message received.</p></div>
+<div class="paragraph"><p>This function will be called every time an Erlang message
+has been received. The message can be any Erlang term.</p></div>
+<div class="paragraph"><p>The <code>stop</code> return value can be used to close the
+connection. A close reply will also result in the connection
+being closed.</p></div>
+<div class="paragraph"><p>The <code>hibernate</code> option will hibernate the process until
+it receives another message or new data from the Websocket
+connection.</p></div>
+</div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

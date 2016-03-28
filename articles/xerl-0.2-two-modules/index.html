@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Xerl: two modules</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>Xerl: two modules</span></h1>
+	<p class="date">
+		<span class="day">03</span>
+		<span class="month">Feb</span>
+	</p>
+</header>
+
+<div class="paragraph"><p>Everything is an expression.</p></div>
+<div class="paragraph"><p>This sentence carries profound meaning. We will invoke it many
+times over the course of these articles.</p></div>
+<div class="paragraph"><p>If everything is an expression, then the language shouldn&#8217;t have
+any problem with me defining two modules in the same source file.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #FF6600">mod</span> <span style="color: #FF6600">first_module</span>
+<span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+
+<span style="color: #FF6600">mod</span> <span style="color: #FF6600">second_module</span>
+<span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Likewise, it shouldn&#8217;t have any problem with me defining a
+module inside another module.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #FF6600">mod</span> <span style="color: #FF6600">out_module</span>
+<span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
+    <span style="color: #FF6600">mod</span> <span style="color: #FF6600">in_module</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Of course, in the context of the Erlang VM, these two snippets
+are equivalent; there is nothing preventing you from calling the
+<code>in_module</code> module from any other module. The <code>mod</code>
+instruction means a module should be created in the Erlang VM,
+with no concept of scope attached.</p></div>
+<div class="paragraph"><p>Still we need to handle both. To do this we will add a step
+between the parser and the code generator that will walk over the
+abstract syntax tree, from here onward shortened as <em>AST</em>,
+and transform the AST by executing it where applicable.</p></div>
+<div class="paragraph"><p>What happens when you execute a <code>mod</code> instruction?
+A module is created. Since we are compiling, that simply means
+the compiler will branch out and create a module.</p></div>
+<div class="paragraph"><p>If everything is an expression, does that mean this will allow
+me to create modules at runtime using the same syntax? Yes, but
+let&#8217;s not get ahead of ourselves yet.</p></div>
+<div class="paragraph"><p>For now we will just iterate over the AST, and will compile
+a module for each <code>mod</code> found. Modules cannot contain
+expressions yet, so there&#8217;s no need to recurse over it at this
+point. This should solve the compilation of our first snippet.</p></div>
+<div class="paragraph"><p>The <code>compile/1</code> function becomes:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">compile</span></span>(<span style="color: #009900">Filename</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"Compiling ~s...~n"</span>, [<span style="color: #009900">Filename</span>]),
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Src</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">file:read_file</span></span>(<span style="color: #009900">Filename</span>),
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Tokens</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">xerl_lexer:string</span></span>(<span style="font-weight: bold"><span style="color: #000080">binary_to_list</span></span>(<span style="color: #009900">Src</span>)),
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Exprs</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">xerl_parser:parse</span></span>(<span style="color: #009900">Tokens</span>),
+        <span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #009900">Filename</span>, <span style="color: #009900">Exprs</span>, [])<span style="color: #990000">.</span>
+
+<span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #990000">_</span>, [], <span style="color: #009900">Modules</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"Done...~n"</span>),
+        {<span style="color: #FF6600">ok</span>, <span style="font-weight: bold"><span style="color: #000000">lists:reverse</span></span>(<span style="color: #009900">Modules</span>)};
+<span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #009900">Filename</span>, [<span style="color: #009900">Expr</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">mod</span>, <span style="color: #990000">_</span>, {<span style="font-weight: bold"><span style="color: #000080">atom</span></span>, <span style="color: #990000">_</span>, <span style="color: #009900">Name</span>}, []}|<span style="color: #009900">Tail</span>], <span style="color: #009900">Modules</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">ok</span>, [<span style="color: #009900">Core</span>]} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">xerl_codegen:exprs</span></span>([<span style="color: #009900">Expr</span>]),
+        {<span style="color: #FF6600">ok</span>, [{<span style="color: #009900">Name</span>, []}]} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">core_lint:module</span></span>(<span style="color: #009900">Core</span>),
+        <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"~s~n"</span>, [<span style="font-weight: bold"><span style="color: #000000">core_pp:format</span></span>(<span style="color: #009900">Core</span>)]),
+        {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>, <span style="color: #009900">Beam</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">compile:forms</span></span>(<span style="color: #009900">Core</span>,
+                [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #FF6600">from_core</span>, <span style="color: #FF6600">return_errors</span>, {<span style="color: #FF6600">source</span>, <span style="color: #009900">Filename</span>}]),
+        {<span style="color: #FF6600">module</span>, <span style="color: #009900">Name</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">code:load_binary</span></span>(<span style="color: #009900">Name</span>, <span style="color: #009900">Filename</span>, <span style="color: #009900">Beam</span>),
+        <span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #009900">Filename</span>, <span style="color: #009900">Tail</span>, [<span style="color: #009900">Name</span>|<span style="color: #009900">Modules</span>])<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Running this compiler over the first snippet yields the following
+result:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Compiling</span> <span style="font-weight: bold"><span style="color: #000000">test</span></span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000000">mod_SUITE_data</span></span><span style="color: #990000">/</span><span style="color: #FF6600">two_modules</span><span style="color: #990000">.</span><span style="color: #FF6600">xerl</span><span style="color: #990000">...</span>
+<span style="color: #FF6600">module</span> <span style="color: #FF6600">'first_module'</span> [<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span>,
+                       <span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span>]
+    <span style="color: #FF6600">attributes</span> []
+<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span> <span style="color: #990000">=</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> () <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
+            (<span style="color: #FF6600">'first_module'</span>)
+<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span> <span style="color: #990000">=</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Key</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
+            (<span style="color: #FF6600">'first_module'</span>, <span style="color: #009900">Key</span>)
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+<span style="color: #FF6600">module</span> <span style="color: #FF6600">'second_module'</span> [<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span>,
+                        <span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span>]
+    <span style="color: #FF6600">attributes</span> []
+<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span> <span style="color: #990000">=</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> () <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
+            (<span style="color: #FF6600">'second_module'</span>)
+<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span> <span style="color: #990000">=</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Key</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
+            (<span style="color: #FF6600">'second_module'</span>, <span style="color: #009900">Key</span>)
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+<span style="color: #009900">Done</span><span style="color: #990000">...</span>
+{<span style="color: #FF6600">ok</span>,[<span style="color: #FF6600">first_module</span>,<span style="color: #FF6600">second_module</span>]}</tt></pre></div></div>
+<div class="paragraph"><p>Everything looks fine. And we can check that the two modules have
+been loaded into the VM:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #993399">9</span><span style="color: #990000">&gt;</span> <span style="color: #FF6600">m</span>(<span style="color: #FF6600">first_module</span>)<span style="color: #990000">.</span>
+<span style="color: #009900">Module</span> <span style="color: #FF6600">first_module</span> <span style="color: #FF6600">compiled</span><span style="color: #990000">:</span> <span style="color: #009900">Date</span><span style="color: #990000">:</span> <span style="color: #009900">February</span> <span style="color: #993399">2</span> <span style="color: #993399">2013</span>, <span style="color: #009900">Time</span><span style="color: #990000">:</span> <span style="color: #993399">14.56</span>
+<span style="color: #009900">Compiler</span> <span style="color: #FF6600">options</span><span style="color: #990000">:</span>  [<span style="color: #FF6600">from_core</span>]
+<span style="color: #009900">Object</span> <span style="font-weight: bold"><span style="color: #000000">file: test</span></span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000000">mod_SUITE_data</span></span><span style="color: #990000">/</span><span style="color: #FF6600">two_modules</span><span style="color: #990000">.</span><span style="color: #FF6600">xerl</span>
+<span style="color: #009900">Exports</span><span style="color: #990000">:</span>
+         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">0</span>
+         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">1</span>
+<span style="color: #FF6600">ok</span>
+<span style="color: #993399">10</span><span style="color: #990000">&gt;</span> <span style="color: #FF6600">m</span>(<span style="color: #FF6600">second_module</span>)<span style="color: #990000">.</span>
+<span style="color: #009900">Module</span> <span style="color: #FF6600">second_module</span> <span style="color: #FF6600">compiled</span><span style="color: #990000">:</span> <span style="color: #009900">Date</span><span style="color: #990000">:</span> <span style="color: #009900">February</span> <span style="color: #993399">2</span> <span style="color: #993399">2013</span>, <span style="color: #009900">Time</span><span style="color: #990000">:</span> <span style="color: #993399">14.56</span>
+<span style="color: #009900">Compiler</span> <span style="color: #FF6600">options</span><span style="color: #990000">:</span>  [<span style="color: #FF6600">from_core</span>]
+<span style="color: #009900">Object</span> <span style="font-weight: bold"><span style="color: #000000">file: test</span></span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000000">mod_SUITE_data</span></span><span style="color: #990000">/</span><span style="color: #FF6600">two_modules</span><span style="color: #990000">.</span><span style="color: #FF6600">xerl</span>
+<span style="color: #009900">Exports</span><span style="color: #990000">:</span>
+         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">0</span>
+         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">1</span>
+<span style="color: #FF6600">ok</span></tt></pre></div></div>
+<div class="paragraph"><p>So far so good!</p></div>
+<div class="paragraph"><p>What about the second snippet? It brings up many questions. What
+happens once a <code>mod</code> expression has been executed at
+compile time? If it&#8217;s an expression then it has to have a result,
+right? Right. We are still a bit lacking with expressions for now,
+though, so let&#8217;s get back to it after we add more.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="https://github.com/extend/xerl/blob/0.2/">View the source</a>
+</p>
+</li>
+</ul></div>
+
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul id="articles-nav" class="extra_margin">
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/on-open-source/">On open source</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+	
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+

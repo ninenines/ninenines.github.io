@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: NIFs and port drivers</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>NIFs and port drivers</span></h1>
+
+<div class="paragraph"><p>Erlang.mk can not only build Erlang projects, but also the C code
+that some projects come with, like NIFs and port drivers.</p></div>
+<div class="paragraph"><p>There are two ways to build the C code: using a custom Makefile,
+or making Erlang.mk do it directly. The C code will be built
+as needed when you run <code>make</code>.</p></div>
+<div class="sect1">
+<h2 id="_c_source_code_location_and_erlang_environment">C source code location and Erlang environment</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The C source code should be located in the <em>$(C_SRC_DIR)</em> directory.
+It defaults to <em>c_src/</em>. Should you need to modify it, all you
+need to do is to set the variable in your Makefile before including
+Erlang.mk:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">C_SRC_DIR =</span> <span style="color: #009900">$(CURDIR)</span>/my_nif_source</tt></pre></div></div>
+<div class="paragraph"><p>When this directory exists, Erlang.mk will automatically create a
+file named <em>$(C_SRC_ENV)</em>. This file defaults to <em>$(C_SRC_DIR)/env.mk</em>.
+This can also be changed:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">C_SRC_ENV =</span> <span style="color: #009900">$(C_SRC_DIR)</span>/erlang_env.mk</tt></pre></div></div>
+<div class="paragraph"><p>It contains a few variable definitions for the environment used for the build:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>ERTS_INCLUDE_DIR</code>
+</dt>
+<dd>
+<p>
+        Path to the ERTS include files (<em>erl_driver.h</em>, <em>erl_nif.h</em> and more).
+</p>
+</dd>
+<dt class="hdlist1">
+<code>ERL_INTERFACE_INCLUDE_DIR</code>
+</dt>
+<dd>
+<p>
+        Path to the Erl_Interface include files (<em>ei.h</em> and related).
+</p>
+</dd>
+<dt class="hdlist1">
+<code>ERL_INTERFACE_LIB_DIR</code>
+</dt>
+<dd>
+<p>
+        Path to the Erl_Interface static libraries.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_a_custom_makefile">Using a custom Makefile</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk will automatically run <code>make</code> if it detects a Makefile
+in <em>$(C_SRC_DIR)/Makefile</em>.</p></div>
+<div class="paragraph"><p>The Makefile should have at least two targets: a default target
+(which can be anything, for example <code>all</code>) which is invoked when
+building the C code, and a <code>clean</code> target invoked when cleaning
+it.</p></div>
+<div class="paragraph"><p>You can include the <em>env.mk</em> file to benefit from the Erlang
+environment detection:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>include env.mk</tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_erlang_mk_directly">Using Erlang.mk directly</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You don&#8217;t need to write a Makefile to build C source code, however.
+Erlang.mk comes with rules to build both shared libraries and
+executables, using the source files it finds in <em>$(C_SRC_DIR)</em>.</p></div>
+<div class="paragraph"><p>By default, Erlang.mk will create a shared library. To change
+this and create an executable instead, put this in your Makefile
+before including Erlang.mk:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">C_SRC_TYPE =</span> executable</tt></pre></div></div>
+<div class="paragraph"><p>The generated file name varies depending on the type of project
+you have (shared library or executable) and on the platform you
+build the project on.</p></div>
+<div class="paragraph"><p>For shared libraries, the generated file name will be
+<em>$(C_SRC_OUTPUT)$(C_SRC_SHARED_EXTENSION)</em>, with the default
+being <em>$(CURDIR)/priv/$(PROJECT)</em> followed by the extension:
+<code>.dll</code> on Windows, <code>.so</code> everywhere else.</p></div>
+<div class="paragraph"><p>For executables, the generated file name is
+<em>$(C_SRC_OUTPUT)$(C_SRC_EXECUTABLE_EXTENSION)</em>, with the same
+default except for the extension: <code>.exe</code> on Windows, and otherwise
+nothing.</p></div>
+<div class="paragraph"><p>Erlang.mk sets appropriate compile and linker flags by default.
+These flags vary depending on the platform, and can of course
+be overriden.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>CC</code>
+</dt>
+<dd>
+<p>
+        The compiler to be used.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>CFLAGS</code>
+</dt>
+<dd>
+<p>
+        C compiler flags.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>CXXFLAGS</code>
+</dt>
+<dd>
+<p>
+        C++ compiler flags.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>LDFLAGS</code>
+</dt>
+<dd>
+<p>
+        Linker flags.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>LDLIBS</code>
+</dt>
+<dd>
+<p>
+        Libraries to link against.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>The source files are automatically gathered from the contents
+of <em>$(C_SRC_DIR)</em>. Erlang.mk looks for <em>.c</em>, <em>.C</em>, <em>.cc</em> and <em>.cpp</em>
+source files. You can define the variable <code>SOURCES</code> to manually
+list the files to compile.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Erlang.mk
+	1
+	
+	User Guide
+</h3>
+
+<ul>
+	
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/erlang.mk/1/guide">1</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

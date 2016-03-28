@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: cowboy_middleware(3)</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_middleware(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>cowboy_middleware - behaviour for middlewares</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <code>cowboy_middleware</code> behaviour defines the interface used
+by Cowboy middleware modules.</p></div>
+<div class="paragraph"><p>Middlewares process the request sequentially in the order they
+are configured.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_types">Types</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_env_atom_any">env() = [{atom(), any()}]</h3>
+<div class="paragraph"><p>The environment variable.</p></div>
+<div class="paragraph"><p>One is created for every request. It is passed to each
+middleware module executed and subsequently returned,
+optionally with its contents modified.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callbacks">Callbacks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_execute_req_env_8594_ok_req_env_suspend_module_function_args_stop_req">execute(Req, Env) &#8594; {ok, Req, Env} | {suspend, Module, Function, Args} | {stop, Req}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Req = cowboy_req:req()
+</dt>
+<dd>
+<p>
+The Req object.
+</p>
+</dd>
+<dt class="hdlist1">
+Env = env()
+</dt>
+<dd>
+<p>
+The request environment.
+</p>
+</dd>
+<dt class="hdlist1">
+Module = module()
+</dt>
+<dd>
+<p>
+MFA to call when resuming the process.
+</p>
+</dd>
+<dt class="hdlist1">
+Function = atom()
+</dt>
+<dd>
+<p>
+MFA to call when resuming the process.
+</p>
+</dd>
+<dt class="hdlist1">
+Args = [any()]
+</dt>
+<dd>
+<p>
+MFA to call when resuming the process.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Execute the middleware.</p></div>
+<div class="paragraph"><p>The <code>ok</code> return value indicates that everything went well
+and that Cowboy should continue processing the request. A
+response may or may not have been sent.</p></div>
+<div class="paragraph"><p>The <code>suspend</code> return value will hibernate the process until
+an Erlang message is received. Note that when resuming, any
+previous stacktrace information will be gone.</p></div>
+<div class="paragraph"><p>The <code>stop</code> return value stops Cowboy from doing any further
+processing of the request, even if there are middlewares
+that haven&#8217;t been executed yet. The connection may be left
+open to receive more requests from the client.</p></div>
+</div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Build Erlang releases with Erlang.mk and Relx</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>Build Erlang releases with Erlang.mk and Relx</span></h1>
+	<p class="date">
+		<span class="day">28</span>
+		<span class="month">May</span>
+	</p>
+</header>
+
+<div class="paragraph"><p>Building OTP releases has always been a difficult task. Tools like
+Reltool or Rebar have made this simpler, but
+it&#8217;s no panacea. This article will show you an alternative and
+hopefully much simpler solution.</p></div>
+<div class="paragraph"><p>There is two steps to building a release. First you need to build
+the various OTP applications you want to include in the release. Once
+done, you need to create the release itself, by including the Erlang
+runtime system alongside the applications, a boot script to start the
+node and all its applications, and some configuration files.</p></div>
+<div class="paragraph"><p><a href="https://github.com/extend/erlang.mk">Erlang.mk</a> solves
+the first step. It is an include file for GNU Make. Just
+including it in a Makefile is enough to allow building your project,
+fetching and building dependencies, building documentation, performing
+static analysis and more.</p></div>
+<div class="paragraph"><p><a href="https://github.com/erlware/relx">Relx</a> solves the second
+step. It is a release creation tool, wrapped into a single executable
+file. It doesn&#8217;t require a configuration file. And if you do need one,
+it will be a pretty small one.</p></div>
+<div class="paragraph"><p>Let&#8217;s take a look at the smallest Erlang.mk powered
+Makefile. There is only one thing required: defining the project
+name.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PROJECT =</span> my_project
+
+include erlang.mk</tt></pre></div></div>
+<div class="paragraph"><p>Simply doing this allows you to build your application by typing
+<code>make</code>, running tests using <code>make tests</code>, and
+more. It will even compile your <em>.dtl</em> files found in the
+<em>templates/</em> directory if you are using ErlyDTL!</p></div>
+<div class="paragraph"><p>Let&#8217;s now take a look at a simplified version of the Makefile for
+this website. I only removed a few targets that were off-topic.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PROJECT =</span> ninenines
+
+<span style="color: #009900">DEPS =</span> cowboy erlydtl
+<span style="color: #009900">dep_cowboy =</span> https<span style="color: #990000">:</span>//github.com/extend/cowboy.git 0.8.5
+<span style="color: #009900">dep_erlydtl =</span> https<span style="color: #990000">:</span>//github.com/evanmiller/erlydtl.git 4d0dc8fb
+
+<span style="font-weight: bold"><span style="color: #000080">.PHONY:</span></span> release clean-release
+
+<span style="color: #990000">release:</span> clean-release all projects
+        relx -o rel<span style="color: #990000">/</span><span style="color: #009900">$(PROJECT)</span>
+
+<span style="color: #990000">clean-release:</span> clean-projects
+        rm -rf rel<span style="color: #990000">/</span><span style="color: #009900">$(PROJECT)</span>
+
+include erlang.mk</tt></pre></div></div>
+<div class="paragraph"><p>You can see here how to define dependencies. First you list all
+the dependency names, then you have one line per dependency, giving
+the repository URL and the commit number, tag or branch you want.</p></div>
+<div class="paragraph"><p>Then you can see two targets defined, with <code>release</code>
+becoming the default target, because it was defined first. You can
+override the default target <code>all</code>, which builds the
+application and its dependencies, this way.</p></div>
+<div class="paragraph"><p>And as you can see, the <code>release</code> target uses
+Relx to build a release into the <em>rel/ninenines/</em>
+directory. Let&#8217;s take a look at the configuration file for this release.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #FF6600">release</span>, {<span style="color: #FF6600">ninenines</span>, <span style="color: #FF0000">"1"</span>}, [<span style="color: #FF6600">ninenines</span>]}<span style="color: #990000">.</span>
+
+{<span style="color: #FF6600">extended_start_script</span>, <span style="color: #000080">true</span>}<span style="color: #990000">.</span>
+{<span style="color: #FF6600">sys_config</span>, <span style="color: #FF0000">"rel/sys.config"</span>}<span style="color: #990000">.</span>
+
+{<span style="color: #FF6600">overlay</span>, [
+        {<span style="color: #FF6600">mkdir</span>, <span style="color: #FF0000">"log"</span>},
+        {<span style="color: #FF6600">copy</span>, <span style="color: #FF0000">"rel/vm.args"</span>,
+                <span style="color: #FF0000">"releases/\{\{release_name\}\}-\{\{release_version\}\}/vm.args"</span>}
+]}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The first line defines a release named <code>ninenines</code>, which
+has a version number <code>"1"</code> and includes one application, also
+named <code>ninenines</code>, although it doesn&#8217;t have to.</p></div>
+<div class="paragraph"><p>We then use the <code>extended_start_script</code> option to tell
+Relx that we would like to have a start script that allows
+us to not only start the release, but do so with the node in the
+background, or also to allow us to connect to a running node, and so on.
+This start script has the same features as the one tools like
+Rebar generates.</p></div>
+<div class="paragraph"><p>The rest of the file just makes sure our configuration files are
+where we expect them. Relx will automatically take care
+of your <em>sys.config</em> file as long as you tell it where to
+find it. The <em>vm.args</em> file used by the extended start script
+needs to be handled more explicitly by using an overlay however.</p></div>
+<div class="paragraph"><p>How does Relx find what applications to include?
+By looking at the application dependencies in the <em>.app</em>
+file of each OTP application. Make sure you put all dependencies in
+there, <em>including</em> library applications, and Relx
+will find everything for you.</p></div>
+<div class="paragraph"><p>For example, this release includes the following applications.
+Only what&#8217;s strictly required.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>compiler-4.9.1  crypto-2.3     kernel-2.16.1    ranch-0.8.3    syntax_tools-1.6.11
+cowboy-0.8.5    erlydtl-0.7.0  ninenines-0.2.0  stdlib-1.19.1</code></pre>
+</div></div>
+<div class="paragraph"><p>The <em>sys.config</em> file is standard and
+<a href="http://www.erlang.org/doc/man/config.html">well documented</a>.
+The <em>vm.args</em> file is just an optionally multiline file
+containing all the flags to pass to the Erlang VM, for example
+<code>-name ninenines@127.0.0.1 -heart</code>.</p></div>
+<div class="paragraph"><p>Building OTP releases has always been a difficult task. Until now.</p></div>
+
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul id="articles-nav" class="extra_margin">
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/on-open-source/">On open source</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+	
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+

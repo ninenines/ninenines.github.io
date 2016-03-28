@@ -1,0 +1,432 @@
+::: The last REST client you will ever need
+
+It's better to REST in BED.
+
+:: Author
+
+* Loïc Hoguin
+* @lhoguin
+* Nine Nines
+* Erlang Cowboy and Nine Nines founder
+
+:: Conference
+
+* EUC 2014
+* 20140609
+
+:: Why this talk?
+
+: REST is great
+
+^!rest.jpg
+
+: The family business
+
+^!family_business.jpg
+
+: Open your mind
+
+^!mind_blown.jpg
+
+:: REST constraints
+
+: Client-server architecture
+
+* Different set of concerns
+* Client cares about processing or rendering
+* Server cares about storing and making information available efficiently
+* Keeping concerns separate allow client and server to evolve independently
+
+: Stateless
+
+* Messages always contain all data needed to process the request
+* Including authentication information if required
+** That doesn't mean you can't use cookies!
+** That means you must use them responsibly
+* The server keeps no session state around
+** The client may
+
+: Cacheable
+
+* Resources may be cached by any component, including the client,
+	the server and any intermediary
+* All resources are explicitly or implicitly marked as (not) cacheable
+
+: Uniform interface
+
+* All components use the same rules to speak to each other
+* Makes it easy to understand the interactions
+* A number of constraints are required to achieve this
+** We will see them in a few minutes!
+
+: Layered system
+
+* Components only know about the components they talk to
+* For example a proxy completely hides what's behind it
+** This is true for both directions
+** There may be more proxies in one way or another
+
+	perhaps use the picture here
+
+: Code on demand (optional)
+
+* Code may be downloaded to extend the client functionality
+* This is optional, you can't assume the client will receive
+	or be able to execute the code
+* Javascript is a common example of this
+
+:: Uniform interface in details
+
+: Resources and resource identifiers
+
+* Any information that can be named can be a resource
+* A resource is a conceptual mapping to a set of entities
+** For example one user or a group of users
+* A resource is identified by a URI
+* Typically we talk about resources and resource collections
+
+: Resource representations
+
+* Sequence of bytes + metadata
+* Representation metadata (media type, modification time...)
+* Resource metadata (related resources, additional representations...)
+* Control data (parameterized requests, handling instructions...)
+
+: Self-descriptive messages
+
+* Messages contain everything needed to decipher them
+* All representations must have a media type in the message
+* The media type must be agreed upon by both endpoints
+* Negotiating the appropriate media type is a big part of REST
+
+: Hypermedia as the engine of the application state
+
+* Interactions must be entirely driven by hypermedia
+* A client only needs an entry point and basic understanding
+	of the media types being used by the service
+* Resources and functionality can be discovered at runtime
+
+:: What media type should we use?
+
+: Not just one media type
+
+* Each resource should have at least one media type
+* The media type defines the structure and accepted values
+* It's pretty much what you do when you document your API
+** So why not give them a name and use that in the protocol?
+* We still need a basic type to extend upon
+
+: Why not JSON?
+
+* No concept of links or link relations
+* Unable to deal with binary data
+* Not very good with the map datatype
+* Very slow and very expensive to parse
+* Stop using JSON, save the planet!
+
+: Why not msgpack?
+
+* No concept of links or link relations
+* No bignums
+* No decimals
+* Not very good with the map datatype
+
+: Why not HTML?
+
+* Everything is a string
+* Unable to deal with binary data
+* No easy mapping of types onto HTML
+* Different use case than what we are looking for really
+
+: Why not XML?
+
+* Everything is a string
+* Unable to deal with binary data
+* No easy mapping of types onto XML
+** You can, but it's damn verbose
+* XML is probably slower and more expensive to parse than JSON
+** The planet is doomed!
+
+: What then?
+
+^!wondering.jpg
+
+:: BED
+
+: Goals
+
+* Hyperlinks and link relations
+* Binary, explicit sizes, efficient to parse
+* Small, exponentially smaller the larger the data gets
+* Good type coverage, extensible
+* No NULL value
+* Fully specified
+
+: Media types 1/2
+
+* application/x-bed
+* application/x-bed-stream
+** Great with Websockets
+
+: Media types 2/2
+
+* Again, don't be shy, define your own media types!
+* Make sure to advertise both your custom type and the basic type
+* This way you can process the data even if you don't know its structure
+
+: Hyperlink 1/2
+
+* Link without link relation
+* Link with link relation
+** Better for automated processing
+* Link relations are standard but you may use custom relations
+
+: Hyperlink 2/2
+
+* Link is a string
+* Link relation is a symbol
+* Highly recommended to only use fully qualified links
+** The client should not build links unless strictly required
+** This is true with any media type
+
+: Symbol 1/9
+
+``` js
+{
+    "firstName": "John",
+    "lastName": "Smith",
+    "isAlive": true,
+    "age": 25,
+    "phoneNumbers": [
+        { "type": "home", "number": "212 555-1234" },
+        { "type": "office",  "number": "646 555-4567" }
+    ]
+}
+```
+
+: Symbol 2/9
+
+* A lot of data is sent as maps
+* A lot of maps share the same keys
+* Repeating these keys over and over is madness
+* There's a better way
+
+: Symbol 3/9
+
+* Keep track of symbols already sent
+* Replace repeated symbols with a numerical value
+* Continue doing that until the end of the message
+** Or the end of the stream!
+* It's just like atoms, isn't it?
+
+: Symbol 4/9
+
+* Symbol dictionary starts with `false` (0) and `true` (1)
+* You can create a custom content-type that has more pre-defined
+
+: Symbol 5/9
+
+* First message
+* JSON: `{"compact":true,"schema":0}` (27 bytes)
+* MsgPack: `82 A7 compact C3 A6 schema 00` (18 bytes)
+* BED: `C2 27 compact 41 26 schema 80` (18 bytes)
+
+: Symbol 6/9
+
+* Subsequent messages
+* JSON: `{"compact":true,"schema":0}` (27 bytes)
+* MsgPack: `82 A7 compact C3 A6 schema 00` (18 bytes)
+* BED: `C2 42 41 43 80` (5 bytes)
+
+: Symbol 7/9
+
+* We sacrifice a little CPU power for a large size gain
+** Especially for collections and large streams
+* We don't sacrifice too much
+** Even streams tend to use a limited number of symbols
+** That means the lookup time is not significant
+
+: Symbol 8/9
+
+* All this without compression
+* All this without schemas
+* Just call the encode function and you're done!
+** Okay some languages might need a little more wrapping than others...
+
+: Symbol 9/9
+
+* The symbol string is limited to 255 bytes (not characters!)
+* The first 32 symbols cost exactly 1 byte
+** This never changes, so choose these 32 symbols well!
+* Subsequent symbols cost 2 or 3 bytes
+** 2 bytes when there are less than 8192 symbols defined total
+** 3 bytes when there are more
+
+: Binary
+
+* Size followed by sequence of bytes
+* Size may be encoded as 16-bit, 32-bit or 64-bit unsigned integer
+* Minimal binary size: 3 bytes
+
+: String
+
+* Must be valid UTF-8
+** Decoding validates UTF-8 by default (optionally can be disabled)
+* Size followed by sequence of bytes
+** Character-terminated strings are the devil!
+* Size may be encoded as 8-bit, 16-bit or 32-bit unsigned integer
+* Minimal string size: 2 bytes
+
+: RFC 3339 date
+
+* Why?
+* Because they are a lot more common than you think
+* By standardizing we avoid having tons of different formats
+** That means less bugs, especially when converting
+* RFC 3339 includes time, date and timezone information
+** It's a subset of ISO 8601
+* 2 bytes followed by the date as a sequence of bytes
+
+: Integer
+
+* 6-bit, 8-bit, 16-bit, 32-bit and 64-bit signed integer
+* Positive and negative bignum integer
+** Same encoding as Erlang
+* Minimal integer size: 1 byte (-32 to 31)
+
+: Floating-point
+
+* IEEE 754 binary64 (double)
+* IEEE 754 decimal64
+* Both take 9 bytes
+
+: Map
+
+* Size followed by unordered list of pairs of key/values
+** If any duplicate, only the last key/value is kept
+* Size may be encoded as 5-bit, 16-bit or 32-bit unsigned integer
+* Minimal map size: 1 byte
+** Maps smaller than 32 keys take 1 byte + the size of pairs
+
+: Array
+
+* Size followed by list of values
+* Size may be encoded as 5-bit, 16-bit or 32-bit unsigned integer
+* Minimal array size: 1 byte
+** Arrays smaller than 32 values take 1 byte + the size of the values
+
+: List
+
+* 1 byte to indicate the start of a list
+* 1 byte to indicate the end
+* For special cases only
+
+: Extensions
+
+* Define up to 256 additional types
+** You can do that through custom media types
+* 8-bit, 16-bit, 32-bit or 64-bit value
+* Blob of 8-bit, 16-bit, 32-bit or 64-bit unsigned size
+
+: Wrap-up
+
+* BED is...
+* Great for REST (hypertext)
+* Great for Websockets (exponentially smaller as time goes on)
+* Comfy!
+
+: But wait...
+
+* Doesn't binary make it harder to debug things?
+* No
+* A large enough JSON is as indecipherable as a large enough binary
+* When debugging you can just add a well placed decode call
+* Plus nothing is stopping you from providing JSON at the same time!
+
+:: Writing a REST client
+
+: Warning
+
+* This part has no code written for it at this point
+* Sorry!
+* The BED format was just too interesting to work on
+* And we're probably running out of time anyway
+
+: Goals
+
+* Manipulate resources
+** Only use URIs
+** Don't look into or validate representations
+** Don't parse representations (with exceptions)
+* Automatic caching
+** Provide a default but replaceable implementation
+** Again, URI based!
+* Automatic discovery of service capabilities
+
+: HTTP client
+
+* Use `gun` as the client
+* Always connected, so great for automation
+* What do you call a `gun` based REST client?
+
+: HTTP client
+
+* Use `gun` as the client
+* Always connected, so great for automation
+* What do you call a `gun` based REST client?
+* `gunr` of course!
+
+: Service map 1/2
+
+* We don't want to hardcode URIs
+* We want to obtain them directly from the service
+* We can generate a wrapper using this information
+* We could use "crawling" but it's impractical
+* RSDL specifications do what we want
+
+: Service map 2/2
+
+* RSDL is ugly XML though :(
+* RSDL includes way more information than we need
+** It literally describes everything
+** It's good, but life is too short
+* A subset of RSDL generated from a simpler DSL might be workable
+** Or just send that simpler DSL
+
+: Interface
+
+``` erlang
+my_generated_api_users:get_all().
+my_generated_api_users:get(Key, MediaType).
+my_generated_api_users:put(Key, MediaType, Representation).
+...
+```
+
+: Cache
+
+* A `get` call first looks into the cache
+* It builds a request based on cache contents
+** In some cases it may not
+* The server dictates the client how cache should be used
+* So we can safely rely on it
+
+: Going further
+
+* We could go further with RSDL
+* Is it worth it, though?
+* Would people really use this stuff to its full potential?
+* I'm not so sure...
+* Sounds like too much work for too little reward
+
+:: Putting it to rest
+
+: Let's be lazy now!
+
+* BED: ^https://github.com/bed-project/
+** Help welcome!
+* gun: ^https://github.com/extend/gun
+** Yes, I promise, I'll add Websockets support soon
+* gunr: help welcome!
+* Me
+** Twitter: @lhoguin
+** ^http://ninenines.eu

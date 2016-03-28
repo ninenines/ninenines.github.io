@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Packages and dependencies</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Packages and dependencies</span></h1>
+
+<div class="paragraph"><p>Erlang.mk can fetch and compile the dependencies that your
+project requires. Erlang.mk improves upon the concepts
+introduced by Rebar, so they should be familiar to many
+seasoned Erlang developers.</p></div>
+<div class="paragraph"><p>Erlang.mk is not a package manager, nor is it trying to be,
+but it does include an index of Erlang packages to make
+discovering useful projects easier.</p></div>
+<div class="paragraph"><p>This chapter will explain how to use packages, add
+dependencies to your project or bundle them directly
+in a single repository.</p></div>
+<div class="sect1">
+<h2 id="_searching_packages">Searching packages</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk gives you access to nearly 500 packages, with more
+being added regularly.</p></div>
+<div class="paragraph"><p>To find a package, search for it:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make search <span style="color: #009900">q</span><span style="color: #990000">=</span>pool</tt></pre></div></div>
+<div class="paragraph"><p>This will return all packages matching this word, like worker
+pool and acceptor pool projects.</p></div>
+<div class="paragraph"><p>You can also list everything and use regular command line
+tools to find what you need, for example:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make search <span style="color: #990000">|</span> less</tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_adding_dependencies_to_your_project">Adding dependencies to your project</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Once you find the package you need, adding it as a dependency
+to your project is a one-liner:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy</tt></pre></div></div>
+<div class="paragraph"><p>And that&#8217;s it! The next time you run <code>make</code>, Erlang.mk will
+fetch and compile Cowboy. Erlang.mk will also ensure Cowboy
+is available whenever you use the shell, run tests and any
+other operations.</p></div>
+<div class="paragraph"><p>Erlang.mk will fill in the application resource file with
+all applications found in <code>DEPS</code>. But not all dependencies
+are Erlang applications, and not all dependencies need to
+be a runtime dependency. That&#8217;s where the <code>BUILD_DEPS</code>
+variable comes in: it works just like <code>DEPS</code>, except the
+dependencies listed there will not be added as runtime
+dependencies.</p></div>
+<div class="paragraph"><p>For example, you could add a parse transform project like
+this to make it available only at build time:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">BUILD_DEPS =</span> erlando</tt></pre></div></div>
+<div class="paragraph"><p>Or you could depend on a C project directly, if you are
+building a NIF:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">BUILD_DEPS =</span> leveldb
+<span style="color: #009900">dep_leveldb =</span> git https<span style="color: #990000">:</span>//github.com/basho/leveldb 2.1.3</tt></pre></div></div>
+<div class="paragraph"><p>This dependency will be built before your application, so
+you could easily copy the resulting shared file into your
+<em>priv/</em> directory as part of the build process. More information
+about that in the <a href="../ports">NIFs and port drivers</a>
+chapter.</p></div>
+<div class="paragraph"><p>Another variable, <code>LOCAL_DEPS</code>, allows specifying runtime
+dependencies which are part of Erlang/OTP itself, but also
+dependencies that are included in the repository. Since they
+are already on your system, there is no need to fetch them.
+Do note that there is no way to choose the version, the
+application used will be the one already on your system.</p></div>
+<div class="paragraph"><p>You could depend on the Crypto application, for example:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">LOCAL_DEPS =</span> crypto</tt></pre></div></div>
+<div class="paragraph"><p>Erlang.mk comes with additional types of dependencies.
+It has <code>TEST_DEPS</code> for dependencies used only for testing:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">TEST_DEPS =</span> ct_helper
+<span style="color: #009900">dep_ct_helper =</span> git https<span style="color: #990000">:</span>//github.com/ninenines/ct_helper master</tt></pre></div></div>
+<div class="paragraph"><p><code>DOC_DEPS</code> for dependencies used only when building documentation:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DOC_DEPS =</span> edown</tt></pre></div></div>
+<div class="paragraph"><p><code>REL_DEPS</code> for dependencies required to build the release,
+or to include extra applications in the release:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">REL_DEPS =</span> recon</tt></pre></div></div>
+<div class="paragraph"><p>And <code>SHELL_DEPS</code> for dependencies to make available when running
+the <code>make shell</code> command:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">SHELL_DEPS =</span> tddreloader</tt></pre></div></div>
+<div class="paragraph"><p>All these will be documented in more details in their respective
+chapters.</p></div>
+<div class="sect3">
+<h4 id="_modifying_the_dependency_source_or_version">Modifying the dependency source or version</h4>
+<div class="paragraph"><p>By default, Erlang.mk will look into its package index to
+find the project you are looking for, if you only provide
+its name. This is this case:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy</tt></pre></div></div>
+<div class="paragraph"><p>If you need a different version, you need to define another
+variable. There are two ways to do this, each being useful
+for different reasons.</p></div>
+<div class="paragraph"><p>If you simply want to change the commit number, all you
+need to do is to define the <code>dep_$(DEP_NAME)_commit</code>
+variable. In the case of Cowboy, this would look like this:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy
+<span style="color: #009900">dep_cowboy_commit =</span> 2.0.0-pre.2</tt></pre></div></div>
+<div class="paragraph"><p>Erlang.mk will use the package index to get all information
+about Cowboy, except the commit number which will be overriden.</p></div>
+<div class="paragraph"><p>If you need to set the fetch method or repository information
+too, for example because you want to use your own fork, or
+simply because the project is missing from the index, you
+can define the <code>dep_$(DEP_NAME)</code> variable with everything:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy
+<span style="color: #009900">dep_cowboy =</span> git https<span style="color: #990000">:</span>//github.com/essen/cowboy 2.0.0-pre.2</tt></pre></div></div>
+<div class="paragraph"><p>This will fetch Cowboy from your fork at the given commit.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_fetch_methods">Fetch methods</h4>
+<div class="paragraph"><p>Erlang.mk comes with a number of different fetch methods.
+You can fetch from Git, Mercurial, SVN, to name a few.
+There are fetch methods that will work everywhere, and
+fetch methods that will only work in a given environment.</p></div>
+<div class="paragraph"><p>The following table lists all existing methods:</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Name           </th>
+<th align="center" valign="top"> Format          </th>
+<th align="center" valign="top"> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">git</p></td>
+<td align="center" valign="top"><p class="table">git repo commit</p></td>
+<td align="center" valign="top"><p class="table">Clone the Git repository and checkout the given version</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">git-submodule</p></td>
+<td align="center" valign="top"><p class="table">git-submodule</p></td>
+<td align="center" valign="top"><p class="table">Initialize and update the Git submodule</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">hg</p></td>
+<td align="center" valign="top"><p class="table">hg repo commit</p></td>
+<td align="center" valign="top"><p class="table">Clone the Mercurial repository and update to the given version</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">svn</p></td>
+<td align="center" valign="top"><p class="table">svn repo</p></td>
+<td align="center" valign="top"><p class="table">Checkout the given SVN repository</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">cp</p></td>
+<td align="center" valign="top"><p class="table">cp path/to/repo</p></td>
+<td align="center" valign="top"><p class="table">Recursively copy a local directory</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">hex</p></td>
+<td align="center" valign="top"><p class="table">hex version</p></td>
+<td align="center" valign="top"><p class="table">Download the given project version from hex.pm</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">fail</p></td>
+<td align="center" valign="top"><p class="table">N/A</p></td>
+<td align="center" valign="top"><p class="table">Always fail, reserved for internal use</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">legacy</p></td>
+<td align="center" valign="top"><p class="table">N/A</p></td>
+<td align="center" valign="top"><p class="table">Legacy Erlang.mk fetcher, reserved for internal use</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph"><p>The <code>git</code> and <code>hg</code> methods both have a repository and commit.
+You can use any valid commit, tag or branch in that repository
+for the commit value.</p></div>
+<div class="paragraph"><p>For example, to fetch Cowboy with tag 2.0.0-pre.2 from Git:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">dep_cowboy =</span> git https<span style="color: #990000">:</span>//github.com/ninenines/cowboy 2.0.0-pre.2</tt></pre></div></div>
+<div class="paragraph"><p>Or to fetch Ehsa tag 4.0.3 from Mercurial:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">dep_ehsa =</span> hg https<span style="color: #990000">:</span>//bitbucket.org/a12n/ehsa 4.0.3</tt></pre></div></div>
+<div class="paragraph"><p>Git also comes with a concept of submodules. Erlang.mk can
+automatically initializes and updates submodules for dependencies,
+as long as they were added beforehand using <code>git submodule add</code>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">dep_cowboy =</span> git-submodule</tt></pre></div></div>
+<div class="paragraph"><p>The <code>svn</code> method only has a repository value, but that&#8217;s
+simply because the SVN repository URL can also contain
+the path and commit.</p></div>
+<div class="paragraph"><p>This would fetch an example project from the trunk:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">dep_ex1 =</span> svn https<span style="color: #990000">:</span>//example.com/svn/trunk/project/ex<span style="color: #993399">1</span></tt></pre></div></div>
+<div class="paragraph"><p>And this would fetch a separate example project from a
+specific commit:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">dep_ex2 =</span> svn svn<span style="color: #990000">:</span>//example.com/svn/branches/erlang-proj/ex<span style="color: #993399">2</span>@<span style="color: #993399">264</span></tt></pre></div></div>
+<div class="paragraph"><p>You can copy a directory from your machine using the <code>cp</code> method.
+It only takes the path to copy from:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">dep_cowboy =</span> cp <span style="color: #009900">$(HOME)</span>/ninenines/cowboy</tt></pre></div></div>
+<div class="paragraph"><p>Finally, you can use a package from the
+<a href="https://hex.pm/">Hex repository</a>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">dep_cowboy =</span> hex 1.0.3</tt></pre></div></div>
+</div>
+<div class="sect3">
+<h4 id="_custom_fetch_methods">Custom fetch methods</h4>
+<div class="paragraph"><p>If none of the existing methods fit your use, you can simply
+define your own. Erlang.mk will consider all variables that
+are named as <code>dep_fetch_$(METHOD)</code> to be available fetch
+methods. You can do anything inside this variable, as long
+as you create a folder named <em>$(DEPS_DIR)/$(call dep_name,$1)</em>.
+Or in layman terms, if your dependency is Cowboy, this would
+become <em>deps/cowboy</em>.</p></div>
+<div class="paragraph"><p>To give an example, this is what the Git method does:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>define dep_fetch_git
+        git clone -q -n -- <span style="color: #009900">$(</span>call dep_repo<span style="color: #990000">,</span><span style="color: #009900">$1</span><span style="color: #990000">)</span> <span style="color: #009900">$(DEPS_DIR)</span><span style="color: #990000">/</span><span style="color: #009900">$(</span>call dep_name<span style="color: #990000">,</span><span style="color: #009900">$1</span><span style="color: #990000">);</span> <span style="color: #990000">\</span>
+        cd <span style="color: #009900">$(DEPS_DIR)</span><span style="color: #990000">/</span><span style="color: #009900">$(</span>call dep_name<span style="color: #990000">,</span><span style="color: #009900">$1</span><span style="color: #990000">)</span> <span style="color: #990000">&amp;&amp;</span> git checkout -q <span style="color: #009900">$(</span>call dep_commit<span style="color: #990000">,</span><span style="color: #009900">$1</span><span style="color: #990000">);</span>
+endef</tt></pre></div></div>
+<div class="paragraph"><p>Note that, like dependency information, this custom fetch method
+must be written before including <em>erlang.mk</em>.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_deps_are_fetched_and_built">How deps are fetched and built</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The order in which dependencies are fetched and built is well
+defined. This means that Erlang.mk will get the same applications
+regardless of the command or options being used.</p></div>
+<div class="paragraph"><p>In tree traversal terms, where the list of dependencies is a
+tree, Erlang.mk fetches everything using the pre-order traversal
+method. The steps can be summarized like this, starting from
+the root application:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Fetch all dependencies for the application
+</p>
+</li>
+<li>
+<p>
+Build first dependency
+</p>
+</li>
+<li>
+<p>
+Build Nth dependency
+</p>
+</li>
+<li>
+<p>
+Build last dependency
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>Every time a dependency is built, these same steps are followed,
+recursively.</p></div>
+<div class="paragraph"><p>Do note that the first step, fetching all dependencies of
+an application, is not guaranteed to be ordered. The reason
+for this is that it is not possible to have the same dependency
+listed twice in a single application, and therefore there can
+be no conflicts. Remember, this step only fetches, at no point
+are different applications built in parallel.</p></div>
+<div class="paragraph"><p>What about conflicts between the dependencies of different
+applications? Simple. Since builds are ordered, this means
+that the first version of an application that is fetched
+will be the one that wins.</p></div>
+<div class="paragraph"><p>This means that if project A depends on projects B and C,
+in this order, and that both B and C depend on a different
+version of D, it will always be B&#8217;s version of D that wins,
+because we fetch the dependencies of B before fetching
+those from C.</p></div>
+<div class="paragraph"><p>Similarly, if project A depends on projects B, C and D,
+regardless of the order, and A, B and C depend on a
+different version of D, it will always be A&#8217;s version
+that wins, because we fetch all dependencies of A before
+fetching those from B or C.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ignoring_unwanted_dependencies">Ignoring unwanted dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Sometimes, you may want to ignore dependencies entirely.
+Not even fetch them. You may want to do this because a
+project you depend on depends on an application you do
+not need (like a dependency for building documentation
+or testing). Or maybe the dependency is already installed
+on your system.</p></div>
+<div class="paragraph"><p>To ignore a dependency, simply add it to the <code>IGNORE_DEPS</code>
+variable:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>IGNORE_DEPS <span style="color: #990000">+=</span> edown proper</tt></pre></div></div>
+<div class="paragraph"><p>This will only ignore dependencies that are needed for
+building. It is therefore safe to write:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>IGNORE_DEPS <span style="color: #990000">+=</span> edown proper
+<span style="color: #009900">TEST_DEPS =</span> proper</tt></pre></div></div>
+<div class="paragraph"><p>The PropEr application will be fetched as intended when
+running <code>make tests</code> or <code>make check</code>. It will however
+not be fetched when running <code>make</code> or <code>make deps</code>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dependencies_directory">Dependencies directory</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Dependencies are fetched in <em>$(DEPS_DIR)</em>. By default this is
+the <em>deps</em> directory. You can change this default, but you
+should only do so if it was not defined previously. Erlang.mk
+uses this variable to tell dependencies where to fetch their
+own dependencies.</p></div>
+<div class="paragraph"><p>You will therefore need to use <code>?=</code> instead of <code>=</code>. Of course,
+if you know you will never use this project as a dependency,
+<code>=</code> will work. But to avoid it biting you later on, do this:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>DEPS_DIR <span style="color: #990000">?=</span> <span style="color: #009900">$(CURDIR)</span>/libs</tt></pre></div></div>
+<div class="paragraph"><p>The <code>$(CURDIR)</code> part is important, otherwise dependencies of
+dependencies will be fetched in the wrong directory.</p></div>
+<div class="paragraph"><p>Erlang.mk will also export the <code>REBAR_DEPS_DIR</code> variable for
+compatibility with Rebar build tools, as long as they are
+recent enough.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_many_applications_in_one_repository">Many applications in one repository</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>In addition to the dependencies that are fetched, Erlang.mk
+also allows you to have dependencies local to your repository.
+This kind of layout is sometimes called multi-application
+repositories, or repositories with multiple applications.</p></div>
+<div class="paragraph"><p>They work exactly the same as remote dependencies, except:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+They are not fetched
+</p>
+</li>
+<li>
+<p>
+They are not autopatched
+</p>
+</li>
+<li>
+<p>
+They are not deleted on <code>make distclean</code>
+</p>
+</li>
+<li>
+<p>
+They are not automatically added to the application resource file
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>To properly fill the application resource file, you will
+need to define the <code>LOCAL_DEPS</code> variable for each relevant
+application, the same as for OTP applications.</p></div>
+<div class="paragraph"><p>If there is a conflict between a local dependency and a
+remote dependency, then the local dependency always wins;
+an error will be triggered when trying to fetch the
+conflicting remote dependency.</p></div>
+<div class="paragraph"><p>To start using dependencies local to the repository, simply
+create a folder named <em>$(APPS_DIR)</em>. By default, this folder
+is the <em>apps/</em> directory.</p></div>
+<div class="paragraph"><p>You can use Erlang.mk to bootstrap local dependencies by
+using the command <code>make new-app</code> or <code>make new-lib</code>. This
+command will create the necessary directories and bootstrap
+the application.</p></div>
+<div class="paragraph"><p>For example, to create a full fledged OTP application as
+a local dependency:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make new-app <span style="font-weight: bold"><span style="color: #0000FF">in</span></span><span style="color: #990000">=</span>webchat</tt></pre></div></div>
+<div class="paragraph"><p>Or, the same as an OTP library:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make new-lib <span style="font-weight: bold"><span style="color: #0000FF">in</span></span><span style="color: #990000">=</span>webchat</tt></pre></div></div>
+<div class="paragraph"><p>Templates also work with local dependencies, from the root
+directory of the project. You do need however to tell
+Erlang.mk to create the files in the correct application:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make new <span style="color: #009900">t</span><span style="color: #990000">=</span>gen_server <span style="color: #009900">n</span><span style="color: #990000">=</span>my_server <span style="font-weight: bold"><span style="color: #0000FF">in</span></span><span style="color: #990000">=</span>webchat</tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_repositories_with_no_application_at_the_root_level">Repositories with no application at the root level</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>It&#8217;s possible to use Erlang.mk with only applications in
+<em>$(APPS_DIR)</em>, and nothing at the root of the repository.
+Just create a folder, put the <em>erlang.mk</em> file in it,
+write a Makefile that includes it, and start creating
+your applications.</p></div>
+<div class="paragraph"><p>Similarly, it&#8217;s possible to have a repository with only
+dependencies found in <em>$(DEPS_DIR)</em>. You just need to
+create a Makefile and specify the dependencies you want.
+This allows you to create a repository for handling the
+building of releases, for example.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_autopatch">Autopatch</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk will automatically patch all the dependencies it
+fetches. It needs to do this to ensure that the dependencies
+become compatible with not only Erlang.mk, but also with
+the version of Erlang.mk that is currently used.</p></div>
+<div class="paragraph"><p>When fetching a dependency, the following operations are
+performed:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Fetch the dependency using the configured fetch method
+</p>
+</li>
+<li>
+<p>
+If it contains a <em>configure.ac</em> or <em>configure.in</em> file, run <code>autoreconf -Wall -vif -I m4</code>
+</p>
+</li>
+<li>
+<p>
+If it contains a <em>configure</em> script, run it
+</p>
+</li>
+<li>
+<p>
+Run autopatch on the project
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Autopatch first checks if there is any project-specific patch
+enabled. There are currently two: <code>RABBITMQ_CLIENT_PATCH</code> for
+the <code>amqp_client</code> dependency, and <code>RABBITMQ_SERVER_PATCH</code> for
+the <code>rabbit</code> dependency. These are needed only for RabbitMQ
+versions before 3.6.0 (assuming you are using upstream RabbitMQ,
+and not a fork).</p></div>
+<div class="paragraph"><p>Otherwise, autopatch performs different operations depending
+on the kind of project it finds the dependency to be.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Rebar projects are automatically converted to use Erlang.mk
+as their build tool. This essentially patches Rebar out, and
+fixes and converts the project to be compatible with Erlang.mk.
+</p>
+</li>
+<li>
+<p>
+Erlang.mk projects have their <em>erlang.mk</em> file redirect to
+the top-level project&#8217;s Erlang.mk. This is to ensure that
+functionality works across all dependencies, even if the
+dependency&#8217;s Erlang.mk is outdated.
+</p>
+</li>
+<li>
+<p>
+Other Erlang projects get a small Erlang.mk Makefile
+generated automatically.
+</p>
+</li>
+<li>
+<p>
+Projects with no source directory and no Makefile get an
+empty Makefile generated, for compatibility purposes.
+</p>
+</li>
+<li>
+<p>
+Other projects with no Makefile are left untouched.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>You can disable the replacing of the <em>erlang.mk</em> file by
+defining the <code>NO_AUTOPATCH_ERLANG_MK</code> variable:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">NO_AUTOPATCH_ERLANG_MK =</span> <span style="color: #993399">1</span></tt></pre></div></div>
+<div class="paragraph"><p>You can also disable autopatch entirely for a few select
+projects using the <code>NO_AUTOPATCH</code> variable:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">NO_AUTOPATCH =</span> cowboy ranch cowlib</tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_skipping_deps">Skipping deps</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>It is possible to temporarily skip all dependency operations.
+This is done by defining the <code>SKIP_DEPS</code> variable. Use cases
+include being somewhere with no connection to download them,
+or perhaps a peculiar setup.</p></div>
+<div class="paragraph"><p>A typical usage would be:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make <span style="color: #009900">SKIP_DEPS</span><span style="color: #990000">=</span><span style="color: #993399">1</span></tt></pre></div></div>
+<div class="paragraph"><p>When the variable is defined:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Dependencies will not be compiled or downloaded when required
+</p>
+</li>
+<li>
+<p>
+The dependency directory <em>$(DEPS_DIR)</em> will not be removed on <code>make distclean</code>
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>This variable only applies to remote dependencies.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Erlang.mk
+	1
+	
+	User Guide
+</h3>
+
+<ul>
+	
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/erlang.mk/1/guide">1</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

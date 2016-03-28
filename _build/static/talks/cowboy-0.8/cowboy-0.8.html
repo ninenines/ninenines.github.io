@@ -1,0 +1,612 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>The new Cowboy</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20130322" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+	<div id="sub_header"></div>
+	<div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>Erlang Factory SF 2013</h1>
+<h2>The new Cowboy, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>The new Cowboy</h1>
+<h2>Le Cowboy nouveau est arrivé !</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>The Cowboy guy</h1>
+</div>
+
+
+<div class="slide">
+<h1>Fact 1</h1>
+<ul>
+<li>I know you but I forgot your name or face, remind me!</li>
+</ul>
+</div>
+
+
+<div class="slide"> 
+<h1>Fact 2</h1>
+<ul>
+<li>Not drinking alcohol, offer me a coke, not a beer!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Fact 3</h1>
+<ul>
+<li>I forget my hat all the time. :(</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>The road so far</h1>
+</div>
+
+
+<div class="slide">
+<h1>Beginnings</h1>
+<ul>
+<li>Unsatisfied with existing solutions</li>
+<li>Wanted a mix of Webmachine and Misultin<ul>
+	<li>With binaries</li>
+	<li>And dynamic "listeners"</li>
+	<li>And some icing on top</li>
+</ul></li>
+<li>First commit on March 7th 2011</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Initial goals</h1>
+<ul>
+<li>Binary</li>
+<li>Dynamic listeners</li>
+<li>Low latency and memory usage</li>
+<li>One Erlang process per connection</li>
+<li>Small codebase</li>
+<li>Clean Erlang code</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Initial reactions</h1>
+<ul>
+<li>Encouraging</li>
+<li>Community started growing slowly</li>
+<li>People started recommending Cowboy to others</li>
+<li>First Cowboy talk at EUC 2011 had a full room</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Misultin's help</h1>
+<ul>
+<li>Great project</li>
+<li>Still unmatched in usability</li>
+<li>Development stopped in favor of Cowboy</li>
+<li>Boosted Cowboy's adoption</li>
+<li>My thanks go to Roberto Ostinelli</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>The road to stable</h1>
+<ul>
+<li>Few changes for about 6 months</li>
+<li>Spent a lot of time figuring things out</li>
+<li>Then spent a lot more time getting things done</li>
+<li>A few improvements remain to be done</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Recent changes</h1>
+</div>
+
+
+<div class="slide">
+<h1>Mascot</h1>
+<img src="pics/cowboy.png"/>
+</div>
+
+
+<div class="slide">
+<h1>New goals</h1>
+<ul>
+<li>Complete HTTP stack</li>
+<li>Complete support for the modern web</li>
+<li>Good documentation</li>
+<li>Stable version</li>
+<li>Target non-Erlang developers</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>New conventions</h1>
+<ul>
+<li>Everything is a binary, including method and header names</li>
+<li>HTTP header names are lowercase</li>
+<li>cowboy_http_req -&gt; cowboy_req</li>
+<li>cowboy_http_* -&gt; cowboy_*</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>HTTP</h1>
+<ul>
+<li>Improved HTTP/1.1 and HTTP/1.0 support</li>
+<li>Built-in response compression</li>
+<li>Built-in parsing of HTTP headers</li>
+<li>Much faster request body streaming code</li>
+<li>Properly detect socket close in long-polling</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>HTTP Req</h1>
+<ul>
+<li>Normalized cowboy_req API</li>
+<li>Access: {Value, Req}</li>
+<li>Action: {Result, Req} | {Result, Value, Req} | {error, atom()}</li>
+<li>Modification: Req</li>
+<li>Question: boolean()</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Websocket</h1>
+<ul>
+<li>Fully passes the Autobahn test suite</li>
+<li>Much faster at processing frames</li>
+<li>Text frames now required to be valid UTF-8</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>REST</h1>
+<ul>
+<li>Better error reporting</li>
+<li>PATCH method support</li>
+<li>Still experimental, no documentation</li>
+<li>Widely adopted by users</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>More powerful routing</h1>
+<ul>
+<li>Routes must now be compiled</li>
+<li>Nicer string-based syntax</li>
+<li>Constraints: apply functions on bound values</li>
+<li>Allows distinguishing between these two:<ul>
+	<li>/api/42/add</li>
+	<li>/api/blue/add</li>
+</ul></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Middlewares</h1>
+<ul>
+<li>Hook code at any point in request handling</li>
+<li>Replace routing or handling components of request processing</li>
+<li>Not WSGI</li>
+<li>WSGI: data centric, chain request, then reverse chain response</li>
+<li>Cowboy: chain of execution, only chain request, response happens at any point</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Documentation</h1>
+<ul>
+<li>Cowboy now has a guide!</li>
+<li>Still many improvements can be made</li>
+<li>Feedback needed</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Focus on performance</h1>
+</div>
+
+
+<div class="slide">
+<h1>Improvements</h1>
+<img src="pics/adgear.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Testing in production</h1>
+<ul>
+<li>Synthetic benchmarks don't help</li>
+<li>Most interesting results are under heavy load</li>
+<li>Users' production systems are the best benchmark</li>
+<li>The PROWESS Project might deliver benchmarking tools later on</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>NIFs and BIFs</h1>
+<ul>
+<li>NIFs considered harmful</li>
+<li>BIFs can be harmful too!</li>
+<li>BIF doesn't mean "fast" or "scheduler friendly"</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Example of BIFs killing scalability</h1>
+<ul>
+<li>erlang:decode_packet/3</li>
+<li>binary:match/2</li>
+<li>lists:length/1</li>
+<li>...</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Performance tips</h1>
+<ul>
+<li>Measure, measure, measure</li>
+<li>Don't assume something is faster, measure it</li>
+<li>Optimize the critical code path</li>
+<li>Don't waste your time on code that is rarely ran</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Project status</h1>
+</div>
+
+
+<div class="slide">
+<h1>Actively developed</h1>
+<ul>
+<li>Cowboy is Nine Nines' main product</li>
+<li>Cowboy is the central project of a family</li>
+<li>Cowboy is key to Nine Nines' future SaaS solution</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Popular</h1>
+<img src="pics/popularity-feb-2013.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Many contributors</h1>
+<ul>
+<li>Exponential growth</li>
+<li>More than 50 total contributors in 2 years</li>
+<li>Half of them over the past 9 months!</li>
+<li>470+ total tickets</li>
+<li>200+ total pull requests</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Many success stories</h1>
+<ul>
+<li>Kóði for realtime financial market data streaming</li>
+<li>2600Hz in Kazoo, their telecom platform</li>
+<li>Heroku for Logplex, a high-performance, realtime system for log delivery</li>
+<li>Linden Lab for Versu, an interactive storytelling platform</li>
+<li>BLOOM for AdGear, their realtime ad bidding system</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>More success stories</h1>
+<ul>
+<li>jtendo.com for a dynamic mobile provisioning system</li>
+<li>Tambur.IO for realtime web and mobile messaging PaaS</li>
+<li>Unison for realtime collaborative environment</li>
+<li>LeChat.im for their realtime team chat system</li>
+<li>Others: TV, Sports, Set-top boxes, ...</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Success story template</h1>
+<ul>
+<li>Service needs high-performance, realtime capabilities</li>
+<li>Service is using HTTP either directly or for inter-connecting systems</li>
+<li>Service needs a REST API and Websocket support</li>
+<li>Service may be used for web or mobile applications</li>
+<li>Bonus points for gaming related projects</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Many open source projects</h1>
+<ul>
+<li>Compatible web frameworks: Nitrogen, ChicagoBoss, axiom...</li>
+<li>Open source users:<ul>
+	<li>RabbitMQ</li>
+	<li>LeoFS</li>
+	<li>Project-FiFo</li>
+	<li>Ybot</li>
+	<li>fipelines</li>
+	<li>Bigwig (needs a maintainer!)</li>
+</ul></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Repository of Cowboy applications</h1>
+<ul>
+<li>Chapter in the guide for listing Cowboy applications</li>
+<li>Please open pull requests to add your project</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Related projects</h1>
+</div>
+
+
+<div class="slide">
+<h1>Ranch</h1>
+<ul>
+<li>Listener and acceptor code spin-off from Cowboy</li>
+<li>Supervises connections automatically</li>
+<li>Abstracts transport and protocol code</li>
+<li>Can be embedded into your own supervision tree</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Bullet</h1>
+<ul>
+<li>Cowboy handler</li>
+<li>Websocket-like behavior on all browsers</li>
+<li>Permanent connection, reconnects on failure</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Farwest</h1>
+<ul>
+<li>A mix of web framework and CMS</li>
+<li>Gives users autonomy to build and manage Erlang web applications</li>
+<li>First alpha version just released!</li>
+<li>Huge amount of development needed</li>
+<li><a href="http://bountysource.com">Bountysource.com Farwest fundraiser</a> just started</a></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>LeoFS</h1>
+<ul>
+<li>The Lion of storage systems</li>
+<li>Distributed file system compatible with Amazon S3 API</li>
+<li>Powered by Cowboy</li>
+<li>Focuses on high throughput instead of latency</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Future works</h1>
+</div>
+
+
+<div class="slide">
+<h1>Remaining API breaking changes</h1>
+<ul>
+<li>Improved POST handling in REST</li>
+<li>Improved request body reading</li>
+<li>Removal of cowboy_req:peer_addr/1</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Connections supervisor</h1>
+<ul>
+<li>Duplicate work with 'max_connections' related monitors</li>
+<li>Overhead on creation and especially termination</li>
+<li>Custom supervisor can fill in both roles</li>
+<li>Makes other optimizations possible</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>SPDY</h1>
+<ul>
+<li>Asynchronous, fully compressed, binary HTTP</li>
+<li>One process per connection + one process per request</li>
+<li>Same code for HTTP and SPDY requests</li>
+<li>Headers in SPDY are lowercase too, no conversion needed</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Complete HTTP support</h1>
+<ul>
+<li>Parsing code for all standard HTTP headers</li>
+<li>Allow users to build any HTTP compatible technology on top of Cowboy</li>
+<li>Support for Websocket extensions</li>
+<li>Support for SPDY based HTTP/2.0 when implementations come out</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Version 1.0</h1>
+<ul>
+<li>All of the above</li>
+<li>Stable API</li>
+<li>Fully documented</li>
+<li>Work won't stop there!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Getting help</h1>
+</div>
+
+
+<div class="slide">
+<h1>Community support</h1>
+<ul>
+<li>#ninenines on Freenode</li>
+<li>Mailing list on http://ninenines.eu</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Consulting and commercial support</h1>
+<ul>
+<li>Hourly remote or on-site consulting</li>
+<li>A la carte commercial support<ul>
+	<li>Specific developments</li>
+	<li>System optimization</li>
+	<li>Code reviews</li>
+	<li>On-call support</li>
+	<li>For both Erlang and Cowboy</li>
+</ul></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Getting involved</h1>
+</div>
+
+
+<div class="slide">
+<h1>Contributing</h1>
+<ul>
+<li>Tell me where you use Cowboy and for what</li>
+<li>Send me graphs showing how new Cowboy versions improve things</li>
+<li>Report bugs on Github</li>
+<li>Send patches, see CONTRIBUTING.md file</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Sponsoring</h1>
+<ul>
+<li>Gives you visibility</li>
+<li>Gives us a budget</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>The Cowboy book</h1>
+<ul>
+<li>The Bible of writing web applications with Erlang and Cowboy</li>
+<li>Accessible by people who never programmed Erlang</li>
+<li>Goes into and explains advanced web development concepts</li>
+<li>Published online for free as it is written</li>
+<li>Hard-copy will be released when the book is completed</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>One more thing</h1>
+</div>
+
+
+<div class="slide">
+<h1>Hello, Joe</h1>
+<ul>
+<li>Cowboy will make an appearance in Programming Erlang 2nd Edition!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Contact info</h1>
+<ul>
+<li>IRC: essen on #erlang or #ninenines on Freenode</li>
+<li>Twitter: @lhoguin</li>
+<li>Sales: contact@ninenines.eu</li>
+</ul>
+</div>
+
+
+</div>
+
+</body>
+</html>

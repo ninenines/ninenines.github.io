@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Cowboy User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>REST handlers</span></h1>
+
+<p>REST is implemented in Cowboy as a protocol upgrade. Once upgraded, the request is handled as a state machine with many optional callbacks describing the resource and modifying the machine's behavior.</p>
+
+<p>The REST handler is the recommended way to handle requests.</p>
+
+<h2 id="initialization">Initialization</h2>
+
+<p>First, the <code>init/3</code> callback is called. This callback is common to all handlers. To use REST for the current request, this function must return an <code>upgrade</code> tuple.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+init({tcp, http}, Req, Opts) ->
+    {upgrade, protocol, cowboy_rest}.
+]]></script>
+
+<p>Cowboy will then switch to the REST protocol and start executing the state machine, starting from <code>rest_init/2</code> if it's defined, and ending with <code>rest_terminate/2</code> also if defined.</p>
+
+<h2 id="methods">Methods</h2>
+
+<p>The REST component has code for handling the following HTTP methods: HEAD, GET, POST, PATCH, PUT, DELETE and OPTIONS.</p>
+
+<p>Other methods can be accepted, however they have no specific callback defined for them at this time.</p>
+
+<h2 id="callbacks">Callbacks</h2>
+
+<p>All callbacks are optional. Some may become mandatory depending on what other defined callbacks return. The various flowcharts in the next chapter should be a useful to determine which callbacks you need.</p>
+
+<p>When the request starts being processed, Cowboy will call the <code>rest_init/2</code> function if it is defined, with the Req object and the handler options as arguments. This function must return <code>{ok, Req, State}</code> where <code>State</code> is the handler's state that all subsequent callbacks will receive.</p>
+
+<p>At the end of every request, the special callback <code>rest_terminate/2</code> will be called if it is defined. It cannot be used to send a reply, and must always return <code>ok</code>.</p>
+
+<p>All other callbacks are resource callbacks. They all take two arguments, the Req object and the State, and return a three-element tuple of the form <code>{Value, Req, State}</code>.</p>
+
+<p>The following table summarizes the callbacks and their default values. If the callback isn't defined, then the default value will be used. Please look at the flowcharts to find out the result of each return value.</p>
+
+<p>All callbacks can also return <code>{halt, Req, State}</code> to stop execution of the request, at which point <code>rest_terminate/2</code> will be called.</p>
+
+<p>In the following table, "skip" means the callback is entirely skipped if it is undefined, moving directly to the next step. Similarly, "none" means there is no default value for this callback.</p>
+
+<table class="table-bordered table-condensed table-striped">
+<thead>
+<tr><th>Callback name</th><th>Default value</th></tr>
+</thead>
+<tbody>
+<tr><td>allowed_methods</td><td><code>[<<"GET">>, <<"HEAD">>, <<"OPTIONS">>]</code></td></tr>
+<tr><td>allow_missing_post</td><td><code>true</code></td></tr>
+<tr><td>charsets_provided</td><td>skip</td></tr>
+<tr><td>content_types_accepted</td><td>none</td></tr>
+<tr><td>content_types_provided</td><td><code>[{{<<"text">>, <<"html">>, '*'}, to_html}] </code></td></tr>
+<tr><td>delete_completed</td><td><code>true</code></td></tr>
+<tr><td>delete_resource</td><td><code>false</code></td></tr>
+<tr><td>expires</td><td><code>undefined</code></td></tr>
+<tr><td>forbidden</td><td><code>false</code></td></tr>
+<tr><td>generate_etag</td><td><code>undefined</code></td></tr>
+<tr><td>is_authorized</td><td><code>true</code></td></tr>
+<tr><td>is_conflict</td><td><code>false</code></td></tr>
+<tr><td>known_content_type</td><td><code>true</code></td></tr>
+<tr><td>known_methods</td><td><code>[<<"GET">>, <<"HEAD">>, <<"POST">>, <<"PUT">>, <<"PATCH">>, <<"DELETE">>, <<"OPTIONS">>]</code></td></tr>
+<tr><td>languages_provided</td><td>skip</td></tr>
+<tr><td>last_modified</td><td><code>undefined</code></td></tr>
+<tr><td>malformed_request</td><td><code>false</code></td></tr>
+<tr><td>moved_permanently</td><td><code>false</code></td></tr>
+<tr><td>moved_temporarily</td><td><code>false</code></td></tr>
+<tr><td>multiple_choices</td><td><code>false</code></td></tr>
+<tr><td>options</td><td><code>ok</code></td></tr>
+<tr><td>previously_existed</td><td><code>false</code></td></tr>
+<tr><td>resource_exists</td><td><code>true</code></td></tr>
+<tr><td>service_available</td><td><code>true</code></td></tr>
+<tr><td>uri_too_long</td><td><code>false</code></td></tr>
+<tr><td>valid_content_headers</td><td><code>true</code></td></tr>
+<tr><td>valid_entity_length</td><td><code>true</code></td></tr>
+<tr><td>variances</td><td><code>[]</code></td></tr>
+</tbody>
+</table>
+
+<p>As you can see, Cowboy tries to move on with the request whenever possible by using well thought out default values.</p>
+
+<p>In addition to these, there can be any number of user-defined callbacks that are specified through <code>content_types_accepted/2</code> and <code>content_types_provided/2</code>. They can take any name, however it is recommended to use a separate prefix for the callbacks of each function. For example, <code>from_html</code> and <code>to_html</code> indicate in the first case that we're accepting a resource given as HTML, and in the second case that we send one as HTML.</p>
+
+<h2 id="meta_data">Meta data</h2>
+
+<p>Cowboy will set informative meta values at various points of the execution. You can retrieve them using <code>cowboy_req:meta/{2,3}</code>. The values are defined in the following table.</p>
+
+<table class="table-bordered table-condensed table-striped">
+<thead>
+<tr><th>Meta key</th><th>Details</th></tr>
+</thead>
+<tbody>
+<tr><td>media_type</td><td>The content-type negotiated for the response entity.</td></tr>
+<tr><td>language</td><td>The language negotiated for the response entity.</td></tr>
+<tr><td>charset</td><td>The charset negotiated for the response entity.</td></tr>
+</tbody>
+</table>
+
+<p>They can be used to send a proper body with the response to a request that used a method other than HEAD or GET.</p>
+
+<h2 id="response_headers">Response headers</h2>
+
+<p>Cowboy will set response headers automatically over the execution of the REST code. They are listed in the following table.</p>
+
+<table class="table-bordered table-condensed table-striped">
+<thead>
+<tr><th>Header name</th><th>Details</th></tr>
+</thead>
+<tbody>
+<tr><td>content-language</td><td>Language used in the response body</td></tr>
+<tr><td>content-type</td><td>Media type and charset of the response body</td></tr>
+<tr><td>etag</td><td>Etag of the resource</td></tr>
+<tr><td>expires</td><td>Expiration date of the resource</td></tr>
+<tr><td>last-modified</td><td>Last modification date for the resource</td></tr>
+<tr><td>location</td><td>Relative or absolute URI to the requested resource</td></tr>
+<tr><td>vary</td><td>List of headers that may change the representation of the resource</td></tr>
+</tbody>
+</table>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+  </body>
+</html>

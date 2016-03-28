@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Cowboy User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Static handler</span></h1>
+
+<p>The static handler is a built-in REST handler for serving files. It is available as a convenience and provides a quick solution for serving files during development.</p>
+
+<p>For systems in production, consider using one of the many Content Distribution Network (CDN) available on the market, as they are the best solution for serving files. They are covered in the next chapter. If you decide against using a CDN solution, then please look at the chapter after that, as it explains how to efficiently serve static files on your own.</p>
+
+<p>The static handler can serve either one file or all files from a given directory. It can also send etag headers for client-side caching.</p>
+
+<p>To use the static file handler, simply add routes for it with the appropriate options.</p>
+
+<h2 id="serve_one_file">Serve one file</h2>
+
+<p>You can use the static handler to serve one specific file from an application's private directory. This is particularly useful to serve an <code>index.html</code> file when the client requests the <code>/</code> path, for example. The path configured is relative to the given application's private directory.</p>
+
+<p>The following rule will serve the file <code>static/index.html</code> from the application <code>my_app</code>'s priv directory whenever the path <code>/</code> is accessed.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/", cowboy_static, {priv_file, my_app, "static/index.html"}}
+]]></script>
+
+<p>You can also specify the absolute path to a file, or the path to the file relative to the current directory.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/", cowboy_static, {file, "/var/www/index.html"}}
+]]></script>
+
+<h2 id="serve_all_files_from_a_directory">Serve all files from a directory</h2>
+
+<p>You can also use the static handler to serve all files that can be found in the configured directory. The handler will use the <code>path_info</code> information to resolve the file location, which means that your route must end with a <code>[...]</code> pattern for it to work. All files are served, including the ones that may be found in subfolders.</p>
+
+<p>You can specify the directory relative to an application's private directory.</p>
+
+<p>The following rule will serve any file found in the application <code>my_app</code>'s priv directory inside the <code>static/assets</code> folder whenever the requested path begins with <code>/assets/</code>.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets"}}
+]]></script>
+
+<p>You can also specify the absolute path to the directory or set it relative to the current directory.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {dir, "/var/www/assets"}}
+]]></script>
+
+<h2 id="customize_the_mimetype_detection">Customize the mimetype detection</h2>
+
+<p>By default, Cowboy will attempt to recognize the mimetype of your static files by looking at the extension.</p>
+
+<p>You can override the function that figures out the mimetype of the static files. It can be useful when Cowboy is missing a mimetype you need to handle, or when you want to reduce the list to make lookups faster. You can also give a hard-coded mimetype that will be used unconditionally.</p>
+
+<p>Cowboy comes with two functions built-in. The default function only handles common file types used when building Web applications. The other function is an extensive list of hundreds of mimetypes that should cover almost any need you may have. You can of course create your own function.</p>
+
+<p>To use the default function, you should not have to configure anything, as it is the default. If you insist, though, the following will do the job.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{mimetypes, cow_mimetypes, web}]}}
+]]></script>
+
+<p>As you can see, there is an optional field that may contain a list of less used options, like mimetypes or etag. All option types have this optional field.</p>
+
+<p>To use the function that will detect almost any mimetype, the following configuration will do.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{mimetypes, cow_mimetypes, all}]}}
+]]></script>
+
+<p>You probably noticed the pattern by now. The configuration expects a module and a function name, so you can use any of your own functions instead.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{mimetypes, Module, Function}]}}
+]]></script>
+
+<p>The function that performs the mimetype detection receives a single argument that is the path to the file on disk. It is recommended to return the mimetype in tuple form, although a binary string is also allowed (but will require extra processing). If the function can't figure out the mimetype, then it should return <code>{<<"application">>, <<"octet-stream">>, []}</code>.</p>
+
+<p>When the static handler fails to find the extension in the list, it will send the file as <code>application/octet-stream</code>. A browser receiving such file will attempt to download it directly to disk.</p>
+
+<p>Finally, the mimetype can be hard-coded for all files. This is especially useful in combination with the <code>file</code> and <code>priv_file</code> options as it avoids needless computation.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/", cowboy_static, {priv_file, my_app, "static/index.html",
+    [{mimetypes, {<<"text">>, <<"html">>, []}}]}}
+]]></script>
+
+<h2 id="generate_an_etag">Generate an etag</h2>
+
+<p>By default, the static handler will generate an etag header value based on the size and modified time. This solution can not be applied to all systems though. It would perform rather poorly over a cluster of nodes, for example, as the file metadata will vary from server to server, giving a different etag on each server.</p>
+
+<p>You can however change the way the etag is calculated.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{etag, Module, Function}]}}
+]]></script>
+
+<p>This function will receive three arguments: the path to the file on disk, the size of the file and the last modification time. In a distributed setup, you would typically use the file path to retrieve an etag value that is identical across all your servers.</p>
+
+<p>You can also completely disable etag handling.</p>
+
+<script type="syntaxhighlighter" class="brush: erlang"><![CDATA[
+{"/assets/[...]", cowboy_static, {priv_dir, my_app, "static/assets",
+    [{etag, false}]}}
+]]></script>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+  </body>
+</html>

@@ -1,0 +1,220 @@
++++
+date = "2012-11-14T00:00:00+01:00"
+title = "Build an FTP Server with Ranch in 30 Minutes"
+
++++
+
+Last week I was speaking at the
+http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin[London Erlang Factory Lite]
+where I presented a live demonstration of building an FTP server using
+http://ninenines.eu/docs/en/ranch/HEAD/README[Ranch].
+As there was no slide, you should use this article as a reference instead.
+
+The goal of this article is to showcase how to use Ranch for writing
+a network protocol implementation, how Ranch gets out of the way to let
+you write the code that matters, and the common techniques used when
+writing servers.
+
+Let's start by creating an empty project. Create a new directory and
+then open a terminal into that directory. The first step is to add Ranch
+as a dependency. Create the `rebar.config` file and add the
+following 3 lines.
+
+[source,erlang]
+----
+{deps, [
+    {ranch, ".*", {git, "git://github.com/extend/ranch.git", "master"}}
+]}.
+----
+
+This makes your application depend on the last Ranch version available
+on the _master_ branch. This is fine for development, however when
+you start pushing your application to production you will want to revisit
+this file to hardcode the exact version you are using, to make sure you
+run the same version of dependencies in production.
+
+You can now fetch the dependencies.
+
+[source,bash]
+----
+$ rebar get-deps
+==> ranch_ftp (get-deps)
+Pulling ranch from {git,"git://github.com/extend/ranch.git","master"}
+Cloning into 'ranch'...
+==> ranch (get-deps)
+----
+
+This will create a 'deps/' folder containing Ranch.
+
+We don't actually need anything else to write the protocol code.
+We could make an application for it, but this isn't the purpose of this
+article so let's just move on to writing the protocol itself. Create
+the file 'ranch_ftp_protocol.erl' and open it in your favorite
+editor.
+
+[source,bash]
+$ vim ranch_ftp_protocol.erl
+
+Let's start with a blank protocol module.
+
+[source,erlang]
+----
+-module(ranch_ftp_protocol).
+-export([start_link/4, init/3]).
+
+start_link(ListenerPid, Socket, Transport, Opts) ->
+    Pid = spawn_link(?MODULE, init, [ListenerPid, Socket, Transport]),
+    {ok, Pid}.
+
+init(ListenerPid, Socket, Transport) ->
+    io:format("Got a connection!~n"),
+    ok.
+----
+
+When Ranch receives a connection, it will call the <code>start_link/4</code>
+function with the listener's pid, socket, transport module to be used,
+and the options we define when starting the listener. We don't need options
+for the purpose of this article, so we don't pass them to the process we are
+creating.
+
+Let's open a shell and start a Ranch listener to begin accepting
+connections. We only need to call one function. You should probably open
+it in another terminal and keep it open for convenience. If you quit
+the shell you will have to repeat the commands to proceed.
+
+Also note that you need to type `c(ranch_ftp_protocol).`
+to recompile and reload the code for the protocol. You do not need to
+restart any process however.
+
+[source,bash]
+----
+$ erl -pa ebin deps/*/ebin
+Erlang R15B02 (erts-5.9.2) [source] [64-bit] [smp:4:4] [async-threads:0] [hipe] [kernel-poll:false]
+
+Eshell V5.9.2  (abort with ^G)
+----
+
+[source,erlang]
+----
+1> application:start(ranch).
+ok
+2> ranch:start_listener(my_ftp, 10,
+       ranch_tcp, [{port, 2121}],
+       ranch_ftp_protocol, []).
+{ok,<0.40.0>}
+----
+
+This starts a listener named `my_ftp` that runs your very own
+`ranch_ftp_protocol` over TCP, listening on port `2121`.
+The last argument is the options given to the protocol that we ignored
+earlier.
+
+To try your code, you can use the following command. It should be able
+to connect, the server will print a message in the console, and then
+the client will print an error.
+
+[source,bash]
+$ ftp localhost 2121
+
+Let's move on to actually writing the protocol.
+
+Once you have created the new process and returned the pid, Ranch will
+give ownership of the socket to you. This requires a synchronization
+step though.
+
+[source,erlang]
+----
+init(ListenerPid, Socket, Transport) ->
+    ok = ranch:accept_ack(ListenerPid),
+    ok.
+----
+
+Now that you acknowledged the new connection, you can use it safely.
+
+When an FTP server accepts a connection, it starts by sending a
+welcome message which can be one or more lines starting with the
+code `200`. Then the server will wait for the client
+to authenticate the user, and if the authentication went successfully,
+which it will always do for the purpose of this article, it will reply
+with a `230` code.
+
+[source,erlang]
+----
+init(ListenerPid, Socket, Transport) ->
+    ok = ranch:accept_ack(ListenerPid),
+    Transport:send(Socket, <<"200 My cool FTP server welcomes you!\r\n">>),
+    {ok, Data} = Transport:recv(Socket, 0, 30000),
+    auth(Socket, Transport, Data).
+
+auth(Socket, Transport, <<"USER ", Rest/bits>>) ->
+    io:format("User authenticated! ~p~n", [Rest]),
+    Transport:send(Socket, <<"230 Auth OK\r\n">>),
+    ok.
+----
+
+As you can see we don't need complex parsing code. We can simply
+match on the binary in the argument!
+
+Next we need to loop receiving data commands and optionally
+execute them, if we want our server to become useful.
+
+We will replace the <code>ok.</code> line with the call to
+the following function. The new function is recursive, each call
+receiving data from the socket and sending a response. For now
+we will send an error response for all commands the client sends.
+
+[source,erlang]
+----
+loop(Socket, Transport) ->
+    case Transport:recv(Socket, 0, 30000) of
+        {ok, Data} ->
+            handle(Socket, Transport, Data),
+            loop(Socket, Transport);
+        {error, _} ->
+            io:format("The client disconnected~n")
+    end.
+
+handle(Socket, Transport, Data) ->
+    io:format("Command received ~p~n", [Data]),
+    Transport:send(Socket, <<"500 Bad command\r\n">>).
+----
+
+With this we are almost ready to start implementing commands.
+But with code like this we might have errors if the client doesn't
+send just one command per packet, or if the packets arrive too fast,
+or if a command is split over multiple packets.
+
+To solve this, we need to use a buffer. Each time we receive data,
+we will append to the buffer, and then check if we have received a
+command fully before running it. The code could look similar to the
+following.
+
+[source,erlang]
+----
+loop(Socket, Transport, Buffer) ->
+    case Transport:recv(Socket, 0, 30000) of
+        {ok, Data} ->
+			Buffer2 = << Buffer/binary, Data/binary >>,
+			{Commands, Rest} = split(Buffer2),
+			[handle(Socket, Transport, C) || C <- Commands],
+            loop(Socket, Transport);
+        {error, _} ->
+            io:format("The client disconnected~n")
+    end.
+----
+
+The implementation of `split/1` is left as an exercice
+to the reader. You will also probably want to handle the `QUIT`
+command, which must stop any processing and close the connection.
+
+The attentive reader will also take note that in the case of text-
+based protocols where commands are separated by line breaks, you can
+set an option using `Transport:setopts/2` and have all the
+buffering done for you for free by Erlang itself.
+
+As you can surely notice by now, Ranch allows us to build network
+applications by getting out of our way entirely past the initial setup.
+It lets you use the power of binary pattern matching to write text and
+binary protocol implementations in just a few lines of code.
+
+* http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin[Watch the talk]

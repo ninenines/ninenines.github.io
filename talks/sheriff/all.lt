@@ -1,0 +1,426 @@
+@Include { myslides }
+
+@OverheadTransparencies
+	@Title {
+Validation using Erlang's type system
+
+with Sheriff
+}
+	@RunningTitle { sheriff }
+	@Author { Loïc Hoguin }
+	@Institution { Dev:Extend }
+	@DateLine { Yes }
+	@InitialLanguage { English }
+	@PageOrientation { Landscape }
+//
+
+@Overhead
+	@Title { Good Erlang code }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-type year() :: 1900..2011.
+-type age() :: 0..111.
+
+-spec main() -> no_return().
+main() ->
+    Year = 1984,
+    Age = calculate_age(Year),
+    io:format("~b years old~n", [Age]),
+    main().
+
+-spec calculate_age(year()) -> age().
+calculate_age(Year) ->
+    2011 - Year.
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { Dialyzer is awesome, isn't it? }
+	@Begin
+
+@BulletList
+@ListItem { Dialyzer statically checks function specifications }
+@ListItem { All type errors will be reported by Dialyzer }
+@ListItem { Okay, code isn't that good, it's just a dumb example }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Good Erlang code receiving external data }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-type year() :: 1900..2011.
+-type age() :: 0..111.
+
+-spec main() -> no_return().
+main() ->
+    receive {year_of_birth, Year} ->
+        Age = calculate_age(Year),
+        io:format("~b years old~n", [Age])
+    end,
+    main().
+
+-spec calculate_age(year()) -> age().
+calculate_age(Year) ->
+    2011 - Year.
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { We lost Dialyzer }
+	@Begin
+
+@BulletList
+@ListItem { Dialyzer doesn't help here }
+@ListItem { @F Year could be any integer in this code!
+	@BulletList
+	@ListItem { Even year 3001 }
+	@ListItem { Or it could be a binary, a list, a tuple, a pid... }
+	@EndList
+}
+@ListItem { This value wouldn't match the type we defined }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { What is external data? }
+	@Begin
+
+@BulletList
+@ListItem { Anything that doesn't come directly from your process }
+@ListItem { This includes:
+	@BulletList
+	@ListItem { Process messages }
+	@ListItem { Shared resources }
+	@ListItem { Sockets, files }
+	@ListItem { Return values from NIFs, ports, linked-in drivers }
+	@EndList
+}
+@ListItem { Real-world applications are all about external data! }
+
+@End @Overhead
+
+@Overhead
+	@Title { Why check external data? Just let it crash! }
+	@Begin
+
+@BulletList
+@ListItem { WHAT?! }
+@ListItem { Are you sure it'll crash? }
+@ListItem { Maybe it's going to crash an unrelated process
+	@BulletList
+	@ListItem { Like a central gen_server of your application }
+	@EndList
+}
+@ListItem { Maybe it's going to be stored in a database or a file }
+@ListItem { Maybe it's going to be sent directly to connected clients }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Really? }
+	@Begin
+
+@BulletList
+@ListItem { A person registering on your website today can't be born in 1492! }
+@ListItem { Think about it, are you really crashing on this kind of data? }
+@ListItem { Also think about XSS, SQL injection, and friends }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Always validate external data }
+	@Begin
+
+@BulletList
+@ListItem { Either print a nice error message to the user
+	@BulletList
+	@ListItem { HTML forms, for example }
+	@EndList
+}
+@ListItem { Or crash as soon as possible
+	@BulletList
+	@ListItem { Don't crash anywhere! Crash on the system boundaries }
+	@ListItem { Don't let bad data crash your core processes }
+	@ListItem { Don't let external attacks or user error bring down your app }
+}
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Data validation without Sheriff }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-type year() :: 1900..2011.
+
+-spec is_valid_year(year()) -> boolean().
+is_valid_year(Y)
+        when is_integer(Y), Y >= 1900, Y =< 2011 ->
+    true;
+is_valid_year(_Y) ->
+    false.
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { All this has happened before... }
+	@Begin
+
+@BulletList
+@ListItem { I feel like I'm repeating myself there }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { And all this will happen again }
+	@Begin
+
+@BulletList
+@ListItem { I did write the same constraint twice }
+@ListItem { Dialyzer already checks it for most of the program }
+@ListItem { Why not use the @F year() type directly? }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { I can't type }
+	@Begin
+
+@BulletList
+@ListItem { But I can't use Erlang's types from runtime code! }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Who do you call when you need help? }
+	@Begin
+
+@CD 3.0 @Scale @IncludeGraphic badge.eps
+
+@End @Overhead
+
+@Overhead
+	@Title { I am the law }
+	@Begin
+
+@BulletList
+@ListItem { Sheriff is a runtime type checker }
+@ListItem { It uses Erlang's type system for validation }
+@ListItem { You don't need to duplicate constraints to validate data anymore! }
+@ListItem { So just be lazy and validate all external data with a single LoC }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Data validation with Sheriff }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+true = sheriff:check(Y, year()).
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { Tuple validation with Sheriff }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-type subject() :: 'I' | you | he.
+-type verb() :: like | ignore | hate.
+-type object() :: me | you | him.
+
+-type grammar() :: {subject(), verb(), object()}.
+
+%% ...
+
+sheriff:check({you, like, me}, grammar()). %% true
+sheriff:check({'I', love, you}, grammar()). %% false
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { Recursive type validation with Sheriff }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-type rtype() :: {leaf | rtype(), leaf | rtype()}.
+
+%% ...
+
+sheriff:check({leaf, {leaf, leaf}}, rtype()). %% true
+sheriff:check({{flower, flower}, leaf}, rtype()). %% false
+sheriff:check(<<"flower">>, rtype()). %% false
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { Parameterized type validation with Sheriff }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-type a() :: 0..65535.
+-type b(T) :: undefined | T.
+-type c() :: b(a()).
+
+%% ...
+
+sheriff:check(undefined, c()). %% true
+sheriff:check(42, c()). %% true
+sheriff:check(-1, c()). %% false
+sheriff:check(1234567890, c()). %% false
+sheriff:check(defined, c()). %% false
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { Record validation with Sheriff }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-record(packet, {
+	id :: 1 | 2 | 3,
+	num = 0 :: non_neg_integer(),
+	data = <<>> :: binary()
+}).
+-type packet() :: #packet{}.
+
+%% ...
+
+sheriff:check(#packet{id=1, data= <<0:32>>}, packet()). %% true
+sheriff:check(#packet{id=undefined}, packet()). %% true
+sheriff:check({packet, 2, 1, <<>>}, packet()). %% true
+sheriff:check(#packet{id=0, num=7}, packet()). %% false
+sheriff:check(#http_req{}, packet()). %% false
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { Digging in }
+	@Begin
+
+@BulletList
+@ListItem { Sheriff is a parse_transform }
+@ListItem { It first generates validation functions for all the types you defined }
+@ListItem { It then replaces the @F @Verbatim { sheriff:check/2 } calls
+with the proper validation calls }
+@ListItem { It's fast and is only a compilation option away }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Don't fall into lava }
+	@Begin
+
+@BulletList
+@ListItem { There are limitations }
+@ListItem { Exported types can only work on modules that were compiled
+using the sheriff parse_transform
+	@BulletList
+	@ListItem { Excluding basic types like @F { integer() } of course }
+	@EndList
+}
+@ListItem { It's only as good as Erlang's type system
+	@BulletList
+	@ListItem { It can't check element order in lists }
+	@ListItem { It can't check the content of binaries, only size }
+	@ListItem { This can probably be fixed later }
+	@EndList
+}
+@ListItem { Dialyzer will print out some warnings if analyzing from source }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Sheriff got deputies }
+	@Begin
+
+@BulletList
+@ListItem { Sheriff, today, is only a proof of concept }
+@ListItem { Code was written by two @I { Dev:Extend } interns
+	@BulletList
+	@ListItem { William Dang }
+	@ListItem { Hamza Mahmood }
+	@EndList
+
+	@ID 0.5 @Scale @IncludeGraphic wilza.eps
+}
+@ListItem { They only had one month to learn Erlang and do the project }
+@ListItem { So there's probably many bugs! }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { To infinity, and beyond! }
+	@Begin
+
+@BulletList
+@ListItem { We'll cleanup the codebase }
+@ListItem { We'll add PropEr tests }
+@ListItem { We'll add a few missing features }
+@ListItem { First release is planned for December 2011 }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Wanted }
+	@Begin
+
+@BulletList
+@ListItem { You can help! }
+@ListItem { Source code is already available on blue @Color {
+"https://github.com/extend/sheriff" @ExternalLink { "https://github.com/extend/sheriff" } } }
+@ListItem { Try it out }
+@ListItem { Suggest improvements }
+@ListItem { File bug reports
+	@BulletList
+	@ListItem { Wait for the code cleanup though }
+	@EndList
+}
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Suit up! }
+	@Begin
+
+@BulletList
+@ListItem { We'll ping Kostis Sagonas and the red ties at some point }
+@ListItem { They have experience, they can probably help }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Fin }
+	@Begin
+
+@BulletList
+@ListItem { Any questions? }
+@EndList
+
+@End @Overhead

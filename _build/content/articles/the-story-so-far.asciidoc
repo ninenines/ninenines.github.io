@@ -1,0 +1,250 @@
++++
+date = "2014-08-23T00:00:00+01:00"
+title = "The story so far"
+
++++
+
+As I am away from home with little to do (some call this
+a vacation) I wanted to reflect a little on the story so far,
+or how I arrived to Erlang and got to where I am now. The
+raw personal experience. It'll be an article that's more
+about social aspect, communities and marketing a project than
+technical considerations. As a period piece, it will also
+allow me to reflect on the evolution of Erlang in recent
+years.
+
+Once upon a time-- Okay this isn't a fairy tale. The story
+begins with a short chapter in 2010. The year 2010 started
+with a fairly major event in my life: the US servers for the
+online game I stopped playing a few months before, but was
+still involved with through its community, were closing. OMG!
+Someone found a way to log packets and started working on a
+private server; meanwhile the JP servers were still up. And
+that's pretty much it.
+
+Fast forward a few months and it became pretty clear that
+the private server was going nowhere considering all the drama
+surrounding it-- which is actually not unusual, but it was
+more entertaining than average and the technical abilities of
+people running the project were obviously lacking so I decided
+to obtain those logged packets and look at things myself. I
+didn't want to do a private server yet, I only wanted to take
+a peek to see how things worked, and perhaps organize some
+effort to document the protocol.
+
+There was 10GB of logs. I didn't have an easy to use
+language to analyze them, and hex editors wouldn't cut it for
+most purposes, so I had to look elsewhere. This was a good
+opportunity to start learning this PHP killer I read about
+before, which also happens to feature syntax for matching
+binaries, called Erlang. To be perfectly honest I wouldn't
+have touched the logs if I didn't have the added motivation
+to play with and learn a new language.
+
+At the time it was pretty hard to learn Erlang. In my
+experience there was Joe's book (which I always recommend
+first as I believe it is the best to learn the Erlang side
+of things; but falls a little short on OTP), and there was
+about 5 chapters of LYSE. There were a couple other books
+I never managed to get into (sorry guys), and there was also
+a few interesting blogs, some of which I can't find anymore.
+Finally the #erlang IRC community was there but I was strictly
+lurking at the time.
+
+What a difference compared to 4 years later! (That's
+today, by the way!) Now we have more books than I can
+remember, tons of articles covering various aspects of the
+language and platform, many targeting beginners but a good
+number of them also about advanced topics. We even have a
+free online book, LYSE, with more than 30 chapters covering
+pretty much everything. Needless to say I never finished
+reading LYSE as it got written slower than I learnt.
+
+Back to 2010. I wrote a parser for the logs, and
+aggregated those results into one CSV file per packet type
+so I could open them in Gnumeric and aggregate some more,
+but manually this time, and draw conclusions on the packet
+structures. That was pretty easy. Even for a beginner.
+Anyone can go from zero to that level in a day or two.
+Then, having mastered binary pattern matching, I wanted
+to learn some more Erlang, by making this aggregation
+faster. What I had done before worked, but I wasn't going
+to wait forever to process everything sequentially. So I
+looked and found a project called `plists` (still exists,
+but not maintained AFAIK). I downloaded that project and
+replaced my `lists:` calls to `plists:`.
+Boom. In just a few minutes all logs were processed, and
+I had learnt something new.
+
+It is particularly interesting to note that the lack of
+a package manager or index never bothered me. Neither before
+nor after learning Erlang. My experience with package
+managers was mostly related to Ubuntu, a little Perl and
+Python, and PHP's Pear. Let's just stay polite and say it
+was always a terrible experience. So searching on the Web
+didn't feel awkward, because even if I used a tool or
+website I would have ended up doing a search or two anyway.
+This is in contrast to the package index feature in
+https://github.com/ninenines/erlang.mk[Erlang.mk],
+which is meant to simplify specifying dependencies more
+than anything: `DEPS = cowboy`. It does not
+attempt to solve any other problem, and will only attempt
+to solve one extra problem in the near future, which is
+the discovery of packages. So expect some kind of website
+listing packages soon enough.
+
+I want to use this parenthese to also point out that at
+the time there was a very small number of projects out there,
+at least compared to today. While you sometimes hear people
+complain about lack of certain libraries, it is so much
+better now than it was before! The situation improves very
+quickly, so much that it's not going to be that big an issue
+soon enough.
+
+Wanting to know more about that game's protocol, in the
+year 2010, I ended up starting to write more Erlang code to
+simulate a server and use the server to query the client and
+see what was happening, documenting the packets and so on.
+This eventually lead to a larger project implementing more
+and more until people got their hopes up for a revival of
+the game, all the while the now competing original server
+project died in a stream of drama and technical incompetence.
+Of course, I ended up doing what any good Internet citizen
+would do, I crushed people's hopes, but that's not important
+to our story. The important part is that before giving up
+on this project, I not only learnt a good deal of Erlang
+and a little deal of OTP (which I did not touch until 6
+months after I started with Erlang; see the paragraph
+about learning material above), but I also had an intriguing
+idea pop into my mind for what would become my greatest
+success yet.
+
+The giving up part was not easy. Having had financial
+difficulties all year 2010 and part of 2009, I resolved
+to travel back to Paris to try and make it. I ended up
+sleeping in offices for 6 months, being hosted by a shady
+person, and hearing my fair share of stories about
+the dark side of business. While there I also worked for
+another company with someone who would end up becoming
+another high profile Erlang developer. The situation
+slowly improved, I started taking part in the #erlang
+IRC discussions, giving up my status of lurker and, a
+few months into 2011, started working on the Apache killer
+project: Cowboy.
+
+This is the part where I probably should get accused of
+racism and other fun things, but I never did. And I think
+that speaks lots about the Erlang community. In all my time
+writing Erlang code, I can count the number of conflicts I
+had with other people on a single hand. This is the nicest
+programming community I have ever seen, by far. And the
+humblest too. The Erlang community feels like Japan. And
+I love Japan. So I love the Erlang community. I can't say
+this enough. This is something that stayed true for all
+my time using Erlang, and despite the rise of alternative
+languages that are not Japan the Erlang community has
+remained very Japan.
+
+The first published version of Cowboy was written in
+two weeks. A little before those two weeks, during, and
+a while after, pretty much everything I said on the
+Internets was that Cowboy was going to be the greatest
+HTTP server ever, that the other servers were problematic
+(and just to be clear, Yaws was rarely if ever mentioned,
+due to being in a perceived different league of "full
+featured servers" while Cowboy was a "lightweight server"),
+and that Cowboy will be the best replacement to a Mochiweb
+or Misultin application. This, alongside a lot of time
+spent on IRC telling people to use Cowboy when they were
+asking for an HTTP server to use, probably made me sound
+very annoying. But it worked, and Cowboy started getting
+its first users, despite being only a few weeks old. Of
+course, as soon as I got my very first user, I started
+claiming Cowboy had "a lot of users".
+
+Looking back today I would definitely find myself annoying,
+this wasn't just an idle comment there. For about a year,
+maybe a little more, all I ever said was that Cowboy was
+the best. This probably made me a little dumber in the
+process (as if I wasn't enough! I know). Being French, I
+sometimes would also say things quite abruptly. To stay
+polite, I probably sounded like an asshole. I learnt to
+stop being so French over time thankfully.
+
+I think what was most important to Cowboy at the time,
+was three things. First, it felt fresh. It was new, had new
+ideas, tried to do things differently and followed "new" old
+best practices (the OTP way-- which was simply too obscure
+for most people at the time). Second, it had me spending
+all my time telling people to use it whenever they were
+looking for an HTTP server. Third, it had me helping people
+get started with it and guide them all the steps of the way.
+Mostly because it didn't have a very good documentation, but
+still, hand holding does wonders.
+
+To be able to help people every time they had a problem,
+I did not spend all my days reading IRC. Instead I simply
+made sure to be notified when someone said `cowboy`.
+The same way many people subscribe to alerts when their
+company is mentioned in the news. Nothing fancy.
+
+Time went on, Cowboy grew, or as some like to say,
+completely destroyed the competition, and many people
+eventually moved from Mochiweb and Misultin to Cowboy.
+And then Roberto Ostinelli stopped Misultin development
+and told everyone to move to Cowboy. This is the most
+humble and selfless act I have ever seen in the programming
+sphere, and I only have one thing to say about it: GG.
+Thanks for the fish. He left me with the tasks of improving
+Cowboy examples, documentation and strongly believed that
+the Misultin interface was more user friendly out of all
+the servers. So I added many examples, as many lines of
+documentation as we have of code, and strongly believe
+that Cowboy 2.0 will be the most user friendly interface
+out of all servers. But only time will tell.
+
+With the rise of the project and the rise in the number
+of users, my previous strategy (completely incidental, by
+the way, and definitely not a well thought out plan to
+become popular) stopped working. It was taking me too much
+time. The important aspects slowly drifted. If I wanted to
+support more users, I would have to spend less time with
+each individual user. This was actually a hard problem.
+You basically have to make people understand they can't
+just come to you directly when they have a problem, they
+have to follow proper channels. It becomes less personal,
+and might be felt like you don't care about them anymore.
+You have to hurt some people's feelings at this point. It
+is quite unfortunate, and also quite difficult to do. There
+is some unwritten rule that says early adopters deserve
+more, but in the real world it never works like this. So
+I probably hurt some people's feelings at some point. But
+that's okay. Because even if you make sure to be as nice
+as possible when you tell people to go through proper
+channels from now on, some people will still get offended.
+There's nothing you can do about it.
+
+From that point onward the important points about the
+project was getting the documentation done, making sure
+people knew about the proper channels to get help and
+report issues, etc. Basically making myself less needed.
+This is quite a contrast with the first days, but I believe
+Cowboy made that transition successfully.
+
+Not only did I win time by not having to hold hands with
+everyone all the time (not that I didn't like it, but you
+know, the sweat), but I also won time thanks to the increased
+project popularity. Indeed, the more users you have, the more
+annoying guys there are to tell people to use your project
+and that it's the best and everything. Which is great. At
+least, it's great if you don't pay too much attention to it.
+Sometimes people will give an advice that is, in your opinion,
+a bad advice. And that's okay. Don't intervene every time
+someone gives a bad advice, learn to let it go. People will
+figure it out. You learn by making mistakes, after all. Use
+this extra time to make sure other people don't end up
+giving the same bad advice instead. Fix the code or the
+documentation that led to this mistake. Slowly improve the
+project and make sure it doesn't happen again.
+
+This is my story. So far, anyway.

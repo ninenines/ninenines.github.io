@@ -1,0 +1,40 @@
+{{ partial "header.html" . }}
+</header>
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>{{ .Title }}</span></h1>
+	<p class="date">
+		<span class="day">{{ .Date.Format "02" }}</span>
+		<span class="month">{{ .Date.Format "Jan" }}</span>
+	</p>
+</header>
+
+{{ .Content }}
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul id="articles-nav" class="extra_margin">
+	{{ range (where $.Site.Pages "Type" "articles") }}
+		<li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+	{{ end }}
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+{{ partial "footer.html" . }}

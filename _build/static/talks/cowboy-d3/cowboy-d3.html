@@ -1,0 +1,565 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>D3 + Websocket for live Web applications</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20140307" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<link href="ui/sh/sh99s.css" rel="stylesheet"/>
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+<!-- syntax highlighter JS -->
+<script type="text/javascript" src="ui/sh/shCore.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushErlang.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushJScript.js"></script>
+<script type="text/javascript" src="ui/sh/shBrushXml.js"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+    <div id="sub_header"></div>
+    <div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>Erlang Factory SF 2014</h1>
+<h2>D3.js + Websocket for live Web applications, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>D3.js + Websocket for live Web applications</h1>
+<h2>Not all JS is bad. True story!</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>Background</h1>
+</div>
+
+
+<div class="slide">
+<h1>LeoFS</h1>
+<ul>
+<li>Distributed file system (S3 and REST API)</li>
+<li>Local and multi-DC replication</li>
+<li>Potentially huge systems</li>
+<li><a href="http://leo-project.net/leofs/">http://leo-project.net/leofs/</a></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>LeoFS sponsored project</h1>
+<ul>
+<li>LeoFS developers and QA team need tools to inspect their systems</li>
+<li>Users need tools to help debug issues with LeoFS</li>
+<li>A centralized tool would help greatly</li>
+<li>Alien Shaman is a project to make it happen</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Inspired by Bigwig</h1>
+<ul>
+<li>Bigwig, Spawnfest 2011 winner, was a good start</li>
+<li>Unfortunately was never maintained (grrrr!)</li>
+<li>Also was local-only, not distributed</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Not a fork of Bigwig</h1>
+<ul>
+<li>Modifying Bigwig would be more work than not</li>
+<li>Distribution means events and UI need to be decoupled</li>
+<li>Event/probe library is Alien</li>
+<li>Web UI is Shaman</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Alien</h1>
+<ul>
+<li>Event/probe library</li>
+<li>Different probes: ondemand, inline and process</li>
+<li>Routing and filtering rules</li>
+<li>Allows grouping events into batches (minimal impact on the running system)</li>
+<li>Can send events through Erlang, TCP, UDP, you name it</li>
+<li>Most of the work is done</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Shaman</h1>
+<ul>
+<li>Web UI</li>
+<li>Forward events to UI using Websocket</li>
+<li>Can handle many types of events, even custom ones</li>
+<li>Pluggable interface</li>
+<li>Live interface, no database required</li>
+<li>Work in progress!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Events storage</h1>
+<ul>
+<li>Events should be stored on disk for later retrieval</li>
+<li>Alien relays can be used for this</li>
+<li>Shaman will need an interface to preload data/load older data</li>
+<li>This isn't even a WIP yet, but it will come eventually</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Alien Shaman demo</h1>
+</div>
+
+
+<div class="slide">
+<h1>D3.js</h1>
+</div>
+
+
+<div class="slide">
+<h1>Data-Driven Documents</h1>
+<ul>
+<li>Javascript library for manipulating documents</li>
+<li>Bind data to the DOM</li>
+<li>Apply transformations to it based on data</li>
+<li>All using standard HTML, SVG and CSS</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Standards-driven</h1>
+<ul>
+<li>You are not limited to what the library offers</li>
+<li>Use all the features offered by browsers as soon as they come out</li>
+<li>Easy to debug using browser inspectors</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>What can you do with D3.js?</h1>
+<ul>
+<li>Update existing data on a page</li>
+<li>Generate HTML tables</li>
+<li>Draw diagrams using SVG</li>
+<li>Create complex animated representations of your data</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>To this end, D3.js provides</h1>
+<ul>
+<li>Selectors</li>
+<li>Dynamic properties</li>
+<li>Enter and exit selections</li>
+<li>Transitions</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Enter and exit</h1>
+<ul>
+<li>Nodes are bound to data</li>
+<li>Data passed to D3 with no corresponding node: enter</li>
+<li>Data passed to D3 with corresponding node: update</li>
+<li>Other nodes with no corresponding data: exit</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Table update example</h1>
+<div><script type="syntaxhighlighter" class="brush: js"><![CDATA[
+function(data){
+	var rows = d3.select("#mytable>tbody")
+		.selectAll("tr").data(data, function(d){return d.name});
+	rows.enter().append("tr");
+	rows.exit().remove();
+
+	var cells = rows.selectAll("td").data(function(d){
+		return selectData("#mytable>thead>tr>th", d);});
+	cells.enter().append("td");
+	cells.text(function(d){return d.v});
+	cells.exit().remove();
+}
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>__data__</h1>
+<ul>
+<li>Data bound to nodes is stored in the __data__ property of the node</li>
+<li>It can be retrieved, manipulated, updated</li>
+<li>(It is generally not needed to do so)</li>
+<li>Selectors return a list of nodes so it makes it easy to access too!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Protocol</h1>
+</div>
+
+
+<div class="slide">
+<h1>Events forwarding</h1>
+<ul>
+<li>Websocket frame contains list of events</li>
+<li>Events encoded using msgpack</li>
+<li>Websocket connection simply encodes and forwards events</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Client commands</h1>
+<ul>
+<li>Client may send commands</li>
+<li>Example: nodes.connect to connect to a node</li>
+<li>Will be used to dynamically connect to nodes and install probes on them remotely</li>
+<li>Commands are always ran from the Websocket process and may return errors to the UI</li>
+<li>Client doesn't really need to wait for completion, an event will arrive instead</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Identifying frames</h1>
+<ul>
+<li>All frames, regardless of origin, have one common key <code>t</code></li>
+<li>This is the type of the frame</li>
+<li>Events are of type <code>data</code></li>
+<li>Each <code>data</code> frame also has a name in key <code>n</code> and actual data in key <code>d</code></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Dynamic JS event handlers</h1>
+<ul>
+<li>The JS code registers handlers for each <code>t</code></li>
+<li>But also for each type of data <code>n</code></li>
+<li>Custom handlers can be registered easily</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Receiving events from JS</h1>
+<ul>
+<li>Receive Websocket frame</li>
+<li>For each event, find the handler for <code>t</code> and pass it the event</li>
+<li>If the event is <code>data</code>, find the handler for <code>n</code> and pass it the data <code>d</code></li>
+<li>Let D3.js magically process this data and update the page</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Specially crafted HTML...</h1>
+<div><script type="syntaxhighlighter" class="brush: html"><![CDATA[
+<table id="nodes-table" class="table table-striped">
+<thead>
+	<tr>
+		<th data-name="name">Name</th>
+		<th data-name="release">Release</th>
+		<th data-name="alien_started">Alien started?</th>
+		<th data-name="shaman_enabled">Shaman enabled?</th>
+	</tr>
+</thead>
+<tbody></tbody>
+</table>
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Plus a simple mapping function make...</h1>
+<div><script type="syntaxhighlighter" class="brush: js"><![CDATA[
+var selectData = function(selector, data){
+	var ret = [];
+
+	d3.selectAll(selector).each(function(){
+		var name = $(this).attr("data-name");
+		ret.push({n: name, v: data[name]});
+	});
+
+	return ret;
+}
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>A developer really bored</h1>
+<ul>
+<li>No specific code needed to update pages</li>
+<li>Rows are created automatically</li>
+<li>Cells get the expected data values automatically</li>
+<li>Boring means good!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>This is truly powerful</h1>
+</div>
+
+
+<div class="slide">
+<h1>I mean, seriously, powerful</h1>
+<ul>
+<li>Adding new information is a two step process</li>
+<li>Modify Erlang code to send more data</li>
+<li>Write a little HTML where values will be displayed</li>
+<li>No Javascript!</li>
+<li>*applause*</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>And this is just the beginning</h1>
+<ul>
+<li>What about client-side calculations?</li>
+<li>Data that is shown in different places?</li>
+<li>And graphs? Show me pretty colors!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Client-side calculations</h1>
+</div>
+
+
+<div class="slide">
+<h1>Make the client do the work</h1>
+<ul>
+<li>Avoid doing calculation in the Erlang node</li>
+<li>Only do if it means sending a lot less data</li>
+<li>Let the client perform the calculation</li>
+<li>Example: difference of a value between T and T+1</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Tricks required</h1>
+<ul>
+<li>D3.js helps very little here</li>
+<li>It's still possible by accessing the data directly in the HTML elements</li>
+<li>Accessing the data like this is documented, so it's still good</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Update __data__ in the DOM</h1>
+<div><script type="syntaxhighlighter" class="brush: js"><![CDATA[
+var cells = rows.selectAll("td").data(function(d){
+	var new_reds = 0;
+	if (this.length && this[2].__data__){
+		new_reds = d.reds - this[2].__data__.v;
+		this[0].parentElement.__data__.new_reds = new_reds;
+	}
+
+	return selectData("#processes-table>thead>tr>th", d);
+});
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Multiple destinations</h1>
+</div>
+
+
+<div class="slide">
+<h1>Use case: modals</h1>
+<ul>
+<li>I have a table with general information about processes</li>
+<li>I want to be able to click a row and display a modal with extra data</li>
+<li>Problem: data is tied to the rows</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Modal solution</h1>
+<ul>
+<li>Creating/updating HTML for every possible modal is madness</li>
+<li>We need to retrieve data directly from the row elements and assign that to the modal</li>
+<li>That operation needs to be done each update</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Retrieving data</h1>
+<div><script type="syntaxhighlighter" class="brush: js"><![CDATA[
+var md = d3.selectAll('#processes-table>tbody>tr')
+	.filter(function(d){return d.pid == self.modalPid})
+	[0][0].__data__;
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Assigning data</h1>
+<div><script type="syntaxhighlighter" class="brush: js"><![CDATA[
+var vals = d3.selectAll("#processes-modal .data")
+	.data(function(){
+		return selectData("#processes-modal .data", md);
+	});
+vals.text(function(d){return d.v});
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Graphs</h1>
+</div>
+
+
+<div class="slide">
+<h1>Accumulate data</h1>
+<ul>
+<li>Graphs typically show data across a period of time</li>
+<li>We need to accumulate data</li>
+<li>Everytime we get an event we push that data to the graph</li>
+<li>And then update the graph</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Simplistic graph example</h1>
+<div><script type="syntaxhighlighter" class="brush: js"><![CDATA[
+// Keep the last 60 new_reds and update the graph.
+self.modalReds.push(md.new_reds);
+self.modalReds = self.modalReds.slice(-60);
+self.modalRedsHistGraph.update(self.modalReds);
+]]></script></div>
+</div>
+
+
+<div class="slide">
+<h1>Library of graphs</h1>
+<ul>
+<li>Graphs can have a very similar interface regardless of how they display data</li>
+<li>We can have a library of reusable graphs</li>
+<li>We can even give the option to change the type of graph displayed in one click</li>
+<li>Still a work in progress</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Future of Alien Shaman</h1>
+</div>
+
+
+<div class="slide">
+<h1>To start</h1>
+<ul>
+<li>Replicate Bigwig/Observer functionality</li>
+<li>We need to see processes, applications, etc.</li>
+<li>We want some general view of all the nodes (example: memory usage)</li>
+<li>We want a common interface for receiving and displaying logs</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Tracing</h1>
+<ul>
+<li>We want to be able to trace systems</li>
+<li>We want to be able to trace not just one node, but follow messages across nodes</li>
+<li>Thankfully Erlang comes with distributed tracing tools!</li>
+<li>(Phew!)</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Attach to any node</h1>
+<ul>
+<li>We want to be able to use probes even on systems without Alien loaded</li>
+<li>That means we'll need to send the whole application using distribution and start it</li>
+<li>It also means that for this operation we need to have the Erlang distribution running, it's not required once configured though</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>And the most important part</h1>
+<ul>
+<li>Get a nice logo!</li>
+<li>Make it pretty!</li>
+<li>Use special effects!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>I think we're done</h1>
+</div>
+
+
+<div class="slide">
+<h1>Questions?</h1>
+<ul>
+<li><a href="http://ninenines.eu">http://ninenines.eu</a></li>
+<li>Twitter: @lhoguin</li>
+<li>IRC: #ninenines on Freenode</li>
+</ul>
+</div>
+
+
+</div>
+
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+</body>
+</html>

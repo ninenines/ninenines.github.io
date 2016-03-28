@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: External plugins</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>External plugins</span></h1>
+
+<div class="paragraph"><p>It is often convenient to be able to keep the build files
+used by all your projects in one place. Those files could
+be Makefiles, configuration files, templates and more.</p></div>
+<div class="paragraph"><p>Erlang.mk allows you to automatically load plugins from
+dependencies. Plugins can do anything, including defining
+new variables, defining file templates, hooking themselves
+inside the normal Erlang.mk processing or even adding new
+rules.</p></div>
+<div class="paragraph"><p>You can load plugins using one of two methods. You can
+either load all plugins from a dependency, or just one.
+We will also cover conventions about writing external
+plugins.</p></div>
+<div class="sect1">
+<h2 id="_loading_all_plugins_from_a_dependency">Loading all plugins from a dependency</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>To load plugins from a dependency, all you need to do is add
+the dependency name to <code>DEP_PLUGINS</code> in addition to the list
+of dependencies.</p></div>
+<div class="paragraph"><p>For example, if you have <code>cowboy</code> in <code>DEPS</code>, add <code>cowboy</code> in
+<code>DEP_PLUGINS</code> also:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy
+<span style="color: #009900">DEP_PLUGINS =</span> cowboy</tt></pre></div></div>
+<div class="paragraph"><p>This will load the file <em>plugins.mk</em> in the root folder of
+the Cowboy repository.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_loading_one_plugin_from_a_dependency">Loading one plugin from a dependency</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Now that we know how to load all plugins, let&#8217;s take a look
+at how to load one specific plugin from a dependency.</p></div>
+<div class="paragraph"><p>To do this, instead of writing only the name of the dependency,
+we will write its name and the path to the plugin file. This
+means that writing <code>DEP_PLUGINS = cowboy</code> is equivalent to
+writing <code>DEP_PLUGINS = cowboy/plugins.mk</code>.</p></div>
+<div class="paragraph"><p>Knowing this, if we were to load the plugin <em>mk/dist.mk</em>
+from Cowboy and no other, we would write the following in
+our Makefile:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy
+<span style="color: #009900">DEP_PLUGINS =</span> cowboy/mk/dist.mk</tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_writing_external_plugins">Writing external plugins</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>plugins.mk</em> file is a convention. It is meant to load
+all the plugins from the dependency. The code for the plugin
+can be written directly in <em>plugins.mk</em> or be separate.</p></div>
+<div class="paragraph"><p>If you are providing more than one plugin with your repository,
+the recommended way is to create one file per plugin in the
+<em>mk/</em> folder in your repository, and then include those
+individual plugins in <em>plugins.mk</em>.</p></div>
+<div class="paragraph"><p>For example, if you have two plugins <em>mk/dist.mk</em> and
+<em>mk/templates.mk</em>, you could write the following <em>plugins.mk</em>
+file:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #990000">THIS :=</span> <span style="color: #009900">$(</span>dir <span style="color: #009900">$(</span>realpath <span style="color: #009900">$(</span>lastword <span style="color: #009900">$(MAKEFILE_LIST))))</span>
+include <span style="color: #009900">$(THIS)</span>/mk/dist.mk
+include <span style="color: #009900">$(THIS)</span>/mk/templates.mk</tt></pre></div></div>
+<div class="paragraph"><p>The <code>THIS</code> variable is required to relatively include files.</p></div>
+<div class="paragraph"><p>This allows users to not only be able to select individual
+plugins, but also select all plugins from the dependency
+in one go if they wish to do so.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Erlang.mk
+	1
+	
+	User Guide
+</h3>
+
+<ul>
+	
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/erlang.mk/1/guide">1</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

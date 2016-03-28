@@ -1,0 +1,583 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Efficient Web Applications with Erlang and Cowboy</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20120719" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+	<div id="sub_header"></div>
+	<div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>OSCON 2012</h1>
+<h2>Efficient Web Applications, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>Efficient Web Applications with Erlang and Cowboy</h1>
+<h2>The Web is made for Erlang</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+<!-- describe myself and nine nines -->
+
+
+<div class="slide">
+<h1>The Web yesterday</h1>
+<img src="pics/web_yesterday.gif"/>
+</div>
+<!-- static files, ugly, slow, high latency -->
+
+
+<div class="slide">
+<h1>The Web today</h1>
+<img src="pics/web_today.gif"/>
+</div>
+<!-- messaging, API, applications -->
+
+
+<div class="slide">
+<h1>What makes it possible?</h1>
+<ul>
+<li>XmlHTTPRequest</li>
+<li>EventSource</li>
+<li>Websockets</li>
+<li>SPDY</li>
+</ul>
+</div>
+<!-- explain a in more details websockets and SPDY -->
+<!-- They do not solve everything on their own -->
+
+
+<div class="slide">
+<h1>What does the Web needs exactly?</h1>
+<ul>
+<li>Efficiency</li>
+<li>Concurrency</li>
+<li>Availability</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Efficiency?</h1>
+<ul>
+<li>Low latency</li>
+<li>Low bandwidth footprint</li>
+<li>Low memory footprint</li>
+</ul>
+</div>
+<!-- users want their info now -->
+
+
+<div class="slide">
+<h1>Concurrency?</h1>
+<ul>
+<li>High number of concurrency connections</li>
+<li>True concurrency: each request has the same weight</li>
+<!-- for example, JS isn't concurrent -->
+<li>No loss of latency due to an expensive connection</li>
+<li>No loss of latency due to many connections</li>
+</ul>
+</div>
+<!-- millions of users at the same time -->
+
+
+<div class="slide">
+<h1>Availability?</h1>
+<p>According to Joe Armstrong, you need: <ul>
+<li>Isolation</li>
+<li>Concurrency</li> <!-- local and distributed -->
+<li>Failure detection</li>
+<li>Fault identification</li>
+<li>Live code upgrade</li>
+<li>Stable storage</li>
+</ul></p>
+</div>
+<!-- when twitter goes down you can't tweet about it -->
+
+
+<div class="slide">
+<h1>Trine</h1>
+<ul>
+<li>Efficiency requires concurrency</li>
+<li>Concurrency requires availability</li>
+<li>No point measuring efficiency if the server is unavailable</li>
+</ul>
+</div>
+<!-- softwares doing only 1 or 2 of the 3 are doing it wrong -->
+
+
+<div class="slide">
+<h1>Erlang, Erlang, Erlang</h1>
+<ul>
+<li>Erlang did this long before it became important for the web</li>
+<li>Erlang did this long before multicore CPUs</li>
+<li>Erlang gives you all this for free</li>
+</ul>
+</div>
+<!-- very easy to achieve this with Erlang -->
+<!-- why? because erlang models the real world -->
+
+
+<div class="slide">
+<h1>Erlang models the real world</h1>
+<ul>
+<li>People don't share memory</li>
+<li>People evolve concurrently</li>
+<li>People communicate by sending messages</li>
+<!-- some people call these actors, but it's incomplete -->
+<li>People die, for a reason we can identify</li>
+<li>The world doesn't crash when someone dies</li>
+</ul>
+</div>
+<!-- can get a bit dark, supervisor restarting children that died -->
+
+
+<div class="slide">
+<h1>Error handling and recovery</h1>
+<ul>
+<li>Erlang features pattern matching</li>
+<li>Error handling is straightforward: "let it crash!"<pre><code>
+    ok = file:write_file(Name, Contents)
+</code></pre></li>
+<li>Application design depends on how you want them to fail</li>
+<li>Your system becomes failure-safe, even from your own bugs</li>
+</ul>
+</div>
+<!-- same monitoring and handling code for local and remote failure handling -->
+
+
+<div class="slide">
+<h1>Erlang is easy to read and write</h1>
+<ul>
+<li>Code is written sequentially</li> <!-- but not necessarily sequential -->
+<li>Asynchronous code is hidden behind a module API</li>
+<li>The language is very small and easy to understand</li>
+<li>Modules are written in a top-down manner</li>
+</ul>
+</div>
+<!-- despite message passing being asynchronous, you rarely have to worry about it -->
+<!-- erlang is a concurrent language written sequentially -->
+
+
+<div class="slide">
+<h1>Erlang systems grow naturally</h1>
+<ul>
+<li>It's almost the same code to go from 1 to 2 nodes</li>
+<li>It's the same code to go from 2 to 1000 nodes</li>
+<li>It's the same code to handle local or remote faults or netsplits</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>What does a HTTP server look like?</h1>
+<ul>
+<li>Accept connection</li>
+<li>Receive and parse request line</li>
+<li>Receive and parse header lines</li>
+<li>Do something</li>
+<li>Send a reply</li>
+<li>Maybe process another request</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>This is what Cowboy is doing</h1>
+<img src="pics/cowboy.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Then is Cowboy sequential?</h1>
+<ul>
+<li>Accepting the connection in a separate process</li>
+<li>Many processes accept connections concurrently</li>
+<li>Requests are processed concurrently</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Is it really effi-- YES!</h1>
+<ul>
+<li>Prove it!</li>
+<li>Sure.</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>And then I realized...</h1>
+<ul>
+<li>Testing efficiency is <strong>hard</strong>!</li>
+<li>Many tools exist to benchmark web servers</li>
+<li>Problem: they don't scale as much as Cowboy</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Trying out Siege</h1>
+<pre><code>
+% siege -b -c 100 -t 30s http://192.168.1.101:8080 
+** SIEGE 2.70
+** Preparing 100 concurrent users for battle.
+Transactions:                 518565 hits
+Availability:                 100.00 %
+Elapsed time:                  29.76 secs
+Data transferred:               5.93 MB
+Response time:                  0.01 secs
+Transaction rate:           17424.90 trans/sec
+Throughput:                     0.20 MB/sec
+Concurrency:                   98.86
+Successful transactions:      518565
+Failed transactions:               0
+Longest transaction:            0.06
+Shortest transaction:           0.00
+</code></pre>
+</div>
+
+
+<div class="slide">
+<h1>Bigger Siege</h1>
+<pre><code>
+% siege -b -c 1000 -t 30s http://192.168.1.101:8080
+** SIEGE 2.70
+** Preparing 1000 concurrent users for battle.
+Transactions:                 106280 hits
+Availability:                 100.00 %
+Elapsed time:                  52.41 secs
+Data transferred:               1.22 MB
+Response time:                  0.37 secs
+Transaction rate:            2027.86 trans/sec
+Throughput:                     0.02 MB/sec
+Concurrency:                  747.29
+Successful transactions:      106281
+Failed transactions:               0
+Longest transaction:            6.26
+Shortest transaction:           0.00
+</code></pre>
+</div>
+
+
+<div class="slide">
+<h1>The thing about benchmarks</h1>
+<ul>
+<li>They're never a "fact" to anyone other than yourself</li>
+<li>Perform your own benchmarks before taking decisions</li>
+<li><strong>Always</strong> check where the bottleneck is</li>
+</ul>
+</div>
+<!-- Knowing this, I'll be showing how I made it work for me -->
+<!-- A better benchmarking tool was needed -->
+
+
+<div class="slide">
+<h1>The Horse project</h1>
+<img src="pics/horse.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Sweet Poney benchmark</h1>
+<ul>
+<li>Loops of "Connection: close" requests</li>
+<li>Start with 500 concurrent clients</li>
+<li>Add 500 clients every 3 seconds</li>
+<li>5K clients running after just 27s</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Hardware</h1>
+<ul>
+<li>Same hardware type for client and server</li>
+<li>Motherboard: ASUSTeK Computer INC. M5A78L-M LX</li>
+<li>AMD Athlon(tm) II X4 640 Processor (3000 Mhz)</li>
+<li>4 GB of 1333 Mhz memory</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Hello world results</h1>
+<img src="pics/hello_world.png"/>
+</div>
+<!-- what about the same on a raspberry pi? -->
+
+
+<div class="slide">
+<h1>Raspberry Pi results</h1>
+<img src="pics/raspberry_pi.png"/>
+</div>
+<!-- this one led to half the requests doing errors -->
+
+
+<div class="slide">
+<h1>Raspberry Siege</h1>
+<pre><code>
+% siege -b -c 100 -t 30s http://192.168.1.14:8080
+** SIEGE 2.70
+** Preparing 100 concurrent users for battle.
+Transactions:                   7986 hits
+Availability:                 100.00 %
+Elapsed time:                  29.58 secs
+Data transferred:               0.09 MB
+Response time:                  0.37 secs
+Transaction rate:             269.98 trans/sec
+Throughput:                     0.00 MB/sec
+Concurrency:                   99.27
+Successful transactions:        7986
+Failed transactions:               0
+Longest transaction:            0.52
+Shortest transaction:           0.20
+</code></pre>
+</div>
+
+
+<div class="slide">
+<h1>1KB static file</h1>
+<img src="pics/static.png"/>
+</div>
+
+
+<div class="slide">
+<h1>100KB static file</h1>
+<ul>
+<li>Benchmark client breaks down</li>
+<li>When it doesn't it's serving about 1000 files/s</li>
+<li>Couldn't get a proper graph</li>
+<li>But I don't recommend serving files from Erlang</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Integrate Cowboy in your applications</h1>
+<ul>
+<li>Experimental FCGI handler</li>
+<li>rake for Rails</li>
+<li>Direct some queries to Erlang and others to your existing system</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Hello PHP FCGI</h1>
+<pre><code>
+% siege -b -c 100 -t 30s http://192.168.1.101:8080/hello.php
+** SIEGE 2.70
+** Preparing 100 concurrent users for battle.
+Transactions:                  65535 hits
+Availability:                 100.00 %
+Elapsed time:                  29.94 secs
+Data transferred:               0.75 MB
+Response time:                  0.03 secs
+Transaction rate:            2188.88 trans/sec
+Throughput:                     0.03 MB/sec
+Concurrency:                   56.34
+Successful transactions:       65535
+Failed transactions:               0
+Longest transaction:            0.43
+Shortest transaction:           0.00
+</code></pre>
+</div>
+
+
+<div class="slide">
+<h1>Experimental FCGI code is experimental</h1>
+<img src="pics/php_fcgi.png"/>
+</div>
+
+
+<div class="slide">
+<h1>wsdemo benchmark</h1>
+<img src="pics/wsdemo.png"/>
+</div>
+
+
+<div class="slide">
+<h1>Real world application stats</h1>
+<ul>
+<li>Dating website chat, peak time</li>
+<li>70k sessions online</li>
+<li>35k active websocket connections</li>
+<li><img src="pics/real_load.png"</li>
+</div>
+
+
+<div class="slide">
+<h1>Is it webscale?</h1>
+<!-- That's a stupid question really, but yes, yes it is -->
+<ul>
+<li>Tested with 1 million active websocket connections on Amazon EC2</li>
+<li>Takes about 20GB of memory</li>
+<li>That's about 20KB per connection</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Is there a catch?</h1>
+<ul>
+<li>Yes</li>
+<li><strong>We haven't started optimizing</strong> Cowboy</li>
+</ul>
+</div>
+<!-- It's all thanks to the enormous potential of Erlang -->
+<!-- Despite Erlang actually being slow sequentially! -->
+
+
+<div class="slide">
+<h1>How is this possible?</h1>
+<img src="pics/erlang_movie.jpg" height="750"/>
+</div>
+<!-- is erlang using magic -->
+<!-- how do we get this performance? -->
+
+
+<div class="slide">
+<h1>Erlang the OS</h1>
+<ul>
+<li>Erlang the VM runs a release</li>
+<li>Release contains applications</li>
+<li>Applications contain processes</li>
+<li>Processes are supervised</li>
+<li>Erlang the VM is <strong>also</strong> supervised</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Real world Erlang system design</h1>
+<ul>
+<li>Each connection is its own process</li>
+<li>Each session is its own process</li>
+<li>Session data is kept inside the process</li>
+<li>Live events are kept inside the session process</li>
+<li>Cache is often done internally in your application</li>
+<li>Results in few database and FS calls</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang system design 101</h1>
+<ul>
+<li>Think about how you want your system to fail</li>
+<li>Protect your core services into inner layers</li>
+<li>Just let outer layers fail</li>
+<li>Results in small focused services applications</li>
+<li>They only do one thing and do it well</li>
+</ul>
+</div>
+<!-- this is really how you achieve efficiency -->
+
+
+<div class="slide">
+<h1>Architecture of an Erlang web app</h1>
+<ul>
+<li>Thin HTTP communication layer</li>
+<li>Makes calls to services in your system</li>
+<li>Services are live processes, not a model library</li>
+<li>Services can be on this or another node</li>
+<li>Connection processes are mostly waiting for replies</li>
+<li>They do not prevent other connections from running!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Scale to the infinite and beyond</h1>
+<ul>
+<li>Remove bottlenecks (core processes...)</li>
+<li>Distribute responsability (master-less)</li>
+<li>Let it crash (but handle faults where it matters)</li>
+<li>Reduce disk or network access</li>
+<li>Measure</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Erlang gives you the tools to measure</h1>
+<ul>
+<li>Default installation contains:<ul>
+	<li>4+ profilers</li>
+	<li>2+ debugging interfaces</li>
+	<li>3+ trace interfaces</li>
+	<li>Direct peeking into running processes</li>
+	<li>Tons of statistics</li>
+	<li>SNMP</li>
+	<li>A lot more...</li>
+</ul></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>What you don't need anymore</h1>
+<ul>
+<li>MVC and friends</li>
+<li>Cache servers (memcache, redis...)</li>
+<li>Messaging servers (Rabbitmq, 0mq...)</li>
+<li>Overtime</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Getting started</h1>
+<ul>
+<li>https://github.com/extend/cowboy</li>
+<li>http://learnyousomeerlang.com</li>
+<li>#erlang and #erlounge on irc.freenode.net</li>
+<li>erlang-questions mailing list</li>
+<li>Contact me directly! @lhoguin or essen@ninenines.eu</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Questions?</h1>
+</div>
+
+
+</div>
+
+</body>
+</html>

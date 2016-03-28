@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Constraints</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Constraints</span></h1>
+
+<div class="paragraph"><p>Cowboy provides an optional constraints based validation feature
+when interacting with user input.</p></div>
+<div class="paragraph"><p>Constraints are first used during routing. The router uses
+constraints to more accurately match bound values, allowing
+to create routes where a segment is an integer for example,
+and rejecting the others.</p></div>
+<div class="paragraph"><p>Constraints are also used when performing a match operation
+on input data, like the query string or cookies. There, a
+default value can also be provided for optional values.</p></div>
+<div class="paragraph"><p>Finally, constraints can be used to not only validate input,
+but also convert said input into proper Erlang terms, all in
+one step.</p></div>
+<div class="sect1">
+<h2 id="_structure">Structure</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Constraints are provided as a list of fields and for each
+field a list of constraints for that field can be provided.</p></div>
+<div class="paragraph"><p>Fields are either the name of the field; the name and
+one or more constraints; or the name, one or more constraints
+and a default value.</p></div>
+<div class="paragraph"><p>When no default value is provided then the field is required.
+Otherwise the default value is used.</p></div>
+<div class="paragraph"><p>All constraints for a field will be used to match its value
+in the order they are given. If the value is modified by a
+constraint, the next constraint receives the updated value.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_built_in_constraints">Built-in constraints</h2>
+<div class="sectionbody">
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="50%" />
+<col width="50%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Constraint </th>
+<th align="left" valign="top"> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">int</p></td>
+<td align="left" valign="top"><p class="table">Convert binary value to integer.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">nonempty</p></td>
+<td align="left" valign="top"><p class="table">Ensures the binary value is non-empty.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_custom_constraint">Custom constraint</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>In addition to the predefined constraints, Cowboy will accept
+a fun. This fun must accept one argument and return one of
+<code>true</code>, <code>{true, NewValue}</code> or <code>false</code>. The result indicates
+whether the value matches the constraint, and if it does it
+can optionally be modified. This allows converting the value
+to a more appropriate Erlang term.</p></div>
+<div class="paragraph"><p>Note that constraint functions SHOULD be pure and MUST NOT crash.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

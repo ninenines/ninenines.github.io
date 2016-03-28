@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Xerl: empty modules</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>Xerl: empty modules</span></h1>
+	<p class="date">
+		<span class="day">30</span>
+		<span class="month">Jan</span>
+	</p>
+</header>
+
+<div class="paragraph"><p>Let&#8217;s build a programming language. I call it Xerl: eXtended ERLang.
+It&#8217;ll be an occasion for us to learn a few things, especially me.</p></div>
+<div class="paragraph"><p>Unlike in Erlang, in this language, everything is an expression.
+This means that modules and functions are expression, and indeed that
+you can have more than one module per file.</p></div>
+<div class="paragraph"><p>We are just starting, so let&#8217;s no go ahead of ourselves here. We&#8217;ll
+begin with writing the code allowing us to compile an empty module.</p></div>
+<div class="paragraph"><p>We will compile to Core Erlang: this is one of the many intermediate
+step your Erlang code compiles to before it becomes BEAM machine code.
+Core Erlang is a very neat language for machine generated code, and we
+will learn many things about it.</p></div>
+<div class="paragraph"><p>Today we will only focus on compiling the following code:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #FF6600">mod</span> <span style="color: #FF6600">my_module</span>
+<span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Compilation will be done in a few steps. First, the source file will
+be transformed in a tree of tokens by the lexer. Then, the parser will
+use that tree of tokens and convert it to the AST, bringing semantical
+meaning to our representation. Finally, the code generator will transform
+this AST to Core Erlang AST, which will then be compiled.</p></div>
+<div class="paragraph"><p>We will use <em>leex</em> for the lexer. This lexer uses .xrl files
+which are then compiled to .erl files that you can then compile to BEAM.
+The file is divided in three parts: definitions, rules and Erlang code.
+Definitions and Erlang code are obvious; rules are what concerns us.</p></div>
+<div class="paragraph"><p>We only need two things: atoms and whitespaces. Atoms are a lowercase
+letter followed by any letter, number, _ or @. Whitespace is either a
+space, an horizontal tab, \r or \n. There exists other kinds of whitespaces
+but we simply do not allow them in the Xerl language.</p></div>
+<div class="paragraph"><p>Rules consist of a regular expression followed by Erlang code. The
+latter must return a token representation or the atom <code>skip_token</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #009900">L</span>}{<span style="color: #009900">A</span>}<span style="color: #990000">*</span> <span style="color: #990000">:</span>
+    <span style="color: #009900">Atom</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000080">list_to_atom</span></span>(<span style="color: #009900">TokenChars</span>),
+    {<span style="color: #FF6600">token</span>, <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">reserved_word</span></span>(<span style="color: #009900">Atom</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+        <span style="color: #000080">true</span> <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Atom</span>, <span style="color: #009900">TokenLine</span>};
+        <span style="color: #000080">false</span> <span style="color: #990000">-&gt;</span> {<span style="font-weight: bold"><span style="color: #000080">atom</span></span>, <span style="color: #009900">TokenLine</span>, <span style="color: #009900">Atom</span>}
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>}<span style="color: #990000">.</span>
+
+{<span style="color: #009900">WS</span>}<span style="color: #990000">+</span> <span style="color: #990000">:</span> <span style="color: #FF6600">skip_token</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The first rule matches an atom, which is converted to either a special
+representation for reserved words, or an atom tuple. The
+<code>TokenChars</code> variable represents the match as a string, and
+the <code>TokenLine</code> variable contains the line number.
+<a href="https://github.com/extend/xerl/blob/0.1/src/xerl_lexer.xrl">View the complete file</a>.</p></div>
+<div class="paragraph"><p>We obtain the following result from the lexer:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>[{<span style="color: #FF6600">mod</span>,<span style="color: #993399">1</span>},{<span style="font-weight: bold"><span style="color: #000080">atom</span></span>,<span style="color: #993399">1</span>,<span style="color: #FF6600">my_module</span>},{<span style="color: #FF6600">'begin'</span>,<span style="color: #993399">2</span>},{<span style="color: #FF6600">'end'</span>,<span style="color: #993399">3</span>}]</tt></pre></div></div>
+<div class="paragraph"><p>The second step is to parse this list of tokens to add semantic meaning
+and generate what is called an <em>abstract syntax tree</em>. We will be
+using the <em>yecc</em> parser generator for this. This time it will take
+.yrl files but the process is the same as before. The file is a little
+more complex than for the lexer, we need to define at the very least
+terminals, nonterminals and root symbols, the grammar itself, and
+optionally some Erlang code.</p></div>
+<div class="paragraph"><p>To compile our module, we need a few things. First, everything is an
+expression. We thus need list of expressions and individual expressions.
+We will support a single expression for now, the <code>mod</code>
+expression which defines a module. And that&#8217;s it! We end up with the
+following grammar:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span>
+<span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">exprs</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span> | <span style="color: #FF6600">'$2'</span>]<span style="color: #990000">.</span>
+
+<span style="color: #FF6600">expr</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">module</span> <span style="color: #990000">:</span> <span style="color: #FF6600">'$1'</span><span style="color: #990000">.</span>
+
+<span style="color: #FF6600">module</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">'mod'</span> <span style="font-weight: bold"><span style="color: #000080">atom</span></span> <span style="color: #FF6600">'begin'</span> <span style="color: #FF6600">'end'</span> <span style="color: #990000">:</span>
+        {<span style="color: #FF6600">'mod'</span>, <span style="font-weight: bold"><span style="color: #000080">?line</span></span>(<span style="color: #FF6600">'$1'</span>), <span style="color: #FF6600">'$2'</span>, []}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p><a href="https://github.com/extend/xerl/blob/0.1/src/xerl_parser.yrl">View the complete file</a>.</p></div>
+<div class="paragraph"><p>We obtain the following result from the parser:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>[{<span style="color: #FF6600">mod</span>,<span style="color: #993399">1</span>,{<span style="font-weight: bold"><span style="color: #000080">atom</span></span>,<span style="color: #993399">1</span>,<span style="color: #FF6600">my_module</span>},[]}]</tt></pre></div></div>
+<div class="paragraph"><p>We obtain a list of a single <code>mod</code> expression. Just like
+we wanted. Last step is generating the Core Erlang code from it.</p></div>
+<div class="paragraph"><p>Code generation generally is comprised of several steps. We will
+discuss these in more details later on. For now, we will focus on the
+minimal needed for successful compilation.</p></div>
+<div class="paragraph"><p>We can use the <code>cerl</code> module to generate Core Erlang AST.
+We will simply be using functions, which allows us to avoid learning
+and keeping up to date with the internal representation.</p></div>
+<div class="paragraph"><p>There&#8217;s one important thing to do when generating Core Erlang AST
+for a module: create the <code>module_info/{0,1}</code> functions.
+Indeed, these are added to Erlang before it becomes Core Erlang, and
+so we need to replicate this ourselves. Do not be concerned however,
+as this only takes a few lines of extra code.</p></div>
+<div class="paragraph"><p>As you can see by
+<a href="https://github.com/extend/xerl/blob/0.1/src/xerl_codegen.erl">looking at the complete file</a>,
+the code generator echoes the grammar we defined in the parser, and
+simply applies the appropriate Core Erlang functions for each expressions.</p></div>
+<div class="paragraph"><p>We obtain the following pretty-printed Core Erlang generated code:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #FF6600">module</span> <span style="color: #FF6600">'my_module'</span> [<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span>,
+                       <span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span>]
+    <span style="color: #FF6600">attributes</span> []
+<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span> <span style="color: #990000">=</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> () <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
+            (<span style="color: #FF6600">'empty_module'</span>)
+<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span> <span style="color: #990000">=</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Key</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
+            (<span style="color: #FF6600">'empty_module'</span>, <span style="color: #009900">Key</span>)
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
+<div class="paragraph"><p>For convenience I added all the steps in a <code>xerl:compile/1</code>
+function that you can use against your own .xerl files.</p></div>
+<div class="paragraph"><p>That&#8217;s it for today! We will go into more details over each steps in
+the next few articles.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="https://github.com/extend/xerl/blob/0.1/">View the source</a>
+</p>
+</li>
+</ul></div>
+
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul id="articles-nav" class="extra_margin">
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/on-open-source/">On open source</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+	
+		<li><a href="http://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+	
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+

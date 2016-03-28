@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Cowboy 2</title>
+
+		<meta name="description" content="Cowboy 2 EUC 2015 talk">
+		<meta name="author" content="Loïc Hoguin">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+<section>
+	<h1>Cowboy 2.0</h1>
+	<h3>The Shape of Things to Come</h3>
+	<p><small>Loïc Hoguin (@lhoguin), <a href="http://ninenines.eu">Nine Nines</a></small></p>
+</section>
+
+<!-- it's where you put the cattle! -->
+<section>
+	<h2>Cowboy changes... again?!</h2>
+	<p>WTF man, don't you understand what <em>stable</em> means?</p>
+	<p>WTF is wrong with you?!</p>
+</section>
+
+<section>
+	<h2>In this talk</h2>
+	<ol>
+		<li>Why Cowboy 2</li>
+		<li>Goals</li>
+		<li>Low-level Cowboy</li>
+		<li>High-level Cowboy</li>
+		<li>Websocket</li>
+		<li>Related projects</li>
+	</ol>
+</section>
+
+<section>
+	<h1>Why Cowboy 2</h1>
+</section>
+
+<section>
+	<h2>Cowboy 1 sucks</h2>
+	<p>If you are watching this talk, you probably agree.</p>
+</section>
+
+<section>
+	<h2>HTTP/2 requires a new model</h2>
+	<p>HTTP/2 is concurrent, so Cowboy must also be.</p>
+</section>
+
+<section>
+	<h2>Long term vision</h2>
+	<p>Even if we are required to make small backward incompatible changes,
+overall the Cowboy 2 design will stand the test of time.</p>
+	<small><p class="fragment">You can quote me on that.</p></small>
+</section>
+
+<section>
+	<h2>Influences</h2>
+	<p>Misultin, HTTP/2, Windows</p>
+</section>
+
+<section>
+	<h1>Goals</h1>
+</section>
+
+<section>
+	<h2>Protocols supported</h2>
+	<p>HTTP/2, HTTP/1.1, Websocket</p>
+	<small><p>HTTP/1.0, SPDY/3.1, SPDY/3</p></small>
+</section>
+
+<section>
+	<h2>More power to users</h2>
+	<ul>
+		<li>Everything special processes (proc_lib/sys)</li>
+		<li>Pluggable low-level interface</li>
+		<li>Tons of options (like Windows!)</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Simpler interface</h2>
+	<ul>
+		<li>Less, simpler callbacks</li>
+		<li>No more dealing with Req object</li>
+		<li>Extract, validate and convert input in one step</li>
+		<li>Maps. Maps everywhere!</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Better code</h2>
+	<p>All parsing code will be in Cowlib.</p>
+	<p>Cowboy will deal strictly with protocol logic and its own features.</p>
+</section>
+
+<section>
+	<h2>Tests tests tests</h2>
+	<ul>
+		<li>Property based testing of Cowlib</li>
+		<li>Functional testing of Cowboy protocols and features</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Low-level Cowboy</h1>
+</section>
+
+<section>
+	<h2>Performance</h2>
+	<p>Do as little as possible, allocate as little as possible,
+and provide a pluggable interface for power users.</p>
+</section>
+
+<section>
+	<h2>Use cases</h2>
+	<ul>
+		<li>Proxies (CONNECT or otherwise)</li>
+		<li>Frameworks</li>
+		<li>Low-level protocols (Websocket)</li>
+		<li>Hooks</li>
+		<li>Handling high demand resources early</li>
+	</ul>
+</section>
+
+<section>
+	<h2>The big picture</h2>
+	<p>Connection &rarr; Protocol &rarr; Streams</p>
+</section>
+
+<section>
+	<h2>Connection</h2>
+	<ul>
+		<li>cowboy_clear</li>
+		<li>cowboy_tls</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Listener startup</h2>
+	<ul>
+		<li>cowboy:start_clear(Name, Nb, TransOpts, ProtoOpts)</li>
+		<li>cowboy:start_tls(Name, Nb, TransOpts, ProtoOpts)</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Choice of protocol</h2>
+	<p>cowboy_clear &rarr; cowboy_http</p>
+	<p>cowboy_tls &rarr; ALPN  &rarr; Protocol</p>
+	<ul>
+		<li>cowboy_http</li>
+		<li>cowboy_http2</li>
+		<li>cowboy_spdy</li>
+	</ul>
+</section>
+
+<section>
+	<h2>ALPN?</h2>
+	<ol>
+		<li>Client advertises list of protocols it supports</li>
+		<li>Server chooses protocol and informs client</li>
+	</ol>
+	<p><small>Erlang/OTP 18+</small></p>
+</section>
+
+<section>
+	<h2>Protocol modules</h2>
+	<ul>
+		<li>Common interface</li>
+		<li>Non-blocking</li>
+		<li>Handles system messages</li>
+		<li>Able to act as a supervisor if stream-based</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Protocol upgrades</h2>
+	<p>Same mechanism for:
+	<ul>
+		<li>Upgrading from HTTP/1.1 to HTTP/2</li>
+		<li>Upgrading from HTTP/1.1 to Websocket</li>
+		<li>Upgrading HTTP/1.1 connections from TCP to TLS</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Streams</h2>
+	<p>A stream is an HTTP request/response pair identified by a unique stream identifier.</p>
+	<p>A stream can be initiated by the server using a promise.</p>
+</section>
+
+<section>
+	<h2>Stream-based protocols</h2>
+	<ul>
+		<li>cowboy_http</li>
+		<li>cowboy_http2</li>
+		<li>cowboy_spdy</li>
+		<li>(cowboy_coap?)</li>
+		<li>NOT cowboy_websocket</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Stream handler</h2>
+	<ul>
+		<li>init(ID, IsFin, Method, Scheme, Host, Path, Headers, Opts)</li>
+		<li>data(ID, IsFin, Data, State)</li>
+		<li>info(ID, Msg, State)</li>
+		<li>terminate(ID, Reason, State)</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Stream-specific messages</h2>
+	<ul>
+		<li>Messages are filtered per-stream</li>
+		<li>{{Handler, ID}, Msg}</li>
+		<li>{{Handler, ID}, From, Msg}</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Stream commands</h2>
+	<ul>
+		<li>{response, IsFin, StatusCode, Headers}</li>
+		<li>{data, IsFin, Data}</li>
+		<li>{promise, Method, Scheme, Authority, Path, Headers}</li>
+		<li>{flow, auto | Size}</li>
+		<li>{spawn, Pid}</li>
+		<li>{upgrade, Mod, Opts}</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Default stream handler</h2>
+	<ul>
+		<li>Creates a new process per stream</li>
+		<li>Communicates with process using Cowboy stream protocol</li>
+		<li>High-level Cowboy</li>
+	</ul>
+</section>
+
+<section>
+	<h2>One process per request</h2>
+	<ul>
+		<li>High-level Cowboy uses 1 proc/conn + 1 proc/stream</li>
+		<li class="fragment"><em>BUT</em></li>
+		<li class="fragment">Low-level Cowboy uses 1 proc/conn <em>only</em></li>
+	</ul>
+</section>
+
+<section>
+	<h2>Cowboy stream protocol</h2>
+	<ul>
+		<li>{response_header, Key, Value}</li>
+		<li>{response_cookie, Key, Value, Opts}</li>
+		<li>{response_body, Body}</li>
+		<li>{response, IsFin, StatusCode, Headers}</li>
+		<li>{data, IsFin, Data}</li>
+		<li>{promise, Method, Scheme, Authority, Path, Headers}</li>
+		<li>{data_request, Size}</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Layered stream handlers</h2>
+	<ul>
+		<li>A stream handler can call another stream handler</li>
+		<li>Use handler-specific options to define the next layer</li>
+		<li class="fragment">This makes Cowboy 1 hooks worthless</li>
+	</ul>
+</section>
+
+<section>
+	<h1>High-level Cowboy</h1>
+</section>
+
+<section>
+	<h2>Convenience</h2>
+	<p>Pie tastes good, right? Just like Cowboy 2.</p>
+	<p class="fragment">Favor convenience, elegance and simplicity.
+No pitfalls. Straightforward.</p>
+</section>
+
+<section>
+	<h2>The big picture</h2>
+	<p>Middlewares &rarr; User handlers</p>
+	<p>Default: cowboy_router &rarr; cowboy_handler</p>
+</section>
+
+<section>
+	<h2>Middlewares</h2>
+	<p>No more 'error' tuple; ok, suspend, stop</p>
+</section>
+
+<section>
+	<h2>Routing</h2>
+	<p>I would like to solve the fact that routing rules are
+copied to all connection processes. Perhaps ets?</p>
+</section>
+
+<section>
+	<h2>Reverse routing</h2>
+	<p>Required for better HATEOAS support.</p>
+	<p>Give module name and bindings, get URL.<br/>Add query string to URL (optional).</p>
+</section>
+
+<section>
+	<h2>Constraints</h2>
+	<p>Use constraints all across high-level Cowboy.</p>
+	<p>Improve error handling interface, add human errors.</p>
+</section>
+
+<section>
+	<h2>Handlers</h2>
+	<p>Unify init and terminate callbacks</p>
+	<p>Simplify init return value: {ok | Mod, State}</p>
+	<p>Do everything in init/2</p>
+</section>
+
+<section>
+	<h2>REST handlers</h2>
+	<p>Add behaviour with optional callbacks</p>
+	<p>Remove known_content_type callback</p>
+</section>
+
+<section>
+	<h2>Req object</h2>
+	<p>Immutable</p>
+	<p>3 levels of access to values:<ul>
+		<li>Raw value</li>
+		<li>Parsed value</li>
+		<li>Matched value</li>
+	</ul></p>
+</section>
+
+<section>
+	<h2>Match functions</h2>
+	<p>Extract, validate and convert values in one step.</p>
+	<pre><code data-trim contenteditable>
+#{lang := Lang} = cowboy_req:match_qs(
+	[{lang, nonempty, &lt;&lt;"en-US"&gt;&gt;}], Req)
+	</code></pre>
+</section>
+
+<section>
+	<h2>Additional notes</h2>
+	<p>Handler suffix becomes _h</p>
+	<p>Settle on 'stop' instead of 'shutdown' or 'halt'</p>
+	<p>Cowlib provides parsers for nearly everything</p>
+</section>
+
+<section>
+	<h1>Websocket</h1>
+</section>
+
+<section>
+	<h2>Upgrade</h2>
+	<ul>
+		<li>From stream handler</li>
+		<li>From request process</li>
+	</ul>
+	<p>Connection process switches to Websocket protocol</p>
+</section>
+
+<section>
+	<h2>Features</h2>
+	<p>Websocket permessage-deflate support added.</p>
+	<p>Websocket UTF-8 validation optimized.<br/>An option to disable validation will be added.</p>
+</section>
+
+<section>
+	<h2>Websocket handlers</h2>
+	<ul>
+		<li>No more websocket_init</li>
+		<li>No more websocket_terminate</li>
+		<li>Optional terminate</li>
+		<li>No keeping track of Req</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Related projects</h1>
+</section>
+
+<section>
+	<h2>Ranch 2</h2>
+	<ul>
+		<li>Merge acceptor and supervisor functionality</li>
+		<li>Use the async accept mechanism</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Gun</h2>
+	<p>Gun is an asynchronous HTTP client with support for HTTP/1.1,
+HTTP/2, SPDY/3 and Websocket, designed for long-running connections.</p>
+</section>
+
+<section>
+	<h2>Erlang.mk</h2>
+	<p>Erlang.mk is a Makefile based build tool that <em>just works</em>.</p>
+	<p>No Makefile knowledge required to use it</p>
+</section>
+
+<section>
+	<h2>Why Erlang.mk</h2>
+	<p>My users need a build tool that actually works.</p>
+</section>
+
+<section>
+	<h2>Convince me</h2>
+	<ul>
+		<li>Compatible with a lot more projects than rebar</li>
+		<li>Dependencies can be in any language (C, Javascript...)</li>
+		<li>It's just a text file</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Complexity comparison</h2>
+	<table>
+		<thead>
+			<tr><th>Rebar feature</th><th>Erlang.mk equivalent</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>rebar.config</td><td>variables</td></tr>
+			<tr><td>rebar.config.script</td><td>variables and/or rules</td></tr>
+			<tr><td>rebar hook</td><td>rules</td></tr>
+			<tr><td>rebar2 plugin</td><td>rules</td></tr>
+			<tr><td>rebar3 plugin</td><td>rules</td></tr>
+		</tbody>
+	</table>
+</section>
+
+<section>
+	<h2>Erlang.mk index</h2>
+	<p>Getting close to 450 projects</p>
+	<p>DEPS = cowboy cpg erlydtl riak_core</p>
+</section>
+
+<section>
+	<section>
+		<h2>All packages 1/6</h2>
+		<p>
+aberth active aleppo alog annotations antidote apns azdht backoff barrel basho_bench bcrypt beam beanstalk bear bertconf bifrost binpp bisect bitcask bitstore bootstrap boss_db boss bson bullet cache cake carotene cberl cecho cferl chaos_monkey check_node chronos classifier clique cloudi_core cloudi_service_* cluster_info color confetti couchbeam couch covertool cowboy cowdb cowlib cpg cqerl cr cuttlefish damocles debbie decimal detergent dh_date dhtcrawler dirbusterl dispcount dlhttpc dns dnssd dtl dynamic_compile e2 eamf eavro ecapnp econfig edate edgar edis edns
+		</p>
+	</section>
+	<section>
+		<h2>All packages 2/6</h2>
+		<p>
+edown eep_app eep efene eganglia egeoip ehsa ejabberd ej ekaf elarm eleveldb elli elvis emagick emysql enm entop epcap eper epgsql episcina eplot epocxy epubnub eqm eredis eredis_pool erlang_cep erlang_js erlang_localtime erlang_smtp erlasticsearch erlastic_search erlbrake erlcloud erlcron erldb erldis erldns erldocker erlfsmon erlgit erlguten erlmc erlmongo erlog erlpass erlport erlsha2 erlsh erlsom erl_streams erlubi erlvolt erlware_commons erlydtl errd erserve erwa espec estatsd etap etest etest_http etoml eunit_formatters eunit euthanasia evum exec exml exometer exs1024 exs64 exsplus116 exsplus128 ezmq ezmtp
+	</section>
+	<section>
+		<h2>All packages 3/6</h2>
+		<p>
+fast_disk_log feeder fix flower fn folsom_cowboy folsom folsomite fs fuse gcm gcprof geas geef gen_cycle gen_icmp gen_nb_server gen_paxos gen_smtp gen_tracker gen_unix getopt gettext giallo gin gitty gold_fever gpb gproc grapherl gun hackney hamcrest hanoidb hottub hyper ibrowse ierlang iota ircd irc_lib iris iso8601 itweet jerg jesse jiffy jiffy_v jobs joxa jsonerl json jsonpath json_rec jsonx jsx kafka kai katja kdht kinetic kjell kraken kucumberl kvc kvlists kvs lager_amqp_backend lager lager_syslog lambdapad lasp lasse ldap lethink lfe ling live lmq locker locks log4erl lol lucid luerl luwak lux mad mavg mcd mcerlang mc_erl meck
+	</section>
+	<section>
+		<h2>All packages 4/6</h2>
+		<p>
+mekao memo merge_index merl mimetypes mixer mochiweb mochiweb_xpath mockgyver modlib mongodb mongooseim moyo msgpack mustache myproto mysql n2o nat_upnp neo4j neotoma newrelic nifty nitrogen_core nkbase nkdocker nkpacket nodefinder nprocreg oauth2c oauth2 oauth of_protocol openflow openid openpoker pal parse_trans parsexml pegjs percept2 pgsql pkgx pkt plain_fsm plumtree pmod_transform pobox ponos poolboy pooler poxa pqueue procket proper props protobuffs psycho ptrackerl purity push_service qdate qrcode quest rabbit_exchange_type_riak rack radierl rafter ranch
+	</section>
+	<section>
+		<h2>All packages 5/6</h2>
+		<p>
+rbeacon rebar rebus rec2json recon record_info redgrid redo relx resource_discovery restc rfc4627_jsonrpc riakc riak_core riak_dt riak_ensemble riakhttpc riak_kv riaknostic riak_pg riak_pipe riakpool riak_sysmon riak_test rivus_cep rlimit safetyvalve seestar service setup sext sfmt sgte sheriff shotgun sidejob sieve sighandler simhash simple_bridge simple_oauth2 skel social spapi_router sqerl srly sshrpc stable statebox statebox_riak statman statsderl stdinout_pool stockdb stripe surrogate swab swarm switchboard sync syntaxerl syslog taskforce tddreloader tempo ticktick tinymq tinymt traffic_tools trane transit trie
+	</section>
+	<section>
+		<h2>All packages 6/6</h2>
+		<p>
+triq tunctl twerl twitter_erlang ucol_nif unicorn unsplit uuid ux vert verx vmq_acl vmq_bridge vmq_graphite vmq_passwd vmq_server vmq_snmp vmq_systree vmstats walrus webmachine websocket_client worker_pool wrangler wsock xref_runner yamerl yamler yaws zab_engine zeta zippers zlists zraft_lib zucchini 
+		</p>
+	</section>
+</section>
+
+<section>
+	<h2>Erlang.mk plans 1/2</h2>
+	<ol>
+		<li>Compile everything</li>
+		<li>Keep track of versions</li>
+		<li>Provide curated packages</li>
+	</ol>
+</section>
+
+<section>
+	<section>
+		<h2>Erlang.mk plans 2/2</h2>
+		<ol>
+			<li>Add support for LFE, Elixir projects</li>
+			<li>Add Concuerror, Chaos Monkey, Smother, RefactorErl...</li>
+			<li>Generate the .app file without a .app.src</li>
+		</ol>
+	</section>
+
+	<section>
+		<h2>Everything in the Makefile</h2>
+		<ul>
+			<li>PROJECT &rarr; application name</li>
+			<li>PROJECT_DESCRIPTION &rarr; description</li>
+			<li>PROJECT_VERSION &rarr; vsn</li>
+			<li>PROJECT_ID &rarr; id</li>
+			<li>PROJECT_TYPE &rarr; mod, registered</li>
+			<li>PROJECT_REGISTERED &rarr; registered</li>
+			<li>PROJECT_ENV or PROJECT_ENV_FILE &rarr; env</li>
+			<li>modules list automatically filled</li>
+			<li>applications list automatically filled from DEPS</li>
+		</ul>
+	</section>
+
+	<section>
+		<h2>Everything optional</h2>
+		<p>All the variables that ultimately build the .app file are
+either optional or automatically defined when bootstrapping.</p>
+		<p>Adding a dependency becomes a one step process.</p>
+	</section>
+
+	<section>
+		<h2>Starting up goals</h2>
+		<ul>
+			<li>mkdir kitty; cd kitty</li>
+			<li>wget $ERLANG_MK_URL</li>
+			<li>make -f bootstrap bootstrap-rel</li>
+			<li>append DEPS = cowboy cpg erlydtl riak_core</li>
+			<li>make run</li>
+		</ul>
+	</section>
+
+	<section>
+		<h2>Starting up later goals</h2>
+		<ul>
+			<li>erlang-mk new kitty</li>
+			<li>append DEPS = cowboy cpg erlydtl riak_core</li>
+			<li>make run</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<h2>Erlang.mk on Windows</h2>
+	<p>Make 4 makes supporting Windows possible without needing the
+whole Unix toolchain.<p>
+	<p>Before this there are much bigger Windows issues
+to solve to make the experience smooth, unrelated to Erlang.mk</p>
+</section>
+
+<section>
+	<h2>The Erlanger Playbook</h2>
+	<p>This book is the missing developer manual. It contains
+advice from my experience working with Cowboy.</p>
+	<p>Price: 50€</p>
+	<p>Ebook preorder available soon on <a href="http://ninenines.eu">ninenines.eu</a></p>
+	<p>Want to buy it today and get it <em>right now</em>? Come talk to me
+or send an email later at <a href="mailto:essen@ninenines.eu">essen@ninenines.eu</a></p>
+</section>
+
+<section>
+	<h1>Terminate</h1>
+</section>
+
+<section>
+	<h2>tl;dr</h2>
+	<p>Cowboy 2's design is long term.</p>
+</section>
+
+<section>
+	<h2>Questions?</h2>
+	<p>To look at an early release of the code in this talk:<br/><a href="https://github.com/ninenines/cowboy/releases/tag/2.0.0-pre.2">tag 2.0.0-pre.2</a></p>
+	<p>To buy the book, access projects:<br/><a href="http://ninenines.eu">ninenines.eu</a></p>
+	<p>To follow my exciting adventures:<br/>@lhoguin on Twitter</a>
+	<p>To ask questions, talk about hats:<br/>#ninenines on Freenode</p>
+</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() {
+						hljs.configure({languages: ['erlang']});
+						hljs.initHighlightingOnLoad();
+					} },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

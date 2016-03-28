@@ -1,0 +1,483 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Reverse-engineering a proprietary game server with Erlang</title>
+<!-- metadata -->
+<meta charset="utf8" />
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<meta name="presdate" content="20120529" />
+<meta name="author" content="Loïc Hoguin" />
+<meta name="company" content="Nine Nines" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="visible" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header">
+	<div id="sub_header"></div>
+	<div id="logo"><img src="ui/img/logo.svg"/></div>
+</div>
+<div id="footer">
+<div id="footer_shadow"></div>
+<h1>EUC 2012</h1>
+<h2>Reverse-engineering, Nine Nines</h2>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+<h1>Reverse-engineering a proprietary game server with Erlang</h1>
+<h2>Erlang, the fear of game developers...</h2>
+<h3>Loïc Hoguin - @lhoguin</h3>
+<h4>Erlang Cowboy and Nine Nines Founder</h4>
+</div>
+
+
+<div class="slide">
+<h1>Background</h1>
+</div>
+
+
+<div class="slide">
+<h1>Why reverse-engineer?</h1>
+<ul>
+<li>Curiosity</li>
+<li>Research the game</li>
+<li>Build your own server<ul>
+	<li>Because you want a challenge</li>
+	<li>Because the official server is discontinued</li>
+</ul></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Frowned upon</h1>
+<ul>
+<li>Few game companies understand</li>
+<li>Data mining is cheating</li>
+<li>Reverse-engineering is cheating</li>
+<li>Even if you don't take advantage of your knowledge</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Anticheat technology</h1>
+<ul>
+<li>Online games feature anticheat technology</li>
+<li>Often instead of real security</li>
+<li>You have to bypass it, undetected</li>
+<li>It's OK, anticheat systems are full of flaws</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Windows</h1>
+<ul>
+<li>Online games usually only run on Windows</li>
+<li>Wine doesn't work because of anticheat programs</li>
+<li>A few steps require a Windows box</li>
+<li>If you're doing any gaming you probably have one</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Phantasy Star Universe (PSU)</h1>
+<ul>
+<li>SEGA game released in 2006</li>
+<li>US version shutdown in early 2010</li>
+<li>JP version still running</li>
+<li>Protected by GameGuard (check files, memory, cheat tools...)</li>
+<li>TCP for patch server, SSL for login/game servers</li>
+<li>My example for this talk</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Packet logging</h1>
+</div>
+
+
+<div class="slide">
+<h1>Undetected logging</h1>
+<ul>
+<li>Methods available can vary depending on the game</li>
+<li>Common methods:<ul>
+	<li>Snooping</li>
+	<li>Hooking a function on packet receive/send</li>
+	<li>Man in the middle</li>
+</ul></li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Breaking through PSU's SSL</h1>
+<ul>
+<li>Find the client SSL certificate</li>
+<li>Try connecting to the server from Erlang</li>
+<li>Use hosts file to redirect the client to localhost</li>
+<li>Make the client connect to Erlang and redirect the packets to the server</li>
+<li>You just built a proxy for the game</li>
+<li>Packets going through the proxy are readable</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Tee</h1>
+<ul>
+<li>A command that redirects input to both standard output and file</li>
+<li>Make the proxy save to a file at the same time as redirecting</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Proxy hint</h1>
+<ul>
+<li>You can always send the server whatever you want now</li>
+<li>You can read, modify, filter packets</li>
+<li>You can send any packet anytime</li>
+<li>You get more control than you would through the client</li>
+<li>Though you need to know the protocol first</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Packet analysis</h1>
+</div>
+
+
+<div class="slide">
+<h1>Protocol</h1>
+<ul>
+<li>First we need to figure out the general framing by hand</li>
+<li>Open the log file with a hex editor and find packet boundaries</li>
+<li>We got a packet size followed by a command number and the packet</li>
+<li>The protocol is 32bit</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Spreadsheet help</h1>
+<ul>
+<li>Parse the file and aggregate the info to CSV files</li>
+<li>Figure out the field boundaries</li>
+<li>We got 8bit, 16bit, 32bit data, 32bit floats, ASCII and UCS2 strings</li>
+<li>Always take notes of what you are doing</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Aggregate the field values</h1>
+<ul>
+<li>Get a clear view of what values a field can take</li>
+<li>Sometimes the value never changes</li>
+<li>Knowing the values allow you to guess the field purpose</li>
+<li>Example: player ID, player level...</li>
+<li>It's actually not that hard to figure out most of them</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Game mechanics</h1>
+<ul>
+<li>A few key values hide a lot of secrets</li>
+<li>Player ID identifies a player account</li>
+<li>Quest, zone, map and entry IDs identify the map you play</li>
+<li>Target ID identifies the player object in the zone</li>
+<li>Client and file analysis helps figure some of these out</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Extracting files</h1>
+</div>
+
+
+<div class="slide">
+<h1>What files?</h1>
+<ul>
+<li>Quest and zone files</li>
+<li>Quest files identify the mission played</li>
+<li>Zone files define the scripts and objects in a set of area</li>
+<li>If we are to write a server, we must understand those</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>File extraction</h1>
+<ul>
+<li>The files aren't always named or identified</li>
+<li>Extract and tag them as properly as possible</li>
+<li>Ignore duplicates</li>
+<li>Get a good SSD for this, it can represent GBs of data</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Files analysis</h1>
+</div>
+
+
+<div class="slide">
+<h1>Client files too</h1>
+<ul>
+<li>Analyze both client and server files</li>
+<li>They share file formats</li>
+<li>PSU has an offline mode where more missions can be found</li>
+<li>Sometimes file formats can be found on Google, often not</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Start with a debugger</h1>
+<ul>
+<li>First, remove the anticheat technology</li>
+<li>Load the game up to the game title</li>
+<li>Break at all file loadings (find them with a dissassembler)</li>
+<li>Press Enter, loading the login screen</li>
+<li>You now have the ASM for loading the file</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Step by step</h1>
+<ul>
+<li>Tediously advance step by step to find the interesting functions</li>
+<li>The main archive format was encrypted using a blowfish variant</li>
+<li>It was also compressed using a custom LZE algorithm</li>
+<li>We got through their "security", let's extract the files</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Concurrent extraction</h1>
+<ul>
+<li>Use Erlang to concurrently extract all the files you have</li>
+<li>This can take some time, but less than if you had to do it on 1 core</li>
+<li>Chances are your extraction code is wrong and doesn't handle edge cases</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Continue with an hex editor</h1>
+<ul>
+<li>Hex editing allow you to isolate values and group of values</li>
+<li>Problem: some files are just structs and arrays with pointers</li>
+<li>Pointers get converted to real memory addresses on load</li>
+<li>We still need to use a debugger to figure these out</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>File parser</h1>
+<ul>
+<li>We now have enough info to write a parser for all files</li>
+<li>We should make sure the parser gets values in the right range</li>
+<li>Pattern matching allow us to crash on unexpected values</li>
+<li>Also crash on values that don't seem to change</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Concurrently check our assumptions</h1>
+<ul>
+<li>Parse all files concurrently with range checking</li>
+<li>If all files pass, then all our assumptions are verified</li>
+<li>Bonus: convert the files to readable formats</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Prototype server</h1>
+</div>
+
+
+<div class="slide">
+<h1>Validating protocol assumptions</h1>
+<ul>
+<li>Using the proxy would be too limited</li>
+<li>We need a valid implementation checked against the client</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>PSU's protocols</h1>
+<ul>
+<li>Patch, login and game servers</li>
+<li>Patch is a very simple TCP protocol</li>
+<li>Login and game are the same SSL protocols</li>
+<li>Login just redirects to the game server on successful auth</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>First implementation</h1>
+<ul>
+<li>Make use of the previously logged packets</li>
+<li>Take one log and just send all the packets unmodified</li>
+<li>Reach in-game and stop there</li>
+<li>Figure out the packet order</li>
+<li>Try modifying values and check that nothing went wrong</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Trial and error</h1>
+<ul>
+<li>Figuring out values and testing them is a trial and error process</li>
+<li>We're developers, we're used to do this</li>
+<li>It gets easier when we properly reach in-game</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Trial and error</h1>
+</div>
+
+
+<div class="slide">
+<h1>In-game</h1>
+<ul>
+<li>Open the menus, move the character, enter rooms</li>
+<li>In other words: make the client send packets!</li>
+<li>Note what packets are sent when you do something</li>
+<li>Find in the logs what is replied when it happens</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Responses</h1>
+<ul>
+<li>Same as before, start sending a logged packet</li>
+<li>Then figure out the values and test things out</li>
+<li>Write a function that does it for you for next times</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Shell testing</h1>
+<ul>
+<li>You don't have to wait for client actions</li>
+<li>Use the shell to send packets directly from the server</li>
+<li>Make your character warp around!</li>
+<li>Test things out thoroughly</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Warping is good</h1>
+<ul>
+<li>Make sure to write a quick command to warp around</li>
+<li>Changing areas allow you to unstuck yourself</li>
+<li>The client doesn't do everything asynchronously</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Feedback loop</h1>
+</div>
+
+
+<div class="slide">
+<h1>Lengthy process</h1>
+<ul>
+<li>We need early feedback</li>
+<li>We must not make the client disconnect</li>
+<li>Reconnecting makes us lose at least 1 minute!</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Reloading</h1>
+<ul>
+<li>Code reloading allows us to test fixes right away</li>
+<li>Data files can be reloaded too</li>
+<li>Client can be forced to reload an area through warping</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Don't crash in the network layer</h1>
+<ul>
+<li>We must not kill the socket</li>
+<li>When something bad happens, print the error in the console!</li>
+<li>If a packet can't be parsed, print its hex representation!</li>
+<li>Tips: also print when something is parsed properly</li>
+<li>You can always crash after you finished working on the server</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Still trial and error</h1>
+<ul>
+<li>Someone can help by figuring out values in the client</li>
+<li>But this is still mostly trial and error</li>
+<li>Although it's much better thanks to Erlang</li>
+</ul>
+</div>
+
+
+<div class="slide">
+<h1>Demo</h1>
+</div>
+
+
+<div class="slide">
+<h1>Questions?</h1>
+</div>
+
+
+</div>
+
+</body>
+</html>

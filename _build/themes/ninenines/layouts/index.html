@@ -1,0 +1,83 @@
+{{ partial "header.html" . }}
+
+<div class="navbar">
+<div class="navbar-inner">
+<div class="container">
+	<em class="brand">Our projects</em>
+	<div class="nav-collapse">
+	<ul class="nav">
+		{{ $.Scratch.Set "projects" 0 }}
+		{{ range $.Site.Data.projects }}
+			<li{{ if eq .name $.Site.Params.main_project }} class="active"{{ end }}>
+				<a data-slide="{{ $.Scratch.Get "projects" }}" href="{{ .permalink }}">{{ .title }}</a>
+				{{ $.Scratch.Add "projects" 1 }}
+			</li>
+		{{ end }}
+	</ul>
+	</div>
+</div>
+</div>
+</div>
+
+</header>
+
+<div id="contents" class="home">
+<div class="container">
+
+<div id="home-carousel" class="carousel row">
+<div class="carousel-inner">
+	{{ range $.Site.Data.projects }}
+		<div class="{{ if eq .name $.Site.Params.main_project }}active {{ end }}item">
+		<div class="span5">
+			<h1>{{ .title }}</h1>
+			<h2>{{ .catchphrase }}</h2>
+			<p>{{ .description }}</p>
+			<p class="right-buttons">
+				<!-- <a class="btn btn-success btn-large">Learn More &raquo;</a> -->
+				<a class="btn btn-large" href="{{ .repository }}">Source Code</a>
+				{{ if .has_guide }}
+					<a class="btn btn-large" href="/docs/en/{{ .name }}/{{ index .versions 0 }}/guide/">User Guide</a>
+				{{ end }}
+				{{ if .has_manual }}
+					<a class="btn btn-large" href="/docs/en/{{ .name }}/{{ index .versions 0}}/manual/">Manual</a>
+				{{ end }}
+				{{ if .external_site }}
+					<a class="btn btn-large" href="{{ .external_site }}">Official Website</a>
+				{{ end }}
+			</p>
+		</div>
+		<div class="span7">
+			<img src="img/projects/{{ .name }}-home.png" class="{{ .name }}-logo"></img>
+		</div>
+		</div>
+	{{ end }}
+</div>
+</div>
+
+<!-- Slogan-->
+<div class="row" id="company-description">
+  <div class="span12">
+	{{ range $.Site.Pages }}
+		{{ if eq .RelPermalink "/slogan/" }}
+			{{ .Content}}
+		{{ end }}
+	{{ end }}
+  </div>
+</div>
+
+<!-- TODO: Make that configurable -->
+<section class="row" id="sponsors">
+<article class="span8">
+	<a href="http://kato.im"><img src="img/sponsors/kato.png" style="display:block;margin:0 0 0 20px"/></a>
+</article>
+<article class="span4">
+	<a href="http://shiguredo.jp"><img src="img/sponsors/shiguredo.png" style="display:block;margin:40px 20px 0 0"/></a>
+</article>
+</section>
+
+</div>
+</div>
+
+
+
+{{ partial "footer.html" . }}

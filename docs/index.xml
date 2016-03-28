@@ -1,0 +1,2001 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docs on Nine Nines</title>
+    <link>http://ninenines.eu/docs/</link>
+    <description>Recent content in Docs on Nine Nines</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://ninenines.eu/docs/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Architecture</title>
+      <link>http://ninenines.eu/docs/en/cowboy/2.0/guide/architecture/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/cowboy/2.0/guide/architecture/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Cowboy is a lightweight HTTP server.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It is built on top of Ranch. Please see the Ranch guide for more
+information.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_one_process_per_connection&#34;&gt;One process per connection&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It uses only one process per connection. The process where your
+code runs is the process controlling the socket. Using one process
+instead of two allows for lower memory usage.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Because there can be more than one request per connection with the
+keepalive feature of HTTP/1.1, that means the same process will be
+used to handle many requests.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Because of this, you are expected to make sure your process cleans
+up before terminating the handling of the current request. This may
+include cleaning up the process dictionary, timers, monitoring and
+more.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_binaries&#34;&gt;Binaries&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It uses binaries. Binaries are more efficient than lists for
+representing strings because they take less memory space. Processing
+performance can vary depending on the operation. Binaries are known
+for generally getting a great boost if the code is compiled natively.
+Please see the HiPE documentation for more details.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_date_header&#34;&gt;Date header&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Because querying for the current date and time can be expensive,
+Cowboy generates one &lt;code&gt;Date&lt;/code&gt; header value every second, shares it
+to all other processes, which then simply copy it in the response.
+This allows compliance with HTTP/1.1 with no actual performance loss.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_max_connections&#34;&gt;Max connections&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;By default the maximum number of active connections is set to a
+generally accepted big enough number. This is meant to prevent having
+too many processes performing potentially heavy work and slowing
+everything else down, or taking up all the memory.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Disabling this feature, by setting the &lt;code&gt;{max_connections, infinity}&lt;/code&gt;
+protocol option, would give you greater performance when you are
+only processing short-lived requests.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>AsciiDoc documentation</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/asciidoc/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/asciidoc/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk provides rules for generating documentation from
+AsciiDoc files. It can automatically build a user guide PDF,
+chunked HTML documentation and Unix manual pages.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_requirements&#34;&gt;Requirements&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It is necessary to have &lt;a href=&#34;http://asciidoc.org/&#34;&gt;AsciiDoc&lt;/a&gt;,
+&lt;a href=&#34;http://xmlsoft.org/XSLT/xsltproc2.html&#34;&gt;xsltproc&lt;/a&gt; and
+&lt;a href=&#34;http://dblatex.sourceforge.net/&#34;&gt;dblatex&lt;/a&gt; installed on your
+system for Erlang.mk to generate documentation from AsciiDoc sources.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_writing_asciidoc_documentation&#34;&gt;Writing AsciiDoc documentation&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;a href=&#34;http://asciidoc.org/&#34;&gt;AsciiDoc&lt;/a&gt; is a text document format for
+writing notes, documentation, articles, books, ebooks, slideshows,
+web pages, man pages and blogs. AsciiDoc files can be translated
+to many formats including HTML, PDF, EPUB, man page.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;a href=&#34;http://asciidoc.org/userguide.html&#34;&gt;AsciiDoc user guide&lt;/a&gt;
+describes the AsciiDoc syntax.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;a href=&#34;https://github.com/ninenines/erlang.mk/tree/master/doc/src/guide&#34;&gt;Erlang.mk user guide&lt;/a&gt;
+is written in AsciiDoc and can be used as an example. The entry
+file is &lt;a href=&#34;https://github.com/ninenines/erlang.mk/blob/master/doc/src/guide/book.asciidoc&#34;&gt;book.asciidoc&lt;/a&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk expects you to put your documentation in a specific
+location. This is &lt;em&gt;doc/src/guide/&lt;/em&gt; for the user guide, and
+&lt;em&gt;doc/src/manual/&lt;/em&gt; for the function reference. In the case of
+the user guide, the entry point is always &lt;em&gt;doc/src/guide/book.asciidoc&lt;/em&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;For manual pages, it is good practice to use section 3 for
+modules, and section 7 for the application itself.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_configuration&#34;&gt;Configuration&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;All of the AsciiDoc related configuration can be done directly
+inside the files themselves.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_usage&#34;&gt;Usage&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To build all documentation:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make docs&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To build only the AsciiDoc documentation:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make asciidoc&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To build only the user guide:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make asciidoc-guide&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To build only the manual:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make asciidoc-manual&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To install man pages on Unix:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make install-docs&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk allows customizing the installation path and sections
+of the man pages to be installed. The &lt;code&gt;MAN_INSTALL_PATH&lt;/code&gt; variable
+defines where man pages will be installed. It defaults to
+&lt;em&gt;/usr/local/share/man&lt;/em&gt;. The &lt;code&gt;MAN_SECTIONS&lt;/code&gt; variable defines
+which manual sections are to be installed. It defaults to &lt;code&gt;3 7&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To install man pages to a custom location:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make install-docs &lt;span style=&#34;color: #009900&#34;&gt;MAN_INSTALL_PATH&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt;/opt/share/man&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that you may need to run the install commands using
+&lt;code&gt;sudo&lt;/code&gt; or equivalent if the location is not writeable by
+your user.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Building</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/app/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk can do a lot of things, but it is, first and
+foremost, a build tool. In this chapter we will cover
+the basics of building a project with Erlang.mk.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;For most of this chapter, we will assume that you are
+using a project &lt;a href=&#34;../getting_started&#34;&gt;generated by Erlang.mk&lt;/a&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_how_to_build&#34;&gt;How to build&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To build a project, all you have to do is type &lt;code&gt;make&lt;/code&gt;:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It will work regardless of your project: OTP applications,
+library applications, NIFs, port drivers or even releases.
+Erlang.mk also automatically downloads and compiles the
+dependencies for your project.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;All this is possible thanks to a combination of configuration
+and conventions. Most of the conventions come from Erlang/OTP
+itself so any seasoned Erlang developers should feel right at
+home.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_what_to_build&#34;&gt;What to build&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk gives you control over three steps of the build
+process, allowing you to do a partial build if needed.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;A build has three phases: first any dependency is fetched
+and built, then the project itself is built and finally a
+release may be generated when applicable. A release is only
+generated for projects specifically configured to do so.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk handles those three phases automatically when you
+type &lt;code&gt;make&lt;/code&gt;. But sometimes you just want to repeat one or
+two of them.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The commands detailed in this section are most useful after
+you have a successful build as they allow you to quickly
+redo a step instead of going through everything. This is
+especially useful for large projects or projects that end
+up generating releases.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_application&#34;&gt;Application&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can build your application and dependencies without
+generating a release by running the following command:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make app&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To build your application without touching dependencies
+at all, you can use the &lt;code&gt;SKIP_DEPS&lt;/code&gt; variable:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make app &lt;span style=&#34;color: #009900&#34;&gt;SKIP_DEPS&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #993399&#34;&gt;1&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This command is very useful if you have a lot of dependencies
+and develop on a machine with slow file access, like the
+Raspberry Pi and many other embedded devices.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that this command may fail if a required dependency
+is missing.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_dependencies&#34;&gt;Dependencies&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can build all dependencies, and nothing else, by
+running the following command:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make deps&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This will fetch and compile all dependencies and their
+dependencies, recursively.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;a href=&#34;../deps&#34;&gt;Packages and dependencies&lt;/a&gt; are covered
+in the next chapter.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_release&#34;&gt;Release&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It is not possible to build the release without at least
+building the application itself, unless of course if there&amp;#8217;s
+no application to begin with.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To generate the release, &lt;code&gt;make&lt;/code&gt; will generally suffice with
+a normal Erlang.mk. A separate target is however available,
+and will take care of building the release, after building
+the application and all dependencies:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make rel&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Consult the &lt;a href=&#34;../relx&#34;&gt;Releases&lt;/a&gt; chapter for more
+information about what releases are and how they are generated.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_application_resource_file&#34;&gt;Application resource file&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When building your application, Erlang.mk will generate the
+&lt;a href=&#34;http://www.erlang.org/doc/man/app.html&#34;&gt;application resource file&lt;/a&gt;.
+This file is mandatory for all Erlang applications and is
+found in &lt;em&gt;ebin/$(PROJECT).app&lt;/em&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;code&gt;PROJECT&lt;/code&gt; is a variable defined in your Makefile and taken
+from the name of the directory when Erlang.mk bootstraps
+your project.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk can build the &lt;em&gt;ebin/$(PROJECT).app&lt;/em&gt; in two different
+ways: from the configuration found in the Makefile, or from
+the &lt;em&gt;src/$(PROJECT).app.src&lt;/em&gt; file.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_application_configuration&#34;&gt;Application configuration&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk automatically fills the &lt;code&gt;PROJECT&lt;/code&gt; variable when
+bootstrapping a new project, but everything else is up to
+you. None of the values are required to build your project,
+although it is recommended to fill everything relevant to
+your situation.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;dlist&#34;&gt;&lt;dl&gt;
+&lt;dt class=&#34;hdlist1&#34;&gt;
+&lt;code&gt;PROJECT&lt;/code&gt;
+&lt;/dt&gt;
+&lt;dd&gt;
+&lt;p&gt;
+        The name of the OTP application or library.
+&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt class=&#34;hdlist1&#34;&gt;
+&lt;code&gt;PROJECT_DESCRIPTION&lt;/code&gt;
+&lt;/dt&gt;
+&lt;dd&gt;
+&lt;p&gt;
+        Short description of the project.
+&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt class=&#34;hdlist1&#34;&gt;
+&lt;code&gt;PROJECT_VERSION&lt;/code&gt;
+&lt;/dt&gt;
+&lt;dd&gt;
+&lt;p&gt;
+        Current version of the project.
+&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt class=&#34;hdlist1&#34;&gt;
+&lt;code&gt;PROJECT_REGISTERED&lt;/code&gt;
+&lt;/dt&gt;
+&lt;dd&gt;
+&lt;p&gt;
+        List of the names of all registered processes.
+&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt class=&#34;hdlist1&#34;&gt;
+&lt;code&gt;LOCAL_DEPS&lt;/code&gt;
+&lt;/dt&gt;
+&lt;dd&gt;
+&lt;p&gt;
+        List of Erlang/OTP applications this project depends on,
+        excluding &lt;code&gt;erts&lt;/code&gt;, &lt;code&gt;kernel&lt;/code&gt; and &lt;code&gt;stdlib&lt;/code&gt;, or list of
+        dependencies local to this repository (in &lt;code&gt;APPS_DIR&lt;/code&gt;).
+&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt class=&#34;hdlist1&#34;&gt;
+&lt;code&gt;DEPS&lt;/code&gt;
+&lt;/dt&gt;
+&lt;dd&gt;
+&lt;p&gt;
+        List of applications this project depends on that need
+        to be fetched by Erlang.mk.
+&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;There&amp;#8217;s no need for quotes or anything. The relevant part of
+the Cowboy Makefile follows, if you need an example:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;PROJECT =&lt;/span&gt; cowboy
+&lt;span style=&#34;color: #009900&#34;&gt;PROJECT_DESCRIPTION =&lt;/span&gt; Small&lt;span style=&#34;color: #990000&#34;&gt;,&lt;/span&gt; fast&lt;span style=&#34;color: #990000&#34;&gt;,&lt;/span&gt; modular HTTP server&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;
+&lt;span style=&#34;color: #009900&#34;&gt;PROJECT_VERSION =&lt;/span&gt; 2.0.0-pre.2
+&lt;span style=&#34;color: #009900&#34;&gt;PROJECT_REGISTERED =&lt;/span&gt; cowboy_clock
+
+&lt;span style=&#34;color: #009900&#34;&gt;LOCAL_DEPS =&lt;/span&gt; crypto
+&lt;span style=&#34;color: #009900&#34;&gt;DEPS =&lt;/span&gt; cowlib ranch&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Any space before and after the value is dropped.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;a href=&#34;../deps&#34;&gt;Dependencies&lt;/a&gt; are covered in details in
+the next chapter.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_legacy_method&#34;&gt;Legacy method&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;em&gt;src/$(PROJECT).app.src&lt;/em&gt; file is a legacy method of
+building Erlang applications. It was introduced by the original
+&lt;code&gt;rebar&lt;/code&gt; build tool, of which Erlang.mk owes a great deal as it
+is its main inspiration.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;em&gt;.app.src&lt;/em&gt; file serves as a template to generate the &lt;em&gt;.app&lt;/em&gt;
+file. Erlang.mk will take it, fill in the &lt;code&gt;modules&lt;/code&gt; value
+dynamically, and save the result in &lt;em&gt;ebin/$(PROJECT).app&lt;/em&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When using this method, Erlang.mk cannot fill the &lt;code&gt;applications&lt;/code&gt;
+key from dependencies automatically, which means you need to
+add them to Erlang.mk and to the &lt;em&gt;.app.src&lt;/em&gt; at the same time,
+duplicating the work.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you really can&amp;#8217;t live without the legacy method, for one
+reason or another, worry not; Erlang.mk will support it. And
+if you need to create a new project that uses this method, you
+just have to say so when bootstrapping:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make -f erlang&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;mk bootstrap-lib &lt;span style=&#34;color: #009900&#34;&gt;LEGACY&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #993399&#34;&gt;1&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_automatic_application_resource_file_values&#34;&gt;Automatic application resource file values&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When building the application resource file, Erlang.mk may
+automatically add an &lt;code&gt;id&lt;/code&gt; key with information about the
+Git commit (if using Git), or an empty string otherwise.
+It will only do this under specific conditions:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+The application was built as a dependency of another, or
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+The legacy method was used, and the &lt;em&gt;.app.src&lt;/em&gt; file contained &lt;code&gt;{id, &#34;git&#34;}&lt;/code&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This value is most useful when you need to help your users,
+as it allows you to know which version they run exactly by
+asking them to look in the file, or by running a simple
+command on their production server:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #993399&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;application:get_all_key&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;cowboy&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;
+{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;,[{&lt;span style=&#34;color: #FF6600&#34;&gt;description&lt;/span&gt;,&lt;span style=&#34;color: #FF0000&#34;&gt;&#34;Small, fast, modular HTTP server.&#34;&lt;/span&gt;},
+     {&lt;span style=&#34;color: #FF6600&#34;&gt;id&lt;/span&gt;,&lt;span style=&#34;color: #FF0000&#34;&gt;&#34;2.0.0-pre.2-25-g0ffde50-dirty&#34;&lt;/span&gt;},&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_file_formats&#34;&gt;File formats&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk supports a variety of different source file formats.
+The following formats are supported natively:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;tableblock&#34;&gt;
+&lt;table rules=&#34;all&#34;
+width=&#34;100%&#34;
+frame=&#34;border&#34;
+cellspacing=&#34;0&#34; cellpadding=&#34;4&#34;&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34; valign=&#34;top&#34;&gt; Extension &lt;/th&gt;
+&lt;th align=&#34;center&#34; valign=&#34;top&#34;&gt; Location &lt;/th&gt;
+&lt;th align=&#34;center&#34; valign=&#34;top&#34;&gt; Description        &lt;/th&gt;
+&lt;th align=&#34;center&#34; valign=&#34;top&#34;&gt; Output&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.erl&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;src/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Erlang source&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;ebin/*.beam&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.core&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;src/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Core Erlang source&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;ebin/*.beam&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.xrl&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;src/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Leex source&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;src/*.erl&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.yrl&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;src/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Yecc source&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;src/*.erl&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.asn1&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;asn1/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;ASN.1 files&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;include/&lt;strong&gt;.hrl include/&lt;/strong&gt;.asn1db src/*.erl&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.mib&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;mibs/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;SNMP MIB files&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;include/&lt;strong&gt;.hrl priv/mibs/&lt;/strong&gt;.bin&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Files are always searched recursively.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The build is ordered, so that files that generate Erlang source
+files are run before, and the resulting Erlang source files are
+then built normally.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In addition, Erlang.mk keeps track of header files (&lt;code&gt;.hrl&lt;/code&gt;)
+as described at the end of this chapter. It can also compile
+C code, as described in the &lt;a href=&#34;../ports&#34;&gt;NIFs and port drivers&lt;/a&gt;
+chapter.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk also comes with plugins for the following formats:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;tableblock&#34;&gt;
+&lt;table rules=&#34;all&#34;
+width=&#34;100%&#34;
+frame=&#34;border&#34;
+cellspacing=&#34;0&#34; cellpadding=&#34;4&#34;&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34; valign=&#34;top&#34;&gt; Extension &lt;/th&gt;
+&lt;th align=&#34;center&#34; valign=&#34;top&#34;&gt; Location   &lt;/th&gt;
+&lt;th align=&#34;center&#34; valign=&#34;top&#34;&gt; Description      &lt;/th&gt;
+&lt;th align=&#34;center&#34; valign=&#34;top&#34;&gt; Output&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.dtl&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;templates/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Django templates&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;ebin/*.beam&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;.proto&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;src/&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Protocol buffers&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;ebin/*.beam&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_compilation_options&#34;&gt;Compilation options&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk provides a few variables that you can use to customize
+the build process and the resulting files.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_erlc_opts&#34;&gt;ERLC_OPTS&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;code&gt;ERLC_OPTS&lt;/code&gt; can be used to pass some options to &lt;code&gt;erlc&lt;/code&gt;, the Erlang
+compiler. Erlang.mk does not restrict any option. Please refer to
+the &lt;a href=&#34;http://www.erlang.org/doc/man/erlc.html&#34;&gt;erlc Manual&lt;/a&gt; for the
+full list.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;By default, Erlang.mk will set the following options:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;ERLC_OPTS =&lt;/span&gt; -Werror &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;debug_info &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;warn_export_vars &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;warn_shadow_vars &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;warn_obsolete_guard&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In other words: warnings as errors, debug info (recommended) and
+enable warnings for exported variables, shadow variables and
+obsolete guard functions.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can redefine this variable in your Makefile to change it
+completely, either before or after including Erlang.mk:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;ERLC_OPTS =&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;debug_info&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can also filter out some options from the defaults Erlang.mk
+sets, by defining ERLC_OPTS after including Erlang.mk using the
+&lt;code&gt;:=&lt;/code&gt; operator.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;include erlang.mk
+
+&lt;span style=&#34;color: #990000&#34;&gt;ERLC_OPTS :=&lt;/span&gt; &lt;span style=&#34;color: #009900&#34;&gt;$(&lt;/span&gt;filter-out -Werror&lt;span style=&#34;color: #990000&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #009900&#34;&gt;$(ERLC_OPTS))&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_erlc_exclude&#34;&gt;ERLC_EXCLUDE&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;code&gt;ERLC_EXCLUDE&lt;/code&gt; can be used to exclude some modules from the
+compilation. It&amp;#8217;s there for handling special cases, you should
+not normally need it.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To exclude a module, simply list it in the variable, either
+before or after including Erlang.mk:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;ERLC_EXCLUDE =&lt;/span&gt; cowboy_http2&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_cold_and_hot_builds&#34;&gt;Cold and hot builds&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The first time you run &lt;code&gt;make&lt;/code&gt;, Erlang.mk will build everything.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The second time you run &lt;code&gt;make&lt;/code&gt;, and all subsequent times, Erlang.mk
+will only rebuild what changed. Erlang.mk has been optimized for
+this use case, as it is the most common during development.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk figures out what changed by using the dependency tracking
+feature of Make. Make automatically rebuilds a target if one of its
+dependency has changed (for example if a header file has changed,
+all the source files that include it will be rebuilt), and Erlang.mk
+leverages this feature to cut down on rebuild times.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that this applies only to building; some other features of
+Erlang.mk will run every time they are called regardless of files
+changed.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_dependency_tracking&#34;&gt;Dependency tracking&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;admonitionblock&#34;&gt;
+&lt;table&gt;&lt;tr&gt;
+&lt;td class=&#34;icon&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Note&lt;/div&gt;
+&lt;/td&gt;
+&lt;td class=&#34;content&#34;&gt;This section is about the dependency tracking between files
+inside your project, not application dependencies.&lt;/td&gt;
+&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk keeps track of the dependencies between the different
+files in your project. This information is kept in the &lt;em&gt;$(PROJECT).d&lt;/em&gt;
+file in your directory. It is generated if missing, and will be
+generated again after every file change, by default.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Dependency tracking is what allows Erlang.mk to know when to
+rebuild Erlang files when header files, behaviors or parse
+transforms have changed. Erlang.mk also automatically keeps
+track of which files should be compiled first, for example
+when you have behaviors used by other modules in your project.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If your project is stable, you may want to disable generating
+the dependency tracking file every time you compile. You can
+do this by adding the following line to your &lt;em&gt;Makefile&lt;/em&gt;:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;NO_MAKEDEP &lt;span style=&#34;color: #990000&#34;&gt;?=&lt;/span&gt; &lt;span style=&#34;color: #993399&#34;&gt;1&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;As you can see, the snippet above uses &lt;code&gt;?=&lt;/code&gt; instead of a
+simple equal sign. This is to allow you to temporarily override
+this value when you do make substantial changes to your project
+(including a new header file, new module with dependencies, etc.)
+and want to rebuild the dependency tracking file. You&amp;#8217;ll be
+able to use the following command:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ &lt;span style=&#34;color: #009900&#34;&gt;NO_MAKEDEP&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; make&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Otherwise, &lt;code&gt;make clean app&lt;/code&gt; will of course force the
+recompilation of your project.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk can also keep track of the source files generated
+by other means, for example if you generate code from a data
+file in your repository.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_generating_erlang_source&#34;&gt;Generating Erlang source&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk provides hooks at different stages of the build process.
+When your goal is to generate Erlang source files, you can
+add your own rules before or after the dependency tracking
+file is generated. To do this, you would add your hook before
+or after including the &lt;em&gt;erlang.mk&lt;/em&gt; file.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The easiest way is after:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;PROJECT =&lt;/span&gt; example
+
+include erlang.mk
+
+&lt;span style=&#34;color: #009900&#34;&gt;$(PROJECT)&lt;/span&gt;.d&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; src/generated_mod.erl
+
+src/generated_mod.erl&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; gen-mod.sh
+        &lt;span style=&#34;color: #009900&#34;&gt;$(gen_verbose)&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;/gen-mod.sh &lt;span style=&#34;color: #009900&#34;&gt;$@&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In this case we use &lt;code&gt;$(gen_verbose)&lt;/code&gt; to hide the details of
+the build by default. Erlang.mk will simply say what file
+is it currently generating.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When using an external script to generate the Erlang source
+file, it is recommended to depend on that script, so that
+the source file gets generated again when the script gets
+modified.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If for whatever reason you prefer to hook before including
+Erlang.mk, don&amp;#8217;t forget to set the &lt;code&gt;.DEFAULT_GOAL&lt;/code&gt; variable,
+otherwise nothing will get built:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;PROJECT =&lt;/span&gt; example
+
+.DEFAULT_GOAL &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; all
+
+&lt;span style=&#34;color: #009900&#34;&gt;$(PROJECT)&lt;/span&gt;.d&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; src/generated_mod.erl
+
+include erlang.mk
+
+src/generated_mod.erl&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; gen-mod.sh
+        &lt;span style=&#34;color: #009900&#34;&gt;$(gen_verbose)&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;/gen-mod.sh &lt;span style=&#34;color: #009900&#34;&gt;$@&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_cleaning&#34;&gt;Cleaning&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Building typically involves creating a lot of new files. Some
+are reused in rebuilds, some are simply replaced. All can be
+removed safely.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk provides two commands to remove them: &lt;code&gt;clean&lt;/code&gt; and
+&lt;code&gt;distclean&lt;/code&gt;. &lt;code&gt;clean&lt;/code&gt; removes all the intermediate files that
+were created as a result of building, including the BEAM files,
+the dependency tracking file and the generated documentation.
+&lt;code&gt;distclean&lt;/code&gt; removes these and more, including the downloaded
+dependencies, Dialyzer&amp;#8217;s PLT file and the generated release,
+putting your directory back to the state it was before you
+started working on it.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To clean:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make clean&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Or distclean:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make distclean&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;That is the question.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that Erlang.mk will automatically clean some files as
+part of other targets, but it will never run &lt;code&gt;distclean&lt;/code&gt; if
+you don&amp;#8217;t explicitly use it.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Code coverage</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Placeholder chapter.&lt;/p&gt;&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Common Test</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/common_test/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/common_test/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Common Test is Erlang&amp;#8217;s functional testing framework.
+Erlang.mk automates the discovery and running of Common
+Test suites.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_writing_tests&#34;&gt;Writing tests&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;a href=&#34;http://www.erlang.org/doc/apps/common_test/write_test_chapter.html&#34;&gt;Common Test user guide&lt;/a&gt;
+is the best place to learn how to write tests. Erlang.mk
+requires that file names for test suites end with &lt;em&gt;_SUITE.erl&lt;/em&gt;
+and that the files be located in the &lt;em&gt;$(TEST_DIR)&lt;/em&gt; directory.
+This defaults to &lt;em&gt;test/&lt;/em&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_configuration&#34;&gt;Configuration&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;code&gt;CT_OPTS&lt;/code&gt; variable allows you to set extra Common Test
+options. Options are documented in the
+&lt;a href=&#34;http://www.erlang.org/doc/apps/common_test/run_test_chapter.html&#34;&gt;Common Test user guide&lt;/a&gt;.
+You can use it to set Common Test hooks, for example:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;CT_OPTS =&lt;/span&gt; -ct_hooks cowboy_ct_hook&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;code&gt;CT_SUITES&lt;/code&gt; variable can be used to override what
+Common Test suites Erlang.mk will be aware of. It does
+not normally need to be set as Erlang.mk will find the
+test suites automatically.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The name of the suite is the part before &lt;code&gt;_SUITE.erl&lt;/code&gt;.
+If the file is named &lt;em&gt;http_SUITE.erl&lt;/em&gt;, the test suite
+is &lt;code&gt;http&lt;/code&gt;:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;CT_SUITES =&lt;/span&gt; http ws&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_usage&#34;&gt;Usage&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To run all tests (including Common Test):&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make tests&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To run all tests and static checks (including Common Test):&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make check&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can also run Common Test separately:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make ct&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk will create targets for all test suites it finds.
+If you have a file named &lt;em&gt;test/http_SUITE.erl&lt;/em&gt;, then the
+target &lt;code&gt;ct-http&lt;/code&gt; will run that specific test suite:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make ct-http&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk provides a convenient way to run a specific
+group or a specific test case within a specific group,
+using the variable &lt;code&gt;t&lt;/code&gt;. Note that this only applies to
+suite-specific targets, like the &lt;code&gt;ct-http&lt;/code&gt; example above.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To run all tests from the &lt;code&gt;http_compress&lt;/code&gt; group in the
+&lt;code&gt;http_SUITE&lt;/code&gt; test suite, write:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make ct-http &lt;span style=&#34;color: #009900&#34;&gt;t&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt;http_compress&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Similarly, to run a specific test case in that group:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make ct-http &lt;span style=&#34;color: #009900&#34;&gt;t&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt;http_compress&lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt;headers_dupe&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To do the same against a multi-application repository,
+you can use the &lt;code&gt;-C&lt;/code&gt; option:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make -C apps/my_app ct-http &lt;span style=&#34;color: #009900&#34;&gt;t&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt;my_group&lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt;my_case&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that this also applies to dependencies. When using Cowboy
+as a dependency, you can run the following directly:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make -C deps/cowboy ct-http &lt;span style=&#34;color: #009900&#34;&gt;t&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt;http_compress&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Finally, &lt;a href=&#34;../coverage&#34;&gt;code coverage&lt;/a&gt; is available,
+but covered in its own chapter.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Compatibility with other build tools</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/compat/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/compat/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk tries its best to be compatible with the other Erlang
+build tools. It can use dependencies written with other build
+tools in mind, and can also make your projects usable by those
+build tools as well. Erlang.mk is like the cool kid that gets
+along with everybody.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In this chapter I will use the term &lt;em&gt;Rebar project&lt;/em&gt; to refer
+to a project built using Rebar 2, Rebar 3 or Mad. These three
+build tools are very similar and share the same configuration
+file.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_rebar_projects_as_erlang_mk_dependencies&#34;&gt;Rebar projects as Erlang.mk dependencies&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk comes with a feature called &lt;em&gt;Autoload&lt;/em&gt; which will
+use Rebar 2 to patch any Rebar project and make it compatible
+with Erlang.mk. This feature essentially patches Rebar out
+and adds a Makefile to the project that Erlang.mk can then
+use for building:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;em&gt;Autoload&lt;/em&gt; is documented in more details in the
+&lt;a href=&#34;../deps&#34;&gt;Packages and dependencies&lt;/a&gt; chapter.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_erlang_mk_projects_as_rebar_dependencies&#34;&gt;Erlang.mk projects as Rebar dependencies&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk projects can be made compatible with the Rebar family
+of build tools pretty easily, as Erlang.mk will generate
+all the files they require for building.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The Rebar family requires two files: a &lt;em&gt;rebar.config&lt;/em&gt; file
+containing compilation options and the list of dependencies,
+and the application resource file, found either at
+&lt;em&gt;ebin/$(PROJECT).app&lt;/em&gt; or at &lt;em&gt;src/$(PROJECT).app.src&lt;/em&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_rebar_configuration&#34;&gt;Rebar configuration&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk comes with a target that generates a &lt;em&gt;rebar.config&lt;/em&gt;
+file when invoked:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make rebar&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;config&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Careful! This will build the file even if it already existed
+before.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To build this file, Erlang.mk uses information it finds in
+the &lt;code&gt;DEPS&lt;/code&gt; and &lt;code&gt;ERLC_OPTS&lt;/code&gt; variables, among others. This
+means that the Rebar family builds your project much the
+same way as Erlang.mk.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Careful though! Different build tools have different fetching
+strategies. If some applications provide differing dependencies,
+they might be fetched differently by other build tools. Check
+the upcoming Sanity check chapter to find out how to detect such
+issues.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can automatically generate this file when you build
+your application, by making it a dependency of the &lt;code&gt;app&lt;/code&gt;
+target:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #990000&#34;&gt;app::&lt;/span&gt; rebar.config&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Don&amp;#8217;t forget to commit the file when it changes!&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you run into other issues, it&amp;#8217;s probably because you use a
+feature specific to Erlang.mk, like the &lt;code&gt;cp&lt;/code&gt; fetch method.
+It could also be that we forgot to handle something! Sorry.
+We are of course interested to hear about any compatibility
+problems you may have, just open a ticket!&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect3&#34;&gt;
+&lt;h4 id=&#34;_application_resource_file&#34;&gt;Application resource file&lt;/h4&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk has two ways to generate an application resource
+file: from the information found in the Makefile, or from
+the information found in the &lt;em&gt;src/$(PROJECT).app.src&lt;/em&gt; file.
+Needless to say, if you have this file in your repository,
+then you don&amp;#8217;t need to worry about compatibility with other
+build tools.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you don&amp;#8217;t, however, it&amp;#8217;s not much harder. Every time
+Erlang.mk will compile your application, it will produce
+a new &lt;em&gt;ebin/$(PROJECT).app&lt;/em&gt; file. Simply commit this file
+when it changes. It will only change when you modify the
+configuration, add or remove modules.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connection</title>
+      <link>http://ninenines.eu/docs/en/gun/1.0/guide/connect/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/gun/1.0/guide/connect/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This chapter describes how to open, monitor and close
+a connection using the Gun client.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_gun_connections&#34;&gt;Gun connections&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Gun is designed with the SPDY and Websocket protocols in mind.
+They are built for long-running connections that allow concurrent
+exchange of data, either in the form of request/responses for
+SPDY or in the form of messages for Websocket.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;A Gun connection is an Erlang process that manages a socket to
+a remote endpoint. This Gun connection is owned by a user
+process that is called the &lt;em&gt;owner&lt;/em&gt; of the connection, and is
+managed by the supervision tree of the &lt;code&gt;gun&lt;/code&gt; application.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The owner process communicates with the Gun connection
+by calling functions from the module &lt;code&gt;gun&lt;/code&gt;. All functions
+perform their respective operations asynchronously. The Gun
+connection will send Erlang messages to the owner process
+whenever needed.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When the remote endpoint closes the connection, Gun attempts
+to reconnect automatically.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_opening_a_new_connection&#34;&gt;Opening a new connection&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;code&gt;gun:open/{2,3}&lt;/code&gt; function must be used to open a connection.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Opening a connection to example.org on port 443&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;gun:open&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF0000&#34;&gt;&#34;example.org&#34;&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;443&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If the port given is 443, Gun will attempt to connect using
+SSL. The protocol will be selected automatically using the
+NPN extension for TLS. By default Gun supports SPDY/3.1,
+SPDY/3 and HTTP/1.1 when connecting using SSL.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;For any other port, Gun will attempt to connect using TCP
+and will use the HTTP/1.1 protocol.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The transport and protocol used can be overriden using
+options. The manual documents all available options.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Options can be provided as a third argument, and take the
+form of a map.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Opening an SSL connection to example.org on port 8443&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;gun:open&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF0000&#34;&gt;&#34;example.org&#34;&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;8443&lt;/span&gt;, #{&lt;span style=&#34;color: #0000FF&#34;&gt;transport&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;=&amp;gt;&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;ssl&lt;/span&gt;})&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_waiting_for_the_connection_to_be_established&#34;&gt;Waiting for the connection to be established&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When Gun successfully connects to the server, it sends a
+&lt;code&gt;gun_up&lt;/code&gt; message with the protocol that has been selected
+for the connection.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Gun provides the functions &lt;code&gt;gun:await_up/{1,2,3}&lt;/code&gt; that wait
+for the &lt;code&gt;gun_up&lt;/code&gt; message. They can optionally take a monitor
+reference and/or timeout value. If no monitor is provided,
+one will be created for the duration of the function call.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Synchronous opening of a connection&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;gun:open&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF0000&#34;&gt;&#34;example.org&#34;&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;443&lt;/span&gt;),
+{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Protocol&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;gun:await_up&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_handling_connection_loss&#34;&gt;Handling connection loss&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When the connection is lost, Gun will send a &lt;code&gt;gun_down&lt;/code&gt;
+message indicating the current protocol, the reason the
+connection was lost and two list of stream references.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The first list indicates open streams that &lt;em&gt;may&lt;/em&gt; have been
+processed by the server. The second list indicates open
+streams that the server did not process.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_monitoring_the_connection_process&#34;&gt;Monitoring the connection process&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;@todo Gun should detect the owner process being killed&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Because software errors are unavoidable, it is important to
+detect when the Gun process crashes. It is also important
+to detect when it exits normally. Erlang provides two ways
+to do that: links and monitors.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Gun leaves you the choice as to which one will be used.
+However, if you use the &lt;code&gt;gun:await/{2,3}&lt;/code&gt; or &lt;code&gt;gun:await_body/{2,3}&lt;/code&gt;
+functions, a monitor may be used for you to avoid getting
+stuck waiting for a message that will never come.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you choose to monitor yourself you can do it on a permanent
+basis rather than on every message you will receive, saving
+resources. Indeed, the &lt;code&gt;gun:await/{3,4}&lt;/code&gt; and &lt;code&gt;gun:await_body/{3,4}&lt;/code&gt;
+functions both accept a monitor argument if you have one already.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Monitoring the connection process&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;gun:open&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF0000&#34;&gt;&#34;example.org&#34;&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;443&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;
+&lt;span style=&#34;color: #009900&#34;&gt;MRef&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;monitor&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000080&#34;&gt;process&lt;/span&gt;&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This monitor reference can be kept and used until the connection
+process exits.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Handling &lt;code&gt;DOWN&lt;/code&gt; messages&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;receive&lt;/span&gt;&lt;/span&gt;
+        &lt;span style=&#34;font-style: italic&#34;&gt;&lt;span style=&#34;color: #9A1900&#34;&gt;%% Receive Gun messages here...&lt;/span&gt;&lt;/span&gt;
+        {&lt;span style=&#34;color: #FF6600&#34;&gt;&#39;DOWN&#39;&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Mref&lt;/span&gt;, &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000080&#34;&gt;process&lt;/span&gt;&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Reason&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt;
+                &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;error_logger:error_msg&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF0000&#34;&gt;&#34;Oops!&#34;&lt;/span&gt;),
+                &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000080&#34;&gt;exit&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Reason&lt;/span&gt;);
+&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;end&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;What to do when you receive a &lt;code&gt;DOWN&lt;/code&gt; message is entirely up to you.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_closing_the_connection_abruptly&#34;&gt;Closing the connection abruptly&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The connection can be stopped abruptly at any time by calling
+the &lt;code&gt;gun:close/1&lt;/code&gt; function.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Immediate closing of the connection&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;gun:close&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The process is stopped immediately without having a chance to
+perform the protocol&amp;#8217;s closing handshake, if any.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_closing_the_connection_gracefully&#34;&gt;Closing the connection gracefully&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The connection can also be stopped gracefully by calling the
+&lt;code&gt;gun:shutdown/1&lt;/code&gt; function.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;title&#34;&gt;Graceful shutdown of the connection&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;gun:shutdown&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;ConnPid&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Gun will refuse any new requests or messages after you call
+this function. It will however continue to send you messages
+for existing streams until they are all completed.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;For example if you performed a GET request just before calling
+&lt;code&gt;gun:shutdown/1&lt;/code&gt;, you will still receive the response before
+Gun closes the connection.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you set a monitor beforehand, you will receive a message
+when the connection has been closed.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Constraints</title>
+      <link>http://ninenines.eu/docs/en/cowboy/2.0/guide/constraints/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/cowboy/2.0/guide/constraints/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Cowboy provides an optional constraints based validation feature
+when interacting with user input.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are first used during routing. The router uses
+constraints to more accurately match bound values, allowing
+to create routes where a segment is an integer for example,
+and rejecting the others.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are also used when performing a match operation
+on input data, like the query string or cookies. There, a
+default value can also be provided for optional values.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Finally, constraints can be used to not only validate input,
+but also convert said input into proper Erlang terms, all in
+one step.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_structure&#34;&gt;Structure&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are provided as a list of fields and for each
+field a list of constraints for that field can be provided.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Fields are either the name of the field; the name and
+one or more constraints; or the name, one or more constraints
+and a default value.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When no default value is provided then the field is required.
+Otherwise the default value is used.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;All constraints for a field will be used to match its value
+in the order they are given. If the value is modified by a
+constraint, the next constraint receives the updated value.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_built_in_constraints&#34;&gt;Built-in constraints&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;tableblock&#34;&gt;
+&lt;table rules=&#34;all&#34;
+width=&#34;100%&#34;
+frame=&#34;border&#34;
+cellspacing=&#34;0&#34; cellpadding=&#34;4&#34;&gt;
+&lt;col width=&#34;50%&#34; /&gt;
+&lt;col width=&#34;50%&#34; /&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34; valign=&#34;top&#34;&gt; Constraint &lt;/th&gt;
+&lt;th align=&#34;left&#34; valign=&#34;top&#34;&gt; Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;int&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Convert binary value to integer.&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;nonempty&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Ensures the binary value is non-empty.&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_custom_constraint&#34;&gt;Custom constraint&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In addition to the predefined constraints, Cowboy will accept
+a fun. This fun must accept one argument and return one of
+&lt;code&gt;true&lt;/code&gt;, &lt;code&gt;{true, NewValue}&lt;/code&gt; or &lt;code&gt;false&lt;/code&gt;. The result indicates
+whether the value matches the constraint, and if it does it
+can optionally be modified. This allows converting the value
+to a more appropriate Erlang term.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that constraint functions SHOULD be pure and MUST NOT crash.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Continuous integration</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Placeholder chapter.&lt;/p&gt;&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Contributing</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/contributing/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/contributing/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You are welcome and encouraged to contribute.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This is how.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_priorities&#34;&gt;Priorities&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;From the most important to the least important:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+Bugs
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+Package issues/additions
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+Refactoring
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+Features
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_bugs&#34;&gt;Bugs&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you have found a bug, you should open a ticket. Include
+everything relevant including the command you used, output,
+a link to the code that triggers the issue, why you think
+this is a bug, etc.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you think you have found a bug but you are not sure, you
+should open a ticket as previously explained.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you have found a bug and you need it to be solved RIGHT
+NOW, open a ticket as previously explained.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Once you have opened a ticket, be patient, try to answer
+questions in a timely manner and confirm that the bug was
+indeed fixed when it is.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you can&amp;#8217;t be patient, either try to solve the bug and
+contribute the fix back or become a paying customer.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_code&#34;&gt;Code&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The code is located in the &lt;em&gt;core/*.mk&lt;/em&gt; and &lt;em&gt;plugins/*.mk&lt;/em&gt; files.
+The tests are located in the &lt;em&gt;test/Makefile&lt;/em&gt; and &lt;em&gt;test/*.mk&lt;/em&gt; files.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you have a fix or a hack for a bug, you should open a
+pull request. Any fix should include a test case that fails
+before the fix and is working after.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you have a test case that reproduces a bug, but no fix for
+it, you should open a pull request.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Changes need to be tested with at least the &lt;code&gt;make check&lt;/code&gt;
+command. A specific test case can be tested using &lt;code&gt;make check c=CASE&lt;/code&gt;
+with &lt;code&gt;CASE&lt;/code&gt; the name of the target to run. Output can be
+modulated using the &lt;code&gt;V&lt;/code&gt; variable, which is an integer
+from 0 to 4. A typical use would be &lt;code&gt;make check c=dialyzer V=3&lt;/code&gt;.
+The value 4 is particular and shows expanded commands right
+before they are executed.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To run tests in parallel, use the &lt;code&gt;-j&lt;/code&gt; option. It is generally
+a good idea to also use the &lt;code&gt;-k&lt;/code&gt; option to run all tests even
+if one fails. For example: &lt;code&gt;make check -j 32 -k&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Some changes should be tested against all packages. Continue
+reading for more details on testing them.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_packages&#34;&gt;Packages&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can search existing packages using the &lt;code&gt;make search q=STRING&lt;/code&gt;
+command. This can be done both from an Erlang.mk project or
+directly from the Erlang.mk repository.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Packages can be added to the index using the &lt;code&gt;pkg_add.sh&lt;/code&gt; script.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ git clone https&lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt;//github&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;com&lt;span style=&#34;color: #990000&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #009900&#34;&gt;$YOURUSERNAME&lt;/span&gt;/erlang&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;mk
+$ cd erlang&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;mk
+$ &lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;/pkg_add&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;sh cowboy git https&lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt;//github&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;com/ninenines/cowboy &lt;span style=&#34;color: #993399&#34;&gt;1.0&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #993399&#34;&gt;0&lt;/span&gt;
+  http&lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt;//ninenines&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;eu &lt;span style=&#34;color: #FF0000&#34;&gt;&#34;Small, fast and modular HTTP server.&#34;&lt;/span&gt;
+$ git push origin master&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Before sending a pull request, you should test your package.
+You can use the following command: &lt;code&gt;make check p=PACKAGE&lt;/code&gt;,
+where &lt;code&gt;PACKAGE&lt;/code&gt; is the name of the package, for example
+&lt;code&gt;cowboy&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To test all packages, the &lt;code&gt;make packages&lt;/code&gt; command can be used.
+This can take a long time. Some packages will fail with certain
+versions of Erlang, or if a prerequisite is missing from your system.
+You can of course speed things up using the &lt;code&gt;-j&lt;/code&gt; and &lt;code&gt;-k&lt;/code&gt; flags.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;After all packages have been tested, you can run the command
+&lt;code&gt;make summary&lt;/code&gt; to know what changed since the previous run.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_documentation&#34;&gt;Documentation&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The documentation is always right.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you think you have found a mistake in the documentation,
+this is a bug. You can either open a ticket or send a pull
+request.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To make sure that the documentation changes work, install
+the listed &lt;a href=&#34;../asciidoc&#34;&gt;Requirements&lt;/a&gt; on your system and
+run &lt;code&gt;make docs&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_feature_requests&#34;&gt;Feature requests&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you have an awesome idea or need something that Erlang.mk
+doesn&amp;#8217;t provide yet, open a ticket. Provide as much detail as
+possible.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you have code, great! Open a pull request as previously
+explained.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If not, you can still improve your feature request by writing
+the related documentation.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Cowboy Function Reference</title>
+      <link>http://ninenines.eu/docs/en/cowboy/2.0/manual/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/cowboy/2.0/manual/</guid>
+      <description>&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_app&#34;&gt;cowboy(7)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy&#34;&gt;cowboy(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_handler&#34;&gt;cowboy_handler(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_loop&#34;&gt;cowboy_loop(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_middleware&#34;&gt;cowboy_middleware(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_protocol&#34;&gt;cowboy_protocol(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_req&#34;&gt;cowboy_req(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_rest&#34;&gt;cowboy_rest(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_router&#34;&gt;cowboy_router(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_static&#34;&gt;cowboy_static(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_sub_protocol&#34;&gt;cowboy_sub_protocol(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cowboy_websocket&#34;&gt;cowboy_websocket(3)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;http_status_codes&#34;&gt;HTTP status codes(7)&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Cowboy User Guide</title>
+      <link>http://ninenines.eu/docs/en/cowboy/2.0/guide/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/cowboy/2.0/guide/</guid>
+      <description>&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_rationale&#34;&gt;Rationale&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;modern_web/&#34;&gt;The modern Web&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;erlang_web/&#34;&gt;Erlang and the Web&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;introduction/&#34;&gt;Introduction&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;getting_started/&#34;&gt;Getting started&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;overview/&#34;&gt;Request overview&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;erlang_beginners/&#34;&gt;Erlang for beginners&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_configuration&#34;&gt;Configuration&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;routing/&#34;&gt;routing&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;constraints/&#34;&gt;Constraints&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;static_files/&#34;&gt;Static files&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_request_and_response&#34;&gt;Request and response&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;handlers/&#34;&gt;Handlers&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;loop_handlers/&#34;&gt;Loop handlers&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;req/&#34;&gt;The Req object&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;req_body/&#34;&gt;Reading the request body&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;resp/&#34;&gt;Sending a response&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;cookies/&#34;&gt;Using cookies&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;multipart/&#34;&gt;Multipart&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_rest&#34;&gt;REST&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;rest_principles/&#34;&gt;REST principles&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;rest_handlers/&#34;&gt;Handling REST requests&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;rest_flowcharts/&#34;&gt;REST flowcharts&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;resource_design/&#34;&gt;Designing a resource handler&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_websocket&#34;&gt;Websocket&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;ws_protocol/&#34;&gt;The Websocket protocol&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;ws_handlers/&#34;&gt;Handling Websocket connections&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_internals&#34;&gt;Internals&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;architecture/&#34;&gt;Architecture&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;broken_clients/&#34;&gt;Dealing with broken clients&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;middlewares/&#34;&gt;Middlewares&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;sub_protocols/&#34;&gt;Sub protocols&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;hooks/&#34;&gt;Hooks&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Dealing with broken clients</title>
+      <link>http://ninenines.eu/docs/en/cowboy/2.0/guide/broken_clients/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/cowboy/2.0/guide/broken_clients/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;There exists a very large number of implementations for the
+HTTP protocol. Most widely used clients, like browsers,
+follow the standard quite well, but others may not. In
+particular custom enterprise clients tend to be very badly
+written.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Cowboy tries to follow the standard as much as possible,
+but is not trying to handle every possible special cases.
+Instead Cowboy focuses on the cases reported in the wild,
+on the public Web.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;That means clients that ignore the HTTP standard completely
+may fail to understand Cowboy&amp;#8217;s responses. There are of
+course workarounds. This chapter aims to cover them.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_lowercase_headers&#34;&gt;Lowercase headers&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Cowboy converts all headers it receives to lowercase, and
+similarly sends back headers all in lowercase. Some broken
+HTTP clients have issues with that.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;A simple way to solve this is to create an &lt;code&gt;onresponse&lt;/code&gt; hook
+that will format the header names with the expected case.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;capitalize_hook&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Status&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Headers&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Body&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Req&lt;/span&gt;) &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt;
+    &lt;span style=&#34;color: #009900&#34;&gt;Headers2&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; [{&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy_bstr:capitalize_token&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;N&lt;/span&gt;), &lt;span style=&#34;color: #009900&#34;&gt;V&lt;/span&gt;}
+        || {&lt;span style=&#34;color: #009900&#34;&gt;N&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;V&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color: #009900&#34;&gt;Headers&lt;/span&gt;],
+    &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy_req:reply&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Status&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Headers2&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Body&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Req&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that HTTP/2 clients do not have that particular issue
+because the specification explicitly says all headers are
+lowercase, unlike HTTP which allows any case but treats
+them as case insensitive.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_camel_case_headers&#34;&gt;Camel-case headers&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Sometimes it is desirable to keep the actual case used by
+clients, for example when acting as a proxy between two broken
+implementations. There is no easy solution for this other than
+forking the project and editing the &lt;code&gt;cowboy_protocol&lt;/code&gt; file
+directly.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_chunked_transfer_encoding&#34;&gt;Chunked transfer-encoding&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Sometimes an HTTP client advertises itself as HTTP/1.1 but
+does not support chunked transfer-encoding. This is invalid
+behavior, as HTTP/1.1 clients are required to support it.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;A simple workaround exists in these cases. By changing the
+Req object response state to &lt;code&gt;waiting_stream&lt;/code&gt;, Cowboy will
+understand that it must use the identity transfer-encoding
+when replying, just like if it was an HTTP/1.0 client.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;Req2&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy_req:set&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;resp_state&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;waiting_stream&lt;/span&gt;)&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Designing a resource handler</title>
+      <link>http://ninenines.eu/docs/en/cowboy/2.0/guide/resource_design/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/cowboy/2.0/guide/resource_design/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This chapter aims to provide you with a list of questions
+you must answer in order to write a good resource handler.
+It is meant to be usable as a step by step guide.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_the_service&#34;&gt;The service&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Can the service become unavailable, and when it does, can
+we detect it? For example, database connectivity problems
+may be detected early. We may also have planned outages
+of all or parts of the system. Implement the
+&lt;code&gt;service_available&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;What HTTP methods does the service implement? Do we need
+more than the standard OPTIONS, HEAD, GET, PUT, POST,
+PATCH and DELETE? Are we not using one of those at all?
+Implement the &lt;code&gt;known_methods&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_type_of_resource_handler&#34;&gt;Type of resource handler&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Am I writing a handler for a collection of resources,
+or for a single resource?&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The semantics for each of these are quite different.
+You should not mix collection and single resource in
+the same handler.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_collection_handler&#34;&gt;Collection handler&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Skip this section if you are not doing a collection.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Is the collection hardcoded or dynamic? For example,
+if you use the route &lt;code&gt;/users&lt;/code&gt; for the collection of
+users then the collection is hardcoded; if you use
+&lt;code&gt;/forums/:category&lt;/code&gt; for the collection of threads
+then it isn&amp;#8217;t. When the collection is hardcoded you
+can safely assume the resource always exists.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;What methods should I implement?&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;OPTIONS is used to get some information about the
+collection. It is recommended to allow it even if you
+do not implement it, as Cowboy has a default
+implementation built-in.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;HEAD and GET are used to retrieve the collection.
+If you allow GET, also allow HEAD as there&amp;#8217;s no extra
+work required to make it work.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;POST is used to create a new resource inside the
+collection. Creating a resource by using POST on
+the collection is useful when resources may be
+created before knowing their URI, usually because
+parts of it are generated dynamically. A common
+case is some kind of auto incremented integer
+identifier.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The next methods are more rarely allowed.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;PUT is used to create a new collection (when
+the collection isn&amp;#8217;t hardcoded), or replace
+the entire collection.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;DELETE is used to delete the entire collection.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;PATCH is used to modify the collection using
+instructions given in the request body. A PATCH
+operation is atomic. The PATCH operation may
+be used for such things as reordering; adding,
+modifying or deleting parts of the collection.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_single_resource_handler&#34;&gt;Single resource handler&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Skip this section if you are doing a collection.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;What methods should I implement?&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;OPTIONS is used to get some information about the
+resource. It is recommended to allow it even if you
+do not implement it, as Cowboy has a default
+implementation built-in.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;HEAD and GET are used to retrieve the resource.
+If you allow GET, also allow HEAD as there&amp;#8217;s no extra
+work required to make it work.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;POST is used to update the resource.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;PUT is used to create a new resource (when it doesn&amp;#8217;t
+already exist) or replace the resource.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;DELETE is used to delete the resource.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;PATCH is used to modify the resource using
+instructions given in the request body. A PATCH
+operation is atomic. The PATCH operation may
+be used for adding, removing or modifying specific
+values in the resource.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_the_resource&#34;&gt;The resource&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Following the above discussion, implement the
+&lt;code&gt;allowed_methods&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Does the resource always exist? If it may not, implement
+the &lt;code&gt;resource_exists&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do I need to authenticate the client before they can
+access the resource? What authentication mechanisms
+should I provide? This may include form-based, token-based
+(in the URL or a cookie), HTTP basic, HTTP digest,
+SSL certificate or any other form of authentication.
+Implement the &lt;code&gt;is_authorized&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do I need fine-grained access control? How do I determine
+that they are authorized access? Handle that in your
+&lt;code&gt;is_authorized&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Can access to a resource be forbidden regardless of access
+being authorized? A simple example of that is censorship
+of a resource. Implement the &lt;code&gt;forbidden&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Are there any constraints on the length of the resource URI?
+For example, the URI may be used as a key in storage and may
+have a limit in length. Implement &lt;code&gt;uri_too_long&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_representations&#34;&gt;Representations&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;What media types do I provide? If text based, what charsets
+are provided? What languages do I provide?&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Implement the mandatory &lt;code&gt;content_types_provided&lt;/code&gt;. Prefix
+the callbacks with &lt;code&gt;to_&lt;/code&gt; for clarity. For example, &lt;code&gt;to_html&lt;/code&gt;
+or &lt;code&gt;to_text&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Implement the &lt;code&gt;languages_provided&lt;/code&gt; or &lt;code&gt;charsets_provided&lt;/code&gt;
+callbacks if applicable.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Is there any other header that may make the representation
+of the resource vary? Implement the &lt;code&gt;variances&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Depending on your choices for caching content, you may
+want to implement one or more of the &lt;code&gt;generate_etag&lt;/code&gt;,
+&lt;code&gt;last_modified&lt;/code&gt; and &lt;code&gt;expires&lt;/code&gt; callbacks.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do I want the user or user agent to actively choose a
+representation available? Send a list of available
+representations in the response body and implement
+the &lt;code&gt;multiple_choices&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_redirections&#34;&gt;Redirections&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do I need to keep track of what resources were deleted?
+For example, you may have a mechanism where moving a
+resource leaves a redirect link to its new location.
+Implement the &lt;code&gt;previously_existed&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Was the resource moved, and is the move temporary? If
+it is explicitly temporary, for example due to maintenance,
+implement the &lt;code&gt;moved_temporarily&lt;/code&gt; callback. Otherwise,
+implement the &lt;code&gt;moved_permanently&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_the_request&#34;&gt;The request&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do we need to perform extra checks to make sure the request
+is valid? Cowboy will do many checks when receiving the
+request already, do we need more? Note that this only
+applies to the request-line and headers of the request,
+and not the body. Implement &lt;code&gt;malformed_request&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;May there be a request body? Will I know its size?
+What&amp;#8217;s the maximum size of the request body I&amp;#8217;m willing
+to accept? Implement &lt;code&gt;valid_entity_length&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Finally, take a look at the sections corresponding to the
+methods you are implementing.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_options_method&#34;&gt;OPTIONS method&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Cowboy by default will send back a list of allowed methods.
+Do I need to add more information to the response? Implement
+the &lt;code&gt;options&lt;/code&gt; method.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_get_and_head_methods&#34;&gt;GET and HEAD methods&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you implement the methods GET and/or HEAD, you must
+implement one &lt;code&gt;ProvideResource&lt;/code&gt; callback for each
+content-type returned by the &lt;code&gt;content_types_provided&lt;/code&gt;
+callback.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_put_post_and_patch_methods&#34;&gt;PUT, POST and PATCH methods&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you implement the methods PUT, POST and/or PATCH,
+you must implement the &lt;code&gt;content_types_accepted&lt;/code&gt; callback,
+and one &lt;code&gt;AcceptResource&lt;/code&gt; callback for each content-type
+it returns. Prefix the &lt;code&gt;AcceptResource&lt;/code&gt; callback names
+with &lt;code&gt;from_&lt;/code&gt; for clarity. For example, &lt;code&gt;from_html&lt;/code&gt; or
+&lt;code&gt;from_json&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do we want to allow the POST method to create individual
+resources directly through their URI (like PUT)? Implement
+the &lt;code&gt;allow_missing_post&lt;/code&gt; callback. It is recommended to
+explicitly use PUT in these cases instead.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;May there be conflicts when using PUT to create or replace
+a resource? Do we want to make sure that two updates around
+the same time are not cancelling one another? Implement the
+&lt;code&gt;is_conflict&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_delete_methods&#34;&gt;DELETE methods&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you implement the method DELETE, you must implement
+the &lt;code&gt;delete_resource&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When &lt;code&gt;delete_resource&lt;/code&gt; returns, is the resource completely
+removed from the server, including from any caching service?
+If not, and/or if the deletion is asynchronous and we have
+no way of knowing it has been completed yet, implement the
+&lt;code&gt;delete_completed&lt;/code&gt; callback.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Dialyzer</title>
+      <link>http://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Dialyzer is a tool that will detect discrepancies in your
+program. It does so using a technique known as success
+typing analysis which has the advantage of providing no
+false positives. Dialyzer is able to detect type errors,
+dead code and more.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk provides a wrapper around Dialyzer.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_how_it_works&#34;&gt;How it works&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Dialyzer requires a PLT file to work. The PLT file contains
+the analysis information from all applications which are not
+expected to change, or rarely do. These would be all the
+dependencies of the application or applications you are
+currently working on, including standard applications in
+Erlang/OTP itself.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Dialyzer can generate this PLT file. Erlang.mk includes rules
+to automatically generate the PLT file when it is missing.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Once the PLT file is generated, Dialyzer can perform the
+analysis in record time.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_configuration&#34;&gt;Configuration&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In a typical usage scenario, no variable needs to be set.
+The defaults should be enough. Do note however that the
+dependencies need to be set properly using the &lt;code&gt;DEPS&lt;/code&gt; and
+&lt;code&gt;LOCAL_DEPS&lt;/code&gt; variables.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;code&gt;DIALYZER_PLT&lt;/code&gt; file indicates where the PLT file will
+be written to (and read from). By default this is
+&lt;em&gt;$(PROJECT).plt&lt;/em&gt; in the project&amp;#8217;s directory. Note that
+the &lt;code&gt;DIALYZER_PLT&lt;/code&gt; variable is exported and is understood
+by Dialyzer directly.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;code&gt;PLT_APPS&lt;/code&gt; variable can be used to add additional
+applications to the PLT. You can either list application
+names or paths to these applications.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Erlang.mk defines two variables for specifying options
+for the analysis: &lt;code&gt;DIALYZER_DIRS&lt;/code&gt; and &lt;code&gt;DIALYZER_OPTS&lt;/code&gt;.
+The former one defines which directories should be part
+of the analysis. The latter defines what extra warnings
+Dialyzer should report.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that Erlang.mk enables the race condition warnings
+by default. As it can take considerably large resources
+to run, you may want to disable it on larger projects.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_usage&#34;&gt;Usage&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To perform an analysis, run the following command:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make dialyze&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This will create the PLT file if it doesn&amp;#8217;t exist.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The analysis will also be performed when you run the
+following command, alongside tests:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;$ make check&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can use the &lt;code&gt;plt&lt;/code&gt; target to create the PLT file if
+it doesn&amp;#8217;t exist. This is normally not necessary as
+Dialyzer creates it automatically.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The PLT file will be removed when you run &lt;code&gt;make distclean&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

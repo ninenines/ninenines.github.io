@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Compatibility with other build tools</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Compatibility with other build tools</span></h1>
+
+<div class="paragraph"><p>Erlang.mk tries its best to be compatible with the other Erlang
+build tools. It can use dependencies written with other build
+tools in mind, and can also make your projects usable by those
+build tools as well. Erlang.mk is like the cool kid that gets
+along with everybody.</p></div>
+<div class="paragraph"><p>In this chapter I will use the term <em>Rebar project</em> to refer
+to a project built using Rebar 2, Rebar 3 or Mad. These three
+build tools are very similar and share the same configuration
+file.</p></div>
+<div class="sect1">
+<h2 id="_rebar_projects_as_erlang_mk_dependencies">Rebar projects as Erlang.mk dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk comes with a feature called <em>Autoload</em> which will
+use Rebar 2 to patch any Rebar project and make it compatible
+with Erlang.mk. This feature essentially patches Rebar out
+and adds a Makefile to the project that Erlang.mk can then
+use for building:</p></div>
+<div class="paragraph"><p><em>Autoload</em> is documented in more details in the
+<a href="../deps">Packages and dependencies</a> chapter.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_erlang_mk_projects_as_rebar_dependencies">Erlang.mk projects as Rebar dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk projects can be made compatible with the Rebar family
+of build tools pretty easily, as Erlang.mk will generate
+all the files they require for building.</p></div>
+<div class="paragraph"><p>The Rebar family requires two files: a <em>rebar.config</em> file
+containing compilation options and the list of dependencies,
+and the application resource file, found either at
+<em>ebin/$(PROJECT).app</em> or at <em>src/$(PROJECT).app.src</em>.</p></div>
+<div class="sect3">
+<h4 id="_rebar_configuration">Rebar configuration</h4>
+<div class="paragraph"><p>Erlang.mk comes with a target that generates a <em>rebar.config</em>
+file when invoked:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make rebar<span style="color: #990000">.</span>config</tt></pre></div></div>
+<div class="paragraph"><p>Careful! This will build the file even if it already existed
+before.</p></div>
+<div class="paragraph"><p>To build this file, Erlang.mk uses information it finds in
+the <code>DEPS</code> and <code>ERLC_OPTS</code> variables, among others. This
+means that the Rebar family builds your project much the
+same way as Erlang.mk.</p></div>
+<div class="paragraph"><p>Careful though! Different build tools have different fetching
+strategies. If some applications provide differing dependencies,
+they might be fetched differently by other build tools. Check
+the upcoming Sanity check chapter to find out how to detect such
+issues.</p></div>
+<div class="paragraph"><p>You can automatically generate this file when you build
+your application, by making it a dependency of the <code>app</code>
+target:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #990000">app::</span> rebar.config</tt></pre></div></div>
+<div class="paragraph"><p>Don&#8217;t forget to commit the file when it changes!</p></div>
+<div class="paragraph"><p>If you run into other issues, it&#8217;s probably because you use a
+feature specific to Erlang.mk, like the <code>cp</code> fetch method.
+It could also be that we forgot to handle something! Sorry.
+We are of course interested to hear about any compatibility
+problems you may have, just open a ticket!</p></div>
+</div>
+<div class="sect3">
+<h4 id="_application_resource_file">Application resource file</h4>
+<div class="paragraph"><p>Erlang.mk has two ways to generate an application resource
+file: from the information found in the Makefile, or from
+the information found in the <em>src/$(PROJECT).app.src</em> file.
+Needless to say, if you have this file in your repository,
+then you don&#8217;t need to worry about compatibility with other
+build tools.</p></div>
+<div class="paragraph"><p>If you don&#8217;t, however, it&#8217;s not much harder. Every time
+Erlang.mk will compile your application, it will produce
+a new <em>ebin/$(PROJECT).app</em> file. Simply commit this file
+when it changes. It will only change when you modify the
+configuration, add or remove modules.</p></div>
+</div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Erlang.mk
+	1
+	
+	User Guide
+</h3>
+
+<ul>
+	
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/erlang.mk/1/guide">1</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

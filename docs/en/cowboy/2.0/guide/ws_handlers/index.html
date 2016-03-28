@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Handling Websocket connections</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Handling Websocket connections</span></h1>
+
+<div class="paragraph"><p>A special handler is required for handling Websocket connections.
+Websocket handlers allow you to initialize the connection,
+handle incoming frames from the socket, handle incoming Erlang
+messages and then clean up on termination.</p></div>
+<div class="paragraph"><p>Websocket handlers essentially act as a bridge between the client
+and the Erlang system. They will typically do little more than
+socket communication and decoding/encoding of frames.</p></div>
+<div class="sect1">
+<h2 id="_initialization">Initialization</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>First, the <code>init/2</code> callback is called. This callback is common
+to all handlers. To establish a Websocket connection, this function
+must return a <code>ws</code> tuple.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Upon receiving this tuple, Cowboy will switch to the code
+that handles Websocket connections and perform the handshake
+immediately.</p></div>
+<div class="paragraph"><p>If the sec-websocket-protocol header was sent with the request
+for establishing a Websocket connection, then the Websocket
+handler <strong>must</strong> select one of these subprotocol and send it
+back to the client, otherwise the client might decide to close
+the connection, assuming no correct subprotocol was found.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+                <span style="color: #000080">undefined</span> <span style="color: #990000">-&gt;</span>
+                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}};
+                <span style="color: #009900">Subprotocols</span> <span style="color: #990000">-&gt;</span>
+                        <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">lists:keymember</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mychat2"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #993399">1</span>, <span style="color: #009900">Subprotocols</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+                                <span style="color: #000080">true</span> <span style="color: #990000">-&gt;</span>
+                                        <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>,
+                                                <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mychat2"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>),
+                                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #008080">#state</span>{}};
+                                <span style="color: #000080">false</span> <span style="color: #990000">-&gt;</span>
+                                        {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #000080">undefined</span>}
+                        <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+        <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>It is not recommended to wait too long inside the <code>init/2</code>
+function. Any extra initialization may be done after returning by
+sending yourself a message before doing anything. Any message sent
+to <code>self()</code> from <code>init/2</code> is guaranteed to arrive before
+any frames from the client.</p></div>
+<div class="paragraph"><p>It is also very easy to ensure that this message arrives before
+any message from other processes by sending it before registering
+or enabling timers.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000080">self</span></span>() <span style="color: #990000">!</span> <span style="color: #FF6600">post_init</span>,
+        <span style="font-style: italic"><span style="color: #9A1900">%% Register process here...</span></span>
+        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span>
+
+<span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #FF6600">post_init</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-style: italic"><span style="color: #9A1900">%% Perform post_init initialization here...</span></span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_handling_frames_from_the_client">Handling frames from the client</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy will call <code>websocket_handle/3</code> whenever a text, binary,
+ping or pong frame arrives from the client. Note that in the
+case of ping and pong frames, no action is expected as Cowboy
+automatically replies to ping frames.</p></div>
+<div class="paragraph"><p>The handler can decide to send frames to the socket, stop
+or just continue without sending anything.</p></div>
+<div class="paragraph"><p>The following snippet echoes back any text frame received and
+ignores all others.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">Frame</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">text</span>, <span style="color: #990000">_</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">reply</span>, <span style="color: #009900">Frame</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
+<span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">_Frame</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_handling_erlang_messages">Handling Erlang messages</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy will call <code>websocket_info/3</code> whenever an Erlang message
+arrives.</p></div>
+<div class="paragraph"><p>The handler can decide to send frames to the socket, stop
+or just continue without sending anything.</p></div>
+<div class="paragraph"><p>The following snippet forwards any <code>log</code> message to the socket
+and ignores all others.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>({<span style="font-weight: bold"><span style="color: #000080">log</span></span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
+<span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sending_frames_to_the_socket">Sending frames to the socket</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy allows sending either a single frame or a list of
+frames to the socket, in which case the frames are sent
+sequentially. Any frame can be sent: text, binary, ping,
+pong or close frames.</p></div>
+<div class="paragraph"><p>The following example sends three frames using a single <code>reply</code>
+tuple.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #FF6600">hello_world</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">reply</span>, [
+                {<span style="color: #FF6600">text</span>, <span style="color: #FF0000">"Hello"</span>},
+                {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"world!"</span><span style="color: #990000">&gt;&gt;</span>},
+                {<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #993399">0</span><span style="color: #990000">:</span><span style="color: #993399">8000</span><span style="color: #990000">&gt;&gt;</span>}
+        ], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
+<span style="font-style: italic"><span style="color: #9A1900">%% More websocket_info/3 clauses here...</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Note that the payload for text and binary frames is of type
+<code>iodata()</code>, meaning it can be either a <code>binary()</code> or an
+<code>iolist()</code>.</p></div>
+<div class="paragraph"><p>Sending a <code>close</code> frame will immediately initiate the closing
+of the Websocket connection. Be aware that any additional
+frames sent by the client or any Erlang messages waiting to
+be received will not be processed. Also note that when replying
+a list of frames that includes close, any frame found after the
+close frame will not be sent.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ping_and_timeout">Ping and timeout</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The biggest performance improvement you can do when dealing
+with a huge number of Websocket connections is to reduce the
+number of timers that are started on the server. A common use
+of timers when dealing with connections is for sending a ping
+every once in a while. This should be done exclusively on the
+client side. Indeed, a server handling one million Websocket
+connections will perform a lot better when it doesn&#8217;t have to
+handle one million extra timers too!</p></div>
+<div class="paragraph"><p>Cowboy will automatically respond to ping frames sent by the
+client. It will still forward the frame to the handler for
+informative purpose, but no further action is required.</p></div>
+<div class="paragraph"><p>Cowboy can be configured to automatically close the Websocket
+connection when no data arrives on the socket. It is highly
+recommended to configure a timeout for it, as otherwise you
+may end up with zombie "half-connected" sockets that may
+leave the process alive forever.</p></div>
+<div class="paragraph"><p>A good timeout value is 60 seconds.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}, <span style="color: #993399">60000</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>This value cannot be changed once it is set. It defaults to
+<code>infinity</code>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hibernate">Hibernate</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Most tuples returned from handler callbacks can include an
+extra value <code>hibernate</code>. After doing any necessary operations
+following the return of the callback, Cowboy will hibernate
+the process.</p></div>
+<div class="paragraph"><p>It is highly recommended to hibernate processes that do not
+handle much traffic. It is a good idea to hibernate all
+connections by default and investigate only when you start
+noticing increased CPU usage.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_supporting_older_browsers">Supporting older browsers</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Unfortunately Websocket is a relatively recent technology,
+which means that not all browsers support it. A library like
+<a href="https://github.com/ninenines/bullet">Bullet</a> can be used to
+emulate Websocket connections on older browsers.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

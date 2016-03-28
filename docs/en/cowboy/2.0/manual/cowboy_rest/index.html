@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: cowboy_rest(3)</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_rest(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>cowboy_rest - REST handlers</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <code>cowboy_rest</code> module implements REST semantics on top of
+the HTTP protocol.</p></div>
+<div class="paragraph"><p>This module is a sub protocol that defines many callbacks
+be implemented by handlers. The <code>init/2</code> and <code>terminate/3</code>
+callbacks are common to all handler types and are documented
+in the manual for the <a href="cowboy_handler.asciidoc">cowboy_handler</a> module.</p></div>
+<div class="paragraph"><p>All other callbacks are optional, though some may become
+required depending on the return value of previous callbacks.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_meta_values">Meta values</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+charset = binary()
+</dt>
+<dd>
+<p>
+        Negotiated charset.
+       <br />
+        This value may not be defined if no charset was negotiated.
+</p>
+</dd>
+<dt class="hdlist1">
+language = binary()
+</dt>
+<dd>
+<p>
+        Negotiated language.
+       <br />
+        This value may not be defined if no language was negotiated.
+</p>
+</dd>
+<dt class="hdlist1">
+media_type = {binary(), binary(), <em>*</em> | [{binary(), binary()}]}
+</dt>
+<dd>
+<p>
+        Negotiated media-type.
+       <br />
+        The media-type is the content-type, excluding the charset.
+       <br />
+        This value is always defined after the call to
+        <code>content_types_provided/2</code>.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_terminate_reasons">Terminate reasons</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The following values may be received as the terminate reason
+in the optional <code>terminate/3</code> callback.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+normal
+</dt>
+<dd>
+<p>
+        The connection was closed normally.
+</p>
+</dd>
+<dt class="hdlist1">
+{crash, Class, Reason}
+</dt>
+<dd>
+<p>
+        A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be
+        used to obtain more information about the crash. The function
+        <code>erlang:get_stacktrace/0</code> can also be called to obtain the
+        stacktrace of the process when the crash occurred.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callbacks">Callbacks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_callback_req_state_8594_value_req_state_stop_req_state">Callback(Req, State) &#8594; {Value, Req, State} | {stop, Req, State}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Callback
+</dt>
+<dd>
+<p>
+One of the REST callbacks described below.
+</p>
+</dd>
+<dt class="hdlist1">
+Req = cowboy_req:req()
+</dt>
+<dd>
+<p>
+The Req object.
+</p>
+</dd>
+<dt class="hdlist1">
+State = any()
+</dt>
+<dd>
+<p>
+Handler state.
+</p>
+</dd>
+<dt class="hdlist1">
+Value
+</dt>
+<dd>
+<p>
+See the REST callbacks description below.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Please see the REST callbacks description below for details
+on the <code>Value</code> type, the default value if the callback is
+not defined, and more general information on when the
+callback is called and what its intended use is.</p></div>
+<div class="paragraph"><p>The <code>stop</code> tuple can be returned to stop REST processing.
+It is up to the resource code to send a reply before that,
+otherwise a <code>204 No Content</code> will be sent.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rest_callbacks_description">REST callbacks description</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_allowed_methods">allowed_methods</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Methods
+</dt>
+<dd>
+<p>
+all
+</p>
+</dd>
+<dt class="hdlist1">
+Value type
+</dt>
+<dd>
+<p>
+[binary()]
+</p>
+</dd>
+<dt class="hdlist1">
+Default value
+</dt>
+<dd>
+<p>
+<code>[&lt;&lt;"GET"&gt;&gt;, &lt;&lt;"HEAD"&gt;&gt;, &lt;&lt;"OPTIONS"&gt;&gt;]</code>
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Return the list of allowed methods.</p></div>
+<div class="paragraph"><p>Methods are case sensitive. Standard methods are always uppercase.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_allow_missing_post">allow_missing_post</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Methods
+</dt>
+<dd>
+<p>
+POST
+</p>
+</dd>
+<dt class="hdlist1">
+Value type
+</dt>
+<dd>
+<p>
+boolean()
+</p>
+</dd>
+<dt class="hdlist1">
+Default value
+</dt>
+<dd>
+<p>
+true
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Return whether POST is allowed when the resource doesn&#8217;t exist.</p></div>
+<div class="paragraph"><p>Returning <code>true</code> here means that a new resource will be
+created. The URL to the created resource should also be
+returned from the <code>AcceptResource</code> callback.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_charsets_provided">charsets_provided</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Methods
+</dt>
+<dd>
+<p>
+GET, HEAD, POST, PUT, PATCH, DELETE
+</p>
+</dd>
+<dt class="hdlist1">
+Value type
+</dt>
+<dd>
+<p>
+[binary()]
+</p>
+</dd>
+<dt class="hdlist1">
+Default behavior
+</dt>
+<dd>
+<p>
+Skip to the next step if undefined.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Return the list of charsets the resource provides.</p></div>
+<div class="paragraph"><p>The list must be ordered in order of preference.</p></div>
+<div class="paragraph"><p>If the accept-charset header was not sent, the first charset
+in the list will be selected. Otherwise Cowboy will select
+the most appropriate charset from the list.</p></div>
+<div class="paragraph"><p>The chosen charset will be set in the <code>Req</code> object as the meta
+value <code>charset</code>.</p></div>
+<div class="paragraph"><p>While charsets are case insensitive, this callback is expected
+to return them as lowercase binary.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_content_types_accepted">content_types_accepted</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Methods
+</dt>
+<dd>
+<p>
+POST, PUT, PATCH
+</p>
+</dd>
+<dt class="hdlist1">
+Value type
+</dt>
+<dd>
+<p>
+[{binary() | {Type, SubType, Params}, AcceptResource}]
+</p>
+</dd>
+<dt class="hdlist1">
+Default behavior
+</dt>
+<dd>
+<p>
+Crash if undefined.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>With types:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Type = SubType = binary()
+</p>
+</li>
+<li>
+<p>
+Params = <em>*</em> | [{binary(), binary()}]
+</p>
+</li>
+<li>
+<p>
+AcceptResource = atom()
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Return the list of content-types the resource accepts.</p></div>
+<div class="paragraph"><p>The list must be ordered in order of preference.</p></div>
+<div class="paragraph"><p>Each content-type can be given either as a binary string or as
+a tuple containing the type, subtype and parameters.</p></div>
+<div class="paragraph"><p>Cowboy will select the most appropriate content-type from the list.
+If any parameter is acceptable, then the tuple form should be used
+with parameters set to <code>'*'</code>. If the parameters value is set to <code>[]</code>
+only content-type values with no parameters will be accepted. All
+parameter values are treated in a case sensitive manner except the
+<code>charset</code> parameter, if present, which is case insensitive.</p></div>
+<div class="paragraph"><p>This function will be called for POST, PUT and PATCH requests.
+It is entirely possible to define different callbacks for different
+methods if the handling of the request differs. Simply verify
+what the method is with <code>cowboy_req:method/1</code> and return a
+different list for each methods.</p></div>
+<div class="paragraph"><p>The <code>AcceptResource</code> value is the name of the callback that will
+be called if the content-type matches. It is defined as follows.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Value type
+</dt>
+<dd>
+<p>
+true | {true, URL} | false
+</p>
+</dd>
+<dt class="hdlist1">
+Default behavior
+</dt>
+<dd>
+<p>
+Crash if undefined.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Process the request body.</p></div>
+<div class="paragraph"><p>This function should create or update the resource with the
+information contained in the request body. This information
+may be full or partial depending on the request method.</p></div>
+<div class="paragraph"><p>If the request body was processed successfully, <code>true</code> must
+be returned. If the request method is POST, <code>{true, URL}</code> may
+be returned instead, and Cowboy will redirect the client to
+the location of the newly created resource.</p></div>
+<div class="paragraph"><p>If a response body must be sent, the appropriate media-type, charset
+and language can be retrieved using the <code>cowboy_req:meta/{2,3}</code>
+functions. The respective keys are <code>media_type</code>, <code>charset</code>
+and <code>language</code>. The body can be set using <code>cowboy_req:set_resp_body/2</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_content_types_provided">content_types_provided</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Methods
+</dt>
+<dd>
+<p>
+GET, HEAD, POST, PUT, PATCH, DELETE
+</p>
+</dd>
+<dt class="hdlist1">
+Value type
+</dt>
+<dd>
+<p>
+[{binary() | {Type, SubType, Params}, ProvideResource}]
+</p>
+</dd>
+<dt class="hdlist1">
+Default value
+</dt>
+<dd>
+<p>
+`[
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

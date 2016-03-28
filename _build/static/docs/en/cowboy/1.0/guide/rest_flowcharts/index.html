@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Nine Nines Support: Cowboy User Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Change them or set them up as you like -->
+    <meta name="description" content="">
+    <meta name="author" content="(Soft10) Pol Cámara">
+
+    <!-- Stylesheets -->    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+<!--    <link href="js/google-code-prettify/prettify.css" rel="stylesheet"> -->
+    <link href="/css/sh99s.css"  rel="stylesheet"/>
+
+    <!-- Enables html5 support on older browsers, other js is placed at the end of the page to speed up loading -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+	<link rel="alternate" href="/feeds/atom.xml" type="application/atom+xml" title="Nine Nines Atom Feed">
+  </head>
+
+  <body class="big_text docs">
+    <header id="page-head">
+      <div id="topbar" class="container">
+          <div class="row">
+            <div class="span2">
+              <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+            </div>
+            <div class="span10">
+              <!-- Top navigation and social icons-->
+              <div id="side-header">
+                <nav>
+                  <ul>
+					<li><a title="Erlang training" href="/training">Training</a></li>
+                    <li><a title="Technical publications" href="/articles">Articles</a></li>
+					<li><a title="Our talks" href="/talks">Talks</a></li>
+					<li class="active"><a title="Our services" href="/support">Pricing &amp; Sponsoring</a></li>
+					<li><a title="Community support" href="http://lists.ninenines.eu">Mailing Lists</a></li>
+                    <li><a title="Contact us" href="mailto:contact@ninenines.eu">Contact</a></li>
+                  </ul>
+                </nav> 
+                <ul id="social">
+                  <li>
+                    <a href="https://github.com/ninenines" title="Check our Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                  </li>
+                  <li class="dropdown" id="twitter-links">
+                    <a href="#twitter-links" class="dropdown-toggle" data-toggle="dropdown"  title="Follow us on Twitter">
+                        <img src="/img/ico_twitter.png" data-hover="/img/ico_twitter_alt.png" alt="Twitter">
+                    </a>                 
+                    <ul class="dropdown-menu">
+                      <li><a title="Visit Loïc Hoguin's Twitter Account" href="http://twitter.com/lhoguin">@lhoguin</a></li>
+                      <!-- <li class="divider"></li>
+                      <li><a title="Visit our official Twitter account" href="#">@99s</a></li> -->
+                    </ul>
+                  </li>
+                  <!-- <li>
+                    <a href="/css/" title="Add us on Linkedin"><img src="/img/ico_linkedin.png" data-hover="img/ico_linkedin_alt.png" alt="Linkedin"></a>
+                  </li> -->
+                </ul>
+              </div>
+            </div>
+          </div>
+      </div>
+
+
+    </header>
+
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>REST flowcharts</span></h1>
+
+<p>This chapter will explain the REST handler state machine through a number of different diagrams.</p>
+
+<p>There are four main paths that requests may follow. One for the method OPTIONS; one for the methods GET and HEAD; one for the methods PUT, POST and PATCH; and one for the method DELETE.</p>
+
+<p>All paths start with the "Start" diagram, and all paths excluding the OPTIONS path go through the "Content negotiation" diagram and optionally the "Conditional requests" diagram if the resource exists.</p>
+
+<p>The red squares refer to another diagram. The light green squares indicate a response. Other squares may be either a callback or a question answered by Cowboy itself. Green arrows tend to indicate the default behavior if the callback is undefined.</p>
+
+<h2 id="start">Start</h2>
+
+<p>All requests start from here.</p>
+
+<p><img title="REST starting flowchart" src="/docs/en/cowboy/1.0/guide/rest_start.png"/></p>
+
+<p>A series of callbacks are called in succession to perform a general checkup of the service, the request line and request headers.</p>
+
+<p>The request body, if any, is not expected to have been received for any of these steps. It is only processed at the end of the "PUT, POST and PATCH methods" diagram, when all conditions have been met.</p>
+
+<p>The <code>known_methods</code> and <code>allowed_methods</code> callbacks return a list of methods. Cowboy then checks if the request method is in the list, and stops otherwise.</p>
+
+<p>The <code>is_authorized</code> callback may be used to check that access to the resource is authorized. Authentication may also be performed as needed. When authorization is denied, the return value from the callback must include a challenge applicable to the requested resource, which will be sent back to the client in the www-authenticate header.</p>
+
+<p>This diagram is immediately followed by either the "OPTIONS method" diagram when the request method is OPTIONS, or the "Content negotiation" diagram otherwise.</p>
+
+<h2 id="options_method">OPTIONS method</h2>
+
+<p>This diagram only applies to OPTIONS requests.</p>
+
+<p><img title="REST OPTIONS method flowchart" src="/docs/en/cowboy/1.0/guide/rest_options.png"/></p>
+
+<p>The <code>options</code> callback may be used to add information about the resource, such as media types or languages provided; allowed methods; any extra information. A response body may also be set, although clients should not be expected to read it.</p>
+
+<p>If the <code>options</code> callback is not defined, Cowboy will send a response containing the list of allowed methods by default.</p>
+
+<h2 id="content_negotiation">Content negotiation</h2>
+
+<p>This diagram applies to all request methods other than OPTIONS. It is executed right after the "Start" diagram is completed.</p>
+
+<p><img title="REST content negotiation flowchart" src="/docs/en/cowboy/1.0/guide/rest_conneg.png"/></p>
+
+<p>The purpose of these steps is to determine an appropriate representation to be sent back to the client.</p>
+
+<p>The request may contain any of the accept header; the accept-language header; or the accept-charset header. When present, Cowboy will parse the headers and then call the corresponding callback to obtain the list of provided content-type, language or charset for this resource. It then automatically select the best match based on the request.</p>
+
+<p>If a callback is not defined, Cowboy will select the content-type, language or charset that the client prefers.</p>
+
+<p>The <code>content_types_provided</code> also returns the name of a callback for every content-type it accepts. This callback will only be called at the end of the "GET and HEAD methods" diagram, when all conditions have been met.</p>
+
+<p>The selected content-type, language and charset are saved as meta values in the Req object. You <em>should</em> use the appropriate representation if you set a response body manually (alongside an error code, for example).</p>
+
+<p>This diagram is immediately followed by the "GET and HEAD methods" diagram, the "PUT, POST and PATCH methods" diagram, or the "DELETE method" diagram, depending on the method.</p>
+
+<h2 id="get_and_head_methods">GET and HEAD methods</h2>
+
+<p>This diagram only applies to GET and HEAD requests.</p>
+
+<p>For a description of the <code>cond</code> step, please see the "Conditional requests" diagram.</p>
+
+<p><img title="REST GET/HEAD methods flowchart" src="/docs/en/cowboy/1.0/guide/rest_get_head.png"/></p>
+
+<p>When the resource exists, and the conditional steps succeed, the resource can be retrieved.</p>
+
+<p>Cowboy prepares the response by first retrieving metadata about the representation, then by calling the <code>ProvideResource</code> callback. This is the callback you defined for each content-types you returned from <code>content_types_provided</code>. This callback returns the body that will be sent back to the client, or a fun if the body must be streamed.</p>
+
+<p>When the resource does not exist, Cowboy will figure out whether the resource existed previously, and if so whether it was moved elsewhere in order to redirect the client to the new URI.</p>
+
+<p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks must return the new location of the resource if it was in fact moved.</p>
+
+<h2 id="put,_post_and_patch_methods">PUT, POST and PATCH methods</h2>
+
+<p>This diagram only applies to PUT, POST and PATCH requests.</p>
+
+<p>For a description of the <code>cond</code> step, please see the "Conditional requests" diagram.</p>
+
+<p><img title="REST PUT/POST/PATCH methods flowchart" src="/docs/en/cowboy/1.0/guide/rest_put_post_patch.png"/></p>
+
+<p>When the resource exists, first the conditional steps are executed. When that succeeds, and the method is PUT, Cowboy will call the <code>is_conflict</code> callback. This function can be used to prevent potential race conditions, by locking the resource for example.</p>
+
+<p>Then all three methods reach the <code>content_types_accepted</code> step that we will describe in a few paragraphs.</p>
+
+<p>When the resource does not exist, and the method is PUT, Cowboy will check for conflicts and then move on to the <code>content_types_accepted</code> step. For other methods, Cowboy will figure out whether the resource existed previously, and if so whether it was moved elsewhere. If the resource is truly non-existent, the method is POST and the call for <code>allow_missing_post</code> returns <code>true</code>, then Cowboy will move on to the <code>content_types_accepted</code> step. Otherwise the request processing ends there.</p>
+
+<p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks must return the new location of the resource if it was in fact moved.</p>
+
+<p>The <code>content_types_accepted</code> returns a list of content-types it accepts, but also the name of a callback for each of them. Cowboy will select the appropriate callback for processing the request body and call it.</p>
+
+<p>This callback may return one of three different return values.</p>
+
+<p>If an error occurred while processing the request body, it must return <code>false</code> and Cowboy will send an appropriate error response.</p>
+
+<p>If the method is POST, then you may return <code>true</code> with an URI of where the resource has been created. This is especially useful for writing handlers for collections.</p>
+
+<p>Otherwise, return <code>true</code> to indicate success. Cowboy will select the appropriate response to be sent depending on whether a resource has been created, rather than modified, and on the availability of a location header or a body in the response.</p>
+
+<h2 id="delete_method">DELETE method</h2>
+
+<p>This diagram only applies to DELETE requests.</p>
+
+<p>For a description of the <code>cond</code> step, please see the "Conditional requests" diagram.</p>
+
+<p><img title="REST DELETE method flowchart" src="/docs/en/cowboy/1.0/guide/rest_delete.png"/></p>
+
+<p>When the resource exists, and the conditional steps succeed, the resource can be deleted.</p>
+
+<p>Deleting the resource is a two steps process. First the callback <code>delete_resource</code> is executed. Use this callback to delete the resource.</p>
+
+<p>Because the resource may be cached, you must also delete all cached representations of this resource in the system. This operation may take a while though, so you may return before it finished.</p>
+
+<p>Cowboy will then call the <code>delete_completed</code> callback. If you know that the resource has been completely deleted from your system, including from caches, then you can return <code>true</code>. If any doubts persist, return <code>false</code>. Cowboy will assume <code>true</code> by default.</p>
+
+<p>To finish, Cowboy checks if you set a response body, and depending on that, sends the appropriate response.</p>
+
+<p>When the resource does not exist, Cowboy will figure out whether the resource existed previously, and if so whether it was moved elsewhere in order to redirect the client to the new URI.</p>
+
+<p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks must return the new location of the resource if it was in fact moved.</p>
+
+<h2 id="conditional_requests">Conditional requests</h2>
+
+<p>This diagram applies to all request methods other than OPTIONS. It is executed right after the <code>resource_exists</code> callback, when the resource exists.</p>
+
+<p><img title="REST conditional requests flowchart" src="/docs/en/cowboy/1.0/guide/rest_cond.png"/></p>
+
+<p>A request becomes conditional when it includes either of the if-match header; the if-unmodified-since header; the if-none-match header; or the if-modified-since header.</p>
+
+<p>If the condition fails, the request ends immediately without any retrieval or modification of the resource.</p>
+
+<p>The <code>generate_etag</code> and <code>last_modified</code> are called as needed. Cowboy will only call them once and then cache the results for subsequent use.</p>
+
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+
+<h3 id="docs-nav">Navigation</h3>
+
+<h3>See also</h3><ul><li><a href="/docs/en/cowboy/1.0/manual/">Function Reference</a></li><li><a href="/docs/en/cowboy/1.0/index.html">README</a></li></ul>
+
+<h3>Version select</h3>
+<ul>
+
+	<li><a href="/docs/en/cowboy/1.0/guide/"><strong>1.0</strong></a></li>
+
+	<li><a href="/docs/en/cowboy/HEAD/guide/"><strong>HEAD</strong></a></li>
+
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Nine Nines 2012-2014</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    <!-- Javascript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+
+
+<script type="text/javascript" src="/js/shCore.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushErlang.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/shlang/shBrushPlain.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+<script type="text/javascript" src="/js/fuse.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var f;
+
+	$.getJSON("/docs/db.json", function(data){
+		f = new Fuse(data, {keys: ["n"], threshold: 0.3});
+		$("<ul id=\"search-results\">").insertAfter("#form-search");
+	});
+
+	$("#input-search").keyup(function(e){if(f){if (e.which != 13 ){
+		var results = f.search($(this).val());
+		if (results.length == 0){
+			$("#form-search").attr("action", "#");
+		}else{
+			$("#form-search").attr("action", results[0].l);
+		}
+
+		$("#search-results").empty();
+		for (var i = 0; i < 10 && i < results.length; i++){
+			$("<li><a href=\"" + results[i].l + "\">" + results[i].n + "</a></li>")
+				.appendTo("#search-results");
+		}
+	}}});
+});
+</script>
+
+  </body>
+</html>

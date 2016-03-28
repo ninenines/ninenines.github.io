@@ -1,0 +1,143 @@
++++
+date = "2013-02-18T00:00:00+01:00"
+title = "Erlang Scalability"
+
++++
+
+I would like to share some experience and theories on
+Erlang scalability.
+
+This will be in the form of a series of hints, which
+may or may not be accompanied with explanations as to why
+things are this way, or how they improve or reduce the scalability
+of a system. I will try to do my best to avoid giving falsehoods,
+even if that means a few things won't be explained.
+
+== NIFs
+
+NIFs are considered harmful. I don't know any single NIF-based
+library that I would recommend. That doesn't mean they should
+all be avoided, just that if you're going to want your system to
+scale, you probably shouldn't use a NIF.
+
+A common case for using NIFs is JSON processing. The problem
+is that JSON is a highly inefficient data structure (similar
+in inefficiency to XML, although perhaps not as bad). If you can
+avoid using JSON, you probably should. MessagePack can replace
+it in many situations.
+
+Long-running NIFs will take over a scheduler and prevent Erlang
+from efficiently handling many processes.
+
+Short-running NIFs will still confuse the scheduler if they
+take more than a few microseconds to run.
+
+Threaded NIFs, or the use of the `enif_consume_timeslice`
+might help allievate this problem, but they're not a silver bullet.
+
+And as you already know, a crashing NIF will take down your VM,
+destroying any claims you may have at being scalable.
+
+Never use a NIF because "C is fast". This is only true in
+single-threaded programs.
+
+== BIFs
+
+BIFs can also be harmful. While they are generally better than
+NIFs, they are not perfect and some of them might have harmful
+effects on the scheduler.
+
+A great example of this is the `erlang:decode_packet/3`
+BIF, when used for HTTP request or response decoding. Avoiding
+its use in _Cowboy_ allowed us to see a big increase in
+the number of requests production systems were able to handle,
+up to two times the original amount. Incidentally this is something
+that is impossible to detect using synthetic benchmarks.
+
+BIFs that return immediately are perfectly fine though.
+
+== Binary strings
+
+Binary strings use less memory, which means you spend less time
+allocating memory compared to list-based strings. They are also
+more natural for strings manipulation because they are optimized
+for appending (as opposed to prepending for lists).
+
+If you can process a binary string using a single match context,
+then the code will run incredibly fast. The effects will be much
+increased if the code was compiled using HiPE, even if your Erlang
+system isn't compiled natively.
+
+Avoid using `binary:split` or `binary:replace`
+if you can avoid it. They have a certain overhead due to supporting
+many options that you probably don't need for most operations.
+
+== Buffering and streaming
+
+Use binaries. They are great for appending, and it's a direct copy
+from what you receive from a stream (usually a socket or a file).
+
+Be careful to not indefinitely receive data, as you might end up
+having a single binary taking up huge amounts of memory.
+
+If you stream from a socket and know how much data you expect,
+then fetch that data in a single `recv` call.
+
+Similarly, if you can use a single `send` call, then
+you should do so, to avoid going back and forth unnecessarily between
+your Erlang process and the Erlang port for your socket.
+
+== List and binary comprehensions
+
+Prefer list comprehensions over `lists:map/2`. The
+compiler will be able to optimize your code greatly, for example
+not creating the result if you don't need it. As time goes on,
+more optimizations will be added to the compiler and you will
+automatically benefit from them.
+
+== gen_server is no silver bullet
+
+It's a bad idea to use `gen_server` for everything.
+For two reasons.
+
+There is an overhead everytime the `gen_server` receives
+a call, a cast or a simple message. It can be a problem if your
+`gen_server` is in a critical code path where speed
+is all that matters. Do not hesitate to create other kinds of
+processes where it makes sense. And depending on the kind of process,
+you might want to consider making them special processes, which
+would essentially behave the same as a `gen_server`.
+
+A common mistake is to have a unique `gen_server` to
+handle queries from many processes. This generally becomes the
+biggest bottleneck you'll want to fix. You should try to avoid
+relying on a single process, using a pool if you can.
+
+== Supervisor and monitoring
+
+A `supervisor` is also a `gen_server`,
+so the previous points also apply to them.
+
+Sometimes you're in a situation where you have supervised
+processes but also want to monitor them in one or more other
+processes, effectively duplicating the work. The supervisor
+already knows when processes die, why not use this to our
+advantage?
+
+You can create a custom supervisor process that will perform
+both the supervision and handle exit and other events, allowing
+to avoid the combination of supervising and monitoring which
+can prove harmful when many processes die at once, or when you
+have many short lived processes.
+
+== ets for LOLSPEED(tm)
+
+If you have data queried or modified by many processes, then
+`ets` public or protected tables will give you the
+performance boost you require. Do not forget to set the
+`read_concurrency` or `write_concurrency`
+options though.
+
+You might also be thrilled to know that Erlang R16B will feature
+a big performance improvement for accessing `ets` tables
+concurrently.

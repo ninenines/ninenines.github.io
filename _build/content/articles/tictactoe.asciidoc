@@ -1,0 +1,91 @@
++++
+date = "2012-10-17T00:00:00+01:00"
+title = "Erlang Tic Tac Toe"
+
++++
+
+Everyone knows http://en.wikipedia.org/wiki/Tic-tac-toe[Tic Tac Toe],
+right?
+
+Players choose either to be the Xs or the Os, then place their symbol
+on a 3x3 board one after another, trying to create a line of 3 of them.
+
+Writing an algorithm to check for victory sounds easy, right? It's
+easily tested, considering there's only 8 possible winning rows (3 horizontal,
+3 vertical and 2 diagonal).
+
+In Erlang though, you probably wouldn't want an algorithm. Erlang has
+this cool feature called pattern matching which will allow us to completely
+avoid writing the algorithm by instead letting us match directly on the
+solutions.
+
+Let's first create a board. A board is a list of 3 rows each containing
+3 columns. It can also be thought of as a tuple containing 9 elements.
+A tuple is easier to manipulate so this is what we are going to use.
+Each position can either contain an `x`, an `o`,
+or be `undefined`.
+
+[source,erlang]
+----
+new() ->
+    {undefined, undefined, undefined,
+     undefined, undefined, undefined,
+     undefined, undefined, undefined}.
+----
+
+Now that we have a board, if we want to play, we need a function that
+will allow players to, you know, actually play their moves. Rows and
+columns are numbered 1 to 3 so we need a little math to correctly
+deduce the element's position.
+
+[source,erlang]
+----
+play(Who, X, Y, Board) ->
+    setelement((Y - 1) * 3 + X, Board, Who).
+----
+
+This function returns the board with the element modified. Of course,
+as you probably noticed, we aren't checking that the arguments are correct,
+or that the element was already set. This is left as an exercise to the
+reader.
+
+After playing the move, we need to check whether someone won. That's
+where you'd write an algorithm, and that's where I wouldn't. Let's just
+pattern match all of them!
+
+[source,erlang]
+----
+check(Board) ->
+    case Board of
+        {x, x, x,
+         _, _, _,
+         _, _, _} -> {victory, x};
+
+        {x, _, _,
+         _, x, _,
+         _, _, x} -> {victory, x};
+
+        {x, _, _,
+         x, _, _,
+         x, _, _} -> {victory, x};
+
+        %% [snip]
+
+        _ -> ok
+    end.
+----
+
+Pattern matching allows us to simply _draw_ the solutions
+directly inside our code, and if the board matches any of them, then we
+have a victory or a draw, otherwise the game can continue.
+
+The `_` variable is special in that it always matches,
+allowing us to focus strictly on the winning row. And because it's very
+graphical, if we were to have messed up somewhere, then we'd only need
+take a quick glance to be sure the winning solutions are the right ones.
+
+Erlang allows us to transform algorithms into very graphical code thanks
+to its pattern matching feature, and let us focus on doing things instead
+of writing algorithms to do things.
+
+* link:/res/tictactoe.erl[tictactoe.erl]

@@ -1,0 +1,60 @@
+{{ partial "header.html" . }}
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>{{ .Title }}</span></h1>
+
+{{ .Content }}
+
+<!-- a.code -->
+</div>
+
+<div class="span3 sidecol">
+<!-- TODO: add the search back?
+<div class="input-append">
+<form id="form-search" class="form-search" action="#">
+	<input id="input-search" type="text" placeholder="Function search" autocomplete="off" autofocus class="input-medium search-query span2">
+	<button type="submit" class="btn btn-success">Go</button>
+</form>
+</div>
+-->
+
+<h3>
+	{{ index .Site.Data.projects .Params.project "title" }}
+	{{ .Params.version }}
+	{{ if eq .Params.doctype "manual" }}Function Reference{{ end }}
+	{{ if eq .Params.doctype "guide" }}User Guide{{ end }}
+</h3>
+
+<ul>
+	{{ if index .Site.Data.projects .Params.project "has_guide" }}
+		<li><a href="/docs/en/{{ .Params.project }}/{{ .Params.version }}/guide">User Guide</a></li>
+	{{ end }}
+	{{ if index .Site.Data.projects .Params.project "has_manual" }}
+		<li><a href="/docs/en/{{ .Params.project }}/{{ .Params.version }}/manual">Function Reference</a></li>
+	{{ end }}
+	<!-- TODO: link to relevant source file? -->
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	{{ $.Scratch.Set "project" .Params.project }}
+	{{ $.Scratch.Set "doctype" .Params.doctype }}
+	{{ range (index .Site.Data.projects .Params.project "versions") }}
+		<li><a href="/docs/en/{{ $.Scratch.Get "project" }}/{{ . }}/{{ $.Scratch.Get "doctype" }}">{{ . }}</a></li>
+	{{ end }}
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+{{ partial "footer.html" . }}
+

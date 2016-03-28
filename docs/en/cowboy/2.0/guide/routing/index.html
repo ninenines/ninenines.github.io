@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Routing</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Routing</span></h1>
+
+<div class="paragraph"><p>Cowboy does nothing by default.</p></div>
+<div class="paragraph"><p>To make Cowboy useful, you need to map URLs to Erlang modules that will
+handle the requests. This is called routing.</p></div>
+<div class="paragraph"><p>When Cowboy receives a request, it tries to match the requested host and
+path to the resources given in the dispatch rules. If it matches, then
+the associated Erlang code will be executed.</p></div>
+<div class="paragraph"><p>Routing rules are given per host. Cowboy will first match on the host,
+and then try to find a matching path.</p></div>
+<div class="paragraph"><p>Routes need to be compiled before they can be used by Cowboy.</p></div>
+<div class="sect1">
+<h2 id="_structure">Structure</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The general structure for the routes is defined as follow.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Routes</span> <span style="color: #990000">=</span> [<span style="color: #009900">Host1</span>, <span style="color: #009900">Host2</span>, <span style="color: #990000">...</span> <span style="color: #009900">HostN</span>]<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Each host contains matching rules for the host along with optional
+constraints, and a list of routes for the path component.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Host1</span> <span style="color: #990000">=</span> {<span style="color: #009900">HostMatch</span>, <span style="color: #009900">PathsList</span>}<span style="color: #990000">.</span>
+<span style="color: #009900">Host2</span> <span style="color: #990000">=</span> {<span style="color: #009900">HostMatch</span>, <span style="color: #009900">Constraints</span>, <span style="color: #009900">PathsList</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The list of routes for the path component is defined similar to the
+list of hosts.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathsList</span> <span style="color: #990000">=</span> [<span style="color: #009900">Path1</span>, <span style="color: #009900">Path2</span>, <span style="color: #990000">...</span> <span style="color: #009900">PathN</span>]<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Finally, each path contains matching rules for the path along with
+optional constraints, and gives us the handler module to be used
+along with options that will be given to it on initialization.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Path1</span> <span style="color: #990000">=</span> {<span style="color: #009900">PathMatch</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">Opts</span>}<span style="color: #990000">.</span>
+<span style="color: #009900">Path2</span> <span style="color: #990000">=</span> {<span style="color: #009900">PathMatch</span>, <span style="color: #009900">Constraints</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">Opts</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Continue reading to learn more about the match syntax and the optional
+constraints.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_match_syntax">Match syntax</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The match syntax is used to associate host names and paths with their
+respective handlers.</p></div>
+<div class="paragraph"><p>The match syntax is the same for host and path with a few subtleties.
+Indeed, the segments separator is different, and the host is matched
+starting from the last segment going to the first. All examples will
+feature both host and path match rules and explain the differences
+when encountered.</p></div>
+<div class="paragraph"><p>Excluding special values that we will explain at the end of this section,
+the simplest match value is a host or a path. It can be given as either
+a <code>string()</code> or a <code>binary()</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch1</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/"</span><span style="color: #990000">.</span>
+<span style="color: #009900">PathMatch2</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/path/to/resource"</span><span style="color: #990000">.</span>
+
+<span style="color: #009900">HostMatch1</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"cowboy.example.org"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>As you can see, all paths defined this way must start with a slash
+character. Note that these two paths are identical as far as routing
+is concerned.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch2</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/path/to/resource"</span><span style="color: #990000">.</span>
+<span style="color: #009900">PathMatch3</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/path/to/resource/"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Hosts with and without a trailing dot are equivalent for routing.
+Similarly, hosts with and without a leading dot are also equivalent.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">HostMatch1</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"cowboy.example.org"</span><span style="color: #990000">.</span>
+<span style="color: #009900">HostMatch2</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"cowboy.example.org."</span><span style="color: #990000">.</span>
+<span style="color: #009900">HostMatch3</span> <span style="color: #990000">=</span> <span style="color: #FF0000">".cowboy.example.org"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>It is possible to extract segments of the host and path and to store
+the values in the <code>Req</code> object for later use. We call these kind of
+values bindings.</p></div>
+<div class="paragraph"><p>The syntax for bindings is very simple. A segment that begins with
+the <code>:</code> character means that what follows until the end of the segment
+is the name of the binding in which the segment value will be stored.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/hats/:name/prices"</span><span style="color: #990000">.</span>
+<span style="color: #009900">HostMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">":subdomain.example.org"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>If these two end up matching when routing, you will end up with two
+bindings defined, <code>subdomain</code> and <code>name</code>, each containing the
+segment value where they were defined. For example, the URL
+<code>http://test.example.org/hats/wild_cowboy_legendary/prices</code> will
+result in having the value <code>test</code> bound to the name <code>subdomain</code>
+and the value <code>wild_cowboy_legendary</code> bound to the name <code>name</code>.
+They can later be retrieved using <code>cowboy_req:binding/{2,3}</code>. The
+binding name must be given as an atom.</p></div>
+<div class="paragraph"><p>There is a special binding name you can use to mimic the underscore
+variable in Erlang. Any match against the <code>_</code> binding will succeed
+but the data will be discarded. This is especially useful for
+matching against many domain names in one go.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">HostMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"ninenines.:_"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Similarly, it is possible to have optional segments. Anything
+between brackets is optional.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/hats/[page/:number]"</span><span style="color: #990000">.</span>
+<span style="color: #009900">HostMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"[www.]ninenines.eu"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can also have imbricated optional segments.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/hats/[page/[:number]]"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can retrieve the rest of the host or path using <code>[...]</code>.
+In the case of hosts it will match anything before, in the case
+of paths anything after the previously matched segments. It is
+a special case of optional segments, in that it can have
+zero, one or many segments. You can then find the segments using
+<code>cowboy_req:host_info/1</code> and <code>cowboy_req:path_info/1</code> respectively.
+They will be represented as a list of segments.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/hats/[...]"</span><span style="color: #990000">.</span>
+<span style="color: #009900">HostMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"[...]ninenines.eu"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>If a binding appears twice in the routing rules, then the match
+will succeed only if they share the same value. This copies the
+Erlang pattern matching behavior.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/hats/:name/:name"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>This is also true when an optional segment is present. In this
+case the two values must be identical only if the segment is
+available.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/hats/:name/[:name]"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>If a binding is defined in both the host and path, then they must
+also share the same value.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"/:user/[...]"</span><span style="color: #990000">.</span>
+<span style="color: #009900">HostMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">":user.github.com"</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Finally, there are two special match values that can be used. The
+first is the atom <code>'_'</code> which will match any host or path.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathMatch</span> <span style="color: #990000">=</span> <span style="color: #FF6600">'_'</span><span style="color: #990000">.</span>
+<span style="color: #009900">HostMatch</span> <span style="color: #990000">=</span> <span style="color: #FF6600">'_'</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The second is the special host match <code>"*"</code> which will match the
+wildcard path, generally used alongside the <code>OPTIONS</code> method.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">HostMatch</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"*"</span><span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_constraints">Constraints</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>After the matching has completed, the resulting bindings can be tested
+against a set of constraints. Constraints are only tested when the
+binding is defined. They run in the order you defined them. The match
+will succeed only if they all succeed. If the match fails, then Cowboy
+tries the next route in the list.</p></div>
+<div class="paragraph"><p>The format used for constraints is the same as match functions in
+<code>cowboy_req</code>: they are provided as a list of fields which may have
+one or more constraints. While the router accepts the same format,
+it will skip fields with no constraints and will also ignore default
+values, if any.</p></div>
+<div class="paragraph"><p>Read more about <a href="../constraints">constraints</a>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_compilation">Compilation</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The structure defined in this chapter needs to be compiled before it is
+passed to Cowboy. This allows Cowboy to efficiently lookup the correct
+handler to run instead of having to parse the routes repeatedly.</p></div>
+<div class="paragraph"><p>This can be done with a simple call to <code>cowboy_router:compile/1</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
+    <span style="font-style: italic"><span style="color: #9A1900">%% {HostMatch, list({PathMatch, Handler, Opts})}</span></span>
+    {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF6600">'_'</span>, <span style="color: #FF6600">my_handler</span>, []}]}
+]),
+<span style="font-style: italic"><span style="color: #9A1900">%% Name, NbAcceptors, TransOpts, ProtoOpts</span></span>
+<span style="font-weight: bold"><span style="color: #000000">cowboy:start_http</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #993399">100</span>,
+    [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
+    [{<span style="color: #FF6600">env</span>, [{<span style="color: #FF6600">dispatch</span>, <span style="color: #009900">Dispatch</span>}]}]
+)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Note that this function will return <code>{error, badarg}</code> if the structure
+given is incorrect.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_live_update">Live update</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can use the <code>cowboy:set_env/3</code> function for updating the dispatch
+list used by routing. This will apply to all new connections accepted
+by the listener.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">cowboy:set_env</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #FF6600">dispatch</span>, <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>(<span style="color: #009900">Dispatch</span>))<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Note that you need to compile the routes before updating.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

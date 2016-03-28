@@ -1,0 +1,48 @@
+{{ partial "header.html" . }}
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<h1 class="lined-header"><span>Documentation</span></h1>
+
+{{ range $k, $project := $.Site.Data.projects }}
+	{{ if .external_site }}
+		<h2 id="{{ .name }}">{{ .title }}</h2>
+		<ul><li><a href="{{ .external_site }}">Official website</a></li></ul>
+	{{ end }}
+	{{ if or .has_guide .has_manual }}
+		<h2 id="{{ .name }}">{{ .title }}</h2>
+		<ul>
+		{{ range .versions }}
+			{{ if $project.has_guide }}
+				<li><a href="/docs/en/{{ $project.name }}/{{ . }}/guide">{{ $project.title }} {{ . }} User Guide</a></li>
+			{{ end }}
+			{{ if $project.has_manual }}
+				<li><a href="/docs/en/{{ $project.name }}/{{ . }}/manual">{{ $project.title }} {{ . }} Function Reference</a></li>
+			{{ end }}
+		{{ end }}
+		</ul>
+	{{ end }}
+{{ end }}
+
+</div>
+<div class="span3 sidecol">
+<h3>Navigation</h3>
+<ul>
+	{{ range $.Site.Data.projects }}
+		{{ if or .external_site .has_guide .has_manual }}
+			<li><a href="#{{ .name }}">{{ .title }}</a></li>
+		{{ end }}
+	{{ end }}
+</ul>
+
+{{ .Content }}
+</div>
+</div>
+</div>
+</div>
+
+{{ partial "footer.html" . }}

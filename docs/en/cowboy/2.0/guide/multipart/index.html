@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.15" />
+
+    <title>Nine Nines: Multipart requests</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Multipart requests</span></h1>
+
+<div class="paragraph"><p>Multipart originates from MIME, an Internet standard that
+extends the format of emails. Multipart messages are a
+container for parts of any content-type.</p></div>
+<div class="paragraph"><p>For example, a multipart message may have a part
+containing text and a second part containing an
+image. This is what allows you to attach files
+to emails.</p></div>
+<div class="paragraph"><p>In the context of HTTP, multipart is most often used
+with the <code>multipart/form-data</code> content-type. This is
+the content-type you have to use when you want browsers
+to be allowed to upload files through HTML forms.</p></div>
+<div class="paragraph"><p>Multipart is of course not required for uploading
+files, it is only required when you want to do so
+through HTML forms.</p></div>
+<div class="paragraph"><p>You can read and parse multipart messages using the
+Req object directly.</p></div>
+<div class="paragraph"><p>Cowboy defines two functions that allows you to get
+information about each part and read their contents.</p></div>
+<div class="sect1">
+<h2 id="_structure">Structure</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>A multipart message is a list of parts. Parts may
+contain either a multipart message or a non-multipart
+content-type. This allows parts to be arranged in a
+tree structure, although this is a rare case as far
+as the Web is concerned.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_form_data">Form-data</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>In the normal case, when a form is submitted, the
+browser will use the <code>application/x-www-form-urlencoded</code>
+content-type. This type is just a list of keys and
+values and is therefore not fit for uploading files.</p></div>
+<div class="paragraph"><p>That&#8217;s where the <code>multipart/form-data</code> content-type
+comes in. When the form is configured to use this
+content-type, the browser will use one part of the
+message for each form field. This means that a file
+input field will be sent in its own part, but the
+same applies to all other kinds of fields.</p></div>
+<div class="paragraph"><p>A form with a text input, a file input and a select
+choice box will result in a multipart message with
+three parts, one for each field.</p></div>
+<div class="paragraph"><p>The browser does its best to determine the content-type
+of the files it sends this way, but you should not
+rely on it for determining the contents of the file.
+Proper investigation of the contents is recommended.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_checking_the_content_type">Checking the content-type</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>While there is a variety of multipart messages, the
+most common on the Web is <code>multipart/form-data</code>. It&#8217;s
+the type of message being sent when an HTML form
+allows uploading files.</p></div>
+<div class="paragraph"><p>You can quickly figure out if a multipart message
+has been sent by parsing the <code>content-type</code> header.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"multipart"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"form-data"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">_</span>}
+    <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_reading_a_multipart_message">Reading a multipart message</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>To read a message you have to iterate over all its
+parts. Then, for each part, you can inspect its headers
+and read its body.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">multipart</span></span>(<span style="color: #009900">Req</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:part</span></span>(<span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">_Headers</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            {<span style="color: #FF6600">ok</span>, <span style="color: #009900">_Body</span>, <span style="color: #009900">Req3</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:part_body</span></span>(<span style="color: #009900">Req2</span>),
+            <span style="font-weight: bold"><span style="color: #000000">multipart</span></span>(<span style="color: #009900">Req3</span>);
+        {<span style="color: #FF6600">done</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            <span style="color: #009900">Req2</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Parts do not have a size limit. When a part body is
+too big, Cowboy will return what it read so far and
+allow you to continue if you wish to do so.</p></div>
+<div class="paragraph"><p>The function <code>cow_multipart:form_data/1</code> can be used
+to quickly obtain information about a part from a
+<code>multipart/form-data</code> message. This function will
+tell you if the part is for a normal field or if it
+is a file being uploaded.</p></div>
+<div class="paragraph"><p>This can be used for example to allow large part bodies
+for files but crash when a normal field is too large.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">multipart</span></span>(<span style="color: #009900">Req</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:part</span></span>(<span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Headers</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            <span style="color: #009900">Req4</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cow_multipart:form_data</span></span>(<span style="color: #009900">Headers</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+                {<span style="color: #FF6600">data</span>, <span style="color: #009900">_FieldName</span>} <span style="color: #990000">-&gt;</span>
+                    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">_Body</span>, <span style="color: #009900">Req3</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:part_body</span></span>(<span style="color: #009900">Req2</span>),
+                    <span style="color: #009900">Req3</span>;
+                {<span style="color: #FF6600">file</span>, <span style="color: #009900">_FieldName</span>, <span style="color: #009900">_Filename</span>, <span style="color: #009900">_CType</span>, <span style="color: #009900">_CTransferEncoding</span>} <span style="color: #990000">-&gt;</span>
+                    <span style="font-weight: bold"><span style="color: #000000">stream_file</span></span>(<span style="color: #009900">Req2</span>)
+            <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>,
+            <span style="font-weight: bold"><span style="color: #000000">multipart</span></span>(<span style="color: #009900">Req4</span>);
+        {<span style="color: #FF6600">done</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            <span style="color: #009900">Req2</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span>
+
+<span style="font-weight: bold"><span style="color: #000000">stream_file</span></span>(<span style="color: #009900">Req</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:part_body</span></span>(<span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">_Body</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            <span style="color: #009900">Req2</span>;
+        {<span style="color: #FF6600">more</span>, <span style="color: #009900">_Body</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            <span style="font-weight: bold"><span style="color: #000000">stream_file</span></span>(<span style="color: #009900">Req2</span>)
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>By default the body chunk Cowboy will return is limited
+to 8MB. This can of course be overriden. Both functions
+can take a second argument, the same list of options that
+will be passed to <code>cowboy_req:body/2</code> function.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_skipping_unwanted_parts">Skipping unwanted parts</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>If you do not want to read a part&#8217;s body, you can skip it.
+Skipping is easy. If you do not call the function to read
+the part&#8217;s body, Cowboy will automatically skip it when
+you request the next part.</p></div>
+<div class="paragraph"><p>The following snippet reads all part headers and skips
+all bodies:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">multipart</span></span>(<span style="color: #009900">Req</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:part</span></span>(<span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">_Headers</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            <span style="font-weight: bold"><span style="color: #000000">multipart</span></span>(<span style="color: #009900">Req2</span>);
+        {<span style="color: #FF6600">done</span>, <span style="color: #009900">Req2</span>} <span style="color: #990000">-&gt;</span>
+            <span style="color: #009900">Req2</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Similarly, if you start reading the body and it ends up
+being too big, you can simply continue with the next part,
+Cowboy will automatically skip what remains.</p></div>
+<div class="paragraph"><p>Note that the skipping rate may not be adequate for your
+application. If you observe poor performance when skipping,
+you might want to consider manually skipping by calling
+the <code>cowboy_req:part_body/1</code> function directly.</p></div>
+<div class="paragraph"><p>And if you started reading the message but decide that you
+do not need the remaining parts, you can simply stop reading
+entirely and Cowboy will automatically figure out what to do.</p></div>
+</div>
+</div>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

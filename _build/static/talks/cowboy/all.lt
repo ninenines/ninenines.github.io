@@ -1,0 +1,664 @@
+@Include { myslides }
+
+@OverheadTransparencies
+	@Title {
+A Cowboy quest for a modern web
+}
+	@RunningTitle { cowboy }
+	@Author { Loïc Hoguin }
+	@Institution {
+Nine Nines
+Dev:Extend
+}
+	@DateLine { Erlang User Conference 2011 }
+	@InitialLanguage { English }
+	@PageOrientation { Landscape }
+//
+
+@Overhead
+	@Title { Why Cowboy? }
+	@Begin
+
+@BulletList
+@ListItem { Because guns are better than arrows }
+@ListItem { It's all about the hat }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { History }
+	@Begin
+
+@BulletList
+@ListItem { First commit early March 2011 }
+@ListItem { Mentioned on the Github blog two weeks later }
+@ListItem { First beta early September 2011 }
+@ListItem { First talk early November 2011 }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Users and contributors }
+	@Begin
+
+@BulletList
+@ListItem { The etorrent project for its acceptor pool and web interface }
+@ListItem { The sockjs-erlang project for a websocket and HTTP server }
+@ListItem { Smarkets, Nivertech and other companies }
+@ListItem { The "#erlounge" IRC folks }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Cowboy's listeners }
+	@Begin
+
+@BulletList
+@ListItem { Cowboy isn't just an HTTP server }
+@ListItem { Cowboy allows you to start your own listener
+	@BulletList
+	@ListItem { Essentially a transport and protocol-agnostic acceptor pool }
+	@ListItem { An acceptor pool is a pool of processes accepting connections }
+	@EndList
+}
+@ListItem { You can have as many listeners running side by side as you want }
+@ListItem { Even listeners completely unrelated to the HTTP protocol }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Transport handlers }
+	@Begin
+
+@BulletList
+@ListItem { Tiny wrappers around transport-related code
+	@BulletList
+	@ListItem { listen, accept, recv, send, setopts... }
+	@EndList
+}
+@ListItem { Works with any reliable transport
+	@BulletList
+	@ListItem { TCP, SSL }
+	@ListItem { Theorically also the UDP-based ENet }
+	@EndList
+}
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Protocol handlers }
+	@Begin
+
+@BulletList
+@ListItem { Contains the protocol implementation }
+@ListItem { Usually takes the form of a state machine }
+@ListItem { gen_fsm can of course be used }
+@ListItem { Only a "start_link/4" function is required }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Acceptor loop }
+	@Begin
+
+@BulletList
+@ListItem { Wait for a connection }
+@ListItem { Accept the connection
+	@BulletList
+	@ListItem { Start a request process }
+	@ListItem { Give the socket to that new process }
+	@ListItem { Inform the new process everything's ready }
+	@EndList
+}
+@ListItem { Check for max "#" of connections
+	@BulletList
+	@ListItem { Wait if this max is reached }
+	@EndList
+}
+@ListItem { Repeat }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { A pool of many acceptors }
+	@Begin
+
+@BulletList
+@ListItem { Idea taken from Mochiweb }
+@ListItem { Having more than one acceptor process speeds things up }
+@ListItem { Erlang processes are cheap }
+@ListItem { Why not use 100 processes to accept connections? }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Supervision }
+	@Begin
+
+@BulletList
+@ListItem { All processes started by a listener are supervised }
+@ListItem { You don't need to worry about supervision! }
+@ListItem { We're working on release upgrades }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Connection pools }
+	@Begin
+
+@BulletList
+@ListItem { There are different kinds of connections }
+@ListItem { Short-lived "request/response" should have a small max "#" }
+@ListItem { Long-lived idle connections can have a much larger max }
+@ListItem { Pools allow separating those connection types into two groups
+	@BulletList
+	@ListItem { Or more }
+	@EndList
+}
+@ListItem { You can add, move or delete connections from pools }
+@ListItem { By default all connections are added to the pool named 'default' }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Cowboy's HTTP server }
+	@Begin
+
+@BulletList
+@ListItem { Because all applications have their own HTTP interface }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Initial design ideas }
+	@Begin
+
+@BulletList
+@ListItem { gen_fsm, lists }
+@ListItem { Normal process, lists, with "[{active, once}]" }
+@ListItem { Normal process, binary, with "[{active, once}]" }
+@ListItem { Normal process, binary with "[{active, false}]" }
+@ListItem { Normal process, binary, calling "erlang:decode_packet/3" directly }
+@ListItem { We did want binary from the start but it required more custom code }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Dispatch rules }
+	@Begin
+
+@BulletList
+@ListItem { Idea taken from Webmachine }
+@ListItem { Matching hostname and path to HTTP handlers }
+@ListItem { Partial matching allows binding "hostname/path" parts to variables }
+@ListItem { If we had the rule "[<<\"users\">>, id, <<\"pics\">>]"
+	@BulletList
+	@ListItem { The path "/users/42/pics" would match }
+	@ListItem { "{id, 42}" would be added to the bindings }
+	@EndList
+}
+@ListItem { Entirely optional }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { HTTP handlers }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-module(my_handler).
+-export([init/3, handle/2, terminate/2]).
+
+init(_TransportType, Req, _Opts) ->
+    {ok, Req, undefined_state}.
+
+handle(Req, State) ->
+    {ok, Req2} = cowboy_http_req:reply(200, [], <<"Hi EUC!">>,
+        Req),
+    {ok, Req2, State}.
+
+terminate(_Req, _State) ->
+    ok.
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { HTTP request object }
+	@Begin
+
+@BulletList
+@ListItem { Retrieve the method, HTTP version, peer IP and port }
+@ListItem { Retrieve the requested hostname and path }
+@ListItem { Retrieve headers, query string values, bindings, cookies }
+@ListItem { Semantically parse headers }
+@ListItem { Read the body of the request }
+@ListItem { Send a simple or a chunked reply }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { HTTP handler loops }
+	@Begin
+
+@BulletList
+@ListItem { Useful for long-polling or Event Source }
+@ListItem { Receive messages from other processes and send back data }
+@ListItem { Hibernate and timeouts support }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { HTTP handlers for long-polling }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-module(my_loop_handler).
+-export([init/3, info/3, terminate/2]).
+
+init(_TransportType, Req, _Opts) ->
+    my_session_server:hello(),
+    {loop, Req, undefined_state, 60000, hibernate}.
+
+info({my_session_server, Message}, Req, State) ->
+    {ok, Req2} = cowboy_http_req:reply(200, [], Message, Req),
+    {ok, Req2, State};
+info(_Any, Req, State) ->
+    {loop, Req, State, hibernate}.
+
+terminate(_Req, _State) -> ok = my_session_server:bye().
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { Websocket support }
+	@Begin
+
+@BulletList
+@ListItem { Cowboy supports all Websocket protocol versions in use in web browsers }
+@ListItem { New versions get added as soon as browsers start implementing them }
+@ListItem { Cowboy's websocket interface should be future-proof }
+@ListItem { Websocket connections are on a different pool than normal HTTP }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Websocket handlers }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+-module(my_ws_handler).
+-export([init/3, websocket_init/3, websocket_handle/3,
+    websocket_info/3, websocket_terminate/3]).
+
+init(_TransportType, Req, _Opts) ->
+    {upgrade, protocol, cowboy_http_websocket}.
+
+websocket_init(_TransportType, Req, _Opts) ->
+    Req2 = cowboy_http_req:compact(Req),
+    {ok, Req2, undefined_state, 60000, hibernate}.
+
+%% ...
+} }
+@End @Overhead
+
+@Overhead
+	@Title { Websocket handlers continued }
+	@Begin
+
+@CD @F @Box paint { lightyellow } { @Verbatim {
+%% ...
+
+websocket_handle({text, Data}, Req, State) ->
+    {reply, {text, Data}, Req, State, hibernate};
+websocket_handle(_Frame, Req, State) ->
+    {ok, Req, State, hibernate}.
+
+websocket_info(_Info, Req, State) ->
+    {ok, Req, State, hibernate}.
+
+websocket_terminate(_Reason, _Req, _State) ->
+    ok.
+} }
+
+@End @Overhead
+
+@Overhead
+	@Title { REST handlers }
+	@Begin
+
+@BulletList
+@ListItem { Use Webmachine's decision flow diagram }
+@ListItem { Not a rewrite, a new implementation }
+@ListItem { Clean, readable code not requiring the diagram to be understood }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Cowboy is clean code }
+	@Begin
+
+@BulletList
+@ListItem { Easy to understand, easy to debug }
+@ListItem { No process dictionaries or other side effects }
+@ListItem { No parameterized modules }
+@ListItem { Use only documented "Erlang/OTP" features }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Cowboy and OTP }
+	@Begin
+
+@BulletList
+@ListItem { All Cowboy processes are supervised }
+@ListItem { OTP upgrades work (though improvements are coming) }
+@ListItem { HTTP handlers are inspired by gen_servers
+	@BulletList
+	@ListItem { gen_server: client > api call > server }
+	@ListItem { http_handler: http client > http request > http handler }
+	@EndList
+}
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Cowboy's performance }
+	@Begin
+
+@BulletList
+@ListItem { 500 000 concurrent websocket connections and beyond }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Does performance matter? }
+	@Begin
+
+@BulletList
+@ListItem { It depends on your application }
+@ListItem { It probably doesn't matter for 99% of the applications }
+@ListItem { In HTTP, response latency is very important }
+@ListItem { When handling many concurrent connections, memory usage matters }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { 1 process per connection }
+	@Begin
+
+@BulletList
+@ListItem { Other Erlang HTTP servers use 2 processes per connection }
+@ListItem { Cowboy uses only 1 }
+@ListItem { Saves a significant amount of memory }
+@ListItem { Reduces latency thanks to reduced message passing }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Low memory usage: binary }
+	@Begin
+
+@BulletList
+@ListItem { Big binaries are ref counted }
+@ListItem { Small binaries are still smaller than lists }
+@ListItem { Sub-binary optimizations helps reduce copying }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Low memory usage: "cowboy_http_req:compact/1" }
+	@Begin
+
+@BulletList
+@ListItem { Removes everything unwanted from the Req object }
+@ListItem { Lowers memory usage for long-running processes }
+@ListItem { Works especially well with process hibernation }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Requests per seconds }
+	@Begin
+
+@BulletList
+@ListItem { Not a good indicator of performance }
+@ListItem { But a good indicator of a design's simplicity }
+@ListItem { If "requests/s" lowers significantly between two commits, you've messed up }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { The Horse project }
+	@Begin
+
+@BulletList
+@ListItem { Continuous performance testing of the Cowboy project }
+@ListItem { Will measure latency, CPU usage, memory usage... }
+@ListItem { Will produce nice graphs to quickly notice drops and fix them }
+@ListItem { Release expected for Q1 2012 }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Cowboy's related projects }
+	@Begin
+
+@BulletList
+@ListItem { Because the core project should stay lightweight }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Bullet handler }
+	@Begin
+
+@BulletList
+@ListItem { A "Socket.IO/SockJS" alternative }
+@ListItem { Sets up an always connected streaming interface between JS and Erlang }
+@ListItem { Uses Websocket by default, other methods when not available }
+@ListItem { A single interface both client and server-side }
+@ListItem { More work is needed on the JS side }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { cowboy_static handler }
+	@Begin
+
+@BulletList
+@ListItem { A static file handler by Magnus Klaar }
+@ListItem { Using the sendfile code originally from Yaws }
+@ListItem { Will be using the future REST support }
+@ListItem { Available as a separate project }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Bigwig: Spawnfest great winner }
+	@Begin
+
+@BulletList
+@ListItem { Spawnfest is an annual Erlang programming contest }
+@ListItem { First edition took place in June 2011 }
+@ListItem { They produced an awesome webtool replacement with many more features }
+@ListItem { Got the IRCCloud guys interested in Cowboy }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Farwest: a new kind of web development stack }
+	@Begin
+
+@BulletList
+@ListItem { Default administration panel
+	@BulletList
+	@ListItem { Setup your data }
+	@ListItem { Setup your views }
+	@ListItem { Write simple rules to route your data to your views }
+	@ListItem { Write simple rules to create forms and save the data }
+	@ListItem { Edit and reload any client and server-side code live }
+	@ListItem { Edit and reload the dispatch list live }
+	@ListItem { Git integration }
+	@EndList
+}
+@ListItem { NoSQL backend, nice development API and many plugins }
+@ListItem { Beta expected for Q1 2012 }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Cowboy's future }
+	@Begin
+
+@BulletList
+@ListItem { Because they aren't just figures of the past }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Listener upgrades }
+	@Begin
+
+@BulletList
+@ListItem { We want to update the dispatch list on-the-fly }
+@ListItem { We want to update most transport or protocol options }
+@ListItem { Also allow adding or removing acceptors }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Improved dispatcher }
+	@Begin
+
+@BulletList
+@ListItem { API will be improved }
+@ListItem { Allow giving tokens as lists and not just binaries }
+@ListItem { Hostname and path hierarchy will be added }
+@ListItem { Might eventually switch to matchspecs for better performance }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { gen_event for request tracking and monitoring }
+	@Begin
+
+@BulletList
+@ListItem { Ad-hoc error and access logging }
+@ListItem { Allows writing custom event handlers }
+@ListItem { No cost when no handlers are defined }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Multipart support }
+	@Begin
+
+@BulletList
+@ListItem { File upload support }
+@ListItem { Convenience function
+	@BulletList
+	@ListItem { Save all files to temporary locations }
+	@ListItem { Return the paths along with the additional POST parameters }
+	@EndList
+}
+@ListItem { Streaming
+	@BulletList
+	@ListItem { Stream each parts individually }
+	@ListItem { Stream each parts' payload }
+	@EndList
+}
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Aiming for full "HTTP/1.1" compliance }
+	@Begin
+
+@BulletList
+@ListItem { Support for all "HTTP/1.1" features }
+@ListItem { Correct "HTTP/1.0" clients handling }
+@ListItem { Semantic parsing of all header values }
+@ListItem { Gzip compression enabled by default for replies }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Up-to-date Websocket support }
+	@Begin
+
+@BulletList
+@ListItem { We are actively monitoring the Websocket draft changes }
+@ListItem { Updated implementation usually supported within 7 days }
+@ListItem { Interface shouldn't be changing anymore }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Links }
+	@Begin
+
+@BulletList
+@ListItem { cowboy: "https://github.com/extend/cowboy" @ExternalLink { "https://github.com/extend/cowboy" } }
+@ListItem { bullet: "https://github.com/extend/bullet" @ExternalLink { "https://github.com/extend/bullet" } }
+@EndList
+
+@DP
+
+@BulletList
+@ListItem { essen on "#erlounge" and "#erlang" on Freenode }
+@ListItem { "@lhoguin" on Twitter }
+@ListItem { Loïc Hoguin on G+ }
+@ListItem { "essen@dev-extend.eu" }
+@EndList
+
+@End @Overhead
+
+@Overhead
+	@Title { Questions? }
+	@Begin
+
+@BulletList
+@ListItem { I won't shoot you for asking! }
+@EndList
+
+@End @Overhead

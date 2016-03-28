@@ -1,0 +1,44 @@
+{{ partial "header.html" . }}
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<h1 class="lined-header"><span>Talks</span></h1>
+
+{{ if $.Site.Data.talks.future }}
+<h2>Upcoming Talks</h2>
+<div id="events" class="eventslist">
+	{{ range $.Site.Data.talks.future }}
+		<article class="event">
+			<p class="date">
+				<span class="day">{{ .date.Format "02" }}</span>
+				<span class="month">{{ .date.Format "Jan" }}</span>
+			</p>
+			<h3>{{ .title }}</h3>
+			<p>Conference: <a href="{{ .link }}">{{ .name }}</a></p>
+			<p>{{ .location }}</p>
+		</article>
+	{{ end }}
+</div>
+
+<h2>Previous Talks</h2>
+{{ end }}
+
+<ul>
+	{{ range $.Site.Data.talks.past }}
+		<li><span class="item_title">{{ .name }}</span><a href="{{ .link }}">{{ .title }}</a></li>
+	{{ end }}
+</ul>
+
+</div>
+<div class="span3 sidecol">
+{{ .Content }}
+</div>
+</div>
+</div>
+</div>
+
+{{ partial "footer.html" . }}

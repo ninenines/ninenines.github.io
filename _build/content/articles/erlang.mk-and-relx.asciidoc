@@ -1,0 +1,131 @@
++++
+date = "2013-05-28T00:00:00+01:00"
+title = "Build Erlang releases with Erlang.mk and Relx"
+
++++
+
+Building OTP releases has always been a difficult task. Tools like
+Reltool or Rebar have made this simpler, but
+it's no panacea. This article will show you an alternative and
+hopefully much simpler solution.
+
+There is two steps to building a release. First you need to build
+the various OTP applications you want to include in the release. Once
+done, you need to create the release itself, by including the Erlang
+runtime system alongside the applications, a boot script to start the
+node and all its applications, and some configuration files.
+
+https://github.com/extend/erlang.mk[Erlang.mk] solves
+the first step. It is an include file for GNU Make. Just
+including it in a Makefile is enough to allow building your project,
+fetching and building dependencies, building documentation, performing
+static analysis and more.
+
+https://github.com/erlware/relx[Relx] solves the second
+step. It is a release creation tool, wrapped into a single executable
+file. It doesn't require a configuration file. And if you do need one,
+it will be a pretty small one.
+
+Let's take a look at the smallest Erlang.mk powered
+Makefile. There is only one thing required: defining the project
+name.
+
+[source,make]
+----
+PROJECT = my_project
+
+include erlang.mk
+----
+
+Simply doing this allows you to build your application by typing
+`make`, running tests using `make tests`, and
+more. It will even compile your '.dtl' files found in the
+'templates/' directory if you are using ErlyDTL!
+
+Let's now take a look at a simplified version of the Makefile for
+this website. I only removed a few targets that were off-topic.
+
+[source,make]
+----
+PROJECT = ninenines
+
+DEPS = cowboy erlydtl
+dep_cowboy = https://github.com/extend/cowboy.git 0.8.5
+dep_erlydtl = https://github.com/evanmiller/erlydtl.git 4d0dc8fb
+
+.PHONY: release clean-release
+
+release: clean-release all projects
+	relx -o rel/$(PROJECT)
+
+clean-release: clean-projects
+	rm -rf rel/$(PROJECT)
+
+include erlang.mk
+----
+
+You can see here how to define dependencies. First you list all
+the dependency names, then you have one line per dependency, giving
+the repository URL and the commit number, tag or branch you want.
+
+Then you can see two targets defined, with `release`
+becoming the default target, because it was defined first. You can
+override the default target `all`, which builds the
+application and its dependencies, this way.
+
+And as you can see, the `release` target uses
+Relx to build a release into the 'rel/ninenines/'
+directory. Let's take a look at the configuration file for this release.
+
+[source,erlang]
+----
+{release, {ninenines, "1"}, [ninenines]}.
+
+{extended_start_script, true}.
+{sys_config, "rel/sys.config"}.
+
+{overlay, [
+	{mkdir, "log"},
+	{copy, "rel/vm.args",
+		"releases/\{\{release_name\}\}-\{\{release_version\}\}/vm.args"}
+]}.
+----
+
+The first line defines a release named `ninenines`, which
+has a version number `"1"` and includes one application, also
+named `ninenines`, although it doesn't have to.
+
+We then use the `extended_start_script` option to tell
+Relx that we would like to have a start script that allows
+us to not only start the release, but do so with the node in the
+background, or also to allow us to connect to a running node, and so on.
+This start script has the same features as the one tools like
+Rebar generates.
+
+The rest of the file just makes sure our configuration files are
+where we expect them. Relx will automatically take care
+of your 'sys.config' file as long as you tell it where to
+find it. The 'vm.args' file used by the extended start script
+needs to be handled more explicitly by using an overlay however.
+
+How does Relx find what applications to include?
+By looking at the application dependencies in the '.app'
+file of each OTP application. Make sure you put all dependencies in
+there, _including_ library applications, and Relx
+will find everything for you.
+
+For example, this release includes the following applications.
+Only what's strictly required.
+
+----
+compiler-4.9.1	crypto-2.3     kernel-2.16.1	ranch-0.8.3    syntax_tools-1.6.11
+cowboy-0.8.5	erlydtl-0.7.0  ninenines-0.2.0	stdlib-1.19.1
+----
+
+The 'sys.config' file is standard and
+http://www.erlang.org/doc/man/config.html[well documented].
+The 'vm.args' file is just an optionally multiline file
+containing all the flags to pass to the Erlang VM, for example
+`-name ninenines@127.0.0.1 -heart`.
+
+Building OTP releases has always been a difficult task. Until now.

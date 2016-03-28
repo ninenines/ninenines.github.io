@@ -1,0 +1,152 @@
++++
+date = "2013-02-03T00:00:00+01:00"
+title = "Xerl: two modules"
+
++++
+
+Everything is an expression.
+
+This sentence carries profound meaning. We will invoke it many
+times over the course of these articles.
+
+If everything is an expression, then the language shouldn't have
+any problem with me defining two modules in the same source file.
+
+[source,erlang]
+----
+mod first_module
+begin
+end
+
+mod second_module
+begin
+end
+----
+
+Likewise, it shouldn't have any problem with me defining a
+module inside another module.
+
+[source,erlang]
+----
+mod out_module
+begin
+    mod in_module
+    begin
+    end
+end
+----
+
+Of course, in the context of the Erlang VM, these two snippets
+are equivalent; there is nothing preventing you from calling the
+`in_module` module from any other module. The `mod`
+instruction means a module should be created in the Erlang VM,
+with no concept of scope attached.
+
+Still we need to handle both. To do this we will add a step
+between the parser and the code generator that will walk over the
+abstract syntax tree, from here onward shortened as _AST_,
+and transform the AST by executing it where applicable.
+
+What happens when you execute a `mod` instruction?
+A module is created. Since we are compiling, that simply means
+the compiler will branch out and create a module.
+
+If everything is an expression, does that mean this will allow
+me to create modules at runtime using the same syntax? Yes, but
+let's not get ahead of ourselves yet.
+
+For now we will just iterate over the AST, and will compile
+a module for each `mod` found. Modules cannot contain
+expressions yet, so there's no need to recurse over it at this
+point. This should solve the compilation of our first snippet.
+
+The `compile/1` function becomes:
+
+[source,erlang]
+----
+compile(Filename) ->
+	io:format("Compiling ~s...~n", [Filename]),
+	{ok, Src} = file:read_file(Filename),
+	{ok, Tokens, _} = xerl_lexer:string(binary_to_list(Src)),
+	{ok, Exprs} = xerl_parser:parse(Tokens),
+	execute(Filename, Exprs, []).
+
+execute(_, [], Modules) ->
+	io:format("Done...~n"),
+	{ok, lists:reverse(Modules)};
+execute(Filename, [Expr = {mod, _, {atom, _, Name}, []}|Tail], Modules) ->
+	{ok, [Core]} = xerl_codegen:exprs([Expr]),
+	{ok, [{Name, []}]} = core_lint:module(Core),
+	io:format("~s~n", [core_pp:format(Core)]),
+	{ok, _, Beam} = compile:forms(Core,
+		[binary, from_core, return_errors, {source, Filename}]),
+	{module, Name} = code:load_binary(Name, Filename, Beam),
+	execute(Filename, Tail, [Name|Modules]).
+----
+
+Running this compiler over the first snippet yields the following
+result:
+
+[source,erlang]
+----
+Compiling test/mod_SUITE_data/two_modules.xerl...
+module 'first_module' ['module_info'/0,
+                       'module_info'/1]
+    attributes []
+'module_info'/0 =
+    fun () ->
+        call 'erlang':'get_module_info'
+            ('first_module')
+'module_info'/1 =
+    fun (Key) ->
+        call 'erlang':'get_module_info'
+            ('first_module', Key)
+end
+module 'second_module' ['module_info'/0,
+                        'module_info'/1]
+    attributes []
+'module_info'/0 =
+    fun () ->
+        call 'erlang':'get_module_info'
+            ('second_module')
+'module_info'/1 =
+    fun (Key) ->
+        call 'erlang':'get_module_info'
+            ('second_module', Key)
+end
+Done...
+{ok,[first_module,second_module]}
+----
+
+Everything looks fine. And we can check that the two modules have
+been loaded into the VM:
+
+[source,erlang]
+----
+9> m(first_module).
+Module first_module compiled: Date: February 2 2013, Time: 14.56
+Compiler options:  [from_core]
+Object file: test/mod_SUITE_data/two_modules.xerl
+Exports: 
+         module_info/0
+         module_info/1
+ok
+10> m(second_module).
+Module second_module compiled: Date: February 2 2013, Time: 14.56
+Compiler options:  [from_core]
+Object file: test/mod_SUITE_data/two_modules.xerl
+Exports: 
+         module_info/0
+         module_info/1
+ok
+----
+
+So far so good!
+
+What about the second snippet? It brings up many questions. What
+happens once a `mod` expression has been executed at
+compile time? If it's an expression then it has to have a result,
+right? Right. We are still a bit lacking with expressions for now,
+though, so let's get back to it after we add more.
+
+* https://github.com/extend/xerl/blob/0.2/[View the source]

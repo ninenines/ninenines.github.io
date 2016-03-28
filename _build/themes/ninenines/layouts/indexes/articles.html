@@ -1,0 +1,36 @@
+{{ partial "header.html" . }}
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<h1 class="lined-header"><span>Articles</span></h1>
+
+{{ range (.Paginate (where .Data.Pages "Type" "articles")).Pages }}
+	<article class="blog_item">
+		<header>
+			<h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+			<p class="date">
+				<span class="day">{{ .Date.Format "02" }}</span>
+				<span class="month">{{ .Date.Format "Jan" }}</span>
+			</p>
+		</header>
+
+		<p>{{ .Summary }}</p>
+
+		<p style="text-align:right">
+			<a class="read_more" href="{{ .Permalink }}">Read More</a>
+		</p>
+	</article>
+{{ end }}
+
+{{ partial "pagination.html" . }}
+
+</div>
+</div>
+</div>
+</div>
+
+{{ partial "footer.html" . }}
