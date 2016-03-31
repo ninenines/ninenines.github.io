@@ -9,7 +9,7 @@
 
     <meta name="generator" content="Hugo 0.15" />
 
-    <title>Nine Nines: Xerl: expression separator</title>
+    <title>Nine Nines: Website update</title>
 
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
 	
@@ -69,65 +69,70 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Xerl: expression separator</span></h1>
+	<h1 class="lined-header"><span>Website update</span></h1>
 	<p class="date">
-		<span class="day">01</span>
-		<span class="month">Mar</span>
+		<span class="day">02</span>
+		<span class="month">Apr</span>
 	</p>
 </header>
 
-<div class="paragraph"><p>As promised we are adding an expression separator this time.
-This will be short and easy.</p></div>
-<div class="paragraph"><p>In the tokenizer we only need to add a line recognizing the
-comma as a valid token.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>, <span style="color: #990000">:</span> {<span style="color: #FF6600">token</span>, {<span style="color: #FF6600">','</span>, <span style="color: #009900">TokenLine</span>}}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Then we need to change the following lines in the parser:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span>
-<span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">exprs</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span> | <span style="color: #FF6600">'$2'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>And add a comma between the expressions on the second line:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span>
-<span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">','</span> <span style="color: #FF6600">exprs</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span> | <span style="color: #FF6600">'$3'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>That takes care of everything except the optional trailing
-comma at the end of our lists of expressions. We just need an
-additional rule to take care of this.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">','</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>That&#8217;s it.</p></div>
-<div class="paragraph"><p>Wondering why we don&#8217;t have this optional trailing comma in
-Erlang considering how easy it was and the number of people
-complaining about it? Yeah, me too. But that&#8217;s for someone else
-to answer.</p></div>
-<div class="paragraph"><p>Another change I want to talk about is a simple modification
-of the compiler code to use an <code>#env{}</code> record for
-tracking state instead of passing around individual variables.
-This will be required later on when we make modules into proper
-expressions so I thought it was a good idea to anticipate.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<a href="https://github.com/extend/xerl/blob/0.4/">View the source</a>
-</p>
-</li>
-</ul></div>
+<div class="paragraph"><p>Last week-end I updated the Nine Nines website.</p></div>
+<div class="paragraph"><p>I switched to <a href="http://gohugo.io/">Hugo</a>. The site is
+now built from <a href="http://asciidoc.org/">Asciidoc</a>
+documents. You probably saw me switch to Asciidoc
+for documentation this past year. This is the
+natural conclusion to that story. The great thing
+is that with a little bit of Makefile magic I can
+just copy the documentation files into Hugo and
+poof, they appear on the website.</p></div>
+<div class="paragraph"><p>I am very happy with that new setup. I can now
+post my thoughts again. Woo! Expect regular posts
+from now on. I will try to replace my long series
+of tweets with posts.</p></div>
+<div class="paragraph"><p>The sections have been rearranged. There used to
+be a separate training section; now
+<a href="/services">all my services</a> are described in
+one page. I have also clarified my areas of
+expertise. There used to be confusion in the past,
+so now it should be clearer that I am not a
+distributed systems expert.</p></div>
+<div class="paragraph"><p>On that note, if you are looking for my
+services right now, I&#8217;m not available. I&#8217;ll have
+to work 7 days a week for a while. Try again in a
+couple months. More on that in a future post.</p></div>
+<div class="paragraph"><p>The <a href="/docs">documentation</a> becomes a first class
+citizen. Bullet and Cowlib don&#8217;t have proper
+documentation&#8230; yet. I have started working on the
+Cowlib documentation, and Bullet shouldn&#8217;t take too
+long. All these projects will be documented when
+Cowboy gets to 2.0, and will all be supported
+equally. Note that the Cowboy 1.0 documentation
+still has the old website templates and links.
+Don&#8217;t worry about it.</p></div>
+<div class="paragraph"><p>The mailing lists link has been removed. I did
+announce a few months back that mailing lists were
+going to go. They&#8217;re still up right now, but not
+for long. I am planning to put the archives
+read-only, link to them from a future post and
+be done with it. If you have a question, open a
+ticket on Github. Then I can just decide to leave
+the ticket open if I want to do improvements based
+on your feedback.</p></div>
+<div class="paragraph"><p>I have replaced most of the "we" by "I". I am
+a one-man company right now. Have been for a while.
+Doesn&#8217;t make sense to keep a facade. I want to be
+close to users, not put a barrier between us.</p></div>
+<div class="paragraph"><p>The RSS changed. The old link doesn&#8217;t work anymore.
+The new link is at <a href="/index.xml">/index.xml</a>,
+or <a href="/articles/index.xml">/articles/index.xml</a>
+if you only care about my posts. I guess that&#8217;s the
+one most people want.</p></div>
+<div class="paragraph"><p>I still have some tweaks to do, but it will take a
+while. My long term plan is to remove Bootstrap, use
+vanilla CSS and as little JS as possible. The reason
+for that is that it&#8217;s cheaper than upgrading libraries
+every few years. Life is too short to spend it
+upgrading JS libraries.</p></div>
 
 </article>
 </div>
