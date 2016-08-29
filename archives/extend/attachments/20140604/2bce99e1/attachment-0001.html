@@ -1,0 +1,18 @@
+<tt>
+&lt;div&nbsp;dir=&quot;ltr&quot;&gt;&lt;br&gt;&lt;div&nbsp;class=&quot;gmail_extra&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;div&nbsp;class=&quot;gmail_quote&quot;&gt;On&nbsp;Wed,&nbsp;Jun&nbsp;4,&nbsp;2014&nbsp;at&nbsp;4:48&nbsp;PM,&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;span&nbsp;dir=&quot;ltr&quot;&gt;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&lt;/span&gt;&nbsp;wrote:&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;&lt;div&nbsp;class=&quot;&quot;&gt;On&nbsp;06/04/2014&nbsp;10:08&nbsp;PM,&nbsp;Daniel&nbsp;Goertzen&nbsp;wrote:&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;<br>
+I&nbsp;am&nbsp;having&nbsp;very&nbsp;good&nbsp;luck&nbsp;with&nbsp;Cowboy&nbsp;so&nbsp;far,&nbsp;but&nbsp;I&nbsp;have&nbsp;some&nbsp;questions:&lt;br&gt;<br>
+&lt;br&gt;<br>
+1.&nbsp;There&nbsp;doesn&#39;t&nbsp;appear&nbsp;to&nbsp;be&nbsp;any&nbsp;way&nbsp;to&nbsp;do&nbsp;client&nbsp;certificate&lt;br&gt;<br>
+authorization&nbsp;in&nbsp;Cowboy,&nbsp;although&nbsp;I&nbsp;see&nbsp;there&nbsp;is&nbsp;an&nbsp;example&nbsp;for&nbsp;doing&lt;br&gt;<br>
+exactly&nbsp;that&nbsp;with&nbsp;Ranch.&nbsp; I&nbsp;think&nbsp;I&nbsp;could&nbsp;modify&nbsp;Cowboy&nbsp;to&nbsp;do&nbsp;what&nbsp;I&lt;br&gt;<br>
+want,&nbsp;but&nbsp;I&nbsp;thought&nbsp;I&nbsp;would&nbsp;ask&nbsp;if&nbsp;there&nbsp;were&nbsp;other&nbsp;options&nbsp;before&nbsp;doing&lt;br&gt;<br>
+that.&lt;br&gt;<br>
+&lt;/blockquote&gt;<br>
+&lt;br&gt;&lt;/div&gt;<br>
+Same&nbsp;as&nbsp;Ranch&nbsp;really,&nbsp;you&nbsp;just&nbsp;gotta&nbsp;take&nbsp;the&nbsp;socket&nbsp;and&nbsp;then&nbsp;call&nbsp;the&nbsp;ssl&nbsp;functions.&lt;div&nbsp;class=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;/blockquote&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Yes,&nbsp;but&nbsp;in&nbsp;cowboy&nbsp;there&#39;s&nbsp;no&nbsp;API&nbsp;to&nbsp;get&nbsp;at&nbsp;the&nbsp;socket.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;<br>
+&lt;div&gt;I&nbsp;was&nbsp;thinking&nbsp;of&nbsp;adding&nbsp;a&nbsp;&quot;onconnect&quot;&nbsp;hook&nbsp;similar&nbsp;to&nbsp;how&nbsp;there&nbsp;are&nbsp;&quot;onrequest&quot;&nbsp;and&nbsp;&quot;onresponse&quot;&nbsp;hooks.&nbsp; The&nbsp;hook&nbsp;would&nbsp;be&nbsp;called&nbsp;in&nbsp;cowboy_protocol:init(),&nbsp;would&nbsp;accept&nbsp;Transport&nbsp;and&nbsp;Socket,&nbsp;and&nbsp;return&nbsp;a&nbsp;&quot;user&nbsp;connection&nbsp;state&quot;&nbsp;term&nbsp;that&nbsp;gets&nbsp;stashed&nbsp;in&nbsp;the&nbsp;state&nbsp;record.&nbsp; The&nbsp;user&nbsp;connection&nbsp;state&nbsp;would&nbsp;then&nbsp;be&nbsp;provided&nbsp;in&nbsp;the&nbsp;Req&nbsp;object&nbsp;to&nbsp;each&nbsp;handler.&nbsp; With&nbsp;these&nbsp;features&nbsp;one&nbsp;could&nbsp;do&nbsp;whatever&nbsp;computation&nbsp;they&nbsp;want&nbsp;on&nbsp;the&nbsp;socket&nbsp;and&nbsp;provide&nbsp;the&nbsp;result&nbsp;to&nbsp;all&nbsp;subsequent&nbsp;requests&nbsp;on&nbsp;that&nbsp;socket.&nbsp; I&nbsp;want&nbsp;to&nbsp;use&nbsp;it&nbsp;for&nbsp;client&nbsp;cert&nbsp;checking,&nbsp;but&nbsp;it&nbsp;could&nbsp;be&nbsp;used&nbsp;for&nbsp;other&nbsp;things&nbsp;such&nbsp;as&nbsp;an&nbsp;IP&nbsp;address&nbsp;security&nbsp;check.&lt;/div&gt;<br>
+&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Dan.&lt;br&gt;&lt;/div&gt;&lt;div&gt; &lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;<br>
+
+</tt>

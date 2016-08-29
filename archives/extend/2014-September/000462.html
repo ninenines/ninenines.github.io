@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Using cowboy_req:body more than once per request
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Using%20cowboy_req%3Abody%20more%20than%20once%20per%20request&In-Reply-To=%3C541766A3.4070309%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000458.html">
+   <LINK REL="Next"  HREF="000463.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Using cowboy_req:body more than once per request</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Using%20cowboy_req%3Abody%20more%20than%20once%20per%20request&In-Reply-To=%3C541766A3.4070309%40ninenines.eu%3E"
+       TITLE="[99s-extend] Using cowboy_req:body more than once per request">essen at ninenines.eu
+       </A><BR>
+    <I>Tue Sep 16 00:22:27 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000458.html">[99s-extend] Using cowboy_req:body more than once per request
+</A></li>
+        <LI>Next message: <A HREF="000463.html">[99s-extend] Using cowboy_req:body more than once per request
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#462">[ date ]</a>
+              <a href="thread.html#462">[ thread ]</a>
+              <a href="subject.html#462">[ subject ]</a>
+              <a href="author.html#462">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>It seems a bit weird to me to read the body and validate it before 
+validating the request itself.
+
+I would explicitly put these checks in the handler directly. This of 
+course means that there is no need to read it twice anymore.
+
+On 09/15/2014 11:24 PM, Paulo F. Oliveira wrote:
+&gt;<i> Hi.
+</I>&gt;<i>
+</I>&gt;<i> I recently implemented a checksum header (X-Checksum) that allows
+</I>&gt;<i> validating the content of a request's body by hash comparison (just to
+</I>&gt;<i> give you some context). I'm using the onrequest hook to affect all
+</I>&gt;<i> requests (and be able to reply appropriately for non-conformance to the
+</I>&gt;<i> hash function result) but can't figure out how to not read the request
+</I>&gt;<i> body twice, i.e. I read it in the onrequest hook but later on need to
+</I>&gt;<i> read it again in the route handler, but I can't (from the manual, for
+</I>&gt;<i> cowboy_req:body: &quot;This function can only be called once. Cowboy will not
+</I>&gt;<i> cache the result of this call.&quot;). At the moment, and because the API
+</I>&gt;<i> consumers were in a hurry, the solution I found (I understand it might
+</I>&gt;<i> be an ugly hack), was to read the body, store it in the Req's meta
+</I>&gt;<i> (property body, for example) and then access that property later on,
+</I>&gt;<i> instead of using cowboy_req:body. I'm not quite happy with this solution
+</I>&gt;<i> and was wondering if there is anything more elegant that I can implement.
+</I>&gt;<i>
+</I>&gt;<i> Thanks.
+</I>&gt;<i>
+</I>&gt;<i> Cheers.
+</I>&gt;<i>
+</I>&gt;<i> - Paulo F. Oliveira
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000458.html">[99s-extend] Using cowboy_req:body more than once per request
+</A></li>
+	<LI>Next message: <A HREF="000463.html">[99s-extend] Using cowboy_req:body more than once per request
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#462">[ date ]</a>
+              <a href="thread.html#462">[ thread ]</a>
+              <a href="subject.html#462">[ subject ]</a>
+              <a href="author.html#462">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

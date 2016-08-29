@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy Calling Hostname
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20Calling%20Hostname&In-Reply-To=%3C9CEDE09F-E3AF-47FB-95B4-6550000B4CE7%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000266.html">
+   <LINK REL="Next"  HREF="000268.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy Calling Hostname</H1>
+    <B>Lee Sylvester</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20Calling%20Hostname&In-Reply-To=%3C9CEDE09F-E3AF-47FB-95B4-6550000B4CE7%40gmail.com%3E"
+       TITLE="[99s-extend] Cowboy Calling Hostname">lee.sylvester at gmail.com
+       </A><BR>
+    <I>Thu Oct 10 08:05:23 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000266.html">[99s-extend] Cowboy Calling Hostname
+</A></li>
+        <LI>Next message: <A HREF="000268.html">[99s-extend] SSL Example
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#267">[ date ]</a>
+              <a href="thread.html#267">[ thread ]</a>
+              <a href="subject.html#267">[ subject ]</a>
+              <a href="author.html#267">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thank you, Daniel.  The project looks very useful.  At this stage, I don't need to strictly require calls to come from a set domain but would like this to be a hurdle for hackers.  I may set up an IP restriction instead.
+
+Thanks,
+Lee
+
+Sent from my iPhone
+
+&gt;<i> On Oct 10, 2013, at 12:03 AM, Daniel White &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">daniel at whitehouse.id.au</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;<i> Depending on your requirements, there is a high likelihood that you
+</I>&gt;<i> need to support pre-flight requests.  Especially if you're intending
+</I>&gt;<i> on providing credentials in the requests.  Many of the interesting
+</I>&gt;<i> headers are not simple headers (for CORS) and require a handshake
+</I>&gt;<i> first between browser and server to ensure the headers in question are
+</I>&gt;<i> allowed to be sent.
+</I>&gt;<i> 
+</I>&gt;<i> This obviously limits the amount of information you can determine
+</I>&gt;<i> about the caller.  One alternative here, is the use of OAuth2 with the
+</I>&gt;<i> 'access_token' query parameter.  This can be sent along with the
+</I>&gt;<i> pre-flight request.
+</I>&gt;<i> 
+</I>&gt;<i> On the other hand, some providers (Github, IIRC) will simply validate
+</I>&gt;<i> a CORS request by comparing the 'Origin' against their entire list of
+</I>&gt;<i> registered origins.  This opens up some opportunity for abuse by other
+</I>&gt;<i> clients in the system, but can be further mitigated by enforcing the
+</I>&gt;<i> 'Origin' more strictly at the authorization step of the request.
+</I>&gt;<i> 
+</I>&gt;<i> As an aside, I have a cowboy middleware project to do the heavy
+</I>&gt;<i> lifting for CORS at <A HREF="https://github.com/danielwhite/cowboy_cors.">https://github.com/danielwhite/cowboy_cors.</A>
+</I>&gt;<i> Business policies can be implemented by means of a callback module.
+</I>&gt;<i> 
+</I>&gt;<i> Cheers,
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;&gt;<i> On Thu, Oct 10, 2013 at 4:28 AM, Lee Sylvester &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">lee.sylvester at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;<i> Essentially, the REST service endpoint would be on widgets.net while the
+</I>&gt;&gt;<i> clients website, in this case things.com, has a JavaScript that makes an
+</I>&gt;&gt;<i> AJAX call to widgets.net.  The account on widgets.net for things.com will
+</I>&gt;&gt;<i> have the things.com domain registered to its account, so that widgets.net
+</I>&gt;&gt;<i> can check to see if the request is coming from an expected domain.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Thanks,
+</I>&gt;&gt;<i> Lee
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> On 9 Oct 2013, at 16:51, Nathan Michaels &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">nathan at nmichaels.org</A>&gt; wrote:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Is the client making the request to your service on widgets.net because
+</I>&gt;&gt;<i> things.com sent them there, or is things.com making the request directly on
+</I>&gt;&gt;<i> behalf of the client? The first is what Lo&#239;c is talking about. The second is
+</I>&gt;&gt;<i> the source IP of the request, which you can definitely get.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> On Wed, Oct 9, 2013 at 11:32 AM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt; wrote:
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> In short: you can't.
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> Browsers may send origin/referer/.. headers depending on the type of
+</I>&gt;&gt;&gt;<i> request, but you can't rely on them to be real or even just there.
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> On 10/09/2013 05:30 PM, Lee Sylvester wrote:
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> Thank you.  I couldn't work out if that's the host being called from or
+</I>&gt;&gt;&gt;&gt;<i> the host name in the request.  For example, a store called things.com makes
+</I>&gt;&gt;&gt;&gt;<i> a request to my service on widgets.net.  I need to see that the request is
+</I>&gt;&gt;&gt;&gt;<i> made FROM things.com for validation purposes. Is it correct that host will
+</I>&gt;&gt;&gt;&gt;<i> provide this?
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> Thanks,
+</I>&gt;&gt;&gt;&gt;<i> Lee
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> Sent from my iPhone
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> On Oct 9, 2013, at 2:31 PM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt; wrote:
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> cowboy_req:host/1?
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> Please use the nice manual we have now.
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i>  <A HREF="http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req">http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req</A>
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> Hi,
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> When receiving a Cowboy request, is there a way to find out which
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> hostname the user made the request from?  I'm using CORS in my REST and
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> Bullet app, where each call can be made through a given account.  However,
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> I'd like to be able to lock requests for each account to a designated
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> hostname to protect that users account usage.
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> Thanks,
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> Lee
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;&gt;&gt;&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;&gt;<i> --
+</I>&gt;&gt;&gt;&gt;&gt;<i> Lo&#239;c Hoguin
+</I>&gt;&gt;&gt;&gt;&gt;<i> Erlang Cowboy
+</I>&gt;&gt;&gt;&gt;&gt;<i> Nine Nines
+</I>&gt;&gt;&gt;&gt;&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> --
+</I>&gt;&gt;&gt;<i> Lo&#239;c Hoguin
+</I>&gt;&gt;&gt;<i> Erlang Cowboy
+</I>&gt;&gt;&gt;<i> Nine Nines
+</I>&gt;&gt;&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> -- 
+</I>&gt;<i> Daniel White
+</I>
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000266.html">[99s-extend] Cowboy Calling Hostname
+</A></li>
+	<LI>Next message: <A HREF="000268.html">[99s-extend] SSL Example
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#267">[ date ]</a>
+              <a href="thread.html#267">[ thread ]</a>
+              <a href="subject.html#267">[ subject ]</a>
+              <a href="author.html#267">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

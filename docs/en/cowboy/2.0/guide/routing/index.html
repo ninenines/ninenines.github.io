@@ -107,14 +107,14 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">PathsList</span> <span style="color: #990000">=</span> [<span style="color: #009900">Path1</span>, <span style="color: #009900">Path2</span>, <span style="color: #990000">...</span> <span style="color: #009900">PathN</span>]<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Finally, each path contains matching rules for the path along with
 optional constraints, and gives us the handler module to be used
-along with options that will be given to it on initialization.</p></div>
+along with its initial state.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Path1</span> <span style="color: #990000">=</span> {<span style="color: #009900">PathMatch</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">Opts</span>}<span style="color: #990000">.</span>
-<span style="color: #009900">Path2</span> <span style="color: #990000">=</span> {<span style="color: #009900">PathMatch</span>, <span style="color: #009900">Constraints</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">Opts</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="color: #009900">Path1</span> <span style="color: #990000">=</span> {<span style="color: #009900">PathMatch</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">InitialState</span>}<span style="color: #990000">.</span>
+<span style="color: #009900">Path2</span> <span style="color: #990000">=</span> {<span style="color: #009900">PathMatch</span>, <span style="color: #009900">Constraints</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">InitialState</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Continue reading to learn more about the match syntax and the optional
 constraints.</p></div>
 </div>
@@ -297,13 +297,13 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
-    <span style="font-style: italic"><span style="color: #9A1900">%% {HostMatch, list({PathMatch, Handler, Opts})}</span></span>
-    {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF6600">'_'</span>, <span style="color: #FF6600">my_handler</span>, []}]}
+    <span style="font-style: italic"><span style="color: #9A1900">%% {HostMatch, list({PathMatch, Handler, InitialState})}</span></span>
+    {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF6600">'_'</span>, <span style="color: #FF6600">my_handler</span>, #{}}]}
 ]),
 <span style="font-style: italic"><span style="color: #9A1900">%% Name, NbAcceptors, TransOpts, ProtoOpts</span></span>
-<span style="font-weight: bold"><span style="color: #000000">cowboy:start_http</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #993399">100</span>,
+<span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #993399">100</span>,
     [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
-    [{<span style="color: #FF6600">env</span>, [{<span style="color: #FF6600">dispatch</span>, <span style="color: #009900">Dispatch</span>}]}]
+    #{<span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}}
 )<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Note that this function will return <code>{error, badarg}</code> if the structure
 given is incorrect.</p></div>

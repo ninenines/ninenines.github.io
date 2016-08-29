@@ -1,0 +1,1740 @@
+From psihonavt at gmail.com  Mon Mar  3 21:49:33 2014
+From: psihonavt at gmail.com (Anton Koval')
+Date: Mon, 3 Mar 2014 22:49:33 +0200
+Subject: [99s-extend] usage of make_* command
+Message-ID: <CAD9h6NFVnE3y6QDj9WPMA8sKZWwzE6==9c8MzJitE=GYEocgmw@mail.gmail.com>
+
+Hello,
+
+I have next structure of my project:
+.
+??? deps
+?   ??? cowboy
+?   ??? cowlib
+?   ??? erlang_iconv
+?   ??? erlydtl
+?   ??? mochiweb_xpath
+?   ??? ranch
+??? ebin
+?   ??? fetchers.beam
+?   ??? parsers.beam
+?   ??? wasearch_sup.beam
+??? erlang.mk
+??? Makefile
+??? _rel
+?   ??? ....
+??? relx
+??? relx.config
+??? src
+?   ??? fetchers.erl
+?   ??? main_handler.erl
+?   ??? parsers.erl
+?   ??? tests
+?   ?   ??? parsers_SUITE_data
+?   ?   ??? parsers_SUITE.erl
+?   ?   ??? ....
+?   ??? wasearch_app.erl
+?   ??? wasearch.app.src
+?   ??? wasearch_sup.erl
+??? templates
+    ??? index.dtl
+
+I would prefer to store tests not in `src` directory but rather in `tests`
+subdirectory.
+Erlang.mk README says: You can run an individual test suite by using the
+special test_* targets. For example if you have a common_test suite named
+spdy and you want to run only this suite and not the others, you can use
+the make test_spdy command.
+And of course `make test_parsers`  returns `no rule to make target` error.
+Is there a way to run suites from custom directory with
+`make_<mod_name_with_suite>` command?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140303/52007acc/attachment.html>
+
+From mark.nijhof at cre8ivethought.com  Thu Mar  6 00:47:08 2014
+From: mark.nijhof at cre8ivethought.com (Mark Nijhof)
+Date: Thu, 6 Mar 2014 00:47:08 +0100
+Subject: [99s-extend] Cowboy pre request filter
+Message-ID: <CACE=TJris=4eTreF13p+bSmhfEqoKtpfj3PGyMCup1zfCRurkQ@mail.gmail.com>
+
+Hi,
+
+I want to create a module that basically sits between the incoming request
+and the http handler for that request to ensure a request is authenticated
+(using a cookie), if the request is not authenticated then I like to
+redirect to a specific login page (which should not be filtered).
+
+Is this possible with Cowboy? Should I use the onrequest hook (not sure if
+I can force redirects from there) for that or is there a better way?
+
+Cheers,
+
+-Mark
+
+-- 
+Mark Nijhof
+t:   @MarkNijhof <https://twitter.com/MarkNijhof>
+s:  marknijhof
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140306/a517215b/attachment.html>
+
+From mark.nijhof at cre8ivethought.com  Thu Mar  6 10:52:01 2014
+From: mark.nijhof at cre8ivethought.com (Mark Nijhof)
+Date: Thu, 6 Mar 2014 10:52:01 +0100
+Subject: [99s-extend] Cowboy pre request filter
+In-Reply-To: <CACE=TJris=4eTreF13p+bSmhfEqoKtpfj3PGyMCup1zfCRurkQ@mail.gmail.com>
+References: <CACE=TJris=4eTreF13p+bSmhfEqoKtpfj3PGyMCup1zfCRurkQ@mail.gmail.com>
+Message-ID: <CACE=TJqaoxrqsCSnN44s_5x4MabgWBVfaN_pecVrShnUuU-9aQ@mail.gmail.com>
+
+I also found the answer to my own question: custom middleware
+
+I just created:
+
+   1 -module(authentication_middleware).
+   2
+   3 -behaviour(cowboy_middleware).
+   4
+   5 -export([execute/2]).
+   6
+   7 execute(Req, Env) ->
+   8
+   9     {Path, Req1} = cowboy_req:path(Req),
+  10
+  11     case Path of
+  12         <<"/login.html">> ->
+  13             {ok, Req1, Env};
+  14         <<"/do_login">> ->
+  15             {ok, Req1, Env};
+  16         _ ->
+  17             case id3as_security:is_request_authenticated(Req1) of
+  18                 {error, eauth, Req2} ->
+  19                     {ok, Req4} = cowboy_req:reply(303,
+[{<<"Location">>, <<"/login.html">>}], "", Req2),
+  20                     {halt, Req4};
+  21                 {authenticated, _Id, Req2} ->
+  22                    {ok, Req2, Env}
+  23             end
+  24     end.
+
+And put this between the cowboy_router and cowboy_handler and life is all
+good.
+
+-Mark
+
+
+
+On Thu, Mar 6, 2014 at 12:47 AM, Mark Nijhof <mark.nijhof at cre8ivethought.com
+> wrote:
+
+> Hi,
+>
+> I want to create a module that basically sits between the incoming request
+> and the http handler for that request to ensure a request is authenticated
+> (using a cookie), if the request is not authenticated then I like to
+> redirect to a specific login page (which should not be filtered).
+>
+> Is this possible with Cowboy? Should I use the onrequest hook (not sure if
+> I can force redirects from there) for that or is there a better way?
+>
+> Cheers,
+>
+> -Mark
+>
+> --
+> Mark Nijhof
+> t:   @MarkNijhof <https://twitter.com/MarkNijhof>
+> s:  marknijhof
+>
+>
+
+
+-- 
+Mark Nijhof
+t:   @MarkNijhof <https://twitter.com/MarkNijhof>
+s:  marknijhof
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140306/24422ef2/attachment.html>
+
+From essen at ninenines.eu  Thu Mar  6 15:40:59 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 06 Mar 2014 15:40:59 +0100
+Subject: [99s-extend] usage of make_* command
+In-Reply-To: <CAD9h6NFVnE3y6QDj9WPMA8sKZWwzE6==9c8MzJitE=GYEocgmw@mail.gmail.com>
+References: <CAD9h6NFVnE3y6QDj9WPMA8sKZWwzE6==9c8MzJitE=GYEocgmw@mail.gmail.com>
+Message-ID: <531888FB.1020500@ninenines.eu>
+
+Tests should be in ./tests, not ./src/tests.
+
+If you put them in ./tests everything you mentioned will work.
+
+On 03/03/2014 09:49 PM, Anton Koval' wrote:
+> Hello,
+>
+> I have next structure of my project:
+> .
+> ??? deps
+> ?   ??? cowboy
+> ?   ??? cowlib
+> ?   ??? erlang_iconv
+> ?   ??? erlydtl
+> ?   ??? mochiweb_xpath
+> ?   ??? ranch
+> ??? ebin
+> ?   ??? fetchers.beam
+> ?   ??? parsers.beam
+> ?   ??? wasearch_sup.beam
+> ??? erlang.mk <http://erlang.mk>
+> ??? Makefile
+> ??? _rel
+> ?   ??? ....
+> ??? relx
+> ??? relx.config
+> ??? src
+> ?   ??? fetchers.erl
+> ?   ??? main_handler.erl
+> ?   ??? parsers.erl
+> ?   ??? tests
+> ?   ?   ??? parsers_SUITE_data
+> ?   ?   ??? parsers_SUITE.erl
+> ?   ?   ??? ....
+> ?   ??? wasearch_app.erl
+> ?   ??? wasearch.app.src
+> ?   ??? wasearch_sup.erl
+> ??? templates
+>      ??? index.dtl
+>
+> I would prefer to store tests not in `src` directory but rather in
+> `tests` subdirectory.
+> Erlang.mk README says: You can run an individual test suite by using the
+> special |test_*| targets. For example if you have a common_test suite
+> named |spdy| and you want to run only this suite and not the others, you
+> can use the |make test_spdy| command.
+> And of course `make test_parsers`  returns `no rule to make target` error.
+> Is there a way to run suites from custom directory with
+> `make_<mod_name_with_suite>` command?
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From psihonavt at gmail.com  Thu Mar  6 15:50:01 2014
+From: psihonavt at gmail.com (Anton Koval')
+Date: Thu, 6 Mar 2014 16:50:01 +0200
+Subject: [99s-extend] usage of make_* command
+In-Reply-To: <531888FB.1020500@ninenines.eu>
+References: <CAD9h6NFVnE3y6QDj9WPMA8sKZWwzE6==9c8MzJitE=GYEocgmw@mail.gmail.com>
+ <531888FB.1020500@ninenines.eu>
+Message-ID: <CAD9h6NHaXQFX518wFdLNpycFVuu0bXN4NKzMqztnVN0rLu6BeA@mail.gmail.com>
+
+Thank you for answer.
+Is it common way (for OTP-based application) to store tests in `tests`
+subdirectory rather then in `src/tests/`?
+
+
+On Thu, Mar 6, 2014 at 4:40 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Tests should be in ./tests, not ./src/tests.
+>
+> If you put them in ./tests everything you mentioned will work.
+>
+>
+> On 03/03/2014 09:49 PM, Anton Koval' wrote:
+>
+>> Hello,
+>>
+>> I have next structure of my project:
+>> .
+>> ??? deps
+>> ?   ??? cowboy
+>> ?   ??? cowlib
+>> ?   ??? erlang_iconv
+>> ?   ??? erlydtl
+>> ?   ??? mochiweb_xpath
+>> ?   ??? ranch
+>> ??? ebin
+>> ?   ??? fetchers.beam
+>> ?   ??? parsers.beam
+>> ?   ??? wasearch_sup.beam
+>> ??? erlang.mk <http://erlang.mk>
+>>
+>> ??? Makefile
+>> ??? _rel
+>> ?   ??? ....
+>> ??? relx
+>> ??? relx.config
+>> ??? src
+>> ?   ??? fetchers.erl
+>> ?   ??? main_handler.erl
+>> ?   ??? parsers.erl
+>> ?   ??? tests
+>> ?   ?   ??? parsers_SUITE_data
+>> ?   ?   ??? parsers_SUITE.erl
+>> ?   ?   ??? ....
+>> ?   ??? wasearch_app.erl
+>> ?   ??? wasearch.app.src
+>> ?   ??? wasearch_sup.erl
+>> ??? templates
+>>      ??? index.dtl
+>>
+>> I would prefer to store tests not in `src` directory but rather in
+>> `tests` subdirectory.
+>> Erlang.mk README says: You can run an individual test suite by using the
+>> special |test_*| targets. For example if you have a common_test suite
+>> named |spdy| and you want to run only this suite and not the others, you
+>> can use the |make test_spdy| command.
+>> And of course `make test_parsers`  returns `no rule to make target` error.
+>> Is there a way to run suites from custom directory with
+>> `make_<mod_name_with_suite>` command?
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140306/6fa8fe3b/attachment.html>
+
+From essen at ninenines.eu  Thu Mar  6 15:51:58 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 06 Mar 2014 15:51:58 +0100
+Subject: [99s-extend] usage of make_* command
+In-Reply-To: <CAD9h6NHaXQFX518wFdLNpycFVuu0bXN4NKzMqztnVN0rLu6BeA@mail.gmail.com>
+References: <CAD9h6NFVnE3y6QDj9WPMA8sKZWwzE6==9c8MzJitE=GYEocgmw@mail.gmail.com>	<531888FB.1020500@ninenines.eu>
+ <CAD9h6NHaXQFX518wFdLNpycFVuu0bXN4NKzMqztnVN0rLu6BeA@mail.gmail.com>
+Message-ID: <53188B8E.5010803@ninenines.eu>
+
+Sorry I meant ./test/ not ./tests/
+
+But yes. That's how OTP does it.
+
+On 03/06/2014 03:50 PM, Anton Koval' wrote:
+> Thank you for answer.
+> Is it common way (for OTP-based application) to store tests in `tests`
+> subdirectory rather then in `src/tests/`?
+>
+>
+> On Thu, Mar 6, 2014 at 4:40 PM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     Tests should be in ./tests, not ./src/tests.
+>
+>     If you put them in ./tests everything you mentioned will work.
+>
+>
+>     On 03/03/2014 09:49 PM, Anton Koval' wrote:
+>
+>         Hello,
+>
+>         I have next structure of my project:
+>         .
+>         ??? deps
+>         ?   ??? cowboy
+>         ?   ??? cowlib
+>         ?   ??? erlang_iconv
+>         ?   ??? erlydtl
+>         ?   ??? mochiweb_xpath
+>         ?   ??? ranch
+>         ??? ebin
+>         ?   ??? fetchers.beam
+>         ?   ??? parsers.beam
+>         ?   ??? wasearch_sup.beam
+>         ??? erlang.mk <http://erlang.mk> <http://erlang.mk>
+>
+>         ??? Makefile
+>         ??? _rel
+>         ?   ??? ....
+>         ??? relx
+>         ??? relx.config
+>         ??? src
+>         ?   ??? fetchers.erl
+>         ?   ??? main_handler.erl
+>         ?   ??? parsers.erl
+>         ?   ??? tests
+>         ?   ?   ??? parsers_SUITE_data
+>         ?   ?   ??? parsers_SUITE.erl
+>         ?   ?   ??? ....
+>         ?   ??? wasearch_app.erl
+>         ?   ??? wasearch.app.src
+>         ?   ??? wasearch_sup.erl
+>         ??? templates
+>               ??? index.dtl
+>
+>         I would prefer to store tests not in `src` directory but rather in
+>         `tests` subdirectory.
+>         Erlang.mk README says: You can run an individual test suite by
+>         using the
+>         special |test_*| targets. For example if you have a common_test
+>         suite
+>         named |spdy| and you want to run only this suite and not the
+>         others, you
+>         can use the |make test_spdy| command.
+>         And of course `make test_parsers`  returns `no rule to make
+>         target` error.
+>         Is there a way to run suites from custom directory with
+>         `make_<mod_name_with_suite>` command?
+>
+>
+>         _________________________________________________
+>         Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         https://lists.ninenines.eu/__listinfo/extend
+>         <https://lists.ninenines.eu/listinfo/extend>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lloyd at writersglen.com  Thu Mar  6 21:29:59 2014
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Thu, 6 Mar 2014 15:29:59 -0500 (EST)
+Subject: [99s-extend] Trying to grok erlang.mk
+Message-ID: <1394137799.268930068@apps.rackspace.com>
+
+Hello,
+
+To secure my understanding of erlang.mk, I've been trying to create the simplest possible example I can imagine. Which gives me this:
+
+min
+   erlang.mk
+   Makefile
+   src
+      min.app.src
+      min.erl
+
+*** Where Makefile is:
+
+PROJECT = min
+
+include erlang.mk
+
+*** min.app.src is:
+
+{application, min,
+         [{description,[]},
+          {vsn,"0.1.0"},
+          {registered,[]},
+          {applications,[kernel,stdlib]},
+          {env,[]},
+          {modules,[]}]}.
+
+*** and min.erl is:
+
+-module(min).
+
+-export([hello/0]).
+
+hello() ->
+   io:format("Hello min!~n~n").
+
+*** But when I call make, I get this:
+
+/min$ make
+ ERLC   min.erl
+ APP    min .app.src
+cat: src/min: No such file or directory
+cat: .app.src: No such file or directory
+sed: can't read .app: No such file or directory
+make: *** [app] Error 2
+
+*** Observations
+
+min.erl compiles just  fine
+min.app.src breaks the compile
+
+*** Questions: 
+
+1) How can I correct this?
+2) How can I structure directories and make files for a project that involves several applications?
+
+Many thanks,
+
+LRP
+
+
+*********************************************
+My books:
+
+THE GOSPEL OF ASHES
+http://thegospelofashes.com
+
+Strength is not enough. Do they have the courage 
+and the cunning? Can they survive long enough to 
+save the lives of millions?  
+
+FREEIN' PANCHO
+http://freeinpancho.com
+
+A community of misfits help a troubled boy find his way 
+
+AYA TAKEO
+http://ayatakeo.com
+
+Star-crossed love, war and power in an alternative 
+universe
+
+Available through Amazon or by request from your 
+favorite bookstore
+
+
+**********************************************
+
+
+
+From ivan at llaisdy.com  Fri Mar  7 13:37:27 2014
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Fri, 07 Mar 2014 12:37:27 +0000
+Subject: [99s-extend] Trying to grok erlang.mk
+In-Reply-To: <1394137799.268930068@apps.rackspace.com>
+References: <1394137799.268930068@apps.rackspace.com>
+Message-ID: <5319BD87.2020109@llaisdy.com>
+
+Dear Lloyd
+
+I've just tried this with file layout and contents copied from your 
+email, and make works fine here I'm afraid.
+
+One odd thing I noticed in your make output ...
+
+ > /min$ make
+ >   ERLC   min.erl
+ >   APP    min .app.src
+ > cat: src/min: No such file or directory
+ > cat: .app.src: No such file or directory
+ > sed: can't read .app: No such file or directory
+ > make: *** [app] Error 2
+
+... is that in the APP line, the filename min.app.src has a space in it, 
+and it looks (in the cat lines) like it's broken down into src/min and 
+.app.src (ie ./.app.src).  I can't imagine why that's happening, but 
+that's what's causing the problem I should think.
+
+ > 2) How can I structure directories and make files for a project
+ >    that involves several applications?
+
+I don't know if it's the "correct" way with erlang.mk but, as a refugee 
+from rebar, I have apps set out rebar-style and use old-school recursive 
+make. e.g.:
+
+max/
+   erlang.mk
+   Makefile
+   apps/
+     app1/
+       Makefile
+       src/
+     app2/
+       Makefile
+       src/
+
+Top level Makefile doesn't need to include erlang.mk, and has lines like:
+
+all:
+	$(MAKE) -C apps/app1
+	$(MAKE) -C apps/app2
+
+Lower level Makefiles include erlang.mk.
+
+Best wishes
+
+Ivan
+
+
+On 06/03/2014 20:29, lloyd at writersglen.com wrote:
+> Hello,
+>
+> To secure my understanding of erlang.mk, I've been trying to create the simplest possible example I can imagine. Which gives me this:
+>
+> min
+>     erlang.mk
+>     Makefile
+>     src
+>        min.app.src
+>        min.erl
+>
+> *** Where Makefile is:
+>
+> PROJECT = min
+>
+> include erlang.mk
+>
+> *** min.app.src is:
+>
+> {application, min,
+>           [{description,[]},
+>            {vsn,"0.1.0"},
+>            {registered,[]},
+>            {applications,[kernel,stdlib]},
+>            {env,[]},
+>            {modules,[]}]}.
+>
+> *** and min.erl is:
+>
+> -module(min).
+>
+> -export([hello/0]).
+>
+> hello() ->
+>     io:format("Hello min!~n~n").
+>
+> *** But when I call make, I get this:
+>
+> /min$ make
+>   ERLC   min.erl
+>   APP    min .app.src
+> cat: src/min: No such file or directory
+> cat: .app.src: No such file or directory
+> sed: can't read .app: No such file or directory
+> make: *** [app] Error 2
+>
+> *** Observations
+>
+> min.erl compiles just  fine
+> min.app.src breaks the compile
+>
+> *** Questions:
+>
+> 1) How can I correct this?
+> 2) How can I structure directories and make files for a project that involves several applications?
+>
+> Many thanks,
+>
+> LRP
+>
+>
+> *********************************************
+> My books:
+>
+> THE GOSPEL OF ASHES
+> http://thegospelofashes.com
+>
+> Strength is not enough. Do they have the courage
+> and the cunning? Can they survive long enough to
+> save the lives of millions?
+>
+> FREEIN' PANCHO
+> http://freeinpancho.com
+>
+> A community of misfits help a troubled boy find his way
+>
+> AYA TAKEO
+> http://ayatakeo.com
+>
+> Star-crossed love, war and power in an alternative
+> universe
+>
+> Available through Amazon or by request from your
+> favorite bookstore
+>
+>
+> **********************************************
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From essen at ninenines.eu  Fri Mar  7 17:56:01 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 07 Mar 2014 17:56:01 +0100
+Subject: [99s-extend] Trying to grok erlang.mk
+In-Reply-To: <1394137799.268930068@apps.rackspace.com>
+References: <1394137799.268930068@apps.rackspace.com>
+Message-ID: <5319FA21.7090603@ninenines.eu>
+
+On 03/06/2014 09:29 PM, lloyd at writersglen.com wrote:
+> PROJECT = min
+
+You probably have an extra space at the end here, and erlang.mk doesn't 
+trim them I guess. Please open a ticket!
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From ivan at llaisdy.com  Fri Mar  7 17:58:40 2014
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Fri, 07 Mar 2014 16:58:40 +0000
+Subject: [99s-extend] Trying to grok erlang.mk
+In-Reply-To: <5319FA21.7090603@ninenines.eu>
+References: <1394137799.268930068@apps.rackspace.com>
+ <5319FA21.7090603@ninenines.eu>
+Message-ID: <5319FAC0.6090807@llaisdy.com>
+
+Yes, that's it!  I've just tried it.
+
+Good old make :)
+
+On 07/03/2014 16:56, Lo?c Hoguin wrote:
+> On 03/06/2014 09:29 PM, lloyd at writersglen.com wrote:
+>> PROJECT = min
+>
+> You probably have an extra space at the end here, and erlang.mk doesn't
+> trim them I guess. Please open a ticket!
+>
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From lloyd at writersglen.com  Mon Mar 10 20:44:27 2014
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Mon, 10 Mar 2014 15:44:27 -0400 (EDT)
+Subject: [99s-extend] =?utf-8?q?Getting_started_error=3A___behaviour_cowbo?=
+ =?utf-8?q?y=5Fhttp=5Fhandler_undefined?=
+Message-ID: <1394480667.69797138@apps.rackspace.com>
+
+Hello,
+
+I've slavishly emulated the "Getting started" example in the guide: 
+
+http://ninenines.eu/docs/en/cowboy/HEAD/guide/getting_started/
+
+But, when I compile I get this error:
+
+yada yada
+ ERLC   hello_erlang_app.erl hello_handler.erl hello_erlang_sup.erl
+compile: warnings being treated as errors
+src/hello_handler.erl:2: behaviour cowboy_http_handler undefined
+make: *** [ebin/hello_erlang.app] Error 1
+
+Cowboy seems to be correctly loaded and compiled as a dependency. I can see .../cowboy/ebin/cowboy_http_handler.beam
+
+However, when I remove the line -behavior(cowboy_http_handler) from hello_handler.erl, system compiles and creates release just fine.
+
+% -behavior(cowboy_http_handler).
+
+Could this be a bug in Getting started or some dunder-headed thing on my end?
+
+Thanks,
+
+LRP
+
+
+*********************************************
+My books:
+
+THE GOSPEL OF ASHES
+http://thegospelofashes.com
+
+Strength is not enough. Do they have the courage 
+and the cunning? Can they survive long enough to 
+save the lives of millions?  
+
+FREEIN' PANCHO
+http://freeinpancho.com
+
+A community of misfits help a troubled boy find his way 
+
+AYA TAKEO
+http://ayatakeo.com
+
+Star-crossed love, war and power in an alternative 
+universe
+
+Available through Amazon or by request from your 
+favorite bookstore
+
+
+**********************************************
+
+
+
+From essen at ninenines.eu  Mon Mar 10 21:36:22 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 10 Mar 2014 21:36:22 +0100
+Subject: [99s-extend] Getting started error: behaviour
+ cowboy_http_handler undefined
+In-Reply-To: <1394480667.69797138@apps.rackspace.com>
+References: <1394480667.69797138@apps.rackspace.com>
+Message-ID: <531E2246.7040307@ninenines.eu>
+
+Try updating Erlang or Cowboy, this isn't the first time this happens 
+and I fixed something at some point.
+
+Also see if you have ERL_LIBS already defined, in which case there might 
+be a bug in Cowboy.
+
+On 03/10/2014 08:44 PM, lloyd at writersglen.com wrote:
+> Hello,
+>
+> I've slavishly emulated the "Getting started" example in the guide:
+>
+> http://ninenines.eu/docs/en/cowboy/HEAD/guide/getting_started/
+>
+> But, when I compile I get this error:
+>
+> yada yada
+>   ERLC   hello_erlang_app.erl hello_handler.erl hello_erlang_sup.erl
+> compile: warnings being treated as errors
+> src/hello_handler.erl:2: behaviour cowboy_http_handler undefined
+> make: *** [ebin/hello_erlang.app] Error 1
+>
+> Cowboy seems to be correctly loaded and compiled as a dependency. I can see .../cowboy/ebin/cowboy_http_handler.beam
+>
+> However, when I remove the line -behavior(cowboy_http_handler) from hello_handler.erl, system compiles and creates release just fine.
+>
+> % -behavior(cowboy_http_handler).
+>
+> Could this be a bug in Getting started or some dunder-headed thing on my end?
+>
+> Thanks,
+>
+> LRP
+>
+>
+> *********************************************
+> My books:
+>
+> THE GOSPEL OF ASHES
+> http://thegospelofashes.com
+>
+> Strength is not enough. Do they have the courage
+> and the cunning? Can they survive long enough to
+> save the lives of millions?
+>
+> FREEIN' PANCHO
+> http://freeinpancho.com
+>
+> A community of misfits help a troubled boy find his way
+>
+> AYA TAKEO
+> http://ayatakeo.com
+>
+> Star-crossed love, war and power in an alternative
+> universe
+>
+> Available through Amazon or by request from your
+> favorite bookstore
+>
+>
+> **********************************************
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lloyd at writersglen.com  Wed Mar 12 23:51:04 2014
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Wed, 12 Mar 2014 18:51:04 -0400 (EDT)
+Subject: [99s-extend]
+ =?utf-8?q?Getting_started_error=3A_behaviour_cowboy?=
+ =?utf-8?q?=5Fhttp=5Fhandler_undefined?=
+In-Reply-To: <531E2246.7040307@ninenines.eu>
+References: <1394480667.69797138@apps.rackspace.com>
+ <531E2246.7040307@ninenines.eu>
+Message-ID: <1394664664.82233997@apps.rackspace.com>
+
+Hi Lo?c,
+
+Thanks for help.
+
+I'm running cowboy master from GitHub and Erlang R16B02.
+
+$ echo $ERL_LIBS
+
+...gives me a directory that no longer exists; don't know how it got there, what it should be, or how to change it.
+
+E.g.: /home/lloyd/Programming/Erlang/zippity/apps
+
+I've looked in .erlang and tried $ export ERL_LIBS=<my path to hello_erlang/ebin>.
+
+Thanks again,
+
+LRP
+
+-----Original Message-----
+From: "Lo?c Hoguin" <essen at ninenines.eu>
+Sent: Monday, March 10, 2014 4:36pm
+To: lloyd at writersglen.com, extend at lists.ninenines.eu
+Subject: Re: [99s-extend] Getting started error: behaviour cowboy_http_handler undefined
+
+Try updating Erlang or Cowboy, this isn't the first time this happens 
+and I fixed something at some point.
+
+Also see if you have ERL_LIBS already defined, in which case there might 
+be a bug in Cowboy.
+
+On 03/10/2014 08:44 PM, lloyd at writersglen.com wrote:
+> Hello,
+>
+> I've slavishly emulated the "Getting started" example in the guide:
+>
+> http://ninenines.eu/docs/en/cowboy/HEAD/guide/getting_started/
+>
+> But, when I compile I get this error:
+>
+> yada yada
+>   ERLC   hello_erlang_app.erl hello_handler.erl hello_erlang_sup.erl
+> compile: warnings being treated as errors
+> src/hello_handler.erl:2: behaviour cowboy_http_handler undefined
+> make: *** [ebin/hello_erlang.app] Error 1
+>
+> Cowboy seems to be correctly loaded and compiled as a dependency. I can see .../cowboy/ebin/cowboy_http_handler.beam
+>
+> However, when I remove the line -behavior(cowboy_http_handler) from hello_handler.erl, system compiles and creates release just fine.
+>
+> % -behavior(cowboy_http_handler).
+>
+> Could this be a bug in Getting started or some dunder-headed thing on my end?
+>
+> Thanks,
+>
+> LRP
+>
+>
+> *********************************************
+> My books:
+>
+> THE GOSPEL OF ASHES
+> http://thegospelofashes.com
+>
+> Strength is not enough. Do they have the courage
+> and the cunning? Can they survive long enough to
+> save the lives of millions?
+>
+> FREEIN' PANCHO
+> http://freeinpancho.com
+>
+> A community of misfits help a troubled boy find his way
+>
+> AYA TAKEO
+> http://ayatakeo.com
+>
+> Star-crossed love, war and power in an alternative
+> universe
+>
+> Available through Amazon or by request from your
+> favorite bookstore
+>
+>
+> **********************************************
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+
+
+From essen at ninenines.eu  Wed Mar 12 23:57:16 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 12 Mar 2014 23:57:16 +0100
+Subject: [99s-extend] Getting started error: behaviour
+ cowboy_http_handler undefined
+In-Reply-To: <1394664664.82233997@apps.rackspace.com>
+References: <1394480667.69797138@apps.rackspace.com>
+ <531E2246.7040307@ninenines.eu> <1394664664.82233997@apps.rackspace.com>
+Message-ID: <5320E64C.7010000@ninenines.eu>
+
+Can you try again after running "unset ERL_LIBS"?
+
+On 03/12/2014 11:51 PM, lloyd at writersglen.com wrote:
+> Hi Lo?c,
+>
+> Thanks for help.
+>
+> I'm running cowboy master from GitHub and Erlang R16B02.
+>
+> $ echo $ERL_LIBS
+>
+> ...gives me a directory that no longer exists; don't know how it got there, what it should be, or how to change it.
+>
+> E.g.: /home/lloyd/Programming/Erlang/zippity/apps
+>
+> I've looked in .erlang and tried $ export ERL_LIBS=<my path to hello_erlang/ebin>.
+>
+> Thanks again,
+>
+> LRP
+>
+> -----Original Message-----
+> From: "Lo?c Hoguin" <essen at ninenines.eu>
+> Sent: Monday, March 10, 2014 4:36pm
+> To: lloyd at writersglen.com, extend at lists.ninenines.eu
+> Subject: Re: [99s-extend] Getting started error: behaviour cowboy_http_handler undefined
+>
+> Try updating Erlang or Cowboy, this isn't the first time this happens
+> and I fixed something at some point.
+>
+> Also see if you have ERL_LIBS already defined, in which case there might
+> be a bug in Cowboy.
+>
+> On 03/10/2014 08:44 PM, lloyd at writersglen.com wrote:
+>> Hello,
+>>
+>> I've slavishly emulated the "Getting started" example in the guide:
+>>
+>> http://ninenines.eu/docs/en/cowboy/HEAD/guide/getting_started/
+>>
+>> But, when I compile I get this error:
+>>
+>> yada yada
+>>    ERLC   hello_erlang_app.erl hello_handler.erl hello_erlang_sup.erl
+>> compile: warnings being treated as errors
+>> src/hello_handler.erl:2: behaviour cowboy_http_handler undefined
+>> make: *** [ebin/hello_erlang.app] Error 1
+>>
+>> Cowboy seems to be correctly loaded and compiled as a dependency. I can see .../cowboy/ebin/cowboy_http_handler.beam
+>>
+>> However, when I remove the line -behavior(cowboy_http_handler) from hello_handler.erl, system compiles and creates release just fine.
+>>
+>> % -behavior(cowboy_http_handler).
+>>
+>> Could this be a bug in Getting started or some dunder-headed thing on my end?
+>>
+>> Thanks,
+>>
+>> LRP
+>>
+>>
+>> *********************************************
+>> My books:
+>>
+>> THE GOSPEL OF ASHES
+>> http://thegospelofashes.com
+>>
+>> Strength is not enough. Do they have the courage
+>> and the cunning? Can they survive long enough to
+>> save the lives of millions?
+>>
+>> FREEIN' PANCHO
+>> http://freeinpancho.com
+>>
+>> A community of misfits help a troubled boy find his way
+>>
+>> AYA TAKEO
+>> http://ayatakeo.com
+>>
+>> Star-crossed love, war and power in an alternative
+>> universe
+>>
+>> Available through Amazon or by request from your
+>> favorite bookstore
+>>
+>>
+>> **********************************************
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lloyd at writersglen.com  Thu Mar 13 00:43:16 2014
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Wed, 12 Mar 2014 19:43:16 -0400 (EDT)
+Subject: [99s-extend]
+ =?utf-8?q?Getting_started_error=3A_behaviour_cowboy?=
+ =?utf-8?q?=5Fhttp=5Fhandler_undefined?=
+In-Reply-To: <5320E64C.7010000@ninenines.eu>
+References: <1394480667.69797138@apps.rackspace.com>
+ <531E2246.7040307@ninenines.eu> 
+ <1394664664.82233997@apps.rackspace.com> <5320E64C.7010000@ninenines.eu>
+Message-ID: <1394667796.517915192@apps.rackspace.com>
+
+Hi,
+
+That fixed it!
+
+But where can I go to understand why and prevent it in future? 
+
+I've googled ERL_LIBS, but not found much enlightenment. Should there possibly be a note in Cowboy docs? Or is this something idiosyncratic to my system?
+
+Many thanks!
+
+Lloyd
+
+-----Original Message-----
+From: "Lo?c Hoguin" <essen at ninenines.eu>
+Sent: Wednesday, March 12, 2014 6:57pm
+To: lloyd at writersglen.com
+Cc: extend at lists.ninenines.eu
+Subject: Re: [99s-extend] Getting started error: behaviour cowboy_http_handler undefined
+
+Can you try again after running "unset ERL_LIBS"?
+
+On 03/12/2014 11:51 PM, lloyd at writersglen.com wrote:
+> Hi Lo?c,
+>
+> Thanks for help.
+>
+> I'm running cowboy master from GitHub and Erlang R16B02.
+>
+> $ echo $ERL_LIBS
+>
+> ...gives me a directory that no longer exists; don't know how it got there, what it should be, or how to change it.
+>
+> E.g.: /home/lloyd/Programming/Erlang/zippity/apps
+>
+> I've looked in .erlang and tried $ export ERL_LIBS=<my path to hello_erlang/ebin>.
+>
+> Thanks again,
+>
+> LRP
+>
+> -----Original Message-----
+> From: "Lo?c Hoguin" <essen at ninenines.eu>
+> Sent: Monday, March 10, 2014 4:36pm
+> To: lloyd at writersglen.com, extend at lists.ninenines.eu
+> Subject: Re: [99s-extend] Getting started error: behaviour cowboy_http_handler undefined
+>
+> Try updating Erlang or Cowboy, this isn't the first time this happens
+> and I fixed something at some point.
+>
+> Also see if you have ERL_LIBS already defined, in which case there might
+> be a bug in Cowboy.
+>
+> On 03/10/2014 08:44 PM, lloyd at writersglen.com wrote:
+>> Hello,
+>>
+>> I've slavishly emulated the "Getting started" example in the guide:
+>>
+>> http://ninenines.eu/docs/en/cowboy/HEAD/guide/getting_started/
+>>
+>> But, when I compile I get this error:
+>>
+>> yada yada
+>>    ERLC   hello_erlang_app.erl hello_handler.erl hello_erlang_sup.erl
+>> compile: warnings being treated as errors
+>> src/hello_handler.erl:2: behaviour cowboy_http_handler undefined
+>> make: *** [ebin/hello_erlang.app] Error 1
+>>
+>> Cowboy seems to be correctly loaded and compiled as a dependency. I can see .../cowboy/ebin/cowboy_http_handler.beam
+>>
+>> However, when I remove the line -behavior(cowboy_http_handler) from hello_handler.erl, system compiles and creates release just fine.
+>>
+>> % -behavior(cowboy_http_handler).
+>>
+>> Could this be a bug in Getting started or some dunder-headed thing on my end?
+>>
+>> Thanks,
+>>
+>> LRP
+>>
+>>
+>> *********************************************
+>> My books:
+>>
+>> THE GOSPEL OF ASHES
+>> http://thegospelofashes.com
+>>
+>> Strength is not enough. Do they have the courage
+>> and the cunning? Can they survive long enough to
+>> save the lives of millions?
+>>
+>> FREEIN' PANCHO
+>> http://freeinpancho.com
+>>
+>> A community of misfits help a troubled boy find his way
+>>
+>> AYA TAKEO
+>> http://ayatakeo.com
+>>
+>> Star-crossed love, war and power in an alternative
+>> universe
+>>
+>> Available through Amazon or by request from your
+>> favorite bookstore
+>>
+>>
+>> **********************************************
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+
+
+From essen at ninenines.eu  Thu Mar 13 00:46:57 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 13 Mar 2014 00:46:57 +0100
+Subject: [99s-extend] Getting started error: behaviour
+ cowboy_http_handler undefined
+In-Reply-To: <1394667796.517915192@apps.rackspace.com>
+References: <1394480667.69797138@apps.rackspace.com>
+ <531E2246.7040307@ninenines.eu> <1394664664.82233997@apps.rackspace.com>
+ <5320E64C.7010000@ninenines.eu> <1394667796.517915192@apps.rackspace.com>
+Message-ID: <5320F1F1.9000506@ninenines.eu>
+
+It's explained here: http://www.erlang.org/doc/man/code.html
+
+I am not sure why it caused issues on your system, possibly Erlang 
+ignored it because there was an invalid folder in there. I don't really 
+know.
+
+On 03/13/2014 12:43 AM, lloyd at writersglen.com wrote:
+> Hi,
+>
+> That fixed it!
+>
+> But where can I go to understand why and prevent it in future?
+>
+> I've googled ERL_LIBS, but not found much enlightenment. Should there possibly be a note in Cowboy docs? Or is this something idiosyncratic to my system?
+>
+> Many thanks!
+>
+> Lloyd
+>
+> -----Original Message-----
+> From: "Lo?c Hoguin" <essen at ninenines.eu>
+> Sent: Wednesday, March 12, 2014 6:57pm
+> To: lloyd at writersglen.com
+> Cc: extend at lists.ninenines.eu
+> Subject: Re: [99s-extend] Getting started error: behaviour cowboy_http_handler undefined
+>
+> Can you try again after running "unset ERL_LIBS"?
+>
+> On 03/12/2014 11:51 PM, lloyd at writersglen.com wrote:
+>> Hi Lo?c,
+>>
+>> Thanks for help.
+>>
+>> I'm running cowboy master from GitHub and Erlang R16B02.
+>>
+>> $ echo $ERL_LIBS
+>>
+>> ...gives me a directory that no longer exists; don't know how it got there, what it should be, or how to change it.
+>>
+>> E.g.: /home/lloyd/Programming/Erlang/zippity/apps
+>>
+>> I've looked in .erlang and tried $ export ERL_LIBS=<my path to hello_erlang/ebin>.
+>>
+>> Thanks again,
+>>
+>> LRP
+>>
+>> -----Original Message-----
+>> From: "Lo?c Hoguin" <essen at ninenines.eu>
+>> Sent: Monday, March 10, 2014 4:36pm
+>> To: lloyd at writersglen.com, extend at lists.ninenines.eu
+>> Subject: Re: [99s-extend] Getting started error: behaviour cowboy_http_handler undefined
+>>
+>> Try updating Erlang or Cowboy, this isn't the first time this happens
+>> and I fixed something at some point.
+>>
+>> Also see if you have ERL_LIBS already defined, in which case there might
+>> be a bug in Cowboy.
+>>
+>> On 03/10/2014 08:44 PM, lloyd at writersglen.com wrote:
+>>> Hello,
+>>>
+>>> I've slavishly emulated the "Getting started" example in the guide:
+>>>
+>>> http://ninenines.eu/docs/en/cowboy/HEAD/guide/getting_started/
+>>>
+>>> But, when I compile I get this error:
+>>>
+>>> yada yada
+>>>     ERLC   hello_erlang_app.erl hello_handler.erl hello_erlang_sup.erl
+>>> compile: warnings being treated as errors
+>>> src/hello_handler.erl:2: behaviour cowboy_http_handler undefined
+>>> make: *** [ebin/hello_erlang.app] Error 1
+>>>
+>>> Cowboy seems to be correctly loaded and compiled as a dependency. I can see .../cowboy/ebin/cowboy_http_handler.beam
+>>>
+>>> However, when I remove the line -behavior(cowboy_http_handler) from hello_handler.erl, system compiles and creates release just fine.
+>>>
+>>> % -behavior(cowboy_http_handler).
+>>>
+>>> Could this be a bug in Getting started or some dunder-headed thing on my end?
+>>>
+>>> Thanks,
+>>>
+>>> LRP
+>>>
+>>>
+>>> *********************************************
+>>> My books:
+>>>
+>>> THE GOSPEL OF ASHES
+>>> http://thegospelofashes.com
+>>>
+>>> Strength is not enough. Do they have the courage
+>>> and the cunning? Can they survive long enough to
+>>> save the lives of millions?
+>>>
+>>> FREEIN' PANCHO
+>>> http://freeinpancho.com
+>>>
+>>> A community of misfits help a troubled boy find his way
+>>>
+>>> AYA TAKEO
+>>> http://ayatakeo.com
+>>>
+>>> Star-crossed love, war and power in an alternative
+>>> universe
+>>>
+>>> Available through Amazon or by request from your
+>>> favorite bookstore
+>>>
+>>>
+>>> **********************************************
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> https://lists.ninenines.eu/listinfo/extend
+>>>
+>>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From joshua.mcquistan at mcq.io  Thu Mar 13 02:41:12 2014
+From: joshua.mcquistan at mcq.io (Joshua McQuistan)
+Date: Thu, 13 Mar 2014 01:41:12 +0000
+Subject: [99s-extend] Updating Cowboy applications
+Message-ID: <53210CB8.5080109@mcq.io>
+
+Hello all,
+
+I have written a Cowboy application that works fine over localhost. I'm
+now looking at ways of deploying and updating it i.e., moving from dev
+to prod in a nice manner.
+
+I have dug around the archives and have found that Cowboy does not
+support hot code reloading meaning either a restart of the vm or playing
+with code:reload_file is necessary.
+
+The latter suggests a possible rewriting of OTP's code loading mechanism
+and seems like it might be sensible to avoid.
+
+The other approach then is a restart. In previous (non-Cowboy) set ups
+I've used nginx on port 80 / 443 that talks to the web app via a unix
+socket (e.g., "web/socket"). When updating I'll start a new instance on
+a new socket (e.g., "web/socket.new") then rely on the file system's
+"mv" to switch it to "web/socket"; this works because the underlying
+file system guarantees mv to be atomic (or at least to never see a
+missing file). I can then ask the old process to shut down nicely in the
+background.
+
+For this to work it would require Cowby / Ranch to be able to listen on
+unix sockets. A glance at the documentation suggests that unix sockets
+aren't available, is this the case? What's the feasibility of it getting
+added?
+
+It might just be simpler to load-balance across multiple servers and
+safely take them out one at a time while updating.
+
+My other question is, how do others approach this problem? Did I miss
+something vitally obvious?
+
+Regards,
+Joshua
+
+
+From essen at ninenines.eu  Thu Mar 13 14:22:03 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 13 Mar 2014 14:22:03 +0100
+Subject: [99s-extend] Updating Cowboy applications
+In-Reply-To: <53210CB8.5080109@mcq.io>
+References: <53210CB8.5080109@mcq.io>
+Message-ID: <5321B0FB.4060203@ninenines.eu>
+
+Deploying is easy: releases.
+
+The "getting started" chapter of the guide, and all the examples use 
+that and it should be pretty easy to do.
+
+You can reload Cowboy modules directly using l(module). You can reload 
+most Ranch modules too but some of them will require using sys. Ranch 
+will get support for upgrades as soon as I finish the upgrade test 
+suite, but it's still low priority.
+
+And upgrade of Cowboy processes can only be added after we make them 
+special processes, which is still a way to go.
+
+There is no plans for supporting unix sockets for the simple reason that 
+it is not portable. On the other hand, if you use a separate library to 
+open a socket and give it to Ranch (socket option), possibly writing a 
+specific transport module for it, then it's very possible that you can 
+use unix sockets (and if it works, please do send feedback).
+
+On 03/13/2014 02:41 AM, Joshua McQuistan wrote:
+> Hello all,
+>
+> I have written a Cowboy application that works fine over localhost. I'm
+> now looking at ways of deploying and updating it i.e., moving from dev
+> to prod in a nice manner.
+>
+> I have dug around the archives and have found that Cowboy does not
+> support hot code reloading meaning either a restart of the vm or playing
+> with code:reload_file is necessary.
+>
+> The latter suggests a possible rewriting of OTP's code loading mechanism
+> and seems like it might be sensible to avoid.
+>
+> The other approach then is a restart. In previous (non-Cowboy) set ups
+> I've used nginx on port 80 / 443 that talks to the web app via a unix
+> socket (e.g., "web/socket"). When updating I'll start a new instance on
+> a new socket (e.g., "web/socket.new") then rely on the file system's
+> "mv" to switch it to "web/socket"; this works because the underlying
+> file system guarantees mv to be atomic (or at least to never see a
+> missing file). I can then ask the old process to shut down nicely in the
+> background.
+>
+> For this to work it would require Cowby / Ranch to be able to listen on
+> unix sockets. A glance at the documentation suggests that unix sockets
+> aren't available, is this the case? What's the feasibility of it getting
+> added?
+>
+> It might just be simpler to load-balance across multiple servers and
+> safely take them out one at a time while updating.
+>
+> My other question is, how do others approach this problem? Did I miss
+> something vitally obvious?
+>
+> Regards,
+> Joshua
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From joshua.mcquistan at mcq.io  Thu Mar 13 15:23:09 2014
+From: joshua.mcquistan at mcq.io (Joshua McQuistan)
+Date: Thu, 13 Mar 2014 14:23:09 +0000
+Subject: [99s-extend] Updating Cowboy applications
+In-Reply-To: <5321B0FB.4060203@ninenines.eu>
+References: <53210CB8.5080109@mcq.io> <5321B0FB.4060203@ninenines.eu>
+Message-ID: <5321BF4D.50102@mcq.io>
+
+> 
+> I wish I knew enough to answer your question. But I do hope you publish a tutorial documenting your solution for those following you down the trail.
+
+Will do.
+
+On 13/03/14 13:22, Lo?c Hoguin wrote:
+> 
+> There is no plans for supporting unix sockets for the simple reason that
+> it is not portable. On the other hand, if you use a separate library to
+> open a socket and give it to Ranch (socket option), possibly writing a
+> specific transport module for it, then it's very possible that you can
+> use unix sockets (and if it works, please do send feedback).
+
+I had missed this last night, I will try passing the socket down and see
+if it works.
+
+I can also see the gen_tcp:listen in ranch_tcp but I'd prefer to avoid that.
+
+
+From Christopher.Phillips at turner.com  Fri Mar 14 19:52:07 2014
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Fri, 14 Mar 2014 18:52:07 +0000
+Subject: [99s-extend] Cowboy unexpectedly timing out when reading the body
+Message-ID: <CF48C816.16B3B%christopher.phillips@turner.com>
+
+On a dev server I had a Cowboy app suddenly start returning timeouts when calling cowboy_req:body_qs(Request), with surprising frequency, which in turn led to 500s back to the calling client. It only appeared to happen when hitting one particular resource, and was sporadic, and I was wondering if there might be some explanation related to Cowboy (as opposed to maybe really weird VM issues). For full disclosure, we would first check the body with cowboy_req:body(Request) as part of an access log, then ignore the returned cowboy_req:req() that call passed back, since we could not then stream the body off of it again. It was working fine, so I don't think it was related, but it seems more solid now after I removed it and I don't know if that's related or not.
+
+
+
+Here is an example request that dumped when the process died -
+
+
+{req,[{socket,#Port<0.7113>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1805.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{10,188,32,225},53188}},{host,<<"bps-feedschedulervip1.turner.com">>},{host_info,undefined},{port,8091},{path,<<"/encoders/Player1/record">>},{path_info,[<<"record">>]},{qs,<<"authToken=...">>},{qs_vals,[{<<"authToken">>,<<"...">>}]},{bindings,[{id,<<"Player1">>}]},{headers,[{<<"host">>,<<"bps-feedschedulervip1.turner.com:8091">>},{<<"content-type">>,<<"application/x-www-form-urlencoded; charset=UTF-8">>},{<<"origin">>,<<"http://bps-newstrondev1.turner.com">>},{<<"content-length">>,<<"48">>},{<<"connection">>,<<"keep-alive">>},{<<"accept">>,<<"application/json, text/javascript, */*; q=0.01">>},{<<"user-agent">>,<<"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.74.9 (KHTML, like Gecko) Version/7.0.2 Safari/537.74.9">>},{<<"referer">>,<<"http://bps-newstrondev1.turner.com/newstron/record/record.html">>},{<<"accept-language">>,<<"en-us">>},{<<"accept-encoding">>,<<"gzip, deflate">>}]},{p_headers,[{<<"content-type">>,{<<"application">>,<<"x-www-form-urlencoded">>,[{<<"charset">>,<<"utf-8">>}]}},{<<"if-modified-since">>,undefined},{<<"if-none-match">>,undefined},{<<"if-unmodified-since">>,undefined},{<<"if-match">>,undefined},{<<"accept">>,[{{<<"application">>,<<"json">>,[]},1000,[]},{{<<"text">>,<<"javascript">>,[]},1000,[]},{{<<"*">>,<<"*">>,[]},10,[]}]},{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[{charset,undefined},{media_type,{<<"application">>,<<"json">>,[]}}]},{body_state,waiting},{multipart,undefined},{buffer,<<>>},{resp_compress,false},{resp_state,waiting},{resp_headers,[{<<"content-type">>,[<<"application">>,<<"/">>,<<"json">>,<<>>]},{<<"Access-Control-Allow-Origin">>,<<"*">>}]},{resp_body,<<>>},{onresponse,#Fun<access_log_responder.onresponse.4>}]}
+
+
+
+
+As I said, it may be just due to VM issues or something, but I figured I'd ask in case there was any obvious issue.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140314/b2f802d3/attachment.html>
+
+From essen at ninenines.eu  Fri Mar 14 19:56:38 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 14 Mar 2014 19:56:38 +0100
+Subject: [99s-extend] Cowboy unexpectedly timing out when reading the
+ body
+In-Reply-To: <CF48C816.16B3B%christopher.phillips@turner.com>
+References: <CF48C816.16B3B%christopher.phillips@turner.com>
+Message-ID: <532350E6.5080507@ninenines.eu>
+
+Cowboy does have a timeout too small, that will be fixed soon (by making 
+it configurable, per body-reading call). It will be in the next release.
+
+On the other hand there's something weird in what you said.
+
+On 03/14/2014 07:52 PM, Phillips, Christopher wrote:
+> first check the body with cowboy_req:body(Request) as part of an access
+> log, then ignore the returned cowboy_req:req() that call passed back,
+> since we could not then stream the body off of it again. It was working
+> fine, so I don't think it was related, but it seems more solid now after
+> I removed it and I don't know if that's related or not.
+
+If you ignore the Req being returned, especially after a body-reading 
+call, then Cowboy will not be able to figure out that you actually read 
+it, and will attempt to read it again to skip it, leading to issues.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From Christopher.Phillips at turner.com  Fri Mar 14 20:07:40 2014
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Fri, 14 Mar 2014 19:07:40 +0000
+Subject: [99s-extend] Cowboy unexpectedly timing out when reading the
+ body
+In-Reply-To: <532350E6.5080507@ninenines.eu>
+References: <CF48C816.16B3B%christopher.phillips@turner.com>
+ <532350E6.5080507@ninenines.eu>
+Message-ID: <CF48CAF9.16B5A%christopher.phillips@turner.com>
+
+  This body is -small-. 48 bytes was my test data (per the
+content-length). That shouldn't take 5 seconds to read, and usually it
+took a millisecond or two, and returned to the client (despite actually
+controlling some hardware across a network and such) within a second. And
+it was ND; I tested this thing a couple of times locally and it appeared
+to work, and even deployed onto a VM it worked some of the time (as I
+said, might have been hardware or some other weirdness).
+
+  So can we only read the body once? Or what's the right approach if I
+want to access the body in both a module registered to the
+onrequest/onresponse callbacks, and in the REST handler?
+
+On 3/14/14, 2:56 PM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+>Cowboy does have a timeout too small, that will be fixed soon (by making
+>it configurable, per body-reading call). It will be in the next release.
+>
+>On the other hand there's something weird in what you said.
+>
+>On 03/14/2014 07:52 PM, Phillips, Christopher wrote:
+>> first check the body with cowboy_req:body(Request) as part of an access
+>> log, then ignore the returned cowboy_req:req() that call passed back,
+>> since we could not then stream the body off of it again. It was working
+>> fine, so I don't think it was related, but it seems more solid now after
+>> I removed it and I don't know if that's related or not.
+>
+>If you ignore the Req being returned, especially after a body-reading
+>call, then Cowboy will not be able to figure out that you actually read
+>it, and will attempt to read it again to skip it, leading to issues.
+>
+>-- 
+>Lo?c Hoguin
+>http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Fri Mar 14 20:11:27 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 14 Mar 2014 20:11:27 +0100
+Subject: [99s-extend] Cowboy unexpectedly timing out when reading the
+ body
+In-Reply-To: <CF48CAF9.16B5A%christopher.phillips@turner.com>
+References: <CF48C816.16B3B%christopher.phillips@turner.com>
+ <532350E6.5080507@ninenines.eu>
+ <CF48CAF9.16B5A%christopher.phillips@turner.com>
+Message-ID: <5323545F.4050602@ninenines.eu>
+
+Yep, only once. All functions that return {ok, ...} are like this. 
+There's no right approach, that's left as an exercise to the developer. :-)
+
+You can probably use cowboy_req:set_meta/meta if you really need to pass 
+it around.
+
+On 03/14/2014 08:07 PM, Phillips, Christopher wrote:
+>    This body is -small-. 48 bytes was my test data (per the
+> content-length). That shouldn't take 5 seconds to read, and usually it
+> took a millisecond or two, and returned to the client (despite actually
+> controlling some hardware across a network and such) within a second. And
+> it was ND; I tested this thing a couple of times locally and it appeared
+> to work, and even deployed onto a VM it worked some of the time (as I
+> said, might have been hardware or some other weirdness).
+>
+>    So can we only read the body once? Or what's the right approach if I
+> want to access the body in both a module registered to the
+> onrequest/onresponse callbacks, and in the REST handler?
+>
+> On 3/14/14, 2:56 PM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+>
+>> Cowboy does have a timeout too small, that will be fixed soon (by making
+>> it configurable, per body-reading call). It will be in the next release.
+>>
+>> On the other hand there's something weird in what you said.
+>>
+>> On 03/14/2014 07:52 PM, Phillips, Christopher wrote:
+>>> first check the body with cowboy_req:body(Request) as part of an access
+>>> log, then ignore the returned cowboy_req:req() that call passed back,
+>>> since we could not then stream the body off of it again. It was working
+>>> fine, so I don't think it was related, but it seems more solid now after
+>>> I removed it and I don't know if that's related or not.
+>>
+>> If you ignore the Req being returned, especially after a body-reading
+>> call, then Cowboy will not be able to figure out that you actually read
+>> it, and will attempt to read it again to skip it, leading to issues.
+>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From Christopher.Phillips at turner.com  Fri Mar 14 20:13:31 2014
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Fri, 14 Mar 2014 19:13:31 +0000
+Subject: [99s-extend] Cowboy unexpectedly timing out when reading the
+ body
+In-Reply-To: <5323545F.4050602@ninenines.eu>
+References: <CF48C816.16B3B%christopher.phillips@turner.com>
+ <532350E6.5080507@ninenines.eu>
+ <CF48CAF9.16B5A%christopher.phillips@turner.com>
+ <5323545F.4050602@ninenines.eu>
+Message-ID: <CF48CD10.16B7C%christopher.phillips@turner.com>
+
+  Hmm, okay. Thanks Loic.
+
+On 3/14/14, 3:11 PM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+>Yep, only once. All functions that return {ok, ...} are like this.
+>There's no right approach, that's left as an exercise to the developer.
+>:-)
+>
+>You can probably use cowboy_req:set_meta/meta if you really need to pass
+>it around.
+>
+>On 03/14/2014 08:07 PM, Phillips, Christopher wrote:
+>>    This body is -small-. 48 bytes was my test data (per the
+>> content-length). That shouldn't take 5 seconds to read, and usually it
+>> took a millisecond or two, and returned to the client (despite actually
+>> controlling some hardware across a network and such) within a second.
+>>And
+>> it was ND; I tested this thing a couple of times locally and it appeared
+>> to work, and even deployed onto a VM it worked some of the time (as I
+>> said, might have been hardware or some other weirdness).
+>>
+>>    So can we only read the body once? Or what's the right approach if I
+>> want to access the body in both a module registered to the
+>> onrequest/onresponse callbacks, and in the REST handler?
+>>
+>> On 3/14/14, 2:56 PM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+>>
+>>> Cowboy does have a timeout too small, that will be fixed soon (by
+>>>making
+>>> it configurable, per body-reading call). It will be in the next
+>>>release.
+>>>
+>>> On the other hand there's something weird in what you said.
+>>>
+>>> On 03/14/2014 07:52 PM, Phillips, Christopher wrote:
+>>>> first check the body with cowboy_req:body(Request) as part of an
+>>>>access
+>>>> log, then ignore the returned cowboy_req:req() that call passed back,
+>>>> since we could not then stream the body off of it again. It was
+>>>>working
+>>>> fine, so I don't think it was related, but it seems more solid now
+>>>>after
+>>>> I removed it and I don't know if that's related or not.
+>>>
+>>> If you ignore the Req being returned, especially after a body-reading
+>>> call, then Cowboy will not be able to figure out that you actually read
+>>> it, and will attempt to read it again to skip it, leading to issues.
+>>>
+>>> --
+>>> Lo?c Hoguin
+>>> http://ninenines.eu
+>>
+>
+>-- 
+>Lo?c Hoguin
+>http://ninenines.eu
+
+
+

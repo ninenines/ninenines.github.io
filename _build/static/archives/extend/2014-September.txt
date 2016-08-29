@@ -1,0 +1,526 @@
+From paulo.ferraz.oliveira at gmail.com  Mon Sep 15 23:24:20 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Mon, 15 Sep 2014 22:24:20 +0100
+Subject: [99s-extend] Using cowboy_req:body more than once per request
+Message-ID: <CA+dV7cT+POGJM=nqBcvnP_NoZUa=_ZHjGx-9gBQ+09Pe7aE2bg@mail.gmail.com>
+
+Hi.
+
+I recently implemented a checksum header (X-Checksum) that allows
+validating the content of a request's body by hash comparison (just to give
+you some context). I'm using the onrequest hook to affect all requests (and
+be able to reply appropriately for non-conformance to the hash function
+result) but can't figure out how to not read the request body twice, i.e. I
+read it in the onrequest hook but later on need to read it again in the
+route handler, but I can't (from the manual, for cowboy_req:body: "This
+function can only be called once. Cowboy will not cache the result of this
+call."). At the moment, and because the API consumers were in a hurry, the
+solution I found (I understand it might be an ugly hack), was to read the
+body, store it in the Req's meta (property body, for example) and then
+access that property later on, instead of using cowboy_req:body. I'm not
+quite happy with this solution and was wondering if there is anything more
+elegant that I can implement.
+
+Thanks.
+
+Cheers.
+
+- Paulo F. Oliveira
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140915/26d4e023/attachment-0001.html>
+
+From paulo.ferraz.oliveira at gmail.com  Mon Sep 15 23:34:48 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Mon, 15 Sep 2014 22:34:48 +0100
+Subject: [99s-extend] :binding doc
+Message-ID: <CA+dV7cTDYsbcVjwO3wxNpzpo0V3gcO+XoY44Yjbc6K1OB8zuVw@mail.gmail.com>
+
+Hi.
+
+This can be read in the cowboy_req:binding doc: "By default the value is a
+binary, however constraints may change the type of this value (for example
+automatically converting numbers to integer)."
+
+What constraints are we talking about here?
+
+Also, there's no reference to the fact that the bindings are URL-decoded,
+even though they appear to be.
+
+Cheers.
+
+- Paulo F. Oliveira
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140915/5f3302e4/attachment.html>
+
+From paulo.ferraz.oliveira at gmail.com  Mon Sep 15 23:55:39 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Mon, 15 Sep 2014 22:55:39 +0100
+Subject: [99s-extend] :binding doc
+Message-ID: <CA+dV7cQkY9k0RSaR+_ja1MQae=f-Yb2Wp7aFGok3ORA=jSE+aA@mail.gmail.com>
+
+OK, I guess "constraints" refers to this:
+http://ninenines.eu/docs/en/cowboy/HEAD/guide/routing/#constraints
+
+:D
+
+Cheers.
+
+- Paulo F. Oliveira
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140915/d97a6072/attachment.html>
+
+From essen at ninenines.eu  Tue Sep 16 00:15:44 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 16 Sep 2014 00:15:44 +0200
+Subject: [99s-extend] :binding doc
+In-Reply-To: <CA+dV7cTDYsbcVjwO3wxNpzpo0V3gcO+XoY44Yjbc6K1OB8zuVw@mail.gmail.com>
+References: <CA+dV7cTDYsbcVjwO3wxNpzpo0V3gcO+XoY44Yjbc6K1OB8zuVw@mail.gmail.com>
+Message-ID: <54176510.9040100@ninenines.eu>
+
+On 09/15/2014 11:34 PM, Paulo F. Oliveira wrote:
+> Also, there's no reference to the fact that the bindings are
+> URL-decoded, even though they appear to be.
+
+Cowboy decodes everything. If you feel it's helpful to mention, please 
+send a patch.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From essen at ninenines.eu  Tue Sep 16 00:22:27 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 16 Sep 2014 00:22:27 +0200
+Subject: [99s-extend] Using cowboy_req:body more than once per request
+In-Reply-To: <CA+dV7cT+POGJM=nqBcvnP_NoZUa=_ZHjGx-9gBQ+09Pe7aE2bg@mail.gmail.com>
+References: <CA+dV7cT+POGJM=nqBcvnP_NoZUa=_ZHjGx-9gBQ+09Pe7aE2bg@mail.gmail.com>
+Message-ID: <541766A3.4070309@ninenines.eu>
+
+It seems a bit weird to me to read the body and validate it before 
+validating the request itself.
+
+I would explicitly put these checks in the handler directly. This of 
+course means that there is no need to read it twice anymore.
+
+On 09/15/2014 11:24 PM, Paulo F. Oliveira wrote:
+> Hi.
+>
+> I recently implemented a checksum header (X-Checksum) that allows
+> validating the content of a request's body by hash comparison (just to
+> give you some context). I'm using the onrequest hook to affect all
+> requests (and be able to reply appropriately for non-conformance to the
+> hash function result) but can't figure out how to not read the request
+> body twice, i.e. I read it in the onrequest hook but later on need to
+> read it again in the route handler, but I can't (from the manual, for
+> cowboy_req:body: "This function can only be called once. Cowboy will not
+> cache the result of this call."). At the moment, and because the API
+> consumers were in a hurry, the solution I found (I understand it might
+> be an ugly hack), was to read the body, store it in the Req's meta
+> (property body, for example) and then access that property later on,
+> instead of using cowboy_req:body. I'm not quite happy with this solution
+> and was wondering if there is anything more elegant that I can implement.
+>
+> Thanks.
+>
+> Cheers.
+>
+> - Paulo F. Oliveira
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From paulo.ferraz.oliveira at gmail.com  Tue Sep 16 00:35:20 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Mon, 15 Sep 2014 23:35:20 +0100
+Subject: [99s-extend] Using cowboy_req:body more than once per request
+In-Reply-To: <541766A3.4070309@ninenines.eu>
+References: <CA+dV7cT+POGJM=nqBcvnP_NoZUa=_ZHjGx-9gBQ+09Pe7aE2bg@mail.gmail.com>
+ <541766A3.4070309@ninenines.eu>
+Message-ID: <CA+dV7cSQc=3wsQrYkg2p6R9M7n_HmZpF6kOt=4CbaphUUx4oGQ@mail.gmail.com>
+
+Hi.
+
+> It seems a bit weird to me to read the body and validate it before validating the request itself.
+
+It certainly seems like it, but I had no immediate solution and
+instead of changing a dozen handlers, this seemed faster to implement
+:D. I don't understand what you mean by "validating the request
+itself". I read the header (I mentioned previously) and the body and
+check one against the other. They are present and enough for the
+_validator_ to make a decision, but I might be missing something here.
+
+> I would explicitly put these checks in the handler directly. This of course means that there is no need to read it twice anymore.
+
+I've been trying to find a way to easily share code between handlers
+without having to rewrite a lot of code (even if I do decide to put
+things in a library function - or several). I recently came across
+https://github.com/opscode/mixer. Have you ever used it?
+
+Thanks.
+
+- Paulo F. Oliveira
+
+From essen at ninenines.eu  Tue Sep 16 00:42:20 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 16 Sep 2014 00:42:20 +0200
+Subject: [99s-extend] Using cowboy_req:body more than once per request
+In-Reply-To: <CA+dV7cSQc=3wsQrYkg2p6R9M7n_HmZpF6kOt=4CbaphUUx4oGQ@mail.gmail.com>
+References: <CA+dV7cT+POGJM=nqBcvnP_NoZUa=_ZHjGx-9gBQ+09Pe7aE2bg@mail.gmail.com>	<541766A3.4070309@ninenines.eu>
+ <CA+dV7cSQc=3wsQrYkg2p6R9M7n_HmZpF6kOt=4CbaphUUx4oGQ@mail.gmail.com>
+Message-ID: <54176B4C.1060101@ninenines.eu>
+
+On 09/16/2014 12:35 AM, Paulo F. Oliveira wrote:
+> Hi.
+>
+>> It seems a bit weird to me to read the body and validate it before validating the request itself.
+>
+> It certainly seems like it, but I had no immediate solution and
+> instead of changing a dozen handlers, this seemed faster to implement
+> :D. I don't understand what you mean by "validating the request
+> itself". I read the header (I mentioned previously) and the body and
+> check one against the other. They are present and enough for the
+> _validator_ to make a decision, but I might be missing something here.
+
+Like, is it the right method? Are the bindings/qs parameters/headers 
+present and valid? And so on. The body should be the last thing you 
+check, due to how expensive it can be, not the first.
+
+>> I would explicitly put these checks in the handler directly. This of course means that there is no need to read it twice anymore.
+>
+> I've been trying to find a way to easily share code between handlers
+> without having to rewrite a lot of code (even if I do decide to put
+> things in a library function - or several). I recently came across
+> https://github.com/opscode/mixer. Have you ever used it?
+
+I usually share code by writing functions. Then I call these functions 
+where needed.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From jmrepetti at gmail.com  Mon Sep 29 18:52:16 2014
+From: jmrepetti at gmail.com (=?UTF-8?B?SnVhbiBNYXTDrWFz?=)
+Date: Mon, 29 Sep 2014 18:52:16 +0200
+Subject: [99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+Message-ID: <CA+ycm=6T4gu=48=VfP3aiVdJFAg--s+xGaT2RtGm1KU8qyLiTw@mail.gmail.com>
+
+Hello list, I hope this is the right place to ask this.
+
+I'm learning Erlang, and I wanted to create a Cowboy app to record audio
+from a web browser.
+
+Based on the websocket example in the Cowboy source code, I get the user
+mic input and send this input to the websocket.
+
+I created a "recorder" module, which functionality is to save the data to
+the a file.
+
+
+*#rawe_handler.erl*-module(rawec_handler).
+-behaviour(cowboy_websocket_handler).
+......
+init(_, _, _) ->
+  case whereis(recorder) of
+    undefined ->
+        RecorderPid = recorder:start(),
+        register(recorder, RecorderPid);
+    _ -> ok
+  end,
+    {upgrade, protocol, cowboy_websocket}.
+.....
+websocket_handle(_Frame, Req, State) ->
+  RecorderPid = whereis(recorder),
+  RecorderPid ! {rec, _Frame/binary},
+    {ok, Req, State}.
+
+*#recorder.erl*
+-module(recorder).
+
+-export([start/0, recorder_fun/1]).
+-compile([debug_info]).
+
+recorder_fun(IoDevice) ->
+  receive
+    {rec, Data} ->
+      ok = file:write(IoDevice, Data),
+      io:format(Data),
+      recorder_fun(IoDevice);
+    {stop, _} ->
+      %%Close file
+      file:close(IoDevice)
+    end.
+
+start() ->
+  {ok, IoDevice} = file:open("/tmp/test_binary.wav", [write,
+binary]),
+  spawn(recorder, recorder_fun, [IoDevice]).
+
+
+When I start the console, and allow the microphone on the browser, I see
+this error on the console:
+
+=ERROR REPORT==== 29-Sep-2014::18:13:03 ===
+Ranch listener http had connection process started with
+cowboy_protocol:start_link/4 at <0.178.0> exit with reason:
+*{[{reason,badarith},{mfa,{rawec_handler,websocket_handle,3*}},{stacktrace,[{rawec_handler,websocket_handle,3,[{file,"src/rawec_handler.erl"},{line,35}]},{cowboy_websocket,handler_call,7,[{file,"src/cowboy_websocket.erl"},{line,588}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]},{msg,{binary,<<0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0....(ETC,
+DATA STREAM CONTINUES)
+
+Probably my approach to do this is totally wrong. I there any obvious
+problem here?
+Can someone point me to a right direction?. Maybe I should write directly
+to a file in the *websocket_handle *funcion, but how can I keep a file
+opened during the streaming?
+
+The github repo is here: https://github.com/jmrepetti/rawec with the whole
+source code if you want to take a look.
+
+
+Thanks in advance,
+Matias.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140929/84fe21a4/attachment.html>
+
+From edgurgel at gmail.com  Tue Sep 30 00:53:26 2014
+From: edgurgel at gmail.com (Eduardo Gurgel)
+Date: Tue, 30 Sep 2014 11:53:26 +1300
+Subject: [99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+In-Reply-To: <CA+ycm=6T4gu=48=VfP3aiVdJFAg--s+xGaT2RtGm1KU8qyLiTw@mail.gmail.com>
+References: <CA+ycm=6T4gu=48=VfP3aiVdJFAg--s+xGaT2RtGm1KU8qyLiTw@mail.gmail.com>
+Message-ID: <CAKAMJXghRnTZ1CTPkTBapOgh7BnFLUnvL++VVedyXuAzWT6HSQ@mail.gmail.com>
+
+Looking on the output it says:
+
+*{reason,badarith} *on this line:
+
+RecorderPid ! {rec, _Frame/binary},
+
+This may help you somehow.
+
+BTW, variables starting with _ are usually used to show unused variables
+and stop warnings from the compiler.
+
+On 30 September 2014 05:52, Juan Mat?as <jmrepetti at gmail.com> wrote:
+
+> Hello list, I hope this is the right place to ask this.
+>
+> I'm learning Erlang, and I wanted to create a Cowboy app to record audio
+> from a web browser.
+>
+> Based on the websocket example in the Cowboy source code, I get the user
+> mic input and send this input to the websocket.
+>
+> I created a "recorder" module, which functionality is to save the data to
+> the a file.
+>
+>
+> *#rawe_handler.erl*-module(rawec_handler).
+> -behaviour(cowboy_websocket_handler).
+> ......
+> init(_, _, _) ->
+>   case whereis(recorder) of
+>     undefined ->
+>         RecorderPid = recorder:start(),
+>         register(recorder, RecorderPid);
+>     _ -> ok
+>   end,
+>     {upgrade, protocol, cowboy_websocket}.
+> .....
+> websocket_handle(_Frame, Req, State) ->
+>   RecorderPid = whereis(recorder),
+>   RecorderPid ! {rec, _Frame/binary},
+>     {ok, Req, State}.
+>
+> *#recorder.erl*
+> -module(recorder).
+>
+> -export([start/0, recorder_fun/1]).
+> -compile([debug_info]).
+>
+> recorder_fun(IoDevice) ->
+>   receive
+>     {rec, Data} ->
+>       ok = file:write(IoDevice, Data),
+>       io:format(Data),
+>       recorder_fun(IoDevice);
+>     {stop, _} ->
+>       %%Close file
+>       file:close(IoDevice)
+>     end.
+>
+> start() ->
+>   {ok, IoDevice} = file:open("/tmp/test_binary.wav", [write,
+> binary]),
+>   spawn(recorder, recorder_fun, [IoDevice]).
+>
+>
+> When I start the console, and allow the microphone on the browser, I see
+> this error on the console:
+>
+> =ERROR REPORT==== 29-Sep-2014::18:13:03 ===
+> Ranch listener http had connection process started with
+> cowboy_protocol:start_link/4 at <0.178.0> exit with reason:
+> *{[{reason,badarith},{mfa,{rawec_handler,websocket_handle,3*}},{stacktrace,[{rawec_handler,websocket_handle,3,[{file,"src/rawec_handler.erl"},{line,35}]},{cowboy_websocket,handler_call,7,[{file,"src/cowboy_websocket.erl"},{line,588}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]},{msg,{binary,<<0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0....(ETC,
+> DATA STREAM CONTINUES)
+>
+> Probably my approach to do this is totally wrong. I there any obvious
+> problem here?
+> Can someone point me to a right direction?. Maybe I should write directly
+> to a file in the *websocket_handle *funcion, but how can I keep a file
+> opened during the streaming?
+>
+> The github repo is here: https://github.com/jmrepetti/rawec with the
+> whole source code if you want to take a look.
+>
+>
+> Thanks in advance,
+> Matias.
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+>
+
+
+-- 
+Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140930/6d952ce6/attachment-0001.html>
+
+From jmrepetti at gmail.com  Tue Sep 30 12:38:15 2014
+From: jmrepetti at gmail.com (=?UTF-8?B?SnVhbiBNYXTDrWFz?=)
+Date: Tue, 30 Sep 2014 12:38:15 +0200
+Subject: [99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+In-Reply-To: <CAKAMJXghRnTZ1CTPkTBapOgh7BnFLUnvL++VVedyXuAzWT6HSQ@mail.gmail.com>
+References: <CA+ycm=6T4gu=48=VfP3aiVdJFAg--s+xGaT2RtGm1KU8qyLiTw@mail.gmail.com>
+ <CAKAMJXghRnTZ1CTPkTBapOgh7BnFLUnvL++VVedyXuAzWT6HSQ@mail.gmail.com>
+Message-ID: <CA+ycm=5YMMKFpZnfGrOBLu5Jn4WFAiX7BmwbKBti2YsVmJ5JjQ@mail.gmail.com>
+
+Thanks, that fixed the error. Now I'm having other but I'll investigate.
+
+
+
+On Tue, Sep 30, 2014 at 12:53 AM, Eduardo Gurgel <edgurgel at gmail.com> wrote:
+
+> Looking on the output it says:
+>
+> *{reason,badarith} *on this line:
+>
+> RecorderPid ! {rec, _Frame/binary},
+>
+> This may help you somehow.
+>
+> BTW, variables starting with _ are usually used to show unused variables
+> and stop warnings from the compiler.
+>
+> On 30 September 2014 05:52, Juan Mat?as <jmrepetti at gmail.com> wrote:
+>
+>> Hello list, I hope this is the right place to ask this.
+>>
+>> I'm learning Erlang, and I wanted to create a Cowboy app to record audio
+>> from a web browser.
+>>
+>> Based on the websocket example in the Cowboy source code, I get the user
+>> mic input and send this input to the websocket.
+>>
+>> I created a "recorder" module, which functionality is to save the data to
+>> the a file.
+>>
+>>
+>> *#rawe_handler.erl*-module(rawec_handler).
+>> -behaviour(cowboy_websocket_handler).
+>> ......
+>> init(_, _, _) ->
+>>   case whereis(recorder) of
+>>     undefined ->
+>>         RecorderPid = recorder:start(),
+>>         register(recorder, RecorderPid);
+>>     _ -> ok
+>>   end,
+>>     {upgrade, protocol, cowboy_websocket}.
+>> .....
+>> websocket_handle(_Frame, Req, State) ->
+>>   RecorderPid = whereis(recorder),
+>>   RecorderPid ! {rec, _Frame/binary},
+>>     {ok, Req, State}.
+>>
+>> *#recorder.erl*
+>> -module(recorder).
+>>
+>> -export([start/0, recorder_fun/1]).
+>> -compile([debug_info]).
+>>
+>> recorder_fun(IoDevice) ->
+>>   receive
+>>     {rec, Data} ->
+>>       ok = file:write(IoDevice, Data),
+>>       io:format(Data),
+>>       recorder_fun(IoDevice);
+>>     {stop, _} ->
+>>       %%Close file
+>>       file:close(IoDevice)
+>>     end.
+>>
+>> start() ->
+>>   {ok, IoDevice} = file:open("/tmp/test_binary.wav", [write,
+>> binary]),
+>>   spawn(recorder, recorder_fun, [IoDevice]).
+>>
+>>
+>> When I start the console, and allow the microphone on the browser, I see
+>> this error on the console:
+>>
+>> =ERROR REPORT==== 29-Sep-2014::18:13:03 ===
+>> Ranch listener http had connection process started with
+>> cowboy_protocol:start_link/4 at <0.178.0> exit with reason:
+>> *{[{reason,badarith},{mfa,{rawec_handler,websocket_handle,3*}},{stacktrace,[{rawec_handler,websocket_handle,3,[{file,"src/rawec_handler.erl"},{line,35}]},{cowboy_websocket,handler_call,7,[{file,"src/cowboy_websocket.erl"},{line,588}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]},{msg,{binary,<<0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0....(ETC,
+>> DATA STREAM CONTINUES)
+>>
+>> Probably my approach to do this is totally wrong. I there any obvious
+>> problem here?
+>> Can someone point me to a right direction?. Maybe I should write directly
+>> to a file in the *websocket_handle *funcion, but how can I keep a file
+>> opened during the streaming?
+>>
+>> The github repo is here: https://github.com/jmrepetti/rawec with the
+>> whole source code if you want to take a look.
+>>
+>>
+>> Thanks in advance,
+>> Matias.
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>
+>
+> --
+> Eduardo
+>
+
+
+
+-- 
+Mat?as
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140930/ef46837f/attachment.html>
+

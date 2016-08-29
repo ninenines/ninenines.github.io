@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Proposal for Cowboy Routing
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Proposal%20for%20Cowboy%20Routing&In-Reply-To=%3C20121113161004.GF17626%40members.linode.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000013.html">
+   <LINK REL="Next"  HREF="000014.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Proposal for Cowboy Routing</H1>
+    <B>Thomas Allen</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Proposal%20for%20Cowboy%20Routing&In-Reply-To=%3C20121113161004.GF17626%40members.linode.com%3E"
+       TITLE="[99s-extend] Proposal for Cowboy Routing">thomas at oinksoft.com
+       </A><BR>
+    <I>Tue Nov 13 17:10:04 CET 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000013.html">[99s-extend] Proposal for Cowboy Routing
+</A></li>
+        <LI>Next message: <A HREF="000014.html">[99s-extend] Proposal for Cowboy Routing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16">[ date ]</a>
+              <a href="thread.html#16">[ thread ]</a>
+              <a href="subject.html#16">[ subject ]</a>
+              <a href="author.html#16">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, Nov 13, 2012 at 04:22:48PM +0100, Lo&#239;c Hoguin wrote:
+&gt;<i> No, just check that cowboy_req:path/1 ends with $/, and if it
+</I>&gt;<i> doesn't then redirect.
+</I>
+OK, so what I'm going for is to actually check for a valid URL with the
+slash. I got it to work in current cowboy, but shield your eyes ...
+
+I do this &quot;middleware&quot; thing often ... this might be a misnomer as I
+think some definitions of middleware specify that it be able to wrap the
+request *and* the response. I digress ...
+
+    %%% foo_app.erl:
+
+    {ok, _} = cowboy:start_http(http, ?ACCEPTORS,
+        [{port, ?PORT}],
+        [{dispatch, Dispatch},
+         {onrequest, fun(Req) -&gt;
+             foo_middleware:all(Dispatch, Req)
+          end}]
+    ),
+
+
+    %% foo_middleware.erl:
+
+    -define(MIDDLEWARE, [
+        fun foo_middleware:slash/2,
+        fun foo_middleware:session/2,
+        fun foo_middleware:user/2
+    ]).
+
+    all(Dispatch, Req) -&gt;
+        lists:foldl(fun(F, CurReq) -&gt; F(Dispatch, CurReq) end, Req,
+            ?MIDDLEWARE).
+
+    %% ...
+
+    slash(Dispatch, Req) -&gt;
+        {Path, _} = cowboy_req:path(Req),
+        case binary:last(Path) of
+            $/ -&gt; Req;
+            _ -&gt;
+                SlashPath = &lt;&lt;Path/bitstring, &quot;/&quot;&gt;&gt;,
+                {Host, _} = cowboy_req:host(Req),
+                Match = cowboy_dispatcher:match(Dispatch, Host,
+                    SlashPath),
+                case element(1, Match) of
+                    ok -&gt;
+                        cowboy_req:reply(301,
+                            [{&lt;&lt;&quot;Location&quot;&gt;&gt;, SlashPath}], &lt;&lt;&gt;&gt;, Req);
+                    error -&gt; Req
+                end
+        end.
+
+So, I assume that any path not ending in &quot;/&quot; won't match. Another
+version of this could toss that assumption, but then you're performing
+an extra match on every request ... much better to use a '_' rule in
+that case.
+
+One thing that is icky about using a fallback '_' handler, and the
+reason I've elected to use onrequest for this example, is that I do not
+see a way to access cowboy_protocol's state.dispatch to access these
+rules. So, I enclose them in my `onrequest` fun. Would it be possible to
+expose Dispatch? This has many applications, particularly for URL
+reversing.
+
+Perhaps I am missing several things ;^)
+
+Thomas
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000013.html">[99s-extend] Proposal for Cowboy Routing
+</A></li>
+	<LI>Next message: <A HREF="000014.html">[99s-extend] Proposal for Cowboy Routing
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#16">[ date ]</a>
+              <a href="thread.html#16">[ thread ]</a>
+              <a href="subject.html#16">[ subject ]</a>
+              <a href="author.html#16">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

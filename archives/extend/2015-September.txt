@@ -1,0 +1,552 @@
+From grahamrhay at gmail.com  Wed Sep 23 19:45:01 2015
+From: grahamrhay at gmail.com (Graham Hay)
+Date: Wed, 23 Sep 2015 18:45:01 +0100
+Subject: [99s-extend] Cowboy, relx, and dev mode, oh my!
+Message-ID: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+
+I was fiddling with some js, and got tired of restarting the server. I was
+under the
+impression that using dev_mode with relx was the solution to this problem,
+but
+I can't seem to get it to work. I have an example here:
+
+https://github.com/grahamrhay/cowboy_devmode
+
+If I look in _rel, the lib folder for my app is a symlink, as expected. Yet
+when I change
+the web page, the rendered page is unchanged. I've tried a hard reload, and
+clearing
+the cache.
+
+And, in case that wasn't annoying enough, even restarting the server isn't
+enough!
+Nor is running make again. In fact, the only way I've found of getting it
+to update,
+is to turn off dev mode, and build the release.
+
+Am I missing something really obvious? As far as I can tell from perusing
+the code,
+the cowboy static handler just serves the file directly from the file
+system.
+
+(P.S. I am using vagrant, but I would expect that to cause errors rather
+than this, if
+the symlink wasn't working.)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150923/fc8e4ef7/attachment.html>
+
+From essen at ninenines.eu  Thu Sep 24 16:35:52 2015
+From: essen at ninenines.eu (=?UTF-8?Q?Lo=c3=afc_Hoguin?=)
+Date: Thu, 24 Sep 2015 16:35:52 +0200
+Subject: [99s-extend] Cowboy, relx, and dev mode, oh my!
+In-Reply-To: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+References: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+Message-ID: <56040A48.6090800@ninenines.eu>
+
+Running the release, stopping it, editing the file, running the release 
+again works here. I suspect something related to Vagrant.
+
+Also I suggest 'make run' rather than your start.sh.
+
+On 09/23/2015 07:45 PM, Graham Hay wrote:
+> I was fiddling with some js, and got tired of restarting the server. I
+> was under the
+> impression that using dev_mode with relx was the solution to this
+> problem, but
+> I can't seem to get it to work. I have an example here:
+>
+> https://github.com/grahamrhay/cowboy_devmode
+>
+> If I look in _rel, the lib folder for my app is a symlink, as expected.
+> Yet when I change
+> the web page, the rendered page is unchanged. I've tried a hard reload,
+> and clearing
+> the cache.
+>
+> And, in case that wasn't annoying enough, even restarting the server
+> isn't enough!
+> Nor is running make again. In fact, the only way I've found of getting
+> it to update,
+> is to turn off dev mode, and build the release.
+>
+> Am I missing something really obvious? As far as I can tell from
+> perusing the code,
+> the cowboy static handler just serves the file directly from the file
+> system.
+>
+> (P.S. I am using vagrant, but I would expect that to cause errors rather
+> than this, if
+> the symlink wasn't working.)
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From essen at ninenines.eu  Thu Sep 24 16:39:17 2015
+From: essen at ninenines.eu (=?UTF-8?Q?Lo=c3=afc_Hoguin?=)
+Date: Thu, 24 Sep 2015 16:39:17 +0200
+Subject: [99s-extend] Cowboy, relx, and dev mode, oh my!
+In-Reply-To: <56040A48.6090800@ninenines.eu>
+References: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+ <56040A48.6090800@ninenines.eu>
+Message-ID: <56040B15.3090702@ninenines.eu>
+
+Wait, I'm dumb. These steps also work:
+
+Running the release, opening the website and seeing ohai, editing the 
+file with some extra text, reloading, seeing the extra text.
+
+On 09/24/2015 04:35 PM, Lo?c Hoguin wrote:
+> Running the release, stopping it, editing the file, running the release
+> again works here. I suspect something related to Vagrant.
+>
+> Also I suggest 'make run' rather than your start.sh.
+>
+> On 09/23/2015 07:45 PM, Graham Hay wrote:
+>> I was fiddling with some js, and got tired of restarting the server. I
+>> was under the
+>> impression that using dev_mode with relx was the solution to this
+>> problem, but
+>> I can't seem to get it to work. I have an example here:
+>>
+>> https://github.com/grahamrhay/cowboy_devmode
+>>
+>> If I look in _rel, the lib folder for my app is a symlink, as expected.
+>> Yet when I change
+>> the web page, the rendered page is unchanged. I've tried a hard reload,
+>> and clearing
+>> the cache.
+>>
+>> And, in case that wasn't annoying enough, even restarting the server
+>> isn't enough!
+>> Nor is running make again. In fact, the only way I've found of getting
+>> it to update,
+>> is to turn off dev mode, and build the release.
+>>
+>> Am I missing something really obvious? As far as I can tell from
+>> perusing the code,
+>> the cowboy static handler just serves the file directly from the file
+>> system.
+>>
+>> (P.S. I am using vagrant, but I would expect that to cause errors rather
+>> than this, if
+>> the symlink wasn't working.)
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From grahamrhay at gmail.com  Thu Sep 24 16:57:37 2015
+From: grahamrhay at gmail.com (Graham Hay)
+Date: Thu, 24 Sep 2015 15:57:37 +0100
+Subject: [99s-extend] Cowboy, relx, and dev mode, oh my!
+In-Reply-To: <56040B15.3090702@ninenines.eu>
+References: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+ <56040A48.6090800@ninenines.eu> <56040B15.3090702@ninenines.eu>
+Message-ID: <CAABECY0h6hCwjw9EcaDHrd98Sb9QUGxjnz1863qL-GBwEZ9QZw@mail.gmail.com>
+
+Yeah, that's how I expected it to work. I'll see if I can identify how
+vagrant is causing me problems.
+
+Didn't know about "make run", thanks :)
+
+On 24 September 2015 at 15:39, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Wait, I'm dumb. These steps also work:
+>
+> Running the release, opening the website and seeing ohai, editing the file
+> with some extra text, reloading, seeing the extra text.
+>
+>
+> On 09/24/2015 04:35 PM, Lo?c Hoguin wrote:
+>
+>> Running the release, stopping it, editing the file, running the release
+>> again works here. I suspect something related to Vagrant.
+>>
+>> Also I suggest 'make run' rather than your start.sh.
+>>
+>> On 09/23/2015 07:45 PM, Graham Hay wrote:
+>>
+>>> I was fiddling with some js, and got tired of restarting the server. I
+>>> was under the
+>>> impression that using dev_mode with relx was the solution to this
+>>> problem, but
+>>> I can't seem to get it to work. I have an example here:
+>>>
+>>> https://github.com/grahamrhay/cowboy_devmode
+>>>
+>>> If I look in _rel, the lib folder for my app is a symlink, as expected.
+>>> Yet when I change
+>>> the web page, the rendered page is unchanged. I've tried a hard reload,
+>>> and clearing
+>>> the cache.
+>>>
+>>> And, in case that wasn't annoying enough, even restarting the server
+>>> isn't enough!
+>>> Nor is running make again. In fact, the only way I've found of getting
+>>> it to update,
+>>> is to turn off dev mode, and build the release.
+>>>
+>>> Am I missing something really obvious? As far as I can tell from
+>>> perusing the code,
+>>> the cowboy static handler just serves the file directly from the file
+>>> system.
+>>>
+>>> (P.S. I am using vagrant, but I would expect that to cause errors rather
+>>> than this, if
+>>> the symlink wasn't working.)
+>>>
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> https://lists.ninenines.eu/listinfo/extend
+>>>
+>>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+> Author of The Erlanger Playbook,
+> A book about software development using Erlang
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150924/6a9add86/attachment.html>
+
+From grahamrhay at gmail.com  Wed Sep 30 18:57:49 2015
+From: grahamrhay at gmail.com (Graham Hay)
+Date: Wed, 30 Sep 2015 17:57:49 +0100
+Subject: [99s-extend] Cowboy, relx, and dev mode, oh my!
+In-Reply-To: <CAABECY0h6hCwjw9EcaDHrd98Sb9QUGxjnz1863qL-GBwEZ9QZw@mail.gmail.com>
+References: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+ <56040A48.6090800@ninenines.eu> <56040B15.3090702@ninenines.eu>
+ <CAABECY0h6hCwjw9EcaDHrd98Sb9QUGxjnz1863qL-GBwEZ9QZw@mail.gmail.com>
+Message-ID: <CAABECY3fkw2m2wc8CxQh+VEZ3waEsgjYUf=hQYL3pwA2LUzTFA@mail.gmail.com>
+
+https://www.virtualbox.org/ticket/9069
+
+Opened 4 years ago :( Maybe I should give VMware some money.
+
+On 24 September 2015 at 15:57, Graham Hay <grahamrhay at gmail.com> wrote:
+
+> Yeah, that's how I expected it to work. I'll see if I can identify how
+> vagrant is causing me problems.
+>
+> Didn't know about "make run", thanks :)
+>
+> On 24 September 2015 at 15:39, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> Wait, I'm dumb. These steps also work:
+>>
+>> Running the release, opening the website and seeing ohai, editing the
+>> file with some extra text, reloading, seeing the extra text.
+>>
+>>
+>> On 09/24/2015 04:35 PM, Lo?c Hoguin wrote:
+>>
+>>> Running the release, stopping it, editing the file, running the release
+>>> again works here. I suspect something related to Vagrant.
+>>>
+>>> Also I suggest 'make run' rather than your start.sh.
+>>>
+>>> On 09/23/2015 07:45 PM, Graham Hay wrote:
+>>>
+>>>> I was fiddling with some js, and got tired of restarting the server. I
+>>>> was under the
+>>>> impression that using dev_mode with relx was the solution to this
+>>>> problem, but
+>>>> I can't seem to get it to work. I have an example here:
+>>>>
+>>>> https://github.com/grahamrhay/cowboy_devmode
+>>>>
+>>>> If I look in _rel, the lib folder for my app is a symlink, as expected.
+>>>> Yet when I change
+>>>> the web page, the rendered page is unchanged. I've tried a hard reload,
+>>>> and clearing
+>>>> the cache.
+>>>>
+>>>> And, in case that wasn't annoying enough, even restarting the server
+>>>> isn't enough!
+>>>> Nor is running make again. In fact, the only way I've found of getting
+>>>> it to update,
+>>>> is to turn off dev mode, and build the release.
+>>>>
+>>>> Am I missing something really obvious? As far as I can tell from
+>>>> perusing the code,
+>>>> the cowboy static handler just serves the file directly from the file
+>>>> system.
+>>>>
+>>>> (P.S. I am using vagrant, but I would expect that to cause errors rather
+>>>> than this, if
+>>>> the symlink wasn't working.)
+>>>>
+>>>>
+>>>> _______________________________________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> https://lists.ninenines.eu/listinfo/extend
+>>>>
+>>>>
+>>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>> Author of The Erlanger Playbook,
+>> A book about software development using Erlang
+>>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150930/ee98f926/attachment.html>
+
+From essen at ninenines.eu  Wed Sep 30 19:03:11 2015
+From: essen at ninenines.eu (=?UTF-8?Q?Lo=c3=afc_Hoguin?=)
+Date: Wed, 30 Sep 2015 19:03:11 +0200
+Subject: [99s-extend] Cowboy, relx, and dev mode, oh my!
+In-Reply-To: <CAABECY3fkw2m2wc8CxQh+VEZ3waEsgjYUf=hQYL3pwA2LUzTFA@mail.gmail.com>
+References: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+ <56040A48.6090800@ninenines.eu> <56040B15.3090702@ninenines.eu>
+ <CAABECY0h6hCwjw9EcaDHrd98Sb9QUGxjnz1863qL-GBwEZ9QZw@mail.gmail.com>
+ <CAABECY3fkw2m2wc8CxQh+VEZ3waEsgjYUf=hQYL3pwA2LUzTFA@mail.gmail.com>
+Message-ID: <560C15CF.7000300@ninenines.eu>
+
+It's not the first time I see this bug. Can you open a ticket on the 
+Cowboy project so it gets documented in some kind of "gotchas" section?
+
+On 09/30/2015 06:57 PM, Graham Hay wrote:
+> https://www.virtualbox.org/ticket/9069
+>
+> Opened 4 years ago :( Maybe I should give VMware some money.
+>
+> On 24 September 2015 at 15:57, Graham Hay <grahamrhay at gmail.com
+> <mailto:grahamrhay at gmail.com>> wrote:
+>
+>     Yeah, that's how I expected it to work. I'll see if I can identify
+>     how vagrant is causing me problems.
+>
+>     Didn't know about "make run", thanks :)
+>
+>     On 24 September 2015 at 15:39, Lo?c Hoguin <essen at ninenines.eu
+>     <mailto:essen at ninenines.eu>> wrote:
+>
+>         Wait, I'm dumb. These steps also work:
+>
+>         Running the release, opening the website and seeing ohai,
+>         editing the file with some extra text, reloading, seeing the
+>         extra text.
+>
+>
+>         On 09/24/2015 04:35 PM, Lo?c Hoguin wrote:
+>
+>             Running the release, stopping it, editing the file, running
+>             the release
+>             again works here. I suspect something related to Vagrant.
+>
+>             Also I suggest 'make run' rather than your start.sh.
+>
+>             On 09/23/2015 07:45 PM, Graham Hay wrote:
+>
+>                 I was fiddling with some js, and got tired of restarting
+>                 the server. I
+>                 was under the
+>                 impression that using dev_mode with relx was the
+>                 solution to this
+>                 problem, but
+>                 I can't seem to get it to work. I have an example here:
+>
+>                 https://github.com/grahamrhay/cowboy_devmode
+>
+>                 If I look in _rel, the lib folder for my app is a
+>                 symlink, as expected.
+>                 Yet when I change
+>                 the web page, the rendered page is unchanged. I've tried
+>                 a hard reload,
+>                 and clearing
+>                 the cache.
+>
+>                 And, in case that wasn't annoying enough, even
+>                 restarting the server
+>                 isn't enough!
+>                 Nor is running make again. In fact, the only way I've
+>                 found of getting
+>                 it to update,
+>                 is to turn off dev mode, and build the release.
+>
+>                 Am I missing something really obvious? As far as I can
+>                 tell from
+>                 perusing the code,
+>                 the cowboy static handler just serves the file directly
+>                 from the file
+>                 system.
+>
+>                 (P.S. I am using vagrant, but I would expect that to
+>                 cause errors rather
+>                 than this, if
+>                 the symlink wasn't working.)
+>
+>
+>                 _______________________________________________
+>                 Extend mailing list
+>                 Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>                 https://lists.ninenines.eu/listinfo/extend
+>
+>
+>
+>         --
+>         Lo?c Hoguin
+>         http://ninenines.eu
+>         Author of The Erlanger Playbook,
+>         A book about software development using Erlang
+>
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From grahamrhay at gmail.com  Wed Sep 30 19:22:58 2015
+From: grahamrhay at gmail.com (Graham Hay)
+Date: Wed, 30 Sep 2015 18:22:58 +0100
+Subject: [99s-extend] Cowboy, relx, and dev mode, oh my!
+In-Reply-To: <560C15CF.7000300@ninenines.eu>
+References: <CAABECY2WtE92TwP0p_9pQFihvfqtf53oARPTxQnbz9Xvw-GjOw@mail.gmail.com>
+ <56040A48.6090800@ninenines.eu> <56040B15.3090702@ninenines.eu>
+ <CAABECY0h6hCwjw9EcaDHrd98Sb9QUGxjnz1863qL-GBwEZ9QZw@mail.gmail.com>
+ <CAABECY3fkw2m2wc8CxQh+VEZ3waEsgjYUf=hQYL3pwA2LUzTFA@mail.gmail.com>
+ <560C15CF.7000300@ninenines.eu>
+Message-ID: <CAABECY39S6vGpLmKrFbCGrV_-=4TWUAgCvE9zaru-FUJxe4cYA@mail.gmail.com>
+
+Done.
+
+https://github.com/ninenines/cowboy/issues/897
+
+On 30 September 2015 at 18:03, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> It's not the first time I see this bug. Can you open a ticket on the
+> Cowboy project so it gets documented in some kind of "gotchas" section?
+>
+> On 09/30/2015 06:57 PM, Graham Hay wrote:
+>
+>> https://www.virtualbox.org/ticket/9069
+>>
+>> Opened 4 years ago :( Maybe I should give VMware some money.
+>>
+>> On 24 September 2015 at 15:57, Graham Hay <grahamrhay at gmail.com
+>> <mailto:grahamrhay at gmail.com>> wrote:
+>>
+>>     Yeah, that's how I expected it to work. I'll see if I can identify
+>>     how vagrant is causing me problems.
+>>
+>>     Didn't know about "make run", thanks :)
+>>
+>>     On 24 September 2015 at 15:39, Lo?c Hoguin <essen at ninenines.eu
+>>     <mailto:essen at ninenines.eu>> wrote:
+>>
+>>         Wait, I'm dumb. These steps also work:
+>>
+>>         Running the release, opening the website and seeing ohai,
+>>         editing the file with some extra text, reloading, seeing the
+>>         extra text.
+>>
+>>
+>>         On 09/24/2015 04:35 PM, Lo?c Hoguin wrote:
+>>
+>>             Running the release, stopping it, editing the file, running
+>>             the release
+>>             again works here. I suspect something related to Vagrant.
+>>
+>>             Also I suggest 'make run' rather than your start.sh.
+>>
+>>             On 09/23/2015 07:45 PM, Graham Hay wrote:
+>>
+>>                 I was fiddling with some js, and got tired of restarting
+>>                 the server. I
+>>                 was under the
+>>                 impression that using dev_mode with relx was the
+>>                 solution to this
+>>                 problem, but
+>>                 I can't seem to get it to work. I have an example here:
+>>
+>>                 https://github.com/grahamrhay/cowboy_devmode
+>>
+>>                 If I look in _rel, the lib folder for my app is a
+>>                 symlink, as expected.
+>>                 Yet when I change
+>>                 the web page, the rendered page is unchanged. I've tried
+>>                 a hard reload,
+>>                 and clearing
+>>                 the cache.
+>>
+>>                 And, in case that wasn't annoying enough, even
+>>                 restarting the server
+>>                 isn't enough!
+>>                 Nor is running make again. In fact, the only way I've
+>>                 found of getting
+>>                 it to update,
+>>                 is to turn off dev mode, and build the release.
+>>
+>>                 Am I missing something really obvious? As far as I can
+>>                 tell from
+>>                 perusing the code,
+>>                 the cowboy static handler just serves the file directly
+>>                 from the file
+>>                 system.
+>>
+>>                 (P.S. I am using vagrant, but I would expect that to
+>>                 cause errors rather
+>>                 than this, if
+>>                 the symlink wasn't working.)
+>>
+>>
+>>                 _______________________________________________
+>>                 Extend mailing list
+>>                 Extend at lists.ninenines.eu <mailto:
+>> Extend at lists.ninenines.eu>
+>>                 https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>>
+>>         --
+>>         Lo?c Hoguin
+>>         http://ninenines.eu
+>>         Author of The Erlanger Playbook,
+>>         A book about software development using Erlang
+>>
+>>
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+> Author of The Erlanger Playbook,
+> A book about software development using Erlang
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150930/7f5e7422/attachment-0001.html>
+

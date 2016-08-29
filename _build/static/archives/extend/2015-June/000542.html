@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Websocket vs. Request-Response msg pair
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Websocket%20vs.%20Request-Response%20msg%20pair&In-Reply-To=%3C558A8645.3010002%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000544.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Websocket vs. Request-Response msg pair</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Websocket%20vs.%20Request-Response%20msg%20pair&In-Reply-To=%3C558A8645.3010002%40ninenines.eu%3E"
+       TITLE="[99s-extend] Websocket vs. Request-Response msg pair">essen at ninenines.eu
+       </A><BR>
+    <I>Wed Jun 24 12:28:21 CEST 2015</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000544.html">[99s-extend] Websocket vs. Request-Response msg pair
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#542">[ date ]</a>
+              <a href="thread.html#542">[ thread ]</a>
+              <a href="subject.html#542">[ subject ]</a>
+              <a href="author.html#542">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 06/24/2015 11:18 AM, Robert Balogh wrote:
+&gt;<i> Now I would like to step forward, and I would like to implement a
+</I>&gt;<i> Request-Response mechanism. I read few articles in to this topic, and
+</I>&gt;<i> all of them has mentioned this &quot;feature&quot; is not part of the Websocket
+</I>&gt;<i> standard. They were suggested to use some sub-protocols for this, but I
+</I>&gt;<i> did not see any written in Erlang.
+</I>&gt;<i>
+</I>&gt;<i> So, I would like to ask you, do I understand right that Cowboy does not
+</I>&gt;<i> have this feature too? If so, do you have some idea how can I implement
+</I>&gt;<i> a basic request-response mechanism? Probably one of you guys in this
+</I>&gt;<i> forum have some idea.
+</I>
+Cowboy only comes with the Websocket protocol itself, all sub protocols 
+and mechanisms you want can then be implemented on top of it.
+
+I strongly recommend not to do RPC. Just send events to the server and 
+let the server send events to you. The difference is in the fact that 
+RPC tracks what requests were sent to tie requests and responses 
+together, while an event channel does not. You just send what the user 
+is doing and the server sends you what it wants the client to update or 
+do. Stay as stateless as possible.
+
+If you need to manage state to update the interface (locking a form 
+while waiting for the result, for example), do use timeouts to avoid 
+locking endlessly.
+
+Try and experiment, it's not very complicated. :-)
+
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+</PRE>
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000544.html">[99s-extend] Websocket vs. Request-Response msg pair
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#542">[ date ]</a>
+              <a href="thread.html#542">[ thread ]</a>
+              <a href="subject.html#542">[ subject ]</a>
+              <a href="author.html#542">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

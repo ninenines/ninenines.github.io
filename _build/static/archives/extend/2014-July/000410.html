@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] [cowboy REST] returning {true, URL} to PUT
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20%5Bcowboy%20REST%5D%20returning%20%7Btrue%2C%20URL%7D%20to%20PUT&In-Reply-To=%3C53BBD908.6020909%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000409.html">
+   <LINK REL="Next"  HREF="000411.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] [cowboy REST] returning {true, URL} to PUT</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20%5Bcowboy%20REST%5D%20returning%20%7Btrue%2C%20URL%7D%20to%20PUT&In-Reply-To=%3C53BBD908.6020909%40ninenines.eu%3E"
+       TITLE="[99s-extend] [cowboy REST] returning {true, URL} to PUT">essen at ninenines.eu
+       </A><BR>
+    <I>Tue Jul  8 13:42:00 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000409.html">[99s-extend] [cowboy REST] returning {true, URL} to PUT
+</A></li>
+        <LI>Next message: <A HREF="000411.html">[99s-extend] [cowboy REST] returning {true, URL} to PUT
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#410">[ date ]</a>
+              <a href="thread.html#410">[ thread ]</a>
+              <a href="subject.html#410">[ subject ]</a>
+              <a href="author.html#410">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>That's what POST should do.
+
+Compare:
+
+PUT /some/resource/1234 -&gt; no redirect needed
+POST /some/resource -&gt; creates /some/resource/1234, redirects
+
+If /some/resource is a collection then PUT on that collection is 
+supposed to replace it entirely.
+
+Again it's possible for PUT to create a resource elsewhere, but 
+typically the redirect would be from something like 
+<A HREF="http://api.yourservice.com/resource/1234">http://api.yourservice.com/resource/1234</A> to 
+<A HREF="http://cloudthingy.server137.yourservice.com/whatever/resource/1234">http://cloudthingy.server137.yourservice.com/whatever/resource/1234</A> and 
+not to do what POST is intended for.
+
+On 07/08/2014 01:32 PM, Samuel wrote:
+&gt;<i> Ok, thanks. That should probably be mentioned in the documentation of
+</I>&gt;<i> content_types_accepted, as it says {true, URI} is a valid output for
+</I>&gt;<i> the provided function.
+</I>&gt;<i>
+</I>&gt;<i> Just out of curiosity from a non-so-expert in REST. The API spec
+</I>&gt;<i> (which I am not the author of) says the PUT call should create a
+</I>&gt;<i> resource with a unique id and return the URI of the created resource
+</I>&gt;<i> in the Location header. That is something like PUT /some/resource
+</I>&gt;<i> should return /some/resource/1234 in the Location. some/resource is
+</I>&gt;<i> fixed but 1234 would be generated for each instance of /some/resource.
+</I>&gt;<i> Is that considered nonsensical?
+</I>&gt;<i>
+</I>&gt;<i> On 8 July 2014 11:57, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt; wrote:
+</I>&gt;&gt;<i> It's not enabled for PATCH or PUT because it makes little sense for them.
+</I>&gt;&gt;<i> PATCH and PUT are typically used directly on the URI of the resource, even
+</I>&gt;&gt;<i> when creating it. While you can return a &quot;better URI&quot; for the created
+</I>&gt;&gt;<i> resource for them, this should be seen as a special case rather than the
+</I>&gt;&gt;<i> norm. You can still do it by setting the location header manually and Cowboy
+</I>&gt;&gt;<i> will react accordingly.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 07/08/2014 09:12 AM, Samuel wrote:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Hi,
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> According to the documentation I should be able to return a new
+</I>&gt;&gt;&gt;<i> location when handling a PUT request when using cowboy_rest protocol:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>       The AcceptResource value is the name of the callback that will be
+</I>&gt;&gt;&gt;<i> called if the
+</I>&gt;&gt;&gt;<i>       content-type matches. It is defined as follow.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>       Value type: true | {true, URL} | false
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> That works for &quot;true&quot; and &quot;false&quot; but not for &quot;{true, URL}&quot;, in that
+</I>&gt;&gt;&gt;<i> case the Ranch listener crashes badly[1].
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Looking into cowboy_rest.erl I see that the {true, URL} form is
+</I>&gt;&gt;&gt;<i> restricted to POST requests:
+</I>&gt;&gt;&gt;<i> <A HREF="https://github.com/extend/cowboy/blob/master/src/cowboy_rest.erl#L784">https://github.com/extend/cowboy/blob/master/src/cowboy_rest.erl#L784</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Is that intentional or should I submit a patch to add at least PUT and
+</I>&gt;&gt;&gt;<i> PATCH to that condition (or remove all of them if that is not guarding
+</I>&gt;&gt;&gt;<i> against something horrible)?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Regards
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> [1] Ranch crash log:
+</I>&gt;&gt;&gt;<i> Ranch listener http_acceptor had connection process started with
+</I>&gt;&gt;&gt;<i> cowboy_protocol:start_link/4 at &lt;0.2660.0&gt; exit with reason:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> {{case_clause,{{true,&quot;/url&quot;},{http_req,#Port&lt;0.15864&gt;,ranch_tcp,keepalive,&lt;0.2660.0&gt;,&lt;&lt;&quot;PUT&quot;&gt;&gt;,'HTTP/1.1',{{127,0,0,1},56983},&lt;&lt;&quot;localhost&quot;&gt;&gt;,undefined,8080,&lt;&lt;&quot;/order&quot;&gt;&gt;,undefined,&lt;&lt;&gt;&gt;,undefined,[],[{&lt;&lt;&quot;user-agent&quot;&gt;&gt;,&lt;&lt;&quot;curl/7.22.0
+</I>&gt;&gt;&gt;<i> (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4
+</I>&gt;&gt;&gt;<i> libidn/1.23
+</I>&gt;&gt;&gt;<i> librtmp/2.3&quot;&gt;&gt;},{&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;localhost:8080&quot;&gt;&gt;},{&lt;&lt;&quot;accept&quot;&gt;&gt;,&lt;&lt;&quot;*/*&quot;&gt;&gt;},{&lt;&lt;&quot;content-type&quot;&gt;&gt;,&lt;&lt;&quot;application/json&quot;&gt;&gt;}],[{&lt;&lt;&quot;content-type&quot;&gt;&gt;,{&lt;&lt;&quot;application&quot;&gt;&gt;,&lt;&lt;&quot;json&quot;&gt;&gt;,[]}},{&lt;&lt;&quot;if-modified-since&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;if-none-match&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;if-unmodified-since&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;if-match&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;accept&quot;&gt;&gt;,[{{&lt;&lt;&quot;*&quot;&gt;&gt;,&lt;&lt;&quot;*&quot;&gt;&gt;,[]},1000,[]}]}],undefined,[{charset,undefined},{media_type,{&lt;&lt;&quot;text&quot;&gt;&gt;,&lt;&lt;&quot;html&quot;&gt;&gt;,[]}}],waiting,undefined,&lt;&lt;&gt;&gt;,false,waiting,[{&lt;&lt;&quot;content-type&quot;&gt;&gt;,[&lt;&lt;&quot;text&quot;&gt;&gt;,&lt;&lt;&quot;/&quot;&gt;&gt;,&lt;&lt;&quot;html&quot;&gt;&gt;,&lt;&lt;&gt;&gt;]}],&lt;&lt;&gt;&gt;,undefined},{state}}},[{cowboy_rest,process_content_type,3,[{file,&quot;src/cowboy_rest.erl&quot;},{line,780}]},{cowboy_protocol,execute,4,[{file,&quot;src/cowboy_protocol.erl&quot;},{line,529}]}]}
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> Lo&#239;c Hoguin
+</I>&gt;&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000409.html">[99s-extend] [cowboy REST] returning {true, URL} to PUT
+</A></li>
+	<LI>Next message: <A HREF="000411.html">[99s-extend] [cowboy REST] returning {true, URL} to PUT
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#410">[ date ]</a>
+              <a href="thread.html#410">[ thread ]</a>
+              <a href="subject.html#410">[ subject ]</a>
+              <a href="author.html#410">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

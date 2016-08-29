@@ -1,0 +1,2012 @@
+From essen at ninenines.eu  Fri Jun 19 15:47:14 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 19 Jun 2015 15:47:14 +0200
+Subject: [99s-extend] [ANN] The Erlanger Playbook early release
+Message-ID: <55841D62.1070400@ninenines.eu>
+
+Hello,
+
+I hope it's OK for me to announce on erlang-questions: The Erlanger 
+Playbook, a book about software development using Erlang, has been 
+*early* released!
+
+The book is meant to be the missing developer manual. It covers all 
+steps from the start of a project to its release including writing code, 
+documentation and tests.
+
+There are books for learning Erlang, for running Erlang in production, 
+but not much for modern Erlang development. This is where The Erlanger 
+Playbook comes in.
+
+This is an early release. An update will be sent to everyone about every 
+month or so. I plan to cover anything that relates to the development of 
+Erlang software, ie the "dev" in "devops". Many tools and techniques 
+will be covered in future updates.
+
+We will do a print book if there is enough interest once the book gets 
+finished, but we're a few months off for now. :-)
+
+You can get more information here:
+
+   http://ninenines.eu/articles/erlanger-playbook/
+
+Thanks for your interest!
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From ethrbh at gmail.com  Tue Jun 23 10:28:16 2015
+From: ethrbh at gmail.com (Robert Balogh)
+Date: Tue, 23 Jun 2015 10:28:16 +0200
+Subject: [99s-extend] Help to use frameset in index.html
+Message-ID: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>
+
+hello,
+
+First of all I would say I am a beginner in Cowboy web server, so probably
+I made something wrong, that is why I got the "fault", what I got.
+
+I would like to build up web page, where the client can communicate to
+server, and server can do the same to client, if client does not send
+anything to server too. The Cowboy has the websocket example, what does
+what I would like to do.
+
+There is only one thing is missing what I would like to have. This is the
+"frameset". My idea is to build the index.html using framsets. I made this
+changes, and I build up the html files for the frames, and of course I set
+these in the index.html.
+
+Here is how the index.html looks like
+    <html>
+
+    <head>
+    <title>Welcome to Websocket example 2</title>
+    </head>
+
+    <frameset rows="64,*">
+        <frame name="top_frame" noresize="noresize" scrolling="no"
+src="frame_top.html">
+        <frameset cols="450,*">
+            <frame name="left_frame" scrolling="auto" src="frame_left.html">
+            <frame name="right_frame" src="frame_right.html">
+        </frameset>
+        <noframes>
+        <body>
+
+        </body>
+        </noframes>
+    </frameset>
+
+    </html>
+
+This is how the priv folder looks like
+-----------------------------------------------------------
+    ls priv/
+    frame_left.html  frame_right.html  frame_top.html  index.html  static
+
+This is how I changed the websocket_2_app:start/2 function
+-----------------------------------------------------------
+    Dispatch = cowboy_router:compile([
+        {'_', [
+
+            {"/", cowboy_static, {priv_file, websocket_2, "index.html"}},
+            {"/[...]", cowboy_static, {priv_dir, websocket_2, ""}},
+
+            {"/websocket_2", ws_handler_2, []},
+            {"/static/[...]", cowboy_static, {priv_dir, websocket_2,
+"static"}}
+        ]}
+    ]),
+
+After compile and make release package of the app, I can reach the
+webserver on the port 8080, but some connection does not set up correctly.
+The following texts are present in the browser
+    DISCONNECTED
+
+    ERROR: undefined
+
+    Connecting to: ws://localhost:8080/websocket_2
+
+I made a dbg trace on all cowboy modules, to start some kind of
+troubleshooting. In the "tons" of printout I can see this one. So in the
+bottom of this, there is an {error,enoent}. It comes when tries connect to
+the socket. But unfortunatelly I do not have idea what may cause this :-(
+
+The part of trace
+-----------------------------------------------------------
+    (<0.177.0>) call
+cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+              {{127,0,0,1},33241},
+              <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+              [<<"websocket_2">>],
+              <<>>,undefined,[],
+              [{<<"host">>,<<"localhost:8080">>},
+               {<<"connection">>,<<"Upgrade">>},
+               {<<"pragma">>,<<"no-cache">>},
+               {<<"cache-control">>,<<"no-cache">>},
+               {<<"upgrade">>,<<"websocket">>},
+               {<<"origin">>,<<"http://localhost:8080">>},
+               {<<"sec-websocket-version">>,<<"13">>},
+               {<<"user-agent">>,
+                <<"Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML,
+like Gecko) Chrome/40.0.2214.115 Safari/537.36">>},
+               {<<"accept-encoding">>,<<"gzip, deflate, sdch">>},
+               {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+               {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+               {<<"sec-websocket-extensions">>,
+                <<"permessage-deflate; client_max_window_bits">>}],
+              [{<<"connection">>,[<<"upgrade">>]}],
+
+undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+            {handler_opts,{priv_dir,websocket_2,[]}},
+            {listener,http},
+            {dispatch,[{'_',[],
+                            [{[],[],cowboy_static,
+                              {priv_file,websocket_2,"index.html"}},
+
+ {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+                             {[<<"websocket_2">>],[],ws_handler_2,[]},
+                             {[<<"static">>,'...'],
+                              [],cowboy_static,
+                              {priv_dir,websocket_2,"static"}}]}]}],
+           <<"GET">>,cowboy_static,
+
+{<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+            {error,enoent},
+            []},
+           undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+           undefined,undefined},#Fun<cowboy_rest.2.41839999>) (Timestamp:
+{1435,
+
+46126,
+
+935663})
+
+I guess, I did something very wrong, but I did not found what is that, thus
+I would like to get some help from you.
+
+Please find my small project in github:
+https://github.com/ethrbh/websocket_2
+
+thanks for your help,
+/Robi
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150623/69dfc8e4/attachment-0001.html>
+
+From essen at ninenines.eu  Tue Jun 23 10:56:02 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 23 Jun 2015 10:56:02 +0200
+Subject: [99s-extend] Help to use frameset in index.html
+In-Reply-To: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>
+References: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>
+Message-ID: <55891F22.5050405@ninenines.eu>
+
+The {error, enoent}, especially there, is probably just because the 
+browser is trying to fetch the favicon.
+
+Your issue is that Websocket won't connect, so it has nothing to do with 
+cowboy_rest. Try tracing cowboy_websocket or enable SASL to have more info.
+
+On 06/23/2015 10:28 AM, Robert Balogh wrote:
+> hello,
+>
+> First of all I would say I am a beginner in Cowboy web server, so
+> probably I made something wrong, that is why I got the "fault", what I got.
+>
+> I would like to build up web page, where the client can communicate to
+> server, and server can do the same to client, if client does not send
+> anything to server too. The Cowboy has the websocket example, what does
+> what I would like to do.
+>
+> There is only one thing is missing what I would like to have. This is
+> the "frameset". My idea is to build the index.html using framsets. I
+> made this changes, and I build up the html files for the frames, and of
+> course I set these in the index.html.
+>
+> Here is how the index.html looks like
+>      <html>
+>
+>      <head>
+>      <title>Welcome to Websocket example 2</title>
+>      </head>
+>
+>      <frameset rows="64,*">
+>          <frame name="top_frame" noresize="noresize" scrolling="no"
+> src="frame_top.html">
+>          <frameset cols="450,*">
+>              <frame name="left_frame" scrolling="auto"
+> src="frame_left.html">
+>              <frame name="right_frame" src="frame_right.html">
+>          </frameset>
+>          <noframes>
+>          <body>
+>
+>          </body>
+>          </noframes>
+>      </frameset>
+>
+>      </html>
+>
+> This is how the priv folder looks like
+> -----------------------------------------------------------
+>      ls priv/
+>      frame_left.html  frame_right.html  frame_top.html  index.html  static
+>
+> This is how I changed the websocket_2_app:start/2 function
+> -----------------------------------------------------------
+>      Dispatch = cowboy_router:compile([
+>          {'_', [
+>
+>              {"/", cowboy_static, {priv_file, websocket_2, "index.html"}},
+>              {"/[...]", cowboy_static, {priv_dir, websocket_2, ""}},
+>
+>              {"/websocket_2", ws_handler_2, []},
+>              {"/static/[...]", cowboy_static, {priv_dir, websocket_2,
+> "static"}}
+>          ]}
+>      ]),
+>
+> After compile and make release package of the app, I can reach the
+> webserver on the port 8080, but some connection does not set up
+> correctly. The following texts are present in the browser
+>      DISCONNECTED
+>
+>      ERROR: undefined
+>
+>      Connecting to: ws://localhost:8080/websocket_2
+>
+> I made a dbg trace on all cowboy modules, to start some kind of
+> troubleshooting. In the "tons" of printout I can see this one. So in the
+> bottom of this, there is an {error,enoent}. It comes when tries connect
+> to the socket. But unfortunatelly I do not have idea what may cause this :-(
+>
+> The part of trace
+> -----------------------------------------------------------
+>      (<0.177.0>) call
+> cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+>                {{127,0,0,1},33241},
+>                <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+>                [<<"websocket_2">>],
+>                <<>>,undefined,[],
+>                [{<<"host">>,<<"localhost:8080">>},
+>                 {<<"connection">>,<<"Upgrade">>},
+>                 {<<"pragma">>,<<"no-cache">>},
+>                 {<<"cache-control">>,<<"no-cache">>},
+>                 {<<"upgrade">>,<<"websocket">>},
+>                 {<<"origin">>,<<"http://localhost:8080">>},
+>                 {<<"sec-websocket-version">>,<<"13">>},
+>                 {<<"user-agent">>,
+>                  <<"Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36
+> (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36">>},
+>                 {<<"accept-encoding">>,<<"gzip, deflate, sdch">>},
+>                 {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+>                 {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+>                 {<<"sec-websocket-extensions">>,
+>                  <<"permessage-deflate; client_max_window_bits">>}],
+>                [{<<"connection">>,[<<"upgrade">>]}],
+>
+> undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+>              {handler_opts,{priv_dir,websocket_2,[]}},
+>              {listener,http},
+>              {dispatch,[{'_',[],
+>                              [{[],[],cowboy_static,
+>                                {priv_file,websocket_2,"index.html"}},
+>
+>   {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+>                               {[<<"websocket_2">>],[],ws_handler_2,[]},
+>                               {[<<"static">>,'...'],
+>                                [],cowboy_static,
+>                                {priv_dir,websocket_2,"static"}}]}]}],
+>             <<"GET">>,cowboy_static,
+>
+> {<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+>              {error,enoent},
+>              []},
+>
+> undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+>             undefined,undefined},#Fun<cowboy_rest.2.41839999>)
+> (Timestamp: {1435,
+>
+>     46126,
+>
+>     935663})
+>
+> I guess, I did something very wrong, but I did not found what is that,
+> thus I would like to get some help from you.
+>
+> Please find my small project in github:
+> https://github.com/ethrbh/websocket_2
+>
+> thanks for your help,
+> /Robi
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From grahamrhay at gmail.com  Tue Jun 23 11:06:35 2015
+From: grahamrhay at gmail.com (Graham Hay)
+Date: Tue, 23 Jun 2015 10:06:35 +0100
+Subject: [99s-extend] Help to use frameset in index.html
+In-Reply-To: <55891F22.5050405@ninenines.eu>
+References: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>
+ <55891F22.5050405@ninenines.eu>
+Message-ID: <CAABECY1tDoHdPDEwJXk=W4ur-Fieigjxg7eSv21jVq=u50Czzw@mail.gmail.com>
+
+I think the order of your routes is the problem, try putting this line
+<https://github.com/ethrbh/websocket_2/blob/master/src/websocket_2_app.erl#L17>
+last.
+
+On 23 June 2015 at 09:56, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> The {error, enoent}, especially there, is probably just because the
+> browser is trying to fetch the favicon.
+>
+> Your issue is that Websocket won't connect, so it has nothing to do with
+> cowboy_rest. Try tracing cowboy_websocket or enable SASL to have more info.
+>
+>
+> On 06/23/2015 10:28 AM, Robert Balogh wrote:
+>
+>> hello,
+>>
+>> First of all I would say I am a beginner in Cowboy web server, so
+>> probably I made something wrong, that is why I got the "fault", what I
+>> got.
+>>
+>> I would like to build up web page, where the client can communicate to
+>> server, and server can do the same to client, if client does not send
+>> anything to server too. The Cowboy has the websocket example, what does
+>> what I would like to do.
+>>
+>> There is only one thing is missing what I would like to have. This is
+>> the "frameset". My idea is to build the index.html using framsets. I
+>> made this changes, and I build up the html files for the frames, and of
+>> course I set these in the index.html.
+>>
+>> Here is how the index.html looks like
+>>      <html>
+>>
+>>      <head>
+>>      <title>Welcome to Websocket example 2</title>
+>>      </head>
+>>
+>>      <frameset rows="64,*">
+>>          <frame name="top_frame" noresize="noresize" scrolling="no"
+>> src="frame_top.html">
+>>          <frameset cols="450,*">
+>>              <frame name="left_frame" scrolling="auto"
+>> src="frame_left.html">
+>>              <frame name="right_frame" src="frame_right.html">
+>>          </frameset>
+>>          <noframes>
+>>          <body>
+>>
+>>          </body>
+>>          </noframes>
+>>      </frameset>
+>>
+>>      </html>
+>>
+>> This is how the priv folder looks like
+>> -----------------------------------------------------------
+>>      ls priv/
+>>      frame_left.html  frame_right.html  frame_top.html  index.html  static
+>>
+>> This is how I changed the websocket_2_app:start/2 function
+>> -----------------------------------------------------------
+>>      Dispatch = cowboy_router:compile([
+>>          {'_', [
+>>
+>>              {"/", cowboy_static, {priv_file, websocket_2, "index.html"}},
+>>              {"/[...]", cowboy_static, {priv_dir, websocket_2, ""}},
+>>
+>>              {"/websocket_2", ws_handler_2, []},
+>>              {"/static/[...]", cowboy_static, {priv_dir, websocket_2,
+>> "static"}}
+>>          ]}
+>>      ]),
+>>
+>> After compile and make release package of the app, I can reach the
+>> webserver on the port 8080, but some connection does not set up
+>> correctly. The following texts are present in the browser
+>>      DISCONNECTED
+>>
+>>      ERROR: undefined
+>>
+>>      Connecting to: ws://localhost:8080/websocket_2
+>>
+>> I made a dbg trace on all cowboy modules, to start some kind of
+>> troubleshooting. In the "tons" of printout I can see this one. So in the
+>> bottom of this, there is an {error,enoent}. It comes when tries connect
+>> to the socket. But unfortunatelly I do not have idea what may cause this
+>> :-(
+>>
+>> The part of trace
+>> -----------------------------------------------------------
+>>      (<0.177.0>) call
+>>
+>> cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+>>                {{127,0,0,1},33241},
+>>                <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+>>                [<<"websocket_2">>],
+>>                <<>>,undefined,[],
+>>                [{<<"host">>,<<"localhost:8080">>},
+>>                 {<<"connection">>,<<"Upgrade">>},
+>>                 {<<"pragma">>,<<"no-cache">>},
+>>                 {<<"cache-control">>,<<"no-cache">>},
+>>                 {<<"upgrade">>,<<"websocket">>},
+>>                 {<<"origin">>,<<"http://localhost:8080">>},
+>>                 {<<"sec-websocket-version">>,<<"13">>},
+>>                 {<<"user-agent">>,
+>>                  <<"Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36
+>> (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36">>},
+>>                 {<<"accept-encoding">>,<<"gzip, deflate, sdch">>},
+>>                 {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+>>                 {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+>>                 {<<"sec-websocket-extensions">>,
+>>                  <<"permessage-deflate; client_max_window_bits">>}],
+>>                [{<<"connection">>,[<<"upgrade">>]}],
+>>
+>>
+>> undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+>>              {handler_opts,{priv_dir,websocket_2,[]}},
+>>              {listener,http},
+>>              {dispatch,[{'_',[],
+>>                              [{[],[],cowboy_static,
+>>                                {priv_file,websocket_2,"index.html"}},
+>>
+>>   {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+>>                               {[<<"websocket_2">>],[],ws_handler_2,[]},
+>>                               {[<<"static">>,'...'],
+>>                                [],cowboy_static,
+>>                                {priv_dir,websocket_2,"static"}}]}]}],
+>>             <<"GET">>,cowboy_static,
+>>
+>>
+>> {<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+>>              {error,enoent},
+>>              []},
+>>
+>> undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+>>             undefined,undefined},#Fun<cowboy_rest.2.41839999>)
+>> (Timestamp: {1435,
+>>
+>>     46126,
+>>
+>>     935663})
+>>
+>> I guess, I did something very wrong, but I did not found what is that,
+>> thus I would like to get some help from you.
+>>
+>> Please find my small project in github:
+>> https://github.com/ethrbh/websocket_2
+>>
+>> thanks for your help,
+>> /Robi
+>>
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+> Author of The Erlanger Playbook,
+> A book about software development using Erlang
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150623/dd7366a3/attachment.html>
+
+From essen at ninenines.eu  Tue Jun 23 11:09:27 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 23 Jun 2015 11:09:27 +0200
+Subject: [99s-extend] Help to use frameset in index.html
+In-Reply-To: <CAABECY1tDoHdPDEwJXk=W4ur-Fieigjxg7eSv21jVq=u50Czzw@mail.gmail.com>
+References: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>	<55891F22.5050405@ninenines.eu>
+ <CAABECY1tDoHdPDEwJXk=W4ur-Fieigjxg7eSv21jVq=u50Czzw@mail.gmail.com>
+Message-ID: <55892247.5010302@ninenines.eu>
+
+Oh nice catch ahah. We should probably warn when something like this 
+happens.
+
+On 06/23/2015 11:06 AM, Graham Hay wrote:
+> I think the order of your routes is the problem, try putting this line
+> <https://github.com/ethrbh/websocket_2/blob/master/src/websocket_2_app.erl#L17>
+> last.
+>
+> On 23 June 2015 at 09:56, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     The {error, enoent}, especially there, is probably just because the
+>     browser is trying to fetch the favicon.
+>
+>     Your issue is that Websocket won't connect, so it has nothing to do
+>     with cowboy_rest. Try tracing cowboy_websocket or enable SASL to
+>     have more info.
+>
+>
+>     On 06/23/2015 10:28 AM, Robert Balogh wrote:
+>
+>         hello,
+>
+>         First of all I would say I am a beginner in Cowboy web server, so
+>         probably I made something wrong, that is why I got the "fault",
+>         what I got.
+>
+>         I would like to build up web page, where the client can
+>         communicate to
+>         server, and server can do the same to client, if client does not
+>         send
+>         anything to server too. The Cowboy has the websocket example,
+>         what does
+>         what I would like to do.
+>
+>         There is only one thing is missing what I would like to have.
+>         This is
+>         the "frameset". My idea is to build the index.html using framsets. I
+>         made this changes, and I build up the html files for the frames,
+>         and of
+>         course I set these in the index.html.
+>
+>         Here is how the index.html looks like
+>               <html>
+>
+>               <head>
+>               <title>Welcome to Websocket example 2</title>
+>               </head>
+>
+>               <frameset rows="64,*">
+>                   <frame name="top_frame" noresize="noresize" scrolling="no"
+>         src="frame_top.html">
+>                   <frameset cols="450,*">
+>                       <frame name="left_frame" scrolling="auto"
+>         src="frame_left.html">
+>                       <frame name="right_frame" src="frame_right.html">
+>                   </frameset>
+>                   <noframes>
+>                   <body>
+>
+>                   </body>
+>                   </noframes>
+>               </frameset>
+>
+>               </html>
+>
+>         This is how the priv folder looks like
+>         -----------------------------------------------------------
+>               ls priv/
+>               frame_left.html  frame_right.html  frame_top.html
+>         index.html  static
+>
+>         This is how I changed the websocket_2_app:start/2 function
+>         -----------------------------------------------------------
+>               Dispatch = cowboy_router:compile([
+>                   {'_', [
+>
+>                       {"/", cowboy_static, {priv_file, websocket_2,
+>         "index.html"}},
+>                       {"/[...]", cowboy_static, {priv_dir, websocket_2,
+>         ""}},
+>
+>                       {"/websocket_2", ws_handler_2, []},
+>                       {"/static/[...]", cowboy_static, {priv_dir,
+>         websocket_2,
+>         "static"}}
+>                   ]}
+>               ]),
+>
+>         After compile and make release package of the app, I can reach the
+>         webserver on the port 8080, but some connection does not set up
+>         correctly. The following texts are present in the browser
+>               DISCONNECTED
+>
+>               ERROR: undefined
+>
+>               Connecting to: ws://localhost:8080/websocket_2
+>
+>         I made a dbg trace on all cowboy modules, to start some kind of
+>         troubleshooting. In the "tons" of printout I can see this one.
+>         So in the
+>         bottom of this, there is an {error,enoent}. It comes when tries
+>         connect
+>         to the socket. But unfortunatelly I do not have idea what may
+>         cause this :-(
+>
+>         The part of trace
+>         -----------------------------------------------------------
+>               (<0.177.0>) call
+>         cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+>                         {{127,0,0,1},33241},
+>                         <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+>                         [<<"websocket_2">>],
+>                         <<>>,undefined,[],
+>                         [{<<"host">>,<<"localhost:8080">>},
+>                          {<<"connection">>,<<"Upgrade">>},
+>                          {<<"pragma">>,<<"no-cache">>},
+>                          {<<"cache-control">>,<<"no-cache">>},
+>                          {<<"upgrade">>,<<"websocket">>},
+>                          {<<"origin">>,<<"http://localhost:8080">>},
+>                          {<<"sec-websocket-version">>,<<"13">>},
+>                          {<<"user-agent">>,
+>                           <<"Mozilla/5.0 (X11; Linux i686)
+>         AppleWebKit/537.36
+>         (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36">>},
+>                          {<<"accept-encoding">>,<<"gzip, deflate, sdch">>},
+>                          {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+>
+>         {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+>                          {<<"sec-websocket-extensions">>,
+>                           <<"permessage-deflate;
+>         client_max_window_bits">>}],
+>                         [{<<"connection">>,[<<"upgrade">>]}],
+>
+>         undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+>                       {handler_opts,{priv_dir,websocket_2,[]}},
+>                       {listener,http},
+>                       {dispatch,[{'_',[],
+>                                       [{[],[],cowboy_static,
+>
+>           {priv_file,websocket_2,"index.html"}},
+>
+>            {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+>
+>         {[<<"websocket_2">>],[],ws_handler_2,[]},
+>                                        {[<<"static">>,'...'],
+>                                         [],cowboy_static,
+>
+>           {priv_dir,websocket_2,"static"}}]}]}],
+>                      <<"GET">>,cowboy_static,
+>
+>         {<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+>                       {error,enoent},
+>                       []},
+>
+>         undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+>                      undefined,undefined},#Fun<cowboy_rest.2.41839999>)
+>         (Timestamp: {1435,
+>
+>              46126,
+>
+>              935663})
+>
+>         I guess, I did something very wrong, but I did not found what is
+>         that,
+>         thus I would like to get some help from you.
+>
+>         Please find my small project in github:
+>         https://github.com/ethrbh/websocket_2
+>
+>         thanks for your help,
+>         /Robi
+>
+>
+>
+>         _______________________________________________
+>         Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         https://lists.ninenines.eu/listinfo/extend
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>     Author of The Erlanger Playbook,
+>     A book about software development using Erlang
+>     _______________________________________________
+>     Extend mailing list
+>     Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>     https://lists.ninenines.eu/listinfo/extend
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From ethrbh at gmail.com  Tue Jun 23 11:11:42 2015
+From: ethrbh at gmail.com (Robert Balogh)
+Date: Tue, 23 Jun 2015 11:11:42 +0200
+Subject: [99s-extend] Help to use frameset in index.html
+In-Reply-To: <55892247.5010302@ninenines.eu>
+References: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>
+ <55891F22.5050405@ninenines.eu>
+ <CAABECY1tDoHdPDEwJXk=W4ur-Fieigjxg7eSv21jVq=u50Czzw@mail.gmail.com>
+ <55892247.5010302@ninenines.eu>
+Message-ID: <CAA4OwwXFxaXMZv0b1kpwn_f8pS1d=bVxs_QxEsLWRWaxFBDRgg@mail.gmail.com>
+
+hello,
+
+Thanks for all. The solution is to put the line at last
+    {"/[...]", cowboy_static, {priv_dir, websocket_2, ""}}
+
+Now It works as I expect.
+
+thanks for your help again.
+
+br,
+/Robi
+
+
+2015-06-23 11:09 GMT+02:00 Lo?c Hoguin <essen at ninenines.eu>:
+
+> Oh nice catch ahah. We should probably warn when something like this
+> happens.
+>
+> On 06/23/2015 11:06 AM, Graham Hay wrote:
+>
+>> I think the order of your routes is the problem, try putting this line
+>> <
+>> https://github.com/ethrbh/websocket_2/blob/master/src/websocket_2_app.erl#L17
+>> >
+>> last.
+>>
+>> On 23 June 2015 at 09:56, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     The {error, enoent}, especially there, is probably just because the
+>>     browser is trying to fetch the favicon.
+>>
+>>     Your issue is that Websocket won't connect, so it has nothing to do
+>>     with cowboy_rest. Try tracing cowboy_websocket or enable SASL to
+>>     have more info.
+>>
+>>
+>>     On 06/23/2015 10:28 AM, Robert Balogh wrote:
+>>
+>>         hello,
+>>
+>>         First of all I would say I am a beginner in Cowboy web server, so
+>>         probably I made something wrong, that is why I got the "fault",
+>>         what I got.
+>>
+>>         I would like to build up web page, where the client can
+>>         communicate to
+>>         server, and server can do the same to client, if client does not
+>>         send
+>>         anything to server too. The Cowboy has the websocket example,
+>>         what does
+>>         what I would like to do.
+>>
+>>         There is only one thing is missing what I would like to have.
+>>         This is
+>>         the "frameset". My idea is to build the index.html using
+>> framsets. I
+>>         made this changes, and I build up the html files for the frames,
+>>         and of
+>>         course I set these in the index.html.
+>>
+>>         Here is how the index.html looks like
+>>               <html>
+>>
+>>               <head>
+>>               <title>Welcome to Websocket example 2</title>
+>>               </head>
+>>
+>>               <frameset rows="64,*">
+>>                   <frame name="top_frame" noresize="noresize"
+>> scrolling="no"
+>>         src="frame_top.html">
+>>                   <frameset cols="450,*">
+>>                       <frame name="left_frame" scrolling="auto"
+>>         src="frame_left.html">
+>>                       <frame name="right_frame" src="frame_right.html">
+>>                   </frameset>
+>>                   <noframes>
+>>                   <body>
+>>
+>>                   </body>
+>>                   </noframes>
+>>               </frameset>
+>>
+>>               </html>
+>>
+>>         This is how the priv folder looks like
+>>         -----------------------------------------------------------
+>>               ls priv/
+>>               frame_left.html  frame_right.html  frame_top.html
+>>         index.html  static
+>>
+>>         This is how I changed the websocket_2_app:start/2 function
+>>         -----------------------------------------------------------
+>>               Dispatch = cowboy_router:compile([
+>>                   {'_', [
+>>
+>>                       {"/", cowboy_static, {priv_file, websocket_2,
+>>         "index.html"}},
+>>                       {"/[...]", cowboy_static, {priv_dir, websocket_2,
+>>         ""}},
+>>
+>>                       {"/websocket_2", ws_handler_2, []},
+>>                       {"/static/[...]", cowboy_static, {priv_dir,
+>>         websocket_2,
+>>         "static"}}
+>>                   ]}
+>>               ]),
+>>
+>>         After compile and make release package of the app, I can reach the
+>>         webserver on the port 8080, but some connection does not set up
+>>         correctly. The following texts are present in the browser
+>>               DISCONNECTED
+>>
+>>               ERROR: undefined
+>>
+>>               Connecting to: ws://localhost:8080/websocket_2
+>>
+>>         I made a dbg trace on all cowboy modules, to start some kind of
+>>         troubleshooting. In the "tons" of printout I can see this one.
+>>         So in the
+>>         bottom of this, there is an {error,enoent}. It comes when tries
+>>         connect
+>>         to the socket. But unfortunatelly I do not have idea what may
+>>         cause this :-(
+>>
+>>         The part of trace
+>>         -----------------------------------------------------------
+>>               (<0.177.0>) call
+>>
+>> cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+>>                         {{127,0,0,1},33241},
+>>                         <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+>>                         [<<"websocket_2">>],
+>>                         <<>>,undefined,[],
+>>                         [{<<"host">>,<<"localhost:8080">>},
+>>                          {<<"connection">>,<<"Upgrade">>},
+>>                          {<<"pragma">>,<<"no-cache">>},
+>>                          {<<"cache-control">>,<<"no-cache">>},
+>>                          {<<"upgrade">>,<<"websocket">>},
+>>                          {<<"origin">>,<<"http://localhost:8080">>},
+>>                          {<<"sec-websocket-version">>,<<"13">>},
+>>                          {<<"user-agent">>,
+>>                           <<"Mozilla/5.0 (X11; Linux i686)
+>>         AppleWebKit/537.36
+>>         (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36">>},
+>>                          {<<"accept-encoding">>,<<"gzip, deflate,
+>> sdch">>},
+>>                          {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+>>
+>>         {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+>>                          {<<"sec-websocket-extensions">>,
+>>                           <<"permessage-deflate;
+>>         client_max_window_bits">>}],
+>>                         [{<<"connection">>,[<<"upgrade">>]}],
+>>
+>>
+>> undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+>>                       {handler_opts,{priv_dir,websocket_2,[]}},
+>>                       {listener,http},
+>>                       {dispatch,[{'_',[],
+>>                                       [{[],[],cowboy_static,
+>>
+>>           {priv_file,websocket_2,"index.html"}},
+>>
+>>            {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+>>
+>>         {[<<"websocket_2">>],[],ws_handler_2,[]},
+>>                                        {[<<"static">>,'...'],
+>>                                         [],cowboy_static,
+>>
+>>           {priv_dir,websocket_2,"static"}}]}]}],
+>>                      <<"GET">>,cowboy_static,
+>>
+>>
+>> {<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+>>                       {error,enoent},
+>>                       []},
+>>
+>>         undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+>>                      undefined,undefined},#Fun<cowboy_rest.2.41839999>)
+>>         (Timestamp: {1435,
+>>
+>>              46126,
+>>
+>>              935663})
+>>
+>>         I guess, I did something very wrong, but I did not found what is
+>>         that,
+>>         thus I would like to get some help from you.
+>>
+>>         Please find my small project in github:
+>>         https://github.com/ethrbh/websocket_2
+>>
+>>         thanks for your help,
+>>         /Robi
+>>
+>>
+>>
+>>         _______________________________________________
+>>         Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>         https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     http://ninenines.eu
+>>     Author of The Erlanger Playbook,
+>>     A book about software development using Erlang
+>>     _______________________________________________
+>>     Extend mailing list
+>>     Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>     https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+> Author of The Erlanger Playbook,
+> A book about software development using Erlang
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150623/fcdb2d7b/attachment.html>
+
+From grahamrhay at gmail.com  Tue Jun 23 11:11:50 2015
+From: grahamrhay at gmail.com (Graham Hay)
+Date: Tue, 23 Jun 2015 10:11:50 +0100
+Subject: [99s-extend] Help to use frameset in index.html
+In-Reply-To: <55892247.5010302@ninenines.eu>
+References: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>
+ <55891F22.5050405@ninenines.eu>
+ <CAABECY1tDoHdPDEwJXk=W4ur-Fieigjxg7eSv21jVq=u50Czzw@mail.gmail.com>
+ <55892247.5010302@ninenines.eu>
+Message-ID: <CAABECY3CmrVG4i2F737frMAbxGEiErieU255F=7m0X1BCPZAvg@mail.gmail.com>
+
+It's bitten me a few times :(
+
+On 23 June 2015 at 10:09, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Oh nice catch ahah. We should probably warn when something like this
+> happens.
+>
+> On 06/23/2015 11:06 AM, Graham Hay wrote:
+>
+>> I think the order of your routes is the problem, try putting this line
+>> <
+>> https://github.com/ethrbh/websocket_2/blob/master/src/websocket_2_app.erl#L17
+>> >
+>> last.
+>>
+>> On 23 June 2015 at 09:56, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     The {error, enoent}, especially there, is probably just because the
+>>     browser is trying to fetch the favicon.
+>>
+>>     Your issue is that Websocket won't connect, so it has nothing to do
+>>     with cowboy_rest. Try tracing cowboy_websocket or enable SASL to
+>>     have more info.
+>>
+>>
+>>     On 06/23/2015 10:28 AM, Robert Balogh wrote:
+>>
+>>         hello,
+>>
+>>         First of all I would say I am a beginner in Cowboy web server, so
+>>         probably I made something wrong, that is why I got the "fault",
+>>         what I got.
+>>
+>>         I would like to build up web page, where the client can
+>>         communicate to
+>>         server, and server can do the same to client, if client does not
+>>         send
+>>         anything to server too. The Cowboy has the websocket example,
+>>         what does
+>>         what I would like to do.
+>>
+>>         There is only one thing is missing what I would like to have.
+>>         This is
+>>         the "frameset". My idea is to build the index.html using
+>> framsets. I
+>>         made this changes, and I build up the html files for the frames,
+>>         and of
+>>         course I set these in the index.html.
+>>
+>>         Here is how the index.html looks like
+>>               <html>
+>>
+>>               <head>
+>>               <title>Welcome to Websocket example 2</title>
+>>               </head>
+>>
+>>               <frameset rows="64,*">
+>>                   <frame name="top_frame" noresize="noresize"
+>> scrolling="no"
+>>         src="frame_top.html">
+>>                   <frameset cols="450,*">
+>>                       <frame name="left_frame" scrolling="auto"
+>>         src="frame_left.html">
+>>                       <frame name="right_frame" src="frame_right.html">
+>>                   </frameset>
+>>                   <noframes>
+>>                   <body>
+>>
+>>                   </body>
+>>                   </noframes>
+>>               </frameset>
+>>
+>>               </html>
+>>
+>>         This is how the priv folder looks like
+>>         -----------------------------------------------------------
+>>               ls priv/
+>>               frame_left.html  frame_right.html  frame_top.html
+>>         index.html  static
+>>
+>>         This is how I changed the websocket_2_app:start/2 function
+>>         -----------------------------------------------------------
+>>               Dispatch = cowboy_router:compile([
+>>                   {'_', [
+>>
+>>                       {"/", cowboy_static, {priv_file, websocket_2,
+>>         "index.html"}},
+>>                       {"/[...]", cowboy_static, {priv_dir, websocket_2,
+>>         ""}},
+>>
+>>                       {"/websocket_2", ws_handler_2, []},
+>>                       {"/static/[...]", cowboy_static, {priv_dir,
+>>         websocket_2,
+>>         "static"}}
+>>                   ]}
+>>               ]),
+>>
+>>         After compile and make release package of the app, I can reach the
+>>         webserver on the port 8080, but some connection does not set up
+>>         correctly. The following texts are present in the browser
+>>               DISCONNECTED
+>>
+>>               ERROR: undefined
+>>
+>>               Connecting to: ws://localhost:8080/websocket_2
+>>
+>>         I made a dbg trace on all cowboy modules, to start some kind of
+>>         troubleshooting. In the "tons" of printout I can see this one.
+>>         So in the
+>>         bottom of this, there is an {error,enoent}. It comes when tries
+>>         connect
+>>         to the socket. But unfortunatelly I do not have idea what may
+>>         cause this :-(
+>>
+>>         The part of trace
+>>         -----------------------------------------------------------
+>>               (<0.177.0>) call
+>>
+>> cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+>>                         {{127,0,0,1},33241},
+>>                         <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+>>                         [<<"websocket_2">>],
+>>                         <<>>,undefined,[],
+>>                         [{<<"host">>,<<"localhost:8080">>},
+>>                          {<<"connection">>,<<"Upgrade">>},
+>>                          {<<"pragma">>,<<"no-cache">>},
+>>                          {<<"cache-control">>,<<"no-cache">>},
+>>                          {<<"upgrade">>,<<"websocket">>},
+>>                          {<<"origin">>,<<"http://localhost:8080">>},
+>>                          {<<"sec-websocket-version">>,<<"13">>},
+>>                          {<<"user-agent">>,
+>>                           <<"Mozilla/5.0 (X11; Linux i686)
+>>         AppleWebKit/537.36
+>>         (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36">>},
+>>                          {<<"accept-encoding">>,<<"gzip, deflate,
+>> sdch">>},
+>>                          {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+>>
+>>         {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+>>                          {<<"sec-websocket-extensions">>,
+>>                           <<"permessage-deflate;
+>>         client_max_window_bits">>}],
+>>                         [{<<"connection">>,[<<"upgrade">>]}],
+>>
+>>
+>> undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+>>                       {handler_opts,{priv_dir,websocket_2,[]}},
+>>                       {listener,http},
+>>                       {dispatch,[{'_',[],
+>>                                       [{[],[],cowboy_static,
+>>
+>>           {priv_file,websocket_2,"index.html"}},
+>>
+>>            {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+>>
+>>         {[<<"websocket_2">>],[],ws_handler_2,[]},
+>>                                        {[<<"static">>,'...'],
+>>                                         [],cowboy_static,
+>>
+>>           {priv_dir,websocket_2,"static"}}]}]}],
+>>                      <<"GET">>,cowboy_static,
+>>
+>>
+>> {<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+>>                       {error,enoent},
+>>                       []},
+>>
+>>         undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+>>                      undefined,undefined},#Fun<cowboy_rest.2.41839999>)
+>>         (Timestamp: {1435,
+>>
+>>              46126,
+>>
+>>              935663})
+>>
+>>         I guess, I did something very wrong, but I did not found what is
+>>         that,
+>>         thus I would like to get some help from you.
+>>
+>>         Please find my small project in github:
+>>         https://github.com/ethrbh/websocket_2
+>>
+>>         thanks for your help,
+>>         /Robi
+>>
+>>
+>>
+>>         _______________________________________________
+>>         Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>         https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     http://ninenines.eu
+>>     Author of The Erlanger Playbook,
+>>     A book about software development using Erlang
+>>     _______________________________________________
+>>     Extend mailing list
+>>     Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>     https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+> Author of The Erlanger Playbook,
+> A book about software development using Erlang
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150623/3556788c/attachment-0001.html>
+
+From essen at ninenines.eu  Tue Jun 23 11:12:56 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 23 Jun 2015 11:12:56 +0200
+Subject: [99s-extend] Help to use frameset in index.html
+In-Reply-To: <CAABECY3CmrVG4i2F737frMAbxGEiErieU255F=7m0X1BCPZAvg@mail.gmail.com>
+References: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>	<55891F22.5050405@ninenines.eu>	<CAABECY1tDoHdPDEwJXk=W4ur-Fieigjxg7eSv21jVq=u50Czzw@mail.gmail.com>	<55892247.5010302@ninenines.eu>
+ <CAABECY3CmrVG4i2F737frMAbxGEiErieU255F=7m0X1BCPZAvg@mail.gmail.com>
+Message-ID: <55892318.2080507@ninenines.eu>
+
+I've opened a ticket to remember so something will be done eventually. 
+Thanks for helping!
+
+On 06/23/2015 11:11 AM, Graham Hay wrote:
+> It's bitten me a few times :(
+>
+> On 23 June 2015 at 10:09, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     Oh nice catch ahah. We should probably warn when something like this
+>     happens.
+>
+>     On 06/23/2015 11:06 AM, Graham Hay wrote:
+>
+>         I think the order of your routes is the problem, try putting
+>         this line
+>         <https://github.com/ethrbh/websocket_2/blob/master/src/websocket_2_app.erl#L17>
+>         last.
+>
+>         On 23 June 2015 at 09:56, Lo?c Hoguin <essen at ninenines.eu
+>         <mailto:essen at ninenines.eu>
+>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>> wrote:
+>
+>              The {error, enoent}, especially there, is probably just
+>         because the
+>              browser is trying to fetch the favicon.
+>
+>              Your issue is that Websocket won't connect, so it has
+>         nothing to do
+>              with cowboy_rest. Try tracing cowboy_websocket or enable
+>         SASL to
+>              have more info.
+>
+>
+>              On 06/23/2015 10:28 AM, Robert Balogh wrote:
+>
+>                  hello,
+>
+>                  First of all I would say I am a beginner in Cowboy web
+>         server, so
+>                  probably I made something wrong, that is why I got the
+>         "fault",
+>                  what I got.
+>
+>                  I would like to build up web page, where the client can
+>                  communicate to
+>                  server, and server can do the same to client, if client
+>         does not
+>                  send
+>                  anything to server too. The Cowboy has the websocket
+>         example,
+>                  what does
+>                  what I would like to do.
+>
+>                  There is only one thing is missing what I would like to
+>         have.
+>                  This is
+>                  the "frameset". My idea is to build the index.html
+>         using framsets. I
+>                  made this changes, and I build up the html files for
+>         the frames,
+>                  and of
+>                  course I set these in the index.html.
+>
+>                  Here is how the index.html looks like
+>                        <html>
+>
+>                        <head>
+>                        <title>Welcome to Websocket example 2</title>
+>                        </head>
+>
+>                        <frameset rows="64,*">
+>                            <frame name="top_frame" noresize="noresize"
+>         scrolling="no"
+>                  src="frame_top.html">
+>                            <frameset cols="450,*">
+>                                <frame name="left_frame" scrolling="auto"
+>                  src="frame_left.html">
+>                                <frame name="right_frame"
+>         src="frame_right.html">
+>                            </frameset>
+>                            <noframes>
+>                            <body>
+>
+>                            </body>
+>                            </noframes>
+>                        </frameset>
+>
+>                        </html>
+>
+>                  This is how the priv folder looks like
+>                  -----------------------------------------------------------
+>                        ls priv/
+>                        frame_left.html  frame_right.html  frame_top.html
+>                  index.html  static
+>
+>                  This is how I changed the websocket_2_app:start/2 function
+>                  -----------------------------------------------------------
+>                        Dispatch = cowboy_router:compile([
+>                            {'_', [
+>
+>                                {"/", cowboy_static, {priv_file, websocket_2,
+>                  "index.html"}},
+>                                {"/[...]", cowboy_static, {priv_dir,
+>         websocket_2,
+>                  ""}},
+>
+>                                {"/websocket_2", ws_handler_2, []},
+>                                {"/static/[...]", cowboy_static, {priv_dir,
+>                  websocket_2,
+>                  "static"}}
+>                            ]}
+>                        ]),
+>
+>                  After compile and make release package of the app, I
+>         can reach the
+>                  webserver on the port 8080, but some connection does
+>         not set up
+>                  correctly. The following texts are present in the browser
+>                        DISCONNECTED
+>
+>                        ERROR: undefined
+>
+>                        Connecting to: ws://localhost:8080/websocket_2
+>
+>                  I made a dbg trace on all cowboy modules, to start some
+>         kind of
+>                  troubleshooting. In the "tons" of printout I can see
+>         this one.
+>                  So in the
+>                  bottom of this, there is an {error,enoent}. It comes
+>         when tries
+>                  connect
+>                  to the socket. But unfortunatelly I do not have idea
+>         what may
+>                  cause this :-(
+>
+>                  The part of trace
+>                  -----------------------------------------------------------
+>                        (<0.177.0>) call
+>
+>         cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+>                                  {{127,0,0,1},33241},
+>
+>         <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+>                                  [<<"websocket_2">>],
+>                                  <<>>,undefined,[],
+>                                  [{<<"host">>,<<"localhost:8080">>},
+>                                   {<<"connection">>,<<"Upgrade">>},
+>                                   {<<"pragma">>,<<"no-cache">>},
+>                                   {<<"cache-control">>,<<"no-cache">>},
+>                                   {<<"upgrade">>,<<"websocket">>},
+>
+>           {<<"origin">>,<<"http://localhost:8080">>},
+>                                   {<<"sec-websocket-version">>,<<"13">>},
+>                                   {<<"user-agent">>,
+>                                    <<"Mozilla/5.0 (X11; Linux i686)
+>                  AppleWebKit/537.36
+>                  (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36">>},
+>                                   {<<"accept-encoding">>,<<"gzip,
+>         deflate, sdch">>},
+>
+>           {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+>
+>                  {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+>                                   {<<"sec-websocket-extensions">>,
+>                                    <<"permessage-deflate;
+>                  client_max_window_bits">>}],
+>                                  [{<<"connection">>,[<<"upgrade">>]}],
+>
+>
+>         undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+>                                {handler_opts,{priv_dir,websocket_2,[]}},
+>                                {listener,http},
+>                                {dispatch,[{'_',[],
+>                                                [{[],[],cowboy_static,
+>
+>                    {priv_file,websocket_2,"index.html"}},
+>
+>                     {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+>
+>                  {[<<"websocket_2">>],[],ws_handler_2,[]},
+>                                                 {[<<"static">>,'...'],
+>                                                  [],cowboy_static,
+>
+>                    {priv_dir,websocket_2,"static"}}]}]}],
+>                               <<"GET">>,cowboy_static,
+>
+>
+>         {<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+>                                {error,enoent},
+>                                []},
+>
+>
+>         undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+>
+>           undefined,undefined},#Fun<cowboy_rest.2.41839999>)
+>                  (Timestamp: {1435,
+>
+>                       46126,
+>
+>                       935663})
+>
+>                  I guess, I did something very wrong, but I did not
+>         found what is
+>                  that,
+>                  thus I would like to get some help from you.
+>
+>                  Please find my small project in github:
+>         https://github.com/ethrbh/websocket_2
+>
+>                  thanks for your help,
+>                  /Robi
+>
+>
+>
+>                  _______________________________________________
+>                  Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         <mailto:Extend at lists.ninenines.eu
+>         <mailto:Extend at lists.ninenines.eu>>
+>         https://lists.ninenines.eu/listinfo/extend
+>
+>
+>              --
+>              Lo?c Hoguin
+>         http://ninenines.eu
+>              Author of The Erlanger Playbook,
+>              A book about software development using Erlang
+>              _______________________________________________
+>              Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         <mailto:Extend at lists.ninenines.eu
+>         <mailto:Extend at lists.ninenines.eu>>
+>         https://lists.ninenines.eu/listinfo/extend
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>     Author of The Erlanger Playbook,
+>     A book about software development using Erlang
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From ethrbh at gmail.com  Tue Jun 23 11:15:05 2015
+From: ethrbh at gmail.com (Robert Balogh)
+Date: Tue, 23 Jun 2015 11:15:05 +0200
+Subject: [99s-extend] Help to use frameset in index.html
+In-Reply-To: <55892318.2080507@ninenines.eu>
+References: <CAA4OwwXgav5U-uXnHqfQ6LkPyeMBuo_3Rw68ORh4NMVHN2_uxA@mail.gmail.com>
+ <55891F22.5050405@ninenines.eu>
+ <CAABECY1tDoHdPDEwJXk=W4ur-Fieigjxg7eSv21jVq=u50Czzw@mail.gmail.com>
+ <55892247.5010302@ninenines.eu>
+ <CAABECY3CmrVG4i2F737frMAbxGEiErieU255F=7m0X1BCPZAvg@mail.gmail.com>
+ <55892318.2080507@ninenines.eu>
+Message-ID: <CAA4OwwVkzpDwMG0MBHS3z6R6FVzXwKfj7YxDa5RUBch-ExJf9Q@mail.gmail.com>
+
+hello,
+
+I would like to thanks for both of you the grate support.
+
+thanks again,
+/Robi
+
+2015-06-23 11:12 GMT+02:00 Lo?c Hoguin <essen at ninenines.eu>:
+
+> I've opened a ticket to remember so something will be done eventually.
+> Thanks for helping!
+>
+> On 06/23/2015 11:11 AM, Graham Hay wrote:
+>
+>> It's bitten me a few times :(
+>>
+>> On 23 June 2015 at 10:09, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     Oh nice catch ahah. We should probably warn when something like this
+>>     happens.
+>>
+>>     On 06/23/2015 11:06 AM, Graham Hay wrote:
+>>
+>>         I think the order of your routes is the problem, try putting
+>>         this line
+>>         <
+>> https://github.com/ethrbh/websocket_2/blob/master/src/websocket_2_app.erl#L17
+>> >
+>>         last.
+>>
+>>         On 23 June 2015 at 09:56, Lo?c Hoguin <essen at ninenines.eu
+>>         <mailto:essen at ninenines.eu>
+>>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>> wrote:
+>>
+>>              The {error, enoent}, especially there, is probably just
+>>         because the
+>>              browser is trying to fetch the favicon.
+>>
+>>              Your issue is that Websocket won't connect, so it has
+>>         nothing to do
+>>              with cowboy_rest. Try tracing cowboy_websocket or enable
+>>         SASL to
+>>              have more info.
+>>
+>>
+>>              On 06/23/2015 10:28 AM, Robert Balogh wrote:
+>>
+>>                  hello,
+>>
+>>                  First of all I would say I am a beginner in Cowboy web
+>>         server, so
+>>                  probably I made something wrong, that is why I got the
+>>         "fault",
+>>                  what I got.
+>>
+>>                  I would like to build up web page, where the client can
+>>                  communicate to
+>>                  server, and server can do the same to client, if client
+>>         does not
+>>                  send
+>>                  anything to server too. The Cowboy has the websocket
+>>         example,
+>>                  what does
+>>                  what I would like to do.
+>>
+>>                  There is only one thing is missing what I would like to
+>>         have.
+>>                  This is
+>>                  the "frameset". My idea is to build the index.html
+>>         using framsets. I
+>>                  made this changes, and I build up the html files for
+>>         the frames,
+>>                  and of
+>>                  course I set these in the index.html.
+>>
+>>                  Here is how the index.html looks like
+>>                        <html>
+>>
+>>                        <head>
+>>                        <title>Welcome to Websocket example 2</title>
+>>                        </head>
+>>
+>>                        <frameset rows="64,*">
+>>                            <frame name="top_frame" noresize="noresize"
+>>         scrolling="no"
+>>                  src="frame_top.html">
+>>                            <frameset cols="450,*">
+>>                                <frame name="left_frame" scrolling="auto"
+>>                  src="frame_left.html">
+>>                                <frame name="right_frame"
+>>         src="frame_right.html">
+>>                            </frameset>
+>>                            <noframes>
+>>                            <body>
+>>
+>>                            </body>
+>>                            </noframes>
+>>                        </frameset>
+>>
+>>                        </html>
+>>
+>>                  This is how the priv folder looks like
+>>
+>>  -----------------------------------------------------------
+>>                        ls priv/
+>>                        frame_left.html  frame_right.html  frame_top.html
+>>                  index.html  static
+>>
+>>                  This is how I changed the websocket_2_app:start/2
+>> function
+>>
+>>  -----------------------------------------------------------
+>>                        Dispatch = cowboy_router:compile([
+>>                            {'_', [
+>>
+>>                                {"/", cowboy_static, {priv_file,
+>> websocket_2,
+>>                  "index.html"}},
+>>                                {"/[...]", cowboy_static, {priv_dir,
+>>         websocket_2,
+>>                  ""}},
+>>
+>>                                {"/websocket_2", ws_handler_2, []},
+>>                                {"/static/[...]", cowboy_static, {priv_dir,
+>>                  websocket_2,
+>>                  "static"}}
+>>                            ]}
+>>                        ]),
+>>
+>>                  After compile and make release package of the app, I
+>>         can reach the
+>>                  webserver on the port 8080, but some connection does
+>>         not set up
+>>                  correctly. The following texts are present in the browser
+>>                        DISCONNECTED
+>>
+>>                        ERROR: undefined
+>>
+>>                        Connecting to: ws://localhost:8080/websocket_2
+>>
+>>                  I made a dbg trace on all cowboy modules, to start some
+>>         kind of
+>>                  troubleshooting. In the "tons" of printout I can see
+>>         this one.
+>>                  So in the
+>>                  bottom of this, there is an {error,enoent}. It comes
+>>         when tries
+>>                  connect
+>>                  to the socket. But unfortunatelly I do not have idea
+>>         what may
+>>                  cause this :-(
+>>
+>>                  The part of trace
+>>
+>>  -----------------------------------------------------------
+>>                        (<0.177.0>) call
+>>
+>>
+>> cowboy_rest:next({http_req,#Port<0.646>,ranch_tcp,keepalive,<0.177.0>,<<"GET">>,'HTTP/1.1',
+>>                                  {{127,0,0,1},33241},
+>>
+>>         <<"localhost">>,undefined,8080,<<"/websocket_2">>,
+>>                                  [<<"websocket_2">>],
+>>                                  <<>>,undefined,[],
+>>                                  [{<<"host">>,<<"localhost:8080">>},
+>>                                   {<<"connection">>,<<"Upgrade">>},
+>>                                   {<<"pragma">>,<<"no-cache">>},
+>>                                   {<<"cache-control">>,<<"no-cache">>},
+>>                                   {<<"upgrade">>,<<"websocket">>},
+>>
+>>           {<<"origin">>,<<"http://localhost:8080">>},
+>>                                   {<<"sec-websocket-version">>,<<"13">>},
+>>                                   {<<"user-agent">>,
+>>                                    <<"Mozilla/5.0 (X11; Linux i686)
+>>                  AppleWebKit/537.36
+>>                  (KHTML, like Gecko) Chrome/40.0.2214.115
+>> Safari/537.36">>},
+>>                                   {<<"accept-encoding">>,<<"gzip,
+>>         deflate, sdch">>},
+>>
+>>           {<<"accept-language">>,<<"en-US,en;q=0.8">>},
+>>
+>>                  {<<"sec-websocket-key">>,<<"by/gwaQvb/51W7Wa9zrGQg==">>},
+>>                                   {<<"sec-websocket-extensions">>,
+>>                                    <<"permessage-deflate;
+>>                  client_max_window_bits">>}],
+>>                                  [{<<"connection">>,[<<"upgrade">>]}],
+>>
+>>
+>>
+>> undefined,[],waiting,<<>>,undefined,false,waiting,[],<<>>,undefined},{state,[{handler,cowboy_static},
+>>                                {handler_opts,{priv_dir,websocket_2,[]}},
+>>                                {listener,http},
+>>                                {dispatch,[{'_',[],
+>>                                                [{[],[],cowboy_static,
+>>
+>>                    {priv_file,websocket_2,"index.html"}},
+>>
+>>                     {['...'],[],cowboy_static,{priv_dir,websocket_2,[]}},
+>>
+>>                  {[<<"websocket_2">>],[],ws_handler_2,[]},
+>>                                                 {[<<"static">>,'...'],
+>>                                                  [],cowboy_static,
+>>
+>>                    {priv_dir,websocket_2,"static"}}]}]}],
+>>                               <<"GET">>,cowboy_static,
+>>
+>>
+>>
+>> {<<"/home/ethrbh/projects/github/websocket_2/_rel/websocket_2/lib/websocket_2-1/priv/websocket_2">>,
+>>                                {error,enoent},
+>>                                []},
+>>
+>>
+>>         undefined,[],undefined,[],undefined,[],undefined,false,undefined,
+>>
+>>           undefined,undefined},#Fun<cowboy_rest.2.41839999>)
+>>                  (Timestamp: {1435,
+>>
+>>                       46126,
+>>
+>>                       935663})
+>>
+>>                  I guess, I did something very wrong, but I did not
+>>         found what is
+>>                  that,
+>>                  thus I would like to get some help from you.
+>>
+>>                  Please find my small project in github:
+>>         https://github.com/ethrbh/websocket_2
+>>
+>>                  thanks for your help,
+>>                  /Robi
+>>
+>>
+>>
+>>                  _______________________________________________
+>>                  Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>         <mailto:Extend at lists.ninenines.eu
+>>         <mailto:Extend at lists.ninenines.eu>>
+>>         https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>>              --
+>>              Lo?c Hoguin
+>>         http://ninenines.eu
+>>              Author of The Erlanger Playbook,
+>>              A book about software development using Erlang
+>>              _______________________________________________
+>>              Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>         <mailto:Extend at lists.ninenines.eu
+>>         <mailto:Extend at lists.ninenines.eu>>
+>>         https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     http://ninenines.eu
+>>     Author of The Erlanger Playbook,
+>>     A book about software development using Erlang
+>>
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+> Author of The Erlanger Playbook,
+> A book about software development using Erlang
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150623/f7c19f68/attachment-0001.html>
+
+From ethrbh at gmail.com  Wed Jun 24 11:18:50 2015
+From: ethrbh at gmail.com (Robert Balogh)
+Date: Wed, 24 Jun 2015 11:18:50 +0200
+Subject: [99s-extend] Websocket vs. Request-Response msg pair
+Message-ID: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+
+hello,
+
+According to you grate support I got from you at yesterday, I could
+continue my project, where I use Cowboy webserver and using Websocket. Now
+I made an own web page with basic features I need, so the server and client
+can communicates to eachother. I like it.
+
+Now I would like to step forward, and I would like to implement a
+Request-Response mechanism. I read few articles in to this topic, and all
+of them has mentioned this "feature" is not part of the Websocket standard.
+They were suggested to use some sub-protocols for this, but I did not see
+any written in Erlang.
+
+So, I would like to ask you, do I understand right that Cowboy does not
+have this feature too? If so, do you have some idea how can I implement a
+basic request-response mechanism? Probably one of you guys in this forum
+have some idea.
+
+Btw, the links I read about this topic:
+
+http://stackoverflow.com/questions/10882370/websocket-request-response-subprotocol
+    http://alabor.me/articles/request-response-oriented-websockets/
+    https://www.npmjs.com/package/primus-responder
+
+thanks for your help,
+/Robi
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150624/204c1308/attachment.html>
+
+From grahamrhay at gmail.com  Wed Jun 24 12:19:39 2015
+From: grahamrhay at gmail.com (Graham Hay)
+Date: Wed, 24 Jun 2015 11:19:39 +0100
+Subject: [99s-extend] Websocket vs. Request-Response msg pair
+In-Reply-To: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+References: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+Message-ID: <CAABECY1-3dxX337kaShnxa3EuH1OAUyKVgonLoM9qAOQN6DNvw@mail.gmail.com>
+
+I think you'd have to roll your own, you just need some way to correlate
+<http://www.enterpriseintegrationpatterns.com/CorrelationIdentifier.html>
+responses
+with the originating request. OTP does something similar under the hood
+with gen_server calls <http://www.erlang.org/doc/man/gen_server.html#call-2>
+.
+
+It's also possible to treat the ws connection as a messaging channel, and
+use something like selective consumer
+<http://www.enterpriseintegrationpatterns.com/MessageSelector.html> to
+de-multiplex the messages. e.g. you could add a type/channel field to each
+message, and only subscribe to those messages.
+
+Remember that once you move into an async world, there are no guarantees
+that you will receive a response! So you need to start thinking about
+timeouts etc.
+
+
+On 24 June 2015 at 10:18, Robert Balogh <ethrbh at gmail.com> wrote:
+
+> hello,
+>
+> According to you grate support I got from you at yesterday, I could
+> continue my project, where I use Cowboy webserver and using Websocket. Now
+> I made an own web page with basic features I need, so the server and client
+> can communicates to eachother. I like it.
+>
+> Now I would like to step forward, and I would like to implement a
+> Request-Response mechanism. I read few articles in to this topic, and all
+> of them has mentioned this "feature" is not part of the Websocket standard.
+> They were suggested to use some sub-protocols for this, but I did not see
+> any written in Erlang.
+>
+> So, I would like to ask you, do I understand right that Cowboy does not
+> have this feature too? If so, do you have some idea how can I implement a
+> basic request-response mechanism? Probably one of you guys in this forum
+> have some idea.
+>
+> Btw, the links I read about this topic:
+>
+> http://stackoverflow.com/questions/10882370/websocket-request-response-subprotocol
+>     http://alabor.me/articles/request-response-oriented-websockets/
+>     https://www.npmjs.com/package/primus-responder
+>
+> thanks for your help,
+> /Robi
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150624/6d15706e/attachment.html>
+
+From essen at ninenines.eu  Wed Jun 24 12:28:21 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 24 Jun 2015 12:28:21 +0200
+Subject: [99s-extend] Websocket vs. Request-Response msg pair
+In-Reply-To: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+References: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+Message-ID: <558A8645.3010002@ninenines.eu>
+
+On 06/24/2015 11:18 AM, Robert Balogh wrote:
+> Now I would like to step forward, and I would like to implement a
+> Request-Response mechanism. I read few articles in to this topic, and
+> all of them has mentioned this "feature" is not part of the Websocket
+> standard. They were suggested to use some sub-protocols for this, but I
+> did not see any written in Erlang.
+>
+> So, I would like to ask you, do I understand right that Cowboy does not
+> have this feature too? If so, do you have some idea how can I implement
+> a basic request-response mechanism? Probably one of you guys in this
+> forum have some idea.
+
+Cowboy only comes with the Websocket protocol itself, all sub protocols 
+and mechanisms you want can then be implemented on top of it.
+
+I strongly recommend not to do RPC. Just send events to the server and 
+let the server send events to you. The difference is in the fact that 
+RPC tracks what requests were sent to tie requests and responses 
+together, while an event channel does not. You just send what the user 
+is doing and the server sends you what it wants the client to update or 
+do. Stay as stateless as possible.
+
+If you need to manage state to update the interface (locking a form 
+while waiting for the result, for example), do use timeouts to avoid 
+locking endlessly.
+
+Try and experiment, it's not very complicated. :-)
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From BasWegh at gmx.de  Wed Jun 24 12:28:09 2015
+From: BasWegh at gmx.de (Bas Wegh)
+Date: Wed, 24 Jun 2015 12:28:09 +0200
+Subject: [99s-extend] Websocket vs. Request-Response msg pair
+In-Reply-To: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+References: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+Message-ID: <558A8639.2080901@gmx.de>
+
+hello Robi,
+
+you might be interested in erwa:
+https://github.com/bwegh/erwa
+
+Cheers,
+Bas
+
+On 06/24/2015 11:18 AM, Robert Balogh wrote:
+> hello,
+>
+> According to you grate support I got from you at yesterday, I could 
+> continue my project, where I use Cowboy webserver and using Websocket. 
+> Now I made an own web page with basic features I need, so the server 
+> and client can communicates to eachother. I like it.
+>
+> Now I would like to step forward, and I would like to implement a 
+> Request-Response mechanism. I read few articles in to this topic, and 
+> all of them has mentioned this "feature" is not part of the Websocket 
+> standard. They were suggested to use some sub-protocols for this, but 
+> I did not see any written in Erlang.
+>
+> So, I would like to ask you, do I understand right that Cowboy does 
+> not have this feature too? If so, do you have some idea how can I 
+> implement a basic request-response mechanism? Probably one of you guys 
+> in this forum have some idea.
+>
+> Btw, the links I read about this topic:
+> http://stackoverflow.com/questions/10882370/websocket-request-response-subprotocol
+> http://alabor.me/articles/request-response-oriented-websockets/
+> https://www.npmjs.com/package/primus-responder
+>
+> thanks for your help,
+> /Robi
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150624/b67122b6/attachment.html>
+
+From ethrbh at gmail.com  Wed Jun 24 12:41:16 2015
+From: ethrbh at gmail.com (Robert Balogh)
+Date: Wed, 24 Jun 2015 12:41:16 +0200
+Subject: [99s-extend] Websocket vs. Request-Response msg pair
+In-Reply-To: <558A8639.2080901@gmx.de>
+References: <CAA4OwwXkFLY0pO7qudu4Xhe-aD4=wYGoitYx=NtN6dh5GN25CA@mail.gmail.com>
+ <558A8639.2080901@gmx.de>
+Message-ID: <CAA4OwwWP5oiZ6fYwAH8qz2FyjZL2MfDFD2B2vMe8J2rUerFU0g@mail.gmail.com>
+
+hello,
+
+I would like to thanks the response to all of you. I will try keep all
+these in my mind.
+
+@Bas, thanks for your note about erwa <https://github.com/bwegh/erwa>, I
+will take a look.
+
+thanks again,
+/Robi
+
+2015-06-24 12:28 GMT+02:00 Bas Wegh <BasWegh at gmx.de>:
+
+>  hello Robi,
+>
+> you might be interested in erwa:
+> https://github.com/bwegh/erwa
+>
+> Cheers,
+> Bas
+>
+> On 06/24/2015 11:18 AM, Robert Balogh wrote:
+>
+>   hello,
+>
+>  According to you grate support I got from you at yesterday, I could
+> continue my project, where I use Cowboy webserver and using Websocket. Now
+> I made an own web page with basic features I need, so the server and client
+> can communicates to eachother. I like it.
+>
+> Now I would like to step forward, and I would like to implement a
+> Request-Response mechanism. I read few articles in to this topic, and all
+> of them has mentioned this "feature" is not part of the Websocket standard.
+> They were suggested to use some sub-protocols for this, but I did not see
+> any written in Erlang.
+>
+>  So, I would like to ask you, do I understand right that Cowboy does not
+> have this feature too? If so, do you have some idea how can I implement a
+> basic request-response mechanism? Probably one of you guys in this forum
+> have some idea.
+>
+>  Btw, the links I read about this topic:
+>
+> http://stackoverflow.com/questions/10882370/websocket-request-response-subprotocol
+>     http://alabor.me/articles/request-response-oriented-websockets/
+>     https://www.npmjs.com/package/primus-responder
+>
+>  thanks for your help,
+>  /Robi
+>
+>
+> _______________________________________________
+> Extend mailing listExtend at lists.ninenines.euhttps://lists.ninenines.eu/listinfo/extend
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150624/72689ab9/attachment-0001.html>
+

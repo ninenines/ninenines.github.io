@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy + SSL
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20%2B%20SSL&In-Reply-To=%3C54BD5BB0.4000503%40bestmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000493.html">
+   <LINK REL="Next"  HREF="000495.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy + SSL</H1>
+    <B>e at bestmx.net</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20%2B%20SSL&In-Reply-To=%3C54BD5BB0.4000503%40bestmx.net%3E"
+       TITLE="[99s-extend] Cowboy + SSL">e at bestmx.net
+       </A><BR>
+    <I>Mon Jan 19 20:32:00 CET 2015</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000493.html">[99s-extend] cowboy and handling exceptions
+</A></li>
+        <LI>Next message: <A HREF="000495.html">[99s-extend] Cowboy + SSL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#494">[ date ]</a>
+              <a href="thread.html#494">[ thread ]</a>
+              <a href="subject.html#494">[ subject ]</a>
+              <a href="author.html#494">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello.
+
+i still have a problem with SSL.
+as soon as i change cowboy:start_http call to cowboy:start_https
+my release refuses to stop (when requested)
+and when i revert to &quot;http&quot; it starts and stops normally.
+
+i am sure it is the only difference: start_http vs. start_https
+
+i am using relx with default settings as it was provided by cowboy
+(Erlang R17, System: Debian &quot;testing&quot;)
+
+here is my_app.erl:
+
+start(_Type, _Args) -&gt;
+   Dispatch =
+   cowboy_router:compile([{'_', [{&quot;/start&quot;, ws_handler, []}]}]),
+
+   cowboy:start_https( https, 100, [ {port, 8765}
+   , {cacertfile, ?Dir ++ &quot;/ssl/cowboy-ca.crt&quot;}
+   , {certfile, ?Dir ++ &quot;/ssl/server.crt&quot;}
+   , {keyfile, ?Dir ++ &quot;/ssl/server.key&quot;} ]
+   , [{env, [{dispatch, Dispatch}]}]),
+
+   online37_sup:start_link().
+
+stop(_State) -&gt; ok.
+
+
+once i call:
+release/bin/my_release stop
+
+the erlang.log repeats hundreds of:
+
+=ERROR REPORT==== 19-Jan-2015::20:06:02 ===
+Error in process &lt;0.234.0&gt; on node '<A HREF="https://lists.ninenines.eu/listinfo/extend">online37 at 127.0.0.1</A>' with exit value: 
+{{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,&quot;src/ranch_acceptor.erl&quot;},{line,28}]}]}
+
+
+what could it be?
+any misconfiguration of my system (regarding ssl support)?
+what exactly does ranch expect from me?
+
+
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000493.html">[99s-extend] cowboy and handling exceptions
+</A></li>
+	<LI>Next message: <A HREF="000495.html">[99s-extend] Cowboy + SSL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#494">[ date ]</a>
+              <a href="thread.html#494">[ thread ]</a>
+              <a href="subject.html#494">[ subject ]</a>
+              <a href="author.html#494">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

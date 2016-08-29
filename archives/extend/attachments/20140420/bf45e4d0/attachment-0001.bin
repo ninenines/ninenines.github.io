@@ -1,0 +1,59 @@
+diff --git a/examples/websocket/priv/index.html b/examples/websocket/priv/index.html
+index 5bc7f15..3e233fa 100644
+--- a/examples/websocket/priv/index.html
++++ b/examples/websocket/priv/index.html
+@@ -1,7 +1,7 @@
+ <html>
+   <head>
+     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+-    <title>Websocket client</title>
++    <title>Websocket client foo</title>
+     <script src="/static/jquery.min.js"></script>
+     <script type="text/javascript">
+       
+@@ -13,7 +13,7 @@
+               $('#status').append('<p><span style="color: red;">websockets are not supported </span></p>');
+               $("#navigation").hide();  
+           } else {
+-              $('#status').append('<p><span style="color: green;">websockets are supported </span></p>');
++              $('#status').append('<p><span style="color: green;">websockets are supported ok </span></p>');
+               connect();
+           };
+               $("#connected").hide(); 	
+diff --git a/examples/websocket/src/ws_handler.erl b/examples/websocket/src/ws_handler.erl
+index bbbf716..cc73513 100644
+--- a/examples/websocket/src/ws_handler.erl
++++ b/examples/websocket/src/ws_handler.erl
+@@ -8,10 +8,12 @@
+ -export([websocket_terminate/3]).
+ 
+ init({tcp, http}, _Req, _Opts) ->
++	io:format("[ws_handler:init] _Req ~p _Opts ~p", [_Req, _Opts]),
+ 	{upgrade, protocol, cowboy_websocket}.
+ 
+ websocket_init(_TransportName, Req, _Opts) ->
+-	erlang:start_timer(1000, self(), <<"Hello!">>),
++	io:format("[websocket_init:init] Req ~p _Opts ~p", [Req, _Opts]),
++	% erlang:start_timer(1000, self(), <<"Hello!">>),
+ 	{ok, Req, undefined_state}.
+ 
+ websocket_handle({text, Msg}, Req, State) ->
+@@ -19,11 +21,15 @@ websocket_handle({text, Msg}, Req, State) ->
+ websocket_handle(_Data, Req, State) ->
+ 	{ok, Req, State}.
+ 
+-websocket_info({timeout, _Ref, Msg}, Req, State) ->
+-	erlang:start_timer(1000, self(), <<"How' you doin'?">>),
+-	{reply, {text, Msg}, Req, State};
++% websocket_info({timeout, _Ref, Msg}, Req, State) ->
++% 	erlang:start_timer(1000, self(), <<"How' you doin'?">>),
++% 	{reply, {text, Msg}, Req, State};
+ websocket_info(_Info, Req, State) ->
++	io:format("[ws_handler:websocket_info] _Info ~p Req ~p State ~p",
++		[_Info, Req, State]),
+ 	{ok, Req, State}.
+ 
+ websocket_terminate(_Reason, _Req, _State) ->
++	io:format("[ws_handler:websocket_terminate] _Reason ~p _Req ~p State ~p",
++		[_Reason, _Req, _State]),
+ 	ok.

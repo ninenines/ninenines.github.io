@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy handler linked processes
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20handler%20linked%20processes&In-Reply-To=%3C51E7C595.5050905%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000159.html">
+   <LINK REL="Next"  HREF="000161.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy handler linked processes</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20handler%20linked%20processes&In-Reply-To=%3C51E7C595.5050905%40ninenines.eu%3E"
+       TITLE="[99s-extend] Cowboy handler linked processes">essen at ninenines.eu
+       </A><BR>
+    <I>Thu Jul 18 12:38:13 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000159.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+        <LI>Next message: <A HREF="000161.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#160">[ date ]</a>
+              <a href="thread.html#160">[ thread ]</a>
+              <a href="subject.html#160">[ subject ]</a>
+              <a href="author.html#160">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>If you got time sure, I won't have much time until Monday. Have fun!
+
+On 07/18/2013 12:37 PM, Adrian Roe wrote:
+&gt;<i> That would be perfect!  Do you want me to make the change and issue a
+</I>&gt;<i> pull request?
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Dr Adrian Roe
+</I>&gt;<i> Director
+</I>&gt;<i>
+</I>&gt;<i> On Thursday, 18 July 2013 at 11:36, Lo&#239;c Hoguin wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> I don't think the problem is that the handler is reused, we don't reuse
+</I>&gt;&gt;<i> them if there's an error. However we do catch errors to print them in
+</I>&gt;&gt;<i> the logs, and then the process stops normally. If you link without
+</I>&gt;&gt;<i> trap_exit you receive a normal exit signal which is ignored and doesn't
+</I>&gt;&gt;<i> kill your process. I suppose we should throw an exit signal when we got
+</I>&gt;&gt;<i> an error, after logging everything, instead of stopping normally.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 07/18/2013 12:31 PM, Adrian Roe wrote:
+</I>&gt;&gt;&gt;<i> My issue is the other way round. My handler crashes - and terminate
+</I>&gt;&gt;&gt;<i> gets called, but the linked process is NOT stopped (unless I stop it in
+</I>&gt;&gt;&gt;<i> terminate having stashed any processes I need to stop in the process
+</I>&gt;&gt;&gt;<i> dictionary - this is what I'm currently doing, but yuck!)
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> . My question is whether it wouldn't be better to no re-use the handler
+</I>&gt;&gt;&gt;<i> process that has crashed and replace it so that handler's can use the
+</I>&gt;&gt;&gt;<i> canonical erlang way of stopping related processes rather than having to
+</I>&gt;&gt;&gt;<i> do it by hand.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Obviously if the handler does not crash there's no need to kill the
+</I>&gt;&gt;&gt;<i> process, so the current efficiency saving works in the &quot;normal&quot; case/
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> --
+</I>&gt;&gt;&gt;<i> Dr Adrian Roe
+</I>&gt;&gt;&gt;<i> Director
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> On Thursday, 18 July 2013 at 11:20, Lo&#239;c Hoguin wrote:
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> I don't know what happens but there's two things I know:
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> * Handlers don't trap_exit, so if the linked process crashes, they
+</I>&gt;&gt;&gt;&gt;<i> crash too
+</I>&gt;&gt;&gt;&gt;<i> * If the handler crashes, we close the connection and stop the
+</I>&gt;&gt;&gt;&gt;<i> handler; if not this is a bug
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> After your log message the handler should stop unless there's a bug
+</I>&gt;&gt;&gt;&gt;<i> somewhere.
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> On 07/18/2013 12:15 PM, Adrian Roe wrote:
+</I>&gt;&gt;&gt;&gt;&gt;<i> We have been using spawn_linked workers to handle tasks that live for
+</I>&gt;&gt;&gt;&gt;&gt;<i> the lifetime of a single HTTP request
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Although in the cowboy guide it is clear that Cowboy can use &quot;One
+</I>&gt;&gt;&gt;&gt;&gt;<i> Process of Many Requests&quot; I am surprised that this is the case even if
+</I>&gt;&gt;&gt;&gt;&gt;<i> the handler crashes. For example, our use case is to copy a large file
+</I>&gt;&gt;&gt;&gt;&gt;<i> to the server over HTTP where a worker process relays the file contents
+</I>&gt;&gt;&gt;&gt;&gt;<i> to long term storage. The worker process is spawn_linked from the HTTP
+</I>&gt;&gt;&gt;&gt;&gt;<i> handler and (for our use case) should die if the handler stops.
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> If the client stops the upload (for example by browsing away, or losing
+</I>&gt;&gt;&gt;&gt;&gt;<i> connectivity) we correctly receive an error (see sample Lager trace
+</I>&gt;&gt;&gt;&gt;&gt;<i> below), but what we are seeing is that spawn_linked processes are NOT
+</I>&gt;&gt;&gt;&gt;&gt;<i> being killed.
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Is this intended behaviour - I accept it makes sense to reuse the
+</I>&gt;&gt;&gt;&gt;&gt;<i> processes but should this continue to be the case even if the previous
+</I>&gt;&gt;&gt;&gt;&gt;<i> use of the process crashed? If it is intended behaviour I think the
+</I>&gt;&gt;&gt;&gt;&gt;<i> docs should highlight this as we've been leaking processes for some
+</I>&gt;&gt;&gt;&gt;&gt;<i> time
+</I>&gt;&gt;&gt;&gt;&gt;<i> now, but I've always seen it as erlang's job to look after related
+</I>&gt;&gt;&gt;&gt;&gt;<i> process trees in the event of error. Our current workaround is to hold
+</I>&gt;&gt;&gt;&gt;&gt;<i> a list of linked processes in process storage and then kill them in the
+</I>&gt;&gt;&gt;&gt;&gt;<i> terminate handler which is ugly in the extreme!! We don't know the PIDS
+</I>&gt;&gt;&gt;&gt;&gt;<i> of the linked processes until it is too late to return State to Cowboy
+</I>&gt;&gt;&gt;&gt;&gt;<i> (i.e. we are already in our handle code)...
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Kind regards
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> Adrian
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> 16:09:32.347 [info] Trailer upload failed with reason
+</I>&gt;&gt;&gt;&gt;&gt;<i> {case_clause,{error,closed}}
+</I>&gt;&gt;&gt;&gt;&gt;<i> 16:09:32.348 [error] ** Cowboy handler upload_trailer_resource
+</I>&gt;&gt;&gt;&gt;&gt;<i> terminating in handle/2
+</I>&gt;&gt;&gt;&gt;&gt;<i> for the reason error:{case_clause,{error,closed}}
+</I>&gt;&gt;&gt;&gt;&gt;<i> ** Handler state was {state,undefined,0,undefined,undefined,undefined}
+</I>&gt;&gt;&gt;&gt;&gt;<i> ** Request was
+</I>&gt;&gt;&gt;&gt;&gt;<i> [{socket,#Port&lt;0.11230&gt;},{transport,ranch_tcp},{connection,keepalive},{pid,&lt;0.1987.0&gt;},{method,&lt;&lt;&quot;POST&quot;&gt;&gt;},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,&lt;&lt;&quot;54.225.117.108&quot;&gt;&gt;},{host_info,undefined},{port,8000},{path,&lt;&lt;&quot;/upload_trailer&quot;&gt;&gt;},{path_info,undef
+</I>&gt;&gt;&gt;&gt;&gt;<i> ined},{qs,&lt;&lt;&quot;name=linux-7.4.21.zip&amp;size=54015414&quot;&gt;&gt;},{qs_vals,undefined},{bindings,[]},{headers,[{&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;54.225.117.108:8000&quot;&gt;&gt;},{&lt;&lt;&quot;connection&quot;&gt;&gt;,&lt;&lt;&quot;keep-alive&quot;&gt;&gt;},{&lt;&lt;&quot;content-length&quot;&gt;&gt;,&lt;&lt;&quot;54015414&quot;&gt;&gt;},{&lt;&lt;&quot;origin&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://54.225.117.108:8000">http://54.225.117.108:8000</A>&quot;&gt;&gt;},{&lt;&lt;&quot;user-agent&quot;&gt;&gt;,&lt;&lt;&quot;M
+</I>&gt;&gt;&gt;&gt;&gt;<i> ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36
+</I>&gt;&gt;&gt;&gt;&gt;<i> (KHTML,
+</I>&gt;&gt;&gt;&gt;&gt;<i> like Gecko) Chrome/28.0.1500.71
+</I>&gt;&gt;&gt;&gt;&gt;<i> Safari/537.36&quot;&gt;&gt;},{&lt;&lt;&quot;content-type&quot;&gt;&gt;,&lt;&lt;&gt;&gt;},{&lt;&lt;&quot;accept&quot;&gt;&gt;,&lt;&lt;&quot;*/*&quot;&gt;&gt;},{&lt;&lt;&quot;referer&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://54.225.117.108:8000/">http://54.225.117.108:8000/</A>&quot;&gt;&gt;},{&lt;&lt;&quot;accept-encoding&quot;&gt;&gt;,&lt;&lt;&quot;gzip,deflate,sdch&quot;&gt;&gt;},{&lt;&lt;&quot;acce
+</I>&gt;&gt;&gt;&gt;&gt;<i> pt-language&quot;&gt;&gt;,&lt;&lt;&quot;en-US,en;q=0.8&quot;&gt;&gt;},{&lt;&lt;&quot;cookie&quot;&gt;&gt;,&lt;&lt;&quot;__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5;
+</I>&gt;&gt;&gt;&gt;&gt;<i> id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93&quot;&gt;&gt;}]},{p_headers,[{&lt;&lt;&quot;connection&quot;&gt;&gt;,[&lt;&lt;&quot;keep-alive&quot;&gt;&gt;]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+</I>&gt;&gt;&gt;&gt;&gt;<i> fined},{buffer,&lt;&lt;&gt;&gt;},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,&lt;&lt;&gt;&gt;},{onresponse,undefined}]
+</I>&gt;&gt;&gt;&gt;&gt;<i> ** Stacktrace:
+</I>&gt;&gt;&gt;&gt;&gt;<i> [{i_cowboy,stream_body,0,[{file,&quot;src/i_cowboy.erl&quot;},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;}
+</I>&gt;&gt;&gt;&gt;&gt;<i> ,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;},{line,202}]},{upload_trailer_resource,sequence,2,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;},{line,106}]},{upload_trailer_resource,process_request,1,[{file,&quot;src/endpo
+</I>&gt;&gt;&gt;&gt;&gt;<i> ints/upload_trailer_resource.erl&quot;},{line,212}]},{i_cowboy,do,3,[{file,&quot;src/i_cowboy.erl&quot;},{line,29}]},{cowboy_handler,handler_handle,4,[{file,&quot;src/cowboy_handler.erl&quot;},{line,119}]}]
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> --
+</I>&gt;&gt;&gt;&gt;&gt;<i> Dr Adrian Roe
+</I>&gt;&gt;&gt;&gt;&gt;<i> Director
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;&gt;&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>&gt;
+</I>&gt;&gt;&gt;&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> --
+</I>&gt;&gt;&gt;&gt;<i> Lo&#239;c Hoguin
+</I>&gt;&gt;&gt;&gt;<i> Erlang Cowboy
+</I>&gt;&gt;&gt;&gt;<i> Nine Nines
+</I>&gt;&gt;&gt;&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> Lo&#239;c Hoguin
+</I>&gt;&gt;<i> Erlang Cowboy
+</I>&gt;&gt;<i> Nine Nines
+</I>&gt;&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000159.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+	<LI>Next message: <A HREF="000161.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#160">[ date ]</a>
+              <a href="thread.html#160">[ thread ]</a>
+              <a href="subject.html#160">[ subject ]</a>
+              <a href="author.html#160">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

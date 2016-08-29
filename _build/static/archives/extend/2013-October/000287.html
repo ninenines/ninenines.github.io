@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] REST handler failure
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20handler%20failure&In-Reply-To=%3CCAJCf5Rz0mKmouz5DEunOOZ%2Bb21bfLCjyQy7ssbHAgUp%2B3rGCaw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000286.html">
+   <LINK REL="Next"  HREF="000288.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] REST handler failure</H1>
+    <B>Daniel Goertzen</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20handler%20failure&In-Reply-To=%3CCAJCf5Rz0mKmouz5DEunOOZ%2Bb21bfLCjyQy7ssbHAgUp%2B3rGCaw%40mail.gmail.com%3E"
+       TITLE="[99s-extend] REST handler failure">daniel.goertzen at gmail.com
+       </A><BR>
+    <I>Tue Oct 29 21:25:54 CET 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000286.html">[99s-extend] cowboy_rest, POST and redirect
+</A></li>
+        <LI>Next message: <A HREF="000288.html">[99s-extend] REST handler failure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#287">[ date ]</a>
+              <a href="thread.html#287">[ thread ]</a>
+              <a href="subject.html#287">[ subject ]</a>
+              <a href="author.html#287">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>My situation is that I have a rest handler that may fail due to invalid url
+segments.  Example situation:
+
+
+init(_Transport, _Req, _Opts) -&gt;
+        {upgrade, protocol, cowboy_rest}.
+
+content_types_provided(Req, State) -&gt;
+    {[{&lt;&lt;&quot;application/json&quot;&gt;&gt;, get_json}], Req, State}.
+
+get_json(Req0, State) -&gt;
+    {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0,
+[param1, param2, param3, ....]),
+
+    case catch other_module:request(Params) of
+        {'EXIT', {badarg, _}} -&gt;
+            hmmm, Params were bad and I would like to return a 404 code now.
+        Result -&gt;
+            {jiffy:encode(Result), Req1, State}
+    end.
+
+
+
+So I would like to return a 404 code when my underlying request function
+fails, but it appears my choices are:
+
+- return a 200 (ok) response with data.
+- crash and cause a 500 (Internal Server Error) response to be returned.
+Not exactly the sentiment I want.
+
+
+Is there some other way to cause a 404 response?
+
+I realize I could add path constraint functions, but I will be replicating
+logic from my underlying request function.  Furthermore, the constraint
+functions consider parameters in isolation, so that won't work if the
+validity of parameters is coupled.
+
+Thanks,
+Dan.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20131029/a9204600/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20131029/a9204600/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000286.html">[99s-extend] cowboy_rest, POST and redirect
+</A></li>
+	<LI>Next message: <A HREF="000288.html">[99s-extend] REST handler failure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#287">[ date ]</a>
+              <a href="thread.html#287">[ thread ]</a>
+              <a href="subject.html#287">[ subject ]</a>
+              <a href="author.html#287">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

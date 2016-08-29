@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy HTTPS connection memory usage
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20HTTPS%20connection%20memory%20usage&In-Reply-To=%3CCAJ0zLRNud5vq9CnvZm8AgH1ZMPCzdkFe5tzdi5s13iP4HR6cuQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000025.html">
+   <LINK REL="Next"  HREF="000027.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy HTTPS connection memory usage</H1>
+    <B>rambocoder</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20HTTPS%20connection%20memory%20usage&In-Reply-To=%3CCAJ0zLRNud5vq9CnvZm8AgH1ZMPCzdkFe5tzdi5s13iP4HR6cuQ%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Cowboy HTTPS connection memory usage">erlang at rambocoder.com
+       </A><BR>
+    <I>Fri Dec 21 20:25:10 CET 2012</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000025.html">[99s-extend] Cowboy HTTPS connection memory usage
+</A></li>
+        <LI>Next message: <A HREF="000027.html">[99s-extend] [ANN] Ranch 0.6.0 Xmas Edition Released
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Long story short, I solved the problem by adding {max_connections, 50000}
+to cowboy:start_https because it default to 1024 at
+<A HREF="https://github.com/extend/ranch/blob/master/src/ranch_listener_sup.erl#L30">https://github.com/extend/ranch/blob/master/src/ranch_listener_sup.erl#L30</A>
+
+However, before I figured out that setting, I did run eprof and these are
+the function calls it was spending most of it's time on
+
+
+FUNCTION                                    CALLS      %   TIME  [uS /
+CALLS]
+--------                                    -----    ---   ----
+ [----------]
+dict:get_slot/2                               174   1.73   1658  [
+ 9.53]
+dict:on_bucket/3                              171   1.77   1701  [
+ 9.95]
+erlang:setelement/3                           684   3.23   3098  [
+ 4.53]
+dict:store_bkt_val/3                          600   5.24   5028  [
+ 8.38]
+
+Then I ran etop and it showed that ranch_acceptor:maybe_wait had the most
+reductions were, so I looked at the code in that
+<A HREF="https://github.com/extend/ranch/blob/master/src/ranch_acceptor.erl#L72">https://github.com/extend/ranch/blob/master/src/ranch_acceptor.erl#L72</A> and
+realized that like a newb I did not set the maximum connections for the
+listener :)
+
+Problem solved. Looks like I won't need to put HAProxy in front of Cowboy
+after all.
+
+Thank you,
+
+rambocoder
+
+On Fri, Dec 21, 2012 at 11:51 AM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt; wrote:
+
+&gt;<i> Can you try enabling eprof to see where the VM spends its time?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 12/21/2012 05:49 PM, rambocoder wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> In my preliminary testing, I used Jmeter this morning since it's an
+</I>&gt;&gt;<i> easy GUI load testing app and this is what I am seeing:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> With R15B03-01 [smp:4:4] [async-threads:4] [hipe] [kernel-poll:true],
+</I>&gt;&gt;<i> when I establish 1K concurrent connections via HTTPS, each connection
+</I>&gt;&gt;<i> takes up about 68K of memory.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Unfortunately, after about 1050-1200 connections, on my test server the
+</I>&gt;&gt;<i> Erlang scheduler jumps to 100% CPU utilization on all 4 schedulers,
+</I>&gt;&gt;<i> while up to that point the scheduler's load was oscillating up and down.
+</I>&gt;&gt;<i> Using the Observer, there is only 1 ssl_connection_sup  in the ssl
+</I>&gt;&gt;<i> application, having to deal with 1000+ gen_fsm workers, so that might be
+</I>&gt;&gt;<i> the bottleneck. Since the ulimit on my server is 50000 I don't think I
+</I>&gt;&gt;<i> am hitting any type of file handler's limit.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Lo&#239;c and the group, am I missing some setting that is causing the
+</I>&gt;&gt;<i> scheduler to go to 100% CPU and the run que in observer to be 99?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Sincerely,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> rambocoder
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Fri, Dec 21, 2012 at 6:45 AM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>
+</I>&gt;&gt;<i> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt; wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     On 12/21/2012 04:34 AM, rambocoder wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         Does anybody know either from benchmarks or real world data what
+</I>&gt;&gt;<i>         is the
+</I>&gt;&gt;<i>         average memory footprint of each concurrent HTTPS connection to
+</I>&gt;&gt;<i>         cowboy?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     I don't have anything, sorry. I'm guessing it consumes a lot more
+</I>&gt;&gt;<i>     than TCP though.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         SSL app in Erlang reuses SSL session-ids so I am not sure if the
+</I>&gt;&gt;<i>         Apache
+</I>&gt;&gt;<i>         Bench I test with reuses the session id or it does not.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     I wouldn't know, but I wouldn't trust Apache Bench doing the right
+</I>&gt;&gt;<i>     thing. Any other benchmark tool usually works better in my experience.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         BTW, what makes an erlang api &quot;documented&quot; vs &quot;undocumented&quot;. For
+</I>&gt;&gt;<i>         example ssl:session_info/1 function here (
+</I>&gt;&gt;<i>         <A HREF="https://github.com/erlang/otp/**__blob/maint/lib/ssl/src/ssl._**">https://github.com/erlang/otp/**__blob/maint/lib/ssl/src/ssl._**</A>
+</I>&gt;&gt;<i> _erl#L411&lt;<A HREF="https://github.com/erlang/otp/__blob/maint/lib/ssl/src/ssl.__erl#L411">https://github.com/erlang/otp/__blob/maint/lib/ssl/src/ssl.__erl#L411</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         &lt;<A HREF="https://github.com/erlang/**otp/blob/maint/lib/ssl/src/**">https://github.com/erlang/**otp/blob/maint/lib/ssl/src/**</A>
+</I>&gt;&gt;<i> ssl.erl#L411&lt;<A HREF="https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411">https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411</A>&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>         ) has
+</I>&gt;&gt;<i>         a spec and a short doc, but session_info is not described
+</I>&gt;&gt;<i>         <A HREF="http://www.erlang.org/doc/man/**__ssl.html&lt;http://www.erlang.org/doc/man/__ssl.html">http://www.erlang.org/doc/man/**__ssl.html&lt;http://www.erlang.org/doc/man/__ssl.html</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         &lt;<A HREF="http://www.erlang.org/doc/**man/ssl.html&lt;http://www.erlang.org/doc/man/ssl.html">http://www.erlang.org/doc/**man/ssl.html&lt;http://www.erlang.org/doc/man/ssl.html</A>&gt;&gt;
+</I>&gt;&gt;<i> .ssl:session_info/1 is
+</I>&gt;&gt;<i>         a useful
+</I>&gt;&gt;<i>         function to be able to track if the load generator is reusing
+</I>&gt;&gt;<i>         the SSL
+</I>&gt;&gt;<i>         session_id or it is generating new one, because that would make
+</I>&gt;&gt;<i>         all the
+</I>&gt;&gt;<i>         difference during measurement due to Erlang caching SSL sessions
+</I>&gt;&gt;<i>         by default.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     The documentation is separate (they're not using edoc). It's perhaps
+</I>&gt;&gt;<i>     not deemed useful enough for documenting it. I wouldn't worry about
+</I>&gt;&gt;<i>     using it for measurements though.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Try asking Ingela on the ML about it, perhaps they just forgot to
+</I>&gt;&gt;<i>     document it.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     --
+</I>&gt;&gt;<i>     Lo&#271;c Hoguin
+</I>&gt;&gt;<i>     Erlang Cowboy
+</I>&gt;&gt;<i>     Nine Nines
+</I>&gt;&gt;<i>     <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> ______________________________**_________________
+</I>&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/**listinfo/extend&lt;http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/**listinfo/extend&lt;http://lists.ninenines.eu:81/listinfo/extend</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Lo&#239;c Hoguin
+</I>&gt;<i>
+</I>&gt;<i> Erlang Cowboy
+</I>&gt;<i> Nine Nines
+</I>&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20121221/945f636e/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20121221/945f636e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000025.html">[99s-extend] Cowboy HTTPS connection memory usage
+</A></li>
+	<LI>Next message: <A HREF="000027.html">[99s-extend] [ANN] Ranch 0.6.0 Xmas Edition Released
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#26">[ date ]</a>
+              <a href="thread.html#26">[ thread ]</a>
+              <a href="subject.html#26">[ subject ]</a>
+              <a href="author.html#26">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

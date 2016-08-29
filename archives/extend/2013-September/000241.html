@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] timeouts and slow clients in cowboy loop handler
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeouts%20and%20slow%20clients%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwbGgYLp0W2esA204iZ0sumV2dBBN6ppbqD29ZKow%2Bts3A%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000240.html">
+   <LINK REL="Next"  HREF="000242.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] timeouts and slow clients in cowboy loop handler</H1>
+    <B>akonsu</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeouts%20and%20slow%20clients%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwbGgYLp0W2esA204iZ0sumV2dBBN6ppbqD29ZKow%2Bts3A%40mail.gmail.com%3E"
+       TITLE="[99s-extend] timeouts and slow clients in cowboy loop handler">akonsu at gmail.com
+       </A><BR>
+    <I>Fri Sep 20 20:59:46 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000240.html">[99s-extend] timeouts and slow clients in cowboy loop handler
+</A></li>
+        <LI>Next message: <A HREF="000242.html">[99s-extend] timeouts and slow clients in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#241">[ date ]</a>
+              <a href="thread.html#241">[ thread ]</a>
+              <a href="subject.html#241">[ subject ]</a>
+              <a href="author.html#241">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Understand about chunks being synchronous. that helps me tremendously to
+understand how it works.
+
+would you give me a sketchy example of how to use send_after in a loop
+handler? (sorry I am new to erlang)
+
+Konstantin
+
+
+2013/9/20 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;
+
+&gt;<i> chunk only returns when the client has received the chunk, so the
+</I>&gt;<i> timestamps solution should work.
+</I>&gt;<i>
+</I>&gt;<i> As for the timeout, you can simply use erlang:send_after or something like
+</I>&gt;<i> usual and the message will arrive in info/3.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 09/20/2013 08:54 PM, akonsu wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> thanks!
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> how to implement timeout callback manually? if I had receive then I
+</I>&gt;&gt;<i> would just use timeout clause there, but with the handler I do not know...
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I have doubts about validity of my question on the erlang list.  I later
+</I>&gt;&gt;<i> realised that there is no problem receiving messages in my handler from
+</I>&gt;&gt;<i> my upstream process, I can do it fast enough and shove everything to the
+</I>&gt;&gt;<i> response. my real problem is to determine if the http client is reading
+</I>&gt;&gt;<i> fast enough from the response...
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 2013/9/20 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Loop handlers close after a while regardless of what you send, it
+</I>&gt;&gt;<i>     only checks what the client sends. The best way for you would be to
+</I>&gt;&gt;<i>     disable that timeout and handle it manually.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     As for the second question, I'm still reading the thread on
+</I>&gt;&gt;<i>     erlang-questions but I've seen some good ideas about timestamps so
+</I>&gt;&gt;<i> far.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     On 09/20/2013 08:47 PM, akonsu wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         Hi,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         I am using loop handler and I stream from it:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         info({stream, Part}, Req, S) -&gt;
+</I>&gt;&gt;<i>               ok = cowboy_req:chunk(Part, Req),
+</I>&gt;&gt;<i>               {loop, Req, S, hibernate};
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         I have two questions:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         1. on timeouts cowboy sends 204 No Content. In my case it is not
+</I>&gt;&gt;<i> the
+</I>&gt;&gt;<i>         right response because I may have already sent some data. Is
+</I>&gt;&gt;<i>         there a way
+</I>&gt;&gt;<i>         to send a custom response?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         2. how to check if the client is too slow and is not reading the
+</I>&gt;&gt;<i>         response stream fast enough? If this happens, then I need to
+</I>&gt;&gt;<i>         disconnect.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         I can live without 1. but I need to figure out 2. Please help.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         thank you!
+</I>&gt;&gt;<i>         Konstantin
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         ______________________________**___________________
+</I>&gt;&gt;<i>         Extend mailing list
+</I>&gt;&gt;<i>         <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.</A>**ninenines.eu&lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>         <A HREF="http://lists.ninenines.eu:81/_**_listinfo/extend&lt;http://lists.ninenines.eu:81/__listinfo/extend">http://lists.ninenines.eu:81/_**_listinfo/extend&lt;http://lists.ninenines.eu:81/__listinfo/extend</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         &lt;<A HREF="http://lists.ninenines.eu:81/**listinfo/extend&lt;http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/**listinfo/extend&lt;http://lists.ninenines.eu:81/listinfo/extend</A>&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     --
+</I>&gt;&gt;<i>     Lo&#271;c Hoguin
+</I>&gt;&gt;<i>     Erlang Cowboy
+</I>&gt;&gt;<i>     Nine Nines
+</I>&gt;&gt;<i>     <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Lo&#239;c Hoguin
+</I>&gt;<i>
+</I>&gt;<i> Erlang Cowboy
+</I>&gt;<i> Nine Nines
+</I>&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130920/4c005881/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130920/4c005881/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000240.html">[99s-extend] timeouts and slow clients in cowboy loop handler
+</A></li>
+	<LI>Next message: <A HREF="000242.html">[99s-extend] timeouts and slow clients in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#241">[ date ]</a>
+              <a href="thread.html#241">[ thread ]</a>
+              <a href="subject.html#241">[ subject ]</a>
+              <a href="author.html#241">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

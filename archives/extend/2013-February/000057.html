@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy REST Logic
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20REST%20Logic&In-Reply-To=%3C511BB29E.3090705%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000055.html">
+   <LINK REL="Next"  HREF="000058.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy REST Logic</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20REST%20Logic&In-Reply-To=%3C511BB29E.3090705%40ninenines.eu%3E"
+       TITLE="[99s-extend] Cowboy REST Logic">essen at ninenines.eu
+       </A><BR>
+    <I>Wed Feb 13 16:34:54 CET 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000055.html">[99s-extend] Cowboy REST Logic
+</A></li>
+        <LI>Next message: <A HREF="000058.html">[99s-extend] Cowboy REST Logic
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#57">[ date ]</a>
+              <a href="thread.html#57">[ thread ]</a>
+              <a href="subject.html#57">[ subject ]</a>
+              <a href="author.html#57">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 02/13/2013 02:52 PM, Phillips, Christopher wrote:
+&gt;<i>
+</I>&gt;<i>    In 6.1, and still in 8.0, there is some logic that surprised me, and
+</I>&gt;<i> I wanted to see if it was intentional, or if I'm missing something.
+</I>&gt;<i>
+</I>&gt;<i>    If I set up a POST such that it's a create, I get back a 303, rather
+</I>&gt;<i> than a 201, on successful create. This came as a bit of a surprise; I
+</I>&gt;<i> know from Webmachine, if it's a new resource being created, a POST will
+</I>&gt;<i> return a 201 (N11 to P11 in Webmachine's v3 diagram).
+</I>&gt;<i>
+</I>&gt;<i>    Is this intentional? The logic seems to be post_is_create/2 -&gt;
+</I>&gt;<i> create_path/2 -&gt; put_resource/3 -&gt; choose_content_type/5 -&gt; next/3 -&gt;
+</I>&gt;<i> respond(_, _, 303). It may be that this is a better response, rather
+</I>&gt;<i> than a 201 with the location header, but it came as a surprise given web
+</I>&gt;<i> machine's behavior.
+</I>
+This difference is probably not intentional. Please open a ticket. :)
+
+&gt;<i>    For background, I'm attempting to migrate some web machine code to
+</I>&gt;<i> Cowboy, which is serving a RESTful API to a Javascript client. The
+</I>&gt;<i> client is making CORS calls. Receiving a 303 and a Location header
+</I>&gt;<i> seemed to mean that the call was redirected before the client side code
+</I>&gt;<i> ever saw it (not sure what the browser was doing; I was expecting
+</I>&gt;<i> another request, but I wasn't quite lucid enough to check for that last
+</I>&gt;<i> night when working on it); a 201 allows me to examine the location.
+</I>
+Would be interested to know more about your CORS implementation, that's 
+something I would like to have in the guide.
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000055.html">[99s-extend] Cowboy REST Logic
+</A></li>
+	<LI>Next message: <A HREF="000058.html">[99s-extend] Cowboy REST Logic
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#57">[ date ]</a>
+              <a href="thread.html#57">[ thread ]</a>
+              <a href="subject.html#57">[ subject ]</a>
+              <a href="author.html#57">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

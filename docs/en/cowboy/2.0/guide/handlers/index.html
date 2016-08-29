@@ -76,39 +76,38 @@
 <div class="paragraph"><p>The most basic handler in Cowboy implements the mandatory
 <code>init/2</code> callback, manipulates the request, optionally
 sends a response and then returns.</p></div>
-<div class="paragraph"><p>This callback receives the <a href="../req">Req object</a> and the options
-defined during the <a href="../routing">router configuration</a>.</p></div>
+<div class="paragraph"><p>This callback receives the <a href="../req">Req object</a> and the initial
+state defined in the <a href="../routing">router configuration</a>.</p></div>
 <div class="paragraph"><p>A handler that does nothing would look like this:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Despite sending no reply, a <code>204 No Content</code> reply will be
-sent to the client, as Cowboy makes sure that a reply is
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Despite sending no reply, a <code>204 No Content</code> response will be
+sent to the client, as Cowboy makes sure that a response is
 sent for every request.</p></div>
-<div class="paragraph"><p>We need to use the Req object for sending a reply.</p></div>
+<div class="paragraph"><p>We need to use the Req object to reply.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req0</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [
         {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>}
-    ], <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello World!"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>),
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>As you can see we return a 3-tuple. <code>ok</code> means that the
-handler ran successfully. The Req object is returned as
-it may have been modified as is the case here: replying
-returns a modified Req object that you need to return
-back to Cowboy for proper operations.</p></div>
+    ], <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello World!"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req0</span>),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Cowboy will immediately send a response when <code>cowboy:reply/4</code>
+is called.</p></div>
+<div class="paragraph"><p>We then return a 3-tuple. <code>ok</code> means that the handler ran
+successfully. We also give the modified Req back to Cowboy.</p></div>
 <div class="paragraph"><p>The last value of the tuple is a state that will be used
 in every subsequent callbacks to this handler. Plain HTTP
 handlers only have one additional callback, the optional
-<code>terminate/3</code>.</p></div>
+and rarely used <code>terminate/3</code>.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -130,16 +129,16 @@ following snippet switches to a Websocket handler:</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>You can also switch to your own custom handler type:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">my_handler_type</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">my_handler_type</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>How to implement a custom handler type is described in the
 <a href="../sub_protocols">Sub protocols</a> chapter.</p></div>
 </div>
@@ -147,26 +146,23 @@ http://www.gnu.org/software/src-highlite -->
 <div class="sect1">
 <h2 id="_cleaning_up">Cleaning up</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>All handlers coming with Cowboy allow the use of the optional
-<code>terminate/3</code> callback.</p></div>
+<div class="paragraph"><p>With the exception of Websocket handlers, all handler types
+provide the optional <code>terminate/3</code> callback.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">_Reason</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">_Reason</span>, <span style="color: #009900">_Req</span>, <span style="color: #009900">_State</span>) <span style="color: #990000">-&gt;</span>
     <span style="color: #FF6600">ok</span><span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>This callback is strictly reserved for any required cleanup.
 You cannot send a response from this function. There is no
 other return value.</p></div>
-<div class="paragraph"><p>If you used the process dictionary, timers, monitors or may
-be receiving messages, then you can use this function to clean
-them up, as Cowboy might reuse the process for the next
-keep-alive request.</p></div>
-<div class="paragraph"><p>Note that while this function may be called in a Websocket
-handler, it is generally not useful to do any clean up as
-the process terminates immediately after calling this callback
-when using Websocket.</p></div>
+<div class="paragraph"><p>This callback is optional because it is rarely necessary.
+Cleanup should be done in separate processes directly (by
+monitoring the handler process to detect when it exits).</p></div>
+<div class="paragraph"><p>Cowboy does not reuse processes for different requests. The
+process will terminate soon after this call returns.</p></div>
 </div>
 </div>
 

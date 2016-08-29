@@ -1,0 +1,89 @@
+<tt>
+&lt;div&nbsp;dir=&quot;ltr&quot;&gt;Okay,&nbsp;I&nbsp;see&nbsp;how&nbsp;I&nbsp;can&nbsp;wrap&nbsp;cowboy_protocol:init()&nbsp;to&nbsp;perhaps&nbsp;add&nbsp;cert&nbsp;information&nbsp;to&nbsp;env&nbsp;or&nbsp;stuff&nbsp;it&nbsp;in&nbsp;an&nbsp;ets&nbsp;table&nbsp;/&nbsp;gproc&nbsp;/&nbsp;process&nbsp;dictionary.&nbsp; Is&nbsp;this&nbsp;what&nbsp;you&nbsp;mean?&nbsp; I&nbsp;think&nbsp;that&nbsp;will&nbsp;work&nbsp;for&nbsp;me.&lt;div&gt;<br>
+&lt;br&gt;&lt;/div&gt;&lt;div&gt;My&nbsp;immediate&nbsp;application&nbsp;is&nbsp;to&nbsp;provide&nbsp;a&nbsp;secure&nbsp;RESTful&nbsp;API&nbsp;for&nbsp;a&nbsp;network&nbsp;appliance.&nbsp; Think&nbsp;securing&nbsp;the&nbsp;Web&nbsp;of&nbsp;Things.&nbsp; I&nbsp;really&nbsp;do&nbsp;want&nbsp;to&nbsp;get&nbsp;in&nbsp;the&nbsp;client&#39;s&nbsp;face&nbsp;if&nbsp;they&nbsp;don&#39;t&nbsp;have&nbsp;the&nbsp;right&nbsp;certificate.&lt;br&gt;<br>
+&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;I&#39;m&nbsp;late&nbsp;in&nbsp;saying&nbsp;this,&nbsp;but&nbsp;thank&nbsp;you&nbsp;for&nbsp;making&nbsp;Cowboy&nbsp;so&nbsp;easy&nbsp;to&nbsp;read&nbsp;and&nbsp;understand.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Cheers,&lt;/div&gt;&lt;div&gt;Dan.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&nbsp;class=&quot;gmail_extra&quot;&gt;&lt;br&gt;<br>
+&lt;br&gt;&lt;div&nbsp;class=&quot;gmail_quote&quot;&gt;On&nbsp;Thu,&nbsp;Jun&nbsp;5,&nbsp;2014&nbsp;at&nbsp;4:24&nbsp;PM,&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;span&nbsp;dir=&quot;ltr&quot;&gt;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&lt;/span&gt;&nbsp;wrote:&lt;br&gt;&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;<br>
+Misunderstood&nbsp;what&nbsp;you&nbsp;needed&nbsp;then.&lt;br&gt;<br>
+&lt;br&gt;<br>
+Note&nbsp;that&nbsp;the&nbsp;services&nbsp;that&nbsp;are&nbsp;completely&nbsp;blocked&nbsp;from&nbsp;anyone&nbsp;who&nbsp;doesn&#39;t&nbsp;have&nbsp;the&nbsp;right&nbsp;cert&nbsp;are&nbsp;virtually&nbsp;non-existent,&nbsp;it&nbsp;doesn&#39;t&nbsp;make&nbsp;sense&nbsp;to&nbsp;add&nbsp;a&nbsp;feature&nbsp;for&nbsp;it.&lt;br&gt;<br>
+&lt;br&gt;<br>
+You&nbsp;can&nbsp;do&nbsp;that&nbsp;kind&nbsp;of&nbsp;thing&nbsp;by&nbsp;having&nbsp;custom&nbsp;code&nbsp;creating&nbsp;the&nbsp;protocol&nbsp;process&nbsp;by&nbsp;the&nbsp;way.&nbsp;There&#39;s&nbsp;no&nbsp;need&nbsp;to&nbsp;patch&nbsp;Cowboy&nbsp;for&nbsp;that.&lt;div&nbsp;class=&quot;&quot;&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+On&nbsp;06/05/2014&nbsp;11:01&nbsp;PM,&nbsp;Daniel&nbsp;Goertzen&nbsp;wrote:&lt;br&gt;<br>
+&lt;/div&gt;&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;&lt;div&nbsp;class=&quot;&quot;&gt;<br>
+But&nbsp;then&nbsp;I&nbsp;would&nbsp;have&nbsp;to&nbsp;check&nbsp;the&nbsp;client&nbsp;cert&nbsp;for&nbsp;each&nbsp;and&nbsp;every&lt;br&gt;<br>
+request.&nbsp; I&nbsp;should&nbsp;have&nbsp;to&nbsp;check&nbsp;the&nbsp;cert&nbsp;only&nbsp;once&nbsp;at&nbsp;connect&nbsp;time&nbsp;and&lt;br&gt;<br>
+then&nbsp;be&nbsp;able&nbsp;to&nbsp;pass&nbsp;the&nbsp;result&nbsp;of&nbsp;that&nbsp;check&nbsp;in&nbsp;the&nbsp;request&nbsp;to&nbsp;each&lt;br&gt;<br>
+handler.&lt;br&gt;<br>
+&lt;br&gt;<br>
+Anyway&nbsp;I&#39;ve&nbsp;gone&nbsp;ahead&nbsp;and&nbsp;implemented&nbsp;what&nbsp;I&nbsp;need&nbsp;in&nbsp;a&nbsp;generic&nbsp;manner&lt;br&gt;<br>
+and&nbsp;it&nbsp;seems&nbsp;to&nbsp;work&nbsp;well.&nbsp; I&nbsp;think&nbsp;it&nbsp;would&nbsp;be&nbsp;a&nbsp;useful&nbsp;addition&nbsp;to&lt;br&gt;<br>
+Cowboy.&nbsp; If&nbsp;you&nbsp;agree&nbsp;I&nbsp;could&nbsp;write&nbsp;some&nbsp;more&nbsp;documentation&nbsp;for&nbsp;it.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;https://github.com/goertzenator/cowboy/tree/onconnect&quot;&nbsp;target=&quot;_blank&quot;&gt;https://github.com/&lt;u&gt;&lt;/u&gt;goertzenator/cowboy/tree/&lt;u&gt;&lt;/u&gt;onconnect&lt;/a&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+I&nbsp;added&nbsp;a&nbsp;&quot;onconnect&quot;&nbsp;hook&nbsp;and&nbsp;&quot;connection&nbsp;metadata&quot;&nbsp;to&nbsp;cowboy_req.&nbsp; The&lt;br&gt;<br>
+connection&nbsp;metadata&nbsp;works&nbsp;like&nbsp;existing&nbsp;metadata,&nbsp;but&nbsp;is&nbsp;preserved&nbsp;from&lt;br&gt;<br>
+request&nbsp;to&nbsp;request&nbsp;on&nbsp;the&nbsp;same&nbsp;connection.&nbsp; The&nbsp;onconnect&nbsp;hook&nbsp;provides&lt;br&gt;<br>
+initial&nbsp;values&nbsp;for&nbsp;the&nbsp;connection&nbsp;metadata.&lt;br&gt;<br>
+&lt;br&gt;<br>
+Dan.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+On&nbsp;Thu,&nbsp;Jun&nbsp;5,&nbsp;2014&nbsp;at&nbsp;3:04&nbsp;AM,&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;div&nbsp;class=&quot;&quot;&gt;<br>
+&lt;mailto:&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&gt;&nbsp;wrote:&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;On&nbsp;06/05/2014&nbsp;01:44&nbsp;AM,&nbsp;Daniel&nbsp;Goertzen&nbsp;wrote:&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;On&nbsp;Wed,&nbsp;Jun&nbsp;4,&nbsp;2014&nbsp;at&nbsp;4:48&nbsp;PM,&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;&lt;mailto:&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&nbsp;class=&quot;h5&quot;&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;&lt;mailto:&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&nbsp;&lt;mailto:&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&gt;&gt;&nbsp;wrote:&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; On&nbsp;06/04/2014&nbsp;10:08&nbsp;PM,&nbsp;Daniel&nbsp;Goertzen&nbsp;wrote:&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; I&nbsp;am&nbsp;having&nbsp;very&nbsp;good&nbsp;luck&nbsp;with&nbsp;Cowboy&nbsp;so&nbsp;far,&nbsp;but&nbsp;I&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;have&nbsp;some&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; questions:&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1.&nbsp;There&nbsp;doesn&#39;t&nbsp;appear&nbsp;to&nbsp;be&nbsp;any&nbsp;way&nbsp;to&nbsp;do&nbsp;client&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;certificate&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; authorization&nbsp;in&nbsp;Cowboy,&nbsp;although&nbsp;I&nbsp;see&nbsp;there&nbsp;is&nbsp;an&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;example&nbsp;for&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; doing&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; exactly&nbsp;that&nbsp;with&nbsp;Ranch.&nbsp; I&nbsp;think&nbsp;I&nbsp;could&nbsp;modify&nbsp;Cowboy&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;to&nbsp;do&nbsp;what&nbsp;I&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; want,&nbsp;but&nbsp;I&nbsp;thought&nbsp;I&nbsp;would&nbsp;ask&nbsp;if&nbsp;there&nbsp;were&nbsp;other&nbsp;options&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; before&nbsp;doing&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; that.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Same&nbsp;as&nbsp;Ranch&nbsp;really,&nbsp;you&nbsp;just&nbsp;gotta&nbsp;take&nbsp;the&nbsp;socket&nbsp;and&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;then&nbsp;call&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; the&nbsp;ssl&nbsp;functions.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;Yes,&nbsp;but&nbsp;in&nbsp;cowboy&nbsp;there&#39;s&nbsp;no&nbsp;API&nbsp;to&nbsp;get&nbsp;at&nbsp;the&nbsp;socket.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;There&nbsp;is&nbsp;the&nbsp;undocumented&nbsp;function&nbsp;cowboy_req:get/1&nbsp;which&nbsp;is&nbsp;meant&lt;br&gt;<br>
+ &nbsp; &nbsp;for&nbsp;that&nbsp;kind&nbsp;of&nbsp;&quot;special&quot;&nbsp;use.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;--&lt;br&gt;<br>
+ &nbsp; &nbsp;Loïc&nbsp;Hoguin&lt;br&gt;<br>
+ &nbsp; &nbsp;&lt;a&nbsp;href=&quot;http://ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;http://ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;/div&gt;&lt;/div&gt;&lt;/blockquote&gt;&lt;div&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;div&nbsp;class=&quot;h5&quot;&gt;<br>
+&lt;br&gt;<br>
+--&nbsp;&lt;br&gt;<br>
+Loïc&nbsp;Hoguin&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;http://ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;http://ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;/div&gt;&lt;/div&gt;&lt;/blockquote&gt;&lt;/div&gt;&lt;br&gt;&lt;/div&gt;<br>
+
+</tt>

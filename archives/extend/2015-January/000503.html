@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Rewriting URLs
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Rewriting%20URLs&In-Reply-To=%3C1422364068.30127.5.camel%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000502.html">
+   <LINK REL="Next"  HREF="000504.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Rewriting URLs</H1>
+    <B>Paul Dickson</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Rewriting%20URLs&In-Reply-To=%3C1422364068.30127.5.camel%40gmail.com%3E"
+       TITLE="[99s-extend] Rewriting URLs">pdtwonotes at gmail.com
+       </A><BR>
+    <I>Tue Jan 27 14:07:48 CET 2015</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000502.html">[99s-extend] Rewriting URLs
+</A></li>
+        <LI>Next message: <A HREF="000504.html">[99s-extend] Rewriting URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#503">[ date ]</a>
+              <a href="thread.html#503">[ thread ]</a>
+              <a href="subject.html#503">[ subject ]</a>
+              <a href="author.html#503">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On Tue, 2015-01-27 at 11:13 +0100, Lo&#239;c Hoguin wrote:
+&gt;<i> On 01/26/2015 10:54 PM, Paul Dickson wrote:
+</I>&gt;<i> &gt; On Mon, 2015-01-26 at 11:26 +0100, Lo&#239;c Hoguin wrote:
+</I>&gt;<i> &gt;&gt; You have to change path_info too if your middleware is after the router.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt; I have added that.  My cowboy:start_http parameters include this:
+</I>&gt;<i> &gt;      {middlewares, [cowboy_router, bz_libmap, cowboy_handler]}
+</I>&gt;<i> &gt; which I think means bz_libmap will get called on *every* request.  This
+</I>&gt;<i> &gt; seems to work.  Among the dispatch rules is this line:
+</I>&gt;<i> &gt;      {&quot;/music/[...]&quot;, cowboy_static, {dir, &quot;&quot;, &quot;&quot;}},
+</I>&gt;<i> 
+</I>&gt;<i> Is it the actual line? Cause {dir, &quot;&quot;, &quot;&quot;} is wrong, the third element 
+</I>&gt;<i> must be an etag or mimetype tuple.
+</I>&gt;<i> 
+</I>&gt;<i> Otherwise, I need a more complete error, or code.
+</I>
+I changed the rule line to:
+
+	    {&quot;/music/[...]&quot;, cowboy_static, {dir, &quot;&quot;, [
+	        {mimetypes, cow_mimetypes, all}]}},
+
+The client I am using is 'mplayer'.  The error message is:
+
+  Server returned 400:Bad Request
+  Failed to parse header.
+  Failed, exiting.
+
+I also included some tracing in my middleware module to print
+out the new path and path_info values it is setting, showing
+the result of the rewrite algorithm.
+
+ Path &lt;&lt;&quot;/music/Library/Folk/Swiss/Alphorn.ogg&quot;&gt;&gt;
+ Info [&lt;&lt;&quot;/&quot;&gt;&gt;,&lt;&lt;&quot;music&quot;&gt;&gt;,&lt;&lt;&quot;Library&quot;&gt;&gt;,&lt;&lt;&quot;Folk&quot;&gt;&gt;,&lt;&lt;&quot;Swiss&quot;&gt;&gt;,
+         &lt;&lt;&quot;Alphorn.ogg&quot;&gt;&gt;]
+
+
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000502.html">[99s-extend] Rewriting URLs
+</A></li>
+	<LI>Next message: <A HREF="000504.html">[99s-extend] Rewriting URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#503">[ date ]</a>
+              <a href="thread.html#503">[ thread ]</a>
+              <a href="subject.html#503">[ subject ]</a>
+              <a href="author.html#503">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

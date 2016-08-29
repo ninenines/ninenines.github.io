@@ -1,0 +1,210 @@
+From suresh at pimtools.com  Thu Nov  6 14:31:23 2014
+From: suresh at pimtools.com (Suresh Kumar R)
+Date: Thu, 6 Nov 2014 19:01:23 +0530
+Subject: [99s-extend] Html encode/decode
+Message-ID: <2CC4A45D-FB15-4FB1-842D-BA29FB4FA3F6@pimtools.com>
+
+Hi,
+
+Can you suggest a best library to encode/decode html and url? I am using cowboy and bullet. Mochiweb seems to support only url encode/decode.
+
+I have been using mochijson2.erl file from mochi web to encode/decode json.
+ 
+Cheers
+Suresh
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20141106/85a93e04/attachment.html>
+
+From e at bestmx.net  Thu Nov  6 14:32:41 2014
+From: e at bestmx.net (e at bestmx.net)
+Date: Thu, 06 Nov 2014 14:32:41 +0100
+Subject: [99s-extend] Html encode/decode
+In-Reply-To: <2CC4A45D-FB15-4FB1-842D-BA29FB4FA3F6@pimtools.com>
+References: <2CC4A45D-FB15-4FB1-842D-BA29FB4FA3F6@pimtools.com>
+Message-ID: <545B7879.3020807@bestmx.net>
+
+> Can you suggest a best library to encode/decode html and url?
+
+what exactly do you mean encode?
+what are desired properties of the encoded text?
+
+
+From e at bestmx.net  Tue Nov 11 01:32:45 2014
+From: e at bestmx.net (e at bestmx.net)
+Date: Tue, 11 Nov 2014 01:32:45 +0100
+Subject: [99s-extend] Websocket frames sequence
+In-Reply-To: <545B7879.3020807@bestmx.net>
+References: <2CC4A45D-FB15-4FB1-842D-BA29FB4FA3F6@pimtools.com>
+ <545B7879.3020807@bestmx.net>
+Message-ID: <5461592D.4000408@bestmx.net>
+
+hi, all
+
+the question is about websocket and cowboy, both.
+
+if i return from a callback the value:
+{reply, [{text,"A"}, {text,"B"}], Req, State}
+
+is it guaranteed that "A" will be received by the client prior to "B" ?
+
+if not, what actually happens? (are they emitted independently or together?)
+
+From pdtwonotes at gmail.com  Tue Nov 11 05:52:45 2014
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Mon, 10 Nov 2014 23:52:45 -0500
+Subject: [99s-extend] Streaming with the static handler
+Message-ID: <1415681565.1368.2.camel@gmail.com>
+
+I am building a streaming music server that delivers mp3 files from disk
+to instances of 'mplayer'.  So far I am using the Cowboy static handler
+for this, and it is working for a single player but I wonder how
+efficient the buffering is at the network level.  Should I instead be
+doing this myself with an http handler and chunked replies?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20141110/a4b469a5/attachment.html>
+
+From essen at ninenines.eu  Tue Nov 11 10:04:04 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 11 Nov 2014 11:04:04 +0200
+Subject: [99s-extend] Websocket frames sequence
+In-Reply-To: <5461592D.4000408@bestmx.net>
+References: <2CC4A45D-FB15-4FB1-842D-BA29FB4FA3F6@pimtools.com>
+ <545B7879.3020807@bestmx.net> <5461592D.4000408@bestmx.net>
+Message-ID: <5461D104.9030802@ninenines.eu>
+
+In order, yes. I will clarify that in the guide.
+
+On 11/11/2014 02:32 AM, e at bestmx.net wrote:
+> hi, all
+>
+> the question is about websocket and cowboy, both.
+>
+> if i return from a callback the value:
+> {reply, [{text,"A"}, {text,"B"}], Req, State}
+>
+> is it guaranteed that "A" will be received by the client prior to "B" ?
+>
+> if not, what actually happens? (are they emitted independently or
+> together?)
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From essen at ninenines.eu  Tue Nov 11 10:08:31 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 11 Nov 2014 11:08:31 +0200
+Subject: [99s-extend] Streaming with the static handler
+In-Reply-To: <1415681565.1368.2.camel@gmail.com>
+References: <1415681565.1368.2.camel@gmail.com>
+Message-ID: <5461D20F.7020904@ninenines.eu>
+
+No idea. Measure? Chances are it's good enough for your intended scale. :-)
+
+On 11/11/2014 06:52 AM, Paul Dickson wrote:
+> I am building a streaming music server that delivers mp3 files from disk
+> to instances of 'mplayer'.  So far I am using the Cowboy static handler
+> for this, and it is working for a single player but I wonder how
+> efficient the buffering is at the network level.  Should I instead be
+> doing this myself with an http handler and chunked replies?
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From e at bestmx.net  Tue Nov 11 13:24:10 2014
+From: e at bestmx.net (e at bestmx.net)
+Date: Tue, 11 Nov 2014 13:24:10 +0100
+Subject: [99s-extend] Streaming with the static handler
+In-Reply-To: <1415681565.1368.2.camel@gmail.com>
+References: <1415681565.1368.2.camel@gmail.com>
+Message-ID: <5461FFEA.9090308@bestmx.net>
+
+On 11/11/2014 05:52 AM, Paul Dickson wrote:
+> I am building a streaming music server that delivers mp3 files from disk
+> to instances of 'mplayer'.  So far I am using the Cowboy static handler
+
+nginx is what you need for static files:
+http://wiki.nginx.org/AudioTrackForHLS
+
+
+From tristan.sloughter at gmail.com  Sat Nov 22 06:44:21 2014
+From: tristan.sloughter at gmail.com (Tristan Sloughter)
+Date: Fri, 22 Nov 2014 05:44:21 +0000
+Subject: [99s-extend] shinoki-s44
+Message-ID: <64DDD839586B585FA8DC7B371B81BC74@smtp.deskwing.net>
+
+http://antiq.co.il/ko/vichpcrgddbxwhfcdpsflud.sqkehqciqedlfxud 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Tristan Sloughter 
+
+
+ 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20141122/bcb1d17c/attachment.html>
+
+From daniel.goertzen at gmail.com  Mon Nov 24 22:33:02 2014
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Mon, 24 Nov 2014 15:33:02 -0600
+Subject: [99s-extend] multiple apps with erlang.mk
+Message-ID: <CAJCf5RxyTdDOz-uSSbfL9dRLjMH1exEsuWitBuD4iDpePRLeDw@mail.gmail.com>
+
+I'm working quite a bit with erlang.mk, and one thing I've noticed is that
+I've seen no mention of how to deal with multiple apps.  There are some
+great examples of how to build a single app and its dependencies into a
+release, but what is the proper way of handling things when you have say 6
+custom written apps (with their deps)?
+
+
+Right now my top level directory looks like this:
+
+Makefile
+erlang.mk
+deps/
+custom_app_1/
+custom_app_2/
+custom_app_3/
+...
+
+
+I've got the Makefile using erlang.mk to handle all the dependencies, and
+then some custom rules to invoke make on all the app subdirectories.  It's
+not too bad so far.  I was thinking of formalizing some of this into a
+subapp plugin.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20141124/9ceef28a/attachment.html>
+

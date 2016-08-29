@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20%5Berlang-questions%5D%20%5BANN%5D%20erlang.mk%20build%20tool&In-Reply-To=%3C520E3A54.7040208%40gjunka.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000210.html">
+   <LINK REL="Next"  HREF="000217.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] [erlang-questions] [ANN] erlang.mk build tool</H1>
+    <B>Grzegorz Junka</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20%5Berlang-questions%5D%20%5BANN%5D%20erlang.mk%20build%20tool&In-Reply-To=%3C520E3A54.7040208%40gjunka.com%3E"
+       TITLE="[99s-extend] [erlang-questions] [ANN] erlang.mk build tool">list1 at gjunka.com
+       </A><BR>
+    <I>Fri Aug 16 16:42:28 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000210.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+        <LI>Next message: <A HREF="000217.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#215">[ date ]</a>
+              <a href="thread.html#215">[ thread ]</a>
+              <a href="subject.html#215">[ subject ]</a>
+              <a href="author.html#215">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Why not use Erlang for downloading? Surely if erlang.mk is a tool for 
+Erlang then it will be very likely installed. For example this target 
+downloads Rebar:
+
+# Erlang Rebar downloading, see:
+# 
+<A HREF="https://groups.google.com/forum/?fromgroups=#!topic/erlang-programming/U0JJ3SeUv5Y">https://groups.google.com/forum/?fromgroups=#!topic/erlang-programming/U0JJ3SeUv5Y</A>
+rb_rebar_url=<A HREF="http://cloud.github.com/downloads/basho/rebar/rebar">http://cloud.github.com/downloads/basho/rebar/rebar</A>
+./rebar:
+$(ERL) -noshell -s inets -s ssl \
+-eval 'httpc:request(get, {&quot;$(rb_rebar_url)&quot;, []}, [], [{stream, 
+&quot;./rebar&quot;}])' \
+-s init stop
+chmod +x ./rebar
+REBAR=$(shell (type rebar 2&gt;/dev/null || echo ./rebar) | tail -1 | awk 
+'{ print $$NF }')
+
+
+It could be used to download anything, not just REBAR.
+
+- Greg
+
+
+On 16/08/2013 15:34, Lo&#239;c Hoguin wrote:
+&gt;<i> On 08/16/2013 10:39 AM, Benoit Chesneau wrote:
+</I>&gt;&gt;<i> The big problem with erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; is requiring to have
+</I>&gt;&gt;<i> gmake and more importantly wget installed imo.
+</I>&gt;<i>
+</I>&gt;<i> wget is only used for fetching the package index file. I'm sure if it 
+</I>&gt;<i> doesn't work somewhere it'll be patched eventually.
+</I>&gt;<i>
+</I>&gt;&gt;<i> Which makes it quite annoying to distribute on systems that have none of
+</I>&gt;&gt;<i> them. It would be interrestin to have the support for curl for example.
+</I>&gt;&gt;<i> Also what are the makefile extensions that you really need to require 
+</I>&gt;&gt;<i> gmake?
+</I>&gt;<i>
+</I>&gt;<i> No idea. Patches are welcome for compatibility with different OS/build 
+</I>&gt;<i> tools (as long as it's not &quot;rewrite the whole file&quot; of course, then 
+</I>&gt;<i> you're better off just using gmake).
+</I>&gt;<i>
+</I>&gt;&gt;<i> - benoit
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Thu, Aug 15, 2013 at 4:19 PM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>
+</I>&gt;&gt;<i> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt; wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Hello friendly people,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     I would like to make an official announcement of erlang.mk
+</I>&gt;&gt;<i>     &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; now that all the features I wanted are in.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; is a rebar replacement. It was
+</I>&gt;&gt;<i>     initially created for allowing a faster development process than
+</I>&gt;&gt;<i>     rebar and for better compatibility with Linux build tools. It should
+</I>&gt;&gt;<i>     work on Linux and OSX with GNU Make installed.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Projects using erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; are still compatible
+</I>&gt;&gt;<i>     with rebar. Dependencies fetched by rebar are stored in the same
+</I>&gt;&gt;<i>     deps/ directory, and projects using erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; can
+</I>&gt;&gt;<i>     still be used as rebar dependencies, with or without a rebar.config
+</I>&gt;&gt;<i>     file.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; also features a simple package index.
+</I>&gt;&gt;<i>     Try `make pkg-list` to list all packages currently available. All
+</I>&gt;&gt;<i>     the packages listed are compatible with erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt;
+</I>&gt;&gt;<i>     with no tweaking required.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Makefiles written with erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; are *VERY*
+</I>&gt;&gt;<i>     simple, here are two examples:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>       * <A HREF="https://github.com/extend/__farwest/blob/master/Makefile">https://github.com/extend/__farwest/blob/master/Makefile</A>
+</I>&gt;&gt;<i> &lt;<A HREF="https://github.com/extend/farwest/blob/master/Makefile">https://github.com/extend/farwest/blob/master/Makefile</A>&gt;
+</I>&gt;&gt;<i>       * <A HREF="https://github.com/extend/__cowboy/blob/master/Makefile">https://github.com/extend/__cowboy/blob/master/Makefile</A>
+</I>&gt;&gt;<i> &lt;<A HREF="https://github.com/extend/cowboy/blob/master/Makefile">https://github.com/extend/cowboy/blob/master/Makefile</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     I wrote about erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; and relx recently on the
+</I>&gt;&gt;<i>     Nine Nines blog. erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; is the perfect
+</I>&gt;&gt;<i>     companion to relx.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>       * <A HREF="http://ninenines.eu/articles/__erlang.mk-and-relx">http://ninenines.eu/articles/__erlang.mk-and-relx</A>
+</I>&gt;&gt;<i>     &lt;<A HREF="http://ninenines.eu/articles/erlang.mk-and-relx">http://ninenines.eu/articles/erlang.mk-and-relx</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Here are examples of projects that are using and compatible with
+</I>&gt;&gt;<i>     erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt;:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>       * <A HREF="https://github.com/jlouis/__etorrent">https://github.com/jlouis/__etorrent</A>
+</I>&gt;&gt;<i>     &lt;<A HREF="https://github.com/jlouis/etorrent">https://github.com/jlouis/etorrent</A>&gt;
+</I>&gt;&gt;<i>       * <A HREF="https://github.com/extend/__cowboy">https://github.com/extend/__cowboy</A>
+</I>&gt;&gt;<i>     &lt;<A HREF="https://github.com/extend/cowboy">https://github.com/extend/cowboy</A>&gt;
+</I>&gt;&gt;<i>       * <A HREF="https://github.com/extend/__farwest">https://github.com/extend/__farwest</A>
+</I>&gt;&gt;<i>     &lt;<A HREF="https://github.com/extend/farwest">https://github.com/extend/farwest</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     You can find erlang.mk &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; at the following URL:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>       * <A HREF="https://github.com/extend/__erlang.mk">https://github.com/extend/__erlang.mk</A>
+</I>&gt;&gt;<i>     &lt;<A HREF="https://github.com/extend/erlang.mk">https://github.com/extend/erlang.mk</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Contributions to the package index are of course welcome! The only
+</I>&gt;&gt;<i>     requirement is that the package is to be compatible with erlang.mk
+</I>&gt;&gt;<i>     &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; itself. Just send a PR to the erlang.mk
+</I>&gt;&gt;<i>     &lt;<A HREF="http://erlang.mk">http://erlang.mk</A>&gt; project updating the packages.v1.txt!
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Enjoy!
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     --
+</I>&gt;&gt;<i>     Lo&#239;c Hoguin
+</I>&gt;&gt;<i>     Erlang Cowboy
+</I>&gt;&gt;<i>     Nine Nines
+</I>&gt;&gt;<i>     <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;&gt;<i>     _________________________________________________
+</I>&gt;&gt;<i>     erlang-questions mailing list
+</I>&gt;&gt;<i>     <A HREF="https://lists.ninenines.eu/listinfo/extend">erlang-questions at erlang.org</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">erlang-questions at erlang.org</A>&gt;
+</I>&gt;&gt;<i>     <A HREF="http://erlang.org/mailman/__listinfo/erlang-questions">http://erlang.org/mailman/__listinfo/erlang-questions</A>
+</I>&gt;&gt;<i>     &lt;<A HREF="http://erlang.org/mailman/listinfo/erlang-questions">http://erlang.org/mailman/listinfo/erlang-questions</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130816/4e596577/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130816/4e596577/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000210.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+	<LI>Next message: <A HREF="000217.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#215">[ date ]</a>
+              <a href="thread.html#215">[ thread ]</a>
+              <a href="subject.html#215">[ subject ]</a>
+              <a href="author.html#215">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

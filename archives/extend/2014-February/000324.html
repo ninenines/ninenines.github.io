@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Accept header in POST request
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Accept%20header%20in%20POST%20request&In-Reply-To=%3CCAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk%2Bnw2VA%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000325.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Accept header in POST request</H1>
+    <B>&#321;ukasz Biedrycki</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Accept%20header%20in%20POST%20request&In-Reply-To=%3CCAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk%2Bnw2VA%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Accept header in POST request">lukasz.biedrycki at gmail.com
+       </A><BR>
+    <I>Mon Feb  3 19:13:04 CET 2014</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000325.html">[99s-extend] Accept header in POST request
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#324">[ date ]</a>
+              <a href="thread.html#324">[ thread ]</a>
+              <a href="subject.html#324">[ subject ]</a>
+              <a href="author.html#324">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+I have a rest handler that accepts POST and PUT requests with
+&#8220;application/json&#8221; content type.
+
+I have content_types_accepted function defined as follows:
+
+content_types_accepted(Req, State) -&gt;
+    {[{&#8216;application/json', from_json}], Req, State}.
+
+
+The problem I have is within a request that has two headers:
+
+*Content-type*: application/json
+*Accept*: application/json
+
+With this combination I receive *406*.
+
+You can repeat it with test:
+
+http_SUITE.erl:
+1072 rest_postonly(Config) -&gt;
+1073     Client = ?config(client, Config),
+1074     Headers = [
+1075         {&lt;&lt;&quot;content-type&quot;&gt;&gt;, &lt;&lt;&quot;text/plain&quot;&gt;&gt;},
+1076         {&lt;&lt;&quot;accept&quot;&gt;&gt;, &lt;&lt;&quot;text/plain&quot;&gt;&gt;}
+1077     ],
+1078     {ok, Client2} = cowboy_client:request(&lt;&lt;&quot;POST&quot;&gt;&gt;,
+1079         build_url(&quot;/postonly&quot;, Config), Headers, &quot;12345&quot;, Client),
+1080     {ok, 204, _, _} = cowboy_client:response(Client2).
+
+My solution to that was to add a content_types_provided function:
+
+content_types_provided(Req, State) -&gt;
+    ContentTypes = [{{&lt;&lt;&quot;application&quot;&gt;&gt;, &lt;&lt;&quot;json&quot;&gt;&gt;, '*'}, to_json}],
+    {ContentTypes, Req, State}.
+
+
+But it is useless as *to_json* callback registered is not called anyhow.
+
+Adding *content_types_provided* function is a correct solution in this case?
+Or I am missing something here?
+&#8220;Accept&#8221; header is not relevant only in case of GET requests?
+
+Thank for help,
+&#321;ukasz Biedrycki
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20140203/104f8577/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20140203/104f8577/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000325.html">[99s-extend] Accept header in POST request
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#324">[ date ]</a>
+              <a href="thread.html#324">[ thread ]</a>
+              <a href="subject.html#324">[ subject ]</a>
+              <a href="author.html#324">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

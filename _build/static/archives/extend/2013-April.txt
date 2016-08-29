@@ -1,0 +1,3953 @@
+From essen at ninenines.eu  Tue Apr  2 19:23:28 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 02 Apr 2013 19:23:28 +0200
+Subject: [99s-extend] [ANN] Ranch 0.8.0
+Message-ID: <515B1410.6080905@ninenines.eu>
+
+Just released!
+
+We have greatly improved the performance of Ranch both for accepting 
+connections and when they get disconnected. Stability has also been much 
+improved thanks to many community provided tests.
+
+Small API changes. Sorry!
+
+  *  ListenerPid argument to Protocol:start_link/4 became Ref
+  *  as a result it's now ranch:accept_ack(Ref)
+  *  ranch_listener:remove_connection(ListenerPid) became 
+ranch:remove_connection(Ref)
+
+Unless you used ranch_listener_remove_connection/1 your old code should 
+still work without any changes.
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Wed Apr  3 17:21:16 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 03 Apr 2013 17:21:16 +0200
+Subject: [99s-extend] [ANN] Cowboy 0.8.3
+Message-ID: <515C48EC.7040403@ninenines.eu>
+
+Hello!
+
+Very small release just to update Ranch to 0.8.0 (faster!) and change 
+something about streaming the body. Newly introduced init_stream/5 
+proved to be a bad idea and got removed in favor of a new stream_body/2 
+which allows specifying the maximum chunk size you want on a per chunk 
+basis.
+
+   https://github.com/extend/cowboy
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lee.sylvester at gmail.com  Wed Apr  3 21:33:20 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Wed, 3 Apr 2013 20:33:20 +0100
+Subject: [99s-extend] Response headers
+Message-ID: <CE8DCDF4-398A-42CA-BCBE-8342F5D00DEF@gmail.com>
+
+Hi list,
+
+I'd like to set up my handler to use CORS.  Can anyone tell me how I can modify the headers for my handler to support this?
+
+Thanks loads,
+Lee
+
+From Christopher.Phillips at turner.com  Wed Apr  3 22:35:36 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Wed, 3 Apr 2013 20:35:36 +0000
+Subject: [99s-extend] Response headers
+In-Reply-To: <CE8DCDF4-398A-42CA-BCBE-8342F5D00DEF@gmail.com>
+Message-ID: <CD81FF59.4478%christopher.phillips@turner.com>
+
+
+  Sure. Right now, Cowboy doesn't parse the headers, but you can manually
+parse them in your handler. I've got them working in my implementation
+pretty well, I'll try and break it down a bit here.
+
+  A good, basic overview of what the requests the browser will send, and
+what your responses should look like, is here:
+https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS
+
+
+
+HANDLING PRE-FLIGHTS -
+  Pre-flights are the OPTION requests the browser automatically sends off
+when you make a CORS request using a verb other than GET, or POST with one
+of three acceptable content types. They're defined well in the above link.
+
+  You can read off the requested headers the actual call wants to send in
+the OPTIONS preflight with
+
+	{Headers, NewRequest } =
+cowboy_req:header(<<"access-control-request-headers">>, Request)
+
+  Headers will either be the binary, or undefined. If the binary, you
+either need to manually parse it and choose to allow/disallow the request
+from continuing based on it, or, if you just want to allow all headers
+trivially, just pipe that back into the request, a la -
+
+        Request2 = 
+cowboy_req:set_resp_header(<<"access-control-allow-headers">>,
+binary_to_list(Headers), NewRequest)
+
+  (As a reminder, it can be undefined. You'll need to check for that
+before passing it into the above. If it's undefined, you don't need to add
+the access-control-allow-headers header).
+
+
+
+  As part of the pre-flight request, you also need to handle what methods
+are allowed. This looks something like -
+
+	PreflightedRequest =
+cowboy_req:set_resp_header(<<"access-control-allow-methods">>, <<"GET,
+POST, DELETE, PUT">>, Request2)
+
+  If I wanted to allow gets, posts, deletes, and puts. You can also choose
+to read off the access-control-request-method header sent from the client,
+but I don't see the point; your list of allowed methods doesn't need to
+change based on that (the user is requesting a POST, why does that change
+whether you allow a POST or not? But I digress).
+
+
+
+
+
+FOR ALL CALLS (both pre-flights and the actual call)
+  Respond with acceptable origin. If you want any domain to access this
+resource (not advised, unless this is a public, readonly resource, but
+good for testing), you can do -
+
+  	NewRequest = 
+cowboy_req:set_resp_header(<<"access-control-allow-origin">>, <<"*">>,
+Request)
+
+
+  If you want to filter out the allowed domains, it looks like -
+
+	Origin = cowboy_req:header(<<"origin">>, Request) %Get the origin that
+the browser sent you
+
+        %Do logic to check Origin, and any other data that would decide
+whether this request is allowed; it will only apply on a CORS request from
+another browser.
+        
+	%If it passes, pass Origin back as the value for the
+access-control-allow-origin header.
+        NewRequest =
+cowboy_req:set_resp_header(<<"access-control-allow-origin">>, Origin,
+Request)
+
+
+
+FOR ONLY THE ACTUAL CALL
+  If you want to send custom headers back to your Javascript client (or
+read any standard header beyond content-type), you need to explicitly
+allow them. This looks like (if I wanted to expose the 'server' header so
+my client Javascript can see that it's Cowboy on the backend) -
+
+  	ExposedHeaderRequest =
+cowboy_req:set_resp_header(<<"access-control-expose-headers">>,
+<<"server">>, Request)
+
+
+
+
+  That's basically it I believe. There is also a max age, and a allow
+credentials header (which is really more of a require credentials);
+they're pretty straightforwardly explained on that page I linked above,
+but I haven't played with them personally.
+
+
+  Caveats I ran into were largely being aware that same domain requests do
+NOT supply any of the CORS headers, not even the origin header (so you can
+get undefined and have to handle those cases), as well as understanding
+the ramifications of allowing cross domain requests. Also, if you want to
+develop while disconnected (or if it's not easy to grab another domain),
+use your hosts file to declare a fake domain pointed to 127.0.0.1, load
+your page from that, explicitly define your AJAX calls to localhost. Note
+too that there is a bug in Firefox at present when you try and get all the
+request headers. It returns an empty list. You can get individual ones if
+you know the name (I.e., getResponseHeader("server") will work,
+getAllResponseHeaders() returns an empty string). This is further
+compounded by jQuery building its own XHR that loads headers by calling
+getAllResponseHeaders, so in Firefox, using jQuery, you can get back zero
+headers. Don't know if that affects you, but it's an issue it took me a
+good while to diagnose, and which we've had to bear in mind.
+
+
+
+   
+On 4/3/13 3:33 PM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+
+>Hi list,
+>
+>I'd like to set up my handler to use CORS.  Can anyone tell me how I can
+>modify the headers for my handler to support this?
+>
+>Thanks loads,
+>Lee
+>_______________________________________________
+>Extend mailing list
+>Extend at lists.ninenines.eu
+>http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+
+
+From lee.sylvester at gmail.com  Thu Apr  4 10:38:07 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 4 Apr 2013 09:38:07 +0100
+Subject: [99s-extend] Response headers
+In-Reply-To: <CD81FF59.4478%christopher.phillips@turner.com>
+References: <CD81FF59.4478%christopher.phillips@turner.com>
+Message-ID: <3E75C3ED-9F52-495A-8E04-EF0A4667DB4E@gmail.com>
+
+Hi Christopher,
+
+Thank you for that.  I will attempt to go through each piece today and solve the problem.  This is good advice; maybe it belongs in a blog post?  :-)
+
+Thanks again,
+Lee
+
+
+
+
+On 3 Apr 2013, at 21:35, "Phillips, Christopher" <Christopher.Phillips at turner.com> wrote:
+
+> 
+>  Sure. Right now, Cowboy doesn't parse the headers, but you can manually
+> parse them in your handler. I've got them working in my implementation
+> pretty well, I'll try and break it down a bit here.
+> 
+>  A good, basic overview of what the requests the browser will send, and
+> what your responses should look like, is here:
+> https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS
+> 
+> 
+> 
+> HANDLING PRE-FLIGHTS -
+>  Pre-flights are the OPTION requests the browser automatically sends off
+> when you make a CORS request using a verb other than GET, or POST with one
+> of three acceptable content types. They're defined well in the above link.
+> 
+>  You can read off the requested headers the actual call wants to send in
+> the OPTIONS preflight with
+> 
+> 	{Headers, NewRequest } =
+> cowboy_req:header(<<"access-control-request-headers">>, Request)
+> 
+>  Headers will either be the binary, or undefined. If the binary, you
+> either need to manually parse it and choose to allow/disallow the request
+> from continuing based on it, or, if you just want to allow all headers
+> trivially, just pipe that back into the request, a la -
+> 
+>        Request2 = 
+> cowboy_req:set_resp_header(<<"access-control-allow-headers">>,
+> binary_to_list(Headers), NewRequest)
+> 
+>  (As a reminder, it can be undefined. You'll need to check for that
+> before passing it into the above. If it's undefined, you don't need to add
+> the access-control-allow-headers header).
+> 
+> 
+> 
+>  As part of the pre-flight request, you also need to handle what methods
+> are allowed. This looks something like -
+> 
+> 	PreflightedRequest =
+> cowboy_req:set_resp_header(<<"access-control-allow-methods">>, <<"GET,
+> POST, DELETE, PUT">>, Request2)
+> 
+>  If I wanted to allow gets, posts, deletes, and puts. You can also choose
+> to read off the access-control-request-method header sent from the client,
+> but I don't see the point; your list of allowed methods doesn't need to
+> change based on that (the user is requesting a POST, why does that change
+> whether you allow a POST or not? But I digress).
+> 
+> 
+> 
+> 
+> 
+> FOR ALL CALLS (both pre-flights and the actual call)
+>  Respond with acceptable origin. If you want any domain to access this
+> resource (not advised, unless this is a public, readonly resource, but
+> good for testing), you can do -
+> 
+>  	NewRequest = 
+> cowboy_req:set_resp_header(<<"access-control-allow-origin">>, <<"*">>,
+> Request)
+> 
+> 
+>  If you want to filter out the allowed domains, it looks like -
+> 
+> 	Origin = cowboy_req:header(<<"origin">>, Request) %Get the origin that
+> the browser sent you
+> 
+>        %Do logic to check Origin, and any other data that would decide
+> whether this request is allowed; it will only apply on a CORS request from
+> another browser.
+> 
+> 	%If it passes, pass Origin back as the value for the
+> access-control-allow-origin header.
+>        NewRequest =
+> cowboy_req:set_resp_header(<<"access-control-allow-origin">>, Origin,
+> Request)
+> 
+> 
+> 
+> FOR ONLY THE ACTUAL CALL
+>  If you want to send custom headers back to your Javascript client (or
+> read any standard header beyond content-type), you need to explicitly
+> allow them. This looks like (if I wanted to expose the 'server' header so
+> my client Javascript can see that it's Cowboy on the backend) -
+> 
+>  	ExposedHeaderRequest =
+> cowboy_req:set_resp_header(<<"access-control-expose-headers">>,
+> <<"server">>, Request)
+> 
+> 
+> 
+> 
+>  That's basically it I believe. There is also a max age, and a allow
+> credentials header (which is really more of a require credentials);
+> they're pretty straightforwardly explained on that page I linked above,
+> but I haven't played with them personally.
+> 
+> 
+>  Caveats I ran into were largely being aware that same domain requests do
+> NOT supply any of the CORS headers, not even the origin header (so you can
+> get undefined and have to handle those cases), as well as understanding
+> the ramifications of allowing cross domain requests. Also, if you want to
+> develop while disconnected (or if it's not easy to grab another domain),
+> use your hosts file to declare a fake domain pointed to 127.0.0.1, load
+> your page from that, explicitly define your AJAX calls to localhost. Note
+> too that there is a bug in Firefox at present when you try and get all the
+> request headers. It returns an empty list. You can get individual ones if
+> you know the name (I.e., getResponseHeader("server") will work,
+> getAllResponseHeaders() returns an empty string). This is further
+> compounded by jQuery building its own XHR that loads headers by calling
+> getAllResponseHeaders, so in Firefox, using jQuery, you can get back zero
+> headers. Don't know if that affects you, but it's an issue it took me a
+> good while to diagnose, and which we've had to bear in mind.
+> 
+> 
+> 
+> 
+> On 4/3/13 3:33 PM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+> 
+>> Hi list,
+>> 
+>> I'd like to set up my handler to use CORS.  Can anyone tell me how I can
+>> modify the headers for my handler to support this?
+>> 
+>> Thanks loads,
+>> Lee
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>> 
+> 
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+
+From lee.sylvester at gmail.com  Thu Apr  4 22:17:54 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 4 Apr 2013 21:17:54 +0100
+Subject: [99s-extend] Bullet connection
+Message-ID: <33516651-FC93-49EA-A8CA-B5C3E42B03E5@gmail.com>
+
+Hi guys,
+
+So, I'm using bullet in my Cowboy setup. There's a lot of tasks that take place before a connection is finally requested, but when it is requested, I see that the server is first called via HTTPS using method CONNECT.  The problem I have is that, while testing this on local host, this CONNECT request is throwing a 500 error, stating "SSL Proxying not enabled for this host: enable in Proxy Settings, SSL locations".
+
+Does anyone know how I fix this to get past this problem?
+
+Thanks,
+Lee
+
+From essen at ninenines.eu  Thu Apr  4 22:39:32 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 04 Apr 2013 22:39:32 +0200
+Subject: [99s-extend] Bullet connection
+In-Reply-To: <33516651-FC93-49EA-A8CA-B5C3E42B03E5@gmail.com>
+References: <33516651-FC93-49EA-A8CA-B5C3E42B03E5@gmail.com>
+Message-ID: <515DE504.5060007@ninenines.eu>
+
+On 04/04/2013 10:17 PM, Lee Sylvester wrote:
+> Hi guys,
+>
+> So, I'm using bullet in my Cowboy setup. There's a lot of tasks that take place before a connection is finally requested, but when it is requested, I see that the server is first called via HTTPS using method CONNECT.  The problem I have is that, while testing this on local host, this CONNECT request is throwing a 500 error, stating "SSL Proxying not enabled for this host: enable in Proxy Settings, SSL locations".
+>
+> Does anyone know how I fix this to get past this problem?
+
+You should probably disable the proxy you have configured in your 
+browser for the domain localhost.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lee.sylvester at gmail.com  Thu Apr  4 22:54:54 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 4 Apr 2013 21:54:54 +0100
+Subject: [99s-extend] Bullet connection
+In-Reply-To: <515DE504.5060007@ninenines.eu>
+References: <33516651-FC93-49EA-A8CA-B5C3E42B03E5@gmail.com>
+ <515DE504.5060007@ninenines.eu>
+Message-ID: <52A2CDB5-3C4D-4E20-ACDF-011A44E0FD8B@gmail.com>
+
+D'oh!  I'm obviously tired :(  Thanks for that.  I saw the message and instantly assumed it was a Cowboy related error.  Okay, so I got that fixed.  Now I need to work out why my connections close the instant they're open :-D  Oh, the life of a developer!
+
+Thanks again.
+
+Lee
+
+
+
+
+On 4 Apr 2013, at 21:39, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> On 04/04/2013 10:17 PM, Lee Sylvester wrote:
+>> Hi guys,
+>> 
+>> So, I'm using bullet in my Cowboy setup. There's a lot of tasks that take place before a connection is finally requested, but when it is requested, I see that the server is first called via HTTPS using method CONNECT.  The problem I have is that, while testing this on local host, this CONNECT request is throwing a 500 error, stating "SSL Proxying not enabled for this host: enable in Proxy Settings, SSL locations".
+>> 
+>> Does anyone know how I fix this to get past this problem?
+> 
+> You should probably disable the proxy you have configured in your browser for the domain localhost.
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From lee.sylvester at gmail.com  Mon Apr  8 15:53:38 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Mon, 8 Apr 2013 14:53:38 +0100
+Subject: [99s-extend] Problems with Bullet
+Message-ID: <B09B2F4B-4842-430D-A3AB-AC132B646E04@gmail.com>
+
+Hi all,
+
+I'm currently having problems getting a websocket to connect to a simple bare bones Bullet handler.  Unfortunately, I'm still quite an Erlang noob, so the stack traces tend to lead me in circles.  I'm hoping this is obvious stuff to you Erlang pros :-)
+
+Given the below handler:
+
+init(_Transport, Req, _Opts, _Active) ->
+	{ok, Req, undefined_state}.
+
+stream(Data, Req, State) ->
+	{ok, Req, State}.
+
+info(Info, Req, State) ->
+	{reply, Info, Req, State}.
+	
+terminate(_Req, _State) ->
+	ok.
+
+Connecting with a websocket throws the following error:
+
+=ERROR REPORT==== 8-Apr-2013::14:46:11 ===
+** Cowboy handler bullet_handler terminating in init/3
+   for the reason error:undef
+** Options were [{handler,connection_handler}]
+** Request was [{socket,#Port<0.926>},
+                {transport,ranch_tcp},
+                {connection,keepalive},
+                {pid,<0.491.0>},
+                {method,<<"GET">>},
+                {version,{1,1}},
+                {peer,{{127,0,0,1},56630}},
+                {host,<<"localhost">>},
+                {host_info,undefined},
+                {port,8080},
+                {path,<<"/">>},
+                {path_info,undefined},
+                {qs,<<"encoding=text">>},
+                {qs_vals,undefined},
+                {fragment,<<>>},
+                {bindings,[]},
+                {headers,[{<<"upgrade">>,<<"websocket">>},
+                          {<<"connection">>,<<"Upgrade">>},
+                          {<<"host">>,<<"localhost:8080">>},
+                          {<<"origin">>,<<"http://www.websocket.org">>},
+                          {<<"pragma">>,<<"no-cache">>},
+                          {<<"cache-control">>,<<"no-cache">>},
+                          {<<"sec-websocket-key">>,
+                           <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+                          {<<"sec-websocket-version">>,<<"13">>},
+                          {<<"sec-websocket-extensions">>,
+                           <<"x-webkit-deflate-frame">>}]},
+                {p_headers,[{<<"connection">>,[<<"upgrade">>]}]},
+                {cookies,undefined},
+                {meta,[]},
+                {body_state,waiting},
+                {multipart,undefined},
+                {buffer,<<>>},
+                {resp_compress,false},
+                {resp_state,waiting},
+                {resp_headers,[]},
+                {resp_body,<<>>},
+                {onresponse,undefined}]
+** Stacktrace: [{bullet_handler,init,
+                    [{tcp,http},
+                     {http_req,#Port<0.926>,ranch_tcp,keepalive,<0.491.0>,
+                         <<"GET">>,
+                         {1,1},
+                         {{127,0,0,1},56630},
+                         <<"localhost">>,undefined,8080,<<"/">>,
+                         undefined,<<"encoding=text">>,undefined,<<>>,
+                         [],
+                         [{<<"upgrade">>,<<"websocket">>},
+                          {<<"connection">>,<<"Upgrade">>},
+                          {<<"host">>,<<"localhost:8080">>},
+                          {<<"origin">>,<<"http://www.websocket.org">>},
+                          {<<"pragma">>,<<"no-cache">>},
+                          {<<"cache-control">>,<<"no-cache">>},
+                          {<<"sec-websocket-key">>,
+                           <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+                          {<<"sec-websocket-version">>,<<"13">>},
+                          {<<"sec-websocket-extensions">>,
+                           <<"x-webkit-deflate-frame">>}],
+                         [{<<"connection">>,[<<"upgrade">>]}],
+                         undefined,[],waiting,undefined,<<>>,false,waiting,[],
+                         <<>>,undefined},
+                     [{handler,connection_handler}]],
+                    []},
+                {cowboy_handler,handler_init,4,
+                    [{file,"src/cowboy_handler.erl"},{line,69}]},
+                {cowboy_protocol,execute,4,
+                    [{file,"src/cowboy_protocol.erl"},{line,514}]}]
+
+Can anyone see what might be throwing this off?  I'd like to get a minimal handler running before I attempt to add some logic.
+
+Thanks,
+Lee
+
+From essen at ninenines.eu  Mon Apr  8 16:08:31 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 08 Apr 2013 16:08:31 +0200
+Subject: [99s-extend] Problems with Bullet
+In-Reply-To: <B09B2F4B-4842-430D-A3AB-AC132B646E04@gmail.com>
+References: <B09B2F4B-4842-430D-A3AB-AC132B646E04@gmail.com>
+Message-ID: <5162CF5F.2060200@ninenines.eu>
+
+Sounds like Bullet isn't in your path. Forgot -pa deps/*/ebin?
+
+On 04/08/2013 03:53 PM, Lee Sylvester wrote:
+> Hi all,
+>
+> I'm currently having problems getting a websocket to connect to a simple bare bones Bullet handler.  Unfortunately, I'm still quite an Erlang noob, so the stack traces tend to lead me in circles.  I'm hoping this is obvious stuff to you Erlang pros :-)
+>
+> Given the below handler:
+>
+> init(_Transport, Req, _Opts, _Active) ->
+> 	{ok, Req, undefined_state}.
+>
+> stream(Data, Req, State) ->
+> 	{ok, Req, State}.
+>
+> info(Info, Req, State) ->
+> 	{reply, Info, Req, State}.
+> 	
+> terminate(_Req, _State) ->
+> 	ok.
+>
+> Connecting with a websocket throws the following error:
+>
+> =ERROR REPORT==== 8-Apr-2013::14:46:11 ===
+> ** Cowboy handler bullet_handler terminating in init/3
+>     for the reason error:undef
+> ** Options were [{handler,connection_handler}]
+> ** Request was [{socket,#Port<0.926>},
+>                  {transport,ranch_tcp},
+>                  {connection,keepalive},
+>                  {pid,<0.491.0>},
+>                  {method,<<"GET">>},
+>                  {version,{1,1}},
+>                  {peer,{{127,0,0,1},56630}},
+>                  {host,<<"localhost">>},
+>                  {host_info,undefined},
+>                  {port,8080},
+>                  {path,<<"/">>},
+>                  {path_info,undefined},
+>                  {qs,<<"encoding=text">>},
+>                  {qs_vals,undefined},
+>                  {fragment,<<>>},
+>                  {bindings,[]},
+>                  {headers,[{<<"upgrade">>,<<"websocket">>},
+>                            {<<"connection">>,<<"Upgrade">>},
+>                            {<<"host">>,<<"localhost:8080">>},
+>                            {<<"origin">>,<<"http://www.websocket.org">>},
+>                            {<<"pragma">>,<<"no-cache">>},
+>                            {<<"cache-control">>,<<"no-cache">>},
+>                            {<<"sec-websocket-key">>,
+>                             <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>                            {<<"sec-websocket-version">>,<<"13">>},
+>                            {<<"sec-websocket-extensions">>,
+>                             <<"x-webkit-deflate-frame">>}]},
+>                  {p_headers,[{<<"connection">>,[<<"upgrade">>]}]},
+>                  {cookies,undefined},
+>                  {meta,[]},
+>                  {body_state,waiting},
+>                  {multipart,undefined},
+>                  {buffer,<<>>},
+>                  {resp_compress,false},
+>                  {resp_state,waiting},
+>                  {resp_headers,[]},
+>                  {resp_body,<<>>},
+>                  {onresponse,undefined}]
+> ** Stacktrace: [{bullet_handler,init,
+>                      [{tcp,http},
+>                       {http_req,#Port<0.926>,ranch_tcp,keepalive,<0.491.0>,
+>                           <<"GET">>,
+>                           {1,1},
+>                           {{127,0,0,1},56630},
+>                           <<"localhost">>,undefined,8080,<<"/">>,
+>                           undefined,<<"encoding=text">>,undefined,<<>>,
+>                           [],
+>                           [{<<"upgrade">>,<<"websocket">>},
+>                            {<<"connection">>,<<"Upgrade">>},
+>                            {<<"host">>,<<"localhost:8080">>},
+>                            {<<"origin">>,<<"http://www.websocket.org">>},
+>                            {<<"pragma">>,<<"no-cache">>},
+>                            {<<"cache-control">>,<<"no-cache">>},
+>                            {<<"sec-websocket-key">>,
+>                             <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>                            {<<"sec-websocket-version">>,<<"13">>},
+>                            {<<"sec-websocket-extensions">>,
+>                             <<"x-webkit-deflate-frame">>}],
+>                           [{<<"connection">>,[<<"upgrade">>]}],
+>                           undefined,[],waiting,undefined,<<>>,false,waiting,[],
+>                           <<>>,undefined},
+>                       [{handler,connection_handler}]],
+>                      []},
+>                  {cowboy_handler,handler_init,4,
+>                      [{file,"src/cowboy_handler.erl"},{line,69}]},
+>                  {cowboy_protocol,execute,4,
+>                      [{file,"src/cowboy_protocol.erl"},{line,514}]}]
+>
+> Can anyone see what might be throwing this off?  I'd like to get a minimal handler running before I attempt to add some logic.
+>
+> Thanks,
+> Lee
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Christopher.Phillips at turner.com  Mon Apr  8 16:11:44 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Mon, 8 Apr 2013 14:11:44 +0000
+Subject: [99s-extend] Problems with Bullet
+In-Reply-To: <B09B2F4B-4842-430D-A3AB-AC132B646E04@gmail.com>
+Message-ID: <CD884493.47E3%christopher.phillips@turner.com>
+
+  Can you get the clock example working? I'm not sure why the initial
+upgrade request would fail; are you exporting init/4 in your handler? Are
+your dependencies consistent (I.e., blow them away and regrab them in case
+it's an older version of cowboy with a new version of bullet, or vice
+versa, maybe)? Either way, starting from the example would allow you to
+start from a set of working code and either avoid the issue entirely, or
+isolate it from your code.
+
+On 4/8/13 9:53 AM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+
+>Hi all,
+>
+>I'm currently having problems getting a websocket to connect to a simple
+>bare bones Bullet handler.  Unfortunately, I'm still quite an Erlang
+>noob, so the stack traces tend to lead me in circles.  I'm hoping this is
+>obvious stuff to you Erlang pros :-)
+>
+>Given the below handler:
+>
+>init(_Transport, Req, _Opts, _Active) ->
+>	{ok, Req, undefined_state}.
+>
+>stream(Data, Req, State) ->
+>	{ok, Req, State}.
+>
+>info(Info, Req, State) ->
+>	{reply, Info, Req, State}.
+>	
+>terminate(_Req, _State) ->
+>	ok.
+>
+>Connecting with a websocket throws the following error:
+>
+>=ERROR REPORT==== 8-Apr-2013::14:46:11 ===
+>** Cowboy handler bullet_handler terminating in init/3
+>   for the reason error:undef
+>** Options were [{handler,connection_handler}]
+>** Request was [{socket,#Port<0.926>},
+>                {transport,ranch_tcp},
+>                {connection,keepalive},
+>                {pid,<0.491.0>},
+>                {method,<<"GET">>},
+>                {version,{1,1}},
+>                {peer,{{127,0,0,1},56630}},
+>                {host,<<"localhost">>},
+>                {host_info,undefined},
+>                {port,8080},
+>                {path,<<"/">>},
+>                {path_info,undefined},
+>                {qs,<<"encoding=text">>},
+>                {qs_vals,undefined},
+>                {fragment,<<>>},
+>                {bindings,[]},
+>                {headers,[{<<"upgrade">>,<<"websocket">>},
+>                          {<<"connection">>,<<"Upgrade">>},
+>                          {<<"host">>,<<"localhost:8080">>},
+>                          {<<"origin">>,<<"http://www.websocket.org">>},
+>                          {<<"pragma">>,<<"no-cache">>},
+>                          {<<"cache-control">>,<<"no-cache">>},
+>                          {<<"sec-websocket-key">>,
+>                           <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>                          {<<"sec-websocket-version">>,<<"13">>},
+>                          {<<"sec-websocket-extensions">>,
+>                           <<"x-webkit-deflate-frame">>}]},
+>                {p_headers,[{<<"connection">>,[<<"upgrade">>]}]},
+>                {cookies,undefined},
+>                {meta,[]},
+>                {body_state,waiting},
+>                {multipart,undefined},
+>                {buffer,<<>>},
+>                {resp_compress,false},
+>                {resp_state,waiting},
+>                {resp_headers,[]},
+>                {resp_body,<<>>},
+>                {onresponse,undefined}]
+>** Stacktrace: [{bullet_handler,init,
+>                    [{tcp,http},
+>                     {http_req,#Port<0.926>,ranch_tcp,keepalive,<0.491.0>,
+>                         <<"GET">>,
+>                         {1,1},
+>                         {{127,0,0,1},56630},
+>                         <<"localhost">>,undefined,8080,<<"/">>,
+>                         undefined,<<"encoding=text">>,undefined,<<>>,
+>                         [],
+>                         [{<<"upgrade">>,<<"websocket">>},
+>                          {<<"connection">>,<<"Upgrade">>},
+>                          {<<"host">>,<<"localhost:8080">>},
+>                          {<<"origin">>,<<"http://www.websocket.org">>},
+>                          {<<"pragma">>,<<"no-cache">>},
+>                          {<<"cache-control">>,<<"no-cache">>},
+>                          {<<"sec-websocket-key">>,
+>                           <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>                          {<<"sec-websocket-version">>,<<"13">>},
+>                          {<<"sec-websocket-extensions">>,
+>                           <<"x-webkit-deflate-frame">>}],
+>                         [{<<"connection">>,[<<"upgrade">>]}],
+>                  
+>undefined,[],waiting,undefined,<<>>,false,waiting,[],
+>                         <<>>,undefined},
+>                     [{handler,connection_handler}]],
+>                    []},
+>                {cowboy_handler,handler_init,4,
+>                    [{file,"src/cowboy_handler.erl"},{line,69}]},
+>                {cowboy_protocol,execute,4,
+>                    [{file,"src/cowboy_protocol.erl"},{line,514}]}]
+>
+>Can anyone see what might be throwing this off?  I'd like to get a
+>minimal handler running before I attempt to add some logic.
+>
+>Thanks,
+>Lee
+>_______________________________________________
+>Extend mailing list
+>Extend at lists.ninenines.eu
+>http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+
+
+From Christopher.Phillips at turner.com  Mon Apr  8 16:18:27 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Mon, 8 Apr 2013 14:18:27 +0000
+Subject: [99s-extend] Problems with Bullet
+In-Reply-To: <5162CF5F.2060200@ninenines.eu>
+Message-ID: <CD8849A5.4807%christopher.phillips@turner.com>
+
+  *facepalm* Or that, yeah. Should have correlated the stack trace with
+the error. Not used to seeing cowboy run as the app, not a dependency.
+
+On 4/8/13 10:08 AM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+>Sounds like Bullet isn't in your path. Forgot -pa deps/*/ebin?
+>
+>On 04/08/2013 03:53 PM, Lee Sylvester wrote:
+>> Hi all,
+>>
+>> I'm currently having problems getting a websocket to connect to a
+>>simple bare bones Bullet handler.  Unfortunately, I'm still quite an
+>>Erlang noob, so the stack traces tend to lead me in circles.  I'm hoping
+>>this is obvious stuff to you Erlang pros :-)
+>>
+>> Given the below handler:
+>>
+>> init(_Transport, Req, _Opts, _Active) ->
+>> 	{ok, Req, undefined_state}.
+>>
+>> stream(Data, Req, State) ->
+>> 	{ok, Req, State}.
+>>
+>> info(Info, Req, State) ->
+>> 	{reply, Info, Req, State}.
+>> 	
+>> terminate(_Req, _State) ->
+>> 	ok.
+>>
+>> Connecting with a websocket throws the following error:
+>>
+>> =ERROR REPORT==== 8-Apr-2013::14:46:11 ===
+>> ** Cowboy handler bullet_handler terminating in init/3
+>>     for the reason error:undef
+>> ** Options were [{handler,connection_handler}]
+>> ** Request was [{socket,#Port<0.926>},
+>>                  {transport,ranch_tcp},
+>>                  {connection,keepalive},
+>>                  {pid,<0.491.0>},
+>>                  {method,<<"GET">>},
+>>                  {version,{1,1}},
+>>                  {peer,{{127,0,0,1},56630}},
+>>                  {host,<<"localhost">>},
+>>                  {host_info,undefined},
+>>                  {port,8080},
+>>                  {path,<<"/">>},
+>>                  {path_info,undefined},
+>>                  {qs,<<"encoding=text">>},
+>>                  {qs_vals,undefined},
+>>                  {fragment,<<>>},
+>>                  {bindings,[]},
+>>                  {headers,[{<<"upgrade">>,<<"websocket">>},
+>>                            {<<"connection">>,<<"Upgrade">>},
+>>                            {<<"host">>,<<"localhost:8080">>},
+>>                 
+>>{<<"origin">>,<<"http://www.websocket.org">>},
+>>                            {<<"pragma">>,<<"no-cache">>},
+>>                            {<<"cache-control">>,<<"no-cache">>},
+>>                            {<<"sec-websocket-key">>,
+>>                             <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>>                            {<<"sec-websocket-version">>,<<"13">>},
+>>                            {<<"sec-websocket-extensions">>,
+>>                             <<"x-webkit-deflate-frame">>}]},
+>>                  {p_headers,[{<<"connection">>,[<<"upgrade">>]}]},
+>>                  {cookies,undefined},
+>>                  {meta,[]},
+>>                  {body_state,waiting},
+>>                  {multipart,undefined},
+>>                  {buffer,<<>>},
+>>                  {resp_compress,false},
+>>                  {resp_state,waiting},
+>>                  {resp_headers,[]},
+>>                  {resp_body,<<>>},
+>>                  {onresponse,undefined}]
+>> ** Stacktrace: [{bullet_handler,init,
+>>                      [{tcp,http},
+>>                 
+>>{http_req,#Port<0.926>,ranch_tcp,keepalive,<0.491.0>,
+>>                           <<"GET">>,
+>>                           {1,1},
+>>                           {{127,0,0,1},56630},
+>>                           <<"localhost">>,undefined,8080,<<"/">>,
+>>                           undefined,<<"encoding=text">>,undefined,<<>>,
+>>                           [],
+>>                           [{<<"upgrade">>,<<"websocket">>},
+>>                            {<<"connection">>,<<"Upgrade">>},
+>>                            {<<"host">>,<<"localhost:8080">>},
+>>                 
+>>{<<"origin">>,<<"http://www.websocket.org">>},
+>>                            {<<"pragma">>,<<"no-cache">>},
+>>                            {<<"cache-control">>,<<"no-cache">>},
+>>                            {<<"sec-websocket-key">>,
+>>                             <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>>                            {<<"sec-websocket-version">>,<<"13">>},
+>>                            {<<"sec-websocket-extensions">>,
+>>                             <<"x-webkit-deflate-frame">>}],
+>>                           [{<<"connection">>,[<<"upgrade">>]}],
+>>                 
+>>undefined,[],waiting,undefined,<<>>,false,waiting,[],
+>>                           <<>>,undefined},
+>>                       [{handler,connection_handler}]],
+>>                      []},
+>>                  {cowboy_handler,handler_init,4,
+>>                      [{file,"src/cowboy_handler.erl"},{line,69}]},
+>>                  {cowboy_protocol,execute,4,
+>>                      [{file,"src/cowboy_protocol.erl"},{line,514}]}]
+>>
+>> Can anyone see what might be throwing this off?  I'd like to get a
+>>minimal handler running before I attempt to add some logic.
+>>
+>> Thanks,
+>> Lee
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>>
+>
+>
+>-- 
+>Lo?c Hoguin
+>Erlang Cowboy
+>Nine Nines
+>http://ninenines.eu
+>_______________________________________________
+>Extend mailing list
+>Extend at lists.ninenines.eu
+>http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+
+
+From lee.sylvester at gmail.com  Mon Apr  8 16:21:53 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Mon, 8 Apr 2013 15:21:53 +0100
+Subject: [99s-extend] Problems with Bullet
+In-Reply-To: <CD8849A5.4807%christopher.phillips@turner.com>
+References: <CD8849A5.4807%christopher.phillips@turner.com>
+Message-ID: <A39F0108-E420-4FAB-A1A9-33C062509565@gmail.com>
+
+Thanks guys,  that was exactly the problem.  I feel a little stupid :-)  I use Rebar to compile my apps, but none of the three books I have on Erlang describe the config files in much detail.  I probably have my entire setup wrong.
+
+Anyhow, it looks to be working, now :-)
+
+Thanks again,
+Lee
+
+
+
+On 8 Apr 2013, at 15:18, "Phillips, Christopher" <Christopher.Phillips at turner.com> wrote:
+
+>  *facepalm* Or that, yeah. Should have correlated the stack trace with
+> the error. Not used to seeing cowboy run as the app, not a dependency.
+> 
+> On 4/8/13 10:08 AM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+> 
+>> Sounds like Bullet isn't in your path. Forgot -pa deps/*/ebin?
+>> 
+>> On 04/08/2013 03:53 PM, Lee Sylvester wrote:
+>>> Hi all,
+>>> 
+>>> I'm currently having problems getting a websocket to connect to a
+>>> simple bare bones Bullet handler.  Unfortunately, I'm still quite an
+>>> Erlang noob, so the stack traces tend to lead me in circles.  I'm hoping
+>>> this is obvious stuff to you Erlang pros :-)
+>>> 
+>>> Given the below handler:
+>>> 
+>>> init(_Transport, Req, _Opts, _Active) ->
+>>> 	{ok, Req, undefined_state}.
+>>> 
+>>> stream(Data, Req, State) ->
+>>> 	{ok, Req, State}.
+>>> 
+>>> info(Info, Req, State) ->
+>>> 	{reply, Info, Req, State}.
+>>> 	
+>>> terminate(_Req, _State) ->
+>>> 	ok.
+>>> 
+>>> Connecting with a websocket throws the following error:
+>>> 
+>>> =ERROR REPORT==== 8-Apr-2013::14:46:11 ===
+>>> ** Cowboy handler bullet_handler terminating in init/3
+>>>    for the reason error:undef
+>>> ** Options were [{handler,connection_handler}]
+>>> ** Request was [{socket,#Port<0.926>},
+>>>                 {transport,ranch_tcp},
+>>>                 {connection,keepalive},
+>>>                 {pid,<0.491.0>},
+>>>                 {method,<<"GET">>},
+>>>                 {version,{1,1}},
+>>>                 {peer,{{127,0,0,1},56630}},
+>>>                 {host,<<"localhost">>},
+>>>                 {host_info,undefined},
+>>>                 {port,8080},
+>>>                 {path,<<"/">>},
+>>>                 {path_info,undefined},
+>>>                 {qs,<<"encoding=text">>},
+>>>                 {qs_vals,undefined},
+>>>                 {fragment,<<>>},
+>>>                 {bindings,[]},
+>>>                 {headers,[{<<"upgrade">>,<<"websocket">>},
+>>>                           {<<"connection">>,<<"Upgrade">>},
+>>>                           {<<"host">>,<<"localhost:8080">>},
+>>> 
+>>> {<<"origin">>,<<"http://www.websocket.org">>},
+>>>                           {<<"pragma">>,<<"no-cache">>},
+>>>                           {<<"cache-control">>,<<"no-cache">>},
+>>>                           {<<"sec-websocket-key">>,
+>>>                            <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>>>                           {<<"sec-websocket-version">>,<<"13">>},
+>>>                           {<<"sec-websocket-extensions">>,
+>>>                            <<"x-webkit-deflate-frame">>}]},
+>>>                 {p_headers,[{<<"connection">>,[<<"upgrade">>]}]},
+>>>                 {cookies,undefined},
+>>>                 {meta,[]},
+>>>                 {body_state,waiting},
+>>>                 {multipart,undefined},
+>>>                 {buffer,<<>>},
+>>>                 {resp_compress,false},
+>>>                 {resp_state,waiting},
+>>>                 {resp_headers,[]},
+>>>                 {resp_body,<<>>},
+>>>                 {onresponse,undefined}]
+>>> ** Stacktrace: [{bullet_handler,init,
+>>>                     [{tcp,http},
+>>> 
+>>> {http_req,#Port<0.926>,ranch_tcp,keepalive,<0.491.0>,
+>>>                          <<"GET">>,
+>>>                          {1,1},
+>>>                          {{127,0,0,1},56630},
+>>>                          <<"localhost">>,undefined,8080,<<"/">>,
+>>>                          undefined,<<"encoding=text">>,undefined,<<>>,
+>>>                          [],
+>>>                          [{<<"upgrade">>,<<"websocket">>},
+>>>                           {<<"connection">>,<<"Upgrade">>},
+>>>                           {<<"host">>,<<"localhost:8080">>},
+>>> 
+>>> {<<"origin">>,<<"http://www.websocket.org">>},
+>>>                           {<<"pragma">>,<<"no-cache">>},
+>>>                           {<<"cache-control">>,<<"no-cache">>},
+>>>                           {<<"sec-websocket-key">>,
+>>>                            <<"fEj/SOOcQgSKATOjhbNJBQ==">>},
+>>>                           {<<"sec-websocket-version">>,<<"13">>},
+>>>                           {<<"sec-websocket-extensions">>,
+>>>                            <<"x-webkit-deflate-frame">>}],
+>>>                          [{<<"connection">>,[<<"upgrade">>]}],
+>>> 
+>>> undefined,[],waiting,undefined,<<>>,false,waiting,[],
+>>>                          <<>>,undefined},
+>>>                      [{handler,connection_handler}]],
+>>>                     []},
+>>>                 {cowboy_handler,handler_init,4,
+>>>                     [{file,"src/cowboy_handler.erl"},{line,69}]},
+>>>                 {cowboy_protocol,execute,4,
+>>>                     [{file,"src/cowboy_protocol.erl"},{line,514}]}]
+>>> 
+>>> Can anyone see what might be throwing this off?  I'd like to get a
+>>> minimal handler running before I attempt to add some logic.
+>>> 
+>>> Thanks,
+>>> Lee
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>>> 
+>> 
+>> 
+>> -- 
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>> 
+> 
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+
+From lee.sylvester at gmail.com  Wed Apr 10 13:47:45 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Wed, 10 Apr 2013 12:47:45 +0100
+Subject: [99s-extend] Heartbeat?
+Message-ID: <DC437291-FAB7-4E9D-AAAA-EC8B5E755A20@gmail.com>
+
+Hey guys,
+
+So, my bullet websockets are going great.  However, I have a question.  At present, if I don't send any data to or from my websockets for a while, the connection closes after about 10 - 20 seconds.  Therefore, should I send a heartbeat to the client from Erlang to keep this open?  The websockets are for user to user messaging, so it's possible that large periods of inactivity could occur.
+
+Thanks,
+Lee
+
+From sasa.juric at gmail.com  Wed Apr 10 14:00:47 2013
+From: sasa.juric at gmail.com (Sasa Juric)
+Date: Wed, 10 Apr 2013 14:00:47 +0200
+Subject: [99s-extend] cowboy and chromium
+Message-ID: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+
+Hi,
+
+I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+
+After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+
+If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+
+After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+
+However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem. 
+The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives. 
+This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+
+This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+
+Thank you very much in advance and best regards,
+Sasa
+
+From essen at ninenines.eu  Wed Apr 10 16:38:26 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 10 Apr 2013 16:38:26 +0200
+Subject: [99s-extend] Heartbeat?
+In-Reply-To: <DC437291-FAB7-4E9D-AAAA-EC8B5E755A20@gmail.com>
+References: <DC437291-FAB7-4E9D-AAAA-EC8B5E755A20@gmail.com>
+Message-ID: <51657962.8020009@ninenines.eu>
+
+On 04/10/2013 01:47 PM, Lee Sylvester wrote:
+> Hey guys,
+>
+> So, my bullet websockets are going great.  However, I have a question.  At present, if I don't send any data to or from my websockets for a while, the connection closes after about 10 - 20 seconds.  Therefore, should I send a heartbeat to the client from Erlang to keep this open?  The websockets are for user to user messaging, so it's possible that large periods of inactivity could occur.
+
+Send one from the client if you want it to scale. Bullet provides you 
+with one callback that you can use to send anything. If you're using 
+JSON then sending {} is generally enough.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Wed Apr 10 16:41:21 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 10 Apr 2013 16:41:21 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+Message-ID: <51657A11.7070902@ninenines.eu>
+
+On 04/10/2013 02:00 PM, Sasa Juric wrote:
+> Hi,
+>
+> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>
+> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>
+> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>
+> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>
+> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>
+> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+
+Haven't seen this happen on plain Cowboy. The proxy might be the 
+culprit. See if you can reproduce without the proxy.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From sasa.juric at gmail.com  Wed Apr 10 16:50:31 2013
+From: sasa.juric at gmail.com (Sasa Juric)
+Date: Wed, 10 Apr 2013 16:50:31 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <51657A11.7070902@ninenines.eu>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+ <51657A11.7070902@ninenines.eu>
+Message-ID: <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+
+I agree with you. In addition, I can't reproduce without the proxy, which confirms the suspicion.
+
+Looking at the code of mochiweb which I was using, the connection timeout is set to 5 minutes.
+The other factor, which I can confirm is that when the server terminates the connection, the proxy doesn't forward this to the client. Hence, the client and proxy probably "think" that connection is still active, and try to reuse it, but this doesn't work until timeout.
+Other browsers probably can gracefully handle this situation, but for some reason chromium is stuck to 60 seconds and after retry it presumably opens new connection and succeeds.
+
+Question: can I configure keep-alive timeout in Cowboy?
+
+
+On Apr 10, 2013, at 4:41 PM, Lo?c Hoguin wrote:
+
+> On 04/10/2013 02:00 PM, Sasa Juric wrote:
+>> Hi,
+>> 
+>> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>> 
+>> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>> 
+>> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>> 
+>> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>> 
+>> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+>> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+>> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>> 
+>> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+> 
+> Haven't seen this happen on plain Cowboy. The proxy might be the culprit. See if you can reproduce without the proxy.
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Wed Apr 10 16:51:50 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 10 Apr 2013 16:51:50 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+ <51657A11.7070902@ninenines.eu>
+ <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+Message-ID: <51657C86.2060800@ninenines.eu>
+
+'timeout' protocol option, in milliseconds.
+
+On 04/10/2013 04:50 PM, Sasa Juric wrote:
+> I agree with you. In addition, I can't reproduce without the proxy, which confirms the suspicion.
+>
+> Looking at the code of mochiweb which I was using, the connection timeout is set to 5 minutes.
+> The other factor, which I can confirm is that when the server terminates the connection, the proxy doesn't forward this to the client. Hence, the client and proxy probably "think" that connection is still active, and try to reuse it, but this doesn't work until timeout.
+> Other browsers probably can gracefully handle this situation, but for some reason chromium is stuck to 60 seconds and after retry it presumably opens new connection and succeeds.
+>
+> Question: can I configure keep-alive timeout in Cowboy?
+>
+>
+> On Apr 10, 2013, at 4:41 PM, Lo?c Hoguin wrote:
+>
+>> On 04/10/2013 02:00 PM, Sasa Juric wrote:
+>>> Hi,
+>>>
+>>> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>>>
+>>> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>>>
+>>> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>>>
+>>> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>>>
+>>> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+>>> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+>>> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>>>
+>>> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+>>
+>> Haven't seen this happen on plain Cowboy. The proxy might be the culprit. See if you can reproduce without the proxy.
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lee.sylvester at gmail.com  Wed Apr 10 16:53:24 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Wed, 10 Apr 2013 15:53:24 +0100
+Subject: [99s-extend] Heartbeat?
+In-Reply-To: <51657962.8020009@ninenines.eu>
+References: <DC437291-FAB7-4E9D-AAAA-EC8B5E755A20@gmail.com>
+ <51657962.8020009@ninenines.eu>
+Message-ID: <2499D410-A700-41A3-A926-F721CC092600@gmail.com>
+
+Ahh, thank you.
+
+Regards,
+Lee
+
+
+
+On 10 Apr 2013, at 15:38, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> On 04/10/2013 01:47 PM, Lee Sylvester wrote:
+>> Hey guys,
+>> 
+>> So, my bullet websockets are going great.  However, I have a question.  At present, if I don't send any data to or from my websockets for a while, the connection closes after about 10 - 20 seconds.  Therefore, should I send a heartbeat to the client from Erlang to keep this open?  The websockets are for user to user messaging, so it's possible that large periods of inactivity could occur.
+> 
+> Send one from the client if you want it to scale. Bullet provides you with one callback that you can use to send anything. If you're using JSON then sending {} is generally enough.
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From sasa.juric at gmail.com  Wed Apr 10 16:56:08 2013
+From: sasa.juric at gmail.com (Sasa Juric)
+Date: Wed, 10 Apr 2013 16:56:08 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <51657C86.2060800@ninenines.eu>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+ <51657A11.7070902@ninenines.eu>
+ <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+ <51657C86.2060800@ninenines.eu>
+Message-ID: <AE3B3DE1-BEC0-4265-92EC-9D14EB4E0D59@gmail.com>
+
+Thanks!
+
+I was looking at the option, but was confused by description which states:
+Time in milliseconds a client has to send the full request line and headers.
+
+I'll give it a try and see how it works.
+
+Best regards,
+Sasa
+
+On Apr 10, 2013, at 4:51 PM, Lo?c Hoguin wrote:
+
+> 'timeout' protocol option, in milliseconds.
+> 
+> On 04/10/2013 04:50 PM, Sasa Juric wrote:
+>> I agree with you. In addition, I can't reproduce without the proxy, which confirms the suspicion.
+>> 
+>> Looking at the code of mochiweb which I was using, the connection timeout is set to 5 minutes.
+>> The other factor, which I can confirm is that when the server terminates the connection, the proxy doesn't forward this to the client. Hence, the client and proxy probably "think" that connection is still active, and try to reuse it, but this doesn't work until timeout.
+>> Other browsers probably can gracefully handle this situation, but for some reason chromium is stuck to 60 seconds and after retry it presumably opens new connection and succeeds.
+>> 
+>> Question: can I configure keep-alive timeout in Cowboy?
+>> 
+>> 
+>> On Apr 10, 2013, at 4:41 PM, Lo?c Hoguin wrote:
+>> 
+>>> On 04/10/2013 02:00 PM, Sasa Juric wrote:
+>>>> Hi,
+>>>> 
+>>>> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>>>> 
+>>>> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>>>> 
+>>>> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>>>> 
+>>>> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>>>> 
+>>>> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+>>>> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+>>>> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>>>> 
+>>>> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+>>> 
+>>> Haven't seen this happen on plain Cowboy. The proxy might be the culprit. See if you can reproduce without the proxy.
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>> 
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Wed Apr 10 17:01:14 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 10 Apr 2013 17:01:14 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <AE3B3DE1-BEC0-4265-92EC-9D14EB4E0D59@gmail.com>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+ <51657A11.7070902@ninenines.eu>
+ <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+ <51657C86.2060800@ninenines.eu>
+ <AE3B3DE1-BEC0-4265-92EC-9D14EB4E0D59@gmail.com>
+Message-ID: <51657EBA.7050506@ninenines.eu>
+
+Means it's not a read timeout, but a timeout for the whole request up to 
+and excluding the body (so an intentionally slow client will get 
+disconnected at 5s).
+
+On 04/10/2013 04:56 PM, Sasa Juric wrote:
+> Thanks!
+>
+> I was looking at the option, but was confused by description which states:
+> Time in milliseconds a client has to send the full request line and headers.
+>
+> I'll give it a try and see how it works.
+>
+> Best regards,
+> Sasa
+>
+> On Apr 10, 2013, at 4:51 PM, Lo?c Hoguin wrote:
+>
+>> 'timeout' protocol option, in milliseconds.
+>>
+>> On 04/10/2013 04:50 PM, Sasa Juric wrote:
+>>> I agree with you. In addition, I can't reproduce without the proxy, which confirms the suspicion.
+>>>
+>>> Looking at the code of mochiweb which I was using, the connection timeout is set to 5 minutes.
+>>> The other factor, which I can confirm is that when the server terminates the connection, the proxy doesn't forward this to the client. Hence, the client and proxy probably "think" that connection is still active, and try to reuse it, but this doesn't work until timeout.
+>>> Other browsers probably can gracefully handle this situation, but for some reason chromium is stuck to 60 seconds and after retry it presumably opens new connection and succeeds.
+>>>
+>>> Question: can I configure keep-alive timeout in Cowboy?
+>>>
+>>>
+>>> On Apr 10, 2013, at 4:41 PM, Lo?c Hoguin wrote:
+>>>
+>>>> On 04/10/2013 02:00 PM, Sasa Juric wrote:
+>>>>> Hi,
+>>>>>
+>>>>> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>>>>>
+>>>>> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>>>>>
+>>>>> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>>>>>
+>>>>> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>>>>>
+>>>>> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+>>>>> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+>>>>> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>>>>>
+>>>>> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+>>>>
+>>>> Haven't seen this happen on plain Cowboy. The proxy might be the culprit. See if you can reproduce without the proxy.
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> Erlang Cowboy
+>>>> Nine Nines
+>>>> http://ninenines.eu
+>>>
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From sasa.juric at gmail.com  Wed Apr 10 17:05:51 2013
+From: sasa.juric at gmail.com (Sasa Juric)
+Date: Wed, 10 Apr 2013 17:05:51 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <51657EBA.7050506@ninenines.eu>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+ <51657A11.7070902@ninenines.eu>
+ <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+ <51657C86.2060800@ninenines.eu>
+ <AE3B3DE1-BEC0-4265-92EC-9D14EB4E0D59@gmail.com>
+ <51657EBA.7050506@ninenines.eu>
+Message-ID: <E7866B20-0B8D-4192-8956-B5F4AD820FA9@gmail.com>
+
+Ok, just to make sure I understand:
+When I serve a request, and the connection is not closed due to keep-alive, will this timeout also apply?
+
+
+On Apr 10, 2013, at 5:01 PM, Lo?c Hoguin wrote:
+
+> Means it's not a read timeout, but a timeout for the whole request up to and excluding the body (so an intentionally slow client will get disconnected at 5s).
+> 
+> On 04/10/2013 04:56 PM, Sasa Juric wrote:
+>> Thanks!
+>> 
+>> I was looking at the option, but was confused by description which states:
+>> Time in milliseconds a client has to send the full request line and headers.
+>> 
+>> I'll give it a try and see how it works.
+>> 
+>> Best regards,
+>> Sasa
+>> 
+>> On Apr 10, 2013, at 4:51 PM, Lo?c Hoguin wrote:
+>> 
+>>> 'timeout' protocol option, in milliseconds.
+>>> 
+>>> On 04/10/2013 04:50 PM, Sasa Juric wrote:
+>>>> I agree with you. In addition, I can't reproduce without the proxy, which confirms the suspicion.
+>>>> 
+>>>> Looking at the code of mochiweb which I was using, the connection timeout is set to 5 minutes.
+>>>> The other factor, which I can confirm is that when the server terminates the connection, the proxy doesn't forward this to the client. Hence, the client and proxy probably "think" that connection is still active, and try to reuse it, but this doesn't work until timeout.
+>>>> Other browsers probably can gracefully handle this situation, but for some reason chromium is stuck to 60 seconds and after retry it presumably opens new connection and succeeds.
+>>>> 
+>>>> Question: can I configure keep-alive timeout in Cowboy?
+>>>> 
+>>>> 
+>>>> On Apr 10, 2013, at 4:41 PM, Lo?c Hoguin wrote:
+>>>> 
+>>>>> On 04/10/2013 02:00 PM, Sasa Juric wrote:
+>>>>>> Hi,
+>>>>>> 
+>>>>>> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>>>>>> 
+>>>>>> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>>>>>> 
+>>>>>> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>>>>>> 
+>>>>>> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>>>>>> 
+>>>>>> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+>>>>>> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+>>>>>> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>>>>>> 
+>>>>>> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+>>>>> 
+>>>>> Haven't seen this happen on plain Cowboy. The proxy might be the culprit. See if you can reproduce without the proxy.
+>>>>> 
+>>>>> --
+>>>>> Lo?c Hoguin
+>>>>> Erlang Cowboy
+>>>>> Nine Nines
+>>>>> http://ninenines.eu
+>>>> 
+>>> 
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>> 
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Wed Apr 10 17:07:18 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 10 Apr 2013 17:07:18 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <E7866B20-0B8D-4192-8956-B5F4AD820FA9@gmail.com>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+ <51657A11.7070902@ninenines.eu>
+ <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+ <51657C86.2060800@ninenines.eu>
+ <AE3B3DE1-BEC0-4265-92EC-9D14EB4E0D59@gmail.com>
+ <51657EBA.7050506@ninenines.eu>
+ <E7866B20-0B8D-4192-8956-B5F4AD820FA9@gmail.com>
+Message-ID: <51658026.2090805@ninenines.eu>
+
+It's running from the moment Cowboy starts expecting a new request up to 
+the moment it got the request in full (excluding the body), then it's 
+reset for the next request.
+
+On 04/10/2013 05:05 PM, Sasa Juric wrote:
+> Ok, just to make sure I understand:
+> When I serve a request, and the connection is not closed due to keep-alive, will this timeout also apply?
+>
+>
+> On Apr 10, 2013, at 5:01 PM, Lo?c Hoguin wrote:
+>
+>> Means it's not a read timeout, but a timeout for the whole request up to and excluding the body (so an intentionally slow client will get disconnected at 5s).
+>>
+>> On 04/10/2013 04:56 PM, Sasa Juric wrote:
+>>> Thanks!
+>>>
+>>> I was looking at the option, but was confused by description which states:
+>>> Time in milliseconds a client has to send the full request line and headers.
+>>>
+>>> I'll give it a try and see how it works.
+>>>
+>>> Best regards,
+>>> Sasa
+>>>
+>>> On Apr 10, 2013, at 4:51 PM, Lo?c Hoguin wrote:
+>>>
+>>>> 'timeout' protocol option, in milliseconds.
+>>>>
+>>>> On 04/10/2013 04:50 PM, Sasa Juric wrote:
+>>>>> I agree with you. In addition, I can't reproduce without the proxy, which confirms the suspicion.
+>>>>>
+>>>>> Looking at the code of mochiweb which I was using, the connection timeout is set to 5 minutes.
+>>>>> The other factor, which I can confirm is that when the server terminates the connection, the proxy doesn't forward this to the client. Hence, the client and proxy probably "think" that connection is still active, and try to reuse it, but this doesn't work until timeout.
+>>>>> Other browsers probably can gracefully handle this situation, but for some reason chromium is stuck to 60 seconds and after retry it presumably opens new connection and succeeds.
+>>>>>
+>>>>> Question: can I configure keep-alive timeout in Cowboy?
+>>>>>
+>>>>>
+>>>>> On Apr 10, 2013, at 4:41 PM, Lo?c Hoguin wrote:
+>>>>>
+>>>>>> On 04/10/2013 02:00 PM, Sasa Juric wrote:
+>>>>>>> Hi,
+>>>>>>>
+>>>>>>> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>>>>>>>
+>>>>>>> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>>>>>>>
+>>>>>>> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>>>>>>>
+>>>>>>> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>>>>>>>
+>>>>>>> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+>>>>>>> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+>>>>>>> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>>>>>>>
+>>>>>>> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+>>>>>>
+>>>>>> Haven't seen this happen on plain Cowboy. The proxy might be the culprit. See if you can reproduce without the proxy.
+>>>>>>
+>>>>>> --
+>>>>>> Lo?c Hoguin
+>>>>>> Erlang Cowboy
+>>>>>> Nine Nines
+>>>>>> http://ninenines.eu
+>>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> Erlang Cowboy
+>>>> Nine Nines
+>>>> http://ninenines.eu
+>>>
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From sasa.juric at gmail.com  Wed Apr 10 17:11:57 2013
+From: sasa.juric at gmail.com (Sasa Juric)
+Date: Wed, 10 Apr 2013 17:11:57 +0200
+Subject: [99s-extend] cowboy and chromium
+In-Reply-To: <51658026.2090805@ninenines.eu>
+References: <90FA9B10-201C-469E-AF79-749CF56160F1@gmail.com>
+ <51657A11.7070902@ninenines.eu>
+ <3CACD966-2058-4ABF-A819-AE127BE964D7@gmail.com>
+ <51657C86.2060800@ninenines.eu>
+ <AE3B3DE1-BEC0-4265-92EC-9D14EB4E0D59@gmail.com>
+ <51657EBA.7050506@ninenines.eu>
+ <E7866B20-0B8D-4192-8956-B5F4AD820FA9@gmail.com>
+ <51658026.2090805@ninenines.eu>
+Message-ID: <B51E1290-B953-4A81-9B1F-BA9229E65AF1@gmail.com>
+
+Thanks!
+
+On Apr 10, 2013, at 5:07 PM, Lo?c Hoguin wrote:
+
+> It's running from the moment Cowboy starts expecting a new request up to the moment it got the request in full (excluding the body), then it's reset for the next request.
+> 
+> On 04/10/2013 05:05 PM, Sasa Juric wrote:
+>> Ok, just to make sure I understand:
+>> When I serve a request, and the connection is not closed due to keep-alive, will this timeout also apply?
+>> 
+>> 
+>> On Apr 10, 2013, at 5:01 PM, Lo?c Hoguin wrote:
+>> 
+>>> Means it's not a read timeout, but a timeout for the whole request up to and excluding the body (so an intentionally slow client will get disconnected at 5s).
+>>> 
+>>> On 04/10/2013 04:56 PM, Sasa Juric wrote:
+>>>> Thanks!
+>>>> 
+>>>> I was looking at the option, but was confused by description which states:
+>>>> Time in milliseconds a client has to send the full request line and headers.
+>>>> 
+>>>> I'll give it a try and see how it works.
+>>>> 
+>>>> Best regards,
+>>>> Sasa
+>>>> 
+>>>> On Apr 10, 2013, at 4:51 PM, Lo?c Hoguin wrote:
+>>>> 
+>>>>> 'timeout' protocol option, in milliseconds.
+>>>>> 
+>>>>> On 04/10/2013 04:50 PM, Sasa Juric wrote:
+>>>>>> I agree with you. In addition, I can't reproduce without the proxy, which confirms the suspicion.
+>>>>>> 
+>>>>>> Looking at the code of mochiweb which I was using, the connection timeout is set to 5 minutes.
+>>>>>> The other factor, which I can confirm is that when the server terminates the connection, the proxy doesn't forward this to the client. Hence, the client and proxy probably "think" that connection is still active, and try to reuse it, but this doesn't work until timeout.
+>>>>>> Other browsers probably can gracefully handle this situation, but for some reason chromium is stuck to 60 seconds and after retry it presumably opens new connection and succeeds.
+>>>>>> 
+>>>>>> Question: can I configure keep-alive timeout in Cowboy?
+>>>>>> 
+>>>>>> 
+>>>>>> On Apr 10, 2013, at 4:41 PM, Lo?c Hoguin wrote:
+>>>>>> 
+>>>>>>> On 04/10/2013 02:00 PM, Sasa Juric wrote:
+>>>>>>>> Hi,
+>>>>>>>> 
+>>>>>>>> I have recently in my production system replaced mochiweb with cowboy. The server generally works fine, except for a bizarre behavior which I cannot quite explain, so I post here, hoping to get some pointers.
+>>>>>>>> 
+>>>>>>>> After replacing mochiweb with cowboy, I noticed that in chromium (other major browsers work fine) often (but not always) a request lasts a little more than a minute. Further inspection in chrome://net-internals showed that browser tries to send a request, times out after 60 sec, retries and then succeeds immediately. The key point is that it doesn't happen always. First couple of requests work fine, then all of a sudden one doesn't work. At the same time requests from other browsers (including chrome) on the same machine work fine.
+>>>>>>>> 
+>>>>>>>> If I revert to mochiweb, the problem disappears. Other than web server related code, everything else is the same: the rest of my code, the server setup etc... In addition, I return same responses and headers in both versions.
+>>>>>>>> 
+>>>>>>>> After many attempts and failures, I might have worked around the issue. Namely, I included <<"connection">>, <<"close">> in all responses. After this change, it seems that long requests are not occurring. In any case, I can't reproduce it anymore, whereas before the change I could have reproduce it easily.
+>>>>>>>> 
+>>>>>>>> However, I'm not sure if I have really resolved the issue, I'm also not happy with connection closes since it degrades performance. And finally, I'm not sure if I quite understand the problem.
+>>>>>>>> The only theory I have is that due to keep-alive, chromium holds the connection, while cowboy closes it (I read somewhere that hardcoded timeout is 5 seconds, right?). In this case it might happen that chromium sends a request to a non existing socket and then hangs for a minute, waiting for the response which never arrives.
+>>>>>>>> This might further be amplified by the fact that in production, between browser and cowboy, there is a proxy/load balancer, so maybe load balancer still holds the connection despite the fact that server had closed it.
+>>>>>>>> 
+>>>>>>>> This is the only theory I currently have, and I would like to hear if you guys have some other idea or any kind of helpful pointer?
+>>>>>>> 
+>>>>>>> Haven't seen this happen on plain Cowboy. The proxy might be the culprit. See if you can reproduce without the proxy.
+>>>>>>> 
+>>>>>>> --
+>>>>>>> Lo?c Hoguin
+>>>>>>> Erlang Cowboy
+>>>>>>> Nine Nines
+>>>>>>> http://ninenines.eu
+>>>>>> 
+>>>>> 
+>>>>> 
+>>>>> --
+>>>>> Lo?c Hoguin
+>>>>> Erlang Cowboy
+>>>>> Nine Nines
+>>>>> http://ninenines.eu
+>>>> 
+>>> 
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>> 
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From lee.sylvester at gmail.com  Thu Apr 11 07:51:12 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 11 Apr 2013 06:51:12 +0100
+Subject: [99s-extend] Distributed model?
+Message-ID: <ADCAD0B2-A081-44CA-82F5-B544F355956F@gmail.com>
+
+Hi guys,
+
+So, I have my Cowboy / Bullet server working nicely, now, with much thanks to members on this list.  I'm now looking at the best means of clustering this app.  I want to set this up so that, should the connection count get very high (which it will), then I should only have to throw more machines at this problem and it'll all go away.
+
+I've got most of the logic working for this, but what I'm worried about is sending a lot of content over the erlang inter-node connection.  I've heard hogging this line can be both a bottleneck and can potentially interrupt the heartbeat between nodes.  With this in mind, should I look at adding a ZMQ layer or some such to facilitate this?  What is the general solution to high traffic between nodes?
+
+Thanks,
+Lee
+
+From jeremy at quarkgames.com  Thu Apr 11 08:29:16 2013
+From: jeremy at quarkgames.com (Jeremy Ong)
+Date: Wed, 10 Apr 2013 23:29:16 -0700
+Subject: [99s-extend] Distributed model?
+In-Reply-To: <ADCAD0B2-A081-44CA-82F5-B544F355956F@gmail.com>
+References: <ADCAD0B2-A081-44CA-82F5-B544F355956F@gmail.com>
+Message-ID: <CAKD1GY6z-Au5C-AsOus2ieOEtGymgigYp_SzGhrt+GgaXNFd=Q@mail.gmail.com>
+
+Make all the machines identically and add an haproxy (or equivalent)
+machine to load balance between all of them. Haproxy can handle many
+many requests. Keep in mind that with tcp, the load balancer is just
+accepting the socket but then the client communicates with the actual
+application server directly afterwards.
+
+On Wed, Apr 10, 2013 at 10:51 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+> Hi guys,
+>
+> So, I have my Cowboy / Bullet server working nicely, now, with much thanks to members on this list.  I'm now looking at the best means of clustering this app.  I want to set this up so that, should the connection count get very high (which it will), then I should only have to throw more machines at this problem and it'll all go away.
+>
+> I've got most of the logic working for this, but what I'm worried about is sending a lot of content over the erlang inter-node connection.  I've heard hogging this line can be both a bottleneck and can potentially interrupt the heartbeat between nodes.  With this in mind, should I look at adding a ZMQ layer or some such to facilitate this?  What is the general solution to high traffic between nodes?
+>
+> Thanks,
+> Lee
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+From lee.sylvester at gmail.com  Thu Apr 11 08:49:18 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 11 Apr 2013 07:49:18 +0100
+Subject: [99s-extend] Distributed model?
+In-Reply-To: <CAKD1GY6z-Au5C-AsOus2ieOEtGymgigYp_SzGhrt+GgaXNFd=Q@mail.gmail.com>
+References: <ADCAD0B2-A081-44CA-82F5-B544F355956F@gmail.com>
+ <CAKD1GY6z-Au5C-AsOus2ieOEtGymgigYp_SzGhrt+GgaXNFd=Q@mail.gmail.com>
+Message-ID: <8456939C-6A11-4A18-BD8A-DF378644DACB@gmail.com>
+
+Thanks Jeremy, but what about inter-node communication?  If I have a user on node A sending a message to 10k users located on 10 other nodes, what is the best way to handle that?  Especially if this user is sending several messages and expecting replies.  Should I use the standard Erlang inter-process messaging or should I implement an MQ on top to handle this?
+
+Thanks,
+Lee
+
+
+On 11 Apr 2013, at 07:29, Jeremy Ong <jeremy at quarkgames.com> wrote:
+
+> Make all the machines identically and add an haproxy (or equivalent)
+> machine to load balance between all of them. Haproxy can handle many
+> many requests. Keep in mind that with tcp, the load balancer is just
+> accepting the socket but then the client communicates with the actual
+> application server directly afterwards.
+> 
+> On Wed, Apr 10, 2013 at 10:51 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+>> Hi guys,
+>> 
+>> So, I have my Cowboy / Bullet server working nicely, now, with much thanks to members on this list.  I'm now looking at the best means of clustering this app.  I want to set this up so that, should the connection count get very high (which it will), then I should only have to throw more machines at this problem and it'll all go away.
+>> 
+>> I've got most of the logic working for this, but what I'm worried about is sending a lot of content over the erlang inter-node connection.  I've heard hogging this line can be both a bottleneck and can potentially interrupt the heartbeat between nodes.  With this in mind, should I look at adding a ZMQ layer or some such to facilitate this?  What is the general solution to high traffic between nodes?
+>> 
+>> Thanks,
+>> Lee
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+
+
+
+From jeremy at quarkgames.com  Thu Apr 11 09:04:04 2013
+From: jeremy at quarkgames.com (Jeremy Ong)
+Date: Thu, 11 Apr 2013 00:04:04 -0700
+Subject: [99s-extend] Distributed model?
+In-Reply-To: <8456939C-6A11-4A18-BD8A-DF378644DACB@gmail.com>
+References: <ADCAD0B2-A081-44CA-82F5-B544F355956F@gmail.com>
+ <CAKD1GY6z-Au5C-AsOus2ieOEtGymgigYp_SzGhrt+GgaXNFd=Q@mail.gmail.com>
+ <8456939C-6A11-4A18-BD8A-DF378644DACB@gmail.com>
+Message-ID: <CAKD1GY4xtZWXvfqstapnpLskbn3DFPPGDO9yHTLHDmTP+ozR7A@mail.gmail.com>
+
+I see. I assume this is for a chat server of some sort?
+
+You don't want the user process sending all these messages because the
+user process wouldn't be able to do anything useful (like receive
+messages) in the meantime.
+
+Better is to implement a pubsub process for each channel of
+communication (i.e. one process per room) or rely on Redis pubsub or
+something if speed is extremely important.
+
+There is no way to get around the O(N) complexity of broadcasting.
+
+On Wed, Apr 10, 2013 at 11:49 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+> Thanks Jeremy, but what about inter-node communication?  If I have a user on node A sending a message to 10k users located on 10 other nodes, what is the best way to handle that?  Especially if this user is sending several messages and expecting replies.  Should I use the standard Erlang inter-process messaging or should I implement an MQ on top to handle this?
+>
+> Thanks,
+> Lee
+>
+>
+> On 11 Apr 2013, at 07:29, Jeremy Ong <jeremy at quarkgames.com> wrote:
+>
+>> Make all the machines identically and add an haproxy (or equivalent)
+>> machine to load balance between all of them. Haproxy can handle many
+>> many requests. Keep in mind that with tcp, the load balancer is just
+>> accepting the socket but then the client communicates with the actual
+>> application server directly afterwards.
+>>
+>> On Wed, Apr 10, 2013 at 10:51 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+>>> Hi guys,
+>>>
+>>> So, I have my Cowboy / Bullet server working nicely, now, with much thanks to members on this list.  I'm now looking at the best means of clustering this app.  I want to set this up so that, should the connection count get very high (which it will), then I should only have to throw more machines at this problem and it'll all go away.
+>>>
+>>> I've got most of the logic working for this, but what I'm worried about is sending a lot of content over the erlang inter-node connection.  I've heard hogging this line can be both a bottleneck and can potentially interrupt the heartbeat between nodes.  With this in mind, should I look at adding a ZMQ layer or some such to facilitate this?  What is the general solution to high traffic between nodes?
+>>>
+>>> Thanks,
+>>> Lee
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+From lee.sylvester at gmail.com  Thu Apr 11 14:55:29 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 11 Apr 2013 13:55:29 +0100
+Subject: [99s-extend] Distributed model?
+In-Reply-To: <CAKD1GY4xtZWXvfqstapnpLskbn3DFPPGDO9yHTLHDmTP+ozR7A@mail.gmail.com>
+References: <ADCAD0B2-A081-44CA-82F5-B544F355956F@gmail.com>
+ <CAKD1GY6z-Au5C-AsOus2ieOEtGymgigYp_SzGhrt+GgaXNFd=Q@mail.gmail.com>
+ <8456939C-6A11-4A18-BD8A-DF378644DACB@gmail.com>
+ <CAKD1GY4xtZWXvfqstapnpLskbn3DFPPGDO9yHTLHDmTP+ozR7A@mail.gmail.com>
+Message-ID: <D7BCE9BB-C9D2-4423-92EC-14D4DC841D6F@gmail.com>
+
+Thank you, Jeremy, that's good advice.  It's not so much a chat platform, but I guess it would resemble one in architecture.  The part I'm concerned about, though, is should I be avoiding the internal Erlang messaging between connections (over many nodes) for heavy messaging?
+
+Thanks,
+Lee
+
+
+
+On 11 Apr 2013, at 08:04, Jeremy Ong <jeremy at quarkgames.com> wrote:
+
+> I see. I assume this is for a chat server of some sort?
+> 
+> You don't want the user process sending all these messages because the
+> user process wouldn't be able to do anything useful (like receive
+> messages) in the meantime.
+> 
+> Better is to implement a pubsub process for each channel of
+> communication (i.e. one process per room) or rely on Redis pubsub or
+> something if speed is extremely important.
+> 
+> There is no way to get around the O(N) complexity of broadcasting.
+> 
+> On Wed, Apr 10, 2013 at 11:49 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+>> Thanks Jeremy, but what about inter-node communication?  If I have a user on node A sending a message to 10k users located on 10 other nodes, what is the best way to handle that?  Especially if this user is sending several messages and expecting replies.  Should I use the standard Erlang inter-process messaging or should I implement an MQ on top to handle this?
+>> 
+>> Thanks,
+>> Lee
+>> 
+>> 
+>> On 11 Apr 2013, at 07:29, Jeremy Ong <jeremy at quarkgames.com> wrote:
+>> 
+>>> Make all the machines identically and add an haproxy (or equivalent)
+>>> machine to load balance between all of them. Haproxy can handle many
+>>> many requests. Keep in mind that with tcp, the load balancer is just
+>>> accepting the socket but then the client communicates with the actual
+>>> application server directly afterwards.
+>>> 
+>>> On Wed, Apr 10, 2013 at 10:51 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+>>>> Hi guys,
+>>>> 
+>>>> So, I have my Cowboy / Bullet server working nicely, now, with much thanks to members on this list.  I'm now looking at the best means of clustering this app.  I want to set this up so that, should the connection count get very high (which it will), then I should only have to throw more machines at this problem and it'll all go away.
+>>>> 
+>>>> I've got most of the logic working for this, but what I'm worried about is sending a lot of content over the erlang inter-node connection.  I've heard hogging this line can be both a bottleneck and can potentially interrupt the heartbeat between nodes.  With this in mind, should I look at adding a ZMQ layer or some such to facilitate this?  What is the general solution to high traffic between nodes?
+>>>> 
+>>>> Thanks,
+>>>> Lee
+>>>> _______________________________________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> http://lists.ninenines.eu:81/listinfo/extend
+>> 
+
+
+
+From lee.sylvester at gmail.com  Thu Apr 11 17:46:35 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 11 Apr 2013 16:46:35 +0100
+Subject: [99s-extend] Distributed model?
+In-Reply-To: <D7BCE9BB-C9D2-4423-92EC-14D4DC841D6F@gmail.com>
+References: <ADCAD0B2-A081-44CA-82F5-B544F355956F@gmail.com>
+ <CAKD1GY6z-Au5C-AsOus2ieOEtGymgigYp_SzGhrt+GgaXNFd=Q@mail.gmail.com>
+ <8456939C-6A11-4A18-BD8A-DF378644DACB@gmail.com>
+ <CAKD1GY4xtZWXvfqstapnpLskbn3DFPPGDO9yHTLHDmTP+ozR7A@mail.gmail.com>
+ <D7BCE9BB-C9D2-4423-92EC-14D4DC841D6F@gmail.com>
+Message-ID: <4011ABA6-BD55-4DEB-BE8F-2E20F2376A25@gmail.com>
+
+Okay, so I've figured it out.  I will need to have a separate messaging layer.  Does anyone know of a messaging layer that can be used when all you know is the PID to send to?
+
+Thanks,
+Lee
+
+
+
+On 11 Apr 2013, at 13:55, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+
+> Thank you, Jeremy, that's good advice.  It's not so much a chat platform, but I guess it would resemble one in architecture.  The part I'm concerned about, though, is should I be avoiding the internal Erlang messaging between connections (over many nodes) for heavy messaging?
+> 
+> Thanks,
+> Lee
+> 
+> 
+> 
+> On 11 Apr 2013, at 08:04, Jeremy Ong <jeremy at quarkgames.com> wrote:
+> 
+>> I see. I assume this is for a chat server of some sort?
+>> 
+>> You don't want the user process sending all these messages because the
+>> user process wouldn't be able to do anything useful (like receive
+>> messages) in the meantime.
+>> 
+>> Better is to implement a pubsub process for each channel of
+>> communication (i.e. one process per room) or rely on Redis pubsub or
+>> something if speed is extremely important.
+>> 
+>> There is no way to get around the O(N) complexity of broadcasting.
+>> 
+>> On Wed, Apr 10, 2013 at 11:49 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+>>> Thanks Jeremy, but what about inter-node communication?  If I have a user on node A sending a message to 10k users located on 10 other nodes, what is the best way to handle that?  Especially if this user is sending several messages and expecting replies.  Should I use the standard Erlang inter-process messaging or should I implement an MQ on top to handle this?
+>>> 
+>>> Thanks,
+>>> Lee
+>>> 
+>>> 
+>>> On 11 Apr 2013, at 07:29, Jeremy Ong <jeremy at quarkgames.com> wrote:
+>>> 
+>>>> Make all the machines identically and add an haproxy (or equivalent)
+>>>> machine to load balance between all of them. Haproxy can handle many
+>>>> many requests. Keep in mind that with tcp, the load balancer is just
+>>>> accepting the socket but then the client communicates with the actual
+>>>> application server directly afterwards.
+>>>> 
+>>>> On Wed, Apr 10, 2013 at 10:51 PM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+>>>>> Hi guys,
+>>>>> 
+>>>>> So, I have my Cowboy / Bullet server working nicely, now, with much thanks to members on this list.  I'm now looking at the best means of clustering this app.  I want to set this up so that, should the connection count get very high (which it will), then I should only have to throw more machines at this problem and it'll all go away.
+>>>>> 
+>>>>> I've got most of the logic working for this, but what I'm worried about is sending a lot of content over the erlang inter-node connection.  I've heard hogging this line can be both a bottleneck and can potentially interrupt the heartbeat between nodes.  With this in mind, should I look at adding a ZMQ layer or some such to facilitate this?  What is the general solution to high traffic between nodes?
+>>>>> 
+>>>>> Thanks,
+>>>>> Lee
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu
+>>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>> 
+> 
+
+
+
+From Kevin.Brown at turner.com  Fri Apr 12 01:37:18 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Thu, 11 Apr 2013 23:37:18 +0000
+Subject: [99s-extend] populating #http_req for unit testing
+In-Reply-To: <mailman.0.1365721649.19880.extend@lists.ninenines.eu>
+Message-ID: <CD8CBFE1.A141%kevin.brown@turner.com>
+
+
+Cowfolk,
+
+I am doing something like this to create an #http_req suitable for unit
+testing my resource callbacks:
+
+-define (HTTP_REQ_ENCODERS_PORT_8000,  #http_req{host= <<"www.foo.com">> ,
+port=8000, path= <<"/encoders">>,transport=ranch_tcp, qs= <<>>, fragment=
+<<>> }).
+
+Notice that I needed to set the transport to a Cowboy specific atom
+because I wanted to get cowboy_req:host_url and cowboy_req:path to work
+properly.  
+
+I'm sure there is a method that Cowboy uses internally to populate an
+#http_req from a URL that I could use for testing.  What might that be?
+How else should I be populating this record.
+
+Cheers,
+
+-kb
+
+
+
+
+
+
+On 4/11/13 7:07 PM, "extend-request at lists.ninenines.eu"
+<extend-request at lists.ninenines.eu> wrote:
+
+>Welcome to the Extend at lists.ninenines.eu mailing list!
+>
+>To post to this list, send your message to:
+>
+>  extend at lists.ninenines.eu
+>
+>General information about the mailing list is at:
+>
+>  http://lists.ninenines.eu:81/listinfo/extend
+>
+>If you ever want to unsubscribe or change your options (eg, switch to
+>or from digest mode, change your password, etc.), visit your
+>subscription page at:
+>
+>  http://lists.ninenines.eu:81/options/extend/kevin.brown%40turner.com
+>
+>You can also make such adjustments via email by sending a message to:
+>
+>  Extend-request at lists.ninenines.eu
+>
+>with the word `help' in the subject or body (don't include the
+>quotes), and you will get back a message with instructions.
+>
+>You must know your password to change your options (including changing
+>the password, itself) or to unsubscribe without confirmation.  It is:
+>
+>  doofus1
+>
+>Normally, Mailman will remind you of your lists.ninenines.eu mailing
+>list passwords once every month, although you can disable this if you
+>prefer.  This reminder will also include instructions on how to
+>unsubscribe or change your account options.  There is also a button on
+>your options page that will email your current password to you.
+>
+
+
+
+
+From essen at ninenines.eu  Fri Apr 12 02:07:26 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 12 Apr 2013 02:07:26 +0200
+Subject: [99s-extend] populating #http_req for unit testing
+In-Reply-To: <CD8CBFE1.A141%kevin.brown@turner.com>
+References: <CD8CBFE1.A141%kevin.brown@turner.com>
+Message-ID: <5167503E.5070204@ninenines.eu>
+
+There's a few undocumented functions in cowboy_req, like new, set and 
+get, used by Cowboy internally.
+
+On 04/12/2013 01:37 AM, Brown, Kevin wrote:
+>
+> Cowfolk,
+>
+> I am doing something like this to create an #http_req suitable for unit
+> testing my resource callbacks:
+>
+> -define (HTTP_REQ_ENCODERS_PORT_8000,  #http_req{host= <<"www.foo.com">> ,
+> port=8000, path= <<"/encoders">>,transport=ranch_tcp, qs= <<>>, fragment=
+> <<>> }).
+>
+> Notice that I needed to set the transport to a Cowboy specific atom
+> because I wanted to get cowboy_req:host_url and cowboy_req:path to work
+> properly.
+>
+> I'm sure there is a method that Cowboy uses internally to populate an
+> #http_req from a URL that I could use for testing.  What might that be?
+> How else should I be populating this record.
+>
+> Cheers,
+>
+> -kb
+>
+>
+>
+>
+>
+>
+> On 4/11/13 7:07 PM, "extend-request at lists.ninenines.eu"
+> <extend-request at lists.ninenines.eu> wrote:
+>
+>> Welcome to the Extend at lists.ninenines.eu mailing list!
+>>
+>> To post to this list, send your message to:
+>>
+>>   extend at lists.ninenines.eu
+>>
+>> General information about the mailing list is at:
+>>
+>>   http://lists.ninenines.eu:81/listinfo/extend
+>>
+>> If you ever want to unsubscribe or change your options (eg, switch to
+>> or from digest mode, change your password, etc.), visit your
+>> subscription page at:
+>>
+>>   http://lists.ninenines.eu:81/options/extend/kevin.brown%40turner.com
+>>
+>> You can also make such adjustments via email by sending a message to:
+>>
+>>   Extend-request at lists.ninenines.eu
+>>
+>> with the word `help' in the subject or body (don't include the
+>> quotes), and you will get back a message with instructions.
+>>
+>> You must know your password to change your options (including changing
+>> the password, itself) or to unsubscribe without confirmation.  It is:
+>>
+>>   doofus1
+>>
+>> Normally, Mailman will remind you of your lists.ninenines.eu mailing
+>> list passwords once every month, although you can disable this if you
+>> prefer.  This reminder will also include instructions on how to
+>> unsubscribe or change your account options.  There is also a button on
+>> your options page that will email your current password to you.
+>>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Kevin.Brown at turner.com  Fri Apr 12 02:30:15 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Fri, 12 Apr 2013 00:30:15 +0000
+Subject: [99s-extend] populating #http_req for unit testing
+In-Reply-To: <5167503E.5070204@ninenines.eu>
+Message-ID: <CD8CCDCD.A1C9%kevin.brown@turner.com>
+
+Thanks.
+
+On 4/11/13 8:07 PM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+>There's a few undocumented functions in cowboy_req, like new, set and
+>get, used by Cowboy internally.
+>
+>On 04/12/2013 01:37 AM, Brown, Kevin wrote:
+>>
+>> Cowfolk,
+>>
+>> I am doing something like this to create an #http_req suitable for unit
+>> testing my resource callbacks:
+>>
+>> -define (HTTP_REQ_ENCODERS_PORT_8000,  #http_req{host=
+>><<"www.foo.com">> ,
+>> port=8000, path= <<"/encoders">>,transport=ranch_tcp, qs= <<>>,
+>>fragment=
+>> <<>> }).
+>>
+>> Notice that I needed to set the transport to a Cowboy specific atom
+>> because I wanted to get cowboy_req:host_url and cowboy_req:path to work
+>> properly.
+>>
+>> I'm sure there is a method that Cowboy uses internally to populate an
+>> #http_req from a URL that I could use for testing.  What might that be?
+>> How else should I be populating this record.
+>>
+>> Cheers,
+>>
+>> -kb
+>>
+>>
+>>
+>>
+>>
+>>
+>> On 4/11/13 7:07 PM, "extend-request at lists.ninenines.eu"
+>> <extend-request at lists.ninenines.eu> wrote:
+>>
+>>> Welcome to the Extend at lists.ninenines.eu mailing list!
+>>>
+>>> To post to this list, send your message to:
+>>>
+>>>   extend at lists.ninenines.eu
+>>>
+>>> General information about the mailing list is at:
+>>>
+>>>   http://lists.ninenines.eu:81/listinfo/extend
+>>>
+>>> If you ever want to unsubscribe or change your options (eg, switch to
+>>> or from digest mode, change your password, etc.), visit your
+>>> subscription page at:
+>>>
+>>>   http://lists.ninenines.eu:81/options/extend/kevin.brown%40turner.com
+>>>
+>>> You can also make such adjustments via email by sending a message to:
+>>>
+>>>   Extend-request at lists.ninenines.eu
+>>>
+>>> with the word `help' in the subject or body (don't include the
+>>> quotes), and you will get back a message with instructions.
+>>>
+>>> You must know your password to change your options (including changing
+>>> the password, itself) or to unsubscribe without confirmation.  It is:
+>>>
+>>>   doofus1
+>>>
+>>> Normally, Mailman will remind you of your lists.ninenines.eu mailing
+>>> list passwords once every month, although you can disable this if you
+>>> prefer.  This reminder will also include instructions on how to
+>>> unsubscribe or change your account options.  There is also a button on
+>>> your options page that will email your current password to you.
+>>>
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>>
+>
+>
+>-- 
+>Lo?c Hoguin
+>Erlang Cowboy
+>Nine Nines
+>http://ninenines.eu
+>
+
+
+
+
+From edgurgel at gmail.com  Sat Apr 13 13:12:39 2013
+From: edgurgel at gmail.com (Eduardo Gurgel)
+Date: Sat, 13 Apr 2013 08:12:39 -0300
+Subject: [99s-extend] populating #http_req for unit testing
+In-Reply-To: <CD8CBFE1.A141%kevin.brown@turner.com>
+References: <mailman.0.1365721649.19880.extend@lists.ninenines.eu>
+ <CD8CBFE1.A141%kevin.brown@turner.com>
+Message-ID: <CAKAMJXjXrMs5OR+WfHwkmixGAx1UUP4-HyprhTffEjT4yXKBnA@mail.gmail.com>
+
+On Thu, Apr 11, 2013 at 8:37 PM, Brown, Kevin <Kevin.Brown at turner.com>wrote:
+
+>
+> Cowfolk,
+>
+> I am doing something like this to create an #http_req suitable for unit
+> testing my resource callbacks:
+>
+
+
+I use the library meck(https://github.com/eproxus/meck) to test stuff doing
+something like this:
+
+some_test() ->
+  meck:expect(cowboy_req, binding, 2, {<<"app_key">>, req} )
+  ?assertEqual({ok, req, empty},
+                 websocket_handler:websocket_init(transport, req, opts)),
+  ?assert(meck:validate(cowboy_req)).
+
+I use simple atoms as input and mock the cowboy_req functions to return
+atoms that would represent the correct or the wrong answer.
+
+The real implementation or how cowboy represent stuff is not important
+here, just the output pattern like {Binding, Req}.
+
+That's it
+
+-- 
+
+Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130413/f1b70800/attachment.html>
+
+From erlang at rambocoder.com  Mon Apr 15 22:45:42 2013
+From: erlang at rambocoder.com (rambocoder)
+Date: Mon, 15 Apr 2013 16:45:42 -0400
+Subject: [99s-extend] Reading body_qs multiple times
+Message-ID: <CAJ0zLRN-62a9P7QhGz5q6qoj4WaWGv_4qzEznzzwb07Hqo-0QQ@mail.gmail.com>
+
+Hello group,
+
+I am trying to put together a CSRF middleware
+https://github.com/rambocoder/stable/commit/b26980d292ac42aadfe9921a961436e28cdbb693
+and
+if the body of the request contains "_csrf" token, I check to make sure it
+matches the csrf token in the session.
+
+Currently I am doing it in middleware using cowboy_req:body_qs/1 however
+when in the handler I need to read another body parameter, such as in the
+rest_pastebin example:
+
+{ok, BodyQs, Req3} = cowboy_req:body_qs(Req),
+Paste = proplists:get_value(<<"paste">>, BodyQs),
+
+cowboy_req:body_qs/1 returns [] due to the body of the request being
+already read {body_state,done}
+
+Is it pointless to have the type of CSRF middleware that I am writing and
+just do the CSRF in the handler's callback, where I can deal with all the
+body_qs at once?
+
+Thank you,
+
+rambocoder
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130415/03f35a62/attachment.html>
+
+From essen at ninenines.eu  Mon Apr 15 22:47:47 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 15 Apr 2013 22:47:47 +0200
+Subject: [99s-extend] Reading body_qs multiple times
+In-Reply-To: <CAJ0zLRN-62a9P7QhGz5q6qoj4WaWGv_4qzEznzzwb07Hqo-0QQ@mail.gmail.com>
+References: <CAJ0zLRN-62a9P7QhGz5q6qoj4WaWGv_4qzEznzzwb07Hqo-0QQ@mail.gmail.com>
+Message-ID: <516C6773.1000004@ninenines.eu>
+
+Why not just put the token in the URL instead? if it's CSRF then it's 
+probably used only once and only for POST and the like, so not cached or 
+anything.
+
+On 04/15/2013 10:45 PM, rambocoder wrote:
+> Hello group,
+>
+> I am trying to put together a CSRF middleware
+> https://github.com/rambocoder/stable/commit/b26980d292ac42aadfe9921a961436e28cdbb693 and
+> if the body of the request contains "_csrf" token, I check to make sure
+> it matches the csrf token in the session.
+>
+> Currently I am doing it in middleware using cowboy_req:body_qs/1 however
+> when in the handler I need to read another body parameter, such as in
+> the rest_pastebin example:
+>
+> {ok, BodyQs, Req3} = cowboy_req:body_qs(Req),
+> Paste = proplists:get_value(<<"paste">>, BodyQs),
+>
+> cowboy_req:body_qs/1 returns [] due to the body of the request being
+> already read {body_state,done}
+>
+> Is it pointless to have the type of CSRF middleware that I am writing
+> and just do the CSRF in the handler's callback, where I can deal with
+> all the body_qs at once?
+>
+> Thank you,
+>
+> rambocoder
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From erlang at rambocoder.com  Tue Apr 16 02:13:44 2013
+From: erlang at rambocoder.com (rambocoder)
+Date: Mon, 15 Apr 2013 20:13:44 -0400
+Subject: [99s-extend] Reading body_qs multiple times
+In-Reply-To: <516C6773.1000004@ninenines.eu>
+References: <CAJ0zLRN-62a9P7QhGz5q6qoj4WaWGv_4qzEznzzwb07Hqo-0QQ@mail.gmail.com>
+ <516C6773.1000004@ninenines.eu>
+Message-ID: <CAJ0zLRPYmtXEMd6G78D5Dc9-ebrdRzxyWmVHnzGE=YrH+hA6fg@mail.gmail.com>
+
+Loic,
+
+After giving the CSRF middleware some thought and reading
+https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Disclosure_of_Token_in_URL
+I
+came to conclusion that it is best to just not create the middleware and
+instead deal with CSRF on as needed basis.
+
+I know that node's Connect middleware
+http://www.senchalabs.org/connect/csrf.html#defaultValue for example allows
+for the csrf token to be passed as a query string parameter, however, the
+OWASP article made me think that it is not the most secure approach.
+
+For example, AngularJS http://docs.angularjs.org/api/ng.$http has a section
+on how their AJAX component behaves to do CSRF out of the box, and they are
+talking about the server sending a cookie XSRF-TOKEN that is not HttpOnly.
+That makes me realize that csrf is a process more than just slapping some
+middleware into the pipeline.
+
+Btw, I noticed that when the result of the middleware execute function is:
+{error, StatusCode, Req}
+if I set the reply on the request via cowboy_req:reply before returning the
+{error.. , the status code of that reply will be used.
+
+Such as:
+{ok, Req3} = cowboy_req:reply(403, [], "Invalid CSRF Token.", Req2),
+{error, 500, Req3}; % 500 is ignored, 403 is returned
+
+Is that by design?
+
+Sincerely,
+
+rambocoder
+
+
+
+On Mon, Apr 15, 2013 at 4:47 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Why not just put the token in the URL instead? if it's CSRF then it's
+> probably used only once and only for POST and the like, so not cached or
+> anything.
+>
+>
+> On 04/15/2013 10:45 PM, rambocoder wrote:
+>
+>> Hello group,
+>>
+>> I am trying to put together a CSRF middleware
+>> https://github.com/rambocoder/**stable/commit/**
+>> b26980d292ac42aadfe9921a961436**e28cdbb693<https://github.com/rambocoder/stable/commit/b26980d292ac42aadfe9921a961436e28cdbb693>and
+>> if the body of the request contains "_csrf" token, I check to make sure
+>> it matches the csrf token in the session.
+>>
+>> Currently I am doing it in middleware using cowboy_req:body_qs/1 however
+>> when in the handler I need to read another body parameter, such as in
+>> the rest_pastebin example:
+>>
+>> {ok, BodyQs, Req3} = cowboy_req:body_qs(Req),
+>> Paste = proplists:get_value(<<"paste">**>, BodyQs),
+>>
+>> cowboy_req:body_qs/1 returns [] due to the body of the request being
+>> already read {body_state,done}
+>>
+>> Is it pointless to have the type of CSRF middleware that I am writing
+>> and just do the CSRF in the handler's callback, where I can deal with
+>> all the body_qs at once?
+>>
+>> Thank you,
+>>
+>> rambocoder
+>>
+>>
+>> ______________________________**_________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130415/59aaeef2/attachment.html>
+
+From essen at ninenines.eu  Tue Apr 16 13:34:14 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 16 Apr 2013 13:34:14 +0200
+Subject: [99s-extend] Reading body_qs multiple times
+In-Reply-To: <CAJ0zLRPYmtXEMd6G78D5Dc9-ebrdRzxyWmVHnzGE=YrH+hA6fg@mail.gmail.com>
+References: <CAJ0zLRN-62a9P7QhGz5q6qoj4WaWGv_4qzEznzzwb07Hqo-0QQ@mail.gmail.com>
+ <516C6773.1000004@ninenines.eu>
+ <CAJ0zLRPYmtXEMd6G78D5Dc9-ebrdRzxyWmVHnzGE=YrH+hA6fg@mail.gmail.com>
+Message-ID: <516D3736.4000106@ninenines.eu>
+
+On 04/16/2013 02:13 AM, rambocoder wrote:
+> Loic,
+>
+> After giving the CSRF middleware some thought and reading
+> https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Disclosure_of_Token_in_URL I
+> came to conclusion that it is best to just not create the middleware and
+> instead deal with CSRF on as needed basis.
+
+Your link says what I said too, except I probably wasn't explicit enough.
+
+If you have a form that does POST (or PUT or PATCH or DELETE), put the 
+token in "<form action="/path/to/resource?csrf=$TOKEN">". The token must 
+be only valid once, it must not be reused, not even between different 
+forms (each form gets its own token). Since it is not a GET request, 
+then you don't have cache or referer issues.
+
+You can still have issues if you allow another site to run JS on yours 
+(but you probably shouldn't) or if there is a malevolent proxy (use SSL 
+where needed), but these are different issues entirely.
+
+> Btw, I noticed that when the result of the middleware execute function is:
+> {error, StatusCode, Req}
+> if I set the reply on the request via cowboy_req:reply before returning
+> the {error.. , the status code of that reply will be used.
+>
+> Such as:
+> {ok, Req3} = cowboy_req:reply(403, [], "Invalid CSRF Token.", Req2),
+> {error, 500, Req3}; % 500 is ignored, 403 is returned
+
+Yes, the response was already sent, therefore the second one is ignored.
+
+> Is that by design?
+>
+> Sincerely,
+>
+> rambocoder
+>
+>
+>
+> On Mon, Apr 15, 2013 at 4:47 PM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     Why not just put the token in the URL instead? if it's CSRF then
+>     it's probably used only once and only for POST and the like, so not
+>     cached or anything.
+>
+>
+>     On 04/15/2013 10:45 PM, rambocoder wrote:
+>
+>         Hello group,
+>
+>         I am trying to put together a CSRF middleware
+>         https://github.com/rambocoder/__stable/commit/__b26980d292ac42aadfe9921a961436__e28cdbb693
+>         <https://github.com/rambocoder/stable/commit/b26980d292ac42aadfe9921a961436e28cdbb693>
+>         and
+>         if the body of the request contains "_csrf" token, I check to
+>         make sure
+>         it matches the csrf token in the session.
+>
+>         Currently I am doing it in middleware using cowboy_req:body_qs/1
+>         however
+>         when in the handler I need to read another body parameter, such
+>         as in
+>         the rest_pastebin example:
+>
+>         {ok, BodyQs, Req3} = cowboy_req:body_qs(Req),
+>         Paste = proplists:get_value(<<"paste">__>, BodyQs),
+>
+>         cowboy_req:body_qs/1 returns [] due to the body of the request being
+>         already read {body_state,done}
+>
+>         Is it pointless to have the type of CSRF middleware that I am
+>         writing
+>         and just do the CSRF in the handler's callback, where I can deal
+>         with
+>         all the body_qs at once?
+>
+>         Thank you,
+>
+>         rambocoder
+>
+>
+>         _________________________________________________
+>         Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         http://lists.ninenines.eu:81/__listinfo/extend
+>         <http://lists.ninenines.eu:81/listinfo/extend>
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lee.sylvester at gmail.com  Fri Apr 19 16:47:09 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Fri, 19 Apr 2013 15:47:09 +0100
+Subject: [99s-extend] Cowboy CORS
+Message-ID: <0103B45C-A73C-498E-908D-AA1639D3DEE1@gmail.com>
+
+Hi guys,
+
+So, I thought I had this resolved, as I managed to get it working locally, but across different local domains (test.localhost.com and cowboy.localhost.com).  However, now I've deployed my app to a VM, I simply can't get CORS working in Cowboy.  Here's the OPTIONS response from Chrome's console:
+
+
+Request URL:http://www.example.com/
+Request Method:OPTIONS
+Status Code:200 OK
+Request Headersview source
+Accept:*/*
+Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+Accept-Encoding:gzip,deflate,sdch
+Accept-Language:en-US,en;q=0.8
+Access-Control-Request-Headers:origin, method, content-type
+Access-Control-Request-Method:POST
+Connection:keep-alive
+Host:www.example.com
+Origin:http://test.localhost.com:8889
+Referer:http://test.localhost.com:8889/
+User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+Response Headersview source
+Access-Control-Allow-Headers:Content-Type, X-Requested-With, Origin, Method
+Access-Control-Allow-Methods:GET, POST, OPTIONS
+Access-Control-Allow-Origin:*
+connection:keep-alive
+content-length:0
+date:Fri, 19 Apr 2013 14:40:00 GMT
+server:Cowboy
+
+And then this is the POST response:
+
+Request URL:http://www.example.com/
+Request Headersview parsed
+POST http://www.example.com/ HTTP/1.1
+Origin: http://test.localhost.com:8889
+Referer: http://test.localhost.com:8889/
+method: POST http://www.example.com/ HTTP/1.1
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+content-type: application/x-www-form-urlencoded
+Form Dataview parsed
+data={"Type":"auth_request","Authentication":"public","Authorization":null,"Domain":"www.example.com","Application":"test_app","Ident":"lee"}
+
+I am setting {<<"Access-Control-Allow-Origin">>, <<"*">>} in the headers param of cowboy_req:reply and the cowboy_req:set_resp_header, but neither seems to be working.  Can anyone spot what I might be doing wrong?
+
+The cowboy_req:set_resp_header is happening in the handle? So
+
+handle(Req, State) ->
+	Reply = case cowboy_req:method(Req) of
+		{<<"POST">>, Req2} ->
+			Req3 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>, <<"*">>, Req2),
+[snip]
+
+
+Thanks,
+Lee
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130419/bf0e8ef9/attachment.html>
+
+From Christopher.Phillips at turner.com  Fri Apr 19 17:08:03 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Fri, 19 Apr 2013 15:08:03 +0000
+Subject: [99s-extend] Cowboy CORS
+In-Reply-To: <0103B45C-A73C-498E-908D-AA1639D3DEE1@gmail.com>
+Message-ID: <CD96D43A.4E43%christopher.phillips@turner.com>
+
+  When querying to the VM from a browser, is Chrome complaining that it's a cross domain request in the console? Or something else?
+
+  Is the OPTIONS request firing and failing, or is it the POST that is failing (in the network tab)?
+
+  If it's working in a cross origin context for you locally across different domains (I.e., the browser is sending the CORS headers on the request, and you're seeing the right headers on the response, and the browser is handling them properly, such that you can retrieve the response from your Javascript), then it seems unlikely to be a CORS issue, but maybe a config or proxy or code issue in your handler.
+
+
+From: Lee Sylvester <lee.sylvester at gmail.com<mailto:lee.sylvester at gmail.com>>
+Date: Friday, April 19, 2013 10:47 AM
+To: "extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>" <extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>>
+Subject: [99s-extend] Cowboy CORS
+
+Hi guys,
+
+So, I thought I had this resolved, as I managed to get it working locally, but across different local domains (test.localhost.com<http://test.localhost.com> and cowboy.localhost.com<http://cowboy.localhost.com>).  However, now I've deployed my app to a VM, I simply can't get CORS working in Cowboy.  Here's the OPTIONS response from Chrome's console:
+
+
+
+  1.
+Request URL:
+http://www.example.com/
+  2.
+Request Method:
+OPTIONS
+  3.
+Status Code:
+200 OK
+  4.  Request Headersview source
+     *
+Accept:
+*/*
+     *
+Accept-Charset:
+ISO-8859-1,utf-8;q=0.7,*;q=0.3
+     *
+Accept-Encoding:
+gzip,deflate,sdch
+     *
+Accept-Language:
+en-US,en;q=0.8
+     *
+Access-Control-Request-Headers:
+origin, method, content-type
+     *
+Access-Control-Request-Method:
+POST
+     *
+Connection:
+keep-alive
+     *
+Host:
+www.example.com<http://www.example.com>
+     *
+Origin:
+http://test.localhost.com:8889
+     *
+Referer:
+http://test.localhost.com:8889/
+     *
+User-Agent:
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+  5.  Response Headersview source
+     *
+Access-Control-Allow-Headers:
+Content-Type, X-Requested-With, Origin, Method
+     *
+Access-Control-Allow-Methods:
+GET, POST, OPTIONS
+     *
+Access-Control-Allow-Origin:
+*
+     *
+connection:
+keep-alive
+     *
+content-length:
+0
+     *
+date:
+Fri, 19 Apr 2013 14:40:00 GMT
+     *
+server:
+Cowboy
+
+And then this is the POST response:
+
+
+  1.
+Request URL:
+http://www.example.com/
+  2.  Request Headersview parsed
+     *   POST http://www.example.com/ HTTP/1.1 Origin: http://test.localhost.com:8889 Referer: http://test.localhost.com:8889/ method: POST http://www.example.com/ HTTP/1.1 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31 content-type: application/x-www-form-urlencoded
+  3.  Form Dataview parsed
+     *   data={"Type":"auth_request","Authentication":"public","Authorization":null,"Domain":"www.example.com<http://www.example.com>","Application":"test_app","Ident":"lee"}
+
+I am setting {<<"Access-Control-Allow-Origin">>, <<"*">>} in the headers param of cowboy_req:reply and the cowboy_req:set_resp_header, but neither seems to be working.  Can anyone spot what I might be doing wrong?
+
+The cowboy_req:set_resp_header is happening in the handle? So
+
+handle(Req, State) ->
+Reply = case cowboy_req:method(Req) of
+{<<"POST">>, Req2} ->
+Req3 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>, <<"*">>, Req2),
+[snip]
+
+
+Thanks,
+Lee
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130419/383515dd/attachment.html>
+
+From lee.sylvester at gmail.com  Mon Apr 22 14:59:54 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Mon, 22 Apr 2013 13:59:54 +0100
+Subject: [99s-extend] 505 error
+Message-ID: <7E836341-BC4B-4575-AAFC-9F610A5610AE@gmail.com>
+
+Hi guys,
+
+So, I was getting a CORS issue when connecting to my Bullet impl, which I have since fixed.  I am now able to use these from many machines from many locations.  However, I have found some machines to be getting a 505 error when making a POST request to the Cowboy instance:
+
+Request URL:http://www.example.com
+Request Method:OPTIONS
+Status Code:505 HTTP Version Not Supported
+Request Headersview source
+Accept:*/*
+Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+Accept-Encoding:gzip,deflate,sdch
+Accept-Language:en-US,en;q=0.8
+Access-Control-Request-Headers:origin, method, content-type
+Access-Control-Request-Method:POST
+Connection:keep-alive
+Host:www.example.com
+Origin:http://www.test.com
+Referer:http://www.test.com/
+User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+Response Headersview source
+connection:close
+content-length:0
+date:Mon, 22 Apr 2013 12:22:50 GMT
+server:Cowboy
+
+To get around the CORS issue, I set up an onrequest hook, which points to the function:
+
+set_request_cors(Req) ->
+	Req2 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Methods">>, <<"GET, POST, OPTIONS">>, Req),
+	Req3 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Headers">>, <<"Content-Type, X-Requested-With, Origin, Method">>, Req2),
+	cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>, <<"*">>, Req3).
+
+I'm afraid I don't have any more info, but this issue is completely eluding me.
+
+Thanks,
+Lee
+
+
+
+From Kevin.Brown at turner.com  Mon Apr 22 16:28:11 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Mon, 22 Apr 2013 14:28:11 +0000
+Subject: [99s-extend] 505 error
+In-Reply-To: <7E836341-BC4B-4575-AAFC-9F610A5610AE@gmail.com>
+References: <7E836341-BC4B-4575-AAFC-9F610A5610AE@gmail.com>
+Message-ID: <74D3D8EB-2285-47F5-9BD9-BED2021BE79A@turner.com>
+
+What is the exact http request sent on the failing and successful machines?  How do the differ?
+
+Stack trace?
+
+On Apr 22, 2013, at 9:00 AM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+
+> Hi guys,
+> 
+> So, I was getting a CORS issue when connecting to my Bullet impl, which I have since fixed.  I am now able to use these from many machines from many locations.  However, I have found some machines to be getting a 505 error when making a POST request to the Cowboy instance:
+> 
+> Request URL:http://www.example.com
+> Request Method:OPTIONS
+> Status Code:505 HTTP Version Not Supported
+> Request Headersview source
+> Accept:*/*
+> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+> Accept-Encoding:gzip,deflate,sdch
+> Accept-Language:en-US,en;q=0.8
+> Access-Control-Request-Headers:origin, method, content-type
+> Access-Control-Request-Method:POST
+> Connection:keep-alive
+> Host:www.example.com
+> Origin:http://www.test.com
+> Referer:http://www.test.com/
+> User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+> Response Headersview source
+> connection:close
+> content-length:0
+> date:Mon, 22 Apr 2013 12:22:50 GMT
+> server:Cowboy
+> 
+> To get around the CORS issue, I set up an onrequest hook, which points to the function:
+> 
+> set_request_cors(Req) ->
+>    Req2 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Methods">>, <<"GET, POST, OPTIONS">>, Req),
+>    Req3 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Headers">>, <<"Content-Type, X-Requested-With, Origin, Method">>, Req2),
+>    cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>, <<"*">>, Req3).
+> 
+> I'm afraid I don't have any more info, but this issue is completely eluding me.
+> 
+> Thanks,
+> Lee
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+> 
+
+
+
+From lee.sylvester at gmail.com  Mon Apr 22 16:40:19 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Mon, 22 Apr 2013 15:40:19 +0100
+Subject: [99s-extend] 505 error
+In-Reply-To: <74D3D8EB-2285-47F5-9BD9-BED2021BE79A@turner.com>
+References: <7E836341-BC4B-4575-AAFC-9F610A5610AE@gmail.com>
+ <74D3D8EB-2285-47F5-9BD9-BED2021BE79A@turner.com>
+Message-ID: <8D420762-BBE6-48AC-81C9-56FED6EDA3F2@gmail.com>
+
+Well, the below is the sent and return headers on the failing machine.  On a succeeding machine, the headers are
+
+Request URL:http://www.example.com
+Request Method:OPTIONS
+Status Code:200 OK
+
+Request Headersview source
+Accept:*/*
+Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+Accept-Encoding:gzip,deflate,sdch
+Accept-Language:en-US,en;q=0.8
+Access-Control-Request-Headers:origin, method, content-type
+Access-Control-Request-Method:POST
+Connection:keep-alive
+Host:www.example.com
+Origin:http://www.test.com
+Referer:http://www.test.com/
+User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+
+Response Headersview source
+Access-Control-Allow-Headers:Content-Type, X-Requested-With, Origin, Method
+Access-Control-Allow-Methods:GET, POST, OPTIONS
+Access-Control-Allow-Origin:*
+connection:keep-alive
+content-length:68
+date:Mon, 22 Apr 2013 14:33:30 GMT
+server:Cowboy
+
+As you can see, the header control and content isn't being sent back and the connection is closed.
+
+Thanks,
+Lee
+
+
+
+
+On 22 Apr 2013, at 15:28, "Brown, Kevin" <Kevin.Brown at turner.com> wrote:
+
+> What is the exact http request sent on the failing and successful machines?  How do the differ?
+> 
+> Stack trace?
+> 
+> On Apr 22, 2013, at 9:00 AM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+> 
+>> Hi guys,
+>> 
+>> So, I was getting a CORS issue when connecting to my Bullet impl, which I have since fixed.  I am now able to use these from many machines from many locations.  However, I have found some machines to be getting a 505 error when making a POST request to the Cowboy instance:
+>> 
+>> Request URL:http://www.example.com
+>> Request Method:OPTIONS
+>> Status Code:505 HTTP Version Not Supported
+>> 
+>> Request Headersview source
+>> Accept:*/*
+>> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>> Accept-Encoding:gzip,deflate,sdch
+>> Accept-Language:en-US,en;q=0.8
+>> Access-Control-Request-Headers:origin, method, content-type
+>> Access-Control-Request-Method:POST
+>> Connection:keep-alive
+>> Host:www.example.com
+>> Origin:http://www.test.com
+>> Referer:http://www.test.com/
+>> User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+>> 
+>> Response Headersview source
+>> connection:close
+>> content-length:0
+>> date:Mon, 22 Apr 2013 12:22:50 GMT
+>> server:Cowboy
+>> 
+>> To get around the CORS issue, I set up an onrequest hook, which points to the function:
+>> 
+>> set_request_cors(Req) ->
+>>   Req2 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Methods">>, <<"GET, POST, OPTIONS">>, Req),
+>>   Req3 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Headers">>, <<"Content-Type, X-Requested-With, Origin, Method">>, Req2),
+>>   cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>, <<"*">>, Req3).
+>> 
+>> I'm afraid I don't have any more info, but this issue is completely eluding me.
+>> 
+>> Thanks,
+>> Lee
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>> 
+> 
+
+
+
+From essen at ninenines.eu  Mon Apr 22 17:53:44 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 22 Apr 2013 17:53:44 +0200
+Subject: [99s-extend] 505 error
+In-Reply-To: <8D420762-BBE6-48AC-81C9-56FED6EDA3F2@gmail.com>
+References: <7E836341-BC4B-4575-AAFC-9F610A5610AE@gmail.com>
+ <74D3D8EB-2285-47F5-9BD9-BED2021BE79A@turner.com>
+ <8D420762-BBE6-48AC-81C9-56FED6EDA3F2@gmail.com>
+Message-ID: <51755D08.2070006@ninenines.eu>
+
+Headers are one thing but it'd be useful to know the request line itself.
+
+On 04/22/2013 04:40 PM, Lee Sylvester wrote:
+> Well, the below is the sent and return headers on the failing machine.  On a succeeding machine, the headers are
+>
+> Request URL:http://www.example.com
+> Request Method:OPTIONS
+> Status Code:200 OK
+>
+> Request Headersview source
+> Accept:*/*
+> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+> Accept-Encoding:gzip,deflate,sdch
+> Accept-Language:en-US,en;q=0.8
+> Access-Control-Request-Headers:origin, method, content-type
+> Access-Control-Request-Method:POST
+> Connection:keep-alive
+> Host:www.example.com
+> Origin:http://www.test.com
+> Referer:http://www.test.com/
+> User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+>
+> Response Headersview source
+> Access-Control-Allow-Headers:Content-Type, X-Requested-With, Origin, Method
+> Access-Control-Allow-Methods:GET, POST, OPTIONS
+> Access-Control-Allow-Origin:*
+> connection:keep-alive
+> content-length:68
+> date:Mon, 22 Apr 2013 14:33:30 GMT
+> server:Cowboy
+>
+> As you can see, the header control and content isn't being sent back and the connection is closed.
+>
+> Thanks,
+> Lee
+>
+>
+>
+>
+> On 22 Apr 2013, at 15:28, "Brown, Kevin" <Kevin.Brown at turner.com> wrote:
+>
+>> What is the exact http request sent on the failing and successful machines?  How do the differ?
+>>
+>> Stack trace?
+>>
+>> On Apr 22, 2013, at 9:00 AM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+>>
+>>> Hi guys,
+>>>
+>>> So, I was getting a CORS issue when connecting to my Bullet impl, which I have since fixed.  I am now able to use these from many machines from many locations.  However, I have found some machines to be getting a 505 error when making a POST request to the Cowboy instance:
+>>>
+>>> Request URL:http://www.example.com
+>>> Request Method:OPTIONS
+>>> Status Code:505 HTTP Version Not Supported
+>>>
+>>> Request Headersview source
+>>> Accept:*/*
+>>> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>>> Accept-Encoding:gzip,deflate,sdch
+>>> Accept-Language:en-US,en;q=0.8
+>>> Access-Control-Request-Headers:origin, method, content-type
+>>> Access-Control-Request-Method:POST
+>>> Connection:keep-alive
+>>> Host:www.example.com
+>>> Origin:http://www.test.com
+>>> Referer:http://www.test.com/
+>>> User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+>>>
+>>> Response Headersview source
+>>> connection:close
+>>> content-length:0
+>>> date:Mon, 22 Apr 2013 12:22:50 GMT
+>>> server:Cowboy
+>>>
+>>> To get around the CORS issue, I set up an onrequest hook, which points to the function:
+>>>
+>>> set_request_cors(Req) ->
+>>>    Req2 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Methods">>, <<"GET, POST, OPTIONS">>, Req),
+>>>    Req3 = cowboy_req:set_resp_header(<<"Access-Control-Allow-Headers">>, <<"Content-Type, X-Requested-With, Origin, Method">>, Req2),
+>>>    cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>, <<"*">>, Req3).
+>>>
+>>> I'm afraid I don't have any more info, but this issue is completely eluding me.
+>>>
+>>> Thanks,
+>>> Lee
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>
+>>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Kevin.Brown at turner.com  Mon Apr 22 17:55:11 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Mon, 22 Apr 2013 15:55:11 +0000
+Subject: [99s-extend] 505 error
+In-Reply-To: <8D420762-BBE6-48AC-81C9-56FED6EDA3F2@gmail.com>
+Message-ID: <CD9AD247.AB02%kevin.brown@turner.com>
+
+You might see if "view source" (rather than the parsed view you sent)
+yields any clues.  You'd like to see HTTP version being sent.
+
+
+On 4/22/13 10:40 AM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+
+>Well, the below is the sent and return headers on the failing machine.
+>On a succeeding machine, the headers are
+>
+>Request URL:http://www.example.com
+>Request Method:OPTIONS
+>Status Code:200 OK
+>
+>Request Headersview source
+>Accept:*/*
+>Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>Accept-Encoding:gzip,deflate,sdch
+>Accept-Language:en-US,en;q=0.8
+>Access-Control-Request-Headers:origin, method, content-type
+>Access-Control-Request-Method:POST
+>Connection:keep-alive
+>Host:www.example.com
+>Origin:http://www.test.com
+>Referer:http://www.test.com/
+>User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3)
+>AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+>
+>Response Headersview source
+>Access-Control-Allow-Headers:Content-Type, X-Requested-With, Origin,
+>Method
+>Access-Control-Allow-Methods:GET, POST, OPTIONS
+>Access-Control-Allow-Origin:*
+>connection:keep-alive
+>content-length:68
+>date:Mon, 22 Apr 2013 14:33:30 GMT
+>server:Cowboy
+>
+>As you can see, the header control and content isn't being sent back and
+>the connection is closed.
+>
+>Thanks,
+>Lee
+>
+>
+>
+>
+>On 22 Apr 2013, at 15:28, "Brown, Kevin" <Kevin.Brown at turner.com> wrote:
+>
+>> What is the exact http request sent on the failing and successful
+>>machines?  How do the differ?
+>> 
+>> Stack trace?
+>> 
+>> On Apr 22, 2013, at 9:00 AM, "Lee Sylvester" <lee.sylvester at gmail.com>
+>>wrote:
+>> 
+>>> Hi guys,
+>>> 
+>>> So, I was getting a CORS issue when connecting to my Bullet impl,
+>>>which I have since fixed.  I am now able to use these from many
+>>>machines from many locations.  However, I have found some machines to
+>>>be getting a 505 error when making a POST request to the Cowboy
+>>>instance:
+>>> 
+>>> Request URL:http://www.example.com
+>>> Request Method:OPTIONS
+>>> Status Code:505 HTTP Version Not Supported
+>>> 
+>>> Request Headersview source
+>>> Accept:*/*
+>>> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>>> Accept-Encoding:gzip,deflate,sdch
+>>> Accept-Language:en-US,en;q=0.8
+>>> Access-Control-Request-Headers:origin, method, content-type
+>>> Access-Control-Request-Method:POST
+>>> Connection:keep-alive
+>>> Host:www.example.com
+>>> Origin:http://www.test.com
+>>> Referer:http://www.test.com/
+>>> User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31
+>>>(KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+>>> 
+>>> Response Headersview source
+>>> connection:close
+>>> content-length:0
+>>> date:Mon, 22 Apr 2013 12:22:50 GMT
+>>> server:Cowboy
+>>> 
+>>> To get around the CORS issue, I set up an onrequest hook, which points
+>>>to the function:
+>>> 
+>>> set_request_cors(Req) ->
+>>>   Req2 = 
+>>>cowboy_req:set_resp_header(<<"Access-Control-Allow-Methods">>, <<"GET,
+>>>POST, OPTIONS">>, Req),
+>>>   Req3 = 
+>>>cowboy_req:set_resp_header(<<"Access-Control-Allow-Headers">>,
+>>><<"Content-Type, X-Requested-With, Origin, Method">>, Req2),
+>>>   cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>,
+>>><<"*">>, Req3).
+>>> 
+>>> I'm afraid I don't have any more info, but this issue is completely
+>>>eluding me.
+>>> 
+>>> Thanks,
+>>> Lee
+>>> 
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>>> 
+>> 
+>
+>
+
+
+
+
+From lee.sylvester at gmail.com  Mon Apr 22 20:30:08 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Mon, 22 Apr 2013 19:30:08 +0100
+Subject: [99s-extend] 505 error
+In-Reply-To: <CD9AD247.AB02%kevin.brown@turner.com>
+References: <CD9AD247.AB02%kevin.brown@turner.com>
+Message-ID: <5826B1C1-C80E-4073-953C-3BF74829CE1A@gmail.com>
+
+Does this help?
+
+Request URL:http://www.example.com
+Request Method:OPTIONS
+Status Code:505 HTTP Version Not Supported
+
+Request Headersview parsed
+OPTIONS http://www.example.com HTTP/1.1
+Host: www.example.com
+Proxy-Connection: keep-alive
+Access-Control-Request-Method: POST
+Origin: http://localhost
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+Access-Control-Request-Headers: origin, method, content-type
+Accept: */*
+Referer: http://localhost/p/
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+
+Response Headersview parsed
+HTTP/1.1 505 HTTP Version Not Supported
+connection: close
+server: Cowboy
+date: Mon, 22 Apr 2013 17:42:39 GMT
+content-length: 0
+
+Thanks,
+Lee
+
+
+On 22 Apr 2013, at 16:55, "Brown, Kevin" <Kevin.Brown at turner.com> wrote:
+
+> You might see if "view source" (rather than the parsed view you sent)
+> yields any clues.  You'd like to see HTTP version being sent.
+> 
+> 
+> On 4/22/13 10:40 AM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+> 
+>> Well, the below is the sent and return headers on the failing machine.
+>> On a succeeding machine, the headers are
+>> 
+>> Request URL:http://www.example.com
+>> Request Method:OPTIONS
+>> Status Code:200 OK
+>> 
+>> Request Headersview source
+>> Accept:*/*
+>> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>> Accept-Encoding:gzip,deflate,sdch
+>> Accept-Language:en-US,en;q=0.8
+>> Access-Control-Request-Headers:origin, method, content-type
+>> Access-Control-Request-Method:POST
+>> Connection:keep-alive
+>> Host:www.example.com
+>> Origin:http://www.test.com
+>> Referer:http://www.test.com/
+>> User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3)
+>> AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+>> 
+>> Response Headersview source
+>> Access-Control-Allow-Headers:Content-Type, X-Requested-With, Origin,
+>> Method
+>> Access-Control-Allow-Methods:GET, POST, OPTIONS
+>> Access-Control-Allow-Origin:*
+>> connection:keep-alive
+>> content-length:68
+>> date:Mon, 22 Apr 2013 14:33:30 GMT
+>> server:Cowboy
+>> 
+>> As you can see, the header control and content isn't being sent back and
+>> the connection is closed.
+>> 
+>> Thanks,
+>> Lee
+>> 
+>> 
+>> 
+>> 
+>> On 22 Apr 2013, at 15:28, "Brown, Kevin" <Kevin.Brown at turner.com> wrote:
+>> 
+>>> What is the exact http request sent on the failing and successful
+>>> machines?  How do the differ?
+>>> 
+>>> Stack trace?
+>>> 
+>>> On Apr 22, 2013, at 9:00 AM, "Lee Sylvester" <lee.sylvester at gmail.com>
+>>> wrote:
+>>> 
+>>>> Hi guys,
+>>>> 
+>>>> So, I was getting a CORS issue when connecting to my Bullet impl,
+>>>> which I have since fixed.  I am now able to use these from many
+>>>> machines from many locations.  However, I have found some machines to
+>>>> be getting a 505 error when making a POST request to the Cowboy
+>>>> instance:
+>>>> 
+>>>> Request URL:http://www.example.com
+>>>> Request Method:OPTIONS
+>>>> Status Code:505 HTTP Version Not Supported
+>>>> 
+>>>> Request Headersview source
+>>>> Accept:*/*
+>>>> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>>>> Accept-Encoding:gzip,deflate,sdch
+>>>> Accept-Language:en-US,en;q=0.8
+>>>> Access-Control-Request-Headers:origin, method, content-type
+>>>> Access-Control-Request-Method:POST
+>>>> Connection:keep-alive
+>>>> Host:www.example.com
+>>>> Origin:http://www.test.com
+>>>> Referer:http://www.test.com/
+>>>> User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31
+>>>> (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+>>>> 
+>>>> Response Headersview source
+>>>> connection:close
+>>>> content-length:0
+>>>> date:Mon, 22 Apr 2013 12:22:50 GMT
+>>>> server:Cowboy
+>>>> 
+>>>> To get around the CORS issue, I set up an onrequest hook, which points
+>>>> to the function:
+>>>> 
+>>>> set_request_cors(Req) ->
+>>>>  Req2 = 
+>>>> cowboy_req:set_resp_header(<<"Access-Control-Allow-Methods">>, <<"GET,
+>>>> POST, OPTIONS">>, Req),
+>>>>  Req3 = 
+>>>> cowboy_req:set_resp_header(<<"Access-Control-Allow-Headers">>,
+>>>> <<"Content-Type, X-Requested-With, Origin, Method">>, Req2),
+>>>>  cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>,
+>>>> <<"*">>, Req3).
+>>>> 
+>>>> I'm afraid I don't have any more info, but this issue is completely
+>>>> eluding me.
+>>>> 
+>>>> Thanks,
+>>>> Lee
+>>>> 
+>>>> _______________________________________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>> 
+>>> 
+>> 
+>> 
+> 
+> 
+
+
+
+From essen at ninenines.eu  Mon Apr 22 21:19:39 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 22 Apr 2013 21:19:39 +0200
+Subject: [99s-extend] 505 error
+In-Reply-To: <5826B1C1-C80E-4073-953C-3BF74829CE1A@gmail.com>
+References: <CD9AD247.AB02%kevin.brown@turner.com>
+ <5826B1C1-C80E-4073-953C-3BF74829CE1A@gmail.com>
+Message-ID: <51758D4B.1020501@ninenines.eu>
+
+I'm going to need the exact request line to make sense of it. 
+Something's missing in the parser I think, not sure what in your case 
+though. Feel free to private email it.
+
+On 04/22/2013 08:30 PM, Lee Sylvester wrote:
+> Does this help?
+>
+> Request URL:http://www.example.com
+> Request Method:OPTIONS
+> Status Code:505 HTTP Version Not Supported
+>
+> Request Headersview parsed
+> OPTIONS http://www.example.com HTTP/1.1
+> Host: www.example.com
+> Proxy-Connection: keep-alive
+> Access-Control-Request-Method: POST
+> Origin: http://localhost
+> User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+> Access-Control-Request-Headers: origin, method, content-type
+> Accept: */*
+> Referer: http://localhost/p/
+> Accept-Encoding: gzip,deflate,sdch
+> Accept-Language: en-US,en;q=0.8
+> Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>
+> Response Headersview parsed
+> HTTP/1.1 505 HTTP Version Not Supported
+> connection: close
+> server: Cowboy
+> date: Mon, 22 Apr 2013 17:42:39 GMT
+> content-length: 0
+>
+> Thanks,
+> Lee
+>
+>
+> On 22 Apr 2013, at 16:55, "Brown, Kevin" <Kevin.Brown at turner.com> wrote:
+>
+>> You might see if "view source" (rather than the parsed view you sent)
+>> yields any clues.  You'd like to see HTTP version being sent.
+>>
+>>
+>> On 4/22/13 10:40 AM, "Lee Sylvester" <lee.sylvester at gmail.com> wrote:
+>>
+>>> Well, the below is the sent and return headers on the failing machine.
+>>> On a succeeding machine, the headers are
+>>>
+>>> Request URL:http://www.example.com
+>>> Request Method:OPTIONS
+>>> Status Code:200 OK
+>>>
+>>> Request Headersview source
+>>> Accept:*/*
+>>> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>>> Accept-Encoding:gzip,deflate,sdch
+>>> Accept-Language:en-US,en;q=0.8
+>>> Access-Control-Request-Headers:origin, method, content-type
+>>> Access-Control-Request-Method:POST
+>>> Connection:keep-alive
+>>> Host:www.example.com
+>>> Origin:http://www.test.com
+>>> Referer:http://www.test.com/
+>>> User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3)
+>>> AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31
+>>>
+>>> Response Headersview source
+>>> Access-Control-Allow-Headers:Content-Type, X-Requested-With, Origin,
+>>> Method
+>>> Access-Control-Allow-Methods:GET, POST, OPTIONS
+>>> Access-Control-Allow-Origin:*
+>>> connection:keep-alive
+>>> content-length:68
+>>> date:Mon, 22 Apr 2013 14:33:30 GMT
+>>> server:Cowboy
+>>>
+>>> As you can see, the header control and content isn't being sent back and
+>>> the connection is closed.
+>>>
+>>> Thanks,
+>>> Lee
+>>>
+>>>
+>>>
+>>>
+>>> On 22 Apr 2013, at 15:28, "Brown, Kevin" <Kevin.Brown at turner.com> wrote:
+>>>
+>>>> What is the exact http request sent on the failing and successful
+>>>> machines?  How do the differ?
+>>>>
+>>>> Stack trace?
+>>>>
+>>>> On Apr 22, 2013, at 9:00 AM, "Lee Sylvester" <lee.sylvester at gmail.com>
+>>>> wrote:
+>>>>
+>>>>> Hi guys,
+>>>>>
+>>>>> So, I was getting a CORS issue when connecting to my Bullet impl,
+>>>>> which I have since fixed.  I am now able to use these from many
+>>>>> machines from many locations.  However, I have found some machines to
+>>>>> be getting a 505 error when making a POST request to the Cowboy
+>>>>> instance:
+>>>>>
+>>>>> Request URL:http://www.example.com
+>>>>> Request Method:OPTIONS
+>>>>> Status Code:505 HTTP Version Not Supported
+>>>>>
+>>>>> Request Headersview source
+>>>>> Accept:*/*
+>>>>> Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+>>>>> Accept-Encoding:gzip,deflate,sdch
+>>>>> Accept-Language:en-US,en;q=0.8
+>>>>> Access-Control-Request-Headers:origin, method, content-type
+>>>>> Access-Control-Request-Method:POST
+>>>>> Connection:keep-alive
+>>>>> Host:www.example.com
+>>>>> Origin:http://www.test.com
+>>>>> Referer:http://www.test.com/
+>>>>> User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31
+>>>>> (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+>>>>>
+>>>>> Response Headersview source
+>>>>> connection:close
+>>>>> content-length:0
+>>>>> date:Mon, 22 Apr 2013 12:22:50 GMT
+>>>>> server:Cowboy
+>>>>>
+>>>>> To get around the CORS issue, I set up an onrequest hook, which points
+>>>>> to the function:
+>>>>>
+>>>>> set_request_cors(Req) ->
+>>>>>   Req2 =
+>>>>> cowboy_req:set_resp_header(<<"Access-Control-Allow-Methods">>, <<"GET,
+>>>>> POST, OPTIONS">>, Req),
+>>>>>   Req3 =
+>>>>> cowboy_req:set_resp_header(<<"Access-Control-Allow-Headers">>,
+>>>>> <<"Content-Type, X-Requested-With, Origin, Method">>, Req2),
+>>>>>   cowboy_req:set_resp_header(<<"Access-Control-Allow-Origin">>,
+>>>>> <<"*">>, Req3).
+>>>>>
+>>>>> I'm afraid I don't have any more info, but this issue is completely
+>>>>> eluding me.
+>>>>>
+>>>>> Thanks,
+>>>>> Lee
+>>>>>
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu
+>>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>>>
+>>>>
+>>>
+>>>
+>>
+>>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From yongboy at gmail.com  Thu Apr 25 05:46:24 2013
+From: yongboy at gmail.com (yongboy)
+Date: Thu, 25 Apr 2013 11:46:24 +0800
+Subject: [99s-extend] does cowboy support hot code reload/replace ?
+Message-ID: <CAN_mQBqbjr_JzSoL=YOzM8SaMbmvd=_OJ5FMg-DbYgKeYq6hBA@mail.gmail.com>
+
+You know, the OTP's code_change so heavy, sometimes, you just want to
+debug, or change a little, does not want to rewrite the rel appup file.
+Any help is appreciated, thanks.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130425/35ee7614/attachment.html>
+
+From essen at ninenines.eu  Thu Apr 25 13:42:15 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 25 Apr 2013 13:42:15 +0200
+Subject: [99s-extend] does cowboy support hot code reload/replace ?
+In-Reply-To: <CAN_mQBqbjr_JzSoL=YOzM8SaMbmvd=_OJ5FMg-DbYgKeYq6hBA@mail.gmail.com>
+References: <CAN_mQBqbjr_JzSoL=YOzM8SaMbmvd=_OJ5FMg-DbYgKeYq6hBA@mail.gmail.com>
+Message-ID: <51791697.7030500@ninenines.eu>
+
+On 04/25/2013 05:46 AM, yongboy wrote:
+> You know, the OTP's code_change so heavy, sometimes, you just want to
+> debug, or change a little, does not want to rewrite the rel appup file.
+> Any help is appreciated, thanks.
+
+At this time there is no code_change mechanism in Cowboy. Reloading a 
+module works, modifying the protocol options with 
+ranch:set_protocol_options can be used, but it doesn't change the 
+running processes.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From yongboy at gmail.com  Fri Apr 26 07:57:00 2013
+From: yongboy at gmail.com (yongboy)
+Date: Fri, 26 Apr 2013 13:57:00 +0800
+Subject: [99s-extend] does cowboy support hot code reload/replace ?
+In-Reply-To: <51791697.7030500@ninenines.eu>
+References: <CAN_mQBqbjr_JzSoL=YOzM8SaMbmvd=_OJ5FMg-DbYgKeYq6hBA@mail.gmail.com>
+ <51791697.7030500@ninenines.eu>
+Message-ID: <CAN_mQBq4FEG66Ot2CpTLgChaaTMUW1vG0cjsZrEs-Rbms7zGuQ@mail.gmail.com>
+
+Thanks very much !
+Maybe we can use the code:load_file() function I had just found it .
+
+
+2013/4/25 Lo?c Hoguin <essen at ninenines.eu>
+
+> On 04/25/2013 05:46 AM, yongboy wrote:
+>
+>> You know, the OTP's code_change so heavy, sometimes, you just want to
+>> debug, or change a little, does not want to rewrite the rel appup file.
+>> Any help is appreciated, thanks.
+>>
+>
+> At this time there is no code_change mechanism in Cowboy. Reloading a
+> module works, modifying the protocol options with
+> ranch:set_protocol_options can be used, but it doesn't change the running
+> processes.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130426/09f3ed34/attachment.html>
+
+From yongboy at gmail.com  Fri Apr 26 08:11:56 2013
+From: yongboy at gmail.com (yongboy)
+Date: Fri, 26 Apr 2013 14:11:56 +0800
+Subject: [99s-extend] cowboy how to ruduce the memory usage per long-hold
+	connection
+Message-ID: <CAN_mQBobPN0zdpqJ3WtGKJaRMNiutvurgJfncMCqM3qtUHTm1g@mail.gmail.com>
+
+I have tested one long-hold webapp, when 512000 user connected, the app
+used
+6801M memory, 6801M*1024K / 512000 = 13.6K/Connection.
+
+Does anyone give me some advice on how to reduce the memory usage per one
+connection, thanks very much !
+
+Here is the code snippet:
+
+start(_Type, _Args) ->
+        Dispatch = cowboy_router:compile([
+            {'_', [{'_', htmlfile_handler, []}]}
+        ]),
+        cowboy:start_http(my_http_listener, 100,
+            [{port, 8000}, {max_connections, infinity}],
+            [{env, [{dispatch, Dispatch}]}]
+        ),
+        count_server:start(),
+        htmlfilesimple_sup:start_link().
+
+......
+
+-module(htmlfile_handler).
+-behaviour(cowboy_loop_handler).
+-export([init/3, info/3, terminate/3]).
+-define(HEARBEAT_TIMEOUT, 20*1000).
+-record(status, {count=0}).
+
+init(_Any, Req, State) ->
+        NowCount = count_server:welcome(),
+        io:format("online user ~p :))~n", [NowCount]),
+
+        output_first(Req),
+        Req2 = cowboy_req:compact(Req),
+        {loop, Req2, State, hibernate}.
+
+%% POST/Short Request
+info(_Any, Req, State) ->
+        {loop, Req, State, hibernate}.
+
+output_first(Req) ->
+        {ok, Reply} = cowboy_req:chunked_reply(200, [{<<"Content-Type">>,
+<<"text/html; charset=utf-8">>},
+
+{<<"Connection">>, <<"keep-alive">>}], Req),
+        cowboy_req:chunk(<<"<html><body><script>var _ = function (msg) {
+parent.s._(msg, document);
+};</script>
+">>,
+                                                                Reply),
+        cowboy_req:chunk(gen_output("1::"), Reply).
+
+gen_output(String) ->
+        DescList = io_lib:format("<script>_('~s');</script>", [String]),
+        list_to_binary(DescList).
+
+terminate(Reason, _Req, _State) ->
+        NowCount = count_server:bye(),
+        io:format("offline user ~p :(( ~n", [NowCount]).
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130426/9d234e27/attachment.html>
+
+From erlang at rambocoder.com  Fri Apr 26 15:11:53 2013
+From: erlang at rambocoder.com (rambocoder)
+Date: Fri, 26 Apr 2013 09:11:53 -0400
+Subject: [99s-extend] cowboy how to ruduce the memory usage per
+	long-hold connection
+In-Reply-To: <CAN_mQBobPN0zdpqJ3WtGKJaRMNiutvurgJfncMCqM3qtUHTm1g@mail.gmail.com>
+References: <CAN_mQBobPN0zdpqJ3WtGKJaRMNiutvurgJfncMCqM3qtUHTm1g@mail.gmail.com>
+Message-ID: <CAJ0zLRPcYmH1OXeiw2aZHLtoqqdW=du0rhonF53xdCbMUmnCLw@mail.gmail.com>
+
+Is 13.6K/connection considered a lot? Once you start doing SSL, each
+connection will be about 80K, IMHO the most important factor for huge
+ammount of COMET users is latency, which Cowboy and Erlang do great.
+
+-rambocoder
+
+On Fri, Apr 26, 2013 at 2:11 AM, yongboy <yongboy at gmail.com> wrote:
+
+> I have tested one long-hold webapp, when 512000 user connected, the app
+> used
+> 6801M memory, 6801M*1024K / 512000 = 13.6K/Connection.
+>
+> Does anyone give me some advice on how to reduce the memory usage per one
+> connection, thanks very much !
+>
+> Here is the code snippet:
+>
+> start(_Type, _Args) ->
+>         Dispatch = cowboy_router:compile([
+>             {'_', [{'_', htmlfile_handler, []}]}
+>         ]),
+>         cowboy:start_http(my_http_listener, 100,
+>             [{port, 8000}, {max_connections, infinity}],
+>             [{env, [{dispatch, Dispatch}]}]
+>         ),
+>         count_server:start(),
+>         htmlfilesimple_sup:start_link().
+>
+> ......
+>
+> -module(htmlfile_handler).
+> -behaviour(cowboy_loop_handler).
+> -export([init/3, info/3, terminate/3]).
+> -define(HEARBEAT_TIMEOUT, 20*1000).
+> -record(status, {count=0}).
+>
+> init(_Any, Req, State) ->
+>         NowCount = count_server:welcome(),
+>         io:format("online user ~p :))~n", [NowCount]),
+>
+>         output_first(Req),
+>         Req2 = cowboy_req:compact(Req),
+>         {loop, Req2, State, hibernate}.
+>
+> %% POST/Short Request
+> info(_Any, Req, State) ->
+>         {loop, Req, State, hibernate}.
+>
+> output_first(Req) ->
+>         {ok, Reply} = cowboy_req:chunked_reply(200, [{<<"Content-Type">>,
+> <<"text/html; charset=utf-8">>},
+>
+> {<<"Connection">>, <<"keep-alive">>}], Req),
+>         cowboy_req:chunk(<<"<html><body><script>var _ = function (msg) {
+> parent.s._(msg, document);
+> };</script>
+> ">>,
+>                                                                 Reply),
+>         cowboy_req:chunk(gen_output("1::"), Reply).
+>
+> gen_output(String) ->
+>         DescList = io_lib:format("<script>_('~s');</script>", [String]),
+>         list_to_binary(DescList).
+>
+> terminate(Reason, _Req, _State) ->
+>         NowCount = count_server:bye(),
+>         io:format("offline user ~p :(( ~n", [NowCount]).
+>
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130426/b1e8ae7a/attachment.html>
+
+From essen at ninenines.eu  Fri Apr 26 17:21:32 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 26 Apr 2013 17:21:32 +0200
+Subject: [99s-extend] [ANN] Cowboy 0.8.4
+Message-ID: <517A9B7C.8090706@ninenines.eu>
+
+Hello,
+
+Cowboy 0.8.4 has been released!
+
+This release features a tentatively stable API. This means that the 
+complete API defined in this release should not change anymore. The API 
+will be augmented with many features and functions of course, but 
+existing code should not break anymore. Changes will only be considered 
+if a feature causes bugs or too much confusion to the majority of users.
+
+This release includes all the remaining changes that had to be done to 
+REST, which is now no longer experimental and has documentation that you 
+can find here:
+
+   http://ninenines.eu/docs/en/cowboy/HEAD/guide/rest_handlers
+
+Diagrams and their explanations will be added to the documentation in 
+the next few days.
+
+The full changelog for this release can be found here: 
+https://github.com/extend/cowboy/commit/46b2ea0aaa7fe891bfdf3f8a0c47357393e72cf6
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From gdesouza at gmail.com  Tue Apr 30 20:59:21 2013
+From: gdesouza at gmail.com (Gregory de Souza)
+Date: Tue, 30 Apr 2013 14:59:21 -0400
+Subject: [99s-extend] cowboy websocket and wamp
+Message-ID: <CAAh+K4zu6f1CM1Dij7XsnUCLXXqaS3E6ZugABuaiST99Pz+KnA@mail.gmail.com>
+
+Hi,
+I'm new to the community and am exploring cowboy for a project.
+
+Can anyone offer guidance/links on how to use cowboy's websocket support
+with WAMP (http://wamp.ws/)?
+The cowboy docs mention bullet <https://github.com/extend/bullet?source=cr> as
+a convenient client/server lib (with an AJAX fallback) which is great, but
+I'd like to use WAMP's RPC and PubSub so I'm unsure how to proceed.
+
+Any tips would be appreciated!
+
+Thanks in advance
+-- 
+Gregory | @gdesouza <http://twitter.com/gdesouza> | http://blog.gdesouza.me
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130430/c86f8fdb/attachment.html>
+

@@ -1,0 +1,80 @@
+From darkit at gmail.com  Wed Jun  5 21:50:25 2013
+From: darkit at gmail.com (Max Grigoriev)
+Date: Wed, 5 Jun 2013 22:50:25 +0300
+Subject: [99s-extend] Cowboy handler and custom gen_server link
+Message-ID: <CAM=nw2VPVVFjVW22fwzA-poQJbM4Yakh9-cZ8L5igHMVi-BSoA@mail.gmail.com>
+
+Hi,
+
+I'm trying to implement REST handler which communicates to custom
+gen_servers.
+
+Get gen_server from supervisor and link to current handler process:
+
+rest_init(Req, _Opts) ->
+...
+  process_flag(trap_exit, true),
+  {ok, Pid} = pbshare_logic_sup:start_registration(),
+  link(Pid),
+...
+
+make_get(Req, State) ->
+....
+make error here !!!
+....
+
+
+And gen_server code:
+start_link() ->
+  gen_server:start_link(?MODULE, [], []).
+
+init(Args) ->
+  process_flag(trap_exit, true),
+  {ok, []}.
+
+handle_info({'EXIT', FromPid, Reason}, State) ->
+  lager:info("Exit Logic from ~p  Reason: ~p~n", [FromPid, Reason]),
+  {noreply, State};
+
+So I expect to receive EXIT signal from REST handler to my gen_server when
+error occurs in cowboy.
+But I don't receive it. Am I doing something wrong?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130605/568478c8/attachment.html>
+
+From essen at ninenines.eu  Thu Jun 20 16:15:34 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 20 Jun 2013 16:15:34 +0200
+Subject: [99s-extend] [ANN] Cowboy 0.8.6 and Ranch 0.8.4 (R16B01 compatible)
+Message-ID: <51C30E86.8050305@ninenines.eu>
+
+Hello,
+
+Just a heads up, a new version of Cowboy and Ranch has been pushed that 
+fixes compilation and documentation for R16B01: you now need the asn1 
+application to be started when using SSL. They will be started 
+automatically if they weren't before, but you will need them in your 
+release (done automatically with relx).
+
+Other interesting changes for Cowboy include:
+
+  *  Support for compression of Websocket frames (thanks Ali Sabil)
+
+  *  Initial support for SPDY
+
+Both are experimental features and undocumented at this point, but 
+feedback is more than welcome. See the changelog for more information.
+
+  *  https://github.com/extend/cowboy
+  *  https://github.com/extend/ranch
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+

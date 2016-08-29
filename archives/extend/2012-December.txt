@@ -1,0 +1,591 @@
+From list1 at gjunka.com  Wed Dec 12 22:14:50 2012
+From: list1 at gjunka.com (Grzegorz Junka)
+Date: Wed, 12 Dec 2012 21:14:50 +0000
+Subject: [99s-extend] Streaming response in cowboy question
+Message-ID: <50C8F3CA.7040002@gjunka.com>
+
+I am implementing a proxy on top of Cowboy. Is it possible to stream the 
+response back to Cowboy as I receive it from the destination server?
+
+I am thinking about something like specifying a fun instead of Response 
+Body when sending the reply so that Cowboy could call it to receive the 
+response in chunks (see send_req in 
+https://github.com/cmullaparthi/ibrowse/blob/master/src/ibrowse.erl).
+
+
+
+From essen at ninenines.eu  Wed Dec 12 22:30:46 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 12 Dec 2012 22:30:46 +0100
+Subject: [99s-extend] Streaming response in cowboy question
+In-Reply-To: <50C8F3CA.7040002@gjunka.com>
+References: <50C8F3CA.7040002@gjunka.com>
+Message-ID: <50C8F786.9070109@ninenines.eu>
+
+On 12/12/2012 10:14 PM, Grzegorz Junka wrote:
+> I am implementing a proxy on top of Cowboy. Is it possible to stream the
+> response back to Cowboy as I receive it from the destination server?
+>
+> I am thinking about something like specifying a fun instead of Response
+> Body when sending the reply so that Cowboy could call it to receive the
+> response in chunks (see send_req in
+> https://github.com/cmullaparthi/ibrowse/blob/master/src/ibrowse.erl).
+
+Lookup cowboy_req:set_resp_body_fun? Tell me if that fits your needs.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Sun Dec 16 19:24:00 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sun, 16 Dec 2012 19:24:00 +0100
+Subject: [99s-extend] Nine Nines IRC Channel
+Message-ID: <50CE11C0.5040505@ninenines.eu>
+
+Hello,
+
+I have started the #ninenines IRC Channel on irc.freenode.net for anyone 
+looking for quick help or willing to participate in Cowboy development 
+or any other related project (Ranch, Bullet, Sheriff and upcoming projects).
+
+Discussions will be centered about these projects and related subjects.
+
+Repositories will soon be updated with information about this IRC channel.
+
+Feel free to come and hang out.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From jeremy at playmesh.com  Sun Dec 16 20:10:16 2012
+From: jeremy at playmesh.com (Jeremy Ong)
+Date: Sun, 16 Dec 2012 11:10:16 -0800
+Subject: [99s-extend] Nine Nines IRC Channel
+In-Reply-To: <50CE11C0.5040505@ninenines.eu>
+References: <50CE11C0.5040505@ninenines.eu>
+Message-ID: <CA+Jb5n4quyppnpe_CF3rtQcKTJ6yq5F8WYUHHbkaJf4vWWc1Vw@mail.gmail.com>
+
+See you there!
+
+Jeremy (banachtarski)
+
+
+On Sun, Dec 16, 2012 at 10:24 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Hello,
+>
+> I have started the #ninenines IRC Channel on irc.freenode.net for anyone
+> looking for quick help or willing to participate in Cowboy development or
+> any other related project (Ranch, Bullet, Sheriff and upcoming projects).
+>
+> Discussions will be centered about these projects and related subjects.
+>
+> Repositories will soon be updated with information about this IRC channel.
+>
+> Feel free to come and hang out.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> ______________________________**_________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20121216/2d0b0da5/attachment.html>
+
+From erlang at rambocoder.com  Fri Dec 21 04:34:23 2012
+From: erlang at rambocoder.com (rambocoder)
+Date: Thu, 20 Dec 2012 22:34:23 -0500
+Subject: [99s-extend] Cowboy HTTPS connection memory usage
+Message-ID: <CAJ0zLRMmSoLzQVdsYHq+MZkbZ4xggVYH_XwWaPd83b-Aa=ftrw@mail.gmail.com>
+
+Does anybody know either from benchmarks or real world data what is the
+average memory footprint of each concurrent HTTPS connection to cowboy?
+
+SSL app in Erlang reuses SSL session-ids so I am not sure if the Apache
+Bench I test with reuses the session id or it does not.
+
+BTW, what makes an erlang api "documented" vs "undocumented". For example
+ssl:session_info/1 function here (
+https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411 ) has a
+spec and a short doc, but session_info is not described
+http://www.erlang.org/doc/man/ssl.html .ssl:session_info/1 is a useful
+function to be able to track if the load generator is reusing the SSL
+session_id or it is generating new one, because that would make all the
+difference during measurement due to Erlang caching SSL sessions by default.
+
+Sincerely,
+
+rambocoder
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20121220/631f7f13/attachment.html>
+
+From essen at ninenines.eu  Fri Dec 21 12:45:23 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 21 Dec 2012 12:45:23 +0100
+Subject: [99s-extend] Cowboy HTTPS connection memory usage
+In-Reply-To: <CAJ0zLRMmSoLzQVdsYHq+MZkbZ4xggVYH_XwWaPd83b-Aa=ftrw@mail.gmail.com>
+References: <CAJ0zLRMmSoLzQVdsYHq+MZkbZ4xggVYH_XwWaPd83b-Aa=ftrw@mail.gmail.com>
+Message-ID: <50D44BD3.4030008@ninenines.eu>
+
+On 12/21/2012 04:34 AM, rambocoder wrote:
+> Does anybody know either from benchmarks or real world data what is the
+> average memory footprint of each concurrent HTTPS connection to cowboy?
+
+I don't have anything, sorry. I'm guessing it consumes a lot more than 
+TCP though.
+
+> SSL app in Erlang reuses SSL session-ids so I am not sure if the Apache
+> Bench I test with reuses the session id or it does not.
+
+I wouldn't know, but I wouldn't trust Apache Bench doing the right 
+thing. Any other benchmark tool usually works better in my experience.
+
+> BTW, what makes an erlang api "documented" vs "undocumented". For
+> example ssl:session_info/1 function here (
+> https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411 ) has
+> a spec and a short doc, but session_info is not described
+> http://www.erlang.org/doc/man/ssl.html .ssl:session_info/1 is a useful
+> function to be able to track if the load generator is reusing the SSL
+> session_id or it is generating new one, because that would make all the
+> difference during measurement due to Erlang caching SSL sessions by default.
+
+The documentation is separate (they're not using edoc). It's perhaps not 
+deemed useful enough for documenting it. I wouldn't worry about using it 
+for measurements though.
+
+Try asking Ingela on the ML about it, perhaps they just forgot to 
+document it.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From erlang at rambocoder.com  Fri Dec 21 17:49:37 2012
+From: erlang at rambocoder.com (rambocoder)
+Date: Fri, 21 Dec 2012 11:49:37 -0500
+Subject: [99s-extend] Cowboy HTTPS connection memory usage
+In-Reply-To: <50D44BD3.4030008@ninenines.eu>
+References: <CAJ0zLRMmSoLzQVdsYHq+MZkbZ4xggVYH_XwWaPd83b-Aa=ftrw@mail.gmail.com>
+ <50D44BD3.4030008@ninenines.eu>
+Message-ID: <CAJ0zLRM4mBK0Du8W0Dg84D6vOqpMTOOOqbJD5L0ZO9cyxR=rZg@mail.gmail.com>
+
+In my preliminary testing, I used Jmeter this morning since it's an
+easy GUI load testing app and this is what I am seeing:
+
+With R15B03-01 [smp:4:4] [async-threads:4] [hipe] [kernel-poll:true], when
+I establish 1K concurrent connections via HTTPS, each connection takes up
+about 68K of memory.
+
+Unfortunately, after about 1050-1200 connections, on my test server the
+Erlang scheduler jumps to 100% CPU utilization on all 4 schedulers, while
+up to that point the scheduler's load was oscillating up and down. Using
+the Observer, there is only 1 ssl_connection_sup  in the ssl application,
+having to deal with 1000+ gen_fsm workers, so that might be the bottleneck.
+Since the ulimit on my server is 50000 I don't think I am hitting any type
+of file handler's limit.
+
+Lo?c and the group, am I missing some setting that is causing the scheduler
+to go to 100% CPU and the run que in observer to be 99?
+
+Sincerely,
+
+rambocoder
+
+
+On Fri, Dec 21, 2012 at 6:45 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> On 12/21/2012 04:34 AM, rambocoder wrote:
+>
+>> Does anybody know either from benchmarks or real world data what is the
+>> average memory footprint of each concurrent HTTPS connection to cowboy?
+>>
+>
+> I don't have anything, sorry. I'm guessing it consumes a lot more than TCP
+> though.
+>
+>
+>  SSL app in Erlang reuses SSL session-ids so I am not sure if the Apache
+>> Bench I test with reuses the session id or it does not.
+>>
+>
+> I wouldn't know, but I wouldn't trust Apache Bench doing the right thing.
+> Any other benchmark tool usually works better in my experience.
+>
+>
+>  BTW, what makes an erlang api "documented" vs "undocumented". For
+>> example ssl:session_info/1 function here (
+>> https://github.com/erlang/otp/**blob/maint/lib/ssl/src/ssl.**erl#L411<https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411>) has
+>> a spec and a short doc, but session_info is not described
+>> http://www.erlang.org/doc/man/**ssl.html<http://www.erlang.org/doc/man/ssl.html>.ssl:session_info/1 is a useful
+>> function to be able to track if the load generator is reusing the SSL
+>> session_id or it is generating new one, because that would make all the
+>> difference during measurement due to Erlang caching SSL sessions by
+>> default.
+>>
+>
+> The documentation is separate (they're not using edoc). It's perhaps not
+> deemed useful enough for documenting it. I wouldn't worry about using it
+> for measurements though.
+>
+> Try asking Ingela on the ML about it, perhaps they just forgot to document
+> it.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20121221/8bfb2f11/attachment.html>
+
+From essen at ninenines.eu  Fri Dec 21 17:51:14 2012
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 21 Dec 2012 17:51:14 +0100
+Subject: [99s-extend] Cowboy HTTPS connection memory usage
+In-Reply-To: <CAJ0zLRM4mBK0Du8W0Dg84D6vOqpMTOOOqbJD5L0ZO9cyxR=rZg@mail.gmail.com>
+References: <CAJ0zLRMmSoLzQVdsYHq+MZkbZ4xggVYH_XwWaPd83b-Aa=ftrw@mail.gmail.com>
+ <50D44BD3.4030008@ninenines.eu>
+ <CAJ0zLRM4mBK0Du8W0Dg84D6vOqpMTOOOqbJD5L0ZO9cyxR=rZg@mail.gmail.com>
+Message-ID: <50D49382.7020309@ninenines.eu>
+
+Can you try enabling eprof to see where the VM spends its time?
+
+On 12/21/2012 05:49 PM, rambocoder wrote:
+> In my preliminary testing, I used Jmeter this morning since it's an
+> easy GUI load testing app and this is what I am seeing:
+>
+> With R15B03-01 [smp:4:4] [async-threads:4] [hipe] [kernel-poll:true],
+> when I establish 1K concurrent connections via HTTPS, each connection
+> takes up about 68K of memory.
+>
+> Unfortunately, after about 1050-1200 connections, on my test server the
+> Erlang scheduler jumps to 100% CPU utilization on all 4 schedulers,
+> while up to that point the scheduler's load was oscillating up and down.
+> Using the Observer, there is only 1 ssl_connection_sup  in the ssl
+> application, having to deal with 1000+ gen_fsm workers, so that might be
+> the bottleneck. Since the ulimit on my server is 50000 I don't think I
+> am hitting any type of file handler's limit.
+>
+> Lo?c and the group, am I missing some setting that is causing the
+> scheduler to go to 100% CPU and the run que in observer to be 99?
+>
+> Sincerely,
+>
+> rambocoder
+>
+>
+>
+> On Fri, Dec 21, 2012 at 6:45 AM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     On 12/21/2012 04:34 AM, rambocoder wrote:
+>
+>         Does anybody know either from benchmarks or real world data what
+>         is the
+>         average memory footprint of each concurrent HTTPS connection to
+>         cowboy?
+>
+>
+>     I don't have anything, sorry. I'm guessing it consumes a lot more
+>     than TCP though.
+>
+>
+>         SSL app in Erlang reuses SSL session-ids so I am not sure if the
+>         Apache
+>         Bench I test with reuses the session id or it does not.
+>
+>
+>     I wouldn't know, but I wouldn't trust Apache Bench doing the right
+>     thing. Any other benchmark tool usually works better in my experience.
+>
+>
+>         BTW, what makes an erlang api "documented" vs "undocumented". For
+>         example ssl:session_info/1 function here (
+>         https://github.com/erlang/otp/__blob/maint/lib/ssl/src/ssl.__erl#L411
+>         <https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411>
+>         ) has
+>         a spec and a short doc, but session_info is not described
+>         http://www.erlang.org/doc/man/__ssl.html
+>         <http://www.erlang.org/doc/man/ssl.html> .ssl:session_info/1 is
+>         a useful
+>         function to be able to track if the load generator is reusing
+>         the SSL
+>         session_id or it is generating new one, because that would make
+>         all the
+>         difference during measurement due to Erlang caching SSL sessions
+>         by default.
+>
+>
+>     The documentation is separate (they're not using edoc). It's perhaps
+>     not deemed useful enough for documenting it. I wouldn't worry about
+>     using it for measurements though.
+>
+>     Try asking Ingela on the ML about it, perhaps they just forgot to
+>     document it.
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From erlang at rambocoder.com  Fri Dec 21 20:25:10 2012
+From: erlang at rambocoder.com (rambocoder)
+Date: Fri, 21 Dec 2012 14:25:10 -0500
+Subject: [99s-extend] Cowboy HTTPS connection memory usage
+In-Reply-To: <50D49382.7020309@ninenines.eu>
+References: <CAJ0zLRMmSoLzQVdsYHq+MZkbZ4xggVYH_XwWaPd83b-Aa=ftrw@mail.gmail.com>
+ <50D44BD3.4030008@ninenines.eu>
+ <CAJ0zLRM4mBK0Du8W0Dg84D6vOqpMTOOOqbJD5L0ZO9cyxR=rZg@mail.gmail.com>
+ <50D49382.7020309@ninenines.eu>
+Message-ID: <CAJ0zLRNud5vq9CnvZm8AgH1ZMPCzdkFe5tzdi5s13iP4HR6cuQ@mail.gmail.com>
+
+Long story short, I solved the problem by adding {max_connections, 50000}
+to cowboy:start_https because it default to 1024 at
+https://github.com/extend/ranch/blob/master/src/ranch_listener_sup.erl#L30
+
+However, before I figured out that setting, I did run eprof and these are
+the function calls it was spending most of it's time on
+
+
+FUNCTION                                    CALLS      %   TIME  [uS /
+CALLS]
+--------                                    -----    ---   ----
+ [----------]
+dict:get_slot/2                               174   1.73   1658  [
+ 9.53]
+dict:on_bucket/3                              171   1.77   1701  [
+ 9.95]
+erlang:setelement/3                           684   3.23   3098  [
+ 4.53]
+dict:store_bkt_val/3                          600   5.24   5028  [
+ 8.38]
+
+Then I ran etop and it showed that ranch_acceptor:maybe_wait had the most
+reductions were, so I looked at the code in that
+https://github.com/extend/ranch/blob/master/src/ranch_acceptor.erl#L72 and
+realized that like a newb I did not set the maximum connections for the
+listener :)
+
+Problem solved. Looks like I won't need to put HAProxy in front of Cowboy
+after all.
+
+Thank you,
+
+rambocoder
+
+On Fri, Dec 21, 2012 at 11:51 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Can you try enabling eprof to see where the VM spends its time?
+>
+>
+> On 12/21/2012 05:49 PM, rambocoder wrote:
+>
+>> In my preliminary testing, I used Jmeter this morning since it's an
+>> easy GUI load testing app and this is what I am seeing:
+>>
+>> With R15B03-01 [smp:4:4] [async-threads:4] [hipe] [kernel-poll:true],
+>> when I establish 1K concurrent connections via HTTPS, each connection
+>> takes up about 68K of memory.
+>>
+>> Unfortunately, after about 1050-1200 connections, on my test server the
+>> Erlang scheduler jumps to 100% CPU utilization on all 4 schedulers,
+>> while up to that point the scheduler's load was oscillating up and down.
+>> Using the Observer, there is only 1 ssl_connection_sup  in the ssl
+>> application, having to deal with 1000+ gen_fsm workers, so that might be
+>> the bottleneck. Since the ulimit on my server is 50000 I don't think I
+>> am hitting any type of file handler's limit.
+>>
+>> Lo?c and the group, am I missing some setting that is causing the
+>> scheduler to go to 100% CPU and the run que in observer to be 99?
+>>
+>> Sincerely,
+>>
+>> rambocoder
+>>
+>>
+>>
+>> On Fri, Dec 21, 2012 at 6:45 AM, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     On 12/21/2012 04:34 AM, rambocoder wrote:
+>>
+>>         Does anybody know either from benchmarks or real world data what
+>>         is the
+>>         average memory footprint of each concurrent HTTPS connection to
+>>         cowboy?
+>>
+>>
+>>     I don't have anything, sorry. I'm guessing it consumes a lot more
+>>     than TCP though.
+>>
+>>
+>>         SSL app in Erlang reuses SSL session-ids so I am not sure if the
+>>         Apache
+>>         Bench I test with reuses the session id or it does not.
+>>
+>>
+>>     I wouldn't know, but I wouldn't trust Apache Bench doing the right
+>>     thing. Any other benchmark tool usually works better in my experience.
+>>
+>>
+>>         BTW, what makes an erlang api "documented" vs "undocumented". For
+>>         example ssl:session_info/1 function here (
+>>         https://github.com/erlang/otp/**__blob/maint/lib/ssl/src/ssl._**
+>> _erl#L411<https://github.com/erlang/otp/__blob/maint/lib/ssl/src/ssl.__erl#L411>
+>>
+>>         <https://github.com/erlang/**otp/blob/maint/lib/ssl/src/**
+>> ssl.erl#L411<https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411>
+>> >
+>>         ) has
+>>         a spec and a short doc, but session_info is not described
+>>         http://www.erlang.org/doc/man/**__ssl.html<http://www.erlang.org/doc/man/__ssl.html>
+>>
+>>         <http://www.erlang.org/doc/**man/ssl.html<http://www.erlang.org/doc/man/ssl.html>>
+>> .ssl:session_info/1 is
+>>         a useful
+>>         function to be able to track if the load generator is reusing
+>>         the SSL
+>>         session_id or it is generating new one, because that would make
+>>         all the
+>>         difference during measurement due to Erlang caching SSL sessions
+>>         by default.
+>>
+>>
+>>     The documentation is separate (they're not using edoc). It's perhaps
+>>     not deemed useful enough for documenting it. I wouldn't worry about
+>>     using it for measurements though.
+>>
+>>     Try asking Ingela on the ML about it, perhaps they just forgot to
+>>     document it.
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     Erlang Cowboy
+>>     Nine Nines
+>>     http://ninenines.eu
+>>
+>>
+>>
+>>
+>> ______________________________**_________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+>
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20121221/945f636e/attachment.html>
+
+From essen at ninenines.eu  Mon Dec 24 23:42:43 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 24 Dec 2012 23:42:43 +0100
+Subject: [99s-extend] [ANN] Ranch 0.6.0 Xmas Edition Released
+Message-ID: <50D8DA63.2060600@ninenines.eu>
+
+Ho ho ho!
+
+I have just tagged version 0.6.0 of the Ranch project!
+
+Ranch is a socket acceptor pool for TCP protocols.
+
+   https://github.com/extend/ranch
+
+Ranch is used by the next version of Cowboy, 0.8.0, set to be released 
+early February, but also in Basho's Riak multi-data center replication 
+amongst others.
+
+All tickets have been resolved. A significant contribution was made by 
+Andrew Majorov to improve the fault tolerance capabilities of the 
+application, making sure it always restarts properly when things go 
+wrong. This has been made possible thanks to the amazing project from 
+Daniel Luna, chaos_monkey (https://github.com/dluna/chaos_monkey).
+
+The guide has also been improved and completed.
+
+   http://ninenines.eu/docs/en/ranch/HEAD/guide/introduction
+
+If the guide isn't enough, drop by our new IRC channel dedicated to 
+Cowboy, Ranch and all our other projects! #ninenines on Freenode.
+
+Following is the list of change since last time:
+
+  *  Improve fault tolerance thanks to chaos_monkey testing
+  *  Add 'nodelay' option to transports
+  *  Add 'verify' option to ranch_ssl transport
+  *  Add 'socket' option to pass an already open socket to the listener
+  *  Add Transport:sendfile/2 function (uses a fallback if unavailable)
+  *  Allow IP tuples in Transport:connect/3
+  *  Add ranch:set_max_connections/2 to update the value live
+  *  Add ranch:get_max_connections/1 to retrieve it
+
+We are always looking for feedback, especially now that there is no 
+ticket left open on this project. If you are using Ranch and have 
+questions or needs that it doesn't cover, please send them to us.
+
+Commercial support will be available starting from January, ping me if 
+you are interested. Details will be announced at a later time on the 
+ninenines.eu mailing list.
+
+I want to thank all contributors for helping this project by opening 
+tickets, sending patches and offering feedback. I am as always very 
+grateful for any and all contributions. I wouldn't have made it this far 
+without the tremendous help I receive everyday.
+
+Thanks to all and have a nice holiday!
+
+-- 
+Lo?c Hoguin
+Erlang Santa
+Nine Nines
+http://ninenines.eu
+
+

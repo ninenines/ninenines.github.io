@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Rewriting URLs
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Rewriting%20URLs&In-Reply-To=%3C1422225008.17343.6.camel%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000500.html">
+   <LINK REL="Next"  HREF="000497.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Rewriting URLs</H1>
+    <B>Paul Dickson</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Rewriting%20URLs&In-Reply-To=%3C1422225008.17343.6.camel%40gmail.com%3E"
+       TITLE="[99s-extend] Rewriting URLs">pdtwonotes at gmail.com
+       </A><BR>
+    <I>Sun Jan 25 23:30:08 CET 2015</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000500.html">[99s-extend] Cowboy + SSL
+</A></li>
+        <LI>Next message: <A HREF="000497.html">[99s-extend] Rewriting URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#496">[ date ]</a>
+              <a href="thread.html#496">[ thread ]</a>
+              <a href="subject.html#496">[ subject ]</a>
+              <a href="author.html#496">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I am trying to write a middleware step that will modify the URL in a
+request before it gets to the default static request handler.  I can not
+find an example of how to do this.  What I&#12288;have so far:
+
+execute( Req, Env ) -&gt;
+    HostUrl = cowboy_req:host_url(Req),
+    NewUrl = rewrite( HostUrl ),
+    NewReq = ???
+    {ok, NewReq, Env}.
+
+How do I modify a Request object so that it contains my modified URL,
+which cowboy_static will then process normally?  My 'rewrite' function
+converts logical directory names into real file-system paths, using a
+dynamic algorithm that can not be simply written into cowboy's dispatch
+rules.
+
+The dispatch rules I am using is as follows, where 'bz_libmap' is my
+module containing the code above:
+	    {&quot;/music/[...]&quot;, cowboy_static, {dir, bz_libmap, &quot;&quot;}},
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20150125/370811e4/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20150125/370811e4/attachment.html</A>&gt;
+</PRE>
+
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000500.html">[99s-extend] Cowboy + SSL
+</A></li>
+	<LI>Next message: <A HREF="000497.html">[99s-extend] Rewriting URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#496">[ date ]</a>
+              <a href="thread.html#496">[ thread ]</a>
+              <a href="subject.html#496">[ subject ]</a>
+              <a href="author.html#496">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

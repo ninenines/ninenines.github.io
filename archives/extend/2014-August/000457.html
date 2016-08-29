@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] I need your feedback about this cowboy_rest	handler.
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20I%20need%20your%20feedback%20about%20this%20cowboy_rest%0A%09handler.&In-Reply-To=%3CCA%2BdV7cRD-UszqUz9gv5KH4rtmW%2BgC6a7tEJYQco66i891%2BTqbg%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000452.html">
+   <LINK REL="Next"  HREF="000453.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] I need your feedback about this cowboy_rest	handler.</H1>
+    <B>Paulo F. Oliveira</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20I%20need%20your%20feedback%20about%20this%20cowboy_rest%0A%09handler.&In-Reply-To=%3CCA%2BdV7cRD-UszqUz9gv5KH4rtmW%2BgC6a7tEJYQco66i891%2BTqbg%40mail.gmail.com%3E"
+       TITLE="[99s-extend] I need your feedback about this cowboy_rest	handler.">paulo.ferraz.oliveira at gmail.com
+       </A><BR>
+    <I>Sat Aug 30 00:15:56 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000452.html">[99s-extend] I need your feedback about this cowboy_rest	handler.
+</A></li>
+        <LI>Next message: <A HREF="000453.html">[99s-extend] Which erlang.mk?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#457">[ date ]</a>
+              <a href="thread.html#457">[ thread ]</a>
+              <a href="subject.html#457">[ subject ]</a>
+              <a href="author.html#457">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>PUT _should_ (there is no police here though) be used to either create
+a resource or completely update it (it's refered to as &quot;upsert&quot; by
+some; in Redis, for example, a similar concept would be &quot;set&quot;).
+Partial modifications should be made using PATCH. POST is what is
+commonly used to create a resource. According to
+<A HREF="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html</A> 412 is used
+when &quot;[t]he precondition given in one or more of the request-header
+fields evaluated to false when it was tested on the server.&quot; (also:
+<A HREF="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.24">http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.24</A>).
+
+- Paulo F. Oliveira
+
+On 27 August 2014 14:26, St&#233;phane Wirtel &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">stephane at wirtel.be</A>&gt; wrote:
+&gt;<i> On 27 Aug 2014, at 12:53, Lo&#239;c Hoguin wrote:
+</I>&gt;<i>
+</I>&gt;&gt;&gt;&gt;&gt;<i> * for PUT, how I have a 201? I have read the rest_flowchart and I need
+</I>&gt;&gt;&gt;&gt;&gt;<i> to specify the location header ok, but where? in the is_conflict
+</I>&gt;&gt;&gt;&gt;&gt;<i> function?
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;&gt;<i> Why do you need a 201? If you PUT a collection to /:collection then
+</I>&gt;&gt;&gt;&gt;<i> this is already the location of the collection. I am not sure what you
+</I>&gt;&gt;&gt;&gt;<i> are trying to do there exactly?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> In this case, the PUT method is used for the creation of the resource
+</I>&gt;&gt;&gt;<i> and not for the update. This is the reason of the 201 status code.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> In the rest_flowchart graph for the PUT/POST methods, what is the node
+</I>&gt;&gt;&gt;<i> &quot;new resource&quot; ? Is it just the {true, Req, State} from the callback
+</I>&gt;&gt;&gt;<i> defined in the content_types_accepted?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> PS: I retested and now, I have my 201 with PUT, just resource_exists has
+</I>&gt;&gt;&gt;<i> to return false and not true ;-)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> My bad I was a little confusing in my previous answer. You are right, if
+</I>&gt;&gt;<i> the resource doesn't exist and PUT is used we get a 201 automatically. The
+</I>&gt;&gt;<i> location header must only be provided if the resource was created elsewhere.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Don't worry and thank you for your answers.
+</I>&gt;<i>
+</I>&gt;<i> Stephane
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> St&#233;phane Wirtel - <A HREF="http://wirtel.be">http://wirtel.be</A> - @matrixise
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I></PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000452.html">[99s-extend] I need your feedback about this cowboy_rest	handler.
+</A></li>
+	<LI>Next message: <A HREF="000453.html">[99s-extend] Which erlang.mk?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#457">[ date ]</a>
+              <a href="thread.html#457">[ thread ]</a>
+              <a href="subject.html#457">[ subject ]</a>
+              <a href="author.html#457">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

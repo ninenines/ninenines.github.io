@@ -87,8 +87,8 @@ must return a <code>ws</code> tuple.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Upon receiving this tuple, Cowboy will switch to the code
 that handles Websocket connections and perform the handshake
 immediately.</p></div>
@@ -102,18 +102,18 @@ the connection, assuming no correct subprotocol was found.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
         <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
                 <span style="color: #000080">undefined</span> <span style="color: #990000">-&gt;</span>
-                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}};
+                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
                 <span style="color: #009900">Subprotocols</span> <span style="color: #990000">-&gt;</span>
                         <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">lists:keymember</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mychat2"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #993399">1</span>, <span style="color: #009900">Subprotocols</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
                                 <span style="color: #000080">true</span> <span style="color: #990000">-&gt;</span>
                                         <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>,
                                                 <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mychat2"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>),
-                                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #008080">#state</span>{}};
+                                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>};
                                 <span style="color: #000080">false</span> <span style="color: #990000">-&gt;</span>
-                                        {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #000080">undefined</span>}
+                                        {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
                         <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
         <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>It is not recommended to wait too long inside the <code>init/2</code>
@@ -129,10 +129,10 @@ or enabling timers.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
         <span style="font-weight: bold"><span style="color: #000080">self</span></span>() <span style="color: #990000">!</span> <span style="color: #FF6600">post_init</span>,
         <span style="font-style: italic"><span style="color: #9A1900">%% Register process here...</span></span>
-        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span>
+        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span>
 
 <span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #FF6600">post_init</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
         <span style="font-style: italic"><span style="color: #9A1900">%% Perform post_init initialization here...</span></span>
@@ -238,8 +238,8 @@ leave the process alive forever.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}, <span style="color: #993399">60000</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #993399">60000</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>This value cannot be changed once it is set. It defaults to
 <code>infinity</code>.</p></div>
 </div>

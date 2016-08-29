@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] question to rest handler
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20question%20to%20rest%20handler&In-Reply-To=%3CCALt%3DJ4P4vpHWTJ9D7JKbv04PU%3DktAsqMdbFnjF3zNLt7Kg9NmA%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000149.html">
+   <LINK REL="Next"  HREF="000144.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] question to rest handler</H1>
+    <B>Witali Monastyrjow</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20question%20to%20rest%20handler&In-Reply-To=%3CCALt%3DJ4P4vpHWTJ9D7JKbv04PU%3DktAsqMdbFnjF3zNLt7Kg9NmA%40mail.gmail.com%3E"
+       TITLE="[99s-extend] question to rest handler">chatlano at googlemail.com
+       </A><BR>
+    <I>Fri May 17 17:41:11 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000149.html">[99s-extend] REALLY SOLVED -- Re: SOLVED -- Re: &quot;access.log&quot; for Cowboy
+</A></li>
+        <LI>Next message: <A HREF="000144.html">[99s-extend] question to rest handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#143">[ date ]</a>
+              <a href="thread.html#143">[ thread ]</a>
+              <a href="subject.html#143">[ subject ]</a>
+              <a href="author.html#143">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi all,
+
+I am learning cowboy by building a small application with rest interface.
+I have a hello_world rest handler and I want to implement POST method that
+returns
+json as response to a client. Therefor I implemented  callbacks
+allowed_methods,
+content_types_accepted and hello_json. The docu says user callbacks can
+return {Value, Req, State} and also can return {halt, Req, State}. It is
+not really clear
+what that Value should be. So I tried {ok, Req, State} and {true, Req,
+State} and with
+both values I have
+
+=ERROR REPORT==== 11-May-2013::16:06:40 ===
+Error in process &lt;0.6649.0&gt; with exit value:
+{function_clause,[{cowboy_req,reply,[303,....
+
+and client gets right response. If I use {halt, Req, State} the client gets
+right response too
+and there is no errors. So, Is it right way to write a POST callback and
+what Values can
+be used for user callbacks? I write my code below.
+
+amike,
+Vitali
+
+allowed_methods(Req, State) -&gt;
+{[&lt;&lt;&quot;POST&quot;&gt;&gt;, &lt;&lt;&quot;DELETE&quot;&gt;&gt;], Req, State}.
+
+content_types_accepted(Req, State) -&gt;
+{[
+    {{&lt;&lt;&quot;application&quot;&gt;&gt;, &lt;&lt;&quot;x-www-form-urlencoded&quot;&gt;&gt;, []}, hello_json}
+ ], Req, State}.
+
+hello_json(Req, State) -&gt;
+{ok, Req2} = cowboy_req:reply(200, [{&lt;&lt;&quot;content-type&quot;&gt;&gt;,
+&lt;&lt;&quot;application/json&quot;&gt;&gt;} ], &lt;&lt;&quot;{\&quot;rest\&quot;: \&quot;Hello World!\&quot;}&quot;&gt;&gt;, Req),
+{halt, Req2, State}.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130517/629071b8/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130517/629071b8/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000149.html">[99s-extend] REALLY SOLVED -- Re: SOLVED -- Re: &quot;access.log&quot; for Cowboy
+</A></li>
+	<LI>Next message: <A HREF="000144.html">[99s-extend] question to rest handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#143">[ date ]</a>
+              <a href="thread.html#143">[ thread ]</a>
+              <a href="subject.html#143">[ subject ]</a>
+              <a href="author.html#143">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

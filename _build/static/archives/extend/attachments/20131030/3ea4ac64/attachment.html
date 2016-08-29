@@ -1,0 +1,88 @@
+<tt>
+&lt;div&nbsp;dir=&quot;ltr&quot;&gt;&lt;div&gt;That&#39;s&nbsp;what&nbsp;I&nbsp;was&nbsp;looking&nbsp;for,&nbsp;thanks!&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Dan.&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&nbsp;class=&quot;gmail_extra&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;div&nbsp;class=&quot;gmail_quote&quot;&gt;On&nbsp;Wed,&nbsp;Oct&nbsp;30,&nbsp;2013&nbsp;at&nbsp;10:25&nbsp;AM,&nbsp;Tilman&nbsp;Holschuh&nbsp;&lt;span&nbsp;dir=&quot;ltr&quot;&gt;&lt;&lt;a&nbsp;href=&quot;mailto:tilman.holschuh@gmail.com&quot;&nbsp;target=&quot;_blank&quot;&gt;tilman.holschuh@gmail.com&lt;/a&gt;&gt;&lt;/span&gt;&nbsp;wrote:&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;Why&nbsp;not&nbsp;let&nbsp;resource_exists/2&nbsp;return&nbsp;false&nbsp;when&nbsp;your&nbsp;resource&nbsp;does&nbsp;not&nbsp;exist?&nbsp;You&nbsp;will&nbsp;get&nbsp;404&nbsp;on&nbsp;false.&nbsp;This&nbsp;way&nbsp;you&nbsp;separate&nbsp;the&nbsp;implementation&nbsp;for&nbsp;turning&nbsp;your&nbsp;data&nbsp;to&nbsp;json&nbsp;from&nbsp;checking&nbsp;if&nbsp;the&nbsp;request&nbsp;went&nbsp;to&nbsp;the&nbsp;correct&nbsp;resource.&lt;br&gt;<br>
+<br>
+&lt;span&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;font&nbsp;color=&quot;#888888&quot;&gt;&lt;br&gt;<br>
+-&nbsp;Tilman&lt;br&gt;<br>
+&lt;/font&gt;&lt;/span&gt;&lt;div&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;div&nbsp;class=&quot;h5&quot;&gt;&lt;br&gt;<br>
+On&nbsp;2013-10-30,&nbsp;at&nbsp;7:58&nbsp;AM,&nbsp;Daniel&nbsp;Goertzen&nbsp;wrote:&lt;br&gt;<br>
+&lt;br&gt;<br>
+&gt;&nbsp;Well,&nbsp;this&nbsp;sort&nbsp;of&nbsp;works.&nbsp; I&nbsp;tried&nbsp;this&nbsp;in&nbsp;the&nbsp;response&nbsp;handler:&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ok,&nbsp;Req2}&nbsp;=&nbsp;cowboy_req:reply(404,&nbsp;[]&nbsp;,&nbsp;&lt;&lt;&quot;this&nbsp;is&nbsp;the&nbsp;body&nbsp;that&nbsp;gets&nbsp;used&quot;&gt;&gt;,&nbsp;Req1),&lt;br&gt;<br>
+&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{&lt;&lt;&quot;this&nbsp;body&nbsp;gets&nbsp;ignored&quot;&gt;&gt;,&nbsp;Req2,&nbsp;State};&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;The&nbsp;client&nbsp;receives&nbsp;a&nbsp;404&nbsp;response,&nbsp;but&nbsp;cowboy&nbsp;crashes:&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;=ERROR&nbsp;REPORT====&nbsp;8-Sep-2013::22:22:03&nbsp;===&lt;br&gt;<br>
+&gt;&nbsp;Error&nbsp;in&nbsp;process&nbsp;&lt;0.131.0&gt;&nbsp;with&nbsp;exit&nbsp;value:&nbsp;{function_clause,[{cowboy_req,reply,[200,[],&lt;&lt;31&nbsp;bytes&gt;&gt;,{http_req,#Port&lt;0.1208&gt;,ranch_tcp,keepalive,&lt;0.131.0&gt;,&lt;&lt;3&nbsp;bytes&gt;&gt;,&#39;HTTP/1.1&#39;,{{192,168,1,187},51017},&lt;&lt;12&nbsp;bytes&gt;&gt;,undefined,80,&lt;&lt;24&nbsp;bytes&gt;&gt;,undefined,&lt;&lt;0&nbsp;bytes&gt;&gt;,undefined,[{channel_num,3}],[{&lt;&lt;10&nbsp;bytes&gt;&gt;,&lt;&lt;11&nbsp;bytes&gt;&gt;},{&lt;&lt;4&nbsp;bytes&gt;&gt;,&lt;&lt;12&nbsp;bytes&gt;&gt;},{&lt;&lt;6&nbsp;bytes&gt;&gt;,&lt;&lt;3&nbsp;bytes&gt;&gt;}],[{&lt;&lt;17&nbsp;bytes&gt;&gt;,undefined},{&lt;&lt;13&nbsp;bytes&gt;&gt;,undefined},{&lt;&lt;19&nbsp;bytes&gt;&gt;,undefined},{&lt;&lt;8&nbsp;bytes&gt;&gt;,undefined},{&lt;&lt;6&nbsp;bytes&gt;&gt;,[...&lt;br&gt;<br>
+<br>
+&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;The&nbsp;issue&nbsp;is&nbsp;that&nbsp;the&nbsp;REST&nbsp;wrapper&nbsp;wants&nbsp;to&nbsp;do&nbsp;the&nbsp;cowboy_req:reply(),&nbsp;and&nbsp;when&nbsp;we&nbsp;do&nbsp;the&nbsp;call&nbsp;we&nbsp;cause&nbsp;the&nbsp;wrapper&#39;s&nbsp;call&nbsp;to&nbsp;fail.&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;Dan.&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;On&nbsp;Tue,&nbsp;Oct&nbsp;29,&nbsp;2013&nbsp;at&nbsp;4:01&nbsp;PM,&nbsp;Ivan&nbsp;uemlianin&nbsp;&lt;&lt;a&nbsp;href=&quot;mailto:ivan@llaisdy.com&quot;&gt;ivan@llaisdy.com&lt;/a&gt;&gt;&nbsp;wrote:&lt;br&gt;<br>
+&gt;&nbsp;Sorry&nbsp;for&nbsp;terse&nbsp;but&nbsp;I&nbsp;only&nbsp;have&nbsp;a&nbsp;phone.&nbsp;Why&nbsp;can&#39;t&nbsp;you&nbsp;return&nbsp;a&nbsp;404&nbsp;here?&nbsp; Using&nbsp;something&nbsp;like&nbsp;cowboy:reply(404,&nbsp;...&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;Ivan&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;--&lt;br&gt;<br>
+&gt;&nbsp;festina&nbsp;lente&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;On&nbsp;29&nbsp;Oct&nbsp;2013,&nbsp;at&nbsp;21:25,&nbsp;Daniel&nbsp;Goertzen&nbsp;&lt;&lt;a&nbsp;href=&quot;mailto:daniel.goertzen@gmail.com&quot;&gt;daniel.goertzen@gmail.com&lt;/a&gt;&gt;&nbsp;wrote:&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;My&nbsp;situation&nbsp;is&nbsp;that&nbsp;I&nbsp;have&nbsp;a&nbsp;rest&nbsp;handler&nbsp;that&nbsp;may&nbsp;fail&nbsp;due&nbsp;to&nbsp;invalid&nbsp;url&nbsp;segments.&nbsp; Example&nbsp;situation:&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;init(_Transport,&nbsp;_Req,&nbsp;_Opts)&nbsp;-&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{upgrade,&nbsp;protocol,&nbsp;cowboy_rest}.&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;content_types_provided(Req,&nbsp;State)&nbsp;-&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp;{[{&lt;&lt;&quot;application/json&quot;&gt;&gt;,&nbsp;get_json}],&nbsp;Req,&nbsp;State}.&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;get_json(Req0,&nbsp;State)&nbsp;-&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp;{Params,&nbsp;Req1}&nbsp;=&nbsp;lists:mapfoldl(fun&nbsp;cowboy_req:binding/2,&nbsp;Req0,&nbsp;[param1,&nbsp;param2,&nbsp;param3,&nbsp;....]),&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp;case&nbsp;catch&nbsp;other_module:request(Params)&nbsp;of&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{&#39;EXIT&#39;,&nbsp;{badarg,&nbsp;_}}&nbsp;-&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hmmm,&nbsp;Params&nbsp;were&nbsp;bad&nbsp;and&nbsp;I&nbsp;would&nbsp;like&nbsp;to&nbsp;return&nbsp;a&nbsp;404&nbsp;code&nbsp;now.&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Result&nbsp;-&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{jiffy:encode(Result),&nbsp;Req1,&nbsp;State}&lt;br&gt;<br>
+&gt;&gt;&nbsp; &nbsp; &nbsp;end.&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;So&nbsp;I&nbsp;would&nbsp;like&nbsp;to&nbsp;return&nbsp;a&nbsp;404&nbsp;code&nbsp;when&nbsp;my&nbsp;underlying&nbsp;request&nbsp;function&nbsp;fails,&nbsp;but&nbsp;it&nbsp;appears&nbsp;my&nbsp;choices&nbsp;are:&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;-&nbsp;return&nbsp;a&nbsp;200&nbsp;(ok)&nbsp;response&nbsp;with&nbsp;data.&lt;br&gt;<br>
+&gt;&gt;&nbsp;-&nbsp;crash&nbsp;and&nbsp;cause&nbsp;a&nbsp;500&nbsp;(Internal&nbsp;Server&nbsp;Error)&nbsp;response&nbsp;to&nbsp;be&nbsp;returned.&nbsp; Not&nbsp;exactly&nbsp;the&nbsp;sentiment&nbsp;I&nbsp;want.&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;Is&nbsp;there&nbsp;some&nbsp;other&nbsp;way&nbsp;to&nbsp;cause&nbsp;a&nbsp;404&nbsp;response?&lt;br&gt;<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;I&nbsp;realize&nbsp;I&nbsp;could&nbsp;add&nbsp;path&nbsp;constraint&nbsp;functions,&nbsp;but&nbsp;I&nbsp;will&nbsp;be&nbsp;replicating&nbsp;logic&nbsp;from&nbsp;my&nbsp;underlying&nbsp;request&nbsp;function.&nbsp; Furthermore,&nbsp;the&nbsp;constraint&nbsp;functions&nbsp;consider&nbsp;parameters&nbsp;in&nbsp;isolation,&nbsp;so&nbsp;that&nbsp;won&#39;t&nbsp;work&nbsp;if&nbsp;the&nbsp;validity&nbsp;of&nbsp;parameters&nbsp;is&nbsp;coupled.&lt;br&gt;<br>
+<br>
+&gt;&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;Thanks,&lt;br&gt;<br>
+&gt;&gt;&nbsp;Dan.&lt;br&gt;<br>
+&gt;&gt;&nbsp;_______________________________________________&lt;br&gt;<br>
+&gt;&gt;&nbsp;Extend&nbsp;mailing&nbsp;list&lt;br&gt;<br>
+&gt;&gt;&nbsp;&lt;a&nbsp;href=&quot;mailto:Extend@lists.ninenines.eu&quot;&gt;Extend@lists.ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&gt;&gt;&nbsp;&lt;a&nbsp;href=&quot;http://lists.ninenines.eu:81/listinfo/extend&quot;&nbsp;target=&quot;_blank&quot;&gt;http://lists.ninenines.eu:81/listinfo/extend&lt;/a&gt;&lt;br&gt;<br>
+&gt;&lt;br&gt;<br>
+&gt;&nbsp;_______________________________________________&lt;br&gt;<br>
+&gt;&nbsp;Extend&nbsp;mailing&nbsp;list&lt;br&gt;<br>
+&gt;&nbsp;&lt;a&nbsp;href=&quot;mailto:Extend@lists.ninenines.eu&quot;&gt;Extend@lists.ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&gt;&nbsp;&lt;a&nbsp;href=&quot;http://lists.ninenines.eu:81/listinfo/extend&quot;&nbsp;target=&quot;_blank&quot;&gt;http://lists.ninenines.eu:81/listinfo/extend&lt;/a&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;/div&gt;&lt;/div&gt;&lt;/blockquote&gt;&lt;/div&gt;&lt;br&gt;&lt;/div&gt;<br>
+
+</tt>

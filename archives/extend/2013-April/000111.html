@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Reading body_qs multiple times
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Reading%20body_qs%20multiple%20times&In-Reply-To=%3C516D3736.4000106%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000110.html">
+   <LINK REL="Next"  HREF="000112.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Reading body_qs multiple times</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Reading%20body_qs%20multiple%20times&In-Reply-To=%3C516D3736.4000106%40ninenines.eu%3E"
+       TITLE="[99s-extend] Reading body_qs multiple times">essen at ninenines.eu
+       </A><BR>
+    <I>Tue Apr 16 13:34:14 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000110.html">[99s-extend] Reading body_qs multiple times
+</A></li>
+        <LI>Next message: <A HREF="000112.html">[99s-extend] Cowboy CORS
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#111">[ date ]</a>
+              <a href="thread.html#111">[ thread ]</a>
+              <a href="subject.html#111">[ subject ]</a>
+              <a href="author.html#111">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 04/16/2013 02:13 AM, rambocoder wrote:
+&gt;<i> Loic,
+</I>&gt;<i>
+</I>&gt;<i> After giving the CSRF middleware some thought and reading
+</I>&gt;<i> <A HREF="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF">https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF</A>)_Prevention_Cheat_Sheet#Disclosure_of_Token_in_URL I
+</I>&gt;<i> came to conclusion that it is best to just not create the middleware and
+</I>&gt;<i> instead deal with CSRF on as needed basis.
+</I>
+Your link says what I said too, except I probably wasn't explicit enough.
+
+If you have a form that does POST (or PUT or PATCH or DELETE), put the 
+token in &quot;&lt;form action=&quot;/path/to/resource?csrf=$TOKEN&quot;&gt;&quot;. The token must 
+be only valid once, it must not be reused, not even between different 
+forms (each form gets its own token). Since it is not a GET request, 
+then you don't have cache or referer issues.
+
+You can still have issues if you allow another site to run JS on yours 
+(but you probably shouldn't) or if there is a malevolent proxy (use SSL 
+where needed), but these are different issues entirely.
+
+&gt;<i> Btw, I noticed that when the result of the middleware execute function is:
+</I>&gt;<i> {error, StatusCode, Req}
+</I>&gt;<i> if I set the reply on the request via cowboy_req:reply before returning
+</I>&gt;<i> the {error.. , the status code of that reply will be used.
+</I>&gt;<i>
+</I>&gt;<i> Such as:
+</I>&gt;<i> {ok, Req3} = cowboy_req:reply(403, [], &quot;Invalid CSRF Token.&quot;, Req2),
+</I>&gt;<i> {error, 500, Req3}; % 500 is ignored, 403 is returned
+</I>
+Yes, the response was already sent, therefore the second one is ignored.
+
+&gt;<i> Is that by design?
+</I>&gt;<i>
+</I>&gt;<i> Sincerely,
+</I>&gt;<i>
+</I>&gt;<i> rambocoder
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Mon, Apr 15, 2013 at 4:47 PM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>
+</I>&gt;<i> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i>     Why not just put the token in the URL instead? if it's CSRF then
+</I>&gt;<i>     it's probably used only once and only for POST and the like, so not
+</I>&gt;<i>     cached or anything.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     On 04/15/2013 10:45 PM, rambocoder wrote:
+</I>&gt;<i>
+</I>&gt;<i>         Hello group,
+</I>&gt;<i>
+</I>&gt;<i>         I am trying to put together a CSRF middleware
+</I>&gt;<i>         <A HREF="https://github.com/rambocoder/__stable/commit/__b26980d292ac42aadfe9921a961436__e28cdbb693">https://github.com/rambocoder/__stable/commit/__b26980d292ac42aadfe9921a961436__e28cdbb693</A>
+</I>&gt;<i>         &lt;<A HREF="https://github.com/rambocoder/stable/commit/b26980d292ac42aadfe9921a961436e28cdbb693">https://github.com/rambocoder/stable/commit/b26980d292ac42aadfe9921a961436e28cdbb693</A>&gt;
+</I>&gt;<i>         and
+</I>&gt;<i>         if the body of the request contains &quot;_csrf&quot; token, I check to
+</I>&gt;<i>         make sure
+</I>&gt;<i>         it matches the csrf token in the session.
+</I>&gt;<i>
+</I>&gt;<i>         Currently I am doing it in middleware using cowboy_req:body_qs/1
+</I>&gt;<i>         however
+</I>&gt;<i>         when in the handler I need to read another body parameter, such
+</I>&gt;<i>         as in
+</I>&gt;<i>         the rest_pastebin example:
+</I>&gt;<i>
+</I>&gt;<i>         {ok, BodyQs, Req3} = cowboy_req:body_qs(Req),
+</I>&gt;<i>         Paste = proplists:get_value(&lt;&lt;&quot;paste&quot;&gt;__&gt;, BodyQs),
+</I>&gt;<i>
+</I>&gt;<i>         cowboy_req:body_qs/1 returns [] due to the body of the request being
+</I>&gt;<i>         already read {body_state,done}
+</I>&gt;<i>
+</I>&gt;<i>         Is it pointless to have the type of CSRF middleware that I am
+</I>&gt;<i>         writing
+</I>&gt;<i>         and just do the CSRF in the handler's callback, where I can deal
+</I>&gt;<i>         with
+</I>&gt;<i>         all the body_qs at once?
+</I>&gt;<i>
+</I>&gt;<i>         Thank you,
+</I>&gt;<i>
+</I>&gt;<i>         rambocoder
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>         _________________________________________________
+</I>&gt;<i>         Extend mailing list
+</I>&gt;<i>         <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>&gt;
+</I>&gt;<i>         <A HREF="http://lists.ninenines.eu:81/__listinfo/extend">http://lists.ninenines.eu:81/__listinfo/extend</A>
+</I>&gt;<i>         &lt;<A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     --
+</I>&gt;<i>     Lo&#271;c Hoguin
+</I>&gt;<i>     Erlang Cowboy
+</I>&gt;<i>     Nine Nines
+</I>&gt;<i>     <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000110.html">[99s-extend] Reading body_qs multiple times
+</A></li>
+	<LI>Next message: <A HREF="000112.html">[99s-extend] Cowboy CORS
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#111">[ date ]</a>
+              <a href="thread.html#111">[ thread ]</a>
+              <a href="subject.html#111">[ subject ]</a>
+              <a href="author.html#111">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

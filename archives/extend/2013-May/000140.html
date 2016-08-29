@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20SOLVED%20%20--%20%20Re%3A%20%20%22access.log%22%20for%20Cowboy&In-Reply-To=%3C519382F0.4040309%40llaisdy.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000139.html">
+   <LINK REL="Next"  HREF="000141.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy</H1>
+    <B>Ivan Uemlianin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20SOLVED%20%20--%20%20Re%3A%20%20%22access.log%22%20for%20Cowboy&In-Reply-To=%3C519382F0.4040309%40llaisdy.com%3E"
+       TITLE="[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy">ivan at llaisdy.com
+       </A><BR>
+    <I>Wed May 15 14:43:28 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000139.html">[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+</A></li>
+        <LI>Next message: <A HREF="000141.html">[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#140">[ date ]</a>
+              <a href="thread.html#140">[ thread ]</a>
+              <a href="subject.html#140">[ subject ]</a>
+              <a href="author.html#140">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks for this.  I've tried it.  It seems to be adding a trace to an 
+already existing log file (which is already handling log messagse of a 
+certain level).  e.g., it uses lager:trace not lager:trace_file.
+
+I can't set it up so the trace file receives *only* trace messages.  I'l 
+revert to the lager:trace_file call.
+
+Best wishes
+
+Ivan
+
+
+Below is the config I've been using.
+
+  {lager, [
+           {handlers,
+	   [
+	    {lager_console_backend, info},
+	    {lager_file_backend,
+	     [
+	      [{file, &quot;log/error.log&quot;}, {level, error},
+                {size, 10485760},
+	       {date, &quot;$D0&quot;}, {count, 5}],
+	      [{file, &quot;log/console.log&quot;}, {level, info},
+                {size, 10485760},
+	       {date, &quot;$D0&quot;}, {count, 5}],
+	      [{file, &quot;log/access.log&quot;},
+                {size, 10485760},
+	       {date, &quot;$D0&quot;}, {count, 5}]
+	     ]}
+	   ]},
+	  {traces,
+	   [
+	    {{lager_file_backend, &quot;log/access.log&quot;},
+              [{type, access}], debug}
+	   ]}
+          ]},
+
+
+On 15/05/2013 12:56, Adam Rutkowski wrote:
+&gt;<i>
+</I>&gt;<i> On 15 May 2013, at 13:40, Ivan Uemlianin wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Thanks!  I got that working.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> When I start cowboy, I call
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   {ok, Trace} = lager:trace_file(&quot;path/to//access.log&quot;,
+</I>&gt;&gt;<i>                                 [{type, access}]),
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> When you say
+</I>&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Since 353dd21fde tracing is configurable.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Do you mean the above could go in a .config file?  I haven't found anything to that effect.  I'll keep looking.
+</I>&gt;<i>
+</I>&gt;<i> See <A HREF="https://github.com/basho/lager/pull/134">https://github.com/basho/lager/pull/134</A>
+</I>&gt;<i>
+</I>
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     <A HREF="https://lists.ninenines.eu/listinfo/extend">ivan at llaisdy.com</A>
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000139.html">[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+</A></li>
+	<LI>Next message: <A HREF="000141.html">[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#140">[ date ]</a>
+              <a href="thread.html#140">[ thread ]</a>
+              <a href="subject.html#140">[ subject ]</a>
+              <a href="author.html#140">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

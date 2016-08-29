@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] REST handler failure
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20handler%20failure&In-Reply-To=%3CA7D0DF68-BC2E-4249-A81F-3F7A645AD310%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000289.html">
+   <LINK REL="Next"  HREF="000293.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] REST handler failure</H1>
+    <B>Tilman Holschuh</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20handler%20failure&In-Reply-To=%3CA7D0DF68-BC2E-4249-A81F-3F7A645AD310%40gmail.com%3E"
+       TITLE="[99s-extend] REST handler failure">tilman.holschuh at gmail.com
+       </A><BR>
+    <I>Wed Oct 30 16:25:02 CET 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000289.html">[99s-extend] REST handler failure
+</A></li>
+        <LI>Next message: <A HREF="000293.html">[99s-extend] REST handler failure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#290">[ date ]</a>
+              <a href="thread.html#290">[ thread ]</a>
+              <a href="subject.html#290">[ subject ]</a>
+              <a href="author.html#290">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Why not let resource_exists/2 return false when your resource does not exist? You will get 404 on false. This way you separate the implementation for turning your data to json from checking if the request went to the correct resource. 
+
+- Tilman
+
+On 2013-10-30, at 7:58 AM, Daniel Goertzen wrote:
+
+&gt;<i> Well, this sort of works.  I tried this in the response handler:
+</I>&gt;<i> 
+</I>&gt;<i>             {ok, Req2} = cowboy_req:reply(404, [] , &lt;&lt;&quot;this is the body that gets used&quot;&gt;&gt;, Req1),
+</I>&gt;<i>             {&lt;&lt;&quot;this body gets ignored&quot;&gt;&gt;, Req2, State};
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> The client receives a 404 response, but cowboy crashes:
+</I>&gt;<i> 
+</I>&gt;<i> =ERROR REPORT==== 8-Sep-2013::22:22:03 ===
+</I>&gt;<i> Error in process &lt;0.131.0&gt; with exit value: {function_clause,[{cowboy_req,reply,[200,[],&lt;&lt;31 bytes&gt;&gt;,{http_req,#Port&lt;0.1208&gt;,ranch_tcp,keepalive,&lt;0.131.0&gt;,&lt;&lt;3 bytes&gt;&gt;,'HTTP/1.1',{{192,168,1,187},51017},&lt;&lt;12 bytes&gt;&gt;,undefined,80,&lt;&lt;24 bytes&gt;&gt;,undefined,&lt;&lt;0 bytes&gt;&gt;,undefined,[{channel_num,3}],[{&lt;&lt;10 bytes&gt;&gt;,&lt;&lt;11 bytes&gt;&gt;},{&lt;&lt;4 bytes&gt;&gt;,&lt;&lt;12 bytes&gt;&gt;},{&lt;&lt;6 bytes&gt;&gt;,&lt;&lt;3 bytes&gt;&gt;}],[{&lt;&lt;17 bytes&gt;&gt;,undefined},{&lt;&lt;13 bytes&gt;&gt;,undefined},{&lt;&lt;19 bytes&gt;&gt;,undefined},{&lt;&lt;8 bytes&gt;&gt;,undefined},{&lt;&lt;6 bytes&gt;&gt;,[... 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> The issue is that the REST wrapper wants to do the cowboy_req:reply(), and when we do the call we cause the wrapper's call to fail.
+</I>&gt;<i> 
+</I>&gt;<i> Dan.
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> On Tue, Oct 29, 2013 at 4:01 PM, Ivan uemlianin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">ivan at llaisdy.com</A>&gt; wrote:
+</I>&gt;<i> Sorry for terse but I only have a phone. Why can't you return a 404 here?  Using something like cowboy:reply(404, ...
+</I>&gt;<i> 
+</I>&gt;<i> Ivan
+</I>&gt;<i> 
+</I>&gt;<i> --
+</I>&gt;<i> festina lente
+</I>&gt;<i> 
+</I>&gt;<i> 
+</I>&gt;<i> On 29 Oct 2013, at 21:25, Daniel Goertzen &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">daniel.goertzen at gmail.com</A>&gt; wrote:
+</I>&gt;<i> 
+</I>&gt;&gt;<i> My situation is that I have a rest handler that may fail due to invalid url segments.  Example situation:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> init(_Transport, _Req, _Opts) -&gt;
+</I>&gt;&gt;<i>         {upgrade, protocol, cowboy_rest}.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> content_types_provided(Req, State) -&gt;
+</I>&gt;&gt;<i>     {[{&lt;&lt;&quot;application/json&quot;&gt;&gt;, get_json}], Req, State}.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> get_json(Req0, State) -&gt;
+</I>&gt;&gt;<i>     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0, [param1, param2, param3, ....]),
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i>     case catch other_module:request(Params) of
+</I>&gt;&gt;<i>         {'EXIT', {badarg, _}} -&gt;
+</I>&gt;&gt;<i>             hmmm, Params were bad and I would like to return a 404 code now.
+</I>&gt;&gt;<i>         Result -&gt;
+</I>&gt;&gt;<i>             {jiffy:encode(Result), Req1, State}
+</I>&gt;&gt;<i>     end.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> So I would like to return a 404 code when my underlying request function fails, but it appears my choices are:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> - return a 200 (ok) response with data.
+</I>&gt;&gt;<i> - crash and cause a 500 (Internal Server Error) response to be returned.  Not exactly the sentiment I want.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Is there some other way to cause a 404 response?
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> I realize I could add path constraint functions, but I will be replicating logic from my underlying request function.  Furthermore, the constraint functions consider parameters in isolation, so that won't work if the validity of parameters is coupled.
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Thanks,
+</I>&gt;&gt;<i> Dan.
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i> 
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000289.html">[99s-extend] REST handler failure
+</A></li>
+	<LI>Next message: <A HREF="000293.html">[99s-extend] REST handler failure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#290">[ date ]</a>
+              <a href="thread.html#290">[ thread ]</a>
+              <a href="subject.html#290">[ subject ]</a>
+              <a href="author.html#290">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

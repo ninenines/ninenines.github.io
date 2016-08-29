@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] timeout in cowboy loop handler
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwb0ubM3O%3DyKmEJvrJ94Y2xVWpnPxXWO7Qx0q8kxL4%2BqwQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000276.html">
+   <LINK REL="Next"  HREF="000278.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] timeout in cowboy loop handler</H1>
+    <B>akonsu</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwb0ubM3O%3DyKmEJvrJ94Y2xVWpnPxXWO7Qx0q8kxL4%2BqwQ%40mail.gmail.com%3E"
+       TITLE="[99s-extend] timeout in cowboy loop handler">akonsu at gmail.com
+       </A><BR>
+    <I>Wed Oct 16 06:12:29 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000276.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+        <LI>Next message: <A HREF="000278.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#277">[ date ]</a>
+              <a href="thread.html#277">[ thread ]</a>
+              <a href="subject.html#277">[ subject ]</a>
+              <a href="author.html#277">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>thanks. one more question if you do not mind. you say that we need timeouts
+when the client does not notify us when it dies. but then you say that if
+the client dies then the socket write will fail. to me this sounds like a
+contradiction. would you please clarify?
+
+(I assume that this is the problem that we are discussing:
+<A HREF="http://stackoverflow.com/questions/283375/detecting-tcp-client-disconnect,">http://stackoverflow.com/questions/283375/detecting-tcp-client-disconnect,</A>
+right?)
+
+
+2013/10/16 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;
+
+&gt;<i> On 10/16/2013 05:48 AM, akonsu wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> 1. do you mean that there is no way on the server side to tell if the
+</I>&gt;&gt;<i> client has disconnected?
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> There are ways, and Cowboy will happily detect them. There's also the
+</I>&gt;<i> problem that a side may be closed without the other side knowing about it,
+</I>&gt;<i> which is why you need timeouts.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>  2. if I use a normal handler, I will still run into the same problem, it
+</I>&gt;&gt;<i> does not matter which handler I use, from the standpoint of deciding
+</I>&gt;&gt;<i> whether the client is still there, right?
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> If the client is gone, the send will fail. Normal handlers are pretty much
+</I>&gt;<i> the same except they don't have a timeout, because your code has an
+</I>&gt;<i> explicit end.
+</I>&gt;<i>
+</I>&gt;<i>  I am confused as to how I can implement my streaming and not drop the
+</I>&gt;&gt;<i> connection on each client and yet make sure I do close the connections
+</I>&gt;&gt;<i> when the clients disconnect...
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 2013/10/15 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Infinite is bad practice, yes. Infinite means some connections will
+</I>&gt;&gt;<i>     *never* be closed, eating FDs and memory for nothing.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     I'm not sure why you want to receive messages, you could just use a
+</I>&gt;&gt;<i>     normal handler that asks for more data, sends it, ask for more data,
+</I>&gt;&gt;<i>     sends it, etc.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Lo&#239;c Hoguin
+</I>&gt;<i> Erlang Cowboy
+</I>&gt;<i> Nine Nines
+</I>&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20131016/edbc349c/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20131016/edbc349c/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000276.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+	<LI>Next message: <A HREF="000278.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#277">[ date ]</a>
+              <a href="thread.html#277">[ thread ]</a>
+              <a href="subject.html#277">[ subject ]</a>
+              <a href="author.html#277">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy HTTPS Issue
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20HTTPS%20Issue&In-Reply-To=%3C420FF871-86CC-4956-924A-514047C614EB%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000161.html">
+   <LINK REL="Next"  HREF="000163.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy HTTPS Issue</H1>
+    <B>Lee Sylvester</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20HTTPS%20Issue&In-Reply-To=%3C420FF871-86CC-4956-924A-514047C614EB%40gmail.com%3E"
+       TITLE="[99s-extend] Cowboy HTTPS Issue">lee.sylvester at gmail.com
+       </A><BR>
+    <I>Tue Jul 23 15:12:08 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000161.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+        <LI>Next message: <A HREF="000163.html">[99s-extend] Cowboy HTTPS Issue
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#162">[ date ]</a>
+              <a href="thread.html#162">[ thread ]</a>
+              <a href="subject.html#162">[ subject ]</a>
+              <a href="author.html#162">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi guys,
+
+So, I'm trying to run Cowboy with SSL, but keep getting an error with the SSL module:
+
+application: ssl
+    exited: {bad_return,
+                {{ssl_app,start,[normal,[]]},
+                 {'EXIT',
+                     {undef,
+                         [{ssl_app,start,[normal,[]],[]},
+                          {application_master,start_it_old,4,
+                              [{file,&quot;application_master.erl&quot;},
+                               {line,274}]}]}}}}
+    type: temporary
+
+
+The way I'm starting Cowboy is like this:
+
+	Env = [
+		{env, [{dispatch, Dispatch}]},
+		{onrequest, fun http_utils:set_request_cors/1}
+	],
+
+	case http_server:is_secure() of
+		true -&gt;
+			cowboy:start_https(https, 100, [
+				{ip, Ip}, {port, Port},
+				{certfile, binary_to_list(http_server:secure_cert())},
+				{keyfile, binary_to_list(http_server:secure_key())},
+				{reuseaddr, true},
+				{fail_if_no_peer_cert, true}
+			], Env);
+		_ -&gt;
+			{ok, _} = cowboy:start_http(http, 100, Options, Env)
+	end,
+
+Does anyone know why I might be getting this issue?
+
+Thanks,
+Lee
+
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000161.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+	<LI>Next message: <A HREF="000163.html">[99s-extend] Cowboy HTTPS Issue
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#162">[ date ]</a>
+              <a href="thread.html#162">[ thread ]</a>
+              <a href="subject.html#162">[ subject ]</a>
+              <a href="author.html#162">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

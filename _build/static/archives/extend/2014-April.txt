@@ -1,0 +1,943 @@
+From essen at ninenines.eu  Tue Apr  8 11:11:07 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 08 Apr 2014 11:11:07 +0200
+Subject: [99s-extend] Closing the mailing lists later this week
+Message-ID: <5343BD2B.1070400@ninenines.eu>
+
+Hello,
+
+I will be closing the mailing lists later this week. Preferred medium 
+for getting help will be opening tickets on github (if you can't figure 
+something out, then it's a bug!) or IRC.
+
+If you would like to continue helping users, then hop on IRC or follow 
+the projects on github and answer tickets. Thank you.
+
+Announcements will probably be made using the website's articles page 
+instead of here.
+
+The archives will be moved to git for safekeeping, but everything else 
+will be deleted, including user data and backups.
+
+Thanks for your understanding,
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From samset at wanadoo.fr  Wed Apr  9 16:52:47 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Wed, 9 Apr 2014 16:52:47 +0200
+Subject: [99s-extend] REST handler with ssl support
+Message-ID: <AD22E9AB-E8FD-42A5-81B9-F42F8B954BD9@wanadoo.fr>
+
+Hi,
+
+I?d like to secure my rest api with an ssl transport.
+Could not find any example to do so ?
+
+Any clue ?
+
+Thank you.
+
+Samir
+
+From samset at wanadoo.fr  Fri Apr 11 12:39:13 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 11 Apr 2014 12:39:13 +0200
+Subject: [99s-extend] ssl_hello_world
+Message-ID: <8FB12862-814C-45A2-8E0D-6328CFDF8370@wanadoo.fr>
+
+Hi,
+
+Still struggling to make ssl work.
+
+I downloaded the example ssl_hello_world.
+Upon execution : i get the following error with curl 
+
+ About to connect() to localhost port 8443 (#0)
+*   Trying ::1... Connexion refus?e
+*   Trying 127.0.0.1... connected
+* Connected to localhost (127.0.0.1) port 8443 (#0)
+* Initializing NSS with certpath: sql:/etc/pki/nssdb
+* NSS error -8018
+* Closing connection #0
+* Problem with the SSL CA cert (path? access rights?)
+curl: (77) Problem with the SSL CA cert (path? access rights?)
+
+
+cmd = curl -vv --cacert priv/cert/cowboy-ca.crt -i https://localhost:8443/
+
+cacert path checked.
+read permission checked
+
+I?ve tested with a browser and get a connection error.
+
+Any clue ?
+
+Samir
+
+
+
+
+From essen at ninenines.eu  Fri Apr 11 13:18:56 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 11 Apr 2014 13:18:56 +0200
+Subject: [99s-extend] ssl_hello_world
+In-Reply-To: <8FB12862-814C-45A2-8E0D-6328CFDF8370@wanadoo.fr>
+References: <8FB12862-814C-45A2-8E0D-6328CFDF8370@wanadoo.fr>
+Message-ID: <5347CFA0.9070907@ninenines.eu>
+
+The certificate in the SSL example is self-generated, try curl with the 
+--insecure option.
+
+On 04/11/2014 12:39 PM, Samir Sow wrote:
+> Hi,
+>
+> Still struggling to make ssl work.
+>
+> I downloaded the example ssl_hello_world.
+> Upon execution : i get the following error with curl
+>
+>   About to connect() to localhost port 8443 (#0)
+> *   Trying ::1... Connexion refus?e
+> *   Trying 127.0.0.1... connected
+> * Connected to localhost (127.0.0.1) port 8443 (#0)
+> * Initializing NSS with certpath: sql:/etc/pki/nssdb
+> * NSS error -8018
+> * Closing connection #0
+> * Problem with the SSL CA cert (path? access rights?)
+> curl: (77) Problem with the SSL CA cert (path? access rights?)
+>
+>
+> cmd = curl -vv --cacert priv/cert/cowboy-ca.crt -i https://localhost:8443/
+>
+> cacert path checked.
+> read permission checked
+>
+> I?ve tested with a browser and get a connection error.
+>
+> Any clue ?
+>
+> Samir
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From samset at wanadoo.fr  Fri Apr 11 13:25:51 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 11 Apr 2014 13:25:51 +0200
+Subject: [99s-extend] ssl_hello_world
+In-Reply-To: <5347CFA0.9070907@ninenines.eu>
+References: <8FB12862-814C-45A2-8E0D-6328CFDF8370@wanadoo.fr>
+ <5347CFA0.9070907@ninenines.eu>
+Message-ID: <352B535C-4C7E-41FB-86F1-02D48226BF50@wanadoo.fr>
+
+Thx.
+
+Same error ?
+Openssl s_client does not work either.
+the server does not answer to ClientHello ?
+
+Samir
+
+On 11 avr. 2014, at 13:18, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> The certificate in the SSL example is self-generated, try curl with the --insecure option.
+> 
+> On 04/11/2014 12:39 PM, Samir Sow wrote:
+>> Hi,
+>> 
+>> Still struggling to make ssl work.
+>> 
+>> I downloaded the example ssl_hello_world.
+>> Upon execution : i get the following error with curl
+>> 
+>>  About to connect() to localhost port 8443 (#0)
+>> *   Trying ::1... Connexion refus?e
+>> *   Trying 127.0.0.1... connected
+>> * Connected to localhost (127.0.0.1) port 8443 (#0)
+>> * Initializing NSS with certpath: sql:/etc/pki/nssdb
+>> * NSS error -8018
+>> * Closing connection #0
+>> * Problem with the SSL CA cert (path? access rights?)
+>> curl: (77) Problem with the SSL CA cert (path? access rights?)
+>> 
+>> 
+>> cmd = curl -vv --cacert priv/cert/cowboy-ca.crt -i https://localhost:8443/
+>> 
+>> cacert path checked.
+>> read permission checked
+>> 
+>> I?ve tested with a browser and get a connection error.
+>> 
+>> Any clue ?
+>> 
+>> Samir
+>> 
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>> 
+> 
+> -- 
+> Lo?c Hoguin
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Fri Apr 11 13:41:29 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 11 Apr 2014 13:41:29 +0200
+Subject: [99s-extend] ssl_hello_world
+In-Reply-To: <352B535C-4C7E-41FB-86F1-02D48226BF50@wanadoo.fr>
+References: <8FB12862-814C-45A2-8E0D-6328CFDF8370@wanadoo.fr>
+ <5347CFA0.9070907@ninenines.eu>
+ <352B535C-4C7E-41FB-86F1-02D48226BF50@wanadoo.fr>
+Message-ID: <5347D4E9.10005@ninenines.eu>
+
+This is the successful output I get. You should try to see why yours is 
+different, perhaps someone somewhere ran into the same issue at some 
+point. Note that the --cacert option isn't needed and basically makes no 
+difference.
+
+
+% curl -ikvv https://localhost:8443
+* Rebuilt URL to: https://localhost:8443/
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8443 (#0)
+* successfully set certificate verify locations:
+*   CAfile: /etc/ssl/certs/ca-certificates.crt
+   CApath: none
+* SSLv3, TLS handshake, Client hello (1):
+* SSLv3, TLS handshake, Server hello (2):
+* SSLv3, TLS handshake, CERT (11):
+* SSLv3, TLS handshake, Server key exchange (12):
+* SSLv3, TLS handshake, Server finished (14):
+* SSLv3, TLS handshake, Client key exchange (16):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSL connection using ECDHE-RSA-AES256-SHA384
+* Server certificate:
+* 	 subject: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=localhost
+* 	 start date: 2013-02-28 05:23:34 GMT
+* 	 expire date: 2033-02-23 05:23:34 GMT
+* 	 issuer: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=ROOT CA
+* 	 SSL certificate verify result: self signed certificate in 
+certificate chain (19), continuing anyway.
+ > GET / HTTP/1.1
+ > User-Agent: curl/7.35.0
+ > Host: localhost:8443
+ > Accept: */*
+ >
+< HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+< connection: keep-alive
+connection: keep-alive
+* Server Cowboy is not blacklisted
+< server: Cowboy
+server: Cowboy
+< date: Fri, 11 Apr 2014 11:30:03 GMT
+date: Fri, 11 Apr 2014 11:30:03 GMT
+< content-length: 12
+content-length: 12
+< content-type: text/plain
+content-type: text/plain
+
+<
+
+
+On 04/11/2014 01:25 PM, Samir Sow wrote:
+> Thx.
+>
+> Same error ?
+> Openssl s_client does not work either.
+> the server does not answer to ClientHello ?
+>
+> Samir
+>
+> On 11 avr. 2014, at 13:18, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> The certificate in the SSL example is self-generated, try curl with the --insecure option.
+>>
+>> On 04/11/2014 12:39 PM, Samir Sow wrote:
+>>> Hi,
+>>>
+>>> Still struggling to make ssl work.
+>>>
+>>> I downloaded the example ssl_hello_world.
+>>> Upon execution : i get the following error with curl
+>>>
+>>>   About to connect() to localhost port 8443 (#0)
+>>> *   Trying ::1... Connexion refus?e
+>>> *   Trying 127.0.0.1... connected
+>>> * Connected to localhost (127.0.0.1) port 8443 (#0)
+>>> * Initializing NSS with certpath: sql:/etc/pki/nssdb
+>>> * NSS error -8018
+>>> * Closing connection #0
+>>> * Problem with the SSL CA cert (path? access rights?)
+>>> curl: (77) Problem with the SSL CA cert (path? access rights?)
+>>>
+>>>
+>>> cmd = curl -vv --cacert priv/cert/cowboy-ca.crt -i https://localhost:8443/
+>>>
+>>> cacert path checked.
+>>> read permission checked
+>>>
+>>> I?ve tested with a browser and get a connection error.
+>>>
+>>> Any clue ?
+>>>
+>>> Samir
+>>>
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> https://lists.ninenines.eu/listinfo/extend
+>>>
+>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From samset at wanadoo.fr  Fri Apr 11 13:48:41 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 11 Apr 2014 13:48:41 +0200
+Subject: [99s-extend] ssl_hello_world
+In-Reply-To: <5347D4E9.10005@ninenines.eu>
+References: <8FB12862-814C-45A2-8E0D-6328CFDF8370@wanadoo.fr>
+ <5347CFA0.9070907@ninenines.eu>
+ <352B535C-4C7E-41FB-86F1-02D48226BF50@wanadoo.fr>
+ <5347D4E9.10005@ninenines.eu>
+Message-ID: <CC9D1F17-FB2A-4EB7-AAC7-6DC43BEC552F@wanadoo.fr>
+
+Thx.
+
+On which OS + Erlang version is the server running ?
+
+Samir
+On 11 avr. 2014, at 13:41, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> This is the successful output I get. You should try to see why yours is different, perhaps someone somewhere ran into the same issue at some point. Note that the --cacert option isn't needed and basically makes no difference.
+> 
+> 
+> % curl -ikvv https://localhost:8443
+> * Rebuilt URL to: https://localhost:8443/
+> * Hostname was NOT found in DNS cache
+> *   Trying 127.0.0.1...
+> * Connected to localhost (127.0.0.1) port 8443 (#0)
+> * successfully set certificate verify locations:
+> *   CAfile: /etc/ssl/certs/ca-certificates.crt
+>  CApath: none
+> * SSLv3, TLS handshake, Client hello (1):
+> * SSLv3, TLS handshake, Server hello (2):
+> * SSLv3, TLS handshake, CERT (11):
+> * SSLv3, TLS handshake, Server key exchange (12):
+> * SSLv3, TLS handshake, Server finished (14):
+> * SSLv3, TLS handshake, Client key exchange (16):
+> * SSLv3, TLS change cipher, Client hello (1):
+> * SSLv3, TLS handshake, Finished (20):
+> * SSLv3, TLS change cipher, Client hello (1):
+> * SSLv3, TLS handshake, Finished (20):
+> * SSL connection using ECDHE-RSA-AES256-SHA384
+> * Server certificate:
+> * 	 subject: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=localhost
+> * 	 start date: 2013-02-28 05:23:34 GMT
+> * 	 expire date: 2033-02-23 05:23:34 GMT
+> * 	 issuer: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=ROOT CA
+> * 	 SSL certificate verify result: self signed certificate in certificate chain (19), continuing anyway.
+> > GET / HTTP/1.1
+> > User-Agent: curl/7.35.0
+> > Host: localhost:8443
+> > Accept: */*
+> >
+> < HTTP/1.1 200 OK
+> HTTP/1.1 200 OK
+> < connection: keep-alive
+> connection: keep-alive
+> * Server Cowboy is not blacklisted
+> < server: Cowboy
+> server: Cowboy
+> < date: Fri, 11 Apr 2014 11:30:03 GMT
+> date: Fri, 11 Apr 2014 11:30:03 GMT
+> < content-length: 12
+> content-length: 12
+> < content-type: text/plain
+> content-type: text/plain
+> 
+> <
+> 
+> 
+> On 04/11/2014 01:25 PM, Samir Sow wrote:
+>> Thx.
+>> 
+>> Same error ?
+>> Openssl s_client does not work either.
+>> the server does not answer to ClientHello ?
+>> 
+>> Samir
+>> 
+>> On 11 avr. 2014, at 13:18, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>> 
+>>> The certificate in the SSL example is self-generated, try curl with the --insecure option.
+>>> 
+>>> On 04/11/2014 12:39 PM, Samir Sow wrote:
+>>>> Hi,
+>>>> 
+>>>> Still struggling to make ssl work.
+>>>> 
+>>>> I downloaded the example ssl_hello_world.
+>>>> Upon execution : i get the following error with curl
+>>>> 
+>>>>  About to connect() to localhost port 8443 (#0)
+>>>> *   Trying ::1... Connexion refus?e
+>>>> *   Trying 127.0.0.1... connected
+>>>> * Connected to localhost (127.0.0.1) port 8443 (#0)
+>>>> * Initializing NSS with certpath: sql:/etc/pki/nssdb
+>>>> * NSS error -8018
+>>>> * Closing connection #0
+>>>> * Problem with the SSL CA cert (path? access rights?)
+>>>> curl: (77) Problem with the SSL CA cert (path? access rights?)
+>>>> 
+>>>> 
+>>>> cmd = curl -vv --cacert priv/cert/cowboy-ca.crt -i https://localhost:8443/
+>>>> 
+>>>> cacert path checked.
+>>>> read permission checked
+>>>> 
+>>>> I?ve tested with a browser and get a connection error.
+>>>> 
+>>>> Any clue ?
+>>>> 
+>>>> Samir
+>>>> 
+>>>> 
+>>>> _______________________________________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> https://lists.ninenines.eu/listinfo/extend
+>>>> 
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> http://ninenines.eu
+>> 
+> 
+> -- 
+> Lo?c Hoguin
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Fri Apr 11 13:57:59 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 11 Apr 2014 13:57:59 +0200
+Subject: [99s-extend] ssl_hello_world
+In-Reply-To: <CC9D1F17-FB2A-4EB7-AAC7-6DC43BEC552F@wanadoo.fr>
+References: <8FB12862-814C-45A2-8E0D-6328CFDF8370@wanadoo.fr>
+ <5347CFA0.9070907@ninenines.eu>
+ <352B535C-4C7E-41FB-86F1-02D48226BF50@wanadoo.fr>
+ <5347D4E9.10005@ninenines.eu>
+ <CC9D1F17-FB2A-4EB7-AAC7-6DC43BEC552F@wanadoo.fr>
+Message-ID: <5347D8C7.8020906@ninenines.eu>
+
+It's tested on ArchLinux from R15B01 to master so that's unrelated to 
+the Erlang version.
+
+On 04/11/2014 01:48 PM, Samir Sow wrote:
+> Thx.
+>
+> On which OS + Erlang version is the server running ?
+>
+> Samir
+> On 11 avr. 2014, at 13:41, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> This is the successful output I get. You should try to see why yours is different, perhaps someone somewhere ran into the same issue at some point. Note that the --cacert option isn't needed and basically makes no difference.
+>>
+>>
+>> % curl -ikvv https://localhost:8443
+>> * Rebuilt URL to: https://localhost:8443/
+>> * Hostname was NOT found in DNS cache
+>> *   Trying 127.0.0.1...
+>> * Connected to localhost (127.0.0.1) port 8443 (#0)
+>> * successfully set certificate verify locations:
+>> *   CAfile: /etc/ssl/certs/ca-certificates.crt
+>>   CApath: none
+>> * SSLv3, TLS handshake, Client hello (1):
+>> * SSLv3, TLS handshake, Server hello (2):
+>> * SSLv3, TLS handshake, CERT (11):
+>> * SSLv3, TLS handshake, Server key exchange (12):
+>> * SSLv3, TLS handshake, Server finished (14):
+>> * SSLv3, TLS handshake, Client key exchange (16):
+>> * SSLv3, TLS change cipher, Client hello (1):
+>> * SSLv3, TLS handshake, Finished (20):
+>> * SSLv3, TLS change cipher, Client hello (1):
+>> * SSLv3, TLS handshake, Finished (20):
+>> * SSL connection using ECDHE-RSA-AES256-SHA384
+>> * Server certificate:
+>> * 	 subject: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=localhost
+>> * 	 start date: 2013-02-28 05:23:34 GMT
+>> * 	 expire date: 2033-02-23 05:23:34 GMT
+>> * 	 issuer: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=ROOT CA
+>> * 	 SSL certificate verify result: self signed certificate in certificate chain (19), continuing anyway.
+>>> GET / HTTP/1.1
+>>> User-Agent: curl/7.35.0
+>>> Host: localhost:8443
+>>> Accept: */*
+>>>
+>> < HTTP/1.1 200 OK
+>> HTTP/1.1 200 OK
+>> < connection: keep-alive
+>> connection: keep-alive
+>> * Server Cowboy is not blacklisted
+>> < server: Cowboy
+>> server: Cowboy
+>> < date: Fri, 11 Apr 2014 11:30:03 GMT
+>> date: Fri, 11 Apr 2014 11:30:03 GMT
+>> < content-length: 12
+>> content-length: 12
+>> < content-type: text/plain
+>> content-type: text/plain
+>>
+>> <
+>>
+>>
+>> On 04/11/2014 01:25 PM, Samir Sow wrote:
+>>> Thx.
+>>>
+>>> Same error ?
+>>> Openssl s_client does not work either.
+>>> the server does not answer to ClientHello ?
+>>>
+>>> Samir
+>>>
+>>> On 11 avr. 2014, at 13:18, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>>
+>>>> The certificate in the SSL example is self-generated, try curl with the --insecure option.
+>>>>
+>>>> On 04/11/2014 12:39 PM, Samir Sow wrote:
+>>>>> Hi,
+>>>>>
+>>>>> Still struggling to make ssl work.
+>>>>>
+>>>>> I downloaded the example ssl_hello_world.
+>>>>> Upon execution : i get the following error with curl
+>>>>>
+>>>>>   About to connect() to localhost port 8443 (#0)
+>>>>> *   Trying ::1... Connexion refus?e
+>>>>> *   Trying 127.0.0.1... connected
+>>>>> * Connected to localhost (127.0.0.1) port 8443 (#0)
+>>>>> * Initializing NSS with certpath: sql:/etc/pki/nssdb
+>>>>> * NSS error -8018
+>>>>> * Closing connection #0
+>>>>> * Problem with the SSL CA cert (path? access rights?)
+>>>>> curl: (77) Problem with the SSL CA cert (path? access rights?)
+>>>>>
+>>>>>
+>>>>> cmd = curl -vv --cacert priv/cert/cowboy-ca.crt -i https://localhost:8443/
+>>>>>
+>>>>> cacert path checked.
+>>>>> read permission checked
+>>>>>
+>>>>> I?ve tested with a browser and get a connection error.
+>>>>>
+>>>>> Any clue ?
+>>>>>
+>>>>> Samir
+>>>>>
+>>>>>
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu
+>>>>> https://lists.ninenines.eu/listinfo/extend
+>>>>>
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> http://ninenines.eu
+>>>
+>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From samset at wanadoo.fr  Fri Apr 11 23:23:10 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 11 Apr 2014 23:23:10 +0200
+Subject: [99s-extend] ssl
+Message-ID: <0C585951-B0F1-458F-8ED9-971980FC1FE6@wanadoo.fr>
+
+Hi,
+
+Still struggling with ssl.
+I decided to check what?s going on at the ssl module level. Did a step by step ssl connection using the erlang ssl doc.
+Found an error erlang:size badarg, but could not understand if it?s a problem with the key/cert files or with the data sent by the client.
+
+Any help welcomed. Thx
+
+Samir
+
+{ok, SSLSocket} = ssl:ssl_accept(Socket, [{cacertfile, "priv/cert/cacert.crt"}, {certfile, "priv/cert/server.crt"}, {keyfile, "priv/cert/server.key"}]).
+** exception exit: {{badarg,
+                        [{erlang,size,
+                             [[22,3,1,0,176,1,0,0,172,3,3,83,72,89,48,183,175,
+                               58,145,197,219|...]],
+                             []},
+                         {tls_record,get_tls_records_aux,2,
+                             [{file,"tls_record.erl"},{line,122}]},
+                         {tls_connection,next_tls_record,2,
+                             [{file,"tls_connection.erl"},{line,484}]},
+                         {tls_connection,handle_info,3,
+                             [{file,"tls_connection.erl"},{line,307}]},
+                         {gen_fsm,handle_msg,7,
+                             [{file,"gen_fsm.erl"},{line,503}]},
+                         {proc_lib,init_p_do_apply,3,
+                             [{file,"proc_lib.erl"},{line,239}]}]},
+                    {gen_fsm,sync_send_all_state_event,
+                        [<0.105.0>,{start,infinity},infinity]}}
+     in function  gen_fsm:sync_send_all_state_event/3 (gen_fsm.erl, line 242)
+     in call from ssl_connection:sync_send_all_state_event/2 (ssl_connection.erl, line 1649)
+     in call from ssl_connection:handshake/2 (ssl_connection.erl, line 97)
+     in call from tls_connection:start_fsm/8 (tls_connection.erl, line 81)
+     in call from ssl_connection:ssl_accept/7 (ssl_connection.erl, line 84)
+
+From essen at ninenines.eu  Fri Apr 11 23:31:36 2014
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 11 Apr 2014 23:31:36 +0200
+Subject: [99s-extend] ssl
+Message-ID: <jwxy2j8ajv5369o6n7tbpueg.1397251896146@email.android.com>
+
+Please report it to erlang-bugs, you'll get better help with ssl bugs there.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+-------- Original Message --------
+From:Samir Sow <samset at wanadoo.fr>
+Sent:Fri, 11 Apr 2014 23:23:10 +0200
+To:extend at lists.ninenines.eu
+Subject:[99s-extend] ssl
+
+>Hi,
+>
+>Still struggling with ssl.
+>I decided to check what?s going on at the ssl module level. Did a step by step ssl connection using the erlang ssl doc.
+>Found an error erlang:size badarg, but could not understand if it?s a problem with the key/cert files or with the data sent by the client.
+>
+>Any help welcomed. Thx
+>
+>Samir
+>
+>{ok, SSLSocket} = ssl:ssl_accept(Socket, [{cacertfile, "priv/cert/cacert.crt"}, {certfile, "priv/cert/server.crt"}, {keyfile, "priv/cert/server.key"}]).
+>** exception exit: {{badarg,
+>                        [{erlang,size,
+>                             [[22,3,1,0,176,1,0,0,172,3,3,83,72,89,48,183,175,
+>                               58,145,197,219|...]],
+>                             []},
+>                         {tls_record,get_tls_records_aux,2,
+>                             [{file,"tls_record.erl"},{line,122}]},
+>                         {tls_connection,next_tls_record,2,
+>                             [{file,"tls_connection.erl"},{line,484}]},
+>                         {tls_connection,handle_info,3,
+>                             [{file,"tls_connection.erl"},{line,307}]},
+>                         {gen_fsm,handle_msg,7,
+>                             [{file,"gen_fsm.erl"},{line,503}]},
+>                         {proc_lib,init_p_do_apply,3,
+>                             [{file,"proc_lib.erl"},{line,239}]}]},
+>                    {gen_fsm,sync_send_all_state_event,
+>                        [<0.105.0>,{start,infinity},infinity]}}
+>     in function  gen_fsm:sync_send_all_state_event/3 (gen_fsm.erl, line 242)
+>     in call from ssl_connection:sync_send_all_state_event/2 (ssl_connection.erl, line 1649)
+>     in call from ssl_connection:handshake/2 (ssl_connection.erl, line 97)
+>     in call from tls_connection:start_fsm/8 (tls_connection.erl, line 81)
+>     in call from ssl_connection:ssl_accept/7 (ssl_connection.erl, line 84)
+>_______________________________________________
+>Extend mailing list
+>Extend at lists.ninenines.eu
+>https://lists.ninenines.eu/listinfo/extend
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140411/9e3c6c32/attachment.html>
+
+From ka.gemayel at gmail.com  Sun Apr 20 19:46:55 2014
+From: ka.gemayel at gmail.com (Karim Gemayel)
+Date: Sun, 20 Apr 2014 19:46:55 +0200
+Subject: [99s-extend] [cowboy] Websocket with Firefox Android
+Message-ID: <5354080F.6030001@gmail.com>
+
+Hello,
+
+Writing a Cowboy (0.9.0) Websocket server (running on Ubuntu 12.04 ; 
+Erlang R16B03), it works fine on Firefox Desktop but fails on Firefox 
+Android (28.0.1).
+
+When testing with the websocket_example, on client-side Websockets are 
+detected but nothing happens then, no connection seems to be initiated ; 
+and on server-side, despite having traces in all functions of 
+ws_handler.erl, nothing appears in the console.
+
+However when testing http://www.websocket.org/echo.html with Firefox 
+Android, it works.
+
+So before going for remote debugging Firefox, I was looking for similar 
+cases using Cowboy Websocket with Firefox Android. Is there a JavaScript 
+tip to manage Websocket connection in that case ? Am I missing something ?
+
+Thanks.
+
+-- 
+Karim Gemayel
+
+
+From essen at ninenines.eu  Sun Apr 20 19:50:07 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sun, 20 Apr 2014 19:50:07 +0200
+Subject: [99s-extend] [cowboy] Websocket with Firefox Android
+In-Reply-To: <5354080F.6030001@gmail.com>
+References: <5354080F.6030001@gmail.com>
+Message-ID: <535408CF.4050809@ninenines.eu>
+
+Try tracing the cowboy_websocket module?
+
+On 04/20/2014 07:46 PM, Karim Gemayel wrote:
+> Hello,
+>
+> Writing a Cowboy (0.9.0) Websocket server (running on Ubuntu 12.04 ;
+> Erlang R16B03), it works fine on Firefox Desktop but fails on Firefox
+> Android (28.0.1).
+>
+> When testing with the websocket_example, on client-side Websockets are
+> detected but nothing happens then, no connection seems to be initiated ;
+> and on server-side, despite having traces in all functions of
+> ws_handler.erl, nothing appears in the console.
+>
+> However when testing http://www.websocket.org/echo.html with Firefox
+> Android, it works.
+>
+> So before going for remote debugging Firefox, I was looking for similar
+> cases using Cowboy Websocket with Firefox Android. Is there a JavaScript
+> tip to manage Websocket connection in that case ? Am I missing something ?
+>
+> Thanks.
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From ka.gemayel at gmail.com  Sun Apr 20 20:28:16 2014
+From: ka.gemayel at gmail.com (Karim Gemayel)
+Date: Sun, 20 Apr 2014 20:28:16 +0200
+Subject: [99s-extend] [cowboy] Websocket with Firefox Android
+In-Reply-To: <535408CF.4050809@ninenines.eu>
+References: <5354080F.6030001@gmail.com> <535408CF.4050809@ninenines.eu>
+Message-ID: <535411C0.1020102@gmail.com>
+
+On 04/20/2014 07:50 PM, Lo?c Hoguin wrote:
+> Try tracing the cowboy_websocket module?
+
+The same case happens, no logs at all from Android whereas logs appear 
+from Desktop.
+
+I've attached the traces diffs.
+
+-- 
+Karim Gemayel
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: cowboy_websocket.diff
+Type: text/x-patch
+Size: 5780 bytes
+Desc: not available
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140420/bf45e4d0/attachment.bin>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: websocket_example.diff
+Type: text/x-patch
+Size: 2413 bytes
+Desc: not available
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140420/bf45e4d0/attachment-0001.bin>
+
+From essen at ninenines.eu  Sun Apr 20 20:30:55 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sun, 20 Apr 2014 20:30:55 +0200
+Subject: [99s-extend] [cowboy] Websocket with Firefox Android
+In-Reply-To: <535411C0.1020102@gmail.com>
+References: <5354080F.6030001@gmail.com> <535408CF.4050809@ninenines.eu>
+ <535411C0.1020102@gmail.com>
+Message-ID: <5354125F.9040603@ninenines.eu>
+
+You really should take a look at tracing using dbg at some point. :-)
+
+But yeah if you don't get the upgrade function output and you are 
+testing against the Websocket example then I doubt the request even 
+reaches the server.
+
+As for why, I have no idea.
+
+On 04/20/2014 08:28 PM, Karim Gemayel wrote:
+> On 04/20/2014 07:50 PM, Lo?c Hoguin wrote:
+>> Try tracing the cowboy_websocket module?
+>
+> The same case happens, no logs at all from Android whereas logs appear
+> from Desktop.
+>
+> I've attached the traces diffs.
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From ka.gemayel at gmail.com  Sun Apr 20 20:49:34 2014
+From: ka.gemayel at gmail.com (Karim Gemayel)
+Date: Sun, 20 Apr 2014 20:49:34 +0200
+Subject: [99s-extend] [cowboy] Websocket with Firefox Android
+In-Reply-To: <5354125F.9040603@ninenines.eu>
+References: <5354080F.6030001@gmail.com> <535408CF.4050809@ninenines.eu>
+ <535411C0.1020102@gmail.com> <5354125F.9040603@ninenines.eu>
+Message-ID: <535416BE.3030901@gmail.com>
+
+On 04/20/2014 08:30 PM, Lo?c Hoguin wrote:
+> You really should take a look at tracing using dbg at some point. :-)
+
+Yes, true. Actually, dbg is on my to-learn list. :)
+
+> But yeah if you don't get the upgrade function output and you are
+> testing against the Websocket example then I doubt the request even
+> reaches the server.
+>
+> As for why, I have no idea.
+
+That's a bit frustrating because the app is supposed to be used 
+primarily on mobile, so it seems I have to implement an HTTP fallback 
+that I didn't want to implement.
+
+I'll have to go for Firefox remote debugging, so.
+
+Thanks anyway.
+
+-- 
+Karim Gemayel
+
+
+From ka.gemayel at gmail.com  Sun Apr 20 22:47:08 2014
+From: ka.gemayel at gmail.com (Karim Gemayel)
+Date: Sun, 20 Apr 2014 22:47:08 +0200
+Subject: [99s-extend] [cowboy] Websocket with Firefox Android
+In-Reply-To: <535416BE.3030901@gmail.com>
+References: <5354080F.6030001@gmail.com> <535408CF.4050809@ninenines.eu>
+ <535411C0.1020102@gmail.com> <5354125F.9040603@ninenines.eu>
+ <535416BE.3030901@gmail.com>
+Message-ID: <5354324C.8070003@gmail.com>
+
+On 04/20/2014 08:49 PM, Karim Gemayel wrote:
+> I'll have to go for Firefox remote debugging, so.
+
+Erm, finally it does work if I set up the correct IP for the Websocket 
+server - localhost is unknown on the LAN...
+
+And it works nicely. Thanks !
+
+-- 
+Karim Gemayel
+
+
+From ka.gemayel at gmail.com  Mon Apr 28 18:01:07 2014
+From: ka.gemayel at gmail.com (Karim Gemayel)
+Date: Mon, 28 Apr 2014 18:01:07 +0200
+Subject: [99s-extend] [cowboy] SSL client authentication
+Message-ID: <535E7B43.4050308@gmail.com>
+
+Hello,
+
+I'm looking to use SSL client certificate for authentication with 
+Cowboy, but according to the Farwest roadmap this feature is not 
+implemented. Is this correct ?
+
+Would Nginx + Cowboy be an alternate solution ?
+
+-- 
+Karim Gemayel
+
+
+From essen at ninenines.eu  Mon Apr 28 18:04:47 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 28 Apr 2014 18:04:47 +0200
+Subject: [99s-extend] [cowboy] SSL client authentication
+In-Reply-To: <535E7B43.4050308@gmail.com>
+References: <535E7B43.4050308@gmail.com>
+Message-ID: <535E7C1F.90501@ninenines.eu>
+
+http://ninenines.eu/docs/en/ranch/HEAD/guide/ssl_auth/
+
+On 04/28/2014 06:01 PM, Karim Gemayel wrote:
+> Hello,
+>
+> I'm looking to use SSL client certificate for authentication with
+> Cowboy, but according to the Farwest roadmap this feature is not
+> implemented. Is this correct ?
+>
+> Would Nginx + Cowboy be an alternate solution ?
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From ka.gemayel at gmail.com  Mon Apr 28 18:12:46 2014
+From: ka.gemayel at gmail.com (Karim Gemayel)
+Date: Mon, 28 Apr 2014 18:12:46 +0200
+Subject: [99s-extend] [cowboy] SSL client authentication
+In-Reply-To: <535E7C1F.90501@ninenines.eu>
+References: <535E7B43.4050308@gmail.com> <535E7C1F.90501@ninenines.eu>
+Message-ID: <535E7DFE.6060206@gmail.com>
+
+On 04/28/2014 06:04 PM, Lo?c Hoguin wrote:
+> http://ninenines.eu/docs/en/ranch/HEAD/guide/ssl_auth/
+
+Thanks !
+
+-- 
+Karim Gemayel
+
+

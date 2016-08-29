@@ -1,0 +1,134 @@
+From samset at wanadoo.fr  Wed Apr 22 22:56:01 2015
+From: samset at wanadoo.fr (Samir Sow)
+Date: Wed, 22 Apr 2015 22:56:01 +0200
+Subject: [99s-extend] cowboy_websocket_handler
+Message-ID: <43C48B2E-0396-43E0-B82C-E524C8274004@wanadoo.fr>
+
+Hi there,
+
+I would like to learn more about the cowboy_xxxx_handler for instance the cowboy_websocket_handler  :
+-  is it an OTP gen_ instance ?
+- how/where the websocket_handle() is called ?
+- how websocket_info() relates to the Transport:send() operation and where/how this latter function is called?
+
+I  could not find the cowboy_websocket_handler behavior in the src dir. I guess i?ve missed something.
+The code is clean but difficult to decipher by a erlang padawan like me.
+
+Why do i need to understand this ?
+
+I would like to write a generic tcp transport layer that provides an interface like the cowboy_xxx_handler to my protocol stack.
+Of course i will use ranch underneath.
+
+Neither the examples provided with ranch nor the ftp server tutorial reveals the sophisticated architecture used to handover data/context to the handler and to get reply data from the handler.
+
+Thank you for your help.
+
+Samir Sow
+
+
+From essen at ninenines.eu  Wed Apr 22 23:18:29 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 23 Apr 2015 00:18:29 +0300
+Subject: [99s-extend] cowboy_websocket_handler
+In-Reply-To: <43C48B2E-0396-43E0-B82C-E524C8274004@wanadoo.fr>
+References: <43C48B2E-0396-43E0-B82C-E524C8274004@wanadoo.fr>
+Message-ID: <55381025.6070607@ninenines.eu>
+
+Hello,
+
+On 04/22/2015 11:56 PM, Samir Sow wrote:
+> I would like to learn more about the cowboy_xxxx_handler for instance the cowboy_websocket_handler  :
+> -  is it an OTP gen_ instance ?
+> - how/where the websocket_handle() is called ?
+> - how websocket_info() relates to the Transport:send() operation and where/how this latter function is called?
+>
+> I  could not find the cowboy_websocket_handler behavior in the src dir. I guess i?ve missed something.
+> The code is clean but difficult to decipher by a erlang padawan like me.
+
+Presumably you are looking in master. cowboy_websocket does that in 
+master now. cowboy_websocket_handler is in Cowboy 1.0.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samset at wanadoo.fr  Wed Apr 22 23:39:29 2015
+From: samset at wanadoo.fr (Samir Sow)
+Date: Wed, 22 Apr 2015 23:39:29 +0200
+Subject: [99s-extend] cowboy_websocket_handler
+In-Reply-To: <55381025.6070607@ninenines.eu>
+References: <43C48B2E-0396-43E0-B82C-E524C8274004@wanadoo.fr>
+ <55381025.6070607@ninenines.eu>
+Message-ID: <55F4A36D-6FEF-47B4-B02F-D3B3FA74732D@wanadoo.fr>
+
+Thanks.
+Still i can?t figure out how you manage the data transmission from/to handler via the websocket_handle() and websocket_info() function.
+
+Samir
+
+> On 22 avr. 2015, at 23:18, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> 
+> Hello,
+> 
+> On 04/22/2015 11:56 PM, Samir Sow wrote:
+>> I would like to learn more about the cowboy_xxxx_handler for instance the cowboy_websocket_handler  :
+>> -  is it an OTP gen_ instance ?
+>> - how/where the websocket_handle() is called ?
+>> - how websocket_info() relates to the Transport:send() operation and where/how this latter function is called?
+>> 
+>> I  could not find the cowboy_websocket_handler behavior in the src dir. I guess i?ve missed something.
+>> The code is clean but difficult to decipher by a erlang padawan like me.
+> 
+> Presumably you are looking in master. cowboy_websocket does that in master now. cowboy_websocket_handler is in Cowboy 1.0.
+> 
+> -- 
+> Lo?c Hoguin
+> http://ninenines.eu
+
+
+From essen at ninenines.eu  Thu Apr 23 10:55:23 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 23 Apr 2015 11:55:23 +0300
+Subject: [99s-extend] cowboy_websocket_handler
+In-Reply-To: <55F4A36D-6FEF-47B4-B02F-D3B3FA74732D@wanadoo.fr>
+References: <43C48B2E-0396-43E0-B82C-E524C8274004@wanadoo.fr>
+ <55381025.6070607@ninenines.eu>
+ <55F4A36D-6FEF-47B4-B02F-D3B3FA74732D@wanadoo.fr>
+Message-ID: <5538B37B.6080501@ninenines.eu>
+
+It's a simple function call.
+
+Assuming the variable Handler contains the name of the module, it's just 
+doing Handler:websocket_info(Info, Req, State) and then checks the 
+return value.
+
+On 04/23/2015 12:39 AM, Samir Sow wrote:
+> Thanks.
+> Still i can?t figure out how you manage the data transmission from/to handler via the websocket_handle() and websocket_info() function.
+>
+> Samir
+>
+>> On 22 avr. 2015, at 23:18, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>
+>> Hello,
+>>
+>> On 04/22/2015 11:56 PM, Samir Sow wrote:
+>>> I would like to learn more about the cowboy_xxxx_handler for instance the cowboy_websocket_handler  :
+>>> -  is it an OTP gen_ instance ?
+>>> - how/where the websocket_handle() is called ?
+>>> - how websocket_info() relates to the Transport:send() operation and where/how this latter function is called?
+>>>
+>>> I  could not find the cowboy_websocket_handler behavior in the src dir. I guess i?ve missed something.
+>>> The code is clean but difficult to decipher by a erlang padawan like me.
+>>
+>> Presumably you are looking in master. cowboy_websocket does that in master now. cowboy_websocket_handler is in Cowboy 1.0.
+>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+

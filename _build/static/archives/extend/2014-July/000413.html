@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] HTTP Basic Auth base64 decode fails
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20HTTP%20Basic%20Auth%20base64%20decode%20fails&In-Reply-To=%3C53BBF058.3090103%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000412.html">
+   <LINK REL="Next"  HREF="000414.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] HTTP Basic Auth base64 decode fails</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20HTTP%20Basic%20Auth%20base64%20decode%20fails&In-Reply-To=%3C53BBF058.3090103%40ninenines.eu%3E"
+       TITLE="[99s-extend] HTTP Basic Auth base64 decode fails">essen at ninenines.eu
+       </A><BR>
+    <I>Tue Jul  8 15:21:28 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000412.html">[99s-extend] HTTP Basic Auth base64 decode fails
+</A></li>
+        <LI>Next message: <A HREF="000414.html">[99s-extend] HTTP Basic Auth base64 decode fails
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#413">[ date ]</a>
+              <a href="thread.html#413">[ thread ]</a>
+              <a href="subject.html#413">[ subject ]</a>
+              <a href="author.html#413">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Parsing of any header may crash. Some may also return an error tuple, 
+though that behavior slowly changes and it will always crash in 2.0. So 
+just wrap the call around a try/catch if you need to handle the error.
+
+Note that at this exact moment I'm working on returning 400 instead of 
+500 automatically when parsing headers end up crashing (and possibly 
+other situations later on).
+
+On 07/08/2014 03:17 PM, Paulo F. Oliveira wrote:
+&gt;<i> Hello, y'all.
+</I>&gt;<i>
+</I>&gt;<i> I'm using HTTP Basic Auth in my API. While calling
+</I>&gt;<i> cowboy_req:parse_header(&lt;&lt;&quot;authorization&gt;&gt;&quot;, ... with an _invalid_
+</I>&gt;<i> Authorization header such as &quot;Authorization: Basic Test1&quot; I get an error
+</I>&gt;<i> 500 back and an error log message on the server.
+</I>&gt;<i>
+</I>&gt;<i> 1. Is this the expected behavior? [if I understand correctly, my request
+</I>&gt;<i> is going through authorization(UserPass, Type = &lt;&lt;&quot;basic&quot;&gt;&gt;) and this
+</I>&gt;<i> has no check for the string being correctly encoded]
+</I>&gt;<i>
+</I>&gt;<i> 2. what would be the best way to guard against this &quot;error&quot;?
+</I>&gt;<i>
+</I>&gt;<i> Thanks.
+</I>&gt;<i>
+</I>&gt;<i> - Paulo F. Oliveira
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000412.html">[99s-extend] HTTP Basic Auth base64 decode fails
+</A></li>
+	<LI>Next message: <A HREF="000414.html">[99s-extend] HTTP Basic Auth base64 decode fails
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#413">[ date ]</a>
+              <a href="thread.html#413">[ thread ]</a>
+              <a href="subject.html#413">[ subject ]</a>
+              <a href="author.html#413">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

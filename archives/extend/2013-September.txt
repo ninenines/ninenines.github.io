@@ -1,0 +1,2240 @@
+From joe.freeman at bitroot.com  Sun Sep 15 19:01:30 2013
+From: joe.freeman at bitroot.com (Joe Freeman)
+Date: Sun, 15 Sep 2013 18:01:30 +0100
+Subject: [99s-extend] Cowboy load test
+Message-ID: <CAOBKReerkZKL_Rm9j7X4FH3YUbFHZDGHiVojNgO7WepOWCc_eQ@mail.gmail.com>
+
+Hi,
+
+I've started work on a project using Clojure, but I was wondering whether
+(and secretly hoping that) Erlang would be a better fit, so I've been load
+testing a few web server frameworks. I'm particularly interested in how the
+server can handle a large number of concurrent WebSocket connections, and
+the test I've been running is similar to Eric Moritz's [1].
+
+I've setup a simple Cowboy 'echo' server running on an EC2 instance
+(m1.medium, as in Eric's test) which could comfortably handle 10k
+concurrent WebSocket requests (as in Eric's results), while echoing about
+200 messages/second. The CPU usage of the VM at this point is about 99%,
+but the server continues to handle up to 40k concurrent connections with a
+consistent average response time (<30ms). Pushing the test beyond this
+number results in a spike in response times and lots of connection timeouts.
+
+40k connections seems pretty good, but when comparing this to the same test
+against a couple of Clojure/JVM-based frameworks (specifically Aleph/Netty
+and http-kit) I find I can get higher numbers of concurrent connections
+with slightly better average response times (100k connections, <10ms
+response time) using much less CPU (~20%). In fact, memory seems to be the
+limiting factor.
+
+So I have two questions:
+
+1) Should I be concerned about the CPU usage in the Erlang/Cowboy test? I
+have limited experience with Erlang so far, but 100% CPU feels like a bad
+thing.
+
+2) Is there any way to increase the performance of the cowboy server? Are
+there any Erlang VM parameters I can change? The fact that the Clojure/JVM
+tests (on the same machine) have managed to get to 100k connections
+suggests that the limitation isn't being imposed by the operating system
+(I've applied changes various changes to sysctl and ulimit).
+
+(Perhaps an echo server isn't the best way to compare HTTP servers, but it
+feels like a good starting point.)
+
+Thanks for any help.
+
+[1] https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md - the
+GitHub repo actually contains code for an Aleph server, but results from
+this aren't included in the summary here.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130915/c9a5340e/attachment.html>
+
+From essen at ninenines.eu  Sun Sep 15 21:02:35 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sun, 15 Sep 2013 21:02:35 +0200
+Subject: [99s-extend] Cowboy load test
+In-Reply-To: <CAOBKReerkZKL_Rm9j7X4FH3YUbFHZDGHiVojNgO7WepOWCc_eQ@mail.gmail.com>
+References: <CAOBKReerkZKL_Rm9j7X4FH3YUbFHZDGHiVojNgO7WepOWCc_eQ@mail.gmail.com>
+Message-ID: <5236044B.5040905@ninenines.eu>
+
+This sounds like you have too many timers, or something else is using 
+the CPU. 40k connections is literally nothing. Also make sure the 
+clients are on a separate VM/machine.
+
+Either way 99% CPU for 10k sounds high, I've had that with 0 CPU (though 
+on real hardware).
+
+Someone a couple years back got above 1 million after fixing 'too many 
+timers issues' but I don't think it was on a medium instance.
+
+On 09/15/2013 07:01 PM, Joe Freeman wrote:
+> Hi,
+>
+> I've started work on a project using Clojure, but I was wondering
+> whether (and secretly hoping that) Erlang would be a better fit, so I've
+> been load testing a few web server frameworks. I'm particularly
+> interested in how the server can handle a large number of concurrent
+> WebSocket connections, and the test I've been running is similar to Eric
+> Moritz's [1].
+>
+> I've setup a simple Cowboy 'echo' server running on an EC2 instance
+> (m1.medium, as in Eric's test) which could comfortably handle 10k
+> concurrent WebSocket requests (as in Eric's results), while echoing
+> about 200 messages/second. The CPU usage of the VM at this point is
+> about 99%, but the server continues to handle up to 40k concurrent
+> connections with a consistent average response time (<30ms). Pushing the
+> test beyond this number results in a spike in response times and lots of
+> connection timeouts.
+>
+> 40k connections seems pretty good, but when comparing this to the same
+> test against a couple of Clojure/JVM-based frameworks (specifically
+> Aleph/Netty and http-kit) I find I can get higher numbers of concurrent
+> connections with slightly better average response times (100k
+> connections, <10ms response time) using much less CPU (~20%). In fact,
+> memory seems to be the limiting factor.
+>
+> So I have two questions:
+>
+> 1) Should I be concerned about the CPU usage in the Erlang/Cowboy test?
+> I have limited experience with Erlang so far, but 100% CPU feels like a
+> bad thing.
+>
+> 2) Is there any way to increase the performance of the cowboy server?
+> Are there any Erlang VM parameters I can change? The fact that the
+> Clojure/JVM tests (on the same machine) have managed to get to 100k
+> connections suggests that the limitation isn't being imposed by the
+> operating system (I've applied changes various changes to sysctl and
+> ulimit).
+>
+> (Perhaps an echo server isn't the best way to compare HTTP servers, but
+> it feels like a good starting point.)
+>
+> Thanks for any help.
+>
+> [1] https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md -
+> the GitHub repo actually contains code for an Aleph server, but results
+> from this aren't included in the summary here.
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Sun Sep 15 21:05:02 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sun, 15 Sep 2013 21:05:02 +0200
+Subject: [99s-extend] Cowboy load test
+In-Reply-To: <5236044B.5040905@ninenines.eu>
+References: <CAOBKReerkZKL_Rm9j7X4FH3YUbFHZDGHiVojNgO7WepOWCc_eQ@mail.gmail.com>
+ <5236044B.5040905@ninenines.eu>
+Message-ID: <523604DE.6050600@ninenines.eu>
+
+This just hit me after hitting send.
+
+Another possibility is that you are using text frames which are required 
+to be valid UTF-8. Cowboy checks that (as required by the RFC), and it's 
+fairly expensive, while most other servers don't. Try with binary frames 
+instead.
+
+On 09/15/2013 09:02 PM, Lo?c Hoguin wrote:
+> This sounds like you have too many timers, or something else is using
+> the CPU. 40k connections is literally nothing. Also make sure the
+> clients are on a separate VM/machine.
+>
+> Either way 99% CPU for 10k sounds high, I've had that with 0 CPU (though
+> on real hardware).
+>
+> Someone a couple years back got above 1 million after fixing 'too many
+> timers issues' but I don't think it was on a medium instance.
+>
+> On 09/15/2013 07:01 PM, Joe Freeman wrote:
+>> Hi,
+>>
+>> I've started work on a project using Clojure, but I was wondering
+>> whether (and secretly hoping that) Erlang would be a better fit, so I've
+>> been load testing a few web server frameworks. I'm particularly
+>> interested in how the server can handle a large number of concurrent
+>> WebSocket connections, and the test I've been running is similar to Eric
+>> Moritz's [1].
+>>
+>> I've setup a simple Cowboy 'echo' server running on an EC2 instance
+>> (m1.medium, as in Eric's test) which could comfortably handle 10k
+>> concurrent WebSocket requests (as in Eric's results), while echoing
+>> about 200 messages/second. The CPU usage of the VM at this point is
+>> about 99%, but the server continues to handle up to 40k concurrent
+>> connections with a consistent average response time (<30ms). Pushing the
+>> test beyond this number results in a spike in response times and lots of
+>> connection timeouts.
+>>
+>> 40k connections seems pretty good, but when comparing this to the same
+>> test against a couple of Clojure/JVM-based frameworks (specifically
+>> Aleph/Netty and http-kit) I find I can get higher numbers of concurrent
+>> connections with slightly better average response times (100k
+>> connections, <10ms response time) using much less CPU (~20%). In fact,
+>> memory seems to be the limiting factor.
+>>
+>> So I have two questions:
+>>
+>> 1) Should I be concerned about the CPU usage in the Erlang/Cowboy test?
+>> I have limited experience with Erlang so far, but 100% CPU feels like a
+>> bad thing.
+>>
+>> 2) Is there any way to increase the performance of the cowboy server?
+>> Are there any Erlang VM parameters I can change? The fact that the
+>> Clojure/JVM tests (on the same machine) have managed to get to 100k
+>> connections suggests that the limitation isn't being imposed by the
+>> operating system (I've applied changes various changes to sysctl and
+>> ulimit).
+>>
+>> (Perhaps an echo server isn't the best way to compare HTTP servers, but
+>> it feels like a good starting point.)
+>>
+>> Thanks for any help.
+>>
+>> [1] https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md -
+>> the GitHub repo actually contains code for an Aleph server, but results
+>> from this aren't included in the summary here.
+>>
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>>
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Mon Sep 16 15:50:22 2013
+From: akonsu at gmail.com (akonsu)
+Date: Mon, 16 Sep 2013 09:50:22 -0400
+Subject: [99s-extend] how to send a message to all connections in cowboy
+Message-ID: <CA+eMAwYqrYJ1bFQfuJJJm=Sfan3K0VVdOQRPb2ULsomk6VuGsA@mail.gmail.com>
+
+Hello,
+
+this is somewhat similar to what someone else has asked:
+http://lists.ninenines.eu:81/archives/extend/2013-August/000224.html
+
+I am new to cowboy, I have a process that runs alongside a cowboy server
+and this process needs to periodically send text to all http clients
+connected to the cowboy server. My goal is to have a streaming connection
+for each http client so that I could stream text to them from my process.
+how is this done?
+
+Thanks!
+Konstantin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130916/dedbf486/attachment.html>
+
+From essen at ninenines.eu  Mon Sep 16 19:06:32 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 16 Sep 2013 19:06:32 +0200
+Subject: [99s-extend] how to send a message to all connections in cowboy
+In-Reply-To: <CA+eMAwYqrYJ1bFQfuJJJm=Sfan3K0VVdOQRPb2ULsomk6VuGsA@mail.gmail.com>
+References: <CA+eMAwYqrYJ1bFQfuJJJm=Sfan3K0VVdOQRPb2ULsomk6VuGsA@mail.gmail.com>
+Message-ID: <52373A98.4080406@ninenines.eu>
+
+On 09/16/2013 03:50 PM, akonsu wrote:
+> Hello,
+>
+> this is somewhat similar to what someone else has asked:
+> http://lists.ninenines.eu:81/archives/extend/2013-August/000224.html
+>
+> I am new to cowboy, I have a process that runs alongside a cowboy server
+> and this process needs to periodically send text to all http clients
+> connected to the cowboy server. My goal is to have a streaming
+> connection for each http client so that I could stream text to them from
+> my process. how is this done?
+
+Same answer really. You need some kind of process registry, like gproc 
+properties for example, that will store all Pids and allow you to send a 
+message to all of them.
+
+On init, register the process, and then handle the incoming message when 
+it arrives.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Mon Sep 16 19:14:24 2013
+From: akonsu at gmail.com (akonsu)
+Date: Mon, 16 Sep 2013 13:14:24 -0400
+Subject: [99s-extend] how to send a message to all connections in cowboy
+In-Reply-To: <52373A98.4080406@ninenines.eu>
+References: <CA+eMAwYqrYJ1bFQfuJJJm=Sfan3K0VVdOQRPb2ULsomk6VuGsA@mail.gmail.com>
+ <52373A98.4080406@ninenines.eu>
+Message-ID: <CA+eMAwYJdErXi780jUepDaCMrWPv99N1diF0a_88AzfM3Z9mMA@mail.gmail.com>
+
+thanks. Suppose my external process is registered and has a name, so I can
+discover it by name from my cowboy request handler. when my cowboy handler
+is invoked, can I just send the handler's process ID to the external
+process? the question is then how does the external process know that the
+http client has disconnected so that it can stop sending data to it.
+
+
+2013/9/16 Lo?c Hoguin <essen at ninenines.eu>
+
+> On 09/16/2013 03:50 PM, akonsu wrote:
+>
+>> Hello,
+>>
+>> this is somewhat similar to what someone else has asked:
+>> http://lists.ninenines.eu:81/**archives/extend/2013-August/**000224.html<http://lists.ninenines.eu:81/archives/extend/2013-August/000224.html>
+>>
+>> I am new to cowboy, I have a process that runs alongside a cowboy server
+>> and this process needs to periodically send text to all http clients
+>> connected to the cowboy server. My goal is to have a streaming
+>> connection for each http client so that I could stream text to them from
+>> my process. how is this done?
+>>
+>
+> Same answer really. You need some kind of process registry, like gproc
+> properties for example, that will store all Pids and allow you to send a
+> message to all of them.
+>
+> On init, register the process, and then handle the incoming message when
+> it arrives.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130916/f55d10f5/attachment.html>
+
+From essen at ninenines.eu  Mon Sep 16 19:19:59 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 16 Sep 2013 19:19:59 +0200
+Subject: [99s-extend] how to send a message to all connections in cowboy
+In-Reply-To: <CA+eMAwYJdErXi780jUepDaCMrWPv99N1diF0a_88AzfM3Z9mMA@mail.gmail.com>
+References: <CA+eMAwYqrYJ1bFQfuJJJm=Sfan3K0VVdOQRPb2ULsomk6VuGsA@mail.gmail.com>
+ <52373A98.4080406@ninenines.eu>
+ <CA+eMAwYJdErXi780jUepDaCMrWPv99N1diF0a_88AzfM3Z9mMA@mail.gmail.com>
+Message-ID: <52373DBF.3080503@ninenines.eu>
+
+Monitors.
+
+But really gproc does all that for you and is already well tested.
+
+https://github.com/esl/gproc
+
+On 09/16/2013 07:14 PM, akonsu wrote:
+> thanks. Suppose my external process is registered and has a name, so I
+> can discover it by name from my cowboy request handler. when my cowboy
+> handler is invoked, can I just send the handler's process ID to the
+> external process? the question is then how does the external process
+> know that the http client has disconnected so that it can stop sending
+> data to it.
+>
+>
+> 2013/9/16 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     On 09/16/2013 03:50 PM, akonsu wrote:
+>
+>         Hello,
+>
+>         this is somewhat similar to what someone else has asked:
+>         http://lists.ninenines.eu:81/__archives/extend/2013-August/__000224.html
+>         <http://lists.ninenines.eu:81/archives/extend/2013-August/000224.html>
+>
+>         I am new to cowboy, I have a process that runs alongside a
+>         cowboy server
+>         and this process needs to periodically send text to all http clients
+>         connected to the cowboy server. My goal is to have a streaming
+>         connection for each http client so that I could stream text to
+>         them from
+>         my process. how is this done?
+>
+>
+>     Same answer really. You need some kind of process registry, like
+>     gproc properties for example, that will store all Pids and allow you
+>     to send a message to all of them.
+>
+>     On init, register the process, and then handle the incoming message
+>     when it arrives.
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Thu Sep 19 06:30:57 2013
+From: akonsu at gmail.com (akonsu)
+Date: Thu, 19 Sep 2013 00:30:57 -0400
+Subject: [99s-extend] cowboy_loop_handler
+Message-ID: <CA+eMAwZtgAjDxQTo6VgC729hhog7wONi-o6vnQa21JExgjUGDA@mail.gmail.com>
+
+Hello,
+
+from the documentation:
+
+info(Info, Req, State) -> {ok, Req, State} | {loop, Req, State} | {loop,
+Req, State, hibernate}
+
+
+in case my handler receives a lot of messages, and they come very often,
+does a response of the latter form {loop, Req, State, hibernate} save
+anything? Can hibernating in this case actually hinder performance?
+
+thanks
+Konstantin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130919/9614ef5e/attachment.html>
+
+From essen at ninenines.eu  Thu Sep 19 11:03:02 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 19 Sep 2013 11:03:02 +0200
+Subject: [99s-extend] cowboy_loop_handler
+In-Reply-To: <CA+eMAwZtgAjDxQTo6VgC729hhog7wONi-o6vnQa21JExgjUGDA@mail.gmail.com>
+References: <CA+eMAwZtgAjDxQTo6VgC729hhog7wONi-o6vnQa21JExgjUGDA@mail.gmail.com>
+Message-ID: <523ABDC6.1050204@ninenines.eu>
+
+How much is a lot of messages?
+
+Hibernating is a bit more expensive on the CPU but better for saving 
+memory. It's generally fine to use except when you have a really busy 
+system. Do note that it also means your responses will be slightly 
+slower (though that is generally not noticeable).
+
+On 09/19/2013 06:30 AM, akonsu wrote:
+> Hello,
+>
+> from the documentation:
+>
+> info(Info, Req, State) -> {ok, Req, State} | {loop, Req, State}| {loop,
+> Req, State, hibernate}
+>
+>
+> in case my handler receives a lot of messages, and they come very often,
+> does a response of the latter form {loop, Req, State, hibernate} save
+> anything? Can hibernating in this case actually hinder performance?
+>
+> thanks
+> Konstantin
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Thu Sep 19 13:37:58 2013
+From: akonsu at gmail.com (akonsu)
+Date: Thu, 19 Sep 2013 07:37:58 -0400
+Subject: [99s-extend] cowboy_loop_handler
+In-Reply-To: <523ABDC6.1050204@ninenines.eu>
+References: <CA+eMAwZtgAjDxQTo6VgC729hhog7wONi-o6vnQa21JExgjUGDA@mail.gmail.com>
+ <523ABDC6.1050204@ninenines.eu>
+Message-ID: <CA+eMAwYiCni664CiSRLmS6nuZOv1O7OSn0D8TM3ZHPRSHu6g_A@mail.gmail.com>
+
+my http handler receives messages carrying json parts obtained from a
+twitter stream by a separate process. the twitter stream is the stream of
+all public tweets, (they call it "firehose") so there are a lot.
+
+
+2013/9/19 Lo?c Hoguin <essen at ninenines.eu>
+
+> How much is a lot of messages?
+>
+> Hibernating is a bit more expensive on the CPU but better for saving
+> memory. It's generally fine to use except when you have a really busy
+> system. Do note that it also means your responses will be slightly slower
+> (though that is generally not noticeable).
+>
+>
+> On 09/19/2013 06:30 AM, akonsu wrote:
+>
+>> Hello,
+>>
+>> from the documentation:
+>>
+>> info(Info, Req, State) -> {ok, Req, State} | {loop, Req, State}| {loop,
+>> Req, State, hibernate}
+>>
+>>
+>> in case my handler receives a lot of messages, and they come very often,
+>> does a response of the latter form {loop, Req, State, hibernate} save
+>> anything? Can hibernating in this case actually hinder performance?
+>>
+>> thanks
+>> Konstantin
+>>
+>>
+>> ______________________________**_________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130919/0a4bcb6c/attachment.html>
+
+From akonsu at gmail.com  Fri Sep 20 20:47:54 2013
+From: akonsu at gmail.com (akonsu)
+Date: Fri, 20 Sep 2013 14:47:54 -0400
+Subject: [99s-extend] timeouts and slow clients in cowboy loop handler
+Message-ID: <CA+eMAwaZoY2LMns_SahfQmNLC5Z6j_nB_YuCHapyShHL6CHnQA@mail.gmail.com>
+
+Hi,
+
+I am using loop handler and I stream from it:
+
+info({stream, Part}, Req, S) ->
+    ok = cowboy_req:chunk(Part, Req),
+    {loop, Req, S, hibernate};
+
+I have two questions:
+
+1. on timeouts cowboy sends 204 No Content. In my case it is not the right
+response because I may have already sent some data. Is there a way to send
+a custom response?
+
+2. how to check if the client is too slow and is not reading the response
+stream fast enough? If this happens, then I need to disconnect.
+
+I can live without 1. but I need to figure out 2. Please help.
+
+thank you!
+Konstantin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130920/6e3fa036/attachment.html>
+
+From essen at ninenines.eu  Fri Sep 20 20:50:57 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 20 Sep 2013 20:50:57 +0200
+Subject: [99s-extend] timeouts and slow clients in cowboy loop handler
+In-Reply-To: <CA+eMAwaZoY2LMns_SahfQmNLC5Z6j_nB_YuCHapyShHL6CHnQA@mail.gmail.com>
+References: <CA+eMAwaZoY2LMns_SahfQmNLC5Z6j_nB_YuCHapyShHL6CHnQA@mail.gmail.com>
+Message-ID: <523C9911.8070908@ninenines.eu>
+
+Loop handlers close after a while regardless of what you send, it only 
+checks what the client sends. The best way for you would be to disable 
+that timeout and handle it manually.
+
+As for the second question, I'm still reading the thread on 
+erlang-questions but I've seen some good ideas about timestamps so far.
+
+On 09/20/2013 08:47 PM, akonsu wrote:
+> Hi,
+>
+> I am using loop handler and I stream from it:
+>
+> info({stream, Part}, Req, S) ->
+>      ok = cowboy_req:chunk(Part, Req),
+>      {loop, Req, S, hibernate};
+>
+> I have two questions:
+>
+> 1. on timeouts cowboy sends 204 No Content. In my case it is not the
+> right response because I may have already sent some data. Is there a way
+> to send a custom response?
+>
+> 2. how to check if the client is too slow and is not reading the
+> response stream fast enough? If this happens, then I need to disconnect.
+>
+> I can live without 1. but I need to figure out 2. Please help.
+>
+> thank you!
+> Konstantin
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Fri Sep 20 20:54:56 2013
+From: akonsu at gmail.com (akonsu)
+Date: Fri, 20 Sep 2013 14:54:56 -0400
+Subject: [99s-extend] timeouts and slow clients in cowboy loop handler
+In-Reply-To: <523C9911.8070908@ninenines.eu>
+References: <CA+eMAwaZoY2LMns_SahfQmNLC5Z6j_nB_YuCHapyShHL6CHnQA@mail.gmail.com>
+ <523C9911.8070908@ninenines.eu>
+Message-ID: <CA+eMAwavLu=E6Ayd2SLKz=OqAn5rfDU=-2USHYcNu-JDSmKhYA@mail.gmail.com>
+
+thanks!
+
+how to implement timeout callback manually? if I had receive then I would
+just use timeout clause there, but with the handler I do not know...
+
+I have doubts about validity of my question on the erlang list.  I later
+realised that there is no problem receiving messages in my handler from my
+upstream process, I can do it fast enough and shove everything to the
+response. my real problem is to determine if the http client is reading
+fast enough from the response...
+
+
+2013/9/20 Lo?c Hoguin <essen at ninenines.eu>
+
+> Loop handlers close after a while regardless of what you send, it only
+> checks what the client sends. The best way for you would be to disable that
+> timeout and handle it manually.
+>
+> As for the second question, I'm still reading the thread on
+> erlang-questions but I've seen some good ideas about timestamps so far.
+>
+>
+> On 09/20/2013 08:47 PM, akonsu wrote:
+>
+>> Hi,
+>>
+>> I am using loop handler and I stream from it:
+>>
+>> info({stream, Part}, Req, S) ->
+>>      ok = cowboy_req:chunk(Part, Req),
+>>      {loop, Req, S, hibernate};
+>>
+>> I have two questions:
+>>
+>> 1. on timeouts cowboy sends 204 No Content. In my case it is not the
+>> right response because I may have already sent some data. Is there a way
+>> to send a custom response?
+>>
+>> 2. how to check if the client is too slow and is not reading the
+>> response stream fast enough? If this happens, then I need to disconnect.
+>>
+>> I can live without 1. but I need to figure out 2. Please help.
+>>
+>> thank you!
+>> Konstantin
+>>
+>>
+>>
+>> ______________________________**_________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130920/32352505/attachment.html>
+
+From essen at ninenines.eu  Fri Sep 20 20:56:31 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 20 Sep 2013 20:56:31 +0200
+Subject: [99s-extend] timeouts and slow clients in cowboy loop handler
+In-Reply-To: <CA+eMAwavLu=E6Ayd2SLKz=OqAn5rfDU=-2USHYcNu-JDSmKhYA@mail.gmail.com>
+References: <CA+eMAwaZoY2LMns_SahfQmNLC5Z6j_nB_YuCHapyShHL6CHnQA@mail.gmail.com>
+ <523C9911.8070908@ninenines.eu>
+ <CA+eMAwavLu=E6Ayd2SLKz=OqAn5rfDU=-2USHYcNu-JDSmKhYA@mail.gmail.com>
+Message-ID: <523C9A5F.3080805@ninenines.eu>
+
+chunk only returns when the client has received the chunk, so the 
+timestamps solution should work.
+
+As for the timeout, you can simply use erlang:send_after or something 
+like usual and the message will arrive in info/3.
+
+On 09/20/2013 08:54 PM, akonsu wrote:
+> thanks!
+>
+> how to implement timeout callback manually? if I had receive then I
+> would just use timeout clause there, but with the handler I do not know...
+>
+> I have doubts about validity of my question on the erlang list.  I later
+> realised that there is no problem receiving messages in my handler from
+> my upstream process, I can do it fast enough and shove everything to the
+> response. my real problem is to determine if the http client is reading
+> fast enough from the response...
+>
+>
+> 2013/9/20 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     Loop handlers close after a while regardless of what you send, it
+>     only checks what the client sends. The best way for you would be to
+>     disable that timeout and handle it manually.
+>
+>     As for the second question, I'm still reading the thread on
+>     erlang-questions but I've seen some good ideas about timestamps so far.
+>
+>
+>     On 09/20/2013 08:47 PM, akonsu wrote:
+>
+>         Hi,
+>
+>         I am using loop handler and I stream from it:
+>
+>         info({stream, Part}, Req, S) ->
+>               ok = cowboy_req:chunk(Part, Req),
+>               {loop, Req, S, hibernate};
+>
+>         I have two questions:
+>
+>         1. on timeouts cowboy sends 204 No Content. In my case it is not the
+>         right response because I may have already sent some data. Is
+>         there a way
+>         to send a custom response?
+>
+>         2. how to check if the client is too slow and is not reading the
+>         response stream fast enough? If this happens, then I need to
+>         disconnect.
+>
+>         I can live without 1. but I need to figure out 2. Please help.
+>
+>         thank you!
+>         Konstantin
+>
+>
+>
+>         _________________________________________________
+>         Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         http://lists.ninenines.eu:81/__listinfo/extend
+>         <http://lists.ninenines.eu:81/listinfo/extend>
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Fri Sep 20 20:59:46 2013
+From: akonsu at gmail.com (akonsu)
+Date: Fri, 20 Sep 2013 14:59:46 -0400
+Subject: [99s-extend] timeouts and slow clients in cowboy loop handler
+In-Reply-To: <523C9A5F.3080805@ninenines.eu>
+References: <CA+eMAwaZoY2LMns_SahfQmNLC5Z6j_nB_YuCHapyShHL6CHnQA@mail.gmail.com>
+ <523C9911.8070908@ninenines.eu>
+ <CA+eMAwavLu=E6Ayd2SLKz=OqAn5rfDU=-2USHYcNu-JDSmKhYA@mail.gmail.com>
+ <523C9A5F.3080805@ninenines.eu>
+Message-ID: <CA+eMAwbGgYLp0W2esA204iZ0sumV2dBBN6ppbqD29ZKow+ts3A@mail.gmail.com>
+
+Understand about chunks being synchronous. that helps me tremendously to
+understand how it works.
+
+would you give me a sketchy example of how to use send_after in a loop
+handler? (sorry I am new to erlang)
+
+Konstantin
+
+
+2013/9/20 Lo?c Hoguin <essen at ninenines.eu>
+
+> chunk only returns when the client has received the chunk, so the
+> timestamps solution should work.
+>
+> As for the timeout, you can simply use erlang:send_after or something like
+> usual and the message will arrive in info/3.
+>
+>
+> On 09/20/2013 08:54 PM, akonsu wrote:
+>
+>> thanks!
+>>
+>> how to implement timeout callback manually? if I had receive then I
+>> would just use timeout clause there, but with the handler I do not know...
+>>
+>> I have doubts about validity of my question on the erlang list.  I later
+>> realised that there is no problem receiving messages in my handler from
+>> my upstream process, I can do it fast enough and shove everything to the
+>> response. my real problem is to determine if the http client is reading
+>> fast enough from the response...
+>>
+>>
+>> 2013/9/20 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>>
+>>
+>>     Loop handlers close after a while regardless of what you send, it
+>>     only checks what the client sends. The best way for you would be to
+>>     disable that timeout and handle it manually.
+>>
+>>     As for the second question, I'm still reading the thread on
+>>     erlang-questions but I've seen some good ideas about timestamps so
+>> far.
+>>
+>>
+>>     On 09/20/2013 08:47 PM, akonsu wrote:
+>>
+>>         Hi,
+>>
+>>         I am using loop handler and I stream from it:
+>>
+>>         info({stream, Part}, Req, S) ->
+>>               ok = cowboy_req:chunk(Part, Req),
+>>               {loop, Req, S, hibernate};
+>>
+>>         I have two questions:
+>>
+>>         1. on timeouts cowboy sends 204 No Content. In my case it is not
+>> the
+>>         right response because I may have already sent some data. Is
+>>         there a way
+>>         to send a custom response?
+>>
+>>         2. how to check if the client is too slow and is not reading the
+>>         response stream fast enough? If this happens, then I need to
+>>         disconnect.
+>>
+>>         I can live without 1. but I need to figure out 2. Please help.
+>>
+>>         thank you!
+>>         Konstantin
+>>
+>>
+>>
+>>         ______________________________**___________________
+>>         Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.**ninenines.eu<Extend at lists.ninenines.eu>
+>> >
+>>         http://lists.ninenines.eu:81/_**_listinfo/extend<http://lists.ninenines.eu:81/__listinfo/extend>
+>>
+>>         <http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>> >
+>>
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     Erlang Cowboy
+>>     Nine Nines
+>>     http://ninenines.eu
+>>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+>
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130920/4c005881/attachment.html>
+
+From essen at ninenines.eu  Fri Sep 20 21:04:34 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 20 Sep 2013 21:04:34 +0200
+Subject: [99s-extend] timeouts and slow clients in cowboy loop handler
+In-Reply-To: <CA+eMAwbGgYLp0W2esA204iZ0sumV2dBBN6ppbqD29ZKow+ts3A@mail.gmail.com>
+References: <CA+eMAwaZoY2LMns_SahfQmNLC5Z6j_nB_YuCHapyShHL6CHnQA@mail.gmail.com>
+ <523C9911.8070908@ninenines.eu>
+ <CA+eMAwavLu=E6Ayd2SLKz=OqAn5rfDU=-2USHYcNu-JDSmKhYA@mail.gmail.com>
+ <523C9A5F.3080805@ninenines.eu>
+ <CA+eMAwbGgYLp0W2esA204iZ0sumV2dBBN6ppbqD29ZKow+ts3A@mail.gmail.com>
+Message-ID: <523C9C42.4040300@ninenines.eu>
+
+send_after sends an Erlang message to a Pid after N milliseconds. It's 
+the same as Pid ! Message, except it's sent later. Send it to self().
+
+But if you're going to use timestamps then you probably don't need this 
+timeout, just check the timestamps and close when too slow.
+
+On 09/20/2013 08:59 PM, akonsu wrote:
+> Understand about chunks being synchronous. that helps me tremendously to
+> understand how it works.
+>
+> would you give me a sketchy example of how to use send_after in a loop
+> handler? (sorry I am new to erlang)
+>
+> Konstantin
+>
+>
+> 2013/9/20 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     chunk only returns when the client has received the chunk, so the
+>     timestamps solution should work.
+>
+>     As for the timeout, you can simply use erlang:send_after or
+>     something like usual and the message will arrive in info/3.
+>
+>
+>     On 09/20/2013 08:54 PM, akonsu wrote:
+>
+>         thanks!
+>
+>         how to implement timeout callback manually? if I had receive then I
+>         would just use timeout clause there, but with the handler I do
+>         not know...
+>
+>         I have doubts about validity of my question on the erlang list.
+>           I later
+>         realised that there is no problem receiving messages in my
+>         handler from
+>         my upstream process, I can do it fast enough and shove
+>         everything to the
+>         response. my real problem is to determine if the http client is
+>         reading
+>         fast enough from the response...
+>
+>
+>         2013/9/20 Lo?c Hoguin <essen at ninenines.eu
+>         <mailto:essen at ninenines.eu> <mailto:essen at ninenines.eu
+>         <mailto:essen at ninenines.eu>>>
+>
+>
+>              Loop handlers close after a while regardless of what you
+>         send, it
+>              only checks what the client sends. The best way for you
+>         would be to
+>              disable that timeout and handle it manually.
+>
+>              As for the second question, I'm still reading the thread on
+>              erlang-questions but I've seen some good ideas about
+>         timestamps so far.
+>
+>
+>              On 09/20/2013 08:47 PM, akonsu wrote:
+>
+>                  Hi,
+>
+>                  I am using loop handler and I stream from it:
+>
+>                  info({stream, Part}, Req, S) ->
+>                        ok = cowboy_req:chunk(Part, Req),
+>                        {loop, Req, S, hibernate};
+>
+>                  I have two questions:
+>
+>                  1. on timeouts cowboy sends 204 No Content. In my case
+>         it is not the
+>                  right response because I may have already sent some
+>         data. Is
+>                  there a way
+>                  to send a custom response?
+>
+>                  2. how to check if the client is too slow and is not
+>         reading the
+>                  response stream fast enough? If this happens, then I
+>         need to
+>                  disconnect.
+>
+>                  I can live without 1. but I need to figure out 2.
+>         Please help.
+>
+>                  thank you!
+>                  Konstantin
+>
+>
+>
+>                  ___________________________________________________
+>                  Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         <mailto:Extend at lists.__ninenines.eu
+>         <mailto:Extend at lists.ninenines.eu>>
+>         http://lists.ninenines.eu:81/____listinfo/extend
+>         <http://lists.ninenines.eu:81/__listinfo/extend>
+>
+>                  <http://lists.ninenines.eu:81/__listinfo/extend
+>         <http://lists.ninenines.eu:81/listinfo/extend>>
+>
+>
+>
+>              --
+>              Lo?c Hoguin
+>              Erlang Cowboy
+>              Nine Nines
+>         http://ninenines.eu
+>
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From mrhegarty at gmail.com  Sun Sep 22 22:55:31 2013
+From: mrhegarty at gmail.com (Matthew Hegarty)
+Date: Sun, 22 Sep 2013 21:55:31 +0100
+Subject: [99s-extend] Cowboy helloworld make fails with missing_beam_file
+	(hipe)
+Message-ID: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+
+hi
+Just starting out so I've got latest versions of apps.
+in cowboy/examples/hello_world, running make fails with:
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130922/77e355ff/attachment.html>
+
+From mrhegarty at gmail.com  Sun Sep 22 22:59:37 2013
+From: mrhegarty at gmail.com (Matthew Hegarty)
+Date: Sun, 22 Sep 2013 21:59:37 +0100
+Subject: [99s-extend] Cowboy helloworld make fails with
+	missing_beam_file (hipe)
+In-Reply-To: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+Message-ID: <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+
+hi
+Just starting out so I'm trying to run cowboy's helloworld
+in cowboy/examples/hello_world, running make fails with:
+
+===> Provider (rlx_prv_discover) failed with: {error,
+                                                      {rlx_app_discovery,
+                                                       [{missing_beam_file,
+                                                         hipe,
+
+<<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+                                                        {missing_beam_file,
+                                                         hipe,
+
+<<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+
+there is no hipe.beam in /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/, it is
+in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+I've tried passing the correct dir to relx using --lib-dir but I still get
+the same error.
+
+Any ideas what's going wrong?
+
+erl: Erlang R16B02 (erts-5.10.3)
+relx: 0.0.0+build.275.refca03701
+rebar: rebar 2.1.0-pre R16B02 20130922_191744 git 2.1.0-pre-46-g78fa8fc
+
+
+On 22 September 2013 21:55, Matthew Hegarty <mrhegarty at gmail.com> wrote:
+
+> hi
+> Just starting out so I've got latest versions of apps.
+> in cowboy/examples/hello_world, running make fails with:
+>
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130922/6e925e9d/attachment.html>
+
+From lloyd at writersglen.com  Mon Sep 23 01:57:41 2013
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Sun, 22 Sep 2013 19:57:41 -0400 (EDT)
+Subject: [99s-extend] Cowboy: Having problems with Getting Started
+Message-ID: <1379894261.367227790@apps.rackspace.com>
+
+Hello,
+
+Forgive my ignorance, but I'm having problems with the Getting Started chapter of the Cowboy Guide.
+
+Near the end I can download relx just fine. But there seems to be a hidden assumption shared, perhaps, by all Erlang cowboys but outside my understanding.
+
+When I get to $./relx, the following is returned:
+
+lloyd at Reliance:~/hello_erlang/relx$ ./relx
+===> Starting relx build process ...
+===> Resolving OTP Applications from directories:
+          /home/lloyd/hello_erlang/relx/ebin
+          /home/lloyd/hello_erlang/relx/deps
+          /usr/lib/erlang/lib
+
+===> Resolving available OTP Releases from directories:
+          /home/lloyd/hello_erlang/relx/ebin
+          /home/lloyd/hello_erlang/relx/deps
+          /usr/lib/erlang/lib
+
+Failed to solve release:
+ Dependency hello_erlang is specified as a dependency but is not reachable by the system.
+
+I've added all variations to .erlang that I can think of to put hello_erlang into the code path, but none seem to work. Can some kind soul let me in on the secret?
+
+Many thanks,
+
+Lloyd
+
+*********************************************
+My books:
+
+THE GOSPEL OF ASHES
+http://thegospelofashes.com
+
+Strength is not enough. Do they have the courage 
+and the cunning? Can they survive long enough to 
+save the lives of millions?  
+
+FREEIN' PANCHO
+http://freeinpancho.com
+
+A community of misfits help a troubled boy find his way 
+
+AYA TAKEO
+http://ayatakeo.com
+
+Star-crossed love, war and power in an alternative 
+universe
+
+Available through Amazon or by request from your 
+favorite bookstore
+
+
+**********************************************
+
+
+
+From essen at ninenines.eu  Wed Sep 25 17:09:16 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 25 Sep 2013 17:09:16 +0200
+Subject: [99s-extend] Cowboy helloworld make fails with
+ missing_beam_file (hipe)
+In-Reply-To: <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+ <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+Message-ID: <5242FC9C.2090501@ninenines.eu>
+
+Why does it look for hipe at all to begin with?
+
+I'll ping tristan about it.
+
+On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+> hi
+> Just starting out so I'm trying to run cowboy's helloworld
+> in cowboy/examples/hello_world, running make fails with:
+>
+> ===> Provider (rlx_prv_discover) failed with: {error,
+>                                                        {rlx_app_discovery,
+>                                                         [{missing_beam_file,
+>                                                           hipe,
+>
+> <<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+>                                                          {missing_beam_file,
+>                                                           hipe,
+>
+> <<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+>
+> there is no hipe.beam in /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/, it
+> is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+> I've tried passing the correct dir to relx using --lib-dir but I still
+> get the same error.
+>
+> Any ideas what's going wrong?
+>
+> erl: Erlang R16B02 (erts-5.10.3)
+> relx: 0.0.0+build.275.refca03701
+> rebar: rebar 2.1.0-pre R16B02 20130922_191744 git 2.1.0-pre-46-g78fa8fc
+>
+>
+> On 22 September 2013 21:55, Matthew Hegarty <mrhegarty at gmail.com
+> <mailto:mrhegarty at gmail.com>> wrote:
+>
+>     hi
+>     Just starting out so I've got latest versions of apps.
+>     in cowboy/examples/hello_world, running make fails with:
+>
+>
+>
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Wed Sep 25 17:10:01 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 25 Sep 2013 17:10:01 +0200
+Subject: [99s-extend] Cowboy: Having problems with Getting Started
+In-Reply-To: <1379894261.367227790@apps.rackspace.com>
+References: <1379894261.367227790@apps.rackspace.com>
+Message-ID: <5242FCC9.5090003@ninenines.eu>
+
+On 09/23/2013 01:57 AM, lloyd at writersglen.com wrote:
+> Hello,
+>
+> Forgive my ignorance, but I'm having problems with the Getting Started chapter of the Cowboy Guide.
+>
+> Near the end I can download relx just fine. But there seems to be a hidden assumption shared, perhaps, by all Erlang cowboys but outside my understanding.
+>
+> When I get to $./relx, the following is returned:
+>
+> lloyd at Reliance:~/hello_erlang/relx$ ./relx
+
+You're in hello_erlang/relx, I'm guessing you want to do that in 
+hello_erlang/ directly.
+
+> ===> Starting relx build process ...
+> ===> Resolving OTP Applications from directories:
+>            /home/lloyd/hello_erlang/relx/ebin
+>            /home/lloyd/hello_erlang/relx/deps
+>            /usr/lib/erlang/lib
+>
+> ===> Resolving available OTP Releases from directories:
+>            /home/lloyd/hello_erlang/relx/ebin
+>            /home/lloyd/hello_erlang/relx/deps
+>            /usr/lib/erlang/lib
+>
+> Failed to solve release:
+>   Dependency hello_erlang is specified as a dependency but is not reachable by the system.
+>
+> I've added all variations to .erlang that I can think of to put hello_erlang into the code path, but none seem to work. Can some kind soul let me in on the secret?
+>
+> Many thanks,
+>
+> Lloyd
+>
+> *********************************************
+> My books:
+>
+> THE GOSPEL OF ASHES
+> http://thegospelofashes.com
+>
+> Strength is not enough. Do they have the courage
+> and the cunning? Can they survive long enough to
+> save the lives of millions?
+>
+> FREEIN' PANCHO
+> http://freeinpancho.com
+>
+> A community of misfits help a troubled boy find his way
+>
+> AYA TAKEO
+> http://ayatakeo.com
+>
+> Star-crossed love, war and power in an alternative
+> universe
+>
+> Available through Amazon or by request from your
+> favorite bookstore
+>
+>
+> **********************************************
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From tristan.sloughter at gmail.com  Wed Sep 25 18:25:04 2013
+From: tristan.sloughter at gmail.com (Tristan Sloughter)
+Date: Wed, 25 Sep 2013 09:25:04 -0700
+Subject: [99s-extend] Cowboy helloworld make fails with
+ missing_beam_file (hipe)
+In-Reply-To: <5242FC9C.2090501@ninenines.eu>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+ <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+ <5242FC9C.2090501@ninenines.eu>
+Message-ID: <1380126304.20343.26357585.70B016C0@webmail.messagingengine.com>
+
+I ran into the same thing. I assume you installed Erlang from the Erlang
+Solutions repo?
+
+Install erlang-hipe package. Or remove
+/usr/local/lib/erlang/lib/hipe-3.10.2.1 entirely.
+
+Their packages install a broken hipe app, missing lots of beams, for
+some reason. But if you install the hipe package it'll install what is
+missing. I told them about this but I haven't heard back.
+
+-- 
+  Tristan Sloughter
+  tsloughter at fastmail.fm
+
+On Wed, Sep 25, 2013, at 08:09 AM, Lo?c Hoguin wrote:
+> Why does it look for hipe at all to begin with?
+> 
+> I'll ping tristan about it.
+> 
+> On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+> > hi
+> > Just starting out so I'm trying to run cowboy's helloworld
+> > in cowboy/examples/hello_world, running make fails with:
+> >
+> > ===> Provider (rlx_prv_discover) failed with: {error,
+> >                                                        {rlx_app_discovery,
+> >                                                         [{missing_beam_file,
+> >                                                           hipe,
+> >
+> > <<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+> >                                                          {missing_beam_file,
+> >                                                           hipe,
+> >
+> > <<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+> >
+> > there is no hipe.beam in /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/, it
+> > is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+> > I've tried passing the correct dir to relx using --lib-dir but I still
+> > get the same error.
+> >
+> > Any ideas what's going wrong?
+> >
+> > erl: Erlang R16B02 (erts-5.10.3)
+> > relx: 0.0.0+build.275.refca03701
+> > rebar: rebar 2.1.0-pre R16B02 20130922_191744 git 2.1.0-pre-46-g78fa8fc
+> >
+> >
+> > On 22 September 2013 21:55, Matthew Hegarty <mrhegarty at gmail.com
+> > <mailto:mrhegarty at gmail.com>> wrote:
+> >
+> >     hi
+> >     Just starting out so I've got latest versions of apps.
+> >     in cowboy/examples/hello_world, running make fails with:
+> >
+> >
+> >
+> >
+> >
+> >
+> > _______________________________________________
+> > Extend mailing list
+> > Extend at lists.ninenines.eu
+> > http://lists.ninenines.eu:81/listinfo/extend
+> >
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+-- 
+  Tristan Sloughter
+  tristan.sloughter at gmail.com
+
+
+From essen at ninenines.eu  Wed Sep 25 18:27:58 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 25 Sep 2013 18:27:58 +0200
+Subject: [99s-extend] Mailing lists maintenance 28th of September
+Message-ID: <52430F0E.5090306@ninenines.eu>
+
+Hello,
+
+Just a heads up, I will be moving the mailing lists to a new server 
+Saturday. As a result they might be unavailable for a couple hours/days 
+depending on how well I manage to do it.
+
+Thanks for your understanding!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From mrhegarty at gmail.com  Thu Sep 26 21:03:06 2013
+From: mrhegarty at gmail.com (Matthew Hegarty)
+Date: Thu, 26 Sep 2013 20:03:06 +0100
+Subject: [99s-extend] Cowboy helloworld make fails with
+	missing_beam_file (hipe)
+In-Reply-To: <1380126304.20343.26357585.70B016C0@webmail.messagingengine.com>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+ <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+ <5242FC9C.2090501@ninenines.eu>
+ <1380126304.20343.26357585.70B016C0@webmail.messagingengine.com>
+Message-ID: <CAAcKVnkTmqkvxq8r6ufAAgkqoLrzjO_rVENuk9YzZNd-mmnM6Q@mail.gmail.com>
+
+hi
+I compiled Erlang from source (downloaded from erlang.org)
+
+
+On 25 September 2013 17:25, Tristan Sloughter
+<tristan.sloughter at gmail.com>wrote:
+
+> I ran into the same thing. I assume you installed Erlang from the Erlang
+> Solutions repo?
+>
+> Install erlang-hipe package. Or remove
+> /usr/local/lib/erlang/lib/hipe-3.10.2.1 entirely.
+>
+> Their packages install a broken hipe app, missing lots of beams, for
+> some reason. But if you install the hipe package it'll install what is
+> missing. I told them about this but I haven't heard back.
+>
+> --
+>   Tristan Sloughter
+>   tsloughter at fastmail.fm
+>
+> On Wed, Sep 25, 2013, at 08:09 AM, Lo?c Hoguin wrote:
+> > Why does it look for hipe at all to begin with?
+> >
+> > I'll ping tristan about it.
+> >
+> > On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+> > > hi
+> > > Just starting out so I'm trying to run cowboy's helloworld
+> > > in cowboy/examples/hello_world, running make fails with:
+> > >
+> > > ===> Provider (rlx_prv_discover) failed with: {error,
+> > >
+>  {rlx_app_discovery,
+> > >
+> [{missing_beam_file,
+> > >                                                           hipe,
+> > >
+> > > <<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+> > >
+>  {missing_beam_file,
+> > >                                                           hipe,
+> > >
+> > > <<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+> > >
+> > > there is no hipe.beam in /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/,
+> it
+> > > is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+> > > I've tried passing the correct dir to relx using --lib-dir but I still
+> > > get the same error.
+> > >
+> > > Any ideas what's going wrong?
+> > >
+> > > erl: Erlang R16B02 (erts-5.10.3)
+> > > relx: 0.0.0+build.275.refca03701
+> > > rebar: rebar 2.1.0-pre R16B02 20130922_191744 git 2.1.0-pre-46-g78fa8fc
+> > >
+> > >
+> > > On 22 September 2013 21:55, Matthew Hegarty <mrhegarty at gmail.com
+> > > <mailto:mrhegarty at gmail.com>> wrote:
+> > >
+> > >     hi
+> > >     Just starting out so I've got latest versions of apps.
+> > >     in cowboy/examples/hello_world, running make fails with:
+> > >
+> > >
+> > >
+> > >
+> > >
+> > >
+> > > _______________________________________________
+> > > Extend mailing list
+> > > Extend at lists.ninenines.eu
+> > > http://lists.ninenines.eu:81/listinfo/extend
+> > >
+> >
+> >
+> > --
+> > Lo?c Hoguin
+> > Erlang Cowboy
+> > Nine Nines
+> > http://ninenines.eu
+> > _______________________________________________
+> > Extend mailing list
+> > Extend at lists.ninenines.eu
+> > http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+> --
+>   Tristan Sloughter
+>   tristan.sloughter at gmail.com
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130926/d34b33e3/attachment.html>
+
+From tristan.sloughter at gmail.com  Thu Sep 26 21:04:00 2013
+From: tristan.sloughter at gmail.com (Tristan Sloughter)
+Date: Thu, 26 Sep 2013 12:04:00 -0700
+Subject: [99s-extend] Cowboy helloworld make fails with
+ missing_beam_file (hipe)
+In-Reply-To: <CAAcKVnkTmqkvxq8r6ufAAgkqoLrzjO_rVENuk9YzZNd-mmnM6Q@mail.gmail.com>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+ <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+ <5242FC9C.2090501@ninenines.eu>
+ <1380126304.20343.26357585.70B016C0@webmail.messagingengine.com>
+ <CAAcKVnkTmqkvxq8r6ufAAgkqoLrzjO_rVENuk9YzZNd-mmnM6Q@mail.gmail.com>
+Message-ID: <1380222240.30914.26875993.6CA5F061@webmail.messagingengine.com>
+
+Did you enable hipe when you compiled? Does
+/usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam exist?
+
+
+
+--
+Tristan Sloughter
+tristan.sloughter at gmail.com
+
+
+
+
+
+On Thu, Sep 26, 2013, at 12:03 PM, Matthew Hegarty wrote:
+
+hi
+
+I compiled Erlang from source (downloaded from [1]erlang.org)
+
+
+
+On 25 September 2013 17:25, Tristan Sloughter
+<[2]tristan.sloughter at gmail.com> wrote:
+
+I ran into the same thing. I assume you installed Erlang from the
+Erlang
+
+Solutions repo?
+
+
+
+Install erlang-hipe package. Or remove
+
+/usr/local/lib/erlang/lib/hipe-3.10.2.1 entirely.
+
+
+
+Their packages install a broken hipe app, missing lots of beams, for
+
+some reason. But if you install the hipe package it'll install what is
+
+missing. I told them about this but I haven't heard back.
+
+
+
+--
+
+  Tristan Sloughter
+
+  [3]tsloughter at fastmail.fm
+
+
+
+
+On Wed, Sep 25, 2013, at 08:09 AM, Lo?c Hoguin wrote:
+> Why does it look for hipe at all to begin with?
+>
+> I'll ping tristan about it.
+>
+> On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+> > hi
+> > Just starting out so I'm trying to run cowboy's helloworld
+> > in cowboy/examples/hello_world, running make fails with:
+> >
+> > ===> Provider (rlx_prv_discover) failed with: {error,
+> >
+{rlx_app_discovery,
+> >
+[{missing_beam_file,
+> >                                                           hipe,
+> >
+> > <<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+> >
+{missing_beam_file,
+> >                                                           hipe,
+> >
+> > <<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+> >
+> > there is no hipe.beam in
+/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/, it
+> > is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+> > I've tried passing the correct dir to relx using --lib-dir but I
+still
+> > get the same error.
+> >
+> > Any ideas what's going wrong?
+> >
+> > erl: Erlang R16B02 (erts-5.10.3)
+> > relx: 0.0.0+build.275.refca03701
+> > rebar: rebar 2.1.0-pre R16B02 20130922_191744 git
+2.1.0-pre-46-g78fa8fc
+> >
+> >
+> > On 22 September 2013 21:55, Matthew Hegarty <[4]mrhegarty at gmail.com
+> > <mailto:[5]mrhegarty at gmail.com>> wrote:
+> >
+> >     hi
+> >     Just starting out so I've got latest versions of apps.
+> >     in cowboy/examples/hello_world, running make fails with:
+> >
+> >
+> >
+> >
+> >
+> >
+> > _______________________________________________
+> > Extend mailing list
+> > [6]Extend at lists.ninenines.eu
+> > [7]http://lists.ninenines.eu:81/listinfo/extend
+> >
+>
+>
+> --
+
+> Lo?c Hoguin
+
+
+
+> Erlang Cowboy
+
+> Nine Nines
+
+> [8]http://ninenines.eu
+
+> _______________________________________________
+> Extend mailing list
+> [9]Extend at lists.ninenines.eu
+> [10]http://lists.ninenines.eu:81/listinfo/extend
+
+
+--
+
+  Tristan Sloughter
+
+  [11]tristan.sloughter at gmail.com
+
+References
+
+1. http://erlang.org/
+2. mailto:tristan.sloughter at gmail.com
+3. mailto:tsloughter at fastmail.fm
+4. mailto:mrhegarty at gmail.com
+5. mailto:mrhegarty at gmail.com
+6. mailto:Extend at lists.ninenines.eu
+7. http://lists.ninenines.eu:81/listinfo/extend
+8. http://ninenines.eu/
+9. mailto:Extend at lists.ninenines.eu
+  10. http://lists.ninenines.eu:81/listinfo/extend
+  11. mailto:tristan.sloughter at gmail.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130926/28d38e59/attachment.html>
+
+From mrhegarty at gmail.com  Thu Sep 26 22:36:03 2013
+From: mrhegarty at gmail.com (Matthew Hegarty)
+Date: Thu, 26 Sep 2013 21:36:03 +0100
+Subject: [99s-extend] Cowboy helloworld make fails with
+	missing_beam_file (hipe)
+In-Reply-To: <1380222240.30914.26875993.6CA5F061@webmail.messagingengine.com>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+ <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+ <5242FC9C.2090501@ninenines.eu>
+ <1380126304.20343.26357585.70B016C0@webmail.messagingengine.com>
+ <CAAcKVnkTmqkvxq8r6ufAAgkqoLrzjO_rVENuk9YzZNd-mmnM6Q@mail.gmail.com>
+ <1380222240.30914.26875993.6CA5F061@webmail.messagingengine.com>
+Message-ID: <CAAcKVn=wMD6crYFEHXB=BcO8HhOJHK5Rhk7LAAzJVBNDU1+tYw@mail.gmail.com>
+
+yes it exists.  I believe hipe is enabled by default when I compile.
+
+however there is no
+
+ /usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam
+ /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam
+
+which is what relx is apparently looking for.
+Do you know where does relx get these paths from?
+
+
+On 26 September 2013 20:04, Tristan Sloughter
+<tristan.sloughter at gmail.com>wrote:
+
+> **
+> Did you enable hipe when you compiled? Does
+> /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam exist?
+>
+> --
+>  Tristan Sloughter
+>  tristan.sloughter at gmail.com
+>
+>
+>
+> On Thu, Sep 26, 2013, at 12:03 PM, Matthew Hegarty wrote:
+>
+> hi
+> I compiled Erlang from source (downloaded from erlang.org)
+>
+>
+> On 25 September 2013 17:25, Tristan Sloughter <tristan.sloughter at gmail.com
+> > wrote:
+>
+>
+> I ran into the same thing. I assume you installed Erlang from the Erlang
+>  Solutions repo?
+>
+>  Install erlang-hipe package. Or remove
+>  /usr/local/lib/erlang/lib/hipe-3.10.2.1 entirely.
+>
+>  Their packages install a broken hipe app, missing lots of beams, for
+>  some reason. But if you install the hipe package it'll install what is
+>  missing. I told them about this but I haven't heard back.
+>
+>  --
+>    Tristan Sloughter
+>    tsloughter at fastmail.fm
+>
+>
+>  On Wed, Sep 25, 2013, at 08:09 AM, Lo?c Hoguin wrote:
+>  > Why does it look for hipe at all to begin with?
+>  >
+>  > I'll ping tristan about it.
+>  >
+>  > On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+>  > > hi
+>  > > Just starting out so I'm trying to run cowboy's helloworld
+>  > > in cowboy/examples/hello_world, running make fails with:
+>  > >
+>  > > ===> Provider (rlx_prv_discover) failed with: {error,
+>  > >
+>  {rlx_app_discovery,
+>  > >
+> [{missing_beam_file,
+>  > >                                                           hipe,
+>  > >
+>  > > <<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+>  > >
+>  {missing_beam_file,
+>  > >                                                           hipe,
+>  > >
+>  > > <<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+>  > >
+>  > > there is no hipe.beam in /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/,
+> it
+>  > > is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+>  > > I've tried passing the correct dir to relx using --lib-dir but I still
+>  > > get the same error.
+>  > >
+>  > > Any ideas what's going wrong?
+>  > >
+>  > > erl: Erlang R16B02 (erts-5.10.3)
+>  > > relx: 0.0.0+build.275.refca03701
+>  > > rebar: rebar 2.1.0-pre R16B02 20130922_191744 git
+> 2.1.0-pre-46-g78fa8fc
+>  > >
+>  > >
+>  > > On 22 September 2013 21:55, Matthew Hegarty <mrhegarty at gmail.com
+>  > > <mailto:mrhegarty at gmail.com>> wrote:
+>  > >
+>  > >     hi
+>  > >     Just starting out so I've got latest versions of apps.
+>  > >     in cowboy/examples/hello_world, running make fails with:
+>  > >
+>  > >
+>  > >
+>  > >
+>  > >
+>  > >
+>  > > _______________________________________________
+>  > > Extend mailing list
+>  > > Extend at lists.ninenines.eu
+>  > > http://lists.ninenines.eu:81/listinfo/extend
+>  > >
+>  >
+>  >
+>  > --
+>  > Lo?c Hoguin
+>
+> > Erlang Cowboy
+>  > Nine Nines
+>  > http://ninenines.eu
+> > _______________________________________________
+>  > Extend mailing list
+>  > Extend at lists.ninenines.eu
+>  > http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+>  --
+>    Tristan Sloughter
+>    tristan.sloughter at gmail.com
+>
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130926/3a77fe04/attachment.html>
+
+From mrhegarty at gmail.com  Sat Sep 28 22:41:16 2013
+From: mrhegarty at gmail.com (Matthew Hegarty)
+Date: Sat, 28 Sep 2013 21:41:16 +0100
+Subject: [99s-extend] Cowboy helloworld make fails with
+	missing_beam_file (hipe)
+In-Reply-To: <CAAcKVn=wMD6crYFEHXB=BcO8HhOJHK5Rhk7LAAzJVBNDU1+tYw@mail.gmail.com>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+ <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+ <5242FC9C.2090501@ninenines.eu>
+ <1380126304.20343.26357585.70B016C0@webmail.messagingengine.com>
+ <CAAcKVnkTmqkvxq8r6ufAAgkqoLrzjO_rVENuk9YzZNd-mmnM6Q@mail.gmail.com>
+ <1380222240.30914.26875993.6CA5F061@webmail.messagingengine.com>
+ <CAAcKVn=wMD6crYFEHXB=BcO8HhOJHK5Rhk7LAAzJVBNDU1+tYw@mail.gmail.com>
+Message-ID: <CAAcKVn=K=7Pv+J_Qx+dJqRH=xcDdhGPws2MmsuwpROVGU_1Axg@mail.gmail.com>
+
+Got it to work.  I apparently had a few versions of hipe in my Erlang lib
+dir:
+
+$ /usr/local/lib/erlang/lib $ ll -ld hipe*
+drwxr-xr-x  9 root root 4096 Feb 11  2013 hipe-3.10/
+drwxr-xr-x  9 root root 4096 Mar  1  2013 hipe-3.10.1/
+drwxr-xr-x 10 root root 4096 Jul  2 11:31 hipe-3.10.2/
+drwxr-xr-x 10 root root 4096 Sep 21 17:36 hipe-3.10.2.1/
+
+They must have come from previous erlang installations (compilation from
+source).  The solution was to remove the older versions and leave only the
+latest one.  Maybe relx should be able to handle this?
+
+thanks for the responses
+
+Matt
+
+
+On 26 September 2013 21:36, Matthew Hegarty <mrhegarty at gmail.com> wrote:
+
+> yes it exists.  I believe hipe is enabled by default when I compile.
+>
+> however there is no
+>
+>  /usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam
+>  /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam
+>
+> which is what relx is apparently looking for.
+> Do you know where does relx get these paths from?
+>
+>
+> On 26 September 2013 20:04, Tristan Sloughter <tristan.sloughter at gmail.com
+> > wrote:
+>
+>> **
+>> Did you enable hipe when you compiled? Does
+>> /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam exist?
+>>
+>> --
+>>  Tristan Sloughter
+>>  tristan.sloughter at gmail.com
+>>
+>>
+>>
+>> On Thu, Sep 26, 2013, at 12:03 PM, Matthew Hegarty wrote:
+>>
+>> hi
+>> I compiled Erlang from source (downloaded from erlang.org)
+>>
+>>
+>> On 25 September 2013 17:25, Tristan Sloughter <
+>> tristan.sloughter at gmail.com> wrote:
+>>
+>>
+>> I ran into the same thing. I assume you installed Erlang from the Erlang
+>>  Solutions repo?
+>>
+>>  Install erlang-hipe package. Or remove
+>>  /usr/local/lib/erlang/lib/hipe-3.10.2.1 entirely.
+>>
+>>  Their packages install a broken hipe app, missing lots of beams, for
+>>  some reason. But if you install the hipe package it'll install what is
+>>  missing. I told them about this but I haven't heard back.
+>>
+>>  --
+>>    Tristan Sloughter
+>>    tsloughter at fastmail.fm
+>>
+>>
+>>  On Wed, Sep 25, 2013, at 08:09 AM, Lo?c Hoguin wrote:
+>>  > Why does it look for hipe at all to begin with?
+>>  >
+>>  > I'll ping tristan about it.
+>>  >
+>>  > On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+>>  > > hi
+>>  > > Just starting out so I'm trying to run cowboy's helloworld
+>>  > > in cowboy/examples/hello_world, running make fails with:
+>>  > >
+>>  > > ===> Provider (rlx_prv_discover) failed with: {error,
+>>  > >
+>>  {rlx_app_discovery,
+>>  > >
+>> [{missing_beam_file,
+>>  > >                                                           hipe,
+>>  > >
+>>  > > <<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+>>  > >
+>>  {missing_beam_file,
+>>  > >                                                           hipe,
+>>  > >
+>>  > > <<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+>>  > >
+>>  > > there is no hipe.beam in
+>> /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/, it
+>>  > > is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+>>  > > I've tried passing the correct dir to relx using --lib-dir but I
+>> still
+>>  > > get the same error.
+>>  > >
+>>  > > Any ideas what's going wrong?
+>>  > >
+>>  > > erl: Erlang R16B02 (erts-5.10.3)
+>>  > > relx: 0.0.0+build.275.refca03701
+>>  > > rebar: rebar 2.1.0-pre R16B02 20130922_191744 git
+>> 2.1.0-pre-46-g78fa8fc
+>>  > >
+>>  > >
+>>  > > On 22 September 2013 21:55, Matthew Hegarty <mrhegarty at gmail.com
+>>  > > <mailto:mrhegarty at gmail.com>> wrote:
+>>  > >
+>>  > >     hi
+>>  > >     Just starting out so I've got latest versions of apps.
+>>  > >     in cowboy/examples/hello_world, running make fails with:
+>>  > >
+>>  > >
+>>  > >
+>>  > >
+>>  > >
+>>  > >
+>>  > > _______________________________________________
+>>  > > Extend mailing list
+>>  > > Extend at lists.ninenines.eu
+>>  > > http://lists.ninenines.eu:81/listinfo/extend
+>>  > >
+>>  >
+>>  >
+>>  > --
+>>  > Lo?c Hoguin
+>>
+>> > Erlang Cowboy
+>>  > Nine Nines
+>>  > http://ninenines.eu
+>> > _______________________________________________
+>>  > Extend mailing list
+>>  > Extend at lists.ninenines.eu
+>>  > http://lists.ninenines.eu:81/listinfo/extend
+>>
+>>
+>>  --
+>>    Tristan Sloughter
+>>    tristan.sloughter at gmail.com
+>>
+>>
+>>
+>>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130928/b1333ac2/attachment.html>
+
+From tristan.sloughter at gmail.com  Sat Sep 28 22:43:25 2013
+From: tristan.sloughter at gmail.com (Tristan Sloughter)
+Date: Sat, 28 Sep 2013 13:43:25 -0700
+Subject: [99s-extend] Cowboy helloworld make fails with
+ missing_beam_file (hipe)
+In-Reply-To: <CAAcKVn=K=7Pv+J_Qx+dJqRH=xcDdhGPws2MmsuwpROVGU_1Axg@mail.gmail.com>
+References: <CAAcKVnkWZ_CHTCu7J0N16g4DqWPEnBriOgYN1A2r05Xom92mCQ@mail.gmail.com>
+ <CAAcKVnknx8gBQZSL-QUOTUVin=a0M+KAEwNd84HMOO1C3iSyZQ@mail.gmail.com>
+ <5242FC9C.2090501@ninenines.eu>
+ <1380126304.20343.26357585.70B016C0@webmail.messagingengine.com>
+ <CAAcKVnkTmqkvxq8r6ufAAgkqoLrzjO_rVENuk9YzZNd-mmnM6Q@mail.gmail.com>
+ <1380222240.30914.26875993.6CA5F061@webmail.messagingengine.com>
+ <CAAcKVn=wMD6crYFEHXB=BcO8HhOJHK5Rhk7LAAzJVBNDU1+tYw@mail.gmail.com>
+ <CAAcKVn=K=7Pv+J_Qx+dJqRH=xcDdhGPws2MmsuwpROVGU_1Axg@mail.gmail.com>
+Message-ID: <1380401005.2981.27620409.32622BC4@webmail.messagingengine.com>
+
+Yea, since I doubt the OTP team (or anyone) will fix the fact that it
+installs a broken hipe we've decided to just warn on broken apps during
+the discovery phase. So it'll only fail if the broken app is also
+suppose to be part of the release.
+
+
+
+Finishing up the relx patch right now.
+
+
+
+--
+Tristan Sloughter
+tristan.sloughter at gmail.com
+
+
+
+
+
+On Sat, Sep 28, 2013, at 01:41 PM, Matthew Hegarty wrote:
+
+Got it to work.  I apparently had a few versions of hipe in my Erlang
+lib dir:
+
+$ /usr/local/lib/erlang/lib $ ll -ld hipe*
+drwxr-xr-x  9 root root 4096 Feb 11  2013 hipe-3.10/
+drwxr-xr-x  9 root root 4096 Mar  1  2013 hipe-3.10.1/
+drwxr-xr-x 10 root root 4096 Jul  2 11:31 hipe-3.10.2/
+drwxr-xr-x 10 root root 4096 Sep 21 17:36 hipe-3.10.2.1/
+
+They must have come from previous erlang installations (compilation
+from source).  The solution was to remove the older versions and leave
+only the latest one.  Maybe relx should be able to handle this?
+
+thanks for the responses
+
+Matt
+
+
+
+On 26 September 2013 21:36, Matthew Hegarty <[1]mrhegarty at gmail.com>
+wrote:
+
+yes it exists.  I believe hipe is enabled by default when I compile.
+
+however there is no
+
+ /usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam
+ /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam
+
+which is what relx is apparently looking for.
+Do you know where does relx get these paths from?
+
+
+
+On 26 September 2013 20:04, Tristan Sloughter
+<[2]tristan.sloughter at gmail.com> wrote:
+
+Did you enable hipe when you compiled? Does
+/usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam exist?
+
+--
+Tristan Sloughter
+[3]tristan.sloughter at gmail.com
+
+
+
+On Thu, Sep 26, 2013, at 12:03 PM, Matthew Hegarty wrote:
+
+hi
+
+I compiled Erlang from source (downloaded from [4]erlang.org)
+
+
+
+On 25 September 2013 17:25, Tristan Sloughter
+<[5]tristan.sloughter at gmail.com> wrote:
+
+I ran into the same thing. I assume you installed Erlang from the
+Erlang
+
+Solutions repo?
+
+
+
+Install erlang-hipe package. Or remove
+
+/usr/local/lib/erlang/lib/hipe-3.10.2.1 entirely.
+
+
+
+Their packages install a broken hipe app, missing lots of beams, for
+
+some reason. But if you install the hipe package it'll install what is
+
+missing. I told them about this but I haven't heard back.
+
+
+
+--
+
+  Tristan Sloughter
+
+  [6]tsloughter at fastmail.fm
+
+
+
+
+On Wed, Sep 25, 2013, at 08:09 AM, Lo?c Hoguin wrote:
+> Why does it look for hipe at all to begin with?
+>
+> I'll ping tristan about it.
+>
+> On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+> > hi
+> > Just starting out so I'm trying to run cowboy's helloworld
+> > in cowboy/examples/hello_world, running make fails with:
+> >
+> > ===> Provider (rlx_prv_discover) failed with: {error,
+> >
+{rlx_app_discovery,
+> >
+[{missing_beam_file,
+> >                                                           hipe,
+> >
+> > <<"/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam">>},
+> >
+{missing_beam_file,
+> >                                                           hipe,
+> >
+> > <<"/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam">>}]}}
+> >
+> > there is no hipe.beam in
+/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/, it
+> > is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+> > I've tried passing the correct dir to relx using --lib-dir but I
+still
+> > get the same error.
+> >
+> > Any ideas what's going wrong?
+> >
+> > erl: Erlang R16B02 (erts-5.10.3)
+> > relx: 0.0.0+build.275.refca03701
+> > rebar: rebar 2.1.0-pre R16B02 20130922_191744 git
+2.1.0-pre-46-g78fa8fc
+> >
+> >
+> > On 22 September 2013 21:55, Matthew Hegarty <[7]mrhegarty at gmail.com
+> > <mailto:[8]mrhegarty at gmail.com>> wrote:
+> >
+> >     hi
+> >     Just starting out so I've got latest versions of apps.
+> >     in cowboy/examples/hello_world, running make fails with:
+> >
+> >
+> >
+> >
+> >
+> >
+> > _______________________________________________
+> > Extend mailing list
+> > [9]Extend at lists.ninenines.eu
+> > [10]http://lists.ninenines.eu:81/listinfo/extend
+> >
+>
+>
+> --
+
+> Lo?c Hoguin
+
+
+
+> Erlang Cowboy
+
+> Nine Nines
+
+> [11]http://ninenines.eu
+
+> _______________________________________________
+> Extend mailing list
+> [12]Extend at lists.ninenines.eu
+> [13]http://lists.ninenines.eu:81/listinfo/extend
+
+
+--
+
+  Tristan Sloughter
+
+  [14]tristan.sloughter at gmail.com
+
+References
+
+1. mailto:mrhegarty at gmail.com
+2. mailto:tristan.sloughter at gmail.com
+3. mailto:tristan.sloughter at gmail.com
+4. http://erlang.org/
+5. mailto:tristan.sloughter at gmail.com
+6. mailto:tsloughter at fastmail.fm
+7. mailto:mrhegarty at gmail.com
+8. mailto:mrhegarty at gmail.com
+9. mailto:Extend at lists.ninenines.eu
+  10. http://lists.ninenines.eu:81/listinfo/extend
+  11. http://ninenines.eu/
+  12. mailto:Extend at lists.ninenines.eu
+  13. http://lists.ninenines.eu:81/listinfo/extend
+  14. mailto:tristan.sloughter at gmail.com
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130928/41b322fd/attachment.html>
+

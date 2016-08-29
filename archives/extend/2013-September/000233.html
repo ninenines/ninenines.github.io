@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] how to send a message to all connections in cowboy
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20how%20to%20send%20a%20message%20to%20all%20connections%20in%20cowboy&In-Reply-To=%3C52373DBF.3080503%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000232.html">
+   <LINK REL="Next"  HREF="000234.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] how to send a message to all connections in cowboy</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20how%20to%20send%20a%20message%20to%20all%20connections%20in%20cowboy&In-Reply-To=%3C52373DBF.3080503%40ninenines.eu%3E"
+       TITLE="[99s-extend] how to send a message to all connections in cowboy">essen at ninenines.eu
+       </A><BR>
+    <I>Mon Sep 16 19:19:59 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000232.html">[99s-extend] how to send a message to all connections in cowboy
+</A></li>
+        <LI>Next message: <A HREF="000234.html">[99s-extend] cowboy_loop_handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#233">[ date ]</a>
+              <a href="thread.html#233">[ thread ]</a>
+              <a href="subject.html#233">[ subject ]</a>
+              <a href="author.html#233">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Monitors.
+
+But really gproc does all that for you and is already well tested.
+
+<A HREF="https://github.com/esl/gproc">https://github.com/esl/gproc</A>
+
+On 09/16/2013 07:14 PM, akonsu wrote:
+&gt;<i> thanks. Suppose my external process is registered and has a name, so I
+</I>&gt;<i> can discover it by name from my cowboy request handler. when my cowboy
+</I>&gt;<i> handler is invoked, can I just send the handler's process ID to the
+</I>&gt;<i> external process? the question is then how does the external process
+</I>&gt;<i> know that the http client has disconnected so that it can stop sending
+</I>&gt;<i> data to it.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> 2013/9/16 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt;
+</I>&gt;<i>
+</I>&gt;<i>     On 09/16/2013 03:50 PM, akonsu wrote:
+</I>&gt;<i>
+</I>&gt;<i>         Hello,
+</I>&gt;<i>
+</I>&gt;<i>         this is somewhat similar to what someone else has asked:
+</I>&gt;<i>         <A HREF="http://lists.ninenines.eu:81/__archives/extend/2013-August/__000224.html">http://lists.ninenines.eu:81/__archives/extend/2013-August/__000224.html</A>
+</I>&gt;<i>         &lt;<A HREF="http://lists.ninenines.eu:81/archives/extend/2013-August/000224.html">http://lists.ninenines.eu:81/archives/extend/2013-August/000224.html</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>         I am new to cowboy, I have a process that runs alongside a
+</I>&gt;<i>         cowboy server
+</I>&gt;<i>         and this process needs to periodically send text to all http clients
+</I>&gt;<i>         connected to the cowboy server. My goal is to have a streaming
+</I>&gt;<i>         connection for each http client so that I could stream text to
+</I>&gt;<i>         them from
+</I>&gt;<i>         my process. how is this done?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     Same answer really. You need some kind of process registry, like
+</I>&gt;<i>     gproc properties for example, that will store all Pids and allow you
+</I>&gt;<i>     to send a message to all of them.
+</I>&gt;<i>
+</I>&gt;<i>     On init, register the process, and then handle the incoming message
+</I>&gt;<i>     when it arrives.
+</I>&gt;<i>
+</I>&gt;<i>     --
+</I>&gt;<i>     Lo&#271;c Hoguin
+</I>&gt;<i>     Erlang Cowboy
+</I>&gt;<i>     Nine Nines
+</I>&gt;<i>     <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000232.html">[99s-extend] how to send a message to all connections in cowboy
+</A></li>
+	<LI>Next message: <A HREF="000234.html">[99s-extend] cowboy_loop_handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#233">[ date ]</a>
+              <a href="thread.html#233">[ thread ]</a>
+              <a href="subject.html#233">[ subject ]</a>
+              <a href="author.html#233">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

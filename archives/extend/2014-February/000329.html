@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Accept header in POST request
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Accept%20header%20in%20POST%20request&In-Reply-To=%3C52EFEAE0.7050804%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000328.html">
+   <LINK REL="Next"  HREF="000330.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Accept header in POST request</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Accept%20header%20in%20POST%20request&In-Reply-To=%3C52EFEAE0.7050804%40ninenines.eu%3E"
+       TITLE="[99s-extend] Accept header in POST request">essen at ninenines.eu
+       </A><BR>
+    <I>Mon Feb  3 20:15:44 CET 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000328.html">[99s-extend] Accept header in POST request
+</A></li>
+        <LI>Next message: <A HREF="000330.html">[99s-extend] Accept header in POST request
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#329">[ date ]</a>
+              <a href="thread.html#329">[ thread ]</a>
+              <a href="subject.html#329">[ subject ]</a>
+              <a href="author.html#329">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Sure. It won't be called if not a GET or HEAD request so that's probably 
+the best value you can return in your case.
+
+On 02/03/2014 08:08 PM, &#321;ukasz Biedrycki wrote:
+&gt;<i> Ok,
+</I>&gt;<i> it is more clear for me.
+</I>&gt;<i>
+</I>&gt;<i> Last question I have is about content_types_provided function.
+</I>&gt;<i>
+</I>&gt;<i> Is it safe to define it like this?
+</I>&gt;<i>
+</I>&gt;<i> content_types_provided(R, S) -&gt;
+</I>&gt;<i> ContentTypes = [{{&lt;&lt;&quot;application&quot;&gt;&gt;, &lt;&lt;&quot;json&quot;&gt;&gt;, '*'}, *undefined*}],
+</I>&gt;<i>     {ContentTypes, Req, State}.
+</I>&gt;<i>
+</I>&gt;<i> Callback in content_types_provided is useless for POST requests, as it
+</I>&gt;<i> won&#8217;t be called.
+</I>&gt;<i> Is it safe to use *undefined *atom, to have a source code clearer?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On Mon, Feb 3, 2014 at 7:37 PM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>
+</I>&gt;<i> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i>     If Accept is sent and is different than text/html, yes.
+</I>&gt;<i>
+</I>&gt;<i>     This is how HTTP is defined. If the client says it speaks only
+</I>&gt;<i>     content-type X but you can only reply with content-type Y, you error
+</I>&gt;<i>     out early and stop processing the request. On the other hand if the
+</I>&gt;<i>     client doesn't say what content-type it speaks then the server can
+</I>&gt;<i>     choose whichever one it wants.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     On 02/03/2014 07:26 PM, &#321;ukasz Biedrycki wrote:
+</I>&gt;<i>
+</I>&gt;<i>         My application sends both headers: &#8220;Content-type&#8221; and &#8220;Accept&#8221;
+</I>&gt;<i>         header
+</I>&gt;<i>         using POST method.
+</I>&gt;<i>
+</I>&gt;<i>         For POST rest handler do I have to specify both:
+</I>&gt;<i>         content_types_accepted
+</I>&gt;<i>         and content_types_provided to manage this kind of request?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>         On Mon, Feb 3, 2014 at 7:23 PM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>
+</I>&gt;<i>         &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;
+</I>&gt;<i>         &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt;&gt; wrote:
+</I>&gt;<i>
+</I>&gt;<i>              The content-type provided is relevant for any response, not
+</I>&gt;<i>         just
+</I>&gt;<i>              responses to GET requests. It defaults to text/html. If
+</I>&gt;<i>         your client
+</I>&gt;<i>              doesn't send that content-type, you have to define the
+</I>&gt;<i>         callback.
+</I>&gt;<i>
+</I>&gt;<i>              I notice that the documentation is incorrect about the relevant
+</I>&gt;<i>              methods for this callback, I will open a ticket to fix it soon.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>              On 02/03/2014 07:13 PM, &#321;ukasz Biedrycki wrote:
+</I>&gt;<i>
+</I>&gt;<i>                  Hi,
+</I>&gt;<i>                  I have a rest handler that accepts POST and PUT
+</I>&gt;<i>         requests with
+</I>&gt;<i>                  &#8220;application/json&#8221; content type.
+</I>&gt;<i>
+</I>&gt;<i>                  I have content_types_accepted function defined as follows:
+</I>&gt;<i>
+</I>&gt;<i>                  content_types_accepted(Req, State) -&gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  {[{&#8216;application/json', from_json}], Req, State}.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  The problem I have is within a request that has two
+</I>&gt;<i>         headers:
+</I>&gt;<i>
+</I>&gt;<i>                  *Content-type*: application/json
+</I>&gt;<i>                  *Accept*: application/json
+</I>&gt;<i>
+</I>&gt;<i>                  With this combination I receive *406*.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  You can repeat it with test:
+</I>&gt;<i>
+</I>&gt;<i>                  http_SUITE.erl:
+</I>&gt;<i>                  1072 rest_postonly(Config) -&gt;
+</I>&gt;<i>                  1073     Client = ?config(client, Config),
+</I>&gt;<i>                  1074     Headers = [
+</I>&gt;<i>                  1075         {&lt;&lt;&quot;content-type&quot;&gt;&gt;, &lt;&lt;&quot;text/plain&quot;&gt;&gt;},
+</I>&gt;<i>                  1076         {&lt;&lt;&quot;accept&quot;&gt;&gt;, &lt;&lt;&quot;text/plain&quot;&gt;&gt;}
+</I>&gt;<i>                  1077     ],
+</I>&gt;<i>                  1078     {ok, Client2} =
+</I>&gt;<i>         cowboy_client:request(&lt;&lt;&quot;POST&quot;____&gt;&gt;,
+</I>&gt;<i>
+</I>&gt;<i>                  1079         build_url(&quot;/postonly&quot;, Config), Headers,
+</I>&gt;<i>         &quot;12345&quot;,
+</I>&gt;<i>                  Client),
+</I>&gt;<i>                  1080     {ok, 204, _, _} =
+</I>&gt;<i>         cowboy_client:response(____Client2).
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  My solution to that was to add a content_types_provided
+</I>&gt;<i>         function:
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  content_types_provided(Req, State) -&gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  ContentTypes = [{{&lt;&lt;&quot;application&quot;&gt;&gt;, &lt;&lt;&quot;json&quot;&gt;&gt;, '*'},
+</I>&gt;<i>         to_json}],
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  {ContentTypes, Req, State}.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  But it is useless as *to_json* callback registered is
+</I>&gt;<i>         not called
+</I>&gt;<i>                  anyhow.
+</I>&gt;<i>
+</I>&gt;<i>                  Adding *content_types_provided* function is a correct
+</I>&gt;<i>         solution
+</I>&gt;<i>                  in this case?
+</I>&gt;<i>
+</I>&gt;<i>                  Or I am missing something here?
+</I>&gt;<i>                  &#8220;Accept&#8221; header is not relevant only in case of GET
+</I>&gt;<i>         requests?
+</I>&gt;<i>
+</I>&gt;<i>                  Thank for help,
+</I>&gt;<i>                  &#321;ukasz Biedrycki
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>                  ___________________________________________________
+</I>&gt;<i>                  Extend mailing list
+</I>&gt;<i>         <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>&gt;
+</I>&gt;<i>         &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.__ninenines.eu</A>
+</I>&gt;<i>         &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>&gt;&gt;
+</I>&gt;<i>         <A HREF="https://lists.ninenines.eu/____listinfo/extend">https://lists.ninenines.eu/____listinfo/extend</A>
+</I>&gt;<i>         &lt;<A HREF="https://lists.ninenines.eu/__listinfo/extend">https://lists.ninenines.eu/__listinfo/extend</A>&gt;
+</I>&gt;<i>
+</I>&gt;<i>                  &lt;<A HREF="https://lists.ninenines.eu/__listinfo/extend">https://lists.ninenines.eu/__listinfo/extend</A>
+</I>&gt;<i>         &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>&gt;&gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>              --
+</I>&gt;<i>              Lo&#239;c Hoguin
+</I>&gt;<i>         <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>     --
+</I>&gt;<i>     Lo&#239;c Hoguin
+</I>&gt;<i>     <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000328.html">[99s-extend] Accept header in POST request
+</A></li>
+	<LI>Next message: <A HREF="000330.html">[99s-extend] Accept header in POST request
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#329">[ date ]</a>
+              <a href="thread.html#329">[ thread ]</a>
+              <a href="subject.html#329">[ subject ]</a>
+              <a href="author.html#329">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

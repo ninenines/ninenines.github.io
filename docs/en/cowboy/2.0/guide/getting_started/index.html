@@ -80,11 +80,17 @@ Cowboy, writing your first application and generating your first
 release. At the end of this chapter you should know everything
 you need to push your first Cowboy application to production.</p></div>
 <div class="sect1">
-<h2 id="_bootstrap">Bootstrap</h2>
+<h2 id="_prerequisites">Prerequisites</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>We are going to use the <a href="https://github.com/ninenines/erlang.mk">Erlang.mk</a>
-build system. It also offers bootstrap features allowing us to
-quickly get started without having to deal with minute details.</p></div>
+build system. If you are using Windows, please check the
+<a href="http://erlang.mk/guide/installation.html">Installation instructions</a>
+to get your environment setup before you continue.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bootstrap">Bootstrap</h2>
+<div class="sectionbody">
 <div class="paragraph"><p>First, let&#8217;s create the directory for our application.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
@@ -100,7 +106,7 @@ command or download it manually.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ wget https<span style="color: #990000">:</span>//raw<span style="color: #990000">.</span>githubusercontent<span style="color: #990000">.</span>com/ninenines/erlang<span style="color: #990000">.</span>mk/master/erlang<span style="color: #990000">.</span>mk</tt></pre></div></div>
+<pre><tt>$ wget https<span style="color: #990000">:</span>//erlang<span style="color: #990000">.</span>mk/erlang<span style="color: #990000">.</span>mk</tt></pre></div></div>
 <div class="paragraph"><p>We can now bootstrap our application. Since we are going to generate
 a release, we will also bootstrap it at the same time.</p></div>
 <div class="listingblock">
@@ -131,20 +137,10 @@ handler.</p></div>
 <div class="sect1">
 <h2 id="_cowboy_setup">Cowboy setup</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Modifying the <em>Makefile</em> allows the build system to know it needs to
-fetch and compile Cowboy. To do that we simply need to add two lines
-to our Makefile to make it look like this:</p></div>
+<div class="paragraph"><p>We will modify the <em>Makefile</em> to tell the build system it needs to
+fetch and compile Cowboy:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">PROJECT =</span> hello_erlang
-
-<span style="color: #009900">DEPS =</span> cowboy
-<span style="color: #009900">dep_cowboy_commit =</span> master
-
-include erlang.mk</tt></pre></div></div>
+<div class="content"></div></div>
 <div class="paragraph"><p>If you run <code>make run</code> now, Cowboy will be included in the release
 and started automatically. This is not enough however, as Cowboy
 doesn&#8217;t do anything by default. We still need to tell Cowboy to
@@ -154,10 +150,9 @@ listen for connections.</p></div>
 <div class="sect1">
 <h2 id="_listening_for_connections">Listening for connections</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>We will do this when our application starts. It&#8217;s a two step process.
-First we need to define and compile the dispatch list, a list of
-routes that Cowboy will use to map requests to handler modules.
-Then we tell Cowboy to listen for connections.</p></div>
+<div class="paragraph"><p>First we define the routes that Cowboy will use to map requests
+to handler modules, and then we start the listener. This is best
+done at application startup.</p></div>
 <div class="paragraph"><p>Open the <em>src/hello_erlang_app.erl</em> file and add the necessary
 code to the <code>start/2</code> function to make it look like this:</p></div>
 <div class="listingblock">
@@ -169,16 +164,16 @@ http://www.gnu.org/software/src-highlite -->
         <span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
                 {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">hello_handler</span>, []}]}
         ]),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_http</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #993399">100</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
-                [{<span style="color: #FF6600">env</span>, [{<span style="color: #FF6600">dispatch</span>, <span style="color: #009900">Dispatch</span>}]}]
+        {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #993399">100</span>,
+                [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
+                #{<span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}}
         ),
         <span style="font-weight: bold"><span style="color: #000000">hello_erlang_sup:start_link</span></span>()<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The dispatch list is explained in great details in the
-<a href="../routing">Routing</a> chapter. For this tutorial we map the
-path <code>/</code> to the handler module <code>hello_handler</code>. This module
-doesn&#8217;t exist yet, we still have to write it.</p></div>
-<div class="paragraph"><p>If you build and start the release, then open <a href="http://localhost:8080">http://localhost:8080</a>
-in your browser, you will get an error because the module is missing.
+<div class="paragraph"><p>Routes are explained in details in the <a href="../routing">Routing</a>
+chapter. For this tutorial we map the path <code>/</code> to the handler
+module <code>hello_handler</code>. This module doesn&#8217;t exist yet.</p></div>
+<div class="paragraph"><p>Build and start the release, then open <a href="http://localhost:8080">http://localhost:8080</a>
+in your browser. You will get a 500 error because the module is missing.
 Any other URL, like <a href="http://localhost:8080/test">http://localhost:8080/test</a>, will result in a
 404 error.</p></div>
 </div>
@@ -189,28 +184,28 @@ Any other URL, like <a href="http://localhost:8080/test">http://localhost:8080/t
 <div class="paragraph"><p>Cowboy features different kinds of handlers, including REST
 and Websocket handlers. For this tutorial we will use a plain
 HTTP handler.</p></div>
-<div class="paragraph"><p>First, let&#8217;s generate a handler from a template.</p></div>
+<div class="paragraph"><p>Generate a handler from a template:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ make new <span style="color: #009900">t</span><span style="color: #990000">=</span>cowboy_http <span style="color: #009900">n</span><span style="color: #990000">=</span>hello_handler</tt></pre></div></div>
-<div class="paragraph"><p>You can then open the <em>src/hello_handler.erl</em> file and modify
+<div class="paragraph"><p>Then, open the <em>src/hello_handler.erl</em> file and modify
 the <code>init/2</code> function like this to send a reply.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">Opts</span>) <span style="color: #990000">-&gt;</span>
-        <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>,
-                [{<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>}],
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req0</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        <span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>,
+                #{<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>},
                 <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello Erlang!"</span><span style="color: #990000">&gt;&gt;</span>,
-                <span style="color: #009900">Req</span>),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">Opts</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+                <span style="color: #009900">Req0</span>),
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>What the above code does is send a <code>200 OK</code> reply, with the
-<code>content-type</code> header set to <code>text/plain</code> and the response
+Content-type header set to <code>text/plain</code> and the response
 body set to <code>Hello Erlang!</code>.</p></div>
 <div class="paragraph"><p>If you run the release and open <a href="http://localhost:8080">http://localhost:8080</a>
 in your browser, you should get a nice <code>Hello Erlang!</code> displayed!</p></div>

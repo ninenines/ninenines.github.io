@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Problems with Bullet
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Problems%20with%20Bullet&In-Reply-To=%3CB09B2F4B-4842-430D-A3AB-AC132B646E04%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000080.html">
+   <LINK REL="Next"  HREF="000082.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Problems with Bullet</H1>
+    <B>Lee Sylvester</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Problems%20with%20Bullet&In-Reply-To=%3CB09B2F4B-4842-430D-A3AB-AC132B646E04%40gmail.com%3E"
+       TITLE="[99s-extend] Problems with Bullet">lee.sylvester at gmail.com
+       </A><BR>
+    <I>Mon Apr  8 15:53:38 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000080.html">[99s-extend] Bullet connection
+</A></li>
+        <LI>Next message: <A HREF="000082.html">[99s-extend] Problems with Bullet
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#81">[ date ]</a>
+              <a href="thread.html#81">[ thread ]</a>
+              <a href="subject.html#81">[ subject ]</a>
+              <a href="author.html#81">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi all,
+
+I'm currently having problems getting a websocket to connect to a simple bare bones Bullet handler.  Unfortunately, I'm still quite an Erlang noob, so the stack traces tend to lead me in circles.  I'm hoping this is obvious stuff to you Erlang pros :-)
+
+Given the below handler:
+
+init(_Transport, Req, _Opts, _Active) -&gt;
+	{ok, Req, undefined_state}.
+
+stream(Data, Req, State) -&gt;
+	{ok, Req, State}.
+
+info(Info, Req, State) -&gt;
+	{reply, Info, Req, State}.
+	
+terminate(_Req, _State) -&gt;
+	ok.
+
+Connecting with a websocket throws the following error:
+
+=ERROR REPORT==== 8-Apr-2013::14:46:11 ===
+** Cowboy handler bullet_handler terminating in init/3
+   for the reason error:undef
+** Options were [{handler,connection_handler}]
+** Request was [{socket,#Port&lt;0.926&gt;},
+                {transport,ranch_tcp},
+                {connection,keepalive},
+                {pid,&lt;0.491.0&gt;},
+                {method,&lt;&lt;&quot;GET&quot;&gt;&gt;},
+                {version,{1,1}},
+                {peer,{{127,0,0,1},56630}},
+                {host,&lt;&lt;&quot;localhost&quot;&gt;&gt;},
+                {host_info,undefined},
+                {port,8080},
+                {path,&lt;&lt;&quot;/&quot;&gt;&gt;},
+                {path_info,undefined},
+                {qs,&lt;&lt;&quot;encoding=text&quot;&gt;&gt;},
+                {qs_vals,undefined},
+                {fragment,&lt;&lt;&gt;&gt;},
+                {bindings,[]},
+                {headers,[{&lt;&lt;&quot;upgrade&quot;&gt;&gt;,&lt;&lt;&quot;websocket&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;connection&quot;&gt;&gt;,&lt;&lt;&quot;Upgrade&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;localhost:8080&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;origin&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://www.websocket.org">http://www.websocket.org</A>&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;pragma&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;cache-control&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;sec-websocket-key&quot;&gt;&gt;,
+                           &lt;&lt;&quot;fEj/SOOcQgSKATOjhbNJBQ==&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;sec-websocket-version&quot;&gt;&gt;,&lt;&lt;&quot;13&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;sec-websocket-extensions&quot;&gt;&gt;,
+                           &lt;&lt;&quot;x-webkit-deflate-frame&quot;&gt;&gt;}]},
+                {p_headers,[{&lt;&lt;&quot;connection&quot;&gt;&gt;,[&lt;&lt;&quot;upgrade&quot;&gt;&gt;]}]},
+                {cookies,undefined},
+                {meta,[]},
+                {body_state,waiting},
+                {multipart,undefined},
+                {buffer,&lt;&lt;&gt;&gt;},
+                {resp_compress,false},
+                {resp_state,waiting},
+                {resp_headers,[]},
+                {resp_body,&lt;&lt;&gt;&gt;},
+                {onresponse,undefined}]
+** Stacktrace: [{bullet_handler,init,
+                    [{tcp,http},
+                     {http_req,#Port&lt;0.926&gt;,ranch_tcp,keepalive,&lt;0.491.0&gt;,
+                         &lt;&lt;&quot;GET&quot;&gt;&gt;,
+                         {1,1},
+                         {{127,0,0,1},56630},
+                         &lt;&lt;&quot;localhost&quot;&gt;&gt;,undefined,8080,&lt;&lt;&quot;/&quot;&gt;&gt;,
+                         undefined,&lt;&lt;&quot;encoding=text&quot;&gt;&gt;,undefined,&lt;&lt;&gt;&gt;,
+                         [],
+                         [{&lt;&lt;&quot;upgrade&quot;&gt;&gt;,&lt;&lt;&quot;websocket&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;connection&quot;&gt;&gt;,&lt;&lt;&quot;Upgrade&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;localhost:8080&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;origin&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://www.websocket.org">http://www.websocket.org</A>&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;pragma&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;cache-control&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;sec-websocket-key&quot;&gt;&gt;,
+                           &lt;&lt;&quot;fEj/SOOcQgSKATOjhbNJBQ==&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;sec-websocket-version&quot;&gt;&gt;,&lt;&lt;&quot;13&quot;&gt;&gt;},
+                          {&lt;&lt;&quot;sec-websocket-extensions&quot;&gt;&gt;,
+                           &lt;&lt;&quot;x-webkit-deflate-frame&quot;&gt;&gt;}],
+                         [{&lt;&lt;&quot;connection&quot;&gt;&gt;,[&lt;&lt;&quot;upgrade&quot;&gt;&gt;]}],
+                         undefined,[],waiting,undefined,&lt;&lt;&gt;&gt;,false,waiting,[],
+                         &lt;&lt;&gt;&gt;,undefined},
+                     [{handler,connection_handler}]],
+                    []},
+                {cowboy_handler,handler_init,4,
+                    [{file,&quot;src/cowboy_handler.erl&quot;},{line,69}]},
+                {cowboy_protocol,execute,4,
+                    [{file,&quot;src/cowboy_protocol.erl&quot;},{line,514}]}]
+
+Can anyone see what might be throwing this off?  I'd like to get a minimal handler running before I attempt to add some logic.
+
+Thanks,
+Lee
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000080.html">[99s-extend] Bullet connection
+</A></li>
+	<LI>Next message: <A HREF="000082.html">[99s-extend] Problems with Bullet
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#81">[ date ]</a>
+              <a href="thread.html#81">[ thread ]</a>
+              <a href="subject.html#81">[ subject ]</a>
+              <a href="author.html#81">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,161 @@
+From essen at ninenines.eu  Wed Mar  6 20:09:27 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 06 Mar 2013 20:09:27 +0100
+Subject: [99s-extend] [ANN] Ranch 0.6.2
+Message-ID: <51379467.3080504@ninenines.eu>
+
+Small update to Ranch: https://github.com/extend/ranch
+
+  *  Allow fail_if_no_peer_cert option in ranch_ssl
+  *  Allow next_protocols_advertised option in ranch_ssl
+
+Second one is mostly just for SPDY.
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Sat Mar  9 15:25:27 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sat, 09 Mar 2013 15:25:27 +0100
+Subject: [99s-extend] [ANN] Cowboy 0.8.2
+Message-ID: <513B4657.4050001@ninenines.eu>
+
+Just tagged a new version: https://github.com/extend/cowboy
+
+Focus has been mostly the body reading API, which should be much faster 
+and also safer to use now.
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From kozlov-ter at yandex.ru  Sun Mar 17 17:22:01 2013
+From: kozlov-ter at yandex.ru (=?koi8-r?B?68/azM/XIPfR3sXTzMHX?=)
+Date: Sun, 17 Mar 2013 20:22:01 +0400
+Subject: [99s-extend] cowboy header
+Message-ID: <696341363537321@web14h.yandex.ru>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130317/2f20f449/attachment.html>
+
+From Christopher.Phillips at turner.com  Sun Mar 17 17:27:40 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Sun, 17 Mar 2013 16:27:40 +0000
+Subject: [99s-extend] cowboy header
+In-Reply-To: <696341363537321@web14h.yandex.ru>
+Message-ID: <CD6B3C03.3A60%christopher.phillips@turner.com>
+
+  Cowboy aims to use binaries, not strings, and unless there's a change in the head branch I don't have, the returned tuple has only two values, the value and the request. So it should look like something like -
+
+  {Value, Req2} = cowboy_req:header(<<"user-agent">>, Req)
+
+
+
+
+From: ?????? ???????? <kozlov-ter at yandex.ru<mailto:kozlov-ter at yandex.ru>>
+Date: Sunday, March 17, 2013 9:22 AM
+To: "extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>" <extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>>
+Subject: [99s-extend] cowboy header
+
+Hello tell me how I can get for example http header "user-agent"?
+I do so:
+
+handle(Req, State) ->
+
+{ok, FwdIP, Req5} = cowboy_req:header("user-agent, Req)
+
+but in this place I get the error
+
+
+
+--
+Vjacheslav Kozlov
+Engineer of AEMS
+Ltd. "EER-Novomichurinsk"
+--
+http://www.ter-energo.ru
++79109095144 09:00-18:00 (GMT+04:00)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130317/2ee0bc92/attachment.html>
+
+From mjollnir.ray at gmail.com  Mon Mar 18 09:39:20 2013
+From: mjollnir.ray at gmail.com (Wu Ray)
+Date: Mon, 18 Mar 2013 16:39:20 +0800
+Subject: [99s-extend] Big body via REST
+Message-ID: <CAABFZ=ZCwTrpdsKW4Yqfq+btmp+YDPN0iXo0WD89Tm6-YqDa_w@mail.gmail.com>
+
+>> Hi list,
+>>
+>> how properly send big response (hundreds of megabytes) via REST callback? As far as I can see REST handler in cowboy handles special case for callback functions (cowboy_rest.erl, line 844): {stream, StreamFun} - is it right place for stream big response from SQL database?
+>>
+>Hey,
+>
+>If you know the size, reply with {stream, Size, StreamFun}, otherwise
+>{stream, StreamFun}, with StreamFun the function that will send all the
+>data to the socket.
+
+Hi, guys,
+my problem is, if the client is closed or network broken, how to
+handle these situation with cowboy.
+
+
+From mjollnir.ray at gmail.com  Mon Mar 18 10:21:13 2013
+From: mjollnir.ray at gmail.com (Wu Ray)
+Date: Mon, 18 Mar 2013 17:21:13 +0800
+Subject: [99s-extend] Big body via REST
+In-Reply-To: <CAABFZ=ZCwTrpdsKW4Yqfq+btmp+YDPN0iXo0WD89Tm6-YqDa_w@mail.gmail.com>
+References: <CAABFZ=ZCwTrpdsKW4Yqfq+btmp+YDPN0iXo0WD89Tm6-YqDa_w@mail.gmail.com>
+Message-ID: <CAABFZ=ZL1e5svfLpmHJON39eXFkvziwMjF2rEm1Pew-PcTEZKQ@mail.gmail.com>
+
+Get it. When something happed with client or network, socket will
+broke, and Transport:send/2 will return {error, closed}, etc.
+
+So, just make sure each Transport:send(...) is correct, like this:
+ok = Transport:send(Socket, Data),
+
+the rest will be handle by cowboy.
+
+On Mon, Mar 18, 2013 at 4:39 PM, Wu Ray <mjollnir.ray at gmail.com> wrote:
+>>> Hi list,
+>>>
+>>> how properly send big response (hundreds of megabytes) via REST callback? As far as I can see REST handler in cowboy handles special case for callback functions (cowboy_rest.erl, line 844): {stream, StreamFun} - is it right place for stream big response from SQL database?
+>>>
+>>Hey,
+>>
+>>If you know the size, reply with {stream, Size, StreamFun}, otherwise
+>>{stream, StreamFun}, with StreamFun the function that will send all the
+>>data to the socket.
+>
+> Hi, guys,
+> my problem is, if the client is closed or network broken, how to
+> handle these situation with cowboy.
+
+
+From erlang at rambocoder.com  Wed Mar 20 13:54:07 2013
+From: erlang at rambocoder.com (rambocoder)
+Date: Wed, 20 Mar 2013 08:54:07 -0400
+Subject: [99s-extend] Login page and session based auth example
+Message-ID: <CAJ0zLRP41RayBRrthv1e18ZW_kDYa8q7s0VOub-MzHrT1unmfA@mail.gmail.com>
+
+Does anybody have an example of Cowboy app that includes a login page,
+secure area and user registration form? It's easy to put this together
+using ChicagoBoss framework, but I was wondering if somebody has done
+this just using pure Cowboy.
+
+Thank you,
+
+-rambocoder
+
+

@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy load test
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20load%20test&In-Reply-To=%3C523604DE.6050600%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000228.html">
+   <LINK REL="Next"  HREF="000230.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy load test</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20load%20test&In-Reply-To=%3C523604DE.6050600%40ninenines.eu%3E"
+       TITLE="[99s-extend] Cowboy load test">essen at ninenines.eu
+       </A><BR>
+    <I>Sun Sep 15 21:05:02 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000228.html">[99s-extend] Cowboy load test
+</A></li>
+        <LI>Next message: <A HREF="000230.html">[99s-extend] how to send a message to all connections in cowboy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#229">[ date ]</a>
+              <a href="thread.html#229">[ thread ]</a>
+              <a href="subject.html#229">[ subject ]</a>
+              <a href="author.html#229">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This just hit me after hitting send.
+
+Another possibility is that you are using text frames which are required 
+to be valid UTF-8. Cowboy checks that (as required by the RFC), and it's 
+fairly expensive, while most other servers don't. Try with binary frames 
+instead.
+
+On 09/15/2013 09:02 PM, Lo&#239;c Hoguin wrote:
+&gt;<i> This sounds like you have too many timers, or something else is using
+</I>&gt;<i> the CPU. 40k connections is literally nothing. Also make sure the
+</I>&gt;<i> clients are on a separate VM/machine.
+</I>&gt;<i>
+</I>&gt;<i> Either way 99% CPU for 10k sounds high, I've had that with 0 CPU (though
+</I>&gt;<i> on real hardware).
+</I>&gt;<i>
+</I>&gt;<i> Someone a couple years back got above 1 million after fixing 'too many
+</I>&gt;<i> timers issues' but I don't think it was on a medium instance.
+</I>&gt;<i>
+</I>&gt;<i> On 09/15/2013 07:01 PM, Joe Freeman wrote:
+</I>&gt;&gt;<i> Hi,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I've started work on a project using Clojure, but I was wondering
+</I>&gt;&gt;<i> whether (and secretly hoping that) Erlang would be a better fit, so I've
+</I>&gt;&gt;<i> been load testing a few web server frameworks. I'm particularly
+</I>&gt;&gt;<i> interested in how the server can handle a large number of concurrent
+</I>&gt;&gt;<i> WebSocket connections, and the test I've been running is similar to Eric
+</I>&gt;&gt;<i> Moritz's [1].
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I've setup a simple Cowboy 'echo' server running on an EC2 instance
+</I>&gt;&gt;<i> (m1.medium, as in Eric's test) which could comfortably handle 10k
+</I>&gt;&gt;<i> concurrent WebSocket requests (as in Eric's results), while echoing
+</I>&gt;&gt;<i> about 200 messages/second. The CPU usage of the VM at this point is
+</I>&gt;&gt;<i> about 99%, but the server continues to handle up to 40k concurrent
+</I>&gt;&gt;<i> connections with a consistent average response time (&lt;30ms). Pushing the
+</I>&gt;&gt;<i> test beyond this number results in a spike in response times and lots of
+</I>&gt;&gt;<i> connection timeouts.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 40k connections seems pretty good, but when comparing this to the same
+</I>&gt;&gt;<i> test against a couple of Clojure/JVM-based frameworks (specifically
+</I>&gt;&gt;<i> Aleph/Netty and http-kit) I find I can get higher numbers of concurrent
+</I>&gt;&gt;<i> connections with slightly better average response times (100k
+</I>&gt;&gt;<i> connections, &lt;10ms response time) using much less CPU (~20%). In fact,
+</I>&gt;&gt;<i> memory seems to be the limiting factor.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> So I have two questions:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 1) Should I be concerned about the CPU usage in the Erlang/Cowboy test?
+</I>&gt;&gt;<i> I have limited experience with Erlang so far, but 100% CPU feels like a
+</I>&gt;&gt;<i> bad thing.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 2) Is there any way to increase the performance of the cowboy server?
+</I>&gt;&gt;<i> Are there any Erlang VM parameters I can change? The fact that the
+</I>&gt;&gt;<i> Clojure/JVM tests (on the same machine) have managed to get to 100k
+</I>&gt;&gt;<i> connections suggests that the limitation isn't being imposed by the
+</I>&gt;&gt;<i> operating system (I've applied changes various changes to sysctl and
+</I>&gt;&gt;<i> ulimit).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> (Perhaps an echo server isn't the best way to compare HTTP servers, but
+</I>&gt;&gt;<i> it feels like a good starting point.)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thanks for any help.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> [1] <A HREF="https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md">https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md</A> -
+</I>&gt;&gt;<i> the GitHub repo actually contains code for an Aleph server, but results
+</I>&gt;&gt;<i> from this aren't included in the summary here.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000228.html">[99s-extend] Cowboy load test
+</A></li>
+	<LI>Next message: <A HREF="000230.html">[99s-extend] how to send a message to all connections in cowboy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#229">[ date ]</a>
+              <a href="thread.html#229">[ thread ]</a>
+              <a href="subject.html#229">[ subject ]</a>
+              <a href="author.html#229">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

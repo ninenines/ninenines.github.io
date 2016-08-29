@@ -1,0 +1,1189 @@
+From e at bestmx.net  Sat Jan 10 14:55:58 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Sat, 10 Jan 2015 14:55:58 +0100
+Subject: [99s-extend] websocket over ssl
+Message-ID: <54B12F6E.6000305@bestmx.net>
+
+Hello all.
+
+I am trying to alter my cowboy-based websocket server from plain to SSL 
+connection.
+And I found out that I have failed to understand very basics of the 
+combination of WS and SSL.
+
+As far as i've understood the very nature of the WS it is a bit altered 
+http connection (i open the http connection first, and then i change its 
+status to WS)
+
+On the other hand the whole "HTTP story" could be wrapped into SSL, so 
+that SSL is an outer layer of data encoding (as seen transparent by an 
+application)
+
+thus,
+if I open HTTPS connection (which implies SSL enveloping) and then alter 
+the connection status to WS, the whole "WS story" appears naturally 
+INSIDE THE PREVIOUSLY ESTABLISHED SSL CONNECTION.
+
+Is it true?
+
+In this regard i can hardly find a place in this world for the "WSS" 
+term, what does it stand for?
+
+Please, help me fit it in my head.
+
+However, i might be confusing some Client-Side entities, that are 
+involved in the process of starting up my WebSocket.
+
+I am using a Browser with JavaScript.
+
+The semantics of the very WebSocket.start() operation is not enough 
+clear to me. Please, do not laugh.
+
+when i do JS WebSocket.start() does it:
+(a) opens an http connection and then alters it to WS
+(b) alters the connection in the context of which the JS process is running
+????
+
+I'll be damned if the answer was lying on the surface of the internet!
+
+The third part of this ugly question is about cowboy actually.
+How all these entities mentioned above do map into my_app.erl file?
+what particular bits of cowboy's "configuration" (may i call this 
+particular piece of code a "setup" or "config"?) affect what aspects of 
+the connection initialization.
+
+well, i am afraid it could be put in a simpler way:
+"Exactly When and Where the WSS story begins?"
+
+
+From essen at ninenines.eu  Sat Jan 10 15:21:04 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sat, 10 Jan 2015 15:21:04 +0100
+Subject: [99s-extend] websocket over ssl
+In-Reply-To: <54B12F6E.6000305@bestmx.net>
+References: <54B12F6E.6000305@bestmx.net>
+Message-ID: <54B13550.5050504@ninenines.eu>
+
+Assuming you have no problem understanding HTTPS, the only differences 
+between plain Websocket and HTTPS Websocket are as follow:
+
+In your browser, your ws:// links become wss:// links.
+
+In Cowboy, use start_https instead of start_http. There is no change 
+required in your code otherwise.
+
+It may or may not be possible to use wss:// from an HTTP page or ws:// 
+from an HTTPS page, I'm not too up to date on that one. Otherwise, ws:// 
+from HTTP page or wss:// from HTTPS page works as intended.
+
+There is no requirement that a Websocket connection is initiated on a 
+new TCP connection. I am not sure if browsers reuse connections or not.
+
+On 01/10/2015 02:55 PM, e at bestmx.net wrote:
+> Hello all.
+>
+> I am trying to alter my cowboy-based websocket server from plain to SSL
+> connection.
+> And I found out that I have failed to understand very basics of the
+> combination of WS and SSL.
+>
+> As far as i've understood the very nature of the WS it is a bit altered
+> http connection (i open the http connection first, and then i change its
+> status to WS)
+>
+> On the other hand the whole "HTTP story" could be wrapped into SSL, so
+> that SSL is an outer layer of data encoding (as seen transparent by an
+> application)
+>
+> thus,
+> if I open HTTPS connection (which implies SSL enveloping) and then alter
+> the connection status to WS, the whole "WS story" appears naturally
+> INSIDE THE PREVIOUSLY ESTABLISHED SSL CONNECTION.
+>
+> Is it true?
+>
+> In this regard i can hardly find a place in this world for the "WSS"
+> term, what does it stand for?
+>
+> Please, help me fit it in my head.
+>
+> However, i might be confusing some Client-Side entities, that are
+> involved in the process of starting up my WebSocket.
+>
+> I am using a Browser with JavaScript.
+>
+> The semantics of the very WebSocket.start() operation is not enough
+> clear to me. Please, do not laugh.
+>
+> when i do JS WebSocket.start() does it:
+> (a) opens an http connection and then alters it to WS
+> (b) alters the connection in the context of which the JS process is running
+> ????
+>
+> I'll be damned if the answer was lying on the surface of the internet!
+>
+> The third part of this ugly question is about cowboy actually.
+> How all these entities mentioned above do map into my_app.erl file?
+> what particular bits of cowboy's "configuration" (may i call this
+> particular piece of code a "setup" or "config"?) affect what aspects of
+> the connection initialization.
+>
+> well, i am afraid it could be put in a simpler way:
+> "Exactly When and Where the WSS story begins?"
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From e at bestmx.net  Sat Jan 10 15:28:52 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Sat, 10 Jan 2015 15:28:52 +0100
+Subject: [99s-extend] websocket over ssl
+In-Reply-To: <54B13550.5050504@ninenines.eu>
+References: <54B12F6E.6000305@bestmx.net> <54B13550.5050504@ninenines.eu>
+Message-ID: <54B13724.8010503@bestmx.net>
+
+> In Cowboy, use start_https instead of start_http.
+
+thanx! it makes a lot of sense for me.
+tell me please what deps should be declared in the .app file?
+
+is the following correct?
+
+	{applications, [
+		kernel,
+		stdlib,
+		crypto,
+		public_key,
+		ssl,
+		cowboy
+	]},
+
+does the order matters?
+
+(i borrowed that from the internet without deep understanding of the 
+roles of each app on the list)
+
+From essen at ninenines.eu  Sat Jan 10 15:34:41 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sat, 10 Jan 2015 15:34:41 +0100
+Subject: [99s-extend] websocket over ssl
+In-Reply-To: <54B13724.8010503@bestmx.net>
+References: <54B12F6E.6000305@bestmx.net> <54B13550.5050504@ninenines.eu>
+ <54B13724.8010503@bestmx.net>
+Message-ID: <54B13881.6000408@ninenines.eu>
+
+Just kernel, stdlib, ssl, cowboy should be enough. Order does not matter 
+I think.
+
+On 01/10/2015 03:28 PM, e at bestmx.net wrote:
+>> In Cowboy, use start_https instead of start_http.
+>
+> thanx! it makes a lot of sense for me.
+> tell me please what deps should be declared in the .app file?
+>
+> is the following correct?
+>
+>      {applications, [
+>          kernel,
+>          stdlib,
+>          crypto,
+>          public_key,
+>          ssl,
+>          cowboy
+>      ]},
+>
+> does the order matters?
+>
+> (i borrowed that from the internet without deep understanding of the
+> roles of each app on the list)
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From lee.sylvester at gmail.com  Sat Jan 10 15:39:41 2015
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Sat, 10 Jan 2015 14:39:41 +0000
+Subject: [99s-extend] websocket over ssl
+In-Reply-To: <54B12F6E.6000305@bestmx.net>
+References: <54B12F6E.6000305@bestmx.net>
+Message-ID: <B264D9ED-5411-41D7-A481-1590E286DD74@gmail.com>
+
+I use Cowboy for websockets, but I find it?s a lot easier (and less stressful) to run Nginx in front of it to provide the SSL layer.
+
+Lee
+
+
+> On 10 Jan 2015, at 13:55, e at bestmx.net wrote:
+> 
+> Hello all.
+> 
+> I am trying to alter my cowboy-based websocket server from plain to SSL connection.
+> And I found out that I have failed to understand very basics of the combination of WS and SSL.
+> 
+> As far as i've understood the very nature of the WS it is a bit altered http connection (i open the http connection first, and then i change its status to WS)
+> 
+> On the other hand the whole "HTTP story" could be wrapped into SSL, so that SSL is an outer layer of data encoding (as seen transparent by an application)
+> 
+> thus,
+> if I open HTTPS connection (which implies SSL enveloping) and then alter the connection status to WS, the whole "WS story" appears naturally INSIDE THE PREVIOUSLY ESTABLISHED SSL CONNECTION.
+> 
+> Is it true?
+> 
+> In this regard i can hardly find a place in this world for the "WSS" term, what does it stand for?
+> 
+> Please, help me fit it in my head.
+> 
+> However, i might be confusing some Client-Side entities, that are involved in the process of starting up my WebSocket.
+> 
+> I am using a Browser with JavaScript.
+> 
+> The semantics of the very WebSocket.start() operation is not enough clear to me. Please, do not laugh.
+> 
+> when i do JS WebSocket.start() does it:
+> (a) opens an http connection and then alters it to WS
+> (b) alters the connection in the context of which the JS process is running
+> ????
+> 
+> I'll be damned if the answer was lying on the surface of the internet!
+> 
+> The third part of this ugly question is about cowboy actually.
+> How all these entities mentioned above do map into my_app.erl file?
+> what particular bits of cowboy's "configuration" (may i call this particular piece of code a "setup" or "config"?) affect what aspects of the connection initialization.
+> 
+> well, i am afraid it could be put in a simpler way:
+> "Exactly When and Where the WSS story begins?"
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+
+From e at bestmx.net  Sat Jan 10 15:46:23 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Sat, 10 Jan 2015 15:46:23 +0100
+Subject: [99s-extend] websocket over ssl
+In-Reply-To: <B264D9ED-5411-41D7-A481-1590E286DD74@gmail.com>
+References: <54B12F6E.6000305@bestmx.net>
+ <B264D9ED-5411-41D7-A481-1590E286DD74@gmail.com>
+Message-ID: <54B13B3F.5090907@bestmx.net>
+
+ > I use Cowboy for websockets, but I find it?s a lot easier (and less
+ > stressful) to run Nginx in front of it to provide the SSL layer.
+
+well, nginx is my choice for almost everything, still i am trying to 
+minimize amount of intermediate software wherever possible.
+
+P.S.
+with nginx and postgreSQL i have managed to eliminate any trace of 
+server-side scripting  in my previous project :)
+just nginx connected to Postgres.
+
+
+From e at bestmx.net  Sat Jan 10 16:28:19 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Sat, 10 Jan 2015 16:28:19 +0100
+Subject: [99s-extend] websocket over ssl
+In-Reply-To: <54B13881.6000408@ninenines.eu>
+References: <54B12F6E.6000305@bestmx.net> <54B13550.5050504@ninenines.eu>
+ <54B13724.8010503@bestmx.net> <54B13881.6000408@ninenines.eu>
+Message-ID: <54B14513.3090804@bestmx.net>
+
+thanx again.
+now everything "magically" works :)
+
+
+On 01/10/2015 03:34 PM, Lo?c Hoguin wrote:
+> Just kernel, stdlib, ssl, cowboy should be enough. Order does not matter
+> I think.
+>
+> On 01/10/2015 03:28 PM, e at bestmx.net wrote:
+>>> In Cowboy, use start_https instead of start_http.
+>>
+>> thanx! it makes a lot of sense for me.
+>> tell me please what deps should be declared in the .app file?
+>>
+>> is the following correct?
+>>
+>>      {applications, [
+>>          kernel,
+>>          stdlib,
+>>          crypto,
+>>          public_key,
+>>          ssl,
+>>          cowboy
+>>      ]},
+>>
+>> does the order matters?
+>>
+>> (i borrowed that from the internet without deep understanding of the
+>> roles of each app on the list)
+>
+
+From stefan.strigler at gmail.com  Wed Jan 14 17:45:41 2015
+From: stefan.strigler at gmail.com (Stefan Strigler)
+Date: Wed, 14 Jan 2015 17:45:41 +0100
+Subject: [99s-extend] cowboy and handling exceptions
+Message-ID: <CAE7Uswd9-1g2QytyFPBWTFzy1KKhBircPT6_Q=g_qBNqwnouow@mail.gmail.com>
+
+Hey there,
+
+maybe I'm missing the obvious. What I want to do is add some generic
+handler for exception handling. Say we have a set of resources some of
+which delegating stuff to external, other services. These calls might
+result in a
+
+throw({error, timeout})
+
+for instance. How would I add/modify cowboy's middleware (right place?) to
+handle those (known) exception and return a custom error (like 504 -
+Gateway Timeout).
+
+Thanks for any hints,
+
+Steve
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150114/3267f73e/attachment.html>
+
+From essen at ninenines.eu  Wed Jan 14 18:49:39 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 14 Jan 2015 18:49:39 +0100
+Subject: [99s-extend] cowboy and handling exceptions
+In-Reply-To: <CAE7Uswd9-1g2QytyFPBWTFzy1KKhBircPT6_Q=g_qBNqwnouow@mail.gmail.com>
+References: <CAE7Uswd9-1g2QytyFPBWTFzy1KKhBircPT6_Q=g_qBNqwnouow@mail.gmail.com>
+Message-ID: <54B6AC33.8040207@ninenines.eu>
+
+I don't know, there is no such thing in Cowboy. :-)
+
+On 01/14/2015 05:45 PM, Stefan Strigler wrote:
+> Hey there,
+>
+> maybe I'm missing the obvious. What I want to do is add some generic
+> handler for exception handling. Say we have a set of resources some of
+> which delegating stuff to external, other services. These calls might
+> result in a
+>
+> throw({error, timeout})
+>
+> for instance. How would I add/modify cowboy's middleware (right place?)
+> to handle those (known) exception and return a custom error (like 504 -
+> Gateway Timeout).
+>
+> Thanks for any hints,
+>
+> Steve
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From essen at ninenines.eu  Wed Jan 14 18:50:21 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 14 Jan 2015 18:50:21 +0100
+Subject: [99s-extend] cowboy and handling exceptions
+In-Reply-To: <54B6AC33.8040207@ninenines.eu>
+References: <CAE7Uswd9-1g2QytyFPBWTFzy1KKhBircPT6_Q=g_qBNqwnouow@mail.gmail.com>
+ <54B6AC33.8040207@ninenines.eu>
+Message-ID: <54B6AC5D.1080903@ninenines.eu>
+
+I send too early...
+
+I want to add a hook for when Cowboy receives exceptions in Cowboy 2, so 
+at that point you will be able to do it. But nothing in current Cowboy.
+
+On 01/14/2015 06:49 PM, Lo?c Hoguin wrote:
+> I don't know, there is no such thing in Cowboy. :-)
+>
+> On 01/14/2015 05:45 PM, Stefan Strigler wrote:
+>> Hey there,
+>>
+>> maybe I'm missing the obvious. What I want to do is add some generic
+>> handler for exception handling. Say we have a set of resources some of
+>> which delegating stuff to external, other services. These calls might
+>> result in a
+>>
+>> throw({error, timeout})
+>>
+>> for instance. How would I add/modify cowboy's middleware (right place?)
+>> to handle those (known) exception and return a custom error (like 504 -
+>> Gateway Timeout).
+>>
+>> Thanks for any hints,
+>>
+>> Steve
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From e at bestmx.net  Mon Jan 19 20:32:00 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Mon, 19 Jan 2015 20:32:00 +0100
+Subject: [99s-extend] Cowboy + SSL
+Message-ID: <54BD5BB0.4000503@bestmx.net>
+
+Hello.
+
+i still have a problem with SSL.
+as soon as i change cowboy:start_http call to cowboy:start_https
+my release refuses to stop (when requested)
+and when i revert to "http" it starts and stops normally.
+
+i am sure it is the only difference: start_http vs. start_https
+
+i am using relx with default settings as it was provided by cowboy
+(Erlang R17, System: Debian "testing")
+
+here is my_app.erl:
+
+start(_Type, _Args) ->
+   Dispatch =
+   cowboy_router:compile([{'_', [{"/start", ws_handler, []}]}]),
+
+   cowboy:start_https( https, 100, [ {port, 8765}
+   , {cacertfile, ?Dir ++ "/ssl/cowboy-ca.crt"}
+   , {certfile, ?Dir ++ "/ssl/server.crt"}
+   , {keyfile, ?Dir ++ "/ssl/server.key"} ]
+   , [{env, [{dispatch, Dispatch}]}]),
+
+   online37_sup:start_link().
+
+stop(_State) -> ok.
+
+
+once i call:
+release/bin/my_release stop
+
+the erlang.log repeats hundreds of:
+
+=ERROR REPORT==== 19-Jan-2015::20:06:02 ===
+Error in process <0.234.0> on node 'online37 at 127.0.0.1' with exit value: 
+{{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,"src/ranch_acceptor.erl"},{line,28}]}]}
+
+
+what could it be?
+any misconfiguration of my system (regarding ssl support)?
+what exactly does ranch expect from me?
+
+
+
+From e at bestmx.net  Wed Jan 21 19:28:40 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Wed, 21 Jan 2015 19:28:40 +0100
+Subject: [99s-extend] Cowboy + SSL
+In-Reply-To: <54BD5BB0.4000503@bestmx.net>
+References: <54BD5BB0.4000503@bestmx.net>
+Message-ID: <54BFEFD8.7070003@bestmx.net>
+
+reading the sources i have found that this crash i am trying to report 
+is intended behavior,
+but
+it happens in the middle of the SHUTDOWN procedure!
+
+
+I tried to investigate how a relx's release shuts down
+and i have found it is merely one call to: init:stop/0
+nothing else.
+
+the manual says:
+
+stop() -> ok
+
+All applications are taken down smoothly, all code is unloaded, and all 
+ports are closed before the system terminates. If the -heart command 
+line flag was given, the heart program is terminated before the Erlang 
+node terminates.
+
+I end up totally clueless -- everything is rock solid yet it crashes.
+maybe there is some clue in the sequence of shutting down applications?
+
+does anything controls/defines that sequence?
+
+
+
+On 01/19/2015 08:32 PM, e at bestmx.net wrote:
+> Hello.
+>
+> i still have a problem with SSL.
+> as soon as i change cowboy:start_http call to cowboy:start_https
+> my release refuses to stop (when requested)
+> and when i revert to "http" it starts and stops normally.
+>
+> i am sure it is the only difference: start_http vs. start_https
+>
+> i am using relx with default settings as it was provided by cowboy
+> (Erlang R17, System: Debian "testing")
+>
+> here is my_app.erl:
+>
+> start(_Type, _Args) ->
+>    Dispatch =
+>    cowboy_router:compile([{'_', [{"/start", ws_handler, []}]}]),
+>
+>    cowboy:start_https( https, 100, [ {port, 8765}
+>    , {cacertfile, ?Dir ++ "/ssl/cowboy-ca.crt"}
+>    , {certfile, ?Dir ++ "/ssl/server.crt"}
+>    , {keyfile, ?Dir ++ "/ssl/server.key"} ]
+>    , [{env, [{dispatch, Dispatch}]}]),
+>
+>    online37_sup:start_link().
+>
+> stop(_State) -> ok.
+>
+>
+> once i call:
+> release/bin/my_release stop
+>
+> the erlang.log repeats hundreds of:
+>
+> =ERROR REPORT==== 19-Jan-2015::20:06:02 ===
+> Error in process <0.234.0> on node 'online37 at 127.0.0.1' with exit value:
+> {{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,"src/ranch_acceptor.erl"},{line,28}]}]}
+>
+>
+>
+> what could it be?
+> any misconfiguration of my system (regarding ssl support)?
+> what exactly does ranch expect from me?
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+From pdtwonotes at gmail.com  Sun Jan 25 23:30:08 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Sun, 25 Jan 2015 17:30:08 -0500
+Subject: [99s-extend] Rewriting URLs
+Message-ID: <1422225008.17343.6.camel@gmail.com>
+
+I am trying to write a middleware step that will modify the URL in a
+request before it gets to the default static request handler.  I can not
+find an example of how to do this.  What I?have so far:
+
+execute( Req, Env ) ->
+    HostUrl = cowboy_req:host_url(Req),
+    NewUrl = rewrite( HostUrl ),
+    NewReq = ???
+    {ok, NewReq, Env}.
+
+How do I modify a Request object so that it contains my modified URL,
+which cowboy_static will then process normally?  My 'rewrite' function
+converts logical directory names into real file-system paths, using a
+dynamic algorithm that can not be simply written into cowboy's dispatch
+rules.
+
+The dispatch rules I am using is as follows, where 'bz_libmap' is my
+module containing the code above:
+	    {"/music/[...]", cowboy_static, {dir, bz_libmap, ""}},
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150125/370811e4/attachment.html>
+
+From pdtwonotes at gmail.com  Mon Jan 26 06:09:49 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Mon, 26 Jan 2015 00:09:49 -0500
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <1422225008.17343.6.camel@gmail.com>
+References: <1422225008.17343.6.camel@gmail.com>
+Message-ID: <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+
+Some progress.  I think this is how the code should look in my middleware:
+
+execute( Req, Env ) ->
+    HostUrl = cowboy_req:path(Req),
+    NewUrl = rewrite( HostUrl ),
+    NewReq = cowboy_req:set( [{path,NewUrl}], Req),
+    {ok, NewReq, Env}.
+
+It is getting called, but cowboy_static is being passed the wrong
+thing afterward.  I think I do not understand how to write the
+dispatch rule.  The value of NewUrl is an absolute filename.
+
+    {"/music/[...]", cowboy_static, {dir, bz_libmap, ""}},
+
+From essen at ninenines.eu  Mon Jan 26 11:26:42 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 26 Jan 2015 11:26:42 +0100
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+References: <1422225008.17343.6.camel@gmail.com>
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+Message-ID: <54C61662.4050309@ninenines.eu>
+
+You have to change path_info too if your middleware is after the router.
+
+On 01/26/2015 06:09 AM, Paul Dickson wrote:
+> Some progress.  I think this is how the code should look in my middleware:
+>
+> execute( Req, Env ) ->
+>      HostUrl = cowboy_req:path(Req),
+>      NewUrl = rewrite( HostUrl ),
+>      NewReq = cowboy_req:set( [{path,NewUrl}], Req),
+>      {ok, NewReq, Env}.
+>
+> It is getting called, but cowboy_static is being passed the wrong
+> thing afterward.  I think I do not understand how to write the
+> dispatch rule.  The value of NewUrl is an absolute filename.
+>
+>      {"/music/[...]", cowboy_static, {dir, bz_libmap, ""}},
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From essen at ninenines.eu  Mon Jan 26 11:29:34 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 26 Jan 2015 11:29:34 +0100
+Subject: [99s-extend] Cowboy + SSL
+In-Reply-To: <54BFEFD8.7070003@bestmx.net>
+References: <54BD5BB0.4000503@bestmx.net> <54BFEFD8.7070003@bestmx.net>
+Message-ID: <54C6170E.6030709@ninenines.eu>
+
+Hey, this is a known issue with recent Erlang versions: 
+https://github.com/ninenines/ranch/issues/90
+
+I don't have a good fix for it other than requiring ssl for using 
+Cowboy/Ranch. I probably will.
+
+On 01/21/2015 07:28 PM, e at bestmx.net wrote:
+> reading the sources i have found that this crash i am trying to report
+> is intended behavior,
+> but
+> it happens in the middle of the SHUTDOWN procedure!
+>
+>
+> I tried to investigate how a relx's release shuts down
+> and i have found it is merely one call to: init:stop/0
+> nothing else.
+>
+> the manual says:
+>
+> stop() -> ok
+>
+> All applications are taken down smoothly, all code is unloaded, and all
+> ports are closed before the system terminates. If the -heart command
+> line flag was given, the heart program is terminated before the Erlang
+> node terminates.
+>
+> I end up totally clueless -- everything is rock solid yet it crashes.
+> maybe there is some clue in the sequence of shutting down applications?
+>
+> does anything controls/defines that sequence?
+>
+>
+>
+> On 01/19/2015 08:32 PM, e at bestmx.net wrote:
+>> Hello.
+>>
+>> i still have a problem with SSL.
+>> as soon as i change cowboy:start_http call to cowboy:start_https
+>> my release refuses to stop (when requested)
+>> and when i revert to "http" it starts and stops normally.
+>>
+>> i am sure it is the only difference: start_http vs. start_https
+>>
+>> i am using relx with default settings as it was provided by cowboy
+>> (Erlang R17, System: Debian "testing")
+>>
+>> here is my_app.erl:
+>>
+>> start(_Type, _Args) ->
+>>    Dispatch =
+>>    cowboy_router:compile([{'_', [{"/start", ws_handler, []}]}]),
+>>
+>>    cowboy:start_https( https, 100, [ {port, 8765}
+>>    , {cacertfile, ?Dir ++ "/ssl/cowboy-ca.crt"}
+>>    , {certfile, ?Dir ++ "/ssl/server.crt"}
+>>    , {keyfile, ?Dir ++ "/ssl/server.key"} ]
+>>    , [{env, [{dispatch, Dispatch}]}]),
+>>
+>>    online37_sup:start_link().
+>>
+>> stop(_State) -> ok.
+>>
+>>
+>> once i call:
+>> release/bin/my_release stop
+>>
+>> the erlang.log repeats hundreds of:
+>>
+>> =ERROR REPORT==== 19-Jan-2015::20:06:02 ===
+>> Error in process <0.234.0> on node 'online37 at 127.0.0.1' with exit value:
+>> {{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,"src/ranch_acceptor.erl"},{line,28}]}]}
+>>
+>>
+>>
+>>
+>> what could it be?
+>> any misconfiguration of my system (regarding ssl support)?
+>> what exactly does ranch expect from me?
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From e at bestmx.net  Mon Jan 26 15:30:56 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Mon, 26 Jan 2015 15:30:56 +0100
+Subject: [99s-extend] Cowboy + SSL
+In-Reply-To: <54C6170E.6030709@ninenines.eu>
+References: <54BD5BB0.4000503@bestmx.net> <54BFEFD8.7070003@bestmx.net>
+ <54C6170E.6030709@ninenines.eu>
+Message-ID: <54C64FA0.7040808@bestmx.net>
+
+> Hey, this is a known issue with recent Erlang versions:
+> https://github.com/ninenines/ranch/issues/90
+
+sorry i didn't know a keyword for googling this issue
+
+well, it seems to me very interesting problem -- basically a dependency 
+that appears in runtime (if i do not pass an ssl socket to the ranch, 
+there will be no dependency).
+
+i dare to suggest few alternative approaches to the solution:
+
+(A) make the shutdown state distinguishable for the 'ranch_acceptor', so 
+that not to crash in one particular sub case of the preliminary socket 
+close. (a terrible STATEFUL solution, i do not dare to suggest how to 
+pass this state to the acceptor)
+
+(B) make it possible *in general* to pass additional dependencies to the 
+applications that your application depends on. (as for now i can define 
+in my .app.src any arbitrary deps for the "top" application, and then 
+this .app.src will be processed anyway, there is no harm in improving 
+this .app preparation procedure one step further, in order to affect 
+.app files of subordinate applications. (it is perhaps a suggestion for 
+relx devs, anyway, nobody forbid us to discuss it))
+
+there are some alternative ways to achieve (B)
+
+(B1)
+it would be a mere change of the type of the 'applications' option in 
+.app.src -- we may make it a tree instead of a list.
+for example:
+
+{applications, [
+         kernel,
+         stdlib,
+         mnesia,
+         {cowboy, [{ranch, [ssl]}]}
+]}
+%% which reads: my app requires all these,
+%% and cowboy must require ranch and ranch must require ssl
+
+it could (or should?) be shortened to:
+
+(B2)
+%% my app requires all these,
+%% and *IF* 'ranch' is somehow required then it must require ssl
+{applications, [
+         kernel,
+         stdlib,
+         mnesia,
+         cowboy,
+	{ranch, [ssl]}
+]}
+
+this in turn makes separation possible:
+
+(B3)
+we specify all applications we require as a plain list, and then we 
+specify PARTIAL ORDER: we need some certain pairs of applications to be 
+started in certain sequences.
+
+{applications, [
+         kernel,
+         stdlib,
+         mnesia,
+	ssl,
+         cowboy
+]},
+{sequence, [
+  	[ssl, ranch],
+]}
+
+%% which reads: my app requires those apps to start
+%% and among these it requires the ssl to be started BEFORE ranch
+
+%% generally we may specify any amount
+%% of subsequences we care about:
+{sequence, [
+  	[ssl, ranch],
+  	[ranch, cowboy_lib, cowboy],
+  	[appA1, appA2, appA3, ...],
+         ...
+]}
+
+of course the specified sequence MIGHT BE IMPOSSIBLE (self-refuting) and 
+it needs to be verified, which is formally possible.
+
+From pdtwonotes at gmail.com  Mon Jan 26 22:54:09 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Mon, 26 Jan 2015 16:54:09 -0500
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <54C61662.4050309@ninenines.eu>
+References: <1422225008.17343.6.camel@gmail.com>
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+ <54C61662.4050309@ninenines.eu>
+Message-ID: <1422309249.26262.15.camel@gmail.com>
+
+On Mon, 2015-01-26 at 11:26 +0100, Lo?c Hoguin wrote:
+> You have to change path_info too if your middleware is after the router.
+> 
+I have added that.  My cowboy:start_http parameters include this:
+    {middlewares, [cowboy_router, bz_libmap, cowboy_handler]}
+which I think means bz_libmap will get called on *every* request.  This
+seems to work.  Among the dispatch rules is this line:
+    {"/music/[...]", cowboy_static, {dir, "", ""}},
+so any request starting with "/music/ will do a standard file fetch.
+But due to the middlewares setup, bz_libmap will get a chance to
+look at it first.
+
+bz_libmap checks the path to see if it starts with "/music/", and if
+not, it just returns {ok,Req,Env} and lets processing proceed normally.
+This works, and other dispatch rules take care of it, usually fetching
+files from priv_dir.
+
+But if bz_libmap sees "/music/" at the start of the URL it transforms
+the URL into something else, an absolute filename typically of an mp3
+file.  This is what I want cowboy_static to process.  Hopefully, this
+does not run through the dispatch rules again.
+
+bz_libmap computes a new path and a new path_info and sets them with a
+cowboy_req:set call.  I am not sure what path_info should look like at
+this point, because the path is no longer covered by any of the dispatch
+rules.  I do not want it to be, as that would allow a browser to fetch
+any file in the file system, unchecked.
+
+But what happens is any attempts to fetch /music/Anything result in a
+status 400 error.
+
+The other approach I was considering was to make my own handler, based
+on cowboy_static, that does the URL/File transformation internally.  But
+even that might not be right, since it eventually upgrades to
+cowboy_rest and there is more processing after that.  This approach
+seems inelegant.
+
+The actual only call to file:open I found in all of cowboy is in
+cowboy_spdy.
+
+
+
+
+From essen at ninenines.eu  Tue Jan 27 11:13:41 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 27 Jan 2015 11:13:41 +0100
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <1422309249.26262.15.camel@gmail.com>
+References: <1422225008.17343.6.camel@gmail.com>	
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>	
+ <54C61662.4050309@ninenines.eu> <1422309249.26262.15.camel@gmail.com>
+Message-ID: <54C764D5.5020404@ninenines.eu>
+
+On 01/26/2015 10:54 PM, Paul Dickson wrote:
+> On Mon, 2015-01-26 at 11:26 +0100, Lo?c Hoguin wrote:
+>> You have to change path_info too if your middleware is after the router.
+>>
+> I have added that.  My cowboy:start_http parameters include this:
+>      {middlewares, [cowboy_router, bz_libmap, cowboy_handler]}
+> which I think means bz_libmap will get called on *every* request.  This
+> seems to work.  Among the dispatch rules is this line:
+>      {"/music/[...]", cowboy_static, {dir, "", ""}},
+
+Is it the actual line? Cause {dir, "", ""} is wrong, the third element 
+must be an etag or mimetype tuple.
+
+Otherwise, I need a more complete error, or code.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From pdtwonotes at gmail.com  Tue Jan 27 14:07:48 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Tue, 27 Jan 2015 08:07:48 -0500
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <54C764D5.5020404@ninenines.eu>
+References: <1422225008.17343.6.camel@gmail.com>
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+ <54C61662.4050309@ninenines.eu> <1422309249.26262.15.camel@gmail.com>
+ <54C764D5.5020404@ninenines.eu>
+Message-ID: <1422364068.30127.5.camel@gmail.com>
+
+On Tue, 2015-01-27 at 11:13 +0100, Lo?c Hoguin wrote:
+> On 01/26/2015 10:54 PM, Paul Dickson wrote:
+> > On Mon, 2015-01-26 at 11:26 +0100, Lo?c Hoguin wrote:
+> >> You have to change path_info too if your middleware is after the router.
+> >>
+> > I have added that.  My cowboy:start_http parameters include this:
+> >      {middlewares, [cowboy_router, bz_libmap, cowboy_handler]}
+> > which I think means bz_libmap will get called on *every* request.  This
+> > seems to work.  Among the dispatch rules is this line:
+> >      {"/music/[...]", cowboy_static, {dir, "", ""}},
+> 
+> Is it the actual line? Cause {dir, "", ""} is wrong, the third element 
+> must be an etag or mimetype tuple.
+> 
+> Otherwise, I need a more complete error, or code.
+
+I changed the rule line to:
+
+	    {"/music/[...]", cowboy_static, {dir, "", [
+	        {mimetypes, cow_mimetypes, all}]}},
+
+The client I am using is 'mplayer'.  The error message is:
+
+  Server returned 400:Bad Request
+  Failed to parse header.
+  Failed, exiting.
+
+I also included some tracing in my middleware module to print
+out the new path and path_info values it is setting, showing
+the result of the rewrite algorithm.
+
+ Path <<"/music/Library/Folk/Swiss/Alphorn.ogg">>
+ Info [<<"/">>,<<"music">>,<<"Library">>,<<"Folk">>,<<"Swiss">>,
+         <<"Alphorn.ogg">>]
+
+
+
+From essen at ninenines.eu  Tue Jan 27 14:10:58 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 27 Jan 2015 14:10:58 +0100
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <1422364068.30127.5.camel@gmail.com>
+References: <1422225008.17343.6.camel@gmail.com>		
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>		
+ <54C61662.4050309@ninenines.eu> <1422309249.26262.15.camel@gmail.com>	
+ <54C764D5.5020404@ninenines.eu> <1422364068.30127.5.camel@gmail.com>
+Message-ID: <54C78E62.9020307@ninenines.eu>
+
+On 01/27/2015 02:07 PM, Paul Dickson wrote:
+>   Info [<<"/">>,<<"music">>,<<"Library">>,<<"Folk">>,<<"Swiss">>,
+>           <<"Alphorn.ogg">>]
+
+Should be from Library onward, and not include the first two elements.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From pdtwonotes at gmail.com  Tue Jan 27 14:24:30 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Tue, 27 Jan 2015 08:24:30 -0500
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <54C78E62.9020307@ninenines.eu>
+References: <1422225008.17343.6.camel@gmail.com>
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+ <54C61662.4050309@ninenines.eu> <1422309249.26262.15.camel@gmail.com>
+ <54C764D5.5020404@ninenines.eu> <1422364068.30127.5.camel@gmail.com>
+ <54C78E62.9020307@ninenines.eu>
+Message-ID: <1422365070.30127.8.camel@gmail.com>
+
+On Tue, 2015-01-27 at 14:10 +0100, Lo?c Hoguin wrote:
+
+> On 01/27/2015 02:07 PM, Paul Dickson wrote:
+> >   Info [<<"/">>,<<"music">>,<<"Library">>,<<"Folk">>,<<"Swiss">>,
+> >           <<"Alphorn.ogg">>]
+> 
+> Should be from Library onward, and not include the first two elements.
+> 
+
+
+This is perhaps a confusing case, because the incoming URL and the
+transformed URL both start with "/music".  What if that was not the
+case, and the resulting path was, for example,
+
+    /home/me/music/Folk/Swiss/Alphorn.ogg
+
+which does not match anything in the rules at all?  Is that allowed, or
+must the rewritten URL also match a rule?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150127/1916d612/attachment.html>
+
+From essen at ninenines.eu  Tue Jan 27 14:29:20 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 27 Jan 2015 14:29:20 +0100
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <1422365070.30127.8.camel@gmail.com>
+References: <1422225008.17343.6.camel@gmail.com>			
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>			
+ <54C61662.4050309@ninenines.eu> <1422309249.26262.15.camel@gmail.com>		
+ <54C764D5.5020404@ninenines.eu> <1422364068.30127.5.camel@gmail.com>	
+ <54C78E62.9020307@ninenines.eu> <1422365070.30127.8.camel@gmail.com>
+Message-ID: <54C792B0.3040406@ninenines.eu>
+
+On 01/27/2015 02:24 PM, Paul Dickson wrote:
+> On Tue, 2015-01-27 at 14:10 +0100, Lo?c Hoguin wrote:
+>> On 01/27/2015 02:07 PM, Paul Dickson wrote:
+>> >   Info [<<"/">>,<<"music">>,<<"Library">>,<<"Folk">>,<<"Swiss">>,
+>> >           <<"Alphorn.ogg">>]
+>>
+>> Should be from Library onward, and not include the first two elements.
+>>
+>
+> This is perhaps a confusing case, because the incoming URL and the
+> transformed URL both start with "/music".  What if that was not the
+> case, and the resulting path was, for example,
+>
+>      /home/me/music/Folk/Swiss/Alphorn.ogg
+>
+> which does not match anything in the rules at all?  Is that allowed, or
+> must the rewritten URL also match a rule?
+
+Middlewares execute in order and only once, so not sure what you're asking.
+
+Again I'd need to see some code to help you as I am quite confused by 
+what you are trying to do and what your issue is.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From pdtwonotes at gmail.com  Tue Jan 27 14:44:14 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Tue, 27 Jan 2015 08:44:14 -0500
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <54C792B0.3040406@ninenines.eu>
+References: <1422225008.17343.6.camel@gmail.com>
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+ <54C61662.4050309@ninenines.eu> <1422309249.26262.15.camel@gmail.com>
+ <54C764D5.5020404@ninenines.eu> <1422364068.30127.5.camel@gmail.com>
+ <54C78E62.9020307@ninenines.eu> <1422365070.30127.8.camel@gmail.com>
+ <54C792B0.3040406@ninenines.eu>
+Message-ID: <1422366254.30127.15.camel@gmail.com>
+
+Ok, here is all the code in bz_libmap.erl
+
+execute(Req, Env) ->
+    Path = cowboy_req:path(Req),
+    Parts = filename:split(Path),
+
+    case cowboy_req:method(Req) of
+      <<"GET">> ->
+         % Check for "/music/" requests
+         rewrite( Parts, Req, Env );
+      _Other ->
+         {ok, Req, Env}
+    end.
+
+rewrite( [<<"/">>, <<"music">>, LibName | UrlParts], Req, Env ) ->
+    % We want URLs of the form "/music/LIBNAME/everythingelse"
+    % Get library definition.  If we do not know that name, then they
+    % are asking for something that does not exist.
+    case bz_db:get_library( LibName ) of
+      [] ->
+         io:format("No such library '~s'~n", [LibName] ),
+         {stop, cowboy_req:reply(404, Req)};
+
+      L when is_record(L,library) ->
+          % Replace the library name with the library base.
+          % This will be the head of an absolute file path.
+          LibBase = L#library.base,
+          NewPath = filename:join([LibBase | UrlParts]),
+          NewInfo = filename:split(NewPath),
+          Req2 = cowboy_req:set( [
+            {path_info,[NewPath]},
+            {path, [NewPath]}], Req),
+          {ok, Req2, Env}
+    end;
+rewrite( _AnythingElse, Req, Env ) ->
+    {ok, Req, Env}.
+
+
+
+
+From pdtwonotes at gmail.com  Thu Jan 29 23:23:35 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Thu, 29 Jan 2015 17:23:35 -0500
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <1422366254.30127.15.camel@gmail.com>
+References: <1422225008.17343.6.camel@gmail.com>
+ <CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>
+ <54C61662.4050309@ninenines.eu>
+ <1422309249.26262.15.camel@gmail.com>
+ <54C764D5.5020404@ninenines.eu>
+ <1422364068.30127.5.camel@gmail.com>
+ <54C78E62.9020307@ninenines.eu>
+ <1422365070.30127.8.camel@gmail.com>
+ <54C792B0.3040406@ninenines.eu>
+ <1422366254.30127.15.camel@gmail.com>
+Message-ID: <CAOdRa2Z-13J_0uGtKYBjXvmiyX0bCnNXbCAxRmkr4RkgyrhDJA@mail.gmail.com>
+
+The status 400 is coming from cowboy_rest, when it complains that
+handler cowboy_static lacks the functions 'service_available',
+'known_methods', 'uri_too_long', and 'allowed_methods'.  Which indeed
+it does not have.
+
+The only place I mention cowboy_static is in the dispatch rule:
+   {"/music/[...]", cowboy_static, {dir, "", [
+       {mimetypes, cow_mimetypes, all}]}},
+
+From essen at ninenines.eu  Thu Jan 29 23:24:59 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 29 Jan 2015 23:24:59 +0100
+Subject: [99s-extend] Rewriting URLs
+In-Reply-To: <CAOdRa2Z-13J_0uGtKYBjXvmiyX0bCnNXbCAxRmkr4RkgyrhDJA@mail.gmail.com>
+References: <1422225008.17343.6.camel@gmail.com>	<CAOdRa2a5+57KeT3xWwabFxoWSMU8yysqVZvQFVQVVL-FJCAz4w@mail.gmail.com>	<54C61662.4050309@ninenines.eu>	<1422309249.26262.15.camel@gmail.com>	<54C764D5.5020404@ninenines.eu>	<1422364068.30127.5.camel@gmail.com>	<54C78E62.9020307@ninenines.eu>	<1422365070.30127.8.camel@gmail.com>	<54C792B0.3040406@ninenines.eu>	<1422366254.30127.15.camel@gmail.com>
+ <CAOdRa2Z-13J_0uGtKYBjXvmiyX0bCnNXbCAxRmkr4RkgyrhDJA@mail.gmail.com>
+Message-ID: <54CAB33B.7070606@ninenines.eu>
+
+They are optional callbacks, so I doubt that's it.
+
+On 01/29/2015 11:23 PM, Paul Dickson wrote:
+> The status 400 is coming from cowboy_rest, when it complains that
+> handler cowboy_static lacks the functions 'service_available',
+> 'known_methods', 'uri_too_long', and 'allowed_methods'.  Which indeed
+> it does not have.
+>
+> The only place I mention cowboy_static is in the dispatch rule:
+>     {"/music/[...]", cowboy_static, {dir, "", [
+>         {mimetypes, cow_mimetypes, all}]}},
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+

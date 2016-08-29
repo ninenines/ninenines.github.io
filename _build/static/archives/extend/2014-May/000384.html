@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] REST responses
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20responses&In-Reply-To=%3CCA%2BdV7cR9M-5dq2kYJgowrodDbCEQ0aAnkZKyQmw07hmAJXmc%3DA%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000383.html">
+   <LINK REL="Next"  HREF="000386.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] REST responses</H1>
+    <B>Paulo F. Oliveira</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20responses&In-Reply-To=%3CCA%2BdV7cR9M-5dq2kYJgowrodDbCEQ0aAnkZKyQmw07hmAJXmc%3DA%40mail.gmail.com%3E"
+       TITLE="[99s-extend] REST responses">paulo.ferraz.oliveira at gmail.com
+       </A><BR>
+    <I>Tue May 20 18:27:58 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000383.html">[99s-extend] Gracefully stop Ranch
+</A></li>
+        <LI>Next message: <A HREF="000386.html">[99s-extend] REST responses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#384">[ date ]</a>
+              <a href="thread.html#384">[ thread ]</a>
+              <a href="subject.html#384">[ subject ]</a>
+              <a href="author.html#384">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello.
+
+First of all, thanks for the great work you've done with cowboy. I've been
+using it with a fait amount of success and I'm a fairly new Erlang
+developer. I'm mainly interested in the REST &quot;interface&quot; of the application
+and its way of doing RESTful things, and I like the way you did it (what
+with all the content_types_provided, service_available, etc. functions).
+I've tested the way the system reacted to the different Accept,
+Content-Type, etc. headers and always got very well-opinionated responses
+(406, 415, ...).
+
+A couple of questions remain though (I'm sorry if they've been asked
+already but I've searched the web for answers and read the available docs
+and couldn't find them):
+
+1. is it expected that, if I use cowboy_req:reply/2 in a GET handler
+(coming from content_types_provided), the onresponse/4 hook be called
+twice? I guess one is due to the reply and the other one due to the
+workflow of the request, but is there a way to prevent the second execution?
+
+2. if I want to JSON-parse ALL my requests should I a) use the onrequest/1
+hook or b) do this on a per-request basis? Because I'd like to reply with a
+400 ASAP but keep going if the JSON validates (I'm going to use JSON-schema
+for validating input); and, if possible, have the JSON-parsed body stored
+somewhere for future manipulation.
+
+3. I haven't seen examples that made use of the State (from the function
+returns). When should I use this instead of the Request metadata? I'd like
+to be able to set a generic error state for a request (either in meta ou
+State) and that have a &quot;standard&quot; error response be created at a later time
+(in a unique function, for example - e.g. onresponse/4).
+
+4. is there anything like a catch-all exception handler? I'd like to catch
+exceptions that occur anywhere so I could log them and analyze them at a
+later moment.
+
+I'm probably abusing the onresponse/onrequest hooks already, so your
+answers should help me clarify this.
+
+Thanks.
+
+- Paulo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20140520/cf7632e9/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20140520/cf7632e9/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000383.html">[99s-extend] Gracefully stop Ranch
+</A></li>
+	<LI>Next message: <A HREF="000386.html">[99s-extend] REST responses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#384">[ date ]</a>
+              <a href="thread.html#384">[ thread ]</a>
+              <a href="subject.html#384">[ subject ]</a>
+              <a href="author.html#384">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy + SSL
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20%2B%20SSL&In-Reply-To=%3C54BFEFD8.7070003%40bestmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000494.html">
+   <LINK REL="Next"  HREF="000499.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy + SSL</H1>
+    <B>e at bestmx.net</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20%2B%20SSL&In-Reply-To=%3C54BFEFD8.7070003%40bestmx.net%3E"
+       TITLE="[99s-extend] Cowboy + SSL">e at bestmx.net
+       </A><BR>
+    <I>Wed Jan 21 19:28:40 CET 2015</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000494.html">[99s-extend] Cowboy + SSL
+</A></li>
+        <LI>Next message: <A HREF="000499.html">[99s-extend] Cowboy + SSL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#495">[ date ]</a>
+              <a href="thread.html#495">[ thread ]</a>
+              <a href="subject.html#495">[ subject ]</a>
+              <a href="author.html#495">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>reading the sources i have found that this crash i am trying to report 
+is intended behavior,
+but
+it happens in the middle of the SHUTDOWN procedure!
+
+
+I tried to investigate how a relx's release shuts down
+and i have found it is merely one call to: init:stop/0
+nothing else.
+
+the manual says:
+
+stop() -&gt; ok
+
+All applications are taken down smoothly, all code is unloaded, and all 
+ports are closed before the system terminates. If the -heart command 
+line flag was given, the heart program is terminated before the Erlang 
+node terminates.
+
+I end up totally clueless -- everything is rock solid yet it crashes.
+maybe there is some clue in the sequence of shutting down applications?
+
+does anything controls/defines that sequence?
+
+
+
+On 01/19/2015 08:32 PM, <A HREF="https://lists.ninenines.eu/listinfo/extend">e at bestmx.net</A> wrote:
+&gt;<i> Hello.
+</I>&gt;<i>
+</I>&gt;<i> i still have a problem with SSL.
+</I>&gt;<i> as soon as i change cowboy:start_http call to cowboy:start_https
+</I>&gt;<i> my release refuses to stop (when requested)
+</I>&gt;<i> and when i revert to &quot;http&quot; it starts and stops normally.
+</I>&gt;<i>
+</I>&gt;<i> i am sure it is the only difference: start_http vs. start_https
+</I>&gt;<i>
+</I>&gt;<i> i am using relx with default settings as it was provided by cowboy
+</I>&gt;<i> (Erlang R17, System: Debian &quot;testing&quot;)
+</I>&gt;<i>
+</I>&gt;<i> here is my_app.erl:
+</I>&gt;<i>
+</I>&gt;<i> start(_Type, _Args) -&gt;
+</I>&gt;<i>    Dispatch =
+</I>&gt;<i>    cowboy_router:compile([{'_', [{&quot;/start&quot;, ws_handler, []}]}]),
+</I>&gt;<i>
+</I>&gt;<i>    cowboy:start_https( https, 100, [ {port, 8765}
+</I>&gt;<i>    , {cacertfile, ?Dir ++ &quot;/ssl/cowboy-ca.crt&quot;}
+</I>&gt;<i>    , {certfile, ?Dir ++ &quot;/ssl/server.crt&quot;}
+</I>&gt;<i>    , {keyfile, ?Dir ++ &quot;/ssl/server.key&quot;} ]
+</I>&gt;<i>    , [{env, [{dispatch, Dispatch}]}]),
+</I>&gt;<i>
+</I>&gt;<i>    online37_sup:start_link().
+</I>&gt;<i>
+</I>&gt;<i> stop(_State) -&gt; ok.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> once i call:
+</I>&gt;<i> release/bin/my_release stop
+</I>&gt;<i>
+</I>&gt;<i> the erlang.log repeats hundreds of:
+</I>&gt;<i>
+</I>&gt;<i> =ERROR REPORT==== 19-Jan-2015::20:06:02 ===
+</I>&gt;<i> Error in process &lt;0.234.0&gt; on node '<A HREF="https://lists.ninenines.eu/listinfo/extend">online37 at 127.0.0.1</A>' with exit value:
+</I>&gt;<i> {{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,&quot;src/ranch_acceptor.erl&quot;},{line,28}]}]}
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> what could it be?
+</I>&gt;<i> any misconfiguration of my system (regarding ssl support)?
+</I>&gt;<i> what exactly does ranch expect from me?
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I></PRE>
+
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000494.html">[99s-extend] Cowboy + SSL
+</A></li>
+	<LI>Next message: <A HREF="000499.html">[99s-extend] Cowboy + SSL
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#495">[ date ]</a>
+              <a href="thread.html#495">[ thread ]</a>
+              <a href="subject.html#495">[ subject ]</a>
+              <a href="author.html#495">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

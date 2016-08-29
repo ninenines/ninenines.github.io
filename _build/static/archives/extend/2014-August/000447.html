@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] cowboy_rest and delete_completed and response
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20cowboy_rest%20and%20delete_completed%20and%20response&In-Reply-To=%3C90BE6FF2-659A-487A-AB91-C968658CE3D3%40wirtel.be%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000446.html">
+   <LINK REL="Next"  HREF="000448.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] cowboy_rest and delete_completed and response</H1>
+    <B>St&#233;phane Wirtel</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20cowboy_rest%20and%20delete_completed%20and%20response&In-Reply-To=%3C90BE6FF2-659A-487A-AB91-C968658CE3D3%40wirtel.be%3E"
+       TITLE="[99s-extend] cowboy_rest and delete_completed and response">stephane at wirtel.be
+       </A><BR>
+    <I>Wed Aug 27 00:12:00 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000446.html">[99s-extend] cowboy_rest and delete_completed and response
+</A></li>
+        <LI>Next message: <A HREF="000448.html">[99s-extend] I need your feedback about this cowboy_rest handler.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#447">[ date ]</a>
+              <a href="thread.html#447">[ thread ]</a>
+              <a href="subject.html#447">[ subject ]</a>
+              <a href="author.html#447">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>What's the purpose of the callbacks in content_types_accepted and 
+content_types_provided?
+
+I prefer set the response in the State to the callbacks and they convert 
+it to the right format.
+
+Example:
+
+delete_completed(Req, State) -&gt;
+	Response = [{&lt;&lt;&quot;ok&quot;&gt;&gt;, &lt;&lt;&quot;dbname&quot;&gt;&gt;}],
+	{true, Req, State#state{response=Response}}.
+
+get_json(Req, #{response=Response}=State) -&gt;
+	Body = jsx:encode(Response),
+	{Body, Req, State}.
+
+get_msgpack(Req, #{response=Response}=State) -&gt;
+	Body = msgpack:pack(Response, [{format, jsx}],
+	{Body, Req, State}.
+
+
+
+On 27 Aug 2014, at 0:03, Lo&#239;c Hoguin wrote:
+
+&gt;<i> Call cowboy_req:meta(media_type, Req) to retrieve it.
+</I>&gt;<i>
+</I>&gt;<i> On 08/27/2014 12:59 AM, St&#233;phane Wirtel wrote:
+</I>&gt;&gt;<i> Hi all,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I work with two content-types (json, msgpack).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> In the DELETE verb, I need to return an object and in this case, I 
+</I>&gt;&gt;<i> work
+</I>&gt;&gt;<i> on delete_resource/2 and delete_completed/2.
+</I>&gt;&gt;<i> The problem is, how can I return a body in function of the 
+</I>&gt;&gt;<i> content-type?
+</I>&gt;&gt;<i> because after delete_completed, there is a call to the
+</I>&gt;&gt;<i> cowboy_rest:has_resp_body function and I need to set the body of the
+</I>&gt;&gt;<i> response.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> delete_completed(Req, State) -&gt;
+</I>&gt;&gt;<i>   Body = Json or MsgPack ?  &lt;-- Which content ?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>   Req2 = cowboy_req:set_resp_body(Body, Req),
+</I>&gt;&gt;<i>   {true, Req2, State}.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Ok, but in this case, what's the reason of content_types_provided/2 
+</I>&gt;&gt;<i> and
+</I>&gt;&gt;<i> content_types_accepted/2 ?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thank you,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Stephane
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> St&#233;phane Wirtel - <A HREF="http://wirtel.be">http://wirtel.be</A> - @matrixise
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;<i>
+</I>&gt;<i> -- 
+</I>&gt;<i> Lo&#239;c Hoguin
+</I>&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>
+
+--
+St&#233;phane Wirtel - <A HREF="http://wirtel.be">http://wirtel.be</A> - @matrixise
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000446.html">[99s-extend] cowboy_rest and delete_completed and response
+</A></li>
+	<LI>Next message: <A HREF="000448.html">[99s-extend] I need your feedback about this cowboy_rest handler.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#447">[ date ]</a>
+              <a href="thread.html#447">[ thread ]</a>
+              <a href="subject.html#447">[ subject ]</a>
+              <a href="author.html#447">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

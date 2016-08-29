@@ -1,0 +1,2737 @@
+From marcel.meyer at gmail.com  Thu Oct  3 07:00:28 2013
+From: marcel.meyer at gmail.com (Marcel Meyer)
+Date: Wed, 2 Oct 2013 22:00:28 -0700
+Subject: [99s-extend] websocket_info and RPC
+Message-ID: <CAFXVr=ZuQNiChQGFHVcS4jGOHXG5NEazbZcP8qp5E91smJEN1A@mail.gmail.com>
+
+Hi there,
+
+How do I use the websocket infrastructure of cowboy to implement RPC?
+It seems like I can talk to the client using websocket_info, but the
+response comes in on websocket_handle, all asynchronously.
+
+Kind regards,
+Marcel
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131002/4463e3fa/attachment.html>
+
+From ryankbrown at gmail.com  Tue Oct  8 05:55:57 2013
+From: ryankbrown at gmail.com (Ryan Brown)
+Date: Mon, 7 Oct 2013 21:55:57 -0600
+Subject: [99s-extend] Problem with cowboy ssl example
+Message-ID: <CAChGYf-ykW7HRb6Hoy6h1NHxmUrbfZ+NBsubvrW-pMieFhESkg@mail.gmail.com>
+
+I was trying to compile and run the ssl_hello_world example in the cowboy
+project and am getting the following error at start-up:
+
+=INFO REPORT==== 7-Oct-2013::21:38:01 ===    application: ssl_hello_world
+  exited: {bad_return,             {{ssl_hello_world_app,start,[normal,[]]},
+            {'EXIT',               {{badmatch,                 {error,
+            {{shutdown,
+{failed_to_start_child,ranch_acceptors_sup,
+ {{case_clause,                       {error,{"no such file or
+directory","asn1.app"}}},
+[{ranch,require,1,[{file,"src/ranch.erl"},{line,207}]},
+
+I can start asn1 from the erl console so I am not sure what I am missing.
+Any help is greatly appreciated.
+
+Best regards.
+
+-- 
+-rb
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131007/fdef2170/attachment.html>
+
+From essen at ninenines.eu  Tue Oct  8 06:13:04 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 08 Oct 2013 06:13:04 +0200
+Subject: [99s-extend] Problem with cowboy ssl example
+In-Reply-To: <CAChGYf-ykW7HRb6Hoy6h1NHxmUrbfZ+NBsubvrW-pMieFhESkg@mail.gmail.com>
+References: <CAChGYf-ykW7HRb6Hoy6h1NHxmUrbfZ+NBsubvrW-pMieFhESkg@mail.gmail.com>
+Message-ID: <52538650.6030804@ninenines.eu>
+
+I'm guessing you run an older Erlang which had that issue. Either 
+upgrade Erlang or add asn1 to the list of apps to include in the release 
+(and open a ticket for it please so it can be made to work with older 
+versions).
+
+On 10/08/2013 05:55 AM, Ryan Brown wrote:
+> I was trying to compile and run the ssl_hello_world example in the
+> cowboy project and am getting the following error at start-up:
+>
+>
+>   =INFO REPORT==== 7-Oct-2013::21:38:01 ===
+>
+>
+>        application: ssl_hello_world
+>
+>
+>        exited: {bad_return,
+>
+>
+>                 {{ssl_hello_world_app,start,[normal,[]]},
+>
+>
+>                  {'EXIT',
+>
+>
+>                   {{badmatch,
+>
+>
+>                     {error,
+>
+>
+>                      {{shutdown,
+>
+>
+>                        {failed_to_start_child,ranch_acceptors_sup,
+>
+>
+>                         {{case_clause,
+>
+>
+>                           {error,{"no such file or directory","asn1.app"}}},
+>
+>
+>
+>   [{ranch,require,1,[{file,"src/ranch.erl"},{line,207}]},
+>
+>
+> I can start asn1 from the erl console so I am not sure what I am
+> missing. Any help is greatly appreciated.
+>
+> Best regards.
+>
+> --
+> -rb
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From ryankbrown at gmail.com  Tue Oct  8 06:24:54 2013
+From: ryankbrown at gmail.com (Ryan Brown)
+Date: Mon, 7 Oct 2013 22:24:54 -0600
+Subject: [99s-extend] Problem with cowboy ssl example
+In-Reply-To: <52538650.6030804@ninenines.eu>
+References: <CAChGYf-ykW7HRb6Hoy6h1NHxmUrbfZ+NBsubvrW-pMieFhESkg@mail.gmail.com>
+ <52538650.6030804@ninenines.eu>
+Message-ID: <CAChGYf-krBbQYAkxMuGt-byPV6PSC-50yrOgBMqUJrQBUZeKcA@mail.gmail.com>
+
+Thanks Lo?c. I am actually running R16B on a macbook OS X 10.8. (I'm
+wondering if the Od could have any effect?)
+
+Best,
+
+Ryan
+
+
+On Mon, Oct 7, 2013 at 10:13 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> I'm guessing you run an older Erlang which had that issue. Either upgrade
+> Erlang or add asn1 to the list of apps to include in the release (and open
+> a ticket for it please so it can be made to work with older versions).
+>
+>
+> On 10/08/2013 05:55 AM, Ryan Brown wrote:
+>
+>> I was trying to compile and run the ssl_hello_world example in the
+>> cowboy project and am getting the following error at start-up:
+>>
+>>
+>>   =INFO REPORT==== 7-Oct-2013::21:38:01 ===
+>>
+>>
+>>        application: ssl_hello_world
+>>
+>>
+>>        exited: {bad_return,
+>>
+>>
+>>                 {{ssl_hello_world_app,start,[**normal,[]]},
+>>
+>>
+>>                  {'EXIT',
+>>
+>>
+>>                   {{badmatch,
+>>
+>>
+>>                     {error,
+>>
+>>
+>>                      {{shutdown,
+>>
+>>
+>>                        {failed_to_start_child,ranch_**acceptors_sup,
+>>
+>>
+>>                         {{case_clause,
+>>
+>>
+>>                           {error,{"no such file or
+>> directory","asn1.app"}}},
+>>
+>>
+>>
+>>   [{ranch,require,1,[{file,"src/**ranch.erl"},{line,207}]},
+>>
+>>
+>> I can start asn1 from the erl console so I am not sure what I am
+>> missing. Any help is greatly appreciated.
+>>
+>> Best regards.
+>>
+>> --
+>> -rb
+>>
+>>
+>> ______________________________**_________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+
+
+
+-- 
+-rb
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131007/863e7358/attachment.html>
+
+From ryankbrown at gmail.com  Tue Oct  8 17:33:36 2013
+From: ryankbrown at gmail.com (Ryan Brown)
+Date: Tue, 8 Oct 2013 09:33:36 -0600
+Subject: [99s-extend] Problem with cowboy ssl example
+In-Reply-To: <CAChGYf-krBbQYAkxMuGt-byPV6PSC-50yrOgBMqUJrQBUZeKcA@mail.gmail.com>
+References: <CAChGYf-ykW7HRb6Hoy6h1NHxmUrbfZ+NBsubvrW-pMieFhESkg@mail.gmail.com>
+ <52538650.6030804@ninenines.eu>
+ <CAChGYf-krBbQYAkxMuGt-byPV6PSC-50yrOgBMqUJrQBUZeKcA@mail.gmail.com>
+Message-ID: <CAChGYf95Zp7gwj3dxtcw1vU-9wWce6PwA2Z2KJjCPU3jan43eA@mail.gmail.com>
+
+Just to complete the loop. As would be expected, adding asn1 to the app.src
+applications fixes the issue.
+
+Thank you,
+
+Ryan
+
+
+On Mon, Oct 7, 2013 at 10:24 PM, Ryan Brown <ryankbrown at gmail.com> wrote:
+
+> Thanks Lo?c. I am actually running R16B on a macbook OS X 10.8. (I'm
+> wondering if the Od could have any effect?)
+>
+> Best,
+>
+> Ryan
+>
+>
+> On Mon, Oct 7, 2013 at 10:13 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> I'm guessing you run an older Erlang which had that issue. Either upgrade
+>> Erlang or add asn1 to the list of apps to include in the release (and open
+>> a ticket for it please so it can be made to work with older versions).
+>>
+>>
+>> On 10/08/2013 05:55 AM, Ryan Brown wrote:
+>>
+>>> I was trying to compile and run the ssl_hello_world example in the
+>>> cowboy project and am getting the following error at start-up:
+>>>
+>>>
+>>>   =INFO REPORT==== 7-Oct-2013::21:38:01 ===
+>>>
+>>>
+>>>        application: ssl_hello_world
+>>>
+>>>
+>>>        exited: {bad_return,
+>>>
+>>>
+>>>                 {{ssl_hello_world_app,start,[**normal,[]]},
+>>>
+>>>
+>>>                  {'EXIT',
+>>>
+>>>
+>>>                   {{badmatch,
+>>>
+>>>
+>>>                     {error,
+>>>
+>>>
+>>>                      {{shutdown,
+>>>
+>>>
+>>>                        {failed_to_start_child,ranch_**acceptors_sup,
+>>>
+>>>
+>>>                         {{case_clause,
+>>>
+>>>
+>>>                           {error,{"no such file or
+>>> directory","asn1.app"}}},
+>>>
+>>>
+>>>
+>>>   [{ranch,require,1,[{file,"src/**ranch.erl"},{line,207}]},
+>>>
+>>>
+>>> I can start asn1 from the erl console so I am not sure what I am
+>>> missing. Any help is greatly appreciated.
+>>>
+>>> Best regards.
+>>>
+>>> --
+>>> -rb
+>>>
+>>>
+>>> ______________________________**_________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>>
+>>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>>
+>
+>
+>
+> --
+> -rb
+>
+
+
+
+-- 
+-rb
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131008/8752fdd7/attachment.html>
+
+From lee.sylvester at gmail.com  Wed Oct  9 15:27:25 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Wed, 9 Oct 2013 14:27:25 +0100
+Subject: [99s-extend] Cowboy Calling Hostname
+Message-ID: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+
+Hi,
+
+When receiving a Cowboy request, is there a way to find out which hostname the user made the request from?  I'm using CORS in my REST and Bullet app, where each call can be made through a given account.  However, I'd like to be able to lock requests for each account to a designated hostname to protect that users account usage.
+
+Thanks,
+Lee
+
+
+
+From essen at ninenines.eu  Wed Oct  9 15:31:04 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 09 Oct 2013 15:31:04 +0200
+Subject: [99s-extend] Cowboy Calling Hostname
+In-Reply-To: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+References: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+Message-ID: <52555A98.8090901@ninenines.eu>
+
+cowboy_req:host/1?
+
+Please use the nice manual we have now.
+
+   http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req
+
+On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+> Hi,
+>
+> When receiving a Cowboy request, is there a way to find out which hostname the user made the request from?  I'm using CORS in my REST and Bullet app, where each call can be made through a given account.  However, I'd like to be able to lock requests for each account to a designated hostname to protect that users account usage.
+>
+> Thanks,
+> Lee
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lee.sylvester at gmail.com  Wed Oct  9 17:30:21 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Wed, 9 Oct 2013 16:30:21 +0100
+Subject: [99s-extend] Cowboy Calling Hostname
+In-Reply-To: <52555A98.8090901@ninenines.eu>
+References: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+ <52555A98.8090901@ninenines.eu>
+Message-ID: <6B317ED7-A80B-4866-A347-CA9FE489D522@gmail.com>
+
+Thank you.  I couldn't work out if that's the host being called from or the host name in the request.  For example, a store called things.com makes a request to my service on widgets.net.  I need to see that the request is made FROM things.com for validation purposes. Is it correct that host will provide this?
+
+Thanks,
+Lee
+
+Sent from my iPhone
+
+> On Oct 9, 2013, at 2:31 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> 
+> cowboy_req:host/1?
+> 
+> Please use the nice manual we have now.
+> 
+>  http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req
+> 
+>> On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+>> Hi,
+>> 
+>> When receiving a Cowboy request, is there a way to find out which hostname the user made the request from?  I'm using CORS in my REST and Bullet app, where each call can be made through a given account.  However, I'd like to be able to lock requests for each account to a designated hostname to protect that users account usage.
+>> 
+>> Thanks,
+>> Lee
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+From essen at ninenines.eu  Wed Oct  9 17:32:54 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 09 Oct 2013 17:32:54 +0200
+Subject: [99s-extend] Cowboy Calling Hostname
+In-Reply-To: <6B317ED7-A80B-4866-A347-CA9FE489D522@gmail.com>
+References: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+ <52555A98.8090901@ninenines.eu>
+ <6B317ED7-A80B-4866-A347-CA9FE489D522@gmail.com>
+Message-ID: <52557726.2060908@ninenines.eu>
+
+In short: you can't.
+
+Browsers may send origin/referer/.. headers depending on the type of 
+request, but you can't rely on them to be real or even just there.
+
+On 10/09/2013 05:30 PM, Lee Sylvester wrote:
+> Thank you.  I couldn't work out if that's the host being called from or the host name in the request.  For example, a store called things.com makes a request to my service on widgets.net.  I need to see that the request is made FROM things.com for validation purposes. Is it correct that host will provide this?
+>
+> Thanks,
+> Lee
+>
+> Sent from my iPhone
+>
+>> On Oct 9, 2013, at 2:31 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>
+>> cowboy_req:host/1?
+>>
+>> Please use the nice manual we have now.
+>>
+>>   http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req
+>>
+>>> On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+>>> Hi,
+>>>
+>>> When receiving a Cowboy request, is there a way to find out which hostname the user made the request from?  I'm using CORS in my REST and Bullet app, where each call can be made through a given account.  However, I'd like to be able to lock requests for each account to a designated hostname to protect that users account usage.
+>>>
+>>> Thanks,
+>>> Lee
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From nathan at nmichaels.org  Wed Oct  9 17:51:14 2013
+From: nathan at nmichaels.org (Nathan Michaels)
+Date: Wed, 9 Oct 2013 11:51:14 -0400
+Subject: [99s-extend] Cowboy Calling Hostname
+In-Reply-To: <52557726.2060908@ninenines.eu>
+References: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+ <52555A98.8090901@ninenines.eu>
+ <6B317ED7-A80B-4866-A347-CA9FE489D522@gmail.com>
+ <52557726.2060908@ninenines.eu>
+Message-ID: <CALvUveMuMZabtizGQDURJs7x62RjZNr=NukQLF49MDtZBiPF6A@mail.gmail.com>
+
+Is the client making the request to your service on widgets.net because
+things.com sent them there, or is things.com making the request directly on
+behalf of the client? The first is what Lo?c is talking about. The second
+is the source IP of the request, which you can definitely get.
+
+
+On Wed, Oct 9, 2013 at 11:32 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> In short: you can't.
+>
+> Browsers may send origin/referer/.. headers depending on the type of
+> request, but you can't rely on them to be real or even just there.
+>
+>
+> On 10/09/2013 05:30 PM, Lee Sylvester wrote:
+>
+>> Thank you.  I couldn't work out if that's the host being called from or
+>> the host name in the request.  For example, a store called things.commakes a request to my service on
+>> widgets.net.  I need to see that the request is made FROM things.com for
+>> validation purposes. Is it correct that host will provide this?
+>>
+>> Thanks,
+>> Lee
+>>
+>> Sent from my iPhone
+>>
+>>  On Oct 9, 2013, at 2:31 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>>
+>>> cowboy_req:host/1?
+>>>
+>>> Please use the nice manual we have now.
+>>>
+>>>   http://ninenines.eu/docs/en/**cowboy/HEAD/manual/cowboy_req<http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req>
+>>>
+>>>  On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+>>>> Hi,
+>>>>
+>>>> When receiving a Cowboy request, is there a way to find out which
+>>>> hostname the user made the request from?  I'm using CORS in my REST and
+>>>> Bullet app, where each call can be made through a given account.  However,
+>>>> I'd like to be able to lock requests for each account to a designated
+>>>> hostname to protect that users account usage.
+>>>>
+>>>> Thanks,
+>>>> Lee
+>>>>
+>>>> ______________________________**_________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>>>
+>>>
+>>>
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> ______________________________**_________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131009/cc05d6f5/attachment.html>
+
+From lee.sylvester at gmail.com  Wed Oct  9 19:28:40 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Wed, 9 Oct 2013 18:28:40 +0100
+Subject: [99s-extend] Cowboy Calling Hostname
+In-Reply-To: <CALvUveMuMZabtizGQDURJs7x62RjZNr=NukQLF49MDtZBiPF6A@mail.gmail.com>
+References: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+ <52555A98.8090901@ninenines.eu>
+ <6B317ED7-A80B-4866-A347-CA9FE489D522@gmail.com>
+ <52557726.2060908@ninenines.eu>
+ <CALvUveMuMZabtizGQDURJs7x62RjZNr=NukQLF49MDtZBiPF6A@mail.gmail.com>
+Message-ID: <A93F7716-AA8E-453D-B773-AB7A7409D154@gmail.com>
+
+Essentially, the REST service endpoint would be on widgets.net while the clients website, in this case things.com, has a JavaScript that makes an AJAX call to widgets.net.  The account on widgets.net for things.com will have the things.com domain registered to its account, so that widgets.net can check to see if the request is coming from an expected domain.
+
+Thanks,
+Lee
+
+
+On 9 Oct 2013, at 16:51, Nathan Michaels <nathan at nmichaels.org> wrote:
+
+> Is the client making the request to your service on widgets.net because things.com sent them there, or is things.com making the request directly on behalf of the client? The first is what Lo?c is talking about. The second is the source IP of the request, which you can definitely get.
+> 
+> 
+> On Wed, Oct 9, 2013 at 11:32 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> In short: you can't.
+> 
+> Browsers may send origin/referer/.. headers depending on the type of request, but you can't rely on them to be real or even just there.
+> 
+> 
+> On 10/09/2013 05:30 PM, Lee Sylvester wrote:
+> Thank you.  I couldn't work out if that's the host being called from or the host name in the request.  For example, a store called things.com makes a request to my service on widgets.net.  I need to see that the request is made FROM things.com for validation purposes. Is it correct that host will provide this?
+> 
+> Thanks,
+> Lee
+> 
+> Sent from my iPhone
+> 
+> On Oct 9, 2013, at 2:31 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> 
+> cowboy_req:host/1?
+> 
+> Please use the nice manual we have now.
+> 
+>   http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req
+> 
+> On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+> Hi,
+> 
+> When receiving a Cowboy request, is there a way to find out which hostname the user made the request from?  I'm using CORS in my REST and Bullet app, where each call can be made through a given account.  However, I'd like to be able to lock requests for each account to a designated hostname to protect that users account usage.
+> 
+> Thanks,
+> Lee
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+> 
+> 
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131009/7c03cefc/attachment.html>
+
+From daniel at whitehouse.id.au  Thu Oct 10 01:03:08 2013
+From: daniel at whitehouse.id.au (Daniel White)
+Date: Thu, 10 Oct 2013 10:03:08 +1100
+Subject: [99s-extend] Cowboy Calling Hostname
+In-Reply-To: <A93F7716-AA8E-453D-B773-AB7A7409D154@gmail.com>
+References: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+ <52555A98.8090901@ninenines.eu>
+ <6B317ED7-A80B-4866-A347-CA9FE489D522@gmail.com>
+ <52557726.2060908@ninenines.eu>
+ <CALvUveMuMZabtizGQDURJs7x62RjZNr=NukQLF49MDtZBiPF6A@mail.gmail.com>
+ <A93F7716-AA8E-453D-B773-AB7A7409D154@gmail.com>
+Message-ID: <CAMD5n_3RJT3Nd0p4cbgCtR1XavDXSY6kaWTbwiLwqH_bF74KOw@mail.gmail.com>
+
+Depending on your requirements, there is a high likelihood that you
+need to support pre-flight requests.  Especially if you're intending
+on providing credentials in the requests.  Many of the interesting
+headers are not simple headers (for CORS) and require a handshake
+first between browser and server to ensure the headers in question are
+allowed to be sent.
+
+This obviously limits the amount of information you can determine
+about the caller.  One alternative here, is the use of OAuth2 with the
+'access_token' query parameter.  This can be sent along with the
+pre-flight request.
+
+On the other hand, some providers (Github, IIRC) will simply validate
+a CORS request by comparing the 'Origin' against their entire list of
+registered origins.  This opens up some opportunity for abuse by other
+clients in the system, but can be further mitigated by enforcing the
+'Origin' more strictly at the authorization step of the request.
+
+As an aside, I have a cowboy middleware project to do the heavy
+lifting for CORS at https://github.com/danielwhite/cowboy_cors.
+Business policies can be implemented by means of a callback module.
+
+Cheers,
+
+
+On Thu, Oct 10, 2013 at 4:28 AM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+> Essentially, the REST service endpoint would be on widgets.net while the
+> clients website, in this case things.com, has a JavaScript that makes an
+> AJAX call to widgets.net.  The account on widgets.net for things.com will
+> have the things.com domain registered to its account, so that widgets.net
+> can check to see if the request is coming from an expected domain.
+>
+> Thanks,
+> Lee
+>
+>
+> On 9 Oct 2013, at 16:51, Nathan Michaels <nathan at nmichaels.org> wrote:
+>
+> Is the client making the request to your service on widgets.net because
+> things.com sent them there, or is things.com making the request directly on
+> behalf of the client? The first is what Lo?c is talking about. The second is
+> the source IP of the request, which you can definitely get.
+>
+>
+> On Wed, Oct 9, 2013 at 11:32 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>
+>> In short: you can't.
+>>
+>> Browsers may send origin/referer/.. headers depending on the type of
+>> request, but you can't rely on them to be real or even just there.
+>>
+>>
+>> On 10/09/2013 05:30 PM, Lee Sylvester wrote:
+>>>
+>>> Thank you.  I couldn't work out if that's the host being called from or
+>>> the host name in the request.  For example, a store called things.com makes
+>>> a request to my service on widgets.net.  I need to see that the request is
+>>> made FROM things.com for validation purposes. Is it correct that host will
+>>> provide this?
+>>>
+>>> Thanks,
+>>> Lee
+>>>
+>>> Sent from my iPhone
+>>>
+>>>> On Oct 9, 2013, at 2:31 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>>>
+>>>> cowboy_req:host/1?
+>>>>
+>>>> Please use the nice manual we have now.
+>>>>
+>>>>   http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req
+>>>>
+>>>>> On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+>>>>> Hi,
+>>>>>
+>>>>> When receiving a Cowboy request, is there a way to find out which
+>>>>> hostname the user made the request from?  I'm using CORS in my REST and
+>>>>> Bullet app, where each call can be made through a given account.  However,
+>>>>> I'd like to be able to lock requests for each account to a designated
+>>>>> hostname to protect that users account usage.
+>>>>>
+>>>>> Thanks,
+>>>>> Lee
+>>>>>
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu
+>>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>>
+>>>>
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> Erlang Cowboy
+>>>> Nine Nines
+>>>> http://ninenines.eu
+>>
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+
+-- 
+Daniel White
+
+
+From lee.sylvester at gmail.com  Thu Oct 10 08:05:23 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Thu, 10 Oct 2013 07:05:23 +0100
+Subject: [99s-extend] Cowboy Calling Hostname
+In-Reply-To: <CAMD5n_3RJT3Nd0p4cbgCtR1XavDXSY6kaWTbwiLwqH_bF74KOw@mail.gmail.com>
+References: <A5839EE5-6B6C-4E92-A7C4-E5D705A1362C@gmail.com>
+ <52555A98.8090901@ninenines.eu>
+ <6B317ED7-A80B-4866-A347-CA9FE489D522@gmail.com>
+ <52557726.2060908@ninenines.eu>
+ <CALvUveMuMZabtizGQDURJs7x62RjZNr=NukQLF49MDtZBiPF6A@mail.gmail.com>
+ <A93F7716-AA8E-453D-B773-AB7A7409D154@gmail.com>
+ <CAMD5n_3RJT3Nd0p4cbgCtR1XavDXSY6kaWTbwiLwqH_bF74KOw@mail.gmail.com>
+Message-ID: <9CEDE09F-E3AF-47FB-95B4-6550000B4CE7@gmail.com>
+
+Thank you, Daniel.  The project looks very useful.  At this stage, I don't need to strictly require calls to come from a set domain but would like this to be a hurdle for hackers.  I may set up an IP restriction instead.
+
+Thanks,
+Lee
+
+Sent from my iPhone
+
+> On Oct 10, 2013, at 12:03 AM, Daniel White <daniel at whitehouse.id.au> wrote:
+> 
+> Depending on your requirements, there is a high likelihood that you
+> need to support pre-flight requests.  Especially if you're intending
+> on providing credentials in the requests.  Many of the interesting
+> headers are not simple headers (for CORS) and require a handshake
+> first between browser and server to ensure the headers in question are
+> allowed to be sent.
+> 
+> This obviously limits the amount of information you can determine
+> about the caller.  One alternative here, is the use of OAuth2 with the
+> 'access_token' query parameter.  This can be sent along with the
+> pre-flight request.
+> 
+> On the other hand, some providers (Github, IIRC) will simply validate
+> a CORS request by comparing the 'Origin' against their entire list of
+> registered origins.  This opens up some opportunity for abuse by other
+> clients in the system, but can be further mitigated by enforcing the
+> 'Origin' more strictly at the authorization step of the request.
+> 
+> As an aside, I have a cowboy middleware project to do the heavy
+> lifting for CORS at https://github.com/danielwhite/cowboy_cors.
+> Business policies can be implemented by means of a callback module.
+> 
+> Cheers,
+> 
+> 
+>> On Thu, Oct 10, 2013 at 4:28 AM, Lee Sylvester <lee.sylvester at gmail.com> wrote:
+>> Essentially, the REST service endpoint would be on widgets.net while the
+>> clients website, in this case things.com, has a JavaScript that makes an
+>> AJAX call to widgets.net.  The account on widgets.net for things.com will
+>> have the things.com domain registered to its account, so that widgets.net
+>> can check to see if the request is coming from an expected domain.
+>> 
+>> Thanks,
+>> Lee
+>> 
+>> 
+>> On 9 Oct 2013, at 16:51, Nathan Michaels <nathan at nmichaels.org> wrote:
+>> 
+>> Is the client making the request to your service on widgets.net because
+>> things.com sent them there, or is things.com making the request directly on
+>> behalf of the client? The first is what Lo?c is talking about. The second is
+>> the source IP of the request, which you can definitely get.
+>> 
+>> 
+>>> On Wed, Oct 9, 2013 at 11:32 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>> 
+>>> In short: you can't.
+>>> 
+>>> Browsers may send origin/referer/.. headers depending on the type of
+>>> request, but you can't rely on them to be real or even just there.
+>>> 
+>>> 
+>>>> On 10/09/2013 05:30 PM, Lee Sylvester wrote:
+>>>> 
+>>>> Thank you.  I couldn't work out if that's the host being called from or
+>>>> the host name in the request.  For example, a store called things.com makes
+>>>> a request to my service on widgets.net.  I need to see that the request is
+>>>> made FROM things.com for validation purposes. Is it correct that host will
+>>>> provide this?
+>>>> 
+>>>> Thanks,
+>>>> Lee
+>>>> 
+>>>> Sent from my iPhone
+>>>> 
+>>>>> On Oct 9, 2013, at 2:31 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>>>> 
+>>>>> cowboy_req:host/1?
+>>>>> 
+>>>>> Please use the nice manual we have now.
+>>>>> 
+>>>>>  http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_req
+>>>>> 
+>>>>>> On 10/09/2013 03:27 PM, Lee Sylvester wrote:
+>>>>>> Hi,
+>>>>>> 
+>>>>>> When receiving a Cowboy request, is there a way to find out which
+>>>>>> hostname the user made the request from?  I'm using CORS in my REST and
+>>>>>> Bullet app, where each call can be made through a given account.  However,
+>>>>>> I'd like to be able to lock requests for each account to a designated
+>>>>>> hostname to protect that users account usage.
+>>>>>> 
+>>>>>> Thanks,
+>>>>>> Lee
+>>>>>> 
+>>>>>> _______________________________________________
+>>>>>> Extend mailing list
+>>>>>> Extend at lists.ninenines.eu
+>>>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>>> 
+>>>>> 
+>>>>> 
+>>>>> --
+>>>>> Lo?c Hoguin
+>>>>> Erlang Cowboy
+>>>>> Nine Nines
+>>>>> http://ninenines.eu
+>>> 
+>>> 
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>> 
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>> 
+>> 
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+> 
+> 
+> 
+> -- 
+> Daniel White
+
+
+From prinbit at gmail.com  Tue Oct 15 03:53:05 2013
+From: prinbit at gmail.com (=?GB2312?B?scjB2rHIzNhQcmluYml0?=)
+Date: Tue, 15 Oct 2013 09:53:05 +0800
+Subject: [99s-extend] SSL Example
+In-Reply-To: <CAO_b8hZeQwEyDKtGbCgLWKSKDD+uW7PbeC-MZME=QVRK2xn4TA@mail.gmail.com>
+References: <CAO_b8hZeQwEyDKtGbCgLWKSKDD+uW7PbeC-MZME=QVRK2xn4TA@mail.gmail.com>
+Message-ID: <CAO_b8hbgbhKYxuh2SGA7n0SSQqCWOCjhKWzL5xhjcC4ht2h7WA@mail.gmail.com>
+
+Hi Essen,
+
+Any suggestion on the question?
+
+I can't receive any email from the lists.
+
+Thanks in advance
+
+2013/10/13 ????Prinbit <prinbit at gmail.com>:
+> Hi essen
+>
+> In your ssl example, three files are needed in ssl folder, they are
+> cowboy-ca.crt, server.crt and server.key.
+>
+> I am applying for a free ssl in startssl, and found there are only
+> server.crt and server.key generated.
+>
+> What is cowboy-ca.crt used for?
+>
+> I want to add ssl certificate in http://prinbit.com, my question is
+> that is cowboy-ca.crt is needed for me?
+>
+> Thanks in advance
+>
+> --
+> Thanks & Regards,
+>
+> PrinBit, Video Chatting and Collaborative Coding, Together
+>
+> http://prinbit.com
+
+
+
+-- 
+Thanks & Regards,
+
+PrinBit, Video Chatting and Collaborative Coding, Together
+
+http://prinbit.com
+
+
+From akonsu at gmail.com  Wed Oct 16 04:55:28 2013
+From: akonsu at gmail.com (akonsu)
+Date: Tue, 15 Oct 2013 22:55:28 -0400
+Subject: [99s-extend] timeout in cowboy loop handler
+Message-ID: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+
+Hello,
+
+the documentation for `init` at
+http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler says:
+
+The receive loop will run for a duration of up to Timeout milliseconds
+after it last received data from the socket, at which point it will stop
+and send a 204 No Content reply.
+
+What socket does it refer to? I had an impression that the loop handles
+erlang messages. Do these messages come through a socket (sorry about a
+trivial question, but I am new to erlang), and this is the socket that the
+docs talk about?
+
+The reason why I am asking is because I used to have a Timeout of 60000,
+and even though messages kept coming non stop, it still kept disconnecting
+after a minute, until I set Timeout to infinity.
+
+thanks
+Konstantin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131015/94506752/attachment.html>
+
+From essen at ninenines.eu  Wed Oct 16 05:01:38 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 16 Oct 2013 05:01:38 +0200
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+Message-ID: <525E0192.7020706@ninenines.eu>
+
+The socket connected to the client.
+
+TCP isn't perfect, there is no way to be 100% sure the client is still 
+connected, hence the timeout. If the client is still up you should make 
+it reconnect.
+
+On 10/16/2013 04:55 AM, akonsu wrote:
+> Hello,
+>
+> the documentation for `init` at
+> http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler says:
+>
+> The receive loop will run for a duration of up to Timeout milliseconds
+> after it last received data from the socket, at which point it will stop
+> and send a 204 No Content reply.
+>
+> What socket does it refer to? I had an impression that the loop handles
+> erlang messages. Do these messages come through a socket (sorry about a
+> trivial question, but I am new to erlang), and this is the socket that
+> the docs talk about?
+>
+> The reason why I am asking is because I used to have a Timeout of 60000,
+> and even though messages kept coming non stop, it still kept
+> disconnecting after a minute, until I set Timeout to infinity.
+>
+> thanks
+> Konstantin
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Wed Oct 16 05:03:53 2013
+From: akonsu at gmail.com (akonsu)
+Date: Tue, 15 Oct 2013 23:03:53 -0400
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <525E0192.7020706@ninenines.eu>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+Message-ID: <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+
+so it will disconnect if the client only listens and sends nothing to the
+socket, correct?
+
+
+2013/10/15 Lo?c Hoguin <essen at ninenines.eu>
+
+> The socket connected to the client.
+>
+> TCP isn't perfect, there is no way to be 100% sure the client is still
+> connected, hence the timeout. If the client is still up you should make it
+> reconnect.
+>
+>
+> On 10/16/2013 04:55 AM, akonsu wrote:
+>
+>> Hello,
+>>
+>> the documentation for `init` at
+>> http://ninenines.eu/docs/en/**cowboy/HEAD/manual/cowboy_**loop_handler<http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler>says:
+>>
+>> The receive loop will run for a duration of up to Timeout milliseconds
+>> after it last received data from the socket, at which point it will stop
+>> and send a 204 No Content reply.
+>>
+>> What socket does it refer to? I had an impression that the loop handles
+>> erlang messages. Do these messages come through a socket (sorry about a
+>> trivial question, but I am new to erlang), and this is the socket that
+>> the docs talk about?
+>>
+>> The reason why I am asking is because I used to have a Timeout of 60000,
+>> and even though messages kept coming non stop, it still kept
+>> disconnecting after a minute, until I set Timeout to infinity.
+>>
+>> thanks
+>> Konstantin
+>>
+>>
+>> ______________________________**_________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131015/591e8649/attachment.html>
+
+From essen at ninenines.eu  Wed Oct 16 05:11:30 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 16 Oct 2013 05:11:30 +0200
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+Message-ID: <525E03E2.5040201@ninenines.eu>
+
+Yep. And it will also disconnect if the client sends too much. It has to 
+disconnect and reconnect eventually, there's no way around it.
+
+On 10/16/2013 05:03 AM, akonsu wrote:
+> so it will disconnect if the client only listens and sends nothing to
+> the socket, correct?
+>
+>
+> 2013/10/15 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     The socket connected to the client.
+>
+>     TCP isn't perfect, there is no way to be 100% sure the client is
+>     still connected, hence the timeout. If the client is still up you
+>     should make it reconnect.
+>
+>
+>     On 10/16/2013 04:55 AM, akonsu wrote:
+>
+>         Hello,
+>
+>         the documentation for `init` at
+>         http://ninenines.eu/docs/en/__cowboy/HEAD/manual/cowboy___loop_handler
+>         <http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler>
+>         says:
+>
+>         The receive loop will run for a duration of up to Timeout
+>         milliseconds
+>         after it last received data from the socket, at which point it
+>         will stop
+>         and send a 204 No Content reply.
+>
+>         What socket does it refer to? I had an impression that the loop
+>         handles
+>         erlang messages. Do these messages come through a socket (sorry
+>         about a
+>         trivial question, but I am new to erlang), and this is the
+>         socket that
+>         the docs talk about?
+>
+>         The reason why I am asking is because I used to have a Timeout
+>         of 60000,
+>         and even though messages kept coming non stop, it still kept
+>         disconnecting after a minute, until I set Timeout to infinity.
+>
+>         thanks
+>         Konstantin
+>
+>
+>         _________________________________________________
+>         Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         http://lists.ninenines.eu:81/__listinfo/extend
+>         <http://lists.ninenines.eu:81/listinfo/extend>
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Wed Oct 16 05:31:46 2013
+From: akonsu at gmail.com (akonsu)
+Date: Tue, 15 Oct 2013 23:31:46 -0400
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <525E03E2.5040201@ninenines.eu>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+Message-ID: <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+
+thanks for your help. suppose that I want to stream live audio. I do not
+know how long my audio program will be, and as I stream it, if I have a
+timeout, the server will just disconnect the user that listens to the audio
+in the browser. and the browser won't reconnect. Would you suggest the
+"right" way to implement something like that? Would infinite timeout
+suffice? or is it a bad practice? another type of handler maybe?
+
+
+2013/10/15 Lo?c Hoguin <essen at ninenines.eu>
+
+> Yep. And it will also disconnect if the client sends too much. It has to
+> disconnect and reconnect eventually, there's no way around it.
+>
+>
+> On 10/16/2013 05:03 AM, akonsu wrote:
+>
+>> so it will disconnect if the client only listens and sends nothing to
+>> the socket, correct?
+>>
+>>
+>> 2013/10/15 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>>
+>>
+>>     The socket connected to the client.
+>>
+>>     TCP isn't perfect, there is no way to be 100% sure the client is
+>>     still connected, hence the timeout. If the client is still up you
+>>     should make it reconnect.
+>>
+>>
+>>     On 10/16/2013 04:55 AM, akonsu wrote:
+>>
+>>         Hello,
+>>
+>>         the documentation for `init` at
+>>         http://ninenines.eu/docs/en/__**cowboy/HEAD/manual/cowboy___**
+>> loop_handler<http://ninenines.eu/docs/en/__cowboy/HEAD/manual/cowboy___loop_handler>
+>>
+>>         <http://ninenines.eu/docs/en/**cowboy/HEAD/manual/cowboy_**
+>> loop_handler<http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler>
+>> >
+>>         says:
+>>
+>>         The receive loop will run for a duration of up to Timeout
+>>         milliseconds
+>>         after it last received data from the socket, at which point it
+>>         will stop
+>>         and send a 204 No Content reply.
+>>
+>>         What socket does it refer to? I had an impression that the loop
+>>         handles
+>>         erlang messages. Do these messages come through a socket (sorry
+>>         about a
+>>         trivial question, but I am new to erlang), and this is the
+>>         socket that
+>>         the docs talk about?
+>>
+>>         The reason why I am asking is because I used to have a Timeout
+>>         of 60000,
+>>         and even though messages kept coming non stop, it still kept
+>>         disconnecting after a minute, until I set Timeout to infinity.
+>>
+>>         thanks
+>>         Konstantin
+>>
+>>
+>>         ______________________________**___________________
+>>         Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.**ninenines.eu<Extend at lists.ninenines.eu>
+>> >
+>>         http://lists.ninenines.eu:81/_**_listinfo/extend<http://lists.ninenines.eu:81/__listinfo/extend>
+>>
+>>         <http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>> >
+>>
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     Erlang Cowboy
+>>     Nine Nines
+>>     http://ninenines.eu
+>>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+>
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131015/203060cc/attachment.html>
+
+From essen at ninenines.eu  Wed Oct 16 05:40:31 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 16 Oct 2013 05:40:31 +0200
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+ <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+Message-ID: <525E0AAF.3070203@ninenines.eu>
+
+Infinite is bad practice, yes. Infinite means some connections will 
+*never* be closed, eating FDs and memory for nothing.
+
+I'm not sure why you want to receive messages, you could just use a 
+normal handler that asks for more data, sends it, ask for more data, 
+sends it, etc.
+
+On 10/16/2013 05:31 AM, akonsu wrote:
+> thanks for your help. suppose that I want to stream live audio. I do not
+> know how long my audio program will be, and as I stream it, if I have a
+> timeout, the server will just disconnect the user that listens to the
+> audio in the browser. and the browser won't reconnect. Would you suggest
+> the "right" way to implement something like that? Would infinite timeout
+> suffice? or is it a bad practice? another type of handler maybe?
+>
+>
+> 2013/10/15 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     Yep. And it will also disconnect if the client sends too much. It
+>     has to disconnect and reconnect eventually, there's no way around it.
+>
+>
+>     On 10/16/2013 05:03 AM, akonsu wrote:
+>
+>         so it will disconnect if the client only listens and sends
+>         nothing to
+>         the socket, correct?
+>
+>
+>         2013/10/15 Lo?c Hoguin <essen at ninenines.eu
+>         <mailto:essen at ninenines.eu> <mailto:essen at ninenines.eu
+>         <mailto:essen at ninenines.eu>>>
+>
+>
+>              The socket connected to the client.
+>
+>              TCP isn't perfect, there is no way to be 100% sure the
+>         client is
+>              still connected, hence the timeout. If the client is still
+>         up you
+>              should make it reconnect.
+>
+>
+>              On 10/16/2013 04:55 AM, akonsu wrote:
+>
+>                  Hello,
+>
+>                  the documentation for `init` at
+>         http://ninenines.eu/docs/en/____cowboy/HEAD/manual/cowboy_____loop_handler
+>         <http://ninenines.eu/docs/en/__cowboy/HEAD/manual/cowboy___loop_handler>
+>
+>
+>         <http://ninenines.eu/docs/en/__cowboy/HEAD/manual/cowboy___loop_handler
+>         <http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler>>
+>                  says:
+>
+>                  The receive loop will run for a duration of up to Timeout
+>                  milliseconds
+>                  after it last received data from the socket, at which
+>         point it
+>                  will stop
+>                  and send a 204 No Content reply.
+>
+>                  What socket does it refer to? I had an impression that
+>         the loop
+>                  handles
+>                  erlang messages. Do these messages come through a
+>         socket (sorry
+>                  about a
+>                  trivial question, but I am new to erlang), and this is the
+>                  socket that
+>                  the docs talk about?
+>
+>                  The reason why I am asking is because I used to have a
+>         Timeout
+>                  of 60000,
+>                  and even though messages kept coming non stop, it still
+>         kept
+>                  disconnecting after a minute, until I set Timeout to
+>         infinity.
+>
+>                  thanks
+>                  Konstantin
+>
+>
+>                  ___________________________________________________
+>                  Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         <mailto:Extend at lists.__ninenines.eu
+>         <mailto:Extend at lists.ninenines.eu>>
+>         http://lists.ninenines.eu:81/____listinfo/extend
+>         <http://lists.ninenines.eu:81/__listinfo/extend>
+>
+>                  <http://lists.ninenines.eu:81/__listinfo/extend
+>         <http://lists.ninenines.eu:81/listinfo/extend>>
+>
+>
+>
+>              --
+>              Lo?c Hoguin
+>              Erlang Cowboy
+>              Nine Nines
+>         http://ninenines.eu
+>
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Wed Oct 16 05:48:42 2013
+From: akonsu at gmail.com (akonsu)
+Date: Tue, 15 Oct 2013 23:48:42 -0400
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <525E0AAF.3070203@ninenines.eu>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+ <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+ <525E0AAF.3070203@ninenines.eu>
+Message-ID: <CA+eMAwZW64xGtVxca35PngCXBJEh8oaQk9TuOPesXf48XUH=qg@mail.gmail.com>
+
+1. do you mean that there is no way on the server side to tell if the
+client has disconnected?
+
+2. if I use a normal handler, I will still run into the same problem, it
+does not matter which handler I use, from the standpoint of deciding
+whether the client is still there, right?
+
+I am confused as to how I can implement my streaming and not drop the
+connection on each client and yet make sure I do close the connections when
+the clients disconnect...
+
+
+2013/10/15 Lo?c Hoguin <essen at ninenines.eu>
+
+> Infinite is bad practice, yes. Infinite means some connections will
+> *never* be closed, eating FDs and memory for nothing.
+>
+> I'm not sure why you want to receive messages, you could just use a normal
+> handler that asks for more data, sends it, ask for more data, sends it, etc.
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131015/bac10460/attachment.html>
+
+From essen at ninenines.eu  Wed Oct 16 06:07:26 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 16 Oct 2013 06:07:26 +0200
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <CA+eMAwZW64xGtVxca35PngCXBJEh8oaQk9TuOPesXf48XUH=qg@mail.gmail.com>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+ <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+ <525E0AAF.3070203@ninenines.eu>
+ <CA+eMAwZW64xGtVxca35PngCXBJEh8oaQk9TuOPesXf48XUH=qg@mail.gmail.com>
+Message-ID: <525E10FE.2020107@ninenines.eu>
+
+On 10/16/2013 05:48 AM, akonsu wrote:
+> 1. do you mean that there is no way on the server side to tell if the
+> client has disconnected?
+
+There are ways, and Cowboy will happily detect them. There's also the 
+problem that a side may be closed without the other side knowing about 
+it, which is why you need timeouts.
+
+> 2. if I use a normal handler, I will still run into the same problem, it
+> does not matter which handler I use, from the standpoint of deciding
+> whether the client is still there, right?
+
+If the client is gone, the send will fail. Normal handlers are pretty 
+much the same except they don't have a timeout, because your code has an 
+explicit end.
+
+> I am confused as to how I can implement my streaming and not drop the
+> connection on each client and yet make sure I do close the connections
+> when the clients disconnect...
+>
+>
+> 2013/10/15 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     Infinite is bad practice, yes. Infinite means some connections will
+>     *never* be closed, eating FDs and memory for nothing.
+>
+>     I'm not sure why you want to receive messages, you could just use a
+>     normal handler that asks for more data, sends it, ask for more data,
+>     sends it, etc.
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Wed Oct 16 06:12:29 2013
+From: akonsu at gmail.com (akonsu)
+Date: Wed, 16 Oct 2013 00:12:29 -0400
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <525E10FE.2020107@ninenines.eu>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+ <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+ <525E0AAF.3070203@ninenines.eu>
+ <CA+eMAwZW64xGtVxca35PngCXBJEh8oaQk9TuOPesXf48XUH=qg@mail.gmail.com>
+ <525E10FE.2020107@ninenines.eu>
+Message-ID: <CA+eMAwb0ubM3O=yKmEJvrJ94Y2xVWpnPxXWO7Qx0q8kxL4+qwQ@mail.gmail.com>
+
+thanks. one more question if you do not mind. you say that we need timeouts
+when the client does not notify us when it dies. but then you say that if
+the client dies then the socket write will fail. to me this sounds like a
+contradiction. would you please clarify?
+
+(I assume that this is the problem that we are discussing:
+http://stackoverflow.com/questions/283375/detecting-tcp-client-disconnect,
+right?)
+
+
+2013/10/16 Lo?c Hoguin <essen at ninenines.eu>
+
+> On 10/16/2013 05:48 AM, akonsu wrote:
+>
+>> 1. do you mean that there is no way on the server side to tell if the
+>> client has disconnected?
+>>
+>
+> There are ways, and Cowboy will happily detect them. There's also the
+> problem that a side may be closed without the other side knowing about it,
+> which is why you need timeouts.
+>
+>
+>  2. if I use a normal handler, I will still run into the same problem, it
+>> does not matter which handler I use, from the standpoint of deciding
+>> whether the client is still there, right?
+>>
+>
+> If the client is gone, the send will fail. Normal handlers are pretty much
+> the same except they don't have a timeout, because your code has an
+> explicit end.
+>
+>  I am confused as to how I can implement my streaming and not drop the
+>> connection on each client and yet make sure I do close the connections
+>> when the clients disconnect...
+>>
+>>
+>> 2013/10/15 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>>
+>>
+>>     Infinite is bad practice, yes. Infinite means some connections will
+>>     *never* be closed, eating FDs and memory for nothing.
+>>
+>>     I'm not sure why you want to receive messages, you could just use a
+>>     normal handler that asks for more data, sends it, ask for more data,
+>>     sends it, etc.
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131016/edbc349c/attachment.html>
+
+From essen at ninenines.eu  Wed Oct 16 06:35:43 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 16 Oct 2013 06:35:43 +0200
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <CA+eMAwb0ubM3O=yKmEJvrJ94Y2xVWpnPxXWO7Qx0q8kxL4+qwQ@mail.gmail.com>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+ <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+ <525E0AAF.3070203@ninenines.eu>
+ <CA+eMAwZW64xGtVxca35PngCXBJEh8oaQk9TuOPesXf48XUH=qg@mail.gmail.com>
+ <525E10FE.2020107@ninenines.eu>
+ <CA+eMAwb0ubM3O=yKmEJvrJ94Y2xVWpnPxXWO7Qx0q8kxL4+qwQ@mail.gmail.com>
+Message-ID: <525E179F.2010200@ninenines.eu>
+
+Loop handlers are designed to wait for a long time with the socket 
+*idle* and then eventually send one response then close the socket. 
+Things like long-polling.
+
+What you are doing is just streaming, for which you do not need a 
+timeout because the socket isn't idle. You are just sending a large 
+response, and normal handlers are perfectly capable of doing that.
+
+On 10/16/2013 06:12 AM, akonsu wrote:
+> thanks. one more question if you do not mind. you say that we need
+> timeouts when the client does not notify us when it dies. but then you
+> say that if the client dies then the socket write will fail. to me this
+> sounds like a contradiction. would you please clarify?
+>
+> (I assume that this is the problem that we are discussing:
+> http://stackoverflow.com/questions/283375/detecting-tcp-client-disconnect,
+> right?)
+>
+>
+> 2013/10/16 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     On 10/16/2013 05:48 AM, akonsu wrote:
+>
+>         1. do you mean that there is no way on the server side to tell
+>         if the
+>         client has disconnected?
+>
+>
+>     There are ways, and Cowboy will happily detect them. There's also
+>     the problem that a side may be closed without the other side knowing
+>     about it, which is why you need timeouts.
+>
+>
+>         2. if I use a normal handler, I will still run into the same
+>         problem, it
+>         does not matter which handler I use, from the standpoint of deciding
+>         whether the client is still there, right?
+>
+>
+>     If the client is gone, the send will fail. Normal handlers are
+>     pretty much the same except they don't have a timeout, because your
+>     code has an explicit end.
+>
+>         I am confused as to how I can implement my streaming and not
+>         drop the
+>         connection on each client and yet make sure I do close the
+>         connections
+>         when the clients disconnect...
+>
+>
+>         2013/10/15 Lo?c Hoguin <essen at ninenines.eu
+>         <mailto:essen at ninenines.eu> <mailto:essen at ninenines.eu
+>         <mailto:essen at ninenines.eu>>>
+>
+>
+>              Infinite is bad practice, yes. Infinite means some
+>         connections will
+>              *never* be closed, eating FDs and memory for nothing.
+>
+>              I'm not sure why you want to receive messages, you could
+>         just use a
+>              normal handler that asks for more data, sends it, ask for
+>         more data,
+>              sends it, etc.
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Wed Oct 16 06:42:02 2013
+From: akonsu at gmail.com (akonsu)
+Date: Wed, 16 Oct 2013 00:42:02 -0400
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <525E179F.2010200@ninenines.eu>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+ <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+ <525E0AAF.3070203@ninenines.eu>
+ <CA+eMAwZW64xGtVxca35PngCXBJEh8oaQk9TuOPesXf48XUH=qg@mail.gmail.com>
+ <525E10FE.2020107@ninenines.eu>
+ <CA+eMAwb0ubM3O=yKmEJvrJ94Y2xVWpnPxXWO7Qx0q8kxL4+qwQ@mail.gmail.com>
+ <525E179F.2010200@ninenines.eu>
+Message-ID: <CA+eMAwbh8xH9Etiev66oA90p7aw3RjffnYoBd8b3Kuab0Bg6WQ@mail.gmail.com>
+
+ok. the data that I need to send are coming as erlang messages to the
+process that runs my handler. so it sounds like if I want to use the
+"normal" cowboy_http_handler, then I need a receive loop inside handle(Req,
+State) callback, right? Basically, my response stream will potentially
+never end, I do not know how to handle this properly in cowboy...
+
+
+2013/10/16 Lo?c Hoguin <essen at ninenines.eu>
+
+> Loop handlers are designed to wait for a long time with the socket *idle*
+> and then eventually send one response then close the socket. Things like
+> long-polling.
+>
+> What you are doing is just streaming, for which you do not need a timeout
+> because the socket isn't idle. You are just sending a large response, and
+> normal handlers are perfectly capable of doing that.
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131016/abe38a1a/attachment.html>
+
+From essen at ninenines.eu  Wed Oct 16 06:48:05 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 16 Oct 2013 06:48:05 +0200
+Subject: [99s-extend] timeout in cowboy loop handler
+In-Reply-To: <CA+eMAwbh8xH9Etiev66oA90p7aw3RjffnYoBd8b3Kuab0Bg6WQ@mail.gmail.com>
+References: <CA+eMAwZDCwOi32RY_mwKY7w-O1Q+PTGQwp4vY72KJY3C-Q8_Xw@mail.gmail.com>
+ <525E0192.7020706@ninenines.eu>
+ <CA+eMAwYP_rRrgTSqwv7nD2UAJkvKDzpKDfkrfLaLJTff_Dg7ig@mail.gmail.com>
+ <525E03E2.5040201@ninenines.eu>
+ <CA+eMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg@mail.gmail.com>
+ <525E0AAF.3070203@ninenines.eu>
+ <CA+eMAwZW64xGtVxca35PngCXBJEh8oaQk9TuOPesXf48XUH=qg@mail.gmail.com>
+ <525E10FE.2020107@ninenines.eu>
+ <CA+eMAwb0ubM3O=yKmEJvrJ94Y2xVWpnPxXWO7Qx0q8kxL4+qwQ@mail.gmail.com>
+ <525E179F.2010200@ninenines.eu>
+ <CA+eMAwbh8xH9Etiev66oA90p7aw3RjffnYoBd8b3Kuab0Bg6WQ@mail.gmail.com>
+Message-ID: <525E1A85.3070706@ninenines.eu>
+
+Then use a loop handler, set its timeout to infinity *but* create a new 
+timeout that checks regularly if the handler is active or not to be able 
+to kill it off in case something happens.
+
+On 10/16/2013 06:42 AM, akonsu wrote:
+> ok. the data that I need to send are coming as erlang messages to the
+> process that runs my handler. so it sounds like if I want to use the
+> "normal" cowboy_http_handler, then I need a receive loop
+> inside handle(Req, State) callback, right? Basically, my response stream
+> will potentially never end, I do not know how to handle this properly in
+> cowboy...
+>
+>
+> 2013/10/16 Lo?c Hoguin <essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>
+>     Loop handlers are designed to wait for a long time with the socket
+>     *idle* and then eventually send one response then close the socket.
+>     Things like long-polling.
+>
+>     What you are doing is just streaming, for which you do not need a
+>     timeout because the socket isn't idle. You are just sending a large
+>     response, and normal handlers are perfectly capable of doing that.
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Fri Oct 18 15:15:37 2013
+From: akonsu at gmail.com (akonsu)
+Date: Fri, 18 Oct 2013 09:15:37 -0400
+Subject: [99s-extend] handler and a linked process
+Message-ID: <CA+eMAwZE0WqFNH0=usVp0ykdGhNE0y7QoaDoRRNcMMveucy7Qw@mail.gmail.com>
+
+Hi,
+
+I have a handler that spawns a process and links to this process. the new
+process does not trap exit signals.
+
+When I open the URL that is handled by this handler in the browser, and
+stop the browser before the handler finishes the request, the handler is
+terminated and my terminate function is called with the Reason set to
+{error,closed} or something similar.
+
+When this happens, the linked process does not get killed, so I have to
+call exit on it from the terminate function.
+
+is this by design? I suppose when I cancel the browser request, the handler
+is exited with normal exit code, correct? could you point me to the source
+code for that part? it is perhaps in the "ranch" repo, no?
+
+thanks in advance
+
+konstantin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131018/00d4df12/attachment.html>
+
+From essen at ninenines.eu  Mon Oct 21 15:07:34 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 21 Oct 2013 15:07:34 +0200
+Subject: [99s-extend] handler and a linked process
+In-Reply-To: <CA+eMAwZE0WqFNH0=usVp0ykdGhNE0y7QoaDoRRNcMMveucy7Qw@mail.gmail.com>
+References: <CA+eMAwZE0WqFNH0=usVp0ykdGhNE0y7QoaDoRRNcMMveucy7Qw@mail.gmail.com>
+Message-ID: <52652716.4010806@ninenines.eu>
+
+Hey,
+
+I'm guessing you use loop handler or websocket handler? The browser 
+closing the connection in these cases is perfectly normal, that's part 
+of the deal. What you can do is monitor the connection process from the 
+other process if you need to go down in all cases. Links are only useful 
+for crashing on errors.
+
+On 10/18/2013 03:15 PM, akonsu wrote:
+> Hi,
+>
+> I have a handler that spawns a process and links to this process. the
+> new process does not trap exit signals.
+>
+> When I open the URL that is handled by this handler in the browser, and
+> stop the browser before the handler finishes the request, the handler is
+> terminated and my terminate function is called with the Reason set to
+> {error,closed} or something similar.
+>
+> When this happens, the linked process does not get killed, so I have to
+> call exit on it from the terminate function.
+>
+> is this by design? I suppose when I cancel the browser request, the
+> handler is exited with normal exit code, correct? could you point me to
+> the source code for that part? it is perhaps in the "ranch" repo, no?
+>
+> thanks in advance
+>
+> konstantin
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From antonio.valente at statpro.com  Tue Oct 22 10:51:14 2013
+From: antonio.valente at statpro.com (Antonio Valente)
+Date: Tue, 22 Oct 2013 10:51:14 +0200
+Subject: [99s-extend] Generate url in cowboy
+Message-ID: <52663C82.80702@statpro.com>
+
+Hi all,
+I need to automatically generate urls from the dispatcher configuration: 
+I'm looking for some kind of function that, given the dispatcher 
+configuration, a module and a list of bindings, returns an url.
+
+For example, if I have the following dispatch configuration:
+
+     [
+     {'_', [
+
+     {"/api/v1/container/:resource/something", a_module, []},
+     ]}
+     ].
+
+I'd like to do something like:
+
+<<"/api/v1/container/replaced/something">> = generate_url(Dispatch, 
+a_module, [{resource, "replaced"}]).
+
+Is there such a function? If not, can you give me some advice to write one?
+
+Thanks
+Antonio
+
+
+This message is private and confidential. If you have received this message in error, please notify us and remove it from your system. Any views or opinions presented in this email are solely those of the author and might not represent those of StatPro. Warning: Although StatPro has taken reasonable precautions to ensure no viruses are present in this email, the company cannot accept responsibility for any loss or damage arising from the use of this email or attachments.
+
+
+From Rolph.deRuiter at spilgames.com  Tue Oct 29 10:00:53 2013
+From: Rolph.deRuiter at spilgames.com (Rolph de Ruiter)
+Date: Tue, 29 Oct 2013 09:00:53 +0000
+Subject: [99s-extend] cowboy_rest, POST and redirect
+Message-ID: <CE9537D4.769B%rolph.deruiter@spilgames.com>
+
+Hi,
+
+I'm using cowboy_rest for a part of our api to handle POST requests. Under certain conditions, I would like to redirect to a new location (based on availability of the redirect qs parameter).
+I was unable to get the moved_temporarily/2 callback to work (was not invoked at al). So I just do the 302 myself, using cowboy_req:reply/4. This works, however, every time it produces an error in the emulator process:
+ [error] emulator Error in process <0.509.0> on node 'api at dev.loc' with exit value: {function_clause,[{cowboy_req,reply,[204,[],<<0 bytes>>,{http_req,#Port<0.14491>,ranch_tcp,keepalive,<0.509.0>,<<4 bytes>>,'HTTP/1.1',{{10,10,10,1},62197},<<15 bytes>>,undefined,8000,<<26 bytes>>,undefined,<<14 bytes>>,[{<<8 bytes>>,<<5 bytes>>}],[{method,<<5 bytes>>}],[{<<4 bytes>>,<<20 bytes>>},{<<10 bytes>>,<<10 bytes>>},{<<14 bytes>>,<<2 bytes>>},{<<6 bytes>>,<<74 bytes>>},{<<6 bytes>>,<<27 bytes>>},{<<10 bytes>>,<<120 bytes>>},{<<12 bytes>>,<<33 bytes>>},{<<7 bytes>>,<<54 bytes>>},{<<15 bytes>>,<<17 bytes>>},{<<15 bytes>>,<<14 bytes>>},{<<6 bytes>>,<<245 bytes>>}],[{<<14 bytes>>,34},{<<6 bytes>>,undefined},{<<14 bytes>>,34},{<<12 bytes>>,{<<11 bytes>>,<<21 bytes>>,[]}},{<<17 bytes>>,undefined},{<<13 bytes>>,...
+
+Can you point me out how to (ideally) make use of moved_temporarily/2 or how I can prevent cowboy_rest from wanting to reply with 204 in this case?
+
+Cheers,
+Rolph
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131029/5fc5da75/attachment.html>
+
+From essen at ninenines.eu  Tue Oct 29 10:09:20 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 29 Oct 2013 10:09:20 +0100
+Subject: [99s-extend] cowboy_rest, POST and redirect
+In-Reply-To: <CE9537D4.769B%rolph.deruiter@spilgames.com>
+References: <CE9537D4.769B%rolph.deruiter@spilgames.com>
+Message-ID: <526F7B40.4060408@ninenines.eu>
+
+On 10/29/2013 10:00 AM, Rolph de Ruiter wrote:
+> Hi,
+>
+> I'm using cowboy_rest for a part of our api to handle POST requests.
+> Under certain conditions, I would like to redirect to a new location
+> (based on availability of the redirect qs parameter).
+> I was unable to get the moved_temporarily/2 callback to work (was not
+> invoked at al). So I just do the 302 myself, using cowboy_req:reply/4.
+> This works, however, every time it produces an error in the emulator
+> process:
+>   [error] emulator Error in process <0.509.0> on node 'api at dev.loc' with
+> exit value: {function_clause,[{cowboy_req,reply,[204,[],<<0
+> bytes>>,{http_req,#Port<0.14491>,ranch_tcp,keepalive,<0.509.0>,<<4
+> bytes>>,'HTTP/1.1',{{10,10,10,1},62197},<<15 bytes>>,undefined,8000,<<26
+> bytes>>,undefined,<<14 bytes>>,[{<<8 bytes>>,<<5 bytes>>}],[{method,<<5
+> bytes>>}],[{<<4 bytes>>,<<20 bytes>>},{<<10 bytes>>,<<10 bytes>>},{<<14
+> bytes>>,<<2 bytes>>},{<<6 bytes>>,<<74 bytes>>},{<<6 bytes>>,<<27
+> bytes>>},{<<10 bytes>>,<<120 bytes>>},{<<12 bytes>>,<<33 bytes>>},{<<7
+> bytes>>,<<54 bytes>>},{<<15 bytes>>,<<17 bytes>>},{<<15 bytes>>,<<14
+> bytes>>},{<<6 bytes>>,<<245 bytes>>}],[{<<14 bytes>>,34},{<<6
+> bytes>>,undefined},{<<14 bytes>>,34},{<<12 bytes>>,{<<11 bytes>>,<<21
+> bytes>>,[]}},{<<17 bytes>>,undefined},{<<13 bytes>>,...
+>
+> Can you point me out how to (ideally) make use of moved_temporarily/2 or
+> how I can prevent cowboy_rest from wanting to reply with 204 in this case?
+
+moved_temporarily is only called if the resource previously existed.
+
+As for calling reply yourself, you just need to return {halt, NewReq, 
+State} afterwards.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Rolph.deRuiter at spilgames.com  Tue Oct 29 10:16:15 2013
+From: Rolph.deRuiter at spilgames.com (Rolph de Ruiter)
+Date: Tue, 29 Oct 2013 09:16:15 +0000
+Subject: [99s-extend] cowboy_rest, POST and redirect
+In-Reply-To: <CE953AD7.76AD%rolph.deruiter@spilgames.com>
+Message-ID: <CE953B4E.76B1%rolph.deruiter@spilgames.com>
+
+(forgot to include the list)
+
+On 10/29/13 10:14 AM, "Rolph de Ruiter" <Rolph.deRuiter at spilgames.com>
+wrote:
+
+>Thanks!
+>
+>{halt, NewReq, State} worked like a charm :)
+>
+>Cheers,
+>Rolph
+>
+>On 10/29/13 10:09 AM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+>
+>>On 10/29/2013 10:00 AM, Rolph de Ruiter wrote:
+>>> Hi,
+>>>
+>>> I'm using cowboy_rest for a part of our api to handle POST requests.
+>>> Under certain conditions, I would like to redirect to a new location
+>>> (based on availability of the redirect qs parameter).
+>>> I was unable to get the moved_temporarily/2 callback to work (was not
+>>> invoked at al). So I just do the 302 myself, using cowboy_req:reply/4.
+>>> This works, however, every time it produces an error in the emulator
+>>> process:
+>>>   [error] emulator Error in process <0.509.0> on node 'api at dev.loc'
+>>>with
+>>> exit value: {function_clause,[{cowboy_req,reply,[204,[],<<0
+>>> bytes>>,{http_req,#Port<0.14491>,ranch_tcp,keepalive,<0.509.0>,<<4
+>>> bytes>>,'HTTP/1.1',{{10,10,10,1},62197},<<15
+>>>bytes>>,undefined,8000,<<26
+>>> bytes>>,undefined,<<14 bytes>>,[{<<8 bytes>>,<<5 bytes>>}],[{method,<<5
+>>> bytes>>}],[{<<4 bytes>>,<<20 bytes>>},{<<10 bytes>>,<<10 bytes>>},{<<14
+>>> bytes>>,<<2 bytes>>},{<<6 bytes>>,<<74 bytes>>},{<<6 bytes>>,<<27
+>>> bytes>>},{<<10 bytes>>,<<120 bytes>>},{<<12 bytes>>,<<33 bytes>>},{<<7
+>>> bytes>>,<<54 bytes>>},{<<15 bytes>>,<<17 bytes>>},{<<15 bytes>>,<<14
+>>> bytes>>},{<<6 bytes>>,<<245 bytes>>}],[{<<14 bytes>>,34},{<<6
+>>> bytes>>,undefined},{<<14 bytes>>,34},{<<12 bytes>>,{<<11 bytes>>,<<21
+>>> bytes>>,[]}},{<<17 bytes>>,undefined},{<<13 bytes>>,...
+>>>
+>>> Can you point me out how to (ideally) make use of moved_temporarily/2
+>>>or
+>>> how I can prevent cowboy_rest from wanting to reply with 204 in this
+>>>case?
+>>
+>>moved_temporarily is only called if the resource previously existed.
+>>
+>>As for calling reply yourself, you just need to return {halt, NewReq,
+>>State} afterwards.
+>>
+>>-- 
+>>Lo?c Hoguin
+>>Erlang Cowboy
+>>Nine Nines
+>>http://ninenines.eu
+>
+
+
+
+From daniel.goertzen at gmail.com  Tue Oct 29 21:25:54 2013
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Tue, 29 Oct 2013 15:25:54 -0500
+Subject: [99s-extend] REST handler failure
+Message-ID: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+
+My situation is that I have a rest handler that may fail due to invalid url
+segments.  Example situation:
+
+
+init(_Transport, _Req, _Opts) ->
+        {upgrade, protocol, cowboy_rest}.
+
+content_types_provided(Req, State) ->
+    {[{<<"application/json">>, get_json}], Req, State}.
+
+get_json(Req0, State) ->
+    {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0,
+[param1, param2, param3, ....]),
+
+    case catch other_module:request(Params) of
+        {'EXIT', {badarg, _}} ->
+            hmmm, Params were bad and I would like to return a 404 code now.
+        Result ->
+            {jiffy:encode(Result), Req1, State}
+    end.
+
+
+
+So I would like to return a 404 code when my underlying request function
+fails, but it appears my choices are:
+
+- return a 200 (ok) response with data.
+- crash and cause a 500 (Internal Server Error) response to be returned.
+Not exactly the sentiment I want.
+
+
+Is there some other way to cause a 404 response?
+
+I realize I could add path constraint functions, but I will be replicating
+logic from my underlying request function.  Furthermore, the constraint
+functions consider parameters in isolation, so that won't work if the
+validity of parameters is coupled.
+
+Thanks,
+Dan.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131029/a9204600/attachment.html>
+
+From ivan at llaisdy.com  Tue Oct 29 22:01:30 2013
+From: ivan at llaisdy.com (Ivan uemlianin)
+Date: Tue, 29 Oct 2013 22:01:30 +0100
+Subject: [99s-extend] REST handler failure
+In-Reply-To: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+References: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+Message-ID: <0F1D01F5-A4B3-4135-8F4C-FCC2E9F79DFA@llaisdy.com>
+
+Sorry for terse but I only have a phone. Why can't you return a 404 here?  Using something like cowboy:reply(404, ...
+
+Ivan
+
+--
+festina lente
+
+
+On 29 Oct 2013, at 21:25, Daniel Goertzen <daniel.goertzen at gmail.com> wrote:
+
+> My situation is that I have a rest handler that may fail due to invalid url segments.  Example situation:
+> 
+> 
+> init(_Transport, _Req, _Opts) ->
+>         {upgrade, protocol, cowboy_rest}.
+> 
+> content_types_provided(Req, State) ->
+>     {[{<<"application/json">>, get_json}], Req, State}.
+> 
+> get_json(Req0, State) ->
+>     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0, [param1, param2, param3, ....]),
+> 
+>     case catch other_module:request(Params) of
+>         {'EXIT', {badarg, _}} ->
+>             hmmm, Params were bad and I would like to return a 404 code now.
+>         Result ->
+>             {jiffy:encode(Result), Req1, State}
+>     end.
+> 
+> 
+> 
+> So I would like to return a 404 code when my underlying request function fails, but it appears my choices are:
+> 
+> - return a 200 (ok) response with data.
+> - crash and cause a 500 (Internal Server Error) response to be returned.  Not exactly the sentiment I want.
+> 
+> 
+> Is there some other way to cause a 404 response?
+> 
+> I realize I could add path constraint functions, but I will be replicating logic from my underlying request function.  Furthermore, the constraint functions consider parameters in isolation, so that won't work if the validity of parameters is coupled.
+> 
+> Thanks,
+> Dan.
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131029/3df30c1d/attachment.html>
+
+From daniel.goertzen at gmail.com  Wed Oct 30 15:58:41 2013
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Wed, 30 Oct 2013 09:58:41 -0500
+Subject: [99s-extend] REST handler failure
+In-Reply-To: <0F1D01F5-A4B3-4135-8F4C-FCC2E9F79DFA@llaisdy.com>
+References: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+ <0F1D01F5-A4B3-4135-8F4C-FCC2E9F79DFA@llaisdy.com>
+Message-ID: <CAJCf5RzwUz1moQooTpMp33tFn8R9xkhxqOnR0joBSUSTwJ_CoQ@mail.gmail.com>
+
+Well, this sort of works.  I tried this in the response handler:
+
+            {ok, Req2} = cowboy_req:reply(404, [] , <<"this is the body
+that gets used">>, Req1),
+            {<<"this body gets ignored">>, Req2, State};
+
+
+
+The client receives a 404 response, but cowboy crashes:
+
+=ERROR REPORT==== 8-Sep-2013::22:22:03 ===
+Error in process <0.131.0> with exit value:
+{function_clause,[{cowboy_req,reply,[200,[],<<31
+bytes>>,{http_req,#Port<0.1208>,ranch_tcp,keepalive,<0.131.0>,<<3
+bytes>>,'HTTP/1.1',{{192,168,1,187},51017},<<12 bytes>>,undefined,80,<<24
+bytes>>,undefined,<<0 bytes>>,undefined,[{channel_num,3}],[{<<10
+bytes>>,<<11 bytes>>},{<<4 bytes>>,<<12 bytes>>},{<<6 bytes>>,<<3
+bytes>>}],[{<<17 bytes>>,undefined},{<<13 bytes>>,undefined},{<<19
+bytes>>,undefined},{<<8 bytes>>,undefined},{<<6 bytes>>,[...
+
+
+
+The issue is that the REST wrapper wants to do the cowboy_req:reply(), and
+when we do the call we cause the wrapper's call to fail.
+
+Dan.
+
+
+
+On Tue, Oct 29, 2013 at 4:01 PM, Ivan uemlianin <ivan at llaisdy.com> wrote:
+
+> Sorry for terse but I only have a phone. Why can't you return a 404 here?
+>  Using something like cowboy:reply(404, ...
+>
+> Ivan
+>
+> --
+> festina lente
+>
+>
+> On 29 Oct 2013, at 21:25, Daniel Goertzen <daniel.goertzen at gmail.com>
+> wrote:
+>
+> My situation is that I have a rest handler that may fail due to invalid
+> url segments.  Example situation:
+>
+>
+> init(_Transport, _Req, _Opts) ->
+>         {upgrade, protocol, cowboy_rest}.
+>
+> content_types_provided(Req, State) ->
+>     {[{<<"application/json">>, get_json}], Req, State}.
+>
+> get_json(Req0, State) ->
+>     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0,
+> [param1, param2, param3, ....]),
+>
+>     case catch other_module:request(Params) of
+>         {'EXIT', {badarg, _}} ->
+>             hmmm, Params were bad and I would like to return a 404 code
+> now.
+>         Result ->
+>             {jiffy:encode(Result), Req1, State}
+>     end.
+>
+>
+>
+> So I would like to return a 404 code when my underlying request function
+> fails, but it appears my choices are:
+>
+> - return a 200 (ok) response with data.
+> - crash and cause a 500 (Internal Server Error) response to be returned.
+> Not exactly the sentiment I want.
+>
+>
+> Is there some other way to cause a 404 response?
+>
+> I realize I could add path constraint functions, but I will be replicating
+> logic from my underlying request function.  Furthermore, the constraint
+> functions consider parameters in isolation, so that won't work if the
+> validity of parameters is coupled.
+>
+> Thanks,
+> Dan.
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131030/460453c8/attachment.html>
+
+From tilman.holschuh at gmail.com  Wed Oct 30 16:25:02 2013
+From: tilman.holschuh at gmail.com (Tilman Holschuh)
+Date: Wed, 30 Oct 2013 08:25:02 -0700
+Subject: [99s-extend] REST handler failure
+In-Reply-To: <CAJCf5RzwUz1moQooTpMp33tFn8R9xkhxqOnR0joBSUSTwJ_CoQ@mail.gmail.com>
+References: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+ <0F1D01F5-A4B3-4135-8F4C-FCC2E9F79DFA@llaisdy.com>
+ <CAJCf5RzwUz1moQooTpMp33tFn8R9xkhxqOnR0joBSUSTwJ_CoQ@mail.gmail.com>
+Message-ID: <A7D0DF68-BC2E-4249-A81F-3F7A645AD310@gmail.com>
+
+Why not let resource_exists/2 return false when your resource does not exist? You will get 404 on false. This way you separate the implementation for turning your data to json from checking if the request went to the correct resource. 
+
+- Tilman
+
+On 2013-10-30, at 7:58 AM, Daniel Goertzen wrote:
+
+> Well, this sort of works.  I tried this in the response handler:
+> 
+>             {ok, Req2} = cowboy_req:reply(404, [] , <<"this is the body that gets used">>, Req1),
+>             {<<"this body gets ignored">>, Req2, State};
+> 
+> 
+> 
+> The client receives a 404 response, but cowboy crashes:
+> 
+> =ERROR REPORT==== 8-Sep-2013::22:22:03 ===
+> Error in process <0.131.0> with exit value: {function_clause,[{cowboy_req,reply,[200,[],<<31 bytes>>,{http_req,#Port<0.1208>,ranch_tcp,keepalive,<0.131.0>,<<3 bytes>>,'HTTP/1.1',{{192,168,1,187},51017},<<12 bytes>>,undefined,80,<<24 bytes>>,undefined,<<0 bytes>>,undefined,[{channel_num,3}],[{<<10 bytes>>,<<11 bytes>>},{<<4 bytes>>,<<12 bytes>>},{<<6 bytes>>,<<3 bytes>>}],[{<<17 bytes>>,undefined},{<<13 bytes>>,undefined},{<<19 bytes>>,undefined},{<<8 bytes>>,undefined},{<<6 bytes>>,[... 
+> 
+> 
+> 
+> The issue is that the REST wrapper wants to do the cowboy_req:reply(), and when we do the call we cause the wrapper's call to fail.
+> 
+> Dan.
+> 
+> 
+> 
+> On Tue, Oct 29, 2013 at 4:01 PM, Ivan uemlianin <ivan at llaisdy.com> wrote:
+> Sorry for terse but I only have a phone. Why can't you return a 404 here?  Using something like cowboy:reply(404, ...
+> 
+> Ivan
+> 
+> --
+> festina lente
+> 
+> 
+> On 29 Oct 2013, at 21:25, Daniel Goertzen <daniel.goertzen at gmail.com> wrote:
+> 
+>> My situation is that I have a rest handler that may fail due to invalid url segments.  Example situation:
+>> 
+>> 
+>> init(_Transport, _Req, _Opts) ->
+>>         {upgrade, protocol, cowboy_rest}.
+>> 
+>> content_types_provided(Req, State) ->
+>>     {[{<<"application/json">>, get_json}], Req, State}.
+>> 
+>> get_json(Req0, State) ->
+>>     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0, [param1, param2, param3, ....]),
+>> 
+>>     case catch other_module:request(Params) of
+>>         {'EXIT', {badarg, _}} ->
+>>             hmmm, Params were bad and I would like to return a 404 code now.
+>>         Result ->
+>>             {jiffy:encode(Result), Req1, State}
+>>     end.
+>> 
+>> 
+>> 
+>> So I would like to return a 404 code when my underlying request function fails, but it appears my choices are:
+>> 
+>> - return a 200 (ok) response with data.
+>> - crash and cause a 500 (Internal Server Error) response to be returned.  Not exactly the sentiment I want.
+>> 
+>> 
+>> Is there some other way to cause a 404 response?
+>> 
+>> I realize I could add path constraint functions, but I will be replicating logic from my underlying request function.  Furthermore, the constraint functions consider parameters in isolation, so that won't work if the validity of parameters is coupled.
+>> 
+>> Thanks,
+>> Dan.
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+
+From ivan at llaisdy.com  Wed Oct 30 16:27:15 2013
+From: ivan at llaisdy.com (Ivan uemlianin)
+Date: Wed, 30 Oct 2013 16:27:15 +0100
+Subject: [99s-extend] REST handler failure
+In-Reply-To: <CAJCf5RzwUz1moQooTpMp33tFn8R9xkhxqOnR0joBSUSTwJ_CoQ@mail.gmail.com>
+References: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+ <0F1D01F5-A4B3-4135-8F4C-FCC2E9F79DFA@llaisdy.com>
+ <CAJCf5RzwUz1moQooTpMp33tFn8R9xkhxqOnR0joBSUSTwJ_CoQ@mail.gmail.com>
+Message-ID: <215FA968-210F-474B-A3C2-0627D8FFFC74@llaisdy.com>
+
+Instead of <<"this body ignored">> can you return the atom halt?
+
+#dontevenhaveanyofmycodewithme:(
+
+Ivan
+
+--
+festina lente
+
+
+On 30 Oct 2013, at 15:58, Daniel Goertzen <daniel.goertzen at gmail.com> wrote:
+
+> Well, this sort of works.  I tried this in the response handler:
+> 
+>             {ok, Req2} = cowboy_req:reply(404, [] , <<"this is the body that gets used">>, Req1),
+>             {<<"this body gets ignored">>, Req2, State};
+> 
+> 
+> 
+> The client receives a 404 response, but cowboy crashes:
+> 
+> =ERROR REPORT==== 8-Sep-2013::22:22:03 ===
+> Error in process <0.131.0> with exit value: {function_clause,[{cowboy_req,reply,[200,[],<<31 bytes>>,{http_req,#Port<0.1208>,ranch_tcp,keepalive,<0.131.0>,<<3 bytes>>,'HTTP/1.1',{{192,168,1,187},51017},<<12 bytes>>,undefined,80,<<24 bytes>>,undefined,<<0 bytes>>,undefined,[{channel_num,3}],[{<<10 bytes>>,<<11 bytes>>},{<<4 bytes>>,<<12 bytes>>},{<<6 bytes>>,<<3 bytes>>}],[{<<17 bytes>>,undefined},{<<13 bytes>>,undefined},{<<19 bytes>>,undefined},{<<8 bytes>>,undefined},{<<6 bytes>>,[... 
+> 
+> 
+> 
+> The issue is that the REST wrapper wants to do the cowboy_req:reply(), and when we do the call we cause the wrapper's call to fail.
+> 
+> Dan.
+> 
+> 
+> 
+> On Tue, Oct 29, 2013 at 4:01 PM, Ivan uemlianin <ivan at llaisdy.com> wrote:
+>> Sorry for terse but I only have a phone. Why can't you return a 404 here?  Using something like cowboy:reply(404, ...
+>> 
+>> Ivan
+>> 
+>> --
+>> festina lente
+>> 
+>> 
+>> On 29 Oct 2013, at 21:25, Daniel Goertzen <daniel.goertzen at gmail.com> wrote:
+>> 
+>>> My situation is that I have a rest handler that may fail due to invalid url segments.  Example situation:
+>>> 
+>>> 
+>>> init(_Transport, _Req, _Opts) ->
+>>>         {upgrade, protocol, cowboy_rest}.
+>>> 
+>>> content_types_provided(Req, State) ->
+>>>     {[{<<"application/json">>, get_json}], Req, State}.
+>>> 
+>>> get_json(Req0, State) ->
+>>>     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0, [param1, param2, param3, ....]),
+>>> 
+>>>     case catch other_module:request(Params) of
+>>>         {'EXIT', {badarg, _}} ->
+>>>             hmmm, Params were bad and I would like to return a 404 code now.
+>>>         Result ->
+>>>             {jiffy:encode(Result), Req1, State}
+>>>     end.
+>>> 
+>>> 
+>>> 
+>>> So I would like to return a 404 code when my underlying request function fails, but it appears my choices are:
+>>> 
+>>> - return a 200 (ok) response with data.
+>>> - crash and cause a 500 (Internal Server Error) response to be returned.  Not exactly the sentiment I want.
+>>> 
+>>> 
+>>> Is there some other way to cause a 404 response?
+>>> 
+>>> I realize I could add path constraint functions, but I will be replicating logic from my underlying request function.  Furthermore, the constraint functions consider parameters in isolation, so that won't work if the validity of parameters is coupled.
+>>> 
+>>> Thanks,
+>>> Dan.
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+> 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131030/6e8ec2f0/attachment.html>
+
+From daniel.goertzen at gmail.com  Wed Oct 30 16:32:47 2013
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Wed, 30 Oct 2013 10:32:47 -0500
+Subject: [99s-extend] REST handler failure
+In-Reply-To: <215FA968-210F-474B-A3C2-0627D8FFFC74@llaisdy.com>
+References: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+ <0F1D01F5-A4B3-4135-8F4C-FCC2E9F79DFA@llaisdy.com>
+ <CAJCf5RzwUz1moQooTpMp33tFn8R9xkhxqOnR0joBSUSTwJ_CoQ@mail.gmail.com>
+ <215FA968-210F-474B-A3C2-0627D8FFFC74@llaisdy.com>
+Message-ID: <CAJCf5Rx_o66FDE-91kX_=KBQou9wcx+UEenGPFYLE2nR_PRh8g@mail.gmail.com>
+
+Returning 'halt' caused a status code of 204.
+
+Dan.
+
+
+On Wed, Oct 30, 2013 at 10:27 AM, Ivan uemlianin <ivan at llaisdy.com> wrote:
+
+> Instead of <<"this body ignored">> can you return the atom halt?
+>
+> #dontevenhaveanyofmycodewithme:(
+>
+> Ivan
+>
+> --
+> festina lente
+>
+>
+> On 30 Oct 2013, at 15:58, Daniel Goertzen <daniel.goertzen at gmail.com>
+> wrote:
+>
+> Well, this sort of works.  I tried this in the response handler:
+>
+>             {ok, Req2} = cowboy_req:reply(404, [] , <<"this is the body
+> that gets used">>, Req1),
+>             {<<"this body gets ignored">>, Req2, State};
+>
+>
+>
+> The client receives a 404 response, but cowboy crashes:
+>
+> =ERROR REPORT==== 8-Sep-2013::22:22:03 ===
+> Error in process <0.131.0> with exit value:
+> {function_clause,[{cowboy_req,reply,[200,[],<<31
+> bytes>>,{http_req,#Port<0.1208>,ranch_tcp,keepalive,<0.131.0>,<<3
+> bytes>>,'HTTP/1.1',{{192,168,1,187},51017},<<12 bytes>>,undefined,80,<<24
+> bytes>>,undefined,<<0 bytes>>,undefined,[{channel_num,3}],[{<<10
+> bytes>>,<<11 bytes>>},{<<4 bytes>>,<<12 bytes>>},{<<6 bytes>>,<<3
+> bytes>>}],[{<<17 bytes>>,undefined},{<<13 bytes>>,undefined},{<<19
+> bytes>>,undefined},{<<8 bytes>>,undefined},{<<6 bytes>>,[...
+>
+>
+>
+> The issue is that the REST wrapper wants to do the cowboy_req:reply(), and
+> when we do the call we cause the wrapper's call to fail.
+>
+> Dan.
+>
+>
+>
+> On Tue, Oct 29, 2013 at 4:01 PM, Ivan uemlianin <ivan at llaisdy.com> wrote:
+>
+>> Sorry for terse but I only have a phone. Why can't you return a 404 here?
+>>  Using something like cowboy:reply(404, ...
+>>
+>> Ivan
+>>
+>> --
+>> festina lente
+>>
+>>
+>> On 29 Oct 2013, at 21:25, Daniel Goertzen <daniel.goertzen at gmail.com>
+>> wrote:
+>>
+>> My situation is that I have a rest handler that may fail due to invalid
+>> url segments.  Example situation:
+>>
+>>
+>> init(_Transport, _Req, _Opts) ->
+>>         {upgrade, protocol, cowboy_rest}.
+>>
+>> content_types_provided(Req, State) ->
+>>     {[{<<"application/json">>, get_json}], Req, State}.
+>>
+>> get_json(Req0, State) ->
+>>     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0,
+>> [param1, param2, param3, ....]),
+>>
+>>     case catch other_module:request(Params) of
+>>         {'EXIT', {badarg, _}} ->
+>>             hmmm, Params were bad and I would like to return a 404 code
+>> now.
+>>         Result ->
+>>             {jiffy:encode(Result), Req1, State}
+>>     end.
+>>
+>>
+>>
+>> So I would like to return a 404 code when my underlying request function
+>> fails, but it appears my choices are:
+>>
+>> - return a 200 (ok) response with data.
+>> - crash and cause a 500 (Internal Server Error) response to be returned.
+>> Not exactly the sentiment I want.
+>>
+>>
+>> Is there some other way to cause a 404 response?
+>>
+>> I realize I could add path constraint functions, but I will be
+>> replicating logic from my underlying request function.  Furthermore, the
+>> constraint functions consider parameters in isolation, so that won't work
+>> if the validity of parameters is coupled.
+>>
+>> Thanks,
+>> Dan.
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>>
+>>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131030/0ab7c8ee/attachment.html>
+
+From daniel.goertzen at gmail.com  Wed Oct 30 16:46:37 2013
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Wed, 30 Oct 2013 10:46:37 -0500
+Subject: [99s-extend] REST handler failure
+In-Reply-To: <A7D0DF68-BC2E-4249-A81F-3F7A645AD310@gmail.com>
+References: <CAJCf5Rz0mKmouz5DEunOOZ+b21bfLCjyQy7ssbHAgUp+3rGCaw@mail.gmail.com>
+ <0F1D01F5-A4B3-4135-8F4C-FCC2E9F79DFA@llaisdy.com>
+ <CAJCf5RzwUz1moQooTpMp33tFn8R9xkhxqOnR0joBSUSTwJ_CoQ@mail.gmail.com>
+ <A7D0DF68-BC2E-4249-A81F-3F7A645AD310@gmail.com>
+Message-ID: <CAJCf5RzwO4nNcv=2Ezf7aMQqFShPhLs4zaYoBBunmzuC7Wp4uQ@mail.gmail.com>
+
+That's what I was looking for, thanks!
+
+Dan.
+
+
+On Wed, Oct 30, 2013 at 10:25 AM, Tilman Holschuh <tilman.holschuh at gmail.com
+> wrote:
+
+> Why not let resource_exists/2 return false when your resource does not
+> exist? You will get 404 on false. This way you separate the implementation
+> for turning your data to json from checking if the request went to the
+> correct resource.
+>
+> - Tilman
+>
+> On 2013-10-30, at 7:58 AM, Daniel Goertzen wrote:
+>
+> > Well, this sort of works.  I tried this in the response handler:
+> >
+> >             {ok, Req2} = cowboy_req:reply(404, [] , <<"this is the body
+> that gets used">>, Req1),
+> >             {<<"this body gets ignored">>, Req2, State};
+> >
+> >
+> >
+> > The client receives a 404 response, but cowboy crashes:
+> >
+> > =ERROR REPORT==== 8-Sep-2013::22:22:03 ===
+> > Error in process <0.131.0> with exit value:
+> {function_clause,[{cowboy_req,reply,[200,[],<<31
+> bytes>>,{http_req,#Port<0.1208>,ranch_tcp,keepalive,<0.131.0>,<<3
+> bytes>>,'HTTP/1.1',{{192,168,1,187},51017},<<12 bytes>>,undefined,80,<<24
+> bytes>>,undefined,<<0 bytes>>,undefined,[{channel_num,3}],[{<<10
+> bytes>>,<<11 bytes>>},{<<4 bytes>>,<<12 bytes>>},{<<6 bytes>>,<<3
+> bytes>>}],[{<<17 bytes>>,undefined},{<<13 bytes>>,undefined},{<<19
+> bytes>>,undefined},{<<8 bytes>>,undefined},{<<6 bytes>>,[...
+> >
+> >
+> >
+> > The issue is that the REST wrapper wants to do the cowboy_req:reply(),
+> and when we do the call we cause the wrapper's call to fail.
+> >
+> > Dan.
+> >
+> >
+> >
+> > On Tue, Oct 29, 2013 at 4:01 PM, Ivan uemlianin <ivan at llaisdy.com>
+> wrote:
+> > Sorry for terse but I only have a phone. Why can't you return a 404
+> here?  Using something like cowboy:reply(404, ...
+> >
+> > Ivan
+> >
+> > --
+> > festina lente
+> >
+> >
+> > On 29 Oct 2013, at 21:25, Daniel Goertzen <daniel.goertzen at gmail.com>
+> wrote:
+> >
+> >> My situation is that I have a rest handler that may fail due to invalid
+> url segments.  Example situation:
+> >>
+> >>
+> >> init(_Transport, _Req, _Opts) ->
+> >>         {upgrade, protocol, cowboy_rest}.
+> >>
+> >> content_types_provided(Req, State) ->
+> >>     {[{<<"application/json">>, get_json}], Req, State}.
+> >>
+> >> get_json(Req0, State) ->
+> >>     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0,
+> [param1, param2, param3, ....]),
+> >>
+> >>     case catch other_module:request(Params) of
+> >>         {'EXIT', {badarg, _}} ->
+> >>             hmmm, Params were bad and I would like to return a 404 code
+> now.
+> >>         Result ->
+> >>             {jiffy:encode(Result), Req1, State}
+> >>     end.
+> >>
+> >>
+> >>
+> >> So I would like to return a 404 code when my underlying request
+> function fails, but it appears my choices are:
+> >>
+> >> - return a 200 (ok) response with data.
+> >> - crash and cause a 500 (Internal Server Error) response to be
+> returned.  Not exactly the sentiment I want.
+> >>
+> >>
+> >> Is there some other way to cause a 404 response?
+> >>
+> >> I realize I could add path constraint functions, but I will be
+> replicating logic from my underlying request function.  Furthermore, the
+> constraint functions consider parameters in isolation, so that won't work
+> if the validity of parameters is coupled.
+> >>
+> >> Thanks,
+> >> Dan.
+> >> _______________________________________________
+> >> Extend mailing list
+> >> Extend at lists.ninenines.eu
+> >> http://lists.ninenines.eu:81/listinfo/extend
+> >
+> > _______________________________________________
+> > Extend mailing list
+> > Extend at lists.ninenines.eu
+> > http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131030/3ea4ac64/attachment.html>
+

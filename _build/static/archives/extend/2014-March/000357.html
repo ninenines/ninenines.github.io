@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Updating Cowboy applications
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Updating%20Cowboy%20applications&In-Reply-To=%3C5321B0FB.4060203%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000356.html">
+   <LINK REL="Next"  HREF="000358.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Updating Cowboy applications</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Updating%20Cowboy%20applications&In-Reply-To=%3C5321B0FB.4060203%40ninenines.eu%3E"
+       TITLE="[99s-extend] Updating Cowboy applications">essen at ninenines.eu
+       </A><BR>
+    <I>Thu Mar 13 14:22:03 CET 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000356.html">[99s-extend] Updating Cowboy applications
+</A></li>
+        <LI>Next message: <A HREF="000358.html">[99s-extend] Updating Cowboy applications
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#357">[ date ]</a>
+              <a href="thread.html#357">[ thread ]</a>
+              <a href="subject.html#357">[ subject ]</a>
+              <a href="author.html#357">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Deploying is easy: releases.
+
+The &quot;getting started&quot; chapter of the guide, and all the examples use 
+that and it should be pretty easy to do.
+
+You can reload Cowboy modules directly using l(module). You can reload 
+most Ranch modules too but some of them will require using sys. Ranch 
+will get support for upgrades as soon as I finish the upgrade test 
+suite, but it's still low priority.
+
+And upgrade of Cowboy processes can only be added after we make them 
+special processes, which is still a way to go.
+
+There is no plans for supporting unix sockets for the simple reason that 
+it is not portable. On the other hand, if you use a separate library to 
+open a socket and give it to Ranch (socket option), possibly writing a 
+specific transport module for it, then it's very possible that you can 
+use unix sockets (and if it works, please do send feedback).
+
+On 03/13/2014 02:41 AM, Joshua McQuistan wrote:
+&gt;<i> Hello all,
+</I>&gt;<i>
+</I>&gt;<i> I have written a Cowboy application that works fine over localhost. I'm
+</I>&gt;<i> now looking at ways of deploying and updating it i.e., moving from dev
+</I>&gt;<i> to prod in a nice manner.
+</I>&gt;<i>
+</I>&gt;<i> I have dug around the archives and have found that Cowboy does not
+</I>&gt;<i> support hot code reloading meaning either a restart of the vm or playing
+</I>&gt;<i> with code:reload_file is necessary.
+</I>&gt;<i>
+</I>&gt;<i> The latter suggests a possible rewriting of OTP's code loading mechanism
+</I>&gt;<i> and seems like it might be sensible to avoid.
+</I>&gt;<i>
+</I>&gt;<i> The other approach then is a restart. In previous (non-Cowboy) set ups
+</I>&gt;<i> I've used nginx on port 80 / 443 that talks to the web app via a unix
+</I>&gt;<i> socket (e.g., &quot;web/socket&quot;). When updating I'll start a new instance on
+</I>&gt;<i> a new socket (e.g., &quot;web/socket.new&quot;) then rely on the file system's
+</I>&gt;<i> &quot;mv&quot; to switch it to &quot;web/socket&quot;; this works because the underlying
+</I>&gt;<i> file system guarantees mv to be atomic (or at least to never see a
+</I>&gt;<i> missing file). I can then ask the old process to shut down nicely in the
+</I>&gt;<i> background.
+</I>&gt;<i>
+</I>&gt;<i> For this to work it would require Cowby / Ranch to be able to listen on
+</I>&gt;<i> unix sockets. A glance at the documentation suggests that unix sockets
+</I>&gt;<i> aren't available, is this the case? What's the feasibility of it getting
+</I>&gt;<i> added?
+</I>&gt;<i>
+</I>&gt;<i> It might just be simpler to load-balance across multiple servers and
+</I>&gt;<i> safely take them out one at a time while updating.
+</I>&gt;<i>
+</I>&gt;<i> My other question is, how do others approach this problem? Did I miss
+</I>&gt;<i> something vitally obvious?
+</I>&gt;<i>
+</I>&gt;<i> Regards,
+</I>&gt;<i> Joshua
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000356.html">[99s-extend] Updating Cowboy applications
+</A></li>
+	<LI>Next message: <A HREF="000358.html">[99s-extend] Updating Cowboy applications
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#357">[ date ]</a>
+              <a href="thread.html#357">[ thread ]</a>
+              <a href="subject.html#357">[ subject ]</a>
+              <a href="author.html#357">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

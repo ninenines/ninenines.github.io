@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy unexpectedly timing out when reading the body
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20unexpectedly%20timing%20out%20when%20reading%20the%20body&In-Reply-To=%3CCF48C816.16B3B%25christopher.phillips%40turner.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000358.html">
+   <LINK REL="Next"  HREF="000360.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy unexpectedly timing out when reading the body</H1>
+    <B>Phillips, Christopher</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20unexpectedly%20timing%20out%20when%20reading%20the%20body&In-Reply-To=%3CCF48C816.16B3B%25christopher.phillips%40turner.com%3E"
+       TITLE="[99s-extend] Cowboy unexpectedly timing out when reading the body">Christopher.Phillips at turner.com
+       </A><BR>
+    <I>Fri Mar 14 19:52:07 CET 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000358.html">[99s-extend] Updating Cowboy applications
+</A></li>
+        <LI>Next message: <A HREF="000360.html">[99s-extend] Cowboy unexpectedly timing out when reading the body
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#359">[ date ]</a>
+              <a href="thread.html#359">[ thread ]</a>
+              <a href="subject.html#359">[ subject ]</a>
+              <a href="author.html#359">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On a dev server I had a Cowboy app suddenly start returning timeouts when calling cowboy_req:body_qs(Request), with surprising frequency, which in turn led to 500s back to the calling client. It only appeared to happen when hitting one particular resource, and was sporadic, and I was wondering if there might be some explanation related to Cowboy (as opposed to maybe really weird VM issues). For full disclosure, we would first check the body with cowboy_req:body(Request) as part of an access log, then ignore the returned cowboy_req:req() that call passed back, since we could not then stream the body off of it again. It was working fine, so I don't think it was related, but it seems more solid now after I removed it and I don't know if that's related or not.
+
+
+
+Here is an example request that dumped when the process died -
+
+
+{req,[{socket,#Port&lt;0.7113&gt;},{transport,ranch_tcp},{connection,keepalive},{pid,&lt;0.1805.0&gt;},{method,&lt;&lt;&quot;POST&quot;&gt;&gt;},{version,'HTTP/1.1'},{peer,{{10,188,32,225},53188}},{host,&lt;&lt;&quot;bps-feedschedulervip1.turner.com&quot;&gt;&gt;},{host_info,undefined},{port,8091},{path,&lt;&lt;&quot;/encoders/Player1/record&quot;&gt;&gt;},{path_info,[&lt;&lt;&quot;record&quot;&gt;&gt;]},{qs,&lt;&lt;&quot;authToken=...&quot;&gt;&gt;},{qs_vals,[{&lt;&lt;&quot;authToken&quot;&gt;&gt;,&lt;&lt;&quot;...&quot;&gt;&gt;}]},{bindings,[{id,&lt;&lt;&quot;Player1&quot;&gt;&gt;}]},{headers,[{&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;bps-feedschedulervip1.turner.com:8091&quot;&gt;&gt;},{&lt;&lt;&quot;content-type&quot;&gt;&gt;,&lt;&lt;&quot;application/x-www-form-urlencoded; charset=UTF-8&quot;&gt;&gt;},{&lt;&lt;&quot;origin&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://bps-newstrondev1.turner.com">http://bps-newstrondev1.turner.com</A>&quot;&gt;&gt;},{&lt;&lt;&quot;content-length&quot;&gt;&gt;,&lt;&lt;&quot;48&quot;&gt;&gt;},{&lt;&lt;&quot;connection&quot;&gt;&gt;,&lt;&lt;&quot;keep-alive&quot;&gt;&gt;},{&lt;&lt;&quot;accept&quot;&gt;&gt;,&lt;&lt;&quot;application/json, text/javascript, */*; q=0.01&quot;&gt;&gt;},{&lt;&lt;&quot;user-agent&quot;&gt;&gt;,&lt;&lt;&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.74.9 (KHTML, like Gecko) Version/7.0.2 Safari/537.74.9&quot;&gt;&gt;},{&lt;&lt;&quot;referer&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://bps-newstrondev1.turner.com/newstron/record/record.html">http://bps-newstrondev1.turner.com/newstron/record/record.html</A>&quot;&gt;&gt;},{&lt;&lt;&quot;accept-language&quot;&gt;&gt;,&lt;&lt;&quot;en-us&quot;&gt;&gt;},{&lt;&lt;&quot;accept-encoding&quot;&gt;&gt;,&lt;&lt;&quot;gzip, deflate&quot;&gt;&gt;}]},{p_headers,[{&lt;&lt;&quot;content-type&quot;&gt;&gt;,{&lt;&lt;&quot;application&quot;&gt;&gt;,&lt;&lt;&quot;x-www-form-urlencoded&quot;&gt;&gt;,[{&lt;&lt;&quot;charset&quot;&gt;&gt;,&lt;&lt;&quot;utf-8&quot;&gt;&gt;}]}},{&lt;&lt;&quot;if-modified-since&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;if-none-match&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;if-unmodified-since&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;if-match&quot;&gt;&gt;,undefined},{&lt;&lt;&quot;accept&quot;&gt;&gt;,[{{&lt;&lt;&quot;application&quot;&gt;&gt;,&lt;&lt;&quot;json&quot;&gt;&gt;,[]},1000,[]},{{&lt;&lt;&quot;text&quot;&gt;&gt;,&lt;&lt;&quot;javascript&quot;&gt;&gt;,[]},1000,[]},{{&lt;&lt;&quot;*&quot;&gt;&gt;,&lt;&lt;&quot;*&quot;&gt;&gt;,[]},10,[]}]},{&lt;&lt;&quot;connection&quot;&gt;&gt;,[&lt;&lt;&quot;keep-alive&quot;&gt;&gt;]}]},{cookies,undefined},{meta,[{charset,undefined},{media_type,{&lt;&lt;&quot;application&quot;&gt;&gt;,&lt;&lt;&quot;json&quot;&gt;&gt;,[]}}]},{body_state,waiting},{multipart,undefined},{buffer,&lt;&lt;&gt;&gt;},{resp_compress,false},{resp_state,waiting},{resp_headers,[{&lt;&lt;&quot;content-type&quot;&gt;&gt;,[&lt;&lt;&quot;application&quot;&gt;&gt;,&lt;&lt;&quot;/&quot;&gt;&gt;,&lt;&lt;&quot;json&quot;&gt;&gt;,&lt;&lt;&gt;&gt;]},{&lt;&lt;&quot;Access-Control-Allow-Origin&quot;&gt;&gt;,&lt;&lt;&quot;*&quot;&gt;&gt;}]},{resp_body,&lt;&lt;&gt;&gt;},{onresponse,#Fun&lt;access_log_responder.onresponse.4&gt;}]}
+
+
+
+
+As I said, it may be just due to VM issues or something, but I figured I'd ask in case there was any obvious issue.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20140314/b2f802d3/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20140314/b2f802d3/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000358.html">[99s-extend] Updating Cowboy applications
+</A></li>
+	<LI>Next message: <A HREF="000360.html">[99s-extend] Cowboy unexpectedly timing out when reading the body
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#359">[ date ]</a>
+              <a href="thread.html#359">[ thread ]</a>
+              <a href="subject.html#359">[ subject ]</a>
+              <a href="author.html#359">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

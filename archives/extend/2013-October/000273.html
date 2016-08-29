@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] timeout in cowboy loop handler
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000272.html">
+   <LINK REL="Next"  HREF="000274.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] timeout in cowboy loop handler</H1>
+    <B>akonsu</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwY75j1G2Ew13WY5dMCT8_E41b85OjoKdFHw9AZfX9qQcg%40mail.gmail.com%3E"
+       TITLE="[99s-extend] timeout in cowboy loop handler">akonsu at gmail.com
+       </A><BR>
+    <I>Wed Oct 16 05:31:46 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000272.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+        <LI>Next message: <A HREF="000274.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#273">[ date ]</a>
+              <a href="thread.html#273">[ thread ]</a>
+              <a href="subject.html#273">[ subject ]</a>
+              <a href="author.html#273">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>thanks for your help. suppose that I want to stream live audio. I do not
+know how long my audio program will be, and as I stream it, if I have a
+timeout, the server will just disconnect the user that listens to the audio
+in the browser. and the browser won't reconnect. Would you suggest the
+&quot;right&quot; way to implement something like that? Would infinite timeout
+suffice? or is it a bad practice? another type of handler maybe?
+
+
+2013/10/15 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;
+
+&gt;<i> Yep. And it will also disconnect if the client sends too much. It has to
+</I>&gt;<i> disconnect and reconnect eventually, there's no way around it.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 10/16/2013 05:03 AM, akonsu wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> so it will disconnect if the client only listens and sends nothing to
+</I>&gt;&gt;<i> the socket, correct?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> 2013/10/15 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     The socket connected to the client.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     TCP isn't perfect, there is no way to be 100% sure the client is
+</I>&gt;&gt;<i>     still connected, hence the timeout. If the client is still up you
+</I>&gt;&gt;<i>     should make it reconnect.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     On 10/16/2013 04:55 AM, akonsu wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         Hello,
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         the documentation for `init` at
+</I>&gt;&gt;<i>         <A HREF="http://ninenines.eu/docs/en/__**cowboy/HEAD/manual/cowboy___**">http://ninenines.eu/docs/en/__**cowboy/HEAD/manual/cowboy___**</A>
+</I>&gt;&gt;<i> loop_handler&lt;<A HREF="http://ninenines.eu/docs/en/__cowboy/HEAD/manual/cowboy___loop_handler">http://ninenines.eu/docs/en/__cowboy/HEAD/manual/cowboy___loop_handler</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         &lt;<A HREF="http://ninenines.eu/docs/en/**cowboy/HEAD/manual/cowboy_**">http://ninenines.eu/docs/en/**cowboy/HEAD/manual/cowboy_**</A>
+</I>&gt;&gt;<i> loop_handler&lt;<A HREF="http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler">http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_loop_handler</A>&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>         says:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         The receive loop will run for a duration of up to Timeout
+</I>&gt;&gt;<i>         milliseconds
+</I>&gt;&gt;<i>         after it last received data from the socket, at which point it
+</I>&gt;&gt;<i>         will stop
+</I>&gt;&gt;<i>         and send a 204 No Content reply.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         What socket does it refer to? I had an impression that the loop
+</I>&gt;&gt;<i>         handles
+</I>&gt;&gt;<i>         erlang messages. Do these messages come through a socket (sorry
+</I>&gt;&gt;<i>         about a
+</I>&gt;&gt;<i>         trivial question, but I am new to erlang), and this is the
+</I>&gt;&gt;<i>         socket that
+</I>&gt;&gt;<i>         the docs talk about?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         The reason why I am asking is because I used to have a Timeout
+</I>&gt;&gt;<i>         of 60000,
+</I>&gt;&gt;<i>         and even though messages kept coming non stop, it still kept
+</I>&gt;&gt;<i>         disconnecting after a minute, until I set Timeout to infinity.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         thanks
+</I>&gt;&gt;<i>         Konstantin
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         ______________________________**___________________
+</I>&gt;&gt;<i>         Extend mailing list
+</I>&gt;&gt;<i>         <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.</A>**ninenines.eu&lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>         <A HREF="http://lists.ninenines.eu:81/_**_listinfo/extend&lt;http://lists.ninenines.eu:81/__listinfo/extend">http://lists.ninenines.eu:81/_**_listinfo/extend&lt;http://lists.ninenines.eu:81/__listinfo/extend</A>&gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         &lt;<A HREF="http://lists.ninenines.eu:81/**listinfo/extend&lt;http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/**listinfo/extend&lt;http://lists.ninenines.eu:81/listinfo/extend</A>&gt;
+</I>&gt;&gt;<i> &gt;
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     --
+</I>&gt;&gt;<i>     Lo&#271;c Hoguin
+</I>&gt;&gt;<i>     Erlang Cowboy
+</I>&gt;&gt;<i>     Nine Nines
+</I>&gt;&gt;<i>     <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Lo&#239;c Hoguin
+</I>&gt;<i>
+</I>&gt;<i> Erlang Cowboy
+</I>&gt;<i> Nine Nines
+</I>&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20131015/203060cc/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20131015/203060cc/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000272.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+	<LI>Next message: <A HREF="000274.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#273">[ date ]</a>
+              <a href="thread.html#273">[ thread ]</a>
+              <a href="subject.html#273">[ subject ]</a>
+              <a href="author.html#273">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

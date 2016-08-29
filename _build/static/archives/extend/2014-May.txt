@@ -1,0 +1,363 @@
+From janos.n.hary at gmail.com  Sun May  4 09:59:21 2014
+From: janos.n.hary at gmail.com (Janos Hary)
+Date: Sun, 4 May 2014 09:59:21 +0200
+Subject: [99s-extend] Gracefully stop Ranch
+Message-ID: <001b01cf676e$c2ec8e20$48c5aa60$@gmail.com>
+
+All!
+
+I implemented a protocol as a ranch_protocol. It handles long running
+sessions. At some point I'd like to stop my server accepting new
+connections, but allow all open sessions to finish. Then I need to know when
+all the open sessions (if any) finished.
+
+What would be the correct strategy to implement this?
+
+Thanks,
+Janos
+
+
+
+From paulo.ferraz.oliveira at gmail.com  Tue May 20 18:27:58 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 20 May 2014 17:27:58 +0100
+Subject: [99s-extend] REST responses
+Message-ID: <CA+dV7cR9M-5dq2kYJgowrodDbCEQ0aAnkZKyQmw07hmAJXmc=A@mail.gmail.com>
+
+Hello.
+
+First of all, thanks for the great work you've done with cowboy. I've been
+using it with a fait amount of success and I'm a fairly new Erlang
+developer. I'm mainly interested in the REST "interface" of the application
+and its way of doing RESTful things, and I like the way you did it (what
+with all the content_types_provided, service_available, etc. functions).
+I've tested the way the system reacted to the different Accept,
+Content-Type, etc. headers and always got very well-opinionated responses
+(406, 415, ...).
+
+A couple of questions remain though (I'm sorry if they've been asked
+already but I've searched the web for answers and read the available docs
+and couldn't find them):
+
+1. is it expected that, if I use cowboy_req:reply/2 in a GET handler
+(coming from content_types_provided), the onresponse/4 hook be called
+twice? I guess one is due to the reply and the other one due to the
+workflow of the request, but is there a way to prevent the second execution?
+
+2. if I want to JSON-parse ALL my requests should I a) use the onrequest/1
+hook or b) do this on a per-request basis? Because I'd like to reply with a
+400 ASAP but keep going if the JSON validates (I'm going to use JSON-schema
+for validating input); and, if possible, have the JSON-parsed body stored
+somewhere for future manipulation.
+
+3. I haven't seen examples that made use of the State (from the function
+returns). When should I use this instead of the Request metadata? I'd like
+to be able to set a generic error state for a request (either in meta ou
+State) and that have a "standard" error response be created at a later time
+(in a unique function, for example - e.g. onresponse/4).
+
+4. is there anything like a catch-all exception handler? I'd like to catch
+exceptions that occur anywhere so I could log them and analyze them at a
+later moment.
+
+I'm probably abusing the onresponse/onrequest hooks already, so your
+answers should help me clarify this.
+
+Thanks.
+
+- Paulo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140520/cf7632e9/attachment.html>
+
+From paulo.ferraz.oliveira at gmail.com  Tue May 20 20:32:10 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 20 May 2014 19:32:10 +0100
+Subject: [99s-extend] 202 for POST or PUT
+Message-ID: <CA+dV7cRUn3oQ34DaZbPaY3TcfEJUO4iq8Gk6sJuLqzGGA4MT8g@mail.gmail.com>
+
+Hi.
+
+Do you think it should be possible to generate a 202 for a POST or a PUT?
+Is it something that will be implemented in a future version?
+
+Many thanks.
+
+- Paulo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140520/699b72b3/attachment.html>
+
+From essen at ninenines.eu  Tue May 20 20:46:02 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 20 May 2014 20:46:02 +0200
+Subject: [99s-extend] REST responses
+In-Reply-To: <CA+dV7cR9M-5dq2kYJgowrodDbCEQ0aAnkZKyQmw07hmAJXmc=A@mail.gmail.com>
+References: <CA+dV7cR9M-5dq2kYJgowrodDbCEQ0aAnkZKyQmw07hmAJXmc=A@mail.gmail.com>
+Message-ID: <537BA2EA.5080108@ninenines.eu>
+
+Hi,
+
+On 05/20/2014 06:27 PM, Paulo F. Oliveira wrote:
+> Hello.
+>
+> First of all, thanks for the great work you've done with cowboy. I've
+> been using it with a fait amount of success and I'm a fairly new Erlang
+> developer. I'm mainly interested in the REST "interface" of the
+> application and its way of doing RESTful things, and I like the way you
+> did it (what with all the content_types_provided, service_available,
+> etc. functions). I've tested the way the system reacted to the different
+> Accept, Content-Type, etc. headers and always got very well-opinionated
+> responses (406, 415, ...).
+>
+> A couple of questions remain though (I'm sorry if they've been asked
+> already but I've searched the web for answers and read the available
+> docs and couldn't find them):
+>
+> 1. is it expected that, if I use cowboy_req:reply/2 in a GET handler
+> (coming from content_types_provided), the onresponse/4 hook be called
+> twice? I guess one is due to the reply and the other one due to the
+> workflow of the request, but is there a way to prevent the second execution?
+
+If you reply from a callback you must call {halt, Req, State} to stop 
+processing.
+
+> 2. if I want to JSON-parse ALL my requests should I a) use the
+> onrequest/1 hook or b) do this on a per-request basis? Because I'd like
+> to reply with a 400 ASAP but keep going if the JSON validates (I'm going
+> to use JSON-schema for validating input); and, if possible, have the
+> JSON-parsed body stored somewhere for future manipulation.
+
+It makes little sense to do it before the accept callback you define. 
+Not only because you will duplicate content-type checks and whatnot, but 
+also because you don't actually win anything from doing this. If you are 
+using JSON, then JSON processing will take infinitely more resources 
+than the REST code.
+
+> 3. I haven't seen examples that made use of the State (from the function
+> returns). When should I use this instead of the Request metadata? I'd
+> like to be able to set a generic error state for a request (either in
+> meta ou State) and that have a "standard" error response be created at a
+> later time (in a unique function, for example - e.g. onresponse/4).
+
+State is for the functions within the current module. Look at 
+cowboy_static for an example.
+
+> 4. is there anything like a catch-all exception handler? I'd like to
+> catch exceptions that occur anywhere so I could log them and analyze
+> them at a later moment.
+
+You can add your own error_logger handler, or use something like lager. 
+All errors end up sending a message to error_logger.
+
+> I'm probably abusing the onresponse/onrequest hooks already, so your
+> answers should help me clarify this.
+
+Sounds like it!
+
+> Thanks.
+>
+> - Paulo
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Tue May 20 20:47:16 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 20 May 2014 20:47:16 +0200
+Subject: [99s-extend] 202 for POST or PUT
+In-Reply-To: <CA+dV7cRUn3oQ34DaZbPaY3TcfEJUO4iq8Gk6sJuLqzGGA4MT8g@mail.gmail.com>
+References: <CA+dV7cRUn3oQ34DaZbPaY3TcfEJUO4iq8Gk6sJuLqzGGA4MT8g@mail.gmail.com>
+Message-ID: <537BA334.7080607@ninenines.eu>
+
+202 is only well defined for the DELETE method so there's no plan to add 
+something for other methods at this point. You can of course reply 
+directly if needed.
+
+On 05/20/2014 08:32 PM, Paulo F. Oliveira wrote:
+> Hi.
+>
+> Do you think it should be possible to generate a 202 for a POST or a
+> PUT? Is it something that will be implemented in a future version?
+>
+> Many thanks.
+>
+> - Paulo
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From paulo.ferraz.oliveira at gmail.com  Tue May 20 23:41:15 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 20 May 2014 22:41:15 +0100
+Subject: [99s-extend] REST responses
+Message-ID: <CA+dV7cTrbQd-widnjH5CjsYum=ASwax7VxtAUn_9BVONp2MMuA@mail.gmail.com>
+
+Hi, Lo?c.
+
+Thanks for having taken the time to reply. In some of my questions I think
+I didn't explain myself correctly so I'll give it another go.
+
+
+On 20 May 2014 19:46, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Hi,
+>
+>
+> On 05/20/2014 06:27 PM, Paulo F. Oliveira wrote:
+>
+>> Hello.
+>>
+>> First of all, thanks for the great work you've done with cowboy. I've
+>> been using it with a fait amount of success and I'm a fairly new Erlang
+>> developer. I'm mainly interested in the REST "interface" of the
+>> application and its way of doing RESTful things, and I like the way you
+>> did it (what with all the content_types_provided, service_available,
+>> etc. functions). I've tested the way the system reacted to the different
+>> Accept, Content-Type, etc. headers and always got very well-opinionated
+>> responses (406, 415, ...).
+>>
+>> A couple of questions remain though (I'm sorry if they've been asked
+>> already but I've searched the web for answers and read the available
+>> docs and couldn't find them):
+>>
+>> 1. is it expected that, if I use cowboy_req:reply/2 in a GET handler
+>> (coming from content_types_provided), the onresponse/4 hook be called
+>> twice? I guess one is due to the reply and the other one due to the
+>> workflow of the request, but is there a way to prevent the second
+>> execution?
+>>
+>
+> If you reply from a callback you must call {halt, Req, State} to stop
+> processing.
+
+
+Got it!
+
+
+> 2. if I want to JSON-parse ALL my requests should I a) use the
+>> onrequest/1 hook or b) do this on a per-request basis? Because I'd like
+>> to reply with a 400 ASAP but keep going if the JSON validates (I'm going
+>> to use JSON-schema for validating input); and, if possible, have the
+>> JSON-parsed body stored somewhere for future manipulation.
+>>
+>
+> It makes little sense to do it before the accept callback you define. Not
+> only because you will duplicate content-type checks and whatnot, but also
+> because you don't actually win anything from doing this. If you are using
+> JSON, then JSON processing will take infinitely more resources than the
+> REST code.
+
+
+OK, I'll probably stick with a "helper" function that'll do this for me and
+reply in case there are validation errors.
+I only found the flow diagrams for the requests today after I had sent this
+message, and they helped a lot.
+
+
+> 3. I haven't seen examples that made use of the State (from the function
+>> returns). When should I use this instead of the Request metadata? I'd
+>> like to be able to set a generic error state for a request (either in
+>> meta ou State) and that have a "standard" error response be created at a
+>> later time (in a unique function, for example - e.g. onresponse/4).
+>>
+>
+> State is for the functions within the current module. Look at
+> cowboy_static for an example.
+
+
+State allows me to, well, keep state, for a request "travelling" through
+functions, right, and I can change it whenever I want just before returning
+from a function that is executed prior to another one (the only function
+for which this doesn't seem to make since is the last one cowboy calls
+before actually replying to the client)? At the same time, so does the
+request meta, from what I understood from the manual. So what is the
+difference between one and the other and when would you recommend one or
+the other.
+
+4. is there anything like a catch-all exception handler? I'd like to
+>> catch exceptions that occur anywhere so I could log them and analyze
+>> them at a later moment.
+>>
+>
+> You can add your own error_logger handler, or use something like lager.
+> All errors end up sending a message to error_logger.
+
+
+I'll do this, thanks.
+
+
+> I'm probably abusing the onresponse/onrequest hooks already, so your
+>> answers should help me clarify this.
+>>
+>
+> Sounds like it!
+>
+> Thanks.
+>>
+>> - Paulo
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+
+Thanks.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140520/32454f85/attachment.html>
+
+From essen at ninenines.eu  Tue May 20 23:52:21 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 20 May 2014 23:52:21 +0200
+Subject: [99s-extend] REST responses
+In-Reply-To: <CA+dV7cTrbQd-widnjH5CjsYum=ASwax7VxtAUn_9BVONp2MMuA@mail.gmail.com>
+References: <CA+dV7cTrbQd-widnjH5CjsYum=ASwax7VxtAUn_9BVONp2MMuA@mail.gmail.com>
+Message-ID: <537BCE95.1090100@ninenines.eu>
+
+> State allows me to, well, keep state, for a request "travelling" through
+> functions, right, and I can change it whenever I want just before
+> returning from a function that is executed prior to another one (the
+> only function for which this doesn't seem to make since is the last one
+> cowboy calls before actually replying to the client)? At the same time,
+> so does the request meta, from what I understood from the manual. So
+> what is the difference between one and the other and when would you
+> recommend one or the other.
+
+They have different purposes. Meta values are additional information 
+about the request. You're not supposed to set them except in special 
+circumstances, either because you have your own custom protocol like 
+cowboy_rest, or because there's no other way to pass state forward.
+
+Don't think about it, always use State.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+

@@ -1,0 +1,113 @@
+diff --git a/src/cowboy_websocket.erl b/src/cowboy_websocket.erl
+index 98e25e6..3f3016a 100644
+--- a/src/cowboy_websocket.erl
++++ b/src/cowboy_websocket.erl
+@@ -62,6 +62,8 @@
+ 	| {suspend, module(), atom(), [any()]}
+ 	when Req::cowboy_req:req(), Env::cowboy_middleware:env().
+ upgrade(Req, Env, Handler, HandlerOpts) ->
++	io:format("[cowboy_websocket:upgrade] Req ~p, Env ~p, Handler ~p, HandlerOpts ~p",
++		[Req, Env, Handler, HandlerOpts]),
+ 	{_, Ref} = lists:keyfind(listener, 1, Env),
+ 	ranch:remove_connection(Ref),
+ 	[Socket, Transport] = cowboy_req:get([socket, transport], Req),
+@@ -78,6 +80,8 @@ upgrade(Req, Env, Handler, HandlerOpts) ->
+ -spec websocket_upgrade(#state{}, Req)
+ 	-> {ok, #state{}, Req} when Req::cowboy_req:req().
+ websocket_upgrade(State, Req) ->
++	io:format("[cowboy_websocket:websocket_upgrade] State ~p Req ~p",
++		[State, Req]),
+ 	{ok, ConnTokens, Req2}
+ 		= cowboy_req:parse_header(<<"connection">>, Req),
+ 	true = lists:member(<<"upgrade">>, ConnTokens),
+@@ -96,6 +100,7 @@ websocket_upgrade(State, Req) ->
+ -spec websocket_extensions(#state{}, Req)
+ 	-> {ok, #state{}, Req} when Req::cowboy_req:req().
+ websocket_extensions(State, Req) ->
++	io:format("[cowboy_websocket:websocket_extensions] State ~p Req ~p", [State, Req]),
+ 	case cowboy_req:parse_header(<<"sec-websocket-extensions">>, Req) of
+ 		{ok, Extensions, Req2} when Extensions =/= undefined ->
+ 			[Compress] = cowboy_req:get([resp_compress], Req),
+@@ -129,6 +134,8 @@ websocket_extensions(State, Req) ->
+ 	when Req::cowboy_req:req().
+ handler_init(State=#state{env=Env, transport=Transport,
+ 		handler=Handler}, Req, HandlerOpts) ->
++	io:format("[cowboy_websocket:handler_init] State ~p, Req ~p HandlerOpts ~p",
++		[State, Req, HandlerOpts]),
+ 	try Handler:websocket_init(Transport:name(), Req, HandlerOpts) of
+ 		{ok, Req2, HandlerState} ->
+ 			websocket_handshake(State, Req2, HandlerState);
+@@ -162,6 +169,8 @@ handler_init(State=#state{env=Env, transport=Transport,
+ websocket_handshake(State=#state{
+ 			transport=Transport, key=Key, deflate_frame=DeflateFrame},
+ 		Req, HandlerState) ->
++	io:format("[cowboy_websocket:websocket_handshake] State ~p Req ~p HandlerState ~p",
++		[State, Req, HandlerState]),
+ 	%% @todo Change into crypto:hash/2 for R17B+ or when supporting only R16B+.
+ 	Challenge = base64:encode(crypto:sha(
+ 		<< Key/binary, "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" >>)),
+@@ -188,18 +197,24 @@ websocket_handshake(State=#state{
+ handler_before_loop(State=#state{
+ 			socket=Socket, transport=Transport, hibernate=true},
+ 		Req, HandlerState, SoFar) ->
++	io:format("[cowboy_websocket:handler_before_loop 1] State ~p Req ~p HandlerState ~p SoFar ~p",
++		[State, Req, HandlerState, SoFar]),
+ 	Transport:setopts(Socket, [{active, once}]),
+ 	{suspend, ?MODULE, handler_loop,
+ 		[State#state{hibernate=false}, Req, HandlerState, SoFar]};
+ handler_before_loop(State=#state{socket=Socket, transport=Transport},
+ 		Req, HandlerState, SoFar) ->
++	io:format("[cowboy_websocket:handler_before_loop 2] State ~p Req ~p HandlerState ~p SoFar ~p",
++		[State, Req, HandlerState, SoFar]),
+ 	Transport:setopts(Socket, [{active, once}]),
+ 	handler_loop(State, Req, HandlerState, SoFar).
+ 
+ -spec handler_loop_timeout(#state{}) -> #state{}.
+ handler_loop_timeout(State=#state{timeout=infinity}) ->
++	io:format("[cowboy_websocket:handler_loop_timeout 1] State ~p", [State]),
+ 	State#state{timeout_ref=undefined};
+ handler_loop_timeout(State=#state{timeout=Timeout, timeout_ref=PrevRef}) ->
++	io:format("[cowboy_websocket:handler_loop_timeout 2] State ~p", [State]),
+ 	_ = case PrevRef of undefined -> ignore; PrevRef ->
+ 		erlang:cancel_timer(PrevRef) end,
+ 	TRef = erlang:start_timer(Timeout, self(), ?MODULE),
+@@ -211,6 +226,8 @@ handler_loop_timeout(State=#state{timeout=Timeout, timeout_ref=PrevRef}) ->
+ 	when Req::cowboy_req:req().
+ handler_loop(State=#state{socket=Socket, messages={OK, Closed, Error},
+ 		timeout_ref=TRef}, Req, HandlerState, SoFar) ->
++	io:format("[cowboy_websocket:handler_loop_timeout] State ~p Req ~p HandlerState ~p SoFar ~p",
++		[State, Req, HandlerState, SoFar]),
+ 	receive
+ 		{OK, Socket, Data} ->
+ 			State2 = handler_loop_timeout(State),
+@@ -516,6 +533,9 @@ is_utf8(_) ->
+ websocket_payload_loop(State=#state{socket=Socket, transport=Transport,
+ 		messages={OK, Closed, Error}, timeout_ref=TRef},
+ 		Req, HandlerState, Opcode, Len, MaskKey, Unmasked, UnmaskedLen, Rsv) ->
++	io:format("[cowboy_websocket:websocket_payload_loop] State ~p Req ~p"
++		"HandlerState ~p Opcode ~p Len ~p MaskKey ~p Unmasked ~p UnmaskedLen ~p Rsv ~p",
++		[State, Req, HandlerState, Opcode, Len, MaskKey, Unmasked, UnmaskedLen, Rsv]),
+ 	Transport:setopts(Socket, [{active, once}]),
+ 	receive
+ 		{OK, Socket, Data} ->
+@@ -726,6 +746,8 @@ websocket_send_many([Frame|Tail], State) ->
+ 	when Req::cowboy_req:req().
+ websocket_close(State=#state{socket=Socket, transport=Transport},
+ 		Req, HandlerState, Reason) ->
++	io:format("[cowboy_websocket:websocket_close] State ~p Req ~p HandlerState ~p Reason ~p",
++		[State, Req, HandlerState, Reason]),
+ 	case Reason of
+ 		{normal, _} ->
+ 			Transport:send(Socket, << 1:1, 0:3, 8:4, 0:1, 2:7, 1000:16 >>);
+@@ -745,8 +767,10 @@ websocket_close(State=#state{socket=Socket, transport=Transport},
+ -spec handler_terminate(#state{}, Req, any(), terminate_reason())
+ 	-> {ok, Req, cowboy_middleware:env()}
+ 	when Req::cowboy_req:req().
+-handler_terminate(#state{env=Env, handler=Handler},
++handler_terminate(#state{env=Env, handler=Handler} = State,
+ 		Req, HandlerState, TerminateReason) ->
++	io:format("[cowboy_websocket:handler_terminate] State ~p Req ~p HandlerState ~p TerminateReason ~p",
++		[State, Req, HandlerState, TerminateReason]),
+ 	try
+ 		Handler:websocket_terminate(TerminateReason, Req, HandlerState)
+ 	catch Class:Reason ->

@@ -1,0 +1,124 @@
+From essen at ninenines.eu  Sat Aug  8 14:43:39 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sat, 08 Aug 2015 14:43:39 +0200
+Subject: [99s-extend] help to combine websocket with basic authentication
+In-Reply-To: <CAA4OwwW-m9+esdjEv-jJv=wZixcisP=OXgAcE5nHVYD2O3NfrA@mail.gmail.com>
+References: <CAA4OwwW-m9+esdjEv-jJv=wZixcisP=OXgAcE5nHVYD2O3NfrA@mail.gmail.com>
+Message-ID: <55C5F97B.2000503@ninenines.eu>
+
+Hey, did you manage to fix your issue?
+
+On 07/13/2015 12:47 PM, Robert Balogh wrote:
+> hello,
+>
+> Sorry that I turned to the list again, but I would like to get some help
+> from you. I have a websocket based application, based on the
+> cowboy/examples/websocket. It is working well. Now I would like to add a
+> basic authentication, and I saw, there is an example how to do this. I
+> checked the cowboy/examples/rest_basic_auth example.
+> So I tried "add" the aut. example into my websocket app by doing the
+> following steps:
+>   - add new module for handle the authentication
+>     do_basic_auth.erl
+>   - update cowboy_router:compile function call when star application
+> with {"/", do_basic_auth, []}
+>
+> Once the compilation done, I can start the app and I get the "basic
+> auth" window in the browser when connecting to localhost:8080, but the
+> "ordinary" index.html does not appears when I set the correct auth data
+> (user/pwd). I am pretty sure that I made something wrong, I do not see
+> what I did wrong, thus I kindly ask you, please try help me.
+>
+> The project what I am working on can be seen in the github:
+> https://github.com/ethrbh/websocket_2
+>
+> thanks fro your help,
+> /Robi
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+
+From a.brandon.clark at gmail.com  Mon Aug 24 20:15:57 2015
+From: a.brandon.clark at gmail.com (Brandon Clark)
+Date: Mon, 24 Aug 2015 11:15:57 -0700
+Subject: [99s-extend] Can't start syslog when built with erlang.mk
+Message-ID: <CA+_xk0nrg_gCKLDBPFNoPBmECNVdZs_MbXotEn1F-xWy9Y__HA@mail.gmail.com>
+
+Greetings...
+
+I'm finding that I can't start syslog when it is built as a dependency of
+my erlang.mk project.  For example:
+
+$ erl -pa _rel/${MY_PROJECT}/lib/*/ebin
+Erlang/OTP 18 [erts-7.0] [source] [64-bit] [async-threads:10] [hipe]
+[kernel-poll:false]
+
+Eshell V7.0  (abort with ^G)
+1> syslog:start().
+{error,"could not load driver syslog_drv: \"cannot open shared object file:
+No such file or directory\""}
+
+
+The root of the problem seems to be that erlang.mk compiled syslog_drv.c as
+"syslog.so" and syslog expects to load "syslog_drv.so".  I have confirmed
+that renaming the file solves the problem.
+
+What do I do with that?
+
+~BC
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150824/7576a7ab/attachment.html>
+
+From essen at ninenines.eu  Mon Aug 24 20:18:27 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 24 Aug 2015 20:18:27 +0200
+Subject: [99s-extend] Can't start syslog when built with erlang.mk
+In-Reply-To: <CA+_xk0nrg_gCKLDBPFNoPBmECNVdZs_MbXotEn1F-xWy9Y__HA@mail.gmail.com>
+References: <CA+_xk0nrg_gCKLDBPFNoPBmECNVdZs_MbXotEn1F-xWy9Y__HA@mail.gmail.com>
+Message-ID: <55DB5FF3.1070604@ninenines.eu>
+
+On 08/24/2015 08:15 PM, Brandon Clark wrote:
+> Greetings...
+>
+> I'm finding that I can't start syslog when it is built as a dependency
+> of my erlang.mk <http://erlang.mk> project.  For example:
+>
+> $ erl -pa _rel/${MY_PROJECT}/lib/*/ebin
+> Erlang/OTP 18 [erts-7.0] [source] [64-bit] [async-threads:10] [hipe]
+> [kernel-poll:false]
+>
+> Eshell V7.0  (abort with ^G)
+> 1> syslog:start().
+> {error,"could not load driver syslog_drv: \"cannot open shared object
+> file: No such file or directory\""}
+>
+>
+> The root of the problem seems to be that erlang.mk <http://erlang.mk>
+> compiled syslog_drv.c as "syslog.so" and syslog expects to load
+> "syslog_drv.so".  I have confirmed that renaming the file solves the
+> problem.
+>
+> What do I do with that?
+
+Open a ticket and this will be fixed, probably just need to handle a 
+case we don't do yet. :-)
+
+Cheers,
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+

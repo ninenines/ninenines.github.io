@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] REST handler failure
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20handler%20failure&In-Reply-To=%3CCAJCf5RzwO4nNcv%3D2Ezf7aMQqFShPhLs4zaYoBBunmzuC7Wp4uQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000290.html">
+   <LINK REL="Next"  HREF="000291.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] REST handler failure</H1>
+    <B>Daniel Goertzen</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20handler%20failure&In-Reply-To=%3CCAJCf5RzwO4nNcv%3D2Ezf7aMQqFShPhLs4zaYoBBunmzuC7Wp4uQ%40mail.gmail.com%3E"
+       TITLE="[99s-extend] REST handler failure">daniel.goertzen at gmail.com
+       </A><BR>
+    <I>Wed Oct 30 16:46:37 CET 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000290.html">[99s-extend] REST handler failure
+</A></li>
+        <LI>Next message: <A HREF="000291.html">[99s-extend] REST handler failure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#293">[ date ]</a>
+              <a href="thread.html#293">[ thread ]</a>
+              <a href="subject.html#293">[ subject ]</a>
+              <a href="author.html#293">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>That's what I was looking for, thanks!
+
+Dan.
+
+
+On Wed, Oct 30, 2013 at 10:25 AM, Tilman Holschuh &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">tilman.holschuh at gmail.com</A>
+&gt;<i> wrote:
+</I>
+&gt;<i> Why not let resource_exists/2 return false when your resource does not
+</I>&gt;<i> exist? You will get 404 on false. This way you separate the implementation
+</I>&gt;<i> for turning your data to json from checking if the request went to the
+</I>&gt;<i> correct resource.
+</I>&gt;<i>
+</I>&gt;<i> - Tilman
+</I>&gt;<i>
+</I>&gt;<i> On 2013-10-30, at 7:58 AM, Daniel Goertzen wrote:
+</I>&gt;<i>
+</I>&gt;<i> &gt; Well, this sort of works.  I tried this in the response handler:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;             {ok, Req2} = cowboy_req:reply(404, [] , &lt;&lt;&quot;this is the body
+</I>&gt;<i> that gets used&quot;&gt;&gt;, Req1),
+</I>&gt;<i> &gt;             {&lt;&lt;&quot;this body gets ignored&quot;&gt;&gt;, Req2, State};
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; The client receives a 404 response, but cowboy crashes:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; =ERROR REPORT==== 8-Sep-2013::22:22:03 ===
+</I>&gt;<i> &gt; Error in process &lt;0.131.0&gt; with exit value:
+</I>&gt;<i> {function_clause,[{cowboy_req,reply,[200,[],&lt;&lt;31
+</I>&gt;<i> bytes&gt;&gt;,{http_req,#Port&lt;0.1208&gt;,ranch_tcp,keepalive,&lt;0.131.0&gt;,&lt;&lt;3
+</I>&gt;<i> bytes&gt;&gt;,'HTTP/1.1',{{192,168,1,187},51017},&lt;&lt;12 bytes&gt;&gt;,undefined,80,&lt;&lt;24
+</I>&gt;<i> bytes&gt;&gt;,undefined,&lt;&lt;0 bytes&gt;&gt;,undefined,[{channel_num,3}],[{&lt;&lt;10
+</I>&gt;<i> bytes&gt;&gt;,&lt;&lt;11 bytes&gt;&gt;},{&lt;&lt;4 bytes&gt;&gt;,&lt;&lt;12 bytes&gt;&gt;},{&lt;&lt;6 bytes&gt;&gt;,&lt;&lt;3
+</I>&gt;<i> bytes&gt;&gt;}],[{&lt;&lt;17 bytes&gt;&gt;,undefined},{&lt;&lt;13 bytes&gt;&gt;,undefined},{&lt;&lt;19
+</I>&gt;<i> bytes&gt;&gt;,undefined},{&lt;&lt;8 bytes&gt;&gt;,undefined},{&lt;&lt;6 bytes&gt;&gt;,[...
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; The issue is that the REST wrapper wants to do the cowboy_req:reply(),
+</I>&gt;<i> and when we do the call we cause the wrapper's call to fail.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Dan.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; On Tue, Oct 29, 2013 at 4:01 PM, Ivan uemlianin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">ivan at llaisdy.com</A>&gt;
+</I>&gt;<i> wrote:
+</I>&gt;<i> &gt; Sorry for terse but I only have a phone. Why can't you return a 404
+</I>&gt;<i> here?  Using something like cowboy:reply(404, ...
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Ivan
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; --
+</I>&gt;<i> &gt; festina lente
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; On 29 Oct 2013, at 21:25, Daniel Goertzen &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">daniel.goertzen at gmail.com</A>&gt;
+</I>&gt;<i> wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;&gt; My situation is that I have a rest handler that may fail due to invalid
+</I>&gt;<i> url segments.  Example situation:
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; init(_Transport, _Req, _Opts) -&gt;
+</I>&gt;<i> &gt;&gt;         {upgrade, protocol, cowboy_rest}.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; content_types_provided(Req, State) -&gt;
+</I>&gt;<i> &gt;&gt;     {[{&lt;&lt;&quot;application/json&quot;&gt;&gt;, get_json}], Req, State}.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; get_json(Req0, State) -&gt;
+</I>&gt;<i> &gt;&gt;     {Params, Req1} = lists:mapfoldl(fun cowboy_req:binding/2, Req0,
+</I>&gt;<i> [param1, param2, param3, ....]),
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;     case catch other_module:request(Params) of
+</I>&gt;<i> &gt;&gt;         {'EXIT', {badarg, _}} -&gt;
+</I>&gt;<i> &gt;&gt;             hmmm, Params were bad and I would like to return a 404 code
+</I>&gt;<i> now.
+</I>&gt;<i> &gt;&gt;         Result -&gt;
+</I>&gt;<i> &gt;&gt;             {jiffy:encode(Result), Req1, State}
+</I>&gt;<i> &gt;&gt;     end.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; So I would like to return a 404 code when my underlying request
+</I>&gt;<i> function fails, but it appears my choices are:
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; - return a 200 (ok) response with data.
+</I>&gt;<i> &gt;&gt; - crash and cause a 500 (Internal Server Error) response to be
+</I>&gt;<i> returned.  Not exactly the sentiment I want.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; Is there some other way to cause a 404 response?
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; I realize I could add path constraint functions, but I will be
+</I>&gt;<i> replicating logic from my underlying request function.  Furthermore, the
+</I>&gt;<i> constraint functions consider parameters in isolation, so that won't work
+</I>&gt;<i> if the validity of parameters is coupled.
+</I>&gt;<i> &gt;&gt;
+</I>&gt;<i> &gt;&gt; Thanks,
+</I>&gt;<i> &gt;&gt; Dan.
+</I>&gt;<i> &gt;&gt; _______________________________________________
+</I>&gt;<i> &gt;&gt; Extend mailing list
+</I>&gt;<i> &gt;&gt; <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> &gt;&gt; <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; Extend mailing list
+</I>&gt;<i> &gt; <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> &gt; <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20131030/3ea4ac64/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20131030/3ea4ac64/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000290.html">[99s-extend] REST handler failure
+</A></li>
+	<LI>Next message: <A HREF="000291.html">[99s-extend] REST handler failure
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#293">[ date ]</a>
+              <a href="thread.html#293">[ thread ]</a>
+              <a href="subject.html#293">[ subject ]</a>
+              <a href="author.html#293">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

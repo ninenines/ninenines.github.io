@@ -1,0 +1,1332 @@
+From lukasz.biedrycki at gmail.com  Mon Feb  3 19:13:04 2014
+From: lukasz.biedrycki at gmail.com (=?ISO-8859-2?Q?=A3ukasz_Biedrycki?=)
+Date: Mon, 3 Feb 2014 19:13:04 +0100
+Subject: [99s-extend] Accept header in POST request
+Message-ID: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+
+Hi,
+I have a rest handler that accepts POST and PUT requests with
+?application/json? content type.
+
+I have content_types_accepted function defined as follows:
+
+content_types_accepted(Req, State) ->
+    {[{?application/json', from_json}], Req, State}.
+
+
+The problem I have is within a request that has two headers:
+
+*Content-type*: application/json
+*Accept*: application/json
+
+With this combination I receive *406*.
+
+You can repeat it with test:
+
+http_SUITE.erl:
+1072 rest_postonly(Config) ->
+1073     Client = ?config(client, Config),
+1074     Headers = [
+1075         {<<"content-type">>, <<"text/plain">>},
+1076         {<<"accept">>, <<"text/plain">>}
+1077     ],
+1078     {ok, Client2} = cowboy_client:request(<<"POST">>,
+1079         build_url("/postonly", Config), Headers, "12345", Client),
+1080     {ok, 204, _, _} = cowboy_client:response(Client2).
+
+My solution to that was to add a content_types_provided function:
+
+content_types_provided(Req, State) ->
+    ContentTypes = [{{<<"application">>, <<"json">>, '*'}, to_json}],
+    {ContentTypes, Req, State}.
+
+
+But it is useless as *to_json* callback registered is not called anyhow.
+
+Adding *content_types_provided* function is a correct solution in this case?
+Or I am missing something here?
+?Accept? header is not relevant only in case of GET requests?
+
+Thank for help,
+?ukasz Biedrycki
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140203/104f8577/attachment.html>
+
+From essen at ninenines.eu  Mon Feb  3 19:23:32 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 03 Feb 2014 19:23:32 +0100
+Subject: [99s-extend] Accept header in POST request
+In-Reply-To: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+References: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+Message-ID: <52EFDEA4.6050004@ninenines.eu>
+
+The content-type provided is relevant for any response, not just 
+responses to GET requests. It defaults to text/html. If your client 
+doesn't send that content-type, you have to define the callback.
+
+I notice that the documentation is incorrect about the relevant methods 
+for this callback, I will open a ticket to fix it soon.
+
+On 02/03/2014 07:13 PM, ?ukasz Biedrycki wrote:
+> Hi,
+> I have a rest handler that accepts POST and PUT requests with
+> ?application/json? content type.
+>
+> I have content_types_accepted function defined as follows:
+>
+> content_types_accepted(Req, State) ->
+>
+>
+> {[{?application/json', from_json}], Req, State}.
+>
+>
+>
+> The problem I have is within a request that has two headers:
+>
+> *Content-type*: application/json
+> *Accept*: application/json
+>
+> With this combination I receive *406*.
+>
+> You can repeat it with test:
+>
+> http_SUITE.erl:
+> 1072 rest_postonly(Config) ->
+> 1073     Client = ?config(client, Config),
+> 1074     Headers = [
+> 1075         {<<"content-type">>, <<"text/plain">>},
+> 1076         {<<"accept">>, <<"text/plain">>}
+> 1077     ],
+> 1078     {ok, Client2} = cowboy_client:request(<<"POST">>,
+> 1079         build_url("/postonly", Config), Headers, "12345", Client),
+> 1080     {ok, 204, _, _} = cowboy_client:response(Client2).
+>
+> My solution to that was to add a content_types_provided function:
+>
+>
+> content_types_provided(Req, State) ->
+>
+>
+> ContentTypes = [{{<<"application">>, <<"json">>, '*'}, to_json}],
+>
+>
+> {ContentTypes, Req, State}.
+>
+>
+>
+> But it is useless as *to_json* callback registered is not called anyhow.
+>
+> Adding *content_types_provided* function is a correct solution in this case?
+> Or I am missing something here?
+> ?Accept? header is not relevant only in case of GET requests?
+>
+> Thank for help,
+> ?ukasz Biedrycki
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lukasz.biedrycki at gmail.com  Mon Feb  3 19:26:17 2014
+From: lukasz.biedrycki at gmail.com (=?ISO-8859-2?Q?=A3ukasz_Biedrycki?=)
+Date: Mon, 3 Feb 2014 19:26:17 +0100
+Subject: [99s-extend] Accept header in POST request
+In-Reply-To: <52EFDEA4.6050004@ninenines.eu>
+References: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+ <52EFDEA4.6050004@ninenines.eu>
+Message-ID: <CAKfrUsiZaAt3k0hDcP2rzUs=w0mTLF7TH3fo+9oLbDu7i0sq-g@mail.gmail.com>
+
+My application sends both headers: ?Content-type? and ?Accept? header using
+POST method.
+
+For POST rest handler do I have to specify both: content_types_accepted and
+content_types_provided to manage this kind of request?
+
+
+On Mon, Feb 3, 2014 at 7:23 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> The content-type provided is relevant for any response, not just responses
+> to GET requests. It defaults to text/html. If your client doesn't send that
+> content-type, you have to define the callback.
+>
+> I notice that the documentation is incorrect about the relevant methods
+> for this callback, I will open a ticket to fix it soon.
+>
+>
+> On 02/03/2014 07:13 PM, ?ukasz Biedrycki wrote:
+>
+>> Hi,
+>> I have a rest handler that accepts POST and PUT requests with
+>> ?application/json? content type.
+>>
+>> I have content_types_accepted function defined as follows:
+>>
+>> content_types_accepted(Req, State) ->
+>>
+>>
+>> {[{?application/json', from_json}], Req, State}.
+>>
+>>
+>>
+>> The problem I have is within a request that has two headers:
+>>
+>> *Content-type*: application/json
+>> *Accept*: application/json
+>>
+>> With this combination I receive *406*.
+>>
+>>
+>> You can repeat it with test:
+>>
+>> http_SUITE.erl:
+>> 1072 rest_postonly(Config) ->
+>> 1073     Client = ?config(client, Config),
+>> 1074     Headers = [
+>> 1075         {<<"content-type">>, <<"text/plain">>},
+>> 1076         {<<"accept">>, <<"text/plain">>}
+>> 1077     ],
+>> 1078     {ok, Client2} = cowboy_client:request(<<"POST">>,
+>> 1079         build_url("/postonly", Config), Headers, "12345", Client),
+>> 1080     {ok, 204, _, _} = cowboy_client:response(Client2).
+>>
+>> My solution to that was to add a content_types_provided function:
+>>
+>>
+>> content_types_provided(Req, State) ->
+>>
+>>
+>> ContentTypes = [{{<<"application">>, <<"json">>, '*'}, to_json}],
+>>
+>>
+>> {ContentTypes, Req, State}.
+>>
+>>
+>>
+>> But it is useless as *to_json* callback registered is not called anyhow.
+>>
+>> Adding *content_types_provided* function is a correct solution in this
+>> case?
+>>
+>> Or I am missing something here?
+>> ?Accept? header is not relevant only in case of GET requests?
+>>
+>> Thank for help,
+>> ?ukasz Biedrycki
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140203/2982cff3/attachment.html>
+
+From essen at ninenines.eu  Mon Feb  3 19:37:55 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 03 Feb 2014 19:37:55 +0100
+Subject: [99s-extend] Accept header in POST request
+In-Reply-To: <CAKfrUsiZaAt3k0hDcP2rzUs=w0mTLF7TH3fo+9oLbDu7i0sq-g@mail.gmail.com>
+References: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+ <52EFDEA4.6050004@ninenines.eu>
+ <CAKfrUsiZaAt3k0hDcP2rzUs=w0mTLF7TH3fo+9oLbDu7i0sq-g@mail.gmail.com>
+Message-ID: <52EFE203.4020702@ninenines.eu>
+
+If Accept is sent and is different than text/html, yes.
+
+This is how HTTP is defined. If the client says it speaks only 
+content-type X but you can only reply with content-type Y, you error out 
+early and stop processing the request. On the other hand if the client 
+doesn't say what content-type it speaks then the server can choose 
+whichever one it wants.
+
+On 02/03/2014 07:26 PM, ?ukasz Biedrycki wrote:
+> My application sends both headers: ?Content-type? and ?Accept? header
+> using POST method.
+>
+> For POST rest handler do I have to specify both: content_types_accepted
+> and content_types_provided to manage this kind of request?
+>
+>
+> On Mon, Feb 3, 2014 at 7:23 PM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     The content-type provided is relevant for any response, not just
+>     responses to GET requests. It defaults to text/html. If your client
+>     doesn't send that content-type, you have to define the callback.
+>
+>     I notice that the documentation is incorrect about the relevant
+>     methods for this callback, I will open a ticket to fix it soon.
+>
+>
+>     On 02/03/2014 07:13 PM, ?ukasz Biedrycki wrote:
+>
+>         Hi,
+>         I have a rest handler that accepts POST and PUT requests with
+>         ?application/json? content type.
+>
+>         I have content_types_accepted function defined as follows:
+>
+>         content_types_accepted(Req, State) ->
+>
+>
+>         {[{?application/json', from_json}], Req, State}.
+>
+>
+>
+>         The problem I have is within a request that has two headers:
+>
+>         *Content-type*: application/json
+>         *Accept*: application/json
+>
+>         With this combination I receive *406*.
+>
+>
+>         You can repeat it with test:
+>
+>         http_SUITE.erl:
+>         1072 rest_postonly(Config) ->
+>         1073     Client = ?config(client, Config),
+>         1074     Headers = [
+>         1075         {<<"content-type">>, <<"text/plain">>},
+>         1076         {<<"accept">>, <<"text/plain">>}
+>         1077     ],
+>         1078     {ok, Client2} = cowboy_client:request(<<"POST"__>>,
+>         1079         build_url("/postonly", Config), Headers, "12345",
+>         Client),
+>         1080     {ok, 204, _, _} = cowboy_client:response(__Client2).
+>
+>         My solution to that was to add a content_types_provided function:
+>
+>
+>         content_types_provided(Req, State) ->
+>
+>
+>         ContentTypes = [{{<<"application">>, <<"json">>, '*'}, to_json}],
+>
+>
+>         {ContentTypes, Req, State}.
+>
+>
+>
+>         But it is useless as *to_json* callback registered is not called
+>         anyhow.
+>
+>         Adding *content_types_provided* function is a correct solution
+>         in this case?
+>
+>         Or I am missing something here?
+>         ?Accept? header is not relevant only in case of GET requests?
+>
+>         Thank for help,
+>         ?ukasz Biedrycki
+>
+>
+>         _________________________________________________
+>         Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         https://lists.ninenines.eu/__listinfo/extend
+>         <https://lists.ninenines.eu/listinfo/extend>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lukasz.biedrycki at gmail.com  Mon Feb  3 20:08:12 2014
+From: lukasz.biedrycki at gmail.com (=?ISO-8859-2?Q?=A3ukasz_Biedrycki?=)
+Date: Mon, 3 Feb 2014 20:08:12 +0100
+Subject: [99s-extend] Accept header in POST request
+In-Reply-To: <52EFE203.4020702@ninenines.eu>
+References: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+ <52EFDEA4.6050004@ninenines.eu>
+ <CAKfrUsiZaAt3k0hDcP2rzUs=w0mTLF7TH3fo+9oLbDu7i0sq-g@mail.gmail.com>
+ <52EFE203.4020702@ninenines.eu>
+Message-ID: <CAKfrUsiHdRRzsBJ_Ns+sw2BdcwbB9dKbx-m6UUL+hRj==wXY=A@mail.gmail.com>
+
+Ok,
+it is more clear for me.
+
+Last question I have is about content_types_provided function.
+
+Is it safe to define it like this?
+
+content_types_provided(R, S) ->
+   ContentTypes = [{{<<"application">>, <<"json">>, '*'}, *undefined*}],
+   {ContentTypes, Req, State}.
+
+Callback in content_types_provided is useless for POST requests, as it
+won?t be called.
+Is it safe to use *undefined *atom, to have a source code clearer?
+
+
+
+
+On Mon, Feb 3, 2014 at 7:37 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> If Accept is sent and is different than text/html, yes.
+>
+> This is how HTTP is defined. If the client says it speaks only
+> content-type X but you can only reply with content-type Y, you error out
+> early and stop processing the request. On the other hand if the client
+> doesn't say what content-type it speaks then the server can choose
+> whichever one it wants.
+>
+>
+> On 02/03/2014 07:26 PM, ?ukasz Biedrycki wrote:
+>
+>> My application sends both headers: ?Content-type? and ?Accept? header
+>> using POST method.
+>>
+>> For POST rest handler do I have to specify both: content_types_accepted
+>> and content_types_provided to manage this kind of request?
+>>
+>>
+>> On Mon, Feb 3, 2014 at 7:23 PM, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     The content-type provided is relevant for any response, not just
+>>     responses to GET requests. It defaults to text/html. If your client
+>>     doesn't send that content-type, you have to define the callback.
+>>
+>>     I notice that the documentation is incorrect about the relevant
+>>     methods for this callback, I will open a ticket to fix it soon.
+>>
+>>
+>>     On 02/03/2014 07:13 PM, ?ukasz Biedrycki wrote:
+>>
+>>         Hi,
+>>         I have a rest handler that accepts POST and PUT requests with
+>>         ?application/json? content type.
+>>
+>>         I have content_types_accepted function defined as follows:
+>>
+>>         content_types_accepted(Req, State) ->
+>>
+>>
+>>         {[{?application/json', from_json}], Req, State}.
+>>
+>>
+>>
+>>         The problem I have is within a request that has two headers:
+>>
+>>         *Content-type*: application/json
+>>         *Accept*: application/json
+>>
+>>         With this combination I receive *406*.
+>>
+>>
+>>         You can repeat it with test:
+>>
+>>         http_SUITE.erl:
+>>         1072 rest_postonly(Config) ->
+>>         1073     Client = ?config(client, Config),
+>>         1074     Headers = [
+>>         1075         {<<"content-type">>, <<"text/plain">>},
+>>         1076         {<<"accept">>, <<"text/plain">>}
+>>         1077     ],
+>>         1078     {ok, Client2} = cowboy_client:request(<<"POST"__>>,
+>>
+>>         1079         build_url("/postonly", Config), Headers, "12345",
+>>         Client),
+>>         1080     {ok, 204, _, _} = cowboy_client:response(__Client2).
+>>
+>>
+>>         My solution to that was to add a content_types_provided function:
+>>
+>>
+>>         content_types_provided(Req, State) ->
+>>
+>>
+>>         ContentTypes = [{{<<"application">>, <<"json">>, '*'}, to_json}],
+>>
+>>
+>>         {ContentTypes, Req, State}.
+>>
+>>
+>>
+>>         But it is useless as *to_json* callback registered is not called
+>>         anyhow.
+>>
+>>         Adding *content_types_provided* function is a correct solution
+>>         in this case?
+>>
+>>         Or I am missing something here?
+>>         ?Accept? header is not relevant only in case of GET requests?
+>>
+>>         Thank for help,
+>>         ?ukasz Biedrycki
+>>
+>>
+>>         _________________________________________________
+>>         Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>         https://lists.ninenines.eu/__listinfo/extend
+>>
+>>         <https://lists.ninenines.eu/listinfo/extend>
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     http://ninenines.eu
+>>
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140203/088e7e6a/attachment.html>
+
+From essen at ninenines.eu  Mon Feb  3 20:15:44 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 03 Feb 2014 20:15:44 +0100
+Subject: [99s-extend] Accept header in POST request
+In-Reply-To: <CAKfrUsiHdRRzsBJ_Ns+sw2BdcwbB9dKbx-m6UUL+hRj==wXY=A@mail.gmail.com>
+References: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+ <52EFDEA4.6050004@ninenines.eu>
+ <CAKfrUsiZaAt3k0hDcP2rzUs=w0mTLF7TH3fo+9oLbDu7i0sq-g@mail.gmail.com>
+ <52EFE203.4020702@ninenines.eu>
+ <CAKfrUsiHdRRzsBJ_Ns+sw2BdcwbB9dKbx-m6UUL+hRj==wXY=A@mail.gmail.com>
+Message-ID: <52EFEAE0.7050804@ninenines.eu>
+
+Sure. It won't be called if not a GET or HEAD request so that's probably 
+the best value you can return in your case.
+
+On 02/03/2014 08:08 PM, ?ukasz Biedrycki wrote:
+> Ok,
+> it is more clear for me.
+>
+> Last question I have is about content_types_provided function.
+>
+> Is it safe to define it like this?
+>
+> content_types_provided(R, S) ->
+> ContentTypes = [{{<<"application">>, <<"json">>, '*'}, *undefined*}],
+>     {ContentTypes, Req, State}.
+>
+> Callback in content_types_provided is useless for POST requests, as it
+> won?t be called.
+> Is it safe to use *undefined *atom, to have a source code clearer?
+>
+>
+>
+>
+> On Mon, Feb 3, 2014 at 7:37 PM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     If Accept is sent and is different than text/html, yes.
+>
+>     This is how HTTP is defined. If the client says it speaks only
+>     content-type X but you can only reply with content-type Y, you error
+>     out early and stop processing the request. On the other hand if the
+>     client doesn't say what content-type it speaks then the server can
+>     choose whichever one it wants.
+>
+>
+>     On 02/03/2014 07:26 PM, ?ukasz Biedrycki wrote:
+>
+>         My application sends both headers: ?Content-type? and ?Accept?
+>         header
+>         using POST method.
+>
+>         For POST rest handler do I have to specify both:
+>         content_types_accepted
+>         and content_types_provided to manage this kind of request?
+>
+>
+>         On Mon, Feb 3, 2014 at 7:23 PM, Lo?c Hoguin <essen at ninenines.eu
+>         <mailto:essen at ninenines.eu>
+>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>> wrote:
+>
+>              The content-type provided is relevant for any response, not
+>         just
+>              responses to GET requests. It defaults to text/html. If
+>         your client
+>              doesn't send that content-type, you have to define the
+>         callback.
+>
+>              I notice that the documentation is incorrect about the relevant
+>              methods for this callback, I will open a ticket to fix it soon.
+>
+>
+>              On 02/03/2014 07:13 PM, ?ukasz Biedrycki wrote:
+>
+>                  Hi,
+>                  I have a rest handler that accepts POST and PUT
+>         requests with
+>                  ?application/json? content type.
+>
+>                  I have content_types_accepted function defined as follows:
+>
+>                  content_types_accepted(Req, State) ->
+>
+>
+>                  {[{?application/json', from_json}], Req, State}.
+>
+>
+>
+>                  The problem I have is within a request that has two
+>         headers:
+>
+>                  *Content-type*: application/json
+>                  *Accept*: application/json
+>
+>                  With this combination I receive *406*.
+>
+>
+>                  You can repeat it with test:
+>
+>                  http_SUITE.erl:
+>                  1072 rest_postonly(Config) ->
+>                  1073     Client = ?config(client, Config),
+>                  1074     Headers = [
+>                  1075         {<<"content-type">>, <<"text/plain">>},
+>                  1076         {<<"accept">>, <<"text/plain">>}
+>                  1077     ],
+>                  1078     {ok, Client2} =
+>         cowboy_client:request(<<"POST"____>>,
+>
+>                  1079         build_url("/postonly", Config), Headers,
+>         "12345",
+>                  Client),
+>                  1080     {ok, 204, _, _} =
+>         cowboy_client:response(____Client2).
+>
+>
+>                  My solution to that was to add a content_types_provided
+>         function:
+>
+>
+>                  content_types_provided(Req, State) ->
+>
+>
+>                  ContentTypes = [{{<<"application">>, <<"json">>, '*'},
+>         to_json}],
+>
+>
+>                  {ContentTypes, Req, State}.
+>
+>
+>
+>                  But it is useless as *to_json* callback registered is
+>         not called
+>                  anyhow.
+>
+>                  Adding *content_types_provided* function is a correct
+>         solution
+>                  in this case?
+>
+>                  Or I am missing something here?
+>                  ?Accept? header is not relevant only in case of GET
+>         requests?
+>
+>                  Thank for help,
+>                  ?ukasz Biedrycki
+>
+>
+>                  ___________________________________________________
+>                  Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         <mailto:Extend at lists.__ninenines.eu
+>         <mailto:Extend at lists.ninenines.eu>>
+>         https://lists.ninenines.eu/____listinfo/extend
+>         <https://lists.ninenines.eu/__listinfo/extend>
+>
+>                  <https://lists.ninenines.eu/__listinfo/extend
+>         <https://lists.ninenines.eu/listinfo/extend>>
+>
+>
+>              --
+>              Lo?c Hoguin
+>         http://ninenines.eu
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lukasz.biedrycki at gmail.com  Mon Feb  3 20:16:29 2014
+From: lukasz.biedrycki at gmail.com (=?ISO-8859-2?Q?=A3ukasz_Biedrycki?=)
+Date: Mon, 3 Feb 2014 20:16:29 +0100
+Subject: [99s-extend] Accept header in POST request
+In-Reply-To: <52EFEAE0.7050804@ninenines.eu>
+References: <CAKfrUsi-hZ-k3QUnhmdRTE1NPZ4j7Lgb2L8xWNdaQ4vk+nw2VA@mail.gmail.com>
+ <52EFDEA4.6050004@ninenines.eu>
+ <CAKfrUsiZaAt3k0hDcP2rzUs=w0mTLF7TH3fo+9oLbDu7i0sq-g@mail.gmail.com>
+ <52EFE203.4020702@ninenines.eu>
+ <CAKfrUsiHdRRzsBJ_Ns+sw2BdcwbB9dKbx-m6UUL+hRj==wXY=A@mail.gmail.com>
+ <52EFEAE0.7050804@ninenines.eu>
+Message-ID: <CAKfrUsjrQxO_6CB0Hw85aqcWe+C5j0Dv+cNbK7ffSzv7npMvMA@mail.gmail.com>
+
+Perfect, thanks a lot!
+Cheers,
+?.
+
+
+On Mon, Feb 3, 2014 at 8:15 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Sure. It won't be called if not a GET or HEAD request so that's probably
+> the best value you can return in your case.
+>
+>
+> On 02/03/2014 08:08 PM, ?ukasz Biedrycki wrote:
+>
+>> Ok,
+>> it is more clear for me.
+>>
+>> Last question I have is about content_types_provided function.
+>>
+>> Is it safe to define it like this?
+>>
+>> content_types_provided(R, S) ->
+>> ContentTypes = [{{<<"application">>, <<"json">>, '*'}, *undefined*}],
+>>
+>>     {ContentTypes, Req, State}.
+>>
+>> Callback in content_types_provided is useless for POST requests, as it
+>> won?t be called.
+>> Is it safe to use *undefined *atom, to have a source code clearer?
+>>
+>>
+>>
+>>
+>>
+>> On Mon, Feb 3, 2014 at 7:37 PM, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     If Accept is sent and is different than text/html, yes.
+>>
+>>     This is how HTTP is defined. If the client says it speaks only
+>>     content-type X but you can only reply with content-type Y, you error
+>>     out early and stop processing the request. On the other hand if the
+>>     client doesn't say what content-type it speaks then the server can
+>>     choose whichever one it wants.
+>>
+>>
+>>     On 02/03/2014 07:26 PM, ?ukasz Biedrycki wrote:
+>>
+>>         My application sends both headers: ?Content-type? and ?Accept?
+>>         header
+>>         using POST method.
+>>
+>>         For POST rest handler do I have to specify both:
+>>         content_types_accepted
+>>         and content_types_provided to manage this kind of request?
+>>
+>>
+>>         On Mon, Feb 3, 2014 at 7:23 PM, Lo?c Hoguin <essen at ninenines.eu
+>>         <mailto:essen at ninenines.eu>
+>>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>> wrote:
+>>
+>>              The content-type provided is relevant for any response, not
+>>         just
+>>              responses to GET requests. It defaults to text/html. If
+>>         your client
+>>              doesn't send that content-type, you have to define the
+>>         callback.
+>>
+>>              I notice that the documentation is incorrect about the
+>> relevant
+>>              methods for this callback, I will open a ticket to fix it
+>> soon.
+>>
+>>
+>>              On 02/03/2014 07:13 PM, ?ukasz Biedrycki wrote:
+>>
+>>                  Hi,
+>>                  I have a rest handler that accepts POST and PUT
+>>         requests with
+>>                  ?application/json? content type.
+>>
+>>                  I have content_types_accepted function defined as
+>> follows:
+>>
+>>                  content_types_accepted(Req, State) ->
+>>
+>>
+>>                  {[{?application/json', from_json}], Req, State}.
+>>
+>>
+>>
+>>                  The problem I have is within a request that has two
+>>         headers:
+>>
+>>                  *Content-type*: application/json
+>>                  *Accept*: application/json
+>>
+>>                  With this combination I receive *406*.
+>>
+>>
+>>                  You can repeat it with test:
+>>
+>>                  http_SUITE.erl:
+>>                  1072 rest_postonly(Config) ->
+>>                  1073     Client = ?config(client, Config),
+>>                  1074     Headers = [
+>>                  1075         {<<"content-type">>, <<"text/plain">>},
+>>                  1076         {<<"accept">>, <<"text/plain">>}
+>>                  1077     ],
+>>                  1078     {ok, Client2} =
+>>         cowboy_client:request(<<"POST"____>>,
+>>
+>>
+>>                  1079         build_url("/postonly", Config), Headers,
+>>         "12345",
+>>                  Client),
+>>                  1080     {ok, 204, _, _} =
+>>         cowboy_client:response(____Client2).
+>>
+>>
+>>
+>>                  My solution to that was to add a content_types_provided
+>>         function:
+>>
+>>
+>>                  content_types_provided(Req, State) ->
+>>
+>>
+>>                  ContentTypes = [{{<<"application">>, <<"json">>, '*'},
+>>         to_json}],
+>>
+>>
+>>                  {ContentTypes, Req, State}.
+>>
+>>
+>>
+>>                  But it is useless as *to_json* callback registered is
+>>         not called
+>>                  anyhow.
+>>
+>>                  Adding *content_types_provided* function is a correct
+>>         solution
+>>                  in this case?
+>>
+>>                  Or I am missing something here?
+>>                  ?Accept? header is not relevant only in case of GET
+>>         requests?
+>>
+>>                  Thank for help,
+>>                  ?ukasz Biedrycki
+>>
+>>
+>>                  ___________________________________________________
+>>
+>>                  Extend mailing list
+>>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>         <mailto:Extend at lists.__ninenines.eu
+>>         <mailto:Extend at lists.ninenines.eu>>
+>>         https://lists.ninenines.eu/____listinfo/extend
+>>         <https://lists.ninenines.eu/__listinfo/extend>
+>>
+>>
+>>                  <https://lists.ninenines.eu/__listinfo/extend
+>>         <https://lists.ninenines.eu/listinfo/extend>>
+>>
+>>
+>>              --
+>>              Lo?c Hoguin
+>>         http://ninenines.eu
+>>
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     http://ninenines.eu
+>>
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140203/e84f6223/attachment.html>
+
+From lukasz.biedrycki at gmail.com  Fri Feb  7 17:56:26 2014
+From: lukasz.biedrycki at gmail.com (=?ISO-8859-2?Q?=A3ukasz_Biedrycki?=)
+Date: Fri, 7 Feb 2014 17:56:26 +0100
+Subject: [99s-extend] Metrics per request and handler
+Message-ID: <CAKfrUsikVjhGk+M8L=9gSxwdmTBtyn1shXsFe35L+6eHZYCwyA@mail.gmail.com>
+
+Hi,
+in my application I would like to add some metrics per handler and per
+response http status code.
+
+One way is to add on response callback function, but there I do not have an
+information about handler and handler opts.
+
+Second way is to add a middleware, but then I do not have an information
+about response status code.
+
+Frankly, I like second way more.
+How do like an idea to add response status code to request record similar
+to: resp_headers or resp_body ?
+
+Cheers,
+?ukasz Biedrycki
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140207/904cc7bf/attachment.html>
+
+From lukasz.biedrycki at gmail.com  Mon Feb 10 10:41:13 2014
+From: lukasz.biedrycki at gmail.com (=?ISO-8859-2?Q?=A3ukasz_Biedrycki?=)
+Date: Mon, 10 Feb 2014 10:41:13 +0100
+Subject: [99s-extend] Metrics per request and handler
+In-Reply-To: <CAKfrUsikVjhGk+M8L=9gSxwdmTBtyn1shXsFe35L+6eHZYCwyA@mail.gmail.com>
+References: <CAKfrUsikVjhGk+M8L=9gSxwdmTBtyn1shXsFe35L+6eHZYCwyA@mail.gmail.com>
+Message-ID: <CAKfrUsiqvYuNVW9H0x4xuarorkCHsw5HJaJWasJvd6XgRfAw4g@mail.gmail.com>
+
+Hi again,
+another idea is to make environment (Env), which is passed between
+middlewares, a part of Request record, so I could have an access to it in
+onresponse callback.
+
+Any of that makes sense?
+
+Cheers,
+?ukasz Biedrycki
+
+
+On Fri, Feb 7, 2014 at 5:56 PM, ?ukasz Biedrycki <lukasz.biedrycki at gmail.com
+> wrote:
+
+> Hi,
+> in my application I would like to add some metrics per handler and per
+> response http status code.
+>
+> One way is to add on response callback function, but there I do not have
+> an information about handler and handler opts.
+>
+> Second way is to add a middleware, but then I do not have an information
+> about response status code.
+>
+> Frankly, I like second way more.
+> How do like an idea to add response status code to request record similar
+> to: resp_headers or resp_body ?
+>
+> Cheers,
+> ?ukasz Biedrycki
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140210/b46e2bab/attachment.html>
+
+From essen at ninenines.eu  Mon Feb 10 10:49:24 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 10 Feb 2014 10:49:24 +0100
+Subject: [99s-extend] Metrics per request and handler
+In-Reply-To: <CAKfrUsiqvYuNVW9H0x4xuarorkCHsw5HJaJWasJvd6XgRfAw4g@mail.gmail.com>
+References: <CAKfrUsikVjhGk+M8L=9gSxwdmTBtyn1shXsFe35L+6eHZYCwyA@mail.gmail.com>
+ <CAKfrUsiqvYuNVW9H0x4xuarorkCHsw5HJaJWasJvd6XgRfAw4g@mail.gmail.com>
+Message-ID: <52F8A0A4.8030109@ninenines.eu>
+
+You have the meta values in Req which are passed everywhere. You can 
+easily set and retrieve them.
+
+On 02/10/2014 10:41 AM, ?ukasz Biedrycki wrote:
+> Hi again,
+> another idea is to make environment (Env), which is passed between
+> middlewares, a part of Request record, so I could have an access to it in
+> onresponse callback.
+>
+> Any of that makes sense?
+>
+> Cheers,
+> ?ukasz Biedrycki
+>
+>
+> On Fri, Feb 7, 2014 at 5:56 PM, ?ukasz Biedrycki <lukasz.biedrycki at gmail.com
+>> wrote:
+>
+>> Hi,
+>> in my application I would like to add some metrics per handler and per
+>> response http status code.
+>>
+>> One way is to add on response callback function, but there I do not have
+>> an information about handler and handler opts.
+>>
+>> Second way is to add a middleware, but then I do not have an information
+>> about response status code.
+>>
+>> Frankly, I like second way more.
+>> How do like an idea to add response status code to request record similar
+>> to: resp_headers or resp_body ?
+>>
+>> Cheers,
+>> ?ukasz Biedrycki
+>>
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lukasz.biedrycki at gmail.com  Mon Feb 10 10:51:50 2014
+From: lukasz.biedrycki at gmail.com (=?ISO-8859-2?Q?=A3ukasz_Biedrycki?=)
+Date: Mon, 10 Feb 2014 10:51:50 +0100
+Subject: [99s-extend] Metrics per request and handler
+In-Reply-To: <52F8A0A4.8030109@ninenines.eu>
+References: <CAKfrUsikVjhGk+M8L=9gSxwdmTBtyn1shXsFe35L+6eHZYCwyA@mail.gmail.com>
+ <CAKfrUsiqvYuNVW9H0x4xuarorkCHsw5HJaJWasJvd6XgRfAw4g@mail.gmail.com>
+ <52F8A0A4.8030109@ninenines.eu>
+Message-ID: <CAKfrUsiCSXx5BTHNHx=nkzS5n2EgKVFt-23tz-GX1cV-2Fk_WA@mail.gmail.com>
+
+Hey,
+I didn?t know about that.
+That is exactly what I need!
+Thank you!
+
+Cheers,
+?ukasz Biedrycki
+
+
+On Mon, Feb 10, 2014 at 10:49 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> You have the meta values in Req which are passed everywhere. You can
+> easily set and retrieve them.
+>
+>
+> On 02/10/2014 10:41 AM, ?ukasz Biedrycki wrote:
+>
+>> Hi again,
+>> another idea is to make environment (Env), which is passed between
+>> middlewares, a part of Request record, so I could have an access to it in
+>> onresponse callback.
+>>
+>> Any of that makes sense?
+>>
+>> Cheers,
+>> ?ukasz Biedrycki
+>>
+>>
+>> On Fri, Feb 7, 2014 at 5:56 PM, ?ukasz Biedrycki <
+>> lukasz.biedrycki at gmail.com
+>>
+>>> wrote:
+>>>
+>>
+>>  Hi,
+>>> in my application I would like to add some metrics per handler and per
+>>> response http status code.
+>>>
+>>> One way is to add on response callback function, but there I do not have
+>>> an information about handler and handler opts.
+>>>
+>>> Second way is to add a middleware, but then I do not have an information
+>>> about response status code.
+>>>
+>>> Frankly, I like second way more.
+>>> How do like an idea to add response status code to request record similar
+>>> to: resp_headers or resp_body ?
+>>>
+>>> Cheers,
+>>> ?ukasz Biedrycki
+>>>
+>>>
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140210/bf26d573/attachment.html>
+
+From psihonavt at gmail.com  Mon Feb 10 19:44:54 2014
+From: psihonavt at gmail.com (Anton Koval')
+Date: Mon, 10 Feb 2014 20:44:54 +0200
+Subject: [99s-extend] do not treat warnings as errors on make?
+Message-ID: <CAD9h6NH=RD9qbU=fu1AG27P0qDCcYpNGcYMaYVSz+1DK1WaLQQ@mail.gmail.com>
+
+Hello,
+
+as I understand, by default `make all` performs compile with option
+warnings_as_errors. How can I disable this option?
+There are options described at
+https://github.com/extend/erlang.mk#optionsand I believe that
+ERLC_OPTS
+should be filled with `-warnings_as_errors`. But it is unclear for me where
+have I to add(put) that option?
+
+Thanks.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140210/a2b35e2f/attachment.html>
+
+From essen at ninenines.eu  Mon Feb 10 19:48:01 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 10 Feb 2014 19:48:01 +0100
+Subject: [99s-extend] do not treat warnings as errors on make?
+In-Reply-To: <CAD9h6NH=RD9qbU=fu1AG27P0qDCcYpNGcYMaYVSz+1DK1WaLQQ@mail.gmail.com>
+References: <CAD9h6NH=RD9qbU=fu1AG27P0qDCcYpNGcYMaYVSz+1DK1WaLQQ@mail.gmail.com>
+Message-ID: <52F91EE1.7040809@ninenines.eu>
+
+You can just define ERLC_OPTS before you include erlang.mk and it'll use 
+that instead. I'm not sure why you want to disable that though, warnings 
+usually alert you of bugs in your code.
+
+On 02/10/2014 07:44 PM, Anton Koval' wrote:
+> Hello,
+>
+> as I understand, by default `make all` performs compile with
+> option**warnings_as_errors.**How can I disable this option?
+> There are options described at
+> https://github.com/extend/erlang.mk#options and I believe that
+> |ERLC_OPTS should be filled with `-|warnings_as_errors`**. But it is
+> unclear for me where have I to add(put) that option?
+>
+> Thanks.
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From psihonavt at gmail.com  Mon Feb 10 20:22:49 2014
+From: psihonavt at gmail.com (Anton Koval')
+Date: Mon, 10 Feb 2014 21:22:49 +0200
+Subject: [99s-extend] do not treat warnings as errors on make?
+In-Reply-To: <52F91EE1.7040809@ninenines.eu>
+References: <CAD9h6NH=RD9qbU=fu1AG27P0qDCcYpNGcYMaYVSz+1DK1WaLQQ@mail.gmail.com>
+ <52F91EE1.7040809@ninenines.eu>
+Message-ID: <CAD9h6NEzSej=2OAfPcksSbBuk-2ui1P5ipaCgB0sQKeNt4Zddw@mail.gmail.com>
+
+Thanks for explanation.
+My situation: I'm developing some stuff in module. That module in some kind
+of "draft' state (e.g. some functions are unused), but regardless that I
+want to compile project in order to test some specific parts of that
+module.
+
+
+On Mon, Feb 10, 2014 at 8:48 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> You can just define ERLC_OPTS before you include erlang.mk and it'll use
+> that instead. I'm not sure why you want to disable that though, warnings
+> usually alert you of bugs in your code.
+>
+>
+> On 02/10/2014 07:44 PM, Anton Koval' wrote:
+>
+>> Hello,
+>>
+>> as I understand, by default `make all` performs compile with
+>> option**warnings_as_errors.**How can I disable this option?
+>>
+>> There are options described at
+>> https://github.com/extend/erlang.mk#options and I believe that
+>> |ERLC_OPTS should be filled with `-|warnings_as_errors`**. But it is
+>>
+>> unclear for me where have I to add(put) that option?
+>>
+>> Thanks.
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140210/2ae635a6/attachment.html>
+
+From ivan at llaisdy.com  Mon Feb 10 20:46:54 2014
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Mon, 10 Feb 2014 19:46:54 +0000
+Subject: [99s-extend] do not treat warnings as errors on make?
+In-Reply-To: <CAD9h6NEzSej=2OAfPcksSbBuk-2ui1P5ipaCgB0sQKeNt4Zddw@mail.gmail.com>
+References: <CAD9h6NH=RD9qbU=fu1AG27P0qDCcYpNGcYMaYVSz+1DK1WaLQQ@mail.gmail.com>
+ <52F91EE1.7040809@ninenines.eu>
+ <CAD9h6NEzSej=2OAfPcksSbBuk-2ui1P5ipaCgB0sQKeNt4Zddw@mail.gmail.com>
+Message-ID: <2424F399-12CA-455D-ACEE-45882873B1D4@llaisdy.com>
+
+I promise you, improving the code now to get rid of the warnings is worth it.
+
+Ivan
+
+--
+festina lente
+
+
+> On 10 Feb 2014, at 19:22, "Anton Koval'" <psihonavt at gmail.com> wrote:
+> 
+> Thanks for explanation. 
+> My situation: I'm developing some stuff in module. That module in some kind of "draft' state (e.g. some functions are unused), but regardless that I want to compile project in order to test some specific parts of that module. 
+> 
+> 
+>> On Mon, Feb 10, 2014 at 8:48 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>> You can just define ERLC_OPTS before you include erlang.mk and it'll use that instead. I'm not sure why you want to disable that though, warnings usually alert you of bugs in your code.
+>> 
+>> 
+>>> On 02/10/2014 07:44 PM, Anton Koval' wrote:
+>>> Hello,
+>>> 
+>>> as I understand, by default `make all` performs compile with
+>>> option**warnings_as_errors.**How can I disable this option?
+>>> 
+>>> There are options described at
+>>> https://github.com/extend/erlang.mk#options and I believe that
+>>> |ERLC_OPTS should be filled with `-|warnings_as_errors`**. But it is
+>>> 
+>>> unclear for me where have I to add(put) that option?
+>>> 
+>>> Thanks.
+>>> 
+>>> 
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> https://lists.ninenines.eu/listinfo/extend
+>> 
+>> -- 
+>> Lo?c Hoguin
+>> http://ninenines.eu
+> 
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140210/1781c9d2/attachment.html>
+
+From psihonavt at gmail.com  Mon Feb 10 20:55:24 2014
+From: psihonavt at gmail.com (Anton Koval')
+Date: Mon, 10 Feb 2014 21:55:24 +0200
+Subject: [99s-extend] do not treat warnings as errors on make?
+In-Reply-To: <2424F399-12CA-455D-ACEE-45882873B1D4@llaisdy.com>
+References: <CAD9h6NH=RD9qbU=fu1AG27P0qDCcYpNGcYMaYVSz+1DK1WaLQQ@mail.gmail.com>
+ <52F91EE1.7040809@ninenines.eu>
+ <CAD9h6NEzSej=2OAfPcksSbBuk-2ui1P5ipaCgB0sQKeNt4Zddw@mail.gmail.com>
+ <2424F399-12CA-455D-ACEE-45882873B1D4@llaisdy.com>
+Message-ID: <CAD9h6NE5HaNe7-RUUVQehkWGF9uwmLzhTh_J=B6mB9ATyPJumQ@mail.gmail.com>
+
+Got it! :)
+fixed all warnings and removed  ERLC_OPTS from Makefile.
+
+
+On Mon, Feb 10, 2014 at 9:46 PM, Ivan Uemlianin <ivan at llaisdy.com> wrote:
+
+> I promise you, improving the code now to get rid of the warnings is worth
+> it.
+>
+> Ivan
+>
+> --
+> festina lente
+>
+>
+> On 10 Feb 2014, at 19:22, "Anton Koval'" <psihonavt at gmail.com> wrote:
+>
+> Thanks for explanation.
+> My situation: I'm developing some stuff in module. That module in some
+> kind of "draft' state (e.g. some functions are unused), but regardless that
+> I want to compile project in order to test some specific parts of that
+> module.
+>
+>
+> On Mon, Feb 10, 2014 at 8:48 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> You can just define ERLC_OPTS before you include erlang.mk and it'll use
+>> that instead. I'm not sure why you want to disable that though, warnings
+>> usually alert you of bugs in your code.
+>>
+>>
+>> On 02/10/2014 07:44 PM, Anton Koval' wrote:
+>>
+>>> Hello,
+>>>
+>>> as I understand, by default `make all` performs compile with
+>>> option**warnings_as_errors.**How can I disable this option?
+>>>
+>>> There are options described at
+>>> https://github.com/extend/erlang.mk#options and I believe that
+>>> |ERLC_OPTS should be filled with `-|warnings_as_errors`**. But it is
+>>>
+>>> unclear for me where have I to add(put) that option?
+>>>
+>>> Thanks.
+>>>
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> https://lists.ninenines.eu/listinfo/extend
+>>>
+>>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140210/fa72e2ba/attachment.html>
+

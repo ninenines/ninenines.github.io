@@ -1,0 +1,223 @@
+From amol at hatwar.org  Sun Oct  5 04:56:58 2014
+From: amol at hatwar.org (Amol Hatwar)
+Date: Sun, 5 Oct 2014 08:26:58 +0530
+Subject: [99s-extend] Prevent resource creation on POST
+Message-ID: <20141005025658.GA12424@newton.local>
+
+Hello,
+
+I was recently tinkering with cowboy_rest and found that there is no way prevent resource creation in a POST request when it already exists. Either that, or I'm probably not doing something right or don't know enough...
+
+Here's what I have running:
+A user tries to signup with a post request. To be successful, the username has to be unique. The resource_exists/2 method responds with proper true and false values by looking at the request body.
+
+Here's what I want done:
+Iff the resource_exists callback returns true, I don't want the AcceptResource callback to run at all. Instead, I want to send a 4XX status and halt. Is there a canonical way of doing this?
+
+Cheers,
+
+AH
+
+From essen at ninenines.eu  Sun Oct  5 09:49:00 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sun, 05 Oct 2014 10:49:00 +0300
+Subject: [99s-extend] Prevent resource creation on POST
+In-Reply-To: <20141005025658.GA12424@newton.local>
+References: <20141005025658.GA12424@newton.local>
+Message-ID: <5430F7EC.4080306@ninenines.eu>
+
+If resource_exists = true, then POST doesn't create but update the 
+resource at the given URI. If what you are doing is something like 
+write-once resources then you will have to reject these cases manually 
+by returning halt at some point.
+
+On 10/05/2014 05:56 AM, Amol Hatwar wrote:
+> Hello,
+>
+> I was recently tinkering with cowboy_rest and found that there is no way prevent resource creation in a POST request when it already exists. Either that, or I'm probably not doing something right or don't know enough...
+>
+> Here's what I have running:
+> A user tries to signup with a post request. To be successful, the username has to be unique. The resource_exists/2 method responds with proper true and false values by looking at the request body.
+>
+> Here's what I want done:
+> Iff the resource_exists callback returns true, I don't want the AcceptResource callback to run at all. Instead, I want to send a 4XX status and halt. Is there a canonical way of doing this?
+>
+> Cheers,
+>
+> AH
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From stefan.strigler at gmail.com  Tue Oct 14 10:05:53 2014
+From: stefan.strigler at gmail.com (Stefan Strigler)
+Date: Tue, 14 Oct 2014 10:05:53 +0200
+Subject: [99s-extend] PUT on new resource and status 201
+Message-ID: <CAE7UswcWMj-voOs4eSbYxNyfkHZ8anCeUr6JyBGU+RhODk5Nig@mail.gmail.com>
+
+Hey,
+
+just subscribed yesterday and now that's already my first question.
+
+I'm referring to
+http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/. Given you
+have a PUT on a new resource the diagram suggests that the response's
+status code depends on whether you've set a location and/or body. But when
+looking at the code (v1.0.0) then cowboy_rest:maybe_created/2 would always
+return a 201. No matter what. I think the code is right, but the diagram
+needs to be fixed.
+
+But then I'm not totally sure how to interpret
+http://tools.ietf.org/html/rfc2616#section-10.2.2 which states
+
+   The newly created resource can be referenced by the URI(s)
+   returned in the entity of the response, with the most specific URI
+   for the resource given by a Location header field.
+
+
+Because currently it is totally possible to not have a location header
+set (just as no body) for the response. In my opinion the current code
+behaves good enough and it's up to the service to ensure the
+requirements as stated by the RFC. Should cowboy enforce a header
+field? Should it try to figure that out on its own?
+
+
+Regards,
+
+
+Stefan
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20141014/d89bced6/attachment.html>
+
+From lists at tuli.pe  Tue Oct 14 10:42:54 2014
+From: lists at tuli.pe (Camille Troillard)
+Date: Tue, 14 Oct 2014 10:42:54 +0200
+Subject: [99s-extend] PUT on new resource and status 201
+In-Reply-To: <CAE7UswcWMj-voOs4eSbYxNyfkHZ8anCeUr6JyBGU+RhODk5Nig@mail.gmail.com>
+References: <CAE7UswcWMj-voOs4eSbYxNyfkHZ8anCeUr6JyBGU+RhODk5Nig@mail.gmail.com>
+Message-ID: <F354B66E-52D3-427F-99F1-FEE86B9F3AEF@tuli.pe>
+
+Hi Stefan,
+
+
+On 14 Oct 2014, at 10:05, Stefan Strigler <stefan.strigler at gmail.com> wrote:
+
+> just subscribed yesterday and now that's already my first question.
+> 
+> I'm referring to http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/. Given you have a PUT on a new resource the diagram suggests that the response's status code depends on whether you've set a location and/or body.
+
+This is correct, I have experience this behaviour on Cowboy 1.0.0 and 2.0.0-pre.1.
+
+
+> But when looking at the code (v1.0.0) then cowboy_rest:maybe_created/2 would always return a 201. No matter what. I think the code is right, but the diagram needs to be fixed. 
+
+Could you be more specific?
+I?m afraid it is not how it works for me.
+
+
+> But then I'm not totally sure how to interpret http://tools.ietf.org/html/rfc2616#section-10.2.2 which states
+> 
+>    The newly created resource can be referenced by the URI(s)
+>    returned in the entity of the response, with the most specific URI
+>    for the resource given by a Location header field.
+> 
+> Because currently it is totally possible to not have a location header set (just as no body) for the response. In my opinion the current code behaves good enough and it's up to the service to ensure the requirements as stated by the RFC. Should cowboy enforce a header field? Should it try to figure that out on its own?
+
+I think how Cowboy does is best at the moment.
+I like to have the freedom to specify myself the Location, especially when PUT-ting new resources.
+
+
+A bit off topic, I think this article is interesting regarding RFC-2616.
+
+	https://www.mnot.net/blog/2014/06/07/rfc2616_is_dead
+
+Given that, you might want to have a look at RFC-7231, section 3.1.4.2:
+
+	http://tools.ietf.org/html/rfc7231#section-3.1.4.2.
+
+
+Camille
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20141014/77f74bf0/attachment-0001.html>
+
+From essen at ninenines.eu  Tue Oct 14 12:38:08 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 14 Oct 2014 12:38:08 +0200
+Subject: [99s-extend] PUT on new resource and status 201
+In-Reply-To: <CAE7UswcWMj-voOs4eSbYxNyfkHZ8anCeUr6JyBGU+RhODk5Nig@mail.gmail.com>
+References: <CAE7UswcWMj-voOs4eSbYxNyfkHZ8anCeUr6JyBGU+RhODk5Nig@mail.gmail.com>
+Message-ID: <543CFD10.1050701@ninenines.eu>
+
+Hi,
+
+On 10/14/2014 10:05 AM, Stefan Strigler wrote:
+> I'm referring to
+> http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/. Given you
+> have a PUT on a new resource the diagram suggests that the response's
+> status code depends on whether you've set a location and/or body. But
+> when looking at the code (v1.0.0) then cowboy_rest:maybe_created/2 would
+> always return a 201. No matter what. I think the code is right, but the
+> diagram needs to be fixed.
+
+Yes it looks like you are on to something there. Please open a ticket 
+and I will look later on. There's another change near that area that 
+needs to be made with POST, I will look at both at the same time.
+
+> But then I'm not totally sure how to interpret
+> http://tools.ietf.org/html/rfc2616#section-10.2.2 which states
+>
+>     The newly created resource can be referenced by the URI(s)
+>     returned in the entity of the response, with the most specific URI
+>     for the resource given by a Location header field.
+>
+>
+> Because currently it is totally possible to not have a location header set (just as no body) for the response. In my opinion the current code behaves good enough and it's up to the service to ensure the requirements as stated by the RFC. Should cowboy enforce a header field? Should it try to figure that out on its own?
+
+201 does not require a location header if the resource is created at the 
+path indicated by the request. Specifying a different URI is a rare 
+occurrence with PUT, it should only occur if you create the resource on 
+a different domain name (think a CDN pushing the file to a subdomain).
+
+And as Camille stated, forget RFC 2616, the various RFCs from httpbis is 
+where it's at now.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From David.Hiers at cdk.com  Fri Oct 31 15:43:22 2014
+From: David.Hiers at cdk.com (Hiers, David)
+Date: Fri, 31 Oct 2014 14:43:22 +0000
+Subject: [99s-extend] Cowboy, IE9, and HTTPS
+Message-ID: <CFEC2ABD93715E4B96AAD927F5AAB44C7514BC20@DSXMBX1HE.ds.ad.adp.com>
+
+Hello,
+
+Has anyone had trouble getting IE9 connecting to Cowboy over HTTPS?
+
+We're using Cowboy embedded in MongooseIM, and IE9 is giving us fits.
+
+
+Thanks,
+
+
+
+
+David
+
+
+----------------------------------------------------------------------
+This message and any attachments are intended only for the use of the addressee and may contain information that is privileged and confidential. If the reader of the message is not the intended recipient or an authorized representative of the intended recipient, you are hereby notified that any dissemination of this communication is strictly prohibited. If you have received this communication in error, notify the sender immediately by return email and delete the message and any attachments from your system.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20141031/fc6724a7/attachment.html>
+

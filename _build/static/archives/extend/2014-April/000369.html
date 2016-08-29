@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] ssl_hello_world
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20ssl_hello_world&In-Reply-To=%3C5347D4E9.10005%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000368.html">
+   <LINK REL="Next"  HREF="000370.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] ssl_hello_world</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20ssl_hello_world&In-Reply-To=%3C5347D4E9.10005%40ninenines.eu%3E"
+       TITLE="[99s-extend] ssl_hello_world">essen at ninenines.eu
+       </A><BR>
+    <I>Fri Apr 11 13:41:29 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000368.html">[99s-extend] ssl_hello_world
+</A></li>
+        <LI>Next message: <A HREF="000370.html">[99s-extend] ssl_hello_world
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#369">[ date ]</a>
+              <a href="thread.html#369">[ thread ]</a>
+              <a href="subject.html#369">[ subject ]</a>
+              <a href="author.html#369">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This is the successful output I get. You should try to see why yours is 
+different, perhaps someone somewhere ran into the same issue at some 
+point. Note that the --cacert option isn't needed and basically makes no 
+difference.
+
+
+% curl -ikvv <A HREF="https://localhost:8443">https://localhost:8443</A>
+* Rebuilt URL to: <A HREF="https://localhost:8443/">https://localhost:8443/</A>
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8443 (#0)
+* successfully set certificate verify locations:
+*   CAfile: /etc/ssl/certs/ca-certificates.crt
+   CApath: none
+* SSLv3, TLS handshake, Client hello (1):
+* SSLv3, TLS handshake, Server hello (2):
+* SSLv3, TLS handshake, CERT (11):
+* SSLv3, TLS handshake, Server key exchange (12):
+* SSLv3, TLS handshake, Server finished (14):
+* SSLv3, TLS handshake, Client key exchange (16):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSLv3, TLS change cipher, Client hello (1):
+* SSLv3, TLS handshake, Finished (20):
+* SSL connection using ECDHE-RSA-AES256-SHA384
+* Server certificate:
+* 	 subject: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=localhost
+* 	 start date: 2013-02-28 05:23:34 GMT
+* 	 expire date: 2033-02-23 05:23:34 GMT
+* 	 issuer: C=US; ST=Texas; O=Nine Nines; OU=Cowboy; CN=ROOT CA
+* 	 SSL certificate verify result: self signed certificate in 
+certificate chain (19), continuing anyway.
+ &gt; GET / HTTP/1.1
+ &gt; User-Agent: curl/7.35.0
+ &gt; Host: localhost:8443
+ &gt; Accept: */*
+ &gt;
+&lt; HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+&lt; connection: keep-alive
+connection: keep-alive
+* Server Cowboy is not blacklisted
+&lt; server: Cowboy
+server: Cowboy
+&lt; date: Fri, 11 Apr 2014 11:30:03 GMT
+date: Fri, 11 Apr 2014 11:30:03 GMT
+&lt; content-length: 12
+content-length: 12
+&lt; content-type: text/plain
+content-type: text/plain
+
+&lt;
+
+
+On 04/11/2014 01:25 PM, Samir Sow wrote:
+&gt;<i> Thx.
+</I>&gt;<i>
+</I>&gt;<i> Same error &#8230;
+</I>&gt;<i> Openssl s_client does not work either.
+</I>&gt;<i> the server does not answer to ClientHello &#8230;
+</I>&gt;<i>
+</I>&gt;<i> Samir
+</I>&gt;<i>
+</I>&gt;<i> On 11 avr. 2014, at 13:18, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> The certificate in the SSL example is self-generated, try curl with the --insecure option.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On 04/11/2014 12:39 PM, Samir Sow wrote:
+</I>&gt;&gt;&gt;<i> Hi,
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Still struggling to make ssl work.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> I downloaded the example ssl_hello_world.
+</I>&gt;&gt;&gt;<i> Upon execution : i get the following error with curl
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>   About to connect() to localhost port 8443 (#0)
+</I>&gt;&gt;&gt;<i> *   Trying ::1... Connexion refus&#233;e
+</I>&gt;&gt;&gt;<i> *   Trying 127.0.0.1... connected
+</I>&gt;&gt;&gt;<i> * Connected to localhost (127.0.0.1) port 8443 (#0)
+</I>&gt;&gt;&gt;<i> * Initializing NSS with certpath: sql:/etc/pki/nssdb
+</I>&gt;&gt;&gt;<i> * NSS error -8018
+</I>&gt;&gt;&gt;<i> * Closing connection #0
+</I>&gt;&gt;&gt;<i> * Problem with the SSL CA cert (path? access rights?)
+</I>&gt;&gt;&gt;<i> curl: (77) Problem with the SSL CA cert (path? access rights?)
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> cmd = curl -vv --cacert priv/cert/cowboy-ca.crt -i <A HREF="https://localhost:8443/">https://localhost:8443/</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> cacert path checked.
+</I>&gt;&gt;&gt;<i> read permission checked
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> I&#8217;ve tested with a browser and get a connection error.
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Any clue ?
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> Samir
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> --
+</I>&gt;&gt;<i> Lo&#239;c Hoguin
+</I>&gt;&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000368.html">[99s-extend] ssl_hello_world
+</A></li>
+	<LI>Next message: <A HREF="000370.html">[99s-extend] ssl_hello_world
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#369">[ date ]</a>
+              <a href="thread.html#369">[ thread ]</a>
+              <a href="subject.html#369">[ subject ]</a>
+              <a href="author.html#369">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

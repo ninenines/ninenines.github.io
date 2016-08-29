@@ -1,0 +1,46 @@
+<tt>
+&lt;div&nbsp;dir=&quot;ltr&quot;&gt;thanks.&nbsp;one&nbsp;more&nbsp;question&nbsp;if&nbsp;you&nbsp;do&nbsp;not&nbsp;mind.&nbsp;you&nbsp;say&nbsp;that&nbsp;we&nbsp;need&nbsp;timeouts&nbsp;when&nbsp;the&nbsp;client&nbsp;does&nbsp;not&nbsp;notify&nbsp;us&nbsp;when&nbsp;it&nbsp;dies.&nbsp;but&nbsp;then&nbsp;you&nbsp;say&nbsp;that&nbsp;if&nbsp;the&nbsp;client&nbsp;dies&nbsp;then&nbsp;the&nbsp;socket&nbsp;write&nbsp;will&nbsp;fail.&nbsp;to&nbsp;me&nbsp;this&nbsp;sounds&nbsp;like&nbsp;a&nbsp;contradiction.&nbsp;would&nbsp;you&nbsp;please&nbsp;clarify?&lt;div&gt;<br>
+&lt;br&gt;&lt;/div&gt;&lt;div&gt;(I&nbsp;assume&nbsp;that&nbsp;this&nbsp;is&nbsp;the&nbsp;problem&nbsp;that&nbsp;we&nbsp;are&nbsp;discussing: &lt;a&nbsp;href=&quot;http://stackoverflow.com/questions/283375/detecting-tcp-client-disconnect&quot;&gt;http://stackoverflow.com/questions/283375/detecting-tcp-client-disconnect&lt;/a&gt;,&nbsp;right?)&lt;/div&gt;<br>
+&lt;/div&gt;&lt;div&nbsp;class=&quot;gmail_extra&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;div&nbsp;class=&quot;gmail_quote&quot;&gt;2013/10/16&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;span&nbsp;dir=&quot;ltr&quot;&gt;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&lt;/span&gt;&lt;br&gt;&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;<br>
+&lt;div&nbsp;class=&quot;im&quot;&gt;On&nbsp;10/16/2013&nbsp;05:48&nbsp;AM,&nbsp;akonsu&nbsp;wrote:&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;<br>
+1.&nbsp;do&nbsp;you&nbsp;mean&nbsp;that&nbsp;there&nbsp;is&nbsp;no&nbsp;way&nbsp;on&nbsp;the&nbsp;server&nbsp;side&nbsp;to&nbsp;tell&nbsp;if&nbsp;the&lt;br&gt;<br>
+client&nbsp;has&nbsp;disconnected?&lt;br&gt;<br>
+&lt;/blockquote&gt;<br>
+&lt;br&gt;&lt;/div&gt;<br>
+There&nbsp;are&nbsp;ways,&nbsp;and&nbsp;Cowboy&nbsp;will&nbsp;happily&nbsp;detect&nbsp;them.&nbsp;There&#39;s&nbsp;also&nbsp;the&nbsp;problem&nbsp;that&nbsp;a&nbsp;side&nbsp;may&nbsp;be&nbsp;closed&nbsp;without&nbsp;the&nbsp;other&nbsp;side&nbsp;knowing&nbsp;about&nbsp;it,&nbsp;which&nbsp;is&nbsp;why&nbsp;you&nbsp;need&nbsp;timeouts.&lt;div&nbsp;class=&quot;im&quot;&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;<br>
+2.&nbsp;if&nbsp;I&nbsp;use&nbsp;a&nbsp;normal&nbsp;handler,&nbsp;I&nbsp;will&nbsp;still&nbsp;run&nbsp;into&nbsp;the&nbsp;same&nbsp;problem,&nbsp;it&lt;br&gt;<br>
+does&nbsp;not&nbsp;matter&nbsp;which&nbsp;handler&nbsp;I&nbsp;use,&nbsp;from&nbsp;the&nbsp;standpoint&nbsp;of&nbsp;deciding&lt;br&gt;<br>
+whether&nbsp;the&nbsp;client&nbsp;is&nbsp;still&nbsp;there,&nbsp;right?&lt;br&gt;<br>
+&lt;/blockquote&gt;<br>
+&lt;br&gt;&lt;/div&gt;<br>
+If&nbsp;the&nbsp;client&nbsp;is&nbsp;gone,&nbsp;the&nbsp;send&nbsp;will&nbsp;fail.&nbsp;Normal&nbsp;handlers&nbsp;are&nbsp;pretty&nbsp;much&nbsp;the&nbsp;same&nbsp;except&nbsp;they&nbsp;don&#39;t&nbsp;have&nbsp;a&nbsp;timeout,&nbsp;because&nbsp;your&nbsp;code&nbsp;has&nbsp;an&nbsp;explicit&nbsp;end.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;&lt;div&nbsp;class=&quot;im&quot;&gt;<br>
+I&nbsp;am&nbsp;confused&nbsp;as&nbsp;to&nbsp;how&nbsp;I&nbsp;can&nbsp;implement&nbsp;my&nbsp;streaming&nbsp;and&nbsp;not&nbsp;drop&nbsp;the&lt;br&gt;<br>
+connection&nbsp;on&nbsp;each&nbsp;client&nbsp;and&nbsp;yet&nbsp;make&nbsp;sure&nbsp;I&nbsp;do&nbsp;close&nbsp;the&nbsp;connections&lt;br&gt;<br>
+when&nbsp;the&nbsp;clients&nbsp;disconnect...&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;&lt;/div&gt;<br>
+2013/10/15&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&nbsp;&lt;mailto:&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&gt;&lt;div&nbsp;class=&quot;im&quot;&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;Infinite&nbsp;is&nbsp;bad&nbsp;practice,&nbsp;yes.&nbsp;Infinite&nbsp;means&nbsp;some&nbsp;connections&nbsp;will&lt;br&gt;<br>
+ &nbsp; &nbsp;*never*&nbsp;be&nbsp;closed,&nbsp;eating&nbsp;FDs&nbsp;and&nbsp;memory&nbsp;for&nbsp;nothing.&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;I&#39;m&nbsp;not&nbsp;sure&nbsp;why&nbsp;you&nbsp;want&nbsp;to&nbsp;receive&nbsp;messages,&nbsp;you&nbsp;could&nbsp;just&nbsp;use&nbsp;a&lt;br&gt;<br>
+ &nbsp; &nbsp;normal&nbsp;handler&nbsp;that&nbsp;asks&nbsp;for&nbsp;more&nbsp;data,&nbsp;sends&nbsp;it,&nbsp;ask&nbsp;for&nbsp;more&nbsp;data,&lt;br&gt;<br>
+ &nbsp; &nbsp;sends&nbsp;it,&nbsp;etc.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;/div&gt;&lt;/blockquote&gt;<br>
+&lt;br&gt;&lt;div&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;div&nbsp;class=&quot;h5&quot;&gt;<br>
+&lt;br&gt;<br>
+--&nbsp;&lt;br&gt;<br>
+Loïc&nbsp;Hoguin&lt;br&gt;<br>
+Erlang&nbsp;Cowboy&lt;br&gt;<br>
+Nine&nbsp;Nines&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;http://ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;http://ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;/div&gt;&lt;/div&gt;&lt;/blockquote&gt;&lt;/div&gt;&lt;br&gt;&lt;/div&gt;<br>
+
+</tt>

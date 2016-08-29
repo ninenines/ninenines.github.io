@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy handler and custom gen_server link
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20handler%20and%20custom%20gen_server%20link&In-Reply-To=%3CCAM%3Dnw2VPVVFjVW22fwzA-poQJbM4Yakh9-cZ8L5igHMVi-BSoA%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000151.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy handler and custom gen_server link</H1>
+    <B>Max Grigoriev</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20handler%20and%20custom%20gen_server%20link&In-Reply-To=%3CCAM%3Dnw2VPVVFjVW22fwzA-poQJbM4Yakh9-cZ8L5igHMVi-BSoA%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Cowboy handler and custom gen_server link">darkit at gmail.com
+       </A><BR>
+    <I>Wed Jun  5 21:50:25 CEST 2013</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000151.html">[99s-extend] [ANN] Cowboy 0.8.6 and Ranch 0.8.4 (R16B01 compatible)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#150">[ date ]</a>
+              <a href="thread.html#150">[ thread ]</a>
+              <a href="subject.html#150">[ subject ]</a>
+              <a href="author.html#150">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I'm trying to implement REST handler which communicates to custom
+gen_servers.
+
+Get gen_server from supervisor and link to current handler process:
+
+rest_init(Req, _Opts) -&gt;
+...
+  process_flag(trap_exit, true),
+  {ok, Pid} = pbshare_logic_sup:start_registration(),
+  link(Pid),
+...
+
+make_get(Req, State) -&gt;
+....
+make error here !!!
+....
+
+
+And gen_server code:
+start_link() -&gt;
+  gen_server:start_link(?MODULE, [], []).
+
+init(Args) -&gt;
+  process_flag(trap_exit, true),
+  {ok, []}.
+
+handle_info({'EXIT', FromPid, Reason}, State) -&gt;
+  lager:info(&quot;Exit Logic from ~p  Reason: ~p~n&quot;, [FromPid, Reason]),
+  {noreply, State};
+
+So I expect to receive EXIT signal from REST handler to my gen_server when
+error occurs in cowboy.
+But I don't receive it. Am I doing something wrong?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130605/568478c8/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130605/568478c8/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000151.html">[99s-extend] [ANN] Cowboy 0.8.6 and Ranch 0.8.4 (R16B01 compatible)
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#150">[ date ]</a>
+              <a href="thread.html#150">[ thread ]</a>
+              <a href="subject.html#150">[ subject ]</a>
+              <a href="author.html#150">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

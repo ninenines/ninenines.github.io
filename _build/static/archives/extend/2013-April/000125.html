@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] cowboy how to ruduce the memory usage per	long-hold connection
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20cowboy%20how%20to%20ruduce%20the%20memory%20usage%20per%0A%09long-hold%20connection&In-Reply-To=%3CCAJ0zLRPcYmH1OXeiw2aZHLtoqqdW%3Ddu0rhonF53xdCbMUmnCLw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000124.html">
+   <LINK REL="Next"  HREF="000126.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] cowboy how to ruduce the memory usage per	long-hold connection</H1>
+    <B>rambocoder</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20cowboy%20how%20to%20ruduce%20the%20memory%20usage%20per%0A%09long-hold%20connection&In-Reply-To=%3CCAJ0zLRPcYmH1OXeiw2aZHLtoqqdW%3Ddu0rhonF53xdCbMUmnCLw%40mail.gmail.com%3E"
+       TITLE="[99s-extend] cowboy how to ruduce the memory usage per	long-hold connection">erlang at rambocoder.com
+       </A><BR>
+    <I>Fri Apr 26 15:11:53 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000124.html">[99s-extend] cowboy how to ruduce the memory usage per long-hold	connection
+</A></li>
+        <LI>Next message: <A HREF="000126.html">[99s-extend] [ANN] Cowboy 0.8.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#125">[ date ]</a>
+              <a href="thread.html#125">[ thread ]</a>
+              <a href="subject.html#125">[ subject ]</a>
+              <a href="author.html#125">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Is 13.6K/connection considered a lot? Once you start doing SSL, each
+connection will be about 80K, IMHO the most important factor for huge
+ammount of COMET users is latency, which Cowboy and Erlang do great.
+
+-rambocoder
+
+On Fri, Apr 26, 2013 at 2:11 AM, yongboy &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">yongboy at gmail.com</A>&gt; wrote:
+
+&gt;<i> I have tested one long-hold webapp, when 512000 user connected, the app
+</I>&gt;<i> used
+</I>&gt;<i> 6801M memory, 6801M*1024K / 512000 = 13.6K/Connection.
+</I>&gt;<i>
+</I>&gt;<i> Does anyone give me some advice on how to reduce the memory usage per one
+</I>&gt;<i> connection, thanks very much !
+</I>&gt;<i>
+</I>&gt;<i> Here is the code snippet:
+</I>&gt;<i>
+</I>&gt;<i> start(_Type, _Args) -&gt;
+</I>&gt;<i>         Dispatch = cowboy_router:compile([
+</I>&gt;<i>             {'_', [{'_', htmlfile_handler, []}]}
+</I>&gt;<i>         ]),
+</I>&gt;<i>         cowboy:start_http(my_http_listener, 100,
+</I>&gt;<i>             [{port, 8000}, {max_connections, infinity}],
+</I>&gt;<i>             [{env, [{dispatch, Dispatch}]}]
+</I>&gt;<i>         ),
+</I>&gt;<i>         count_server:start(),
+</I>&gt;<i>         htmlfilesimple_sup:start_link().
+</I>&gt;<i>
+</I>&gt;<i> ......
+</I>&gt;<i>
+</I>&gt;<i> -module(htmlfile_handler).
+</I>&gt;<i> -behaviour(cowboy_loop_handler).
+</I>&gt;<i> -export([init/3, info/3, terminate/3]).
+</I>&gt;<i> -define(HEARBEAT_TIMEOUT, 20*1000).
+</I>&gt;<i> -record(status, {count=0}).
+</I>&gt;<i>
+</I>&gt;<i> init(_Any, Req, State) -&gt;
+</I>&gt;<i>         NowCount = count_server:welcome(),
+</I>&gt;<i>         io:format(&quot;online user ~p :))~n&quot;, [NowCount]),
+</I>&gt;<i>
+</I>&gt;<i>         output_first(Req),
+</I>&gt;<i>         Req2 = cowboy_req:compact(Req),
+</I>&gt;<i>         {loop, Req2, State, hibernate}.
+</I>&gt;<i>
+</I>&gt;<i> %% POST/Short Request
+</I>&gt;<i> info(_Any, Req, State) -&gt;
+</I>&gt;<i>         {loop, Req, State, hibernate}.
+</I>&gt;<i>
+</I>&gt;<i> output_first(Req) -&gt;
+</I>&gt;<i>         {ok, Reply} = cowboy_req:chunked_reply(200, [{&lt;&lt;&quot;Content-Type&quot;&gt;&gt;,
+</I>&gt;<i> &lt;&lt;&quot;text/html; charset=utf-8&quot;&gt;&gt;},
+</I>&gt;<i>
+</I>&gt;<i> {&lt;&lt;&quot;Connection&quot;&gt;&gt;, &lt;&lt;&quot;keep-alive&quot;&gt;&gt;}], Req),
+</I>&gt;<i>         cowboy_req:chunk(&lt;&lt;&quot;&lt;html&gt;&lt;body&gt;&lt;script&gt;var _ = function (msg) {
+</I>&gt;<i> parent.s._(msg, document);
+</I>&gt;<i> };&lt;/script&gt;
+</I>&gt;<i> &quot;&gt;&gt;,
+</I>&gt;<i>                                                                 Reply),
+</I>&gt;<i>         cowboy_req:chunk(gen_output(&quot;1::&quot;), Reply).
+</I>&gt;<i>
+</I>&gt;<i> gen_output(String) -&gt;
+</I>&gt;<i>         DescList = io_lib:format(&quot;&lt;script&gt;_('~s');&lt;/script&gt;&quot;, [String]),
+</I>&gt;<i>         list_to_binary(DescList).
+</I>&gt;<i>
+</I>&gt;<i> terminate(Reason, _Req, _State) -&gt;
+</I>&gt;<i>         NowCount = count_server:bye(),
+</I>&gt;<i>         io:format(&quot;offline user ~p :(( ~n&quot;, [NowCount]).
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130426/b1e8ae7a/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130426/b1e8ae7a/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000124.html">[99s-extend] cowboy how to ruduce the memory usage per long-hold	connection
+</A></li>
+	<LI>Next message: <A HREF="000126.html">[99s-extend] [ANN] Cowboy 0.8.4
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#125">[ date ]</a>
+              <a href="thread.html#125">[ thread ]</a>
+              <a href="subject.html#125">[ subject ]</a>
+              <a href="author.html#125">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

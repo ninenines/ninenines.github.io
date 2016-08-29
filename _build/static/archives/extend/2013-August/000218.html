@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20%5Berlang-questions%5D%20%5BANN%5D%20erlang.mk%20build%20tool&In-Reply-To=%3C4BEA9D47600B462DAAA7D339E9AE47B5%40srstrong.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000216.html">
+   <LINK REL="Next"  HREF="000210.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] [erlang-questions] [ANN] erlang.mk build tool</H1>
+    <B>Steve Strong</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20%5Berlang-questions%5D%20%5BANN%5D%20erlang.mk%20build%20tool&In-Reply-To=%3C4BEA9D47600B462DAAA7D339E9AE47B5%40srstrong.com%3E"
+       TITLE="[99s-extend] [erlang-questions] [ANN] erlang.mk build tool">steve at srstrong.com
+       </A><BR>
+    <I>Fri Aug 16 16:44:07 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000216.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+        <LI>Next message: <A HREF="000210.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#218">[ date ]</a>
+              <a href="thread.html#218">[ thread ]</a>
+              <a href="subject.html#218">[ subject ]</a>
+              <a href="author.html#218">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Was guessing that was the answer - I'll give it a go...  
+
+--  
+Steve Strong
+Sent with Sparrow (<A HREF="http://www.sparrowmailapp.com/?sig">http://www.sparrowmailapp.com/?sig</A>)
+
+
+On Friday, 16 August 2013 at 16:42, Lo&#239;c Hoguin wrote:
+
+&gt;<i> Well I'm sure if you create a base Makefile (without erlang.mk) that  
+</I>&gt;<i> exports DEPS_DIR and then call $(MAKE) on all folders in /apps (which  
+</I>&gt;<i> would themselves contain Makefiles that use erlang.mk), it would work  
+</I>&gt;<i> just fine. You can still keep only one erlang.mk in your repos and use  
+</I>&gt;<i> include ../../erlang.mk instead for example.
+</I>&gt;<i>  
+</I>&gt;<i> But know that this folder structure is a rebar thing and not standard  
+</I>&gt;<i> (just like /deps you'll say, but that one is insanely useful regardless  
+</I>&gt;<i> of the project structure otherwise).
+</I>&gt;<i>  
+</I>&gt;<i> On 08/16/2013 02:27 PM, Steve Strong wrote:
+</I>&gt;<i> &gt; Looks good - I like simple! Quick question, does it support multiple
+</I>&gt;<i> &gt; applications, for example a project laid out as:
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; /proj
+</I>&gt;<i> &gt; /deps
+</I>&gt;<i> &gt; /stuff
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; /apps
+</I>&gt;<i> &gt; /app1
+</I>&gt;<i> &gt; /app2
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; Most of our stuff is in that form, with shared dependencies between the
+</I>&gt;<i> &gt; various apps. Rebar is quite happy with that format, but I can't see
+</I>&gt;<i> &gt; how to persuade erlang.mk to handle that.
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; Cheers,
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; Steve
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; --
+</I>&gt;<i> &gt; Steve Strong
+</I>&gt;<i> &gt; Sent with Sparrow &lt;<A HREF="http://www.sparrowmailapp.com/?sig">http://www.sparrowmailapp.com/?sig</A>&gt;
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; On Thursday, 15 August 2013 at 16:19, Lo&#239;c Hoguin wrote:
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt; &gt; Hello friendly people,
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; I would like to make an official announcement of erlang.mk now that all
+</I>&gt;<i> &gt; &gt; the features I wanted are in.
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; erlang.mk is a rebar replacement. It was initially created for allowing
+</I>&gt;<i> &gt; &gt; a faster development process than rebar and for better compatibility
+</I>&gt;<i> &gt; &gt; with Linux build tools. It should work on Linux and OSX with GNU Make
+</I>&gt;<i> &gt; &gt; installed.
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; Projects using erlang.mk are still compatible with rebar. Dependencies
+</I>&gt;<i> &gt; &gt; fetched by rebar are stored in the same deps/ directory, and projects
+</I>&gt;<i> &gt; &gt; using erlang.mk can still be used as rebar dependencies, with or without
+</I>&gt;<i> &gt; &gt; a rebar.config file.
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; erlang.mk also features a simple package index. Try `make pkg-list` to
+</I>&gt;<i> &gt; &gt; list all packages currently available. All the packages listed are
+</I>&gt;<i> &gt; &gt; compatible with erlang.mk with no tweaking required.
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; Makefiles written with erlang.mk are *VERY* simple, here are two examples:
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; * <A HREF="https://github.com/extend/farwest/blob/master/Makefile">https://github.com/extend/farwest/blob/master/Makefile</A>
+</I>&gt;<i> &gt; &gt; * <A HREF="https://github.com/extend/cowboy/blob/master/Makefile">https://github.com/extend/cowboy/blob/master/Makefile</A>
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; I wrote about erlang.mk and relx recently on the Nine Nines blog.
+</I>&gt;<i> &gt; &gt; erlang.mk is the perfect companion to relx.
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; * <A HREF="http://ninenines.eu/articles/erlang.mk-and-relx">http://ninenines.eu/articles/erlang.mk-and-relx</A>
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; Here are examples of projects that are using and compatible with
+</I>&gt;<i> &gt; &gt; erlang.mk:
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; * <A HREF="https://github.com/jlouis/etorrent">https://github.com/jlouis/etorrent</A>
+</I>&gt;<i> &gt; &gt; * <A HREF="https://github.com/extend/cowboy">https://github.com/extend/cowboy</A>
+</I>&gt;<i> &gt; &gt; * <A HREF="https://github.com/extend/farwest">https://github.com/extend/farwest</A>
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; You can find erlang.mk at the following URL:
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; * <A HREF="https://github.com/extend/erlang.mk">https://github.com/extend/erlang.mk</A>
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; Contributions to the package index are of course welcome! The only
+</I>&gt;<i> &gt; &gt; requirement is that the package is to be compatible with erlang.mk
+</I>&gt;<i> &gt; &gt; itself. Just send a PR to the erlang.mk project updating the
+</I>&gt;<i> &gt; &gt; packages.v1.txt!
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; Enjoy!
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt; &gt; --
+</I>&gt;<i> &gt; &gt; Lo&#239;c Hoguin
+</I>&gt;<i> &gt; &gt; Erlang Cowboy
+</I>&gt;<i> &gt; &gt; Nine Nines
+</I>&gt;<i> &gt; &gt; <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i> &gt; &gt; _______________________________________________
+</I>&gt;<i> &gt; &gt; erlang-questions mailing list
+</I>&gt;<i> &gt; &gt; <A HREF="https://lists.ninenines.eu/listinfo/extend">erlang-questions at erlang.org</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">erlang-questions at erlang.org</A>&gt;
+</I>&gt;<i> &gt; &gt; <A HREF="http://erlang.org/mailman/listinfo/erlang-questions">http://erlang.org/mailman/listinfo/erlang-questions</A>
+</I>&gt;<i> &gt; &gt;  
+</I>&gt;<i> &gt;  
+</I>&gt;<i> &gt;  
+</I>&gt;<i>  
+</I>&gt;<i>  
+</I>&gt;<i>  
+</I>&gt;<i> --  
+</I>&gt;<i> Lo&#239;c Hoguin
+</I>&gt;<i> Erlang Cowboy
+</I>&gt;<i> Nine Nines
+</I>&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>  
+</I>&gt;<i>  
+</I>
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130816/1cd82d09/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130816/1cd82d09/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000216.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+	<LI>Next message: <A HREF="000210.html">[99s-extend] [erlang-questions] [ANN] erlang.mk build tool
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#218">[ date ]</a>
+              <a href="thread.html#218">[ thread ]</a>
+              <a href="subject.html#218">[ subject ]</a>
+              <a href="author.html#218">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

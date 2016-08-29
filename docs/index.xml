@@ -322,6 +322,14 @@ your situation.&lt;/p&gt;&lt;/div&gt;
 &lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt class=&#34;hdlist1&#34;&gt;
+&lt;code&gt;PROJECT_MOD&lt;/code&gt;
+&lt;/dt&gt;
+&lt;dd&gt;
+&lt;p&gt;
+        The application callback module.
+&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt class=&#34;hdlist1&#34;&gt;
 &lt;code&gt;PROJECT_REGISTERED&lt;/code&gt;
 &lt;/dt&gt;
 &lt;dd&gt;
@@ -352,17 +360,7 @@ your situation.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;There&amp;#8217;s no need for quotes or anything. The relevant part of
 the Cowboy Makefile follows, if you need an example:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;PROJECT =&lt;/span&gt; cowboy
-&lt;span style=&#34;color: #009900&#34;&gt;PROJECT_DESCRIPTION =&lt;/span&gt; Small&lt;span style=&#34;color: #990000&#34;&gt;,&lt;/span&gt; fast&lt;span style=&#34;color: #990000&#34;&gt;,&lt;/span&gt; modular HTTP server&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;
-&lt;span style=&#34;color: #009900&#34;&gt;PROJECT_VERSION =&lt;/span&gt; 2.0.0-pre.2
-&lt;span style=&#34;color: #009900&#34;&gt;PROJECT_REGISTERED =&lt;/span&gt; cowboy_clock
-
-&lt;span style=&#34;color: #009900&#34;&gt;LOCAL_DEPS =&lt;/span&gt; crypto
-&lt;span style=&#34;color: #009900&#34;&gt;DEPS =&lt;/span&gt; cowlib ranch&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Any space before and after the value is dropped.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;a href=&#34;../deps&#34;&gt;Dependencies&lt;/a&gt; are covered in details in
 the next chapter.&lt;/p&gt;&lt;/div&gt;
@@ -545,33 +543,19 @@ the &lt;a href=&#34;http://www.erlang.org/doc/man/erlc.html&#34;&gt;erlc Manual&
 full list.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;By default, Erlang.mk will set the following options:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;ERLC_OPTS =&lt;/span&gt; -Werror &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;debug_info &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;warn_export_vars &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;warn_shadow_vars &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;warn_obsolete_guard&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In other words: warnings as errors, debug info (recommended) and
 enable warnings for exported variables, shadow variables and
 obsolete guard functions.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can redefine this variable in your Makefile to change it
 completely, either before or after including Erlang.mk:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;ERLC_OPTS =&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;+&lt;/span&gt;debug_info&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You can also filter out some options from the defaults Erlang.mk
 sets, by defining ERLC_OPTS after including Erlang.mk using the
 &lt;code&gt;:=&lt;/code&gt; operator.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;include erlang.mk
-
-&lt;span style=&#34;color: #990000&#34;&gt;ERLC_OPTS :=&lt;/span&gt; &lt;span style=&#34;color: #009900&#34;&gt;$(&lt;/span&gt;filter-out -Werror&lt;span style=&#34;color: #990000&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #009900&#34;&gt;$(ERLC_OPTS))&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&#34;sect3&#34;&gt;
 &lt;h4 id=&#34;_erlc_exclude&#34;&gt;ERLC_EXCLUDE&lt;/h4&gt;
@@ -581,11 +565,7 @@ not normally need it.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;To exclude a module, simply list it in the variable, either
 before or after including Erlang.mk:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;ERLC_EXCLUDE =&lt;/span&gt; cowboy_http2&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -631,11 +611,7 @@ when you have behaviors used by other modules in your project.&lt;/p&gt;&lt;/div
 the dependency tracking file every time you compile. You can
 do this by adding the following line to your &lt;em&gt;Makefile&lt;/em&gt;:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;NO_MAKEDEP &lt;span style=&#34;color: #990000&#34;&gt;?=&lt;/span&gt; &lt;span style=&#34;color: #993399&#34;&gt;1&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;As you can see, the snippet above uses &lt;code&gt;?=&lt;/code&gt; instead of a
 simple equal sign. This is to allow you to temporarily override
 this value when you do make substantial changes to your project
@@ -665,18 +641,7 @@ file is generated. To do this, you would add your hook before
 or after including the &lt;em&gt;erlang.mk&lt;/em&gt; file.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The easiest way is after:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;PROJECT =&lt;/span&gt; example
-
-include erlang.mk
-
-&lt;span style=&#34;color: #009900&#34;&gt;$(PROJECT)&lt;/span&gt;.d&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; src/generated_mod.erl
-
-src/generated_mod.erl&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; gen-mod.sh
-        &lt;span style=&#34;color: #009900&#34;&gt;$(gen_verbose)&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;/gen-mod.sh &lt;span style=&#34;color: #009900&#34;&gt;$@&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In this case we use &lt;code&gt;$(gen_verbose)&lt;/code&gt; to hide the details of
 the build by default. Erlang.mk will simply say what file
 is it currently generating.&lt;/p&gt;&lt;/div&gt;
@@ -688,20 +653,7 @@ modified.&lt;/p&gt;&lt;/div&gt;
 Erlang.mk, don&amp;#8217;t forget to set the &lt;code&gt;.DEFAULT_GOAL&lt;/code&gt; variable,
 otherwise nothing will get built:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;PROJECT =&lt;/span&gt; example
-
-.DEFAULT_GOAL &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; all
-
-&lt;span style=&#34;color: #009900&#34;&gt;$(PROJECT)&lt;/span&gt;.d&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; src/generated_mod.erl
-
-include erlang.mk
-
-src/generated_mod.erl&lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; gen-mod.sh
-        &lt;span style=&#34;color: #009900&#34;&gt;$(gen_verbose)&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;/gen-mod.sh &lt;span style=&#34;color: #009900&#34;&gt;$@&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&#34;sect1&#34;&gt;
@@ -778,11 +730,7 @@ options. Options are documented in the
 &lt;a href=&#34;http://www.erlang.org/doc/apps/common_test/run_test_chapter.html&#34;&gt;Common Test user guide&lt;/a&gt;.
 You can use it to set Common Test hooks, for example:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;CT_OPTS =&lt;/span&gt; -ct_hooks cowboy_ct_hook&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;code&gt;CT_SUITES&lt;/code&gt; variable can be used to override what
 Common Test suites Erlang.mk will be aware of. It does
 not normally need to be set as Erlang.mk will find the
@@ -791,11 +739,7 @@ test suites automatically.&lt;/p&gt;&lt;/div&gt;
 If the file is named &lt;em&gt;http_SUITE.erl&lt;/em&gt;, the test suite
 is &lt;code&gt;http&lt;/code&gt;:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;CT_SUITES =&lt;/span&gt; http ws&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&#34;sect1&#34;&gt;
@@ -935,11 +879,7 @@ issues.&lt;/p&gt;&lt;/div&gt;
 your application, by making it a dependency of the &lt;code&gt;app&lt;/code&gt;
 target:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #990000&#34;&gt;app::&lt;/span&gt; rebar.config&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Don&amp;#8217;t forget to commit the file when it changes!&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;If you run into other issues, it&amp;#8217;s probably because you use a
 feature specific to Erlang.mk, like the &lt;code&gt;cp&lt;/code&gt; fetch method.
@@ -1472,14 +1412,11 @@ the related documentation.&lt;/p&gt;&lt;/div&gt;
 &lt;a href=&#34;getting_started/&#34;&gt;Getting started&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;
-&lt;a href=&#34;overview/&#34;&gt;Request overview&lt;/a&gt;
-&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;
-&lt;a href=&#34;erlang_beginners/&#34;&gt;Erlang for beginners&lt;/a&gt;
+&lt;a href=&#34;flow_diagram/&#34;&gt;Flow diagram&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;&lt;/div&gt;
@@ -1491,12 +1428,39 @@ the related documentation.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;
-&lt;a href=&#34;routing/&#34;&gt;routing&lt;/a&gt;
+&lt;a href=&#34;listeners/&#34;&gt;Listeners&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;streams/&#34;&gt;Streams&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;routing/&#34;&gt;Routing&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;
 &lt;a href=&#34;constraints/&#34;&gt;Constraints&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_handlers&#34;&gt;Handlers&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;handlers/&#34;&gt;Handlers&lt;/a&gt;
+&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;
+&lt;a href=&#34;loop_handlers/&#34;&gt;Loop handlers&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -1513,17 +1477,7 @@ the related documentation.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;
-&lt;a href=&#34;handlers/&#34;&gt;Handlers&lt;/a&gt;
-&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;
-&lt;a href=&#34;loop_handlers/&#34;&gt;Loop handlers&lt;/a&gt;
-&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;
-&lt;a href=&#34;req/&#34;&gt;The Req object&lt;/a&gt;
+&lt;a href=&#34;req/&#34;&gt;Request details&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -1602,6 +1556,8 @@ the related documentation.&lt;/p&gt;&lt;/div&gt;
 &lt;a href=&#34;architecture/&#34;&gt;Architecture&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;
 &lt;a href=&#34;broken_clients/&#34;&gt;Dealing with broken clients&lt;/a&gt;
@@ -1617,6 +1573,8 @@ the related documentation.&lt;/p&gt;&lt;/div&gt;
 &lt;a href=&#34;sub_protocols/&#34;&gt;Sub protocols&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;
 &lt;a href=&#34;hooks/&#34;&gt;Hooks&lt;/a&gt;

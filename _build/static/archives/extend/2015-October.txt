@@ -1,0 +1,80 @@
+From ivan at llaisdy.com  Tue Oct 20 15:19:05 2015
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Tue, 20 Oct 2015 14:19:05 +0100
+Subject: [99s-extend] Cowboy: Maps instead of records for context variables
+Message-ID: <56263F49.2000206@llaisdy.com>
+
+Dear All
+
+Would there be any reason against using a map instead of a record for 
+the context variable in a Cowboy REST resource?
+
+Quite often I have a few resources doing very similar things in their 
+callbacks, and I'd like to abstract out the similarities into a module - 
+but I don't want to share a record between modules.
+
+Maps seem to be a good fit, and I can't think of any downside 
+(performance hit should be tiny).
+
+Can anyone give me reasons to stick with records?
+
+With thanks and best wishes
+
+Ivan
+
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                         @llaisdy
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From essen at ninenines.eu  Tue Oct 20 15:22:39 2015
+From: essen at ninenines.eu (=?UTF-8?Q?Lo=c3=afc_Hoguin?=)
+Date: Tue, 20 Oct 2015 15:22:39 +0200
+Subject: [99s-extend] Cowboy: Maps instead of records for context
+ variables
+In-Reply-To: <56263F49.2000206@llaisdy.com>
+References: <56263F49.2000206@llaisdy.com>
+Message-ID: <5626401F.9050907@ninenines.eu>
+
+On 10/20/2015 03:19 PM, Ivan Uemlianin wrote:
+> Dear All
+>
+> Would there be any reason against using a map instead of a record for
+> the context variable in a Cowboy REST resource?
+>
+> Quite often I have a few resources doing very similar things in their
+> callbacks, and I'd like to abstract out the similarities into a module -
+> but I don't want to share a record between modules.
+>
+> Maps seem to be a good fit, and I can't think of any downside
+> (performance hit should be tiny).
+>
+> Can anyone give me reasons to stick with records?
+
+The only reason to use records is to keep typespecs information to 
+improve Dialyzer's error reporting.
+
+Personally I have no problems going with just maps for all kinds of 
+states, even if they are in the same module. This is partly because I 
+rely a lot more on tests than on Dialyzer to tell me my program is wrong.
+
+Cheers,
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+Author of The Erlanger Playbook,
+A book about software development using Erlang
+

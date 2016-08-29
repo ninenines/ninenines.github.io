@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Problems with Bullet
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Problems%20with%20Bullet&In-Reply-To=%3CCD884493.47E3%25christopher.phillips%40turner.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000085.html">
+   <LINK REL="Next"  HREF="000086.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Problems with Bullet</H1>
+    <B>Phillips, Christopher</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Problems%20with%20Bullet&In-Reply-To=%3CCD884493.47E3%25christopher.phillips%40turner.com%3E"
+       TITLE="[99s-extend] Problems with Bullet">Christopher.Phillips at turner.com
+       </A><BR>
+    <I>Mon Apr  8 16:11:44 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000085.html">[99s-extend] Problems with Bullet
+</A></li>
+        <LI>Next message: <A HREF="000086.html">[99s-extend] Heartbeat?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#83">[ date ]</a>
+              <a href="thread.html#83">[ thread ]</a>
+              <a href="subject.html#83">[ subject ]</a>
+              <a href="author.html#83">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>  Can you get the clock example working? I'm not sure why the initial
+upgrade request would fail; are you exporting init/4 in your handler? Are
+your dependencies consistent (I.e., blow them away and regrab them in case
+it's an older version of cowboy with a new version of bullet, or vice
+versa, maybe)? Either way, starting from the example would allow you to
+start from a set of working code and either avoid the issue entirely, or
+isolate it from your code.
+
+On 4/8/13 9:53 AM, &quot;Lee Sylvester&quot; &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">lee.sylvester at gmail.com</A>&gt; wrote:
+
+&gt;<i>Hi all,
+</I>&gt;<i>
+</I>&gt;<i>I'm currently having problems getting a websocket to connect to a simple
+</I>&gt;<i>bare bones Bullet handler.  Unfortunately, I'm still quite an Erlang
+</I>&gt;<i>noob, so the stack traces tend to lead me in circles.  I'm hoping this is
+</I>&gt;<i>obvious stuff to you Erlang pros :-)
+</I>&gt;<i>
+</I>&gt;<i>Given the below handler:
+</I>&gt;<i>
+</I>&gt;<i>init(_Transport, Req, _Opts, _Active) -&gt;
+</I>&gt;<i>	{ok, Req, undefined_state}.
+</I>&gt;<i>
+</I>&gt;<i>stream(Data, Req, State) -&gt;
+</I>&gt;<i>	{ok, Req, State}.
+</I>&gt;<i>
+</I>&gt;<i>info(Info, Req, State) -&gt;
+</I>&gt;<i>	{reply, Info, Req, State}.
+</I>&gt;<i>	
+</I>&gt;<i>terminate(_Req, _State) -&gt;
+</I>&gt;<i>	ok.
+</I>&gt;<i>
+</I>&gt;<i>Connecting with a websocket throws the following error:
+</I>&gt;<i>
+</I>&gt;<i>=ERROR REPORT==== 8-Apr-2013::14:46:11 ===
+</I>&gt;<i>** Cowboy handler bullet_handler terminating in init/3
+</I>&gt;<i>   for the reason error:undef
+</I>&gt;<i>** Options were [{handler,connection_handler}]
+</I>&gt;<i>** Request was [{socket,#Port&lt;0.926&gt;},
+</I>&gt;<i>                {transport,ranch_tcp},
+</I>&gt;<i>                {connection,keepalive},
+</I>&gt;<i>                {pid,&lt;0.491.0&gt;},
+</I>&gt;<i>                {method,&lt;&lt;&quot;GET&quot;&gt;&gt;},
+</I>&gt;<i>                {version,{1,1}},
+</I>&gt;<i>                {peer,{{127,0,0,1},56630}},
+</I>&gt;<i>                {host,&lt;&lt;&quot;localhost&quot;&gt;&gt;},
+</I>&gt;<i>                {host_info,undefined},
+</I>&gt;<i>                {port,8080},
+</I>&gt;<i>                {path,&lt;&lt;&quot;/&quot;&gt;&gt;},
+</I>&gt;<i>                {path_info,undefined},
+</I>&gt;<i>                {qs,&lt;&lt;&quot;encoding=text&quot;&gt;&gt;},
+</I>&gt;<i>                {qs_vals,undefined},
+</I>&gt;<i>                {fragment,&lt;&lt;&gt;&gt;},
+</I>&gt;<i>                {bindings,[]},
+</I>&gt;<i>                {headers,[{&lt;&lt;&quot;upgrade&quot;&gt;&gt;,&lt;&lt;&quot;websocket&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;connection&quot;&gt;&gt;,&lt;&lt;&quot;Upgrade&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;localhost:8080&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;origin&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://www.websocket.org">http://www.websocket.org</A>&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;pragma&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;cache-control&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;sec-websocket-key&quot;&gt;&gt;,
+</I>&gt;<i>                           &lt;&lt;&quot;fEj/SOOcQgSKATOjhbNJBQ==&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;sec-websocket-version&quot;&gt;&gt;,&lt;&lt;&quot;13&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;sec-websocket-extensions&quot;&gt;&gt;,
+</I>&gt;<i>                           &lt;&lt;&quot;x-webkit-deflate-frame&quot;&gt;&gt;}]},
+</I>&gt;<i>                {p_headers,[{&lt;&lt;&quot;connection&quot;&gt;&gt;,[&lt;&lt;&quot;upgrade&quot;&gt;&gt;]}]},
+</I>&gt;<i>                {cookies,undefined},
+</I>&gt;<i>                {meta,[]},
+</I>&gt;<i>                {body_state,waiting},
+</I>&gt;<i>                {multipart,undefined},
+</I>&gt;<i>                {buffer,&lt;&lt;&gt;&gt;},
+</I>&gt;<i>                {resp_compress,false},
+</I>&gt;<i>                {resp_state,waiting},
+</I>&gt;<i>                {resp_headers,[]},
+</I>&gt;<i>                {resp_body,&lt;&lt;&gt;&gt;},
+</I>&gt;<i>                {onresponse,undefined}]
+</I>&gt;<i>** Stacktrace: [{bullet_handler,init,
+</I>&gt;<i>                    [{tcp,http},
+</I>&gt;<i>                     {http_req,#Port&lt;0.926&gt;,ranch_tcp,keepalive,&lt;0.491.0&gt;,
+</I>&gt;<i>                         &lt;&lt;&quot;GET&quot;&gt;&gt;,
+</I>&gt;<i>                         {1,1},
+</I>&gt;<i>                         {{127,0,0,1},56630},
+</I>&gt;<i>                         &lt;&lt;&quot;localhost&quot;&gt;&gt;,undefined,8080,&lt;&lt;&quot;/&quot;&gt;&gt;,
+</I>&gt;<i>                         undefined,&lt;&lt;&quot;encoding=text&quot;&gt;&gt;,undefined,&lt;&lt;&gt;&gt;,
+</I>&gt;<i>                         [],
+</I>&gt;<i>                         [{&lt;&lt;&quot;upgrade&quot;&gt;&gt;,&lt;&lt;&quot;websocket&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;connection&quot;&gt;&gt;,&lt;&lt;&quot;Upgrade&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;localhost:8080&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;origin&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://www.websocket.org">http://www.websocket.org</A>&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;pragma&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;cache-control&quot;&gt;&gt;,&lt;&lt;&quot;no-cache&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;sec-websocket-key&quot;&gt;&gt;,
+</I>&gt;<i>                           &lt;&lt;&quot;fEj/SOOcQgSKATOjhbNJBQ==&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;sec-websocket-version&quot;&gt;&gt;,&lt;&lt;&quot;13&quot;&gt;&gt;},
+</I>&gt;<i>                          {&lt;&lt;&quot;sec-websocket-extensions&quot;&gt;&gt;,
+</I>&gt;<i>                           &lt;&lt;&quot;x-webkit-deflate-frame&quot;&gt;&gt;}],
+</I>&gt;<i>                         [{&lt;&lt;&quot;connection&quot;&gt;&gt;,[&lt;&lt;&quot;upgrade&quot;&gt;&gt;]}],
+</I>&gt;<i>                  
+</I>&gt;<i>undefined,[],waiting,undefined,&lt;&lt;&gt;&gt;,false,waiting,[],
+</I>&gt;<i>                         &lt;&lt;&gt;&gt;,undefined},
+</I>&gt;<i>                     [{handler,connection_handler}]],
+</I>&gt;<i>                    []},
+</I>&gt;<i>                {cowboy_handler,handler_init,4,
+</I>&gt;<i>                    [{file,&quot;src/cowboy_handler.erl&quot;},{line,69}]},
+</I>&gt;<i>                {cowboy_protocol,execute,4,
+</I>&gt;<i>                    [{file,&quot;src/cowboy_protocol.erl&quot;},{line,514}]}]
+</I>&gt;<i>
+</I>&gt;<i>Can anyone see what might be throwing this off?  I'd like to get a
+</I>&gt;<i>minimal handler running before I attempt to add some logic.
+</I>&gt;<i>
+</I>&gt;<i>Thanks,
+</I>&gt;<i>Lee
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>Extend mailing list
+</I>&gt;<i><A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i><A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000085.html">[99s-extend] Problems with Bullet
+</A></li>
+	<LI>Next message: <A HREF="000086.html">[99s-extend] Heartbeat?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#83">[ date ]</a>
+              <a href="thread.html#83">[ thread ]</a>
+              <a href="subject.html#83">[ subject ]</a>
+              <a href="author.html#83">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

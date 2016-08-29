@@ -1,0 +1,870 @@
+From daniel.goertzen at gmail.com  Wed Jun  4 22:08:54 2014
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Wed, 4 Jun 2014 15:08:54 -0500
+Subject: [99s-extend] cowboy client cert auth, basic auth
+Message-ID: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>
+
+I am having very good luck with Cowboy so far, but I have some questions:
+
+1. There doesn't appear to be any way to do client certificate
+authorization in Cowboy, although I see there is an example for doing
+exactly that with Ranch.  I think I could modify Cowboy to do what I want,
+but I thought I would ask if there were other options before doing that.
+
+2. I am also looking at http basic auth.  Would creating a middleware to
+sit in between cowboy_router and cowboy_handler be a typical way to go
+about it?
+
+Thanks,
+Dan.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140604/269377d0/attachment.html>
+
+From paulo.ferraz.oliveira at gmail.com  Wed Jun  4 23:37:14 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Wed, 4 Jun 2014 22:37:14 +0100
+Subject: [99s-extend] Mandatory init/3 and optional handle/2 and terminate/3
+Message-ID: <CA+dV7cT6ftWCadGesyVOsSxVG8PQi0uDRSjHF-Uot3s4hmdDTg@mail.gmail.com>
+
+Hello.
+
+You wrote here <http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_rest/>
+that
+"The only mandatory callback is init/3, needed to perform the protocol
+upgrade."
+
+In my code I have only this function for the protocol upgrade:
+
+init({_TransportName, _ProtocolName}, _Req, []) ->
+    {upgrade, protocol, cowboy_rest}.
+
+On the other hand, when compiling, I get the following warnings:
+
+src/handler_transactions.erl:3: Warning: undefined callback function
+handle/2 (behaviour 'cowboy_http_handler')
+src/handler_transactions.erl:3: Warning: undefined callback function
+terminate/3 (behaviour 'cowboy_http_handler')
+
+Is this the expected behavior? I know I _can_ ignore the warnings, but not
+if I want to use Erlang compiler option warnings_as_errors, for example.
+
+Many thanks.
+
+- Paulo F. Oliveira
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140604/407d3443/attachment.html>
+
+From essen at ninenines.eu  Wed Jun  4 23:46:38 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 04 Jun 2014 23:46:38 +0200
+Subject: [99s-extend] Mandatory init/3 and optional handle/2 and
+	terminate/3
+In-Reply-To: <CA+dV7cT6ftWCadGesyVOsSxVG8PQi0uDRSjHF-Uot3s4hmdDTg@mail.gmail.com>
+References: <CA+dV7cT6ftWCadGesyVOsSxVG8PQi0uDRSjHF-Uot3s4hmdDTg@mail.gmail.com>
+Message-ID: <538F93BE.4080002@ninenines.eu>
+
+You shouldn't say -behavior(cowboy_http_handler) if you don't actually 
+implement it.
+
+On 06/04/2014 11:37 PM, Paulo F. Oliveira wrote:
+> Hello.
+>
+> You wrote here
+> <http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_rest/> that "The
+> only mandatory callback is init/3, needed to perform the protocol upgrade."
+>
+> In my code I have only this function for the protocol upgrade:
+>
+> init({_TransportName, _ProtocolName}, _Req, []) ->
+>      {upgrade, protocol, cowboy_rest}.
+>
+> On the other hand, when compiling, I get the following warnings:
+>
+> src/handler_transactions.erl:3: Warning: undefined callback function
+> handle/2 (behaviour 'cowboy_http_handler')
+> src/handler_transactions.erl:3: Warning: undefined callback function
+> terminate/3 (behaviour 'cowboy_http_handler')
+>
+> Is this the expected behavior? I know I _can_ ignore the warnings, but
+> not if I want to use Erlang compiler option warnings_as_errors, for example.
+>
+> Many thanks.
+>
+> - Paulo F. Oliveira
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From essen at ninenines.eu  Wed Jun  4 23:48:01 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 04 Jun 2014 23:48:01 +0200
+Subject: [99s-extend] cowboy client cert auth, basic auth
+In-Reply-To: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>
+References: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>
+Message-ID: <538F9411.6070108@ninenines.eu>
+
+On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+> I am having very good luck with Cowboy so far, but I have some questions:
+>
+> 1. There doesn't appear to be any way to do client certificate
+> authorization in Cowboy, although I see there is an example for doing
+> exactly that with Ranch.  I think I could modify Cowboy to do what I
+> want, but I thought I would ask if there were other options before doing
+> that.
+
+Same as Ranch really, you just gotta take the socket and then call the 
+ssl functions.
+
+> 2. I am also looking at http basic auth.  Would creating a middleware to
+> sit in between cowboy_router and cowboy_handler be a typical way to go
+> about it?
+
+That's a common way to do it yes.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From daniel.goertzen at gmail.com  Thu Jun  5 01:44:02 2014
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Wed, 4 Jun 2014 18:44:02 -0500
+Subject: [99s-extend] cowboy client cert auth, basic auth
+In-Reply-To: <538F9411.6070108@ninenines.eu>
+References: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>
+ <538F9411.6070108@ninenines.eu>
+Message-ID: <CAJCf5RyYUNPmVcLEV+VyKpA24x0Pjb15+7doeugeQ=ZEJSpc6w@mail.gmail.com>
+
+On Wed, Jun 4, 2014 at 4:48 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+>
+>> I am having very good luck with Cowboy so far, but I have some questions:
+>>
+>> 1. There doesn't appear to be any way to do client certificate
+>> authorization in Cowboy, although I see there is an example for doing
+>> exactly that with Ranch.  I think I could modify Cowboy to do what I
+>> want, but I thought I would ask if there were other options before doing
+>> that.
+>>
+>
+> Same as Ranch really, you just gotta take the socket and then call the ssl
+> functions.
+>
+>
+Yes, but in cowboy there's no API to get at the socket.
+
+I was thinking of adding a "onconnect" hook similar to how there are
+"onrequest" and "onresponse" hooks.  The hook would be called in
+cowboy_protocol:init(), would accept Transport and Socket, and return a
+"user connection state" term that gets stashed in the state record.  The
+user connection state would then be provided in the Req object to each
+handler.  With these features one could do whatever computation they want
+on the socket and provide the result to all subsequent requests on that
+socket.  I want to use it for client cert checking, but it could be used
+for other things such as an IP address security check.
+
+Dan.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140604/2bce99e1/attachment.html>
+
+From paulo.ferraz.oliveira at gmail.com  Thu Jun  5 01:49:01 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Thu, 5 Jun 2014 00:49:01 +0100
+Subject: [99s-extend] Mandatory init/3 and optional handle/2 and
+	terminate/3
+In-Reply-To: <538F93BE.4080002@ninenines.eu>
+References: <CA+dV7cT6ftWCadGesyVOsSxVG8PQi0uDRSjHF-Uot3s4hmdDTg@mail.gmail.com>
+ <538F93BE.4080002@ninenines.eu>
+Message-ID: <CA+dV7cRvLwTj1L=myMrjEUEju8gr0gATSXO+Z+Oktsadh4y37w@mail.gmail.com>
+
+Got it, thanks.
+
+This here <http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_rest/> had
+the fine print that I hadn't read apparently: "This module cannot be
+described as a behaviour due to most of the callbacks it defines being
+optional. It has the same semantics as a behaviour otherwise."
+
+- Paulo F. Oliveira
+
+
+On 4 June 2014 22:46, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> You shouldn't say -behavior(cowboy_http_handler) if you don't actually
+> implement it.
+>
+> On 06/04/2014 11:37 PM, Paulo F. Oliveira wrote:
+>
+>> Hello.
+>>
+>> You wrote here
+>> <http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_rest/> that "The
+>>
+>> only mandatory callback is init/3, needed to perform the protocol
+>> upgrade."
+>>
+>> In my code I have only this function for the protocol upgrade:
+>>
+>> init({_TransportName, _ProtocolName}, _Req, []) ->
+>>      {upgrade, protocol, cowboy_rest}.
+>>
+>> On the other hand, when compiling, I get the following warnings:
+>>
+>> src/handler_transactions.erl:3: Warning: undefined callback function
+>> handle/2 (behaviour 'cowboy_http_handler')
+>> src/handler_transactions.erl:3: Warning: undefined callback function
+>> terminate/3 (behaviour 'cowboy_http_handler')
+>>
+>> Is this the expected behavior? I know I _can_ ignore the warnings, but
+>> not if I want to use Erlang compiler option warnings_as_errors, for
+>> example.
+>>
+>> Many thanks.
+>>
+>> - Paulo F. Oliveira
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140605/46eee3c0/attachment.html>
+
+From essen at ninenines.eu  Thu Jun  5 10:04:08 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 05 Jun 2014 10:04:08 +0200
+Subject: [99s-extend] cowboy client cert auth, basic auth
+In-Reply-To: <CAJCf5RyYUNPmVcLEV+VyKpA24x0Pjb15+7doeugeQ=ZEJSpc6w@mail.gmail.com>
+References: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>	<538F9411.6070108@ninenines.eu>
+ <CAJCf5RyYUNPmVcLEV+VyKpA24x0Pjb15+7doeugeQ=ZEJSpc6w@mail.gmail.com>
+Message-ID: <53902478.40303@ninenines.eu>
+
+On 06/05/2014 01:44 AM, Daniel Goertzen wrote:
+>
+>
+>
+> On Wed, Jun 4, 2014 at 4:48 PM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+>
+>         I am having very good luck with Cowboy so far, but I have some
+>         questions:
+>
+>         1. There doesn't appear to be any way to do client certificate
+>         authorization in Cowboy, although I see there is an example for
+>         doing
+>         exactly that with Ranch.  I think I could modify Cowboy to do what I
+>         want, but I thought I would ask if there were other options
+>         before doing
+>         that.
+>
+>
+>     Same as Ranch really, you just gotta take the socket and then call
+>     the ssl functions.
+>
+>
+> Yes, but in cowboy there's no API to get at the socket.
+
+There is the undocumented function cowboy_req:get/1 which is meant for 
+that kind of "special" use.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From daniel.goertzen at gmail.com  Thu Jun  5 23:01:12 2014
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Thu, 5 Jun 2014 16:01:12 -0500
+Subject: [99s-extend] cowboy client cert auth, basic auth
+In-Reply-To: <53902478.40303@ninenines.eu>
+References: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>
+ <538F9411.6070108@ninenines.eu>
+ <CAJCf5RyYUNPmVcLEV+VyKpA24x0Pjb15+7doeugeQ=ZEJSpc6w@mail.gmail.com>
+ <53902478.40303@ninenines.eu>
+Message-ID: <CAJCf5Ry4Okkua__YtfU8bO5=AvYKPsXzU+1EqyXsK7tx2q6K8w@mail.gmail.com>
+
+But then I would have to check the client cert for each and every request.
+I should have to check the cert only once at connect time and then be able
+to pass the result of that check in the request to each handler.
+
+Anyway I've gone ahead and implemented what I need in a generic manner and
+it seems to work well.  I think it would be a useful addition to Cowboy.
+If you agree I could write some more documentation for it.
+
+https://github.com/goertzenator/cowboy/tree/onconnect
+
+I added a "onconnect" hook and "connection metadata" to cowboy_req.  The
+connection metadata works like existing metadata, but is preserved from
+request to request on the same connection.  The onconnect hook provides
+initial values for the connection metadata.
+
+Dan.
+
+
+
+
+On Thu, Jun 5, 2014 at 3:04 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> On 06/05/2014 01:44 AM, Daniel Goertzen wrote:
+>
+>>
+>>
+>>
+>> On Wed, Jun 4, 2014 at 4:48 PM, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+>>
+>>         I am having very good luck with Cowboy so far, but I have some
+>>         questions:
+>>
+>>         1. There doesn't appear to be any way to do client certificate
+>>         authorization in Cowboy, although I see there is an example for
+>>         doing
+>>         exactly that with Ranch.  I think I could modify Cowboy to do
+>> what I
+>>         want, but I thought I would ask if there were other options
+>>         before doing
+>>         that.
+>>
+>>
+>>     Same as Ranch really, you just gotta take the socket and then call
+>>     the ssl functions.
+>>
+>>
+>> Yes, but in cowboy there's no API to get at the socket.
+>>
+>
+> There is the undocumented function cowboy_req:get/1 which is meant for
+> that kind of "special" use.
+>
+>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140605/3ba15fb3/attachment.html>
+
+From essen at ninenines.eu  Thu Jun  5 23:24:50 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 05 Jun 2014 23:24:50 +0200
+Subject: [99s-extend] cowboy client cert auth, basic auth
+In-Reply-To: <CAJCf5Ry4Okkua__YtfU8bO5=AvYKPsXzU+1EqyXsK7tx2q6K8w@mail.gmail.com>
+References: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>	<538F9411.6070108@ninenines.eu>	<CAJCf5RyYUNPmVcLEV+VyKpA24x0Pjb15+7doeugeQ=ZEJSpc6w@mail.gmail.com>	<53902478.40303@ninenines.eu>
+ <CAJCf5Ry4Okkua__YtfU8bO5=AvYKPsXzU+1EqyXsK7tx2q6K8w@mail.gmail.com>
+Message-ID: <5390E022.40403@ninenines.eu>
+
+Misunderstood what you needed then.
+
+Note that the services that are completely blocked from anyone who 
+doesn't have the right cert are virtually non-existent, it doesn't make 
+sense to add a feature for it.
+
+You can do that kind of thing by having custom code creating the 
+protocol process by the way. There's no need to patch Cowboy for that.
+
+On 06/05/2014 11:01 PM, Daniel Goertzen wrote:
+> But then I would have to check the client cert for each and every
+> request.  I should have to check the cert only once at connect time and
+> then be able to pass the result of that check in the request to each
+> handler.
+>
+> Anyway I've gone ahead and implemented what I need in a generic manner
+> and it seems to work well.  I think it would be a useful addition to
+> Cowboy.  If you agree I could write some more documentation for it.
+>
+> https://github.com/goertzenator/cowboy/tree/onconnect
+>
+> I added a "onconnect" hook and "connection metadata" to cowboy_req.  The
+> connection metadata works like existing metadata, but is preserved from
+> request to request on the same connection.  The onconnect hook provides
+> initial values for the connection metadata.
+>
+> Dan.
+>
+>
+>
+>
+> On Thu, Jun 5, 2014 at 3:04 AM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     On 06/05/2014 01:44 AM, Daniel Goertzen wrote:
+>
+>
+>
+>
+>         On Wed, Jun 4, 2014 at 4:48 PM, Lo?c Hoguin <essen at ninenines.eu
+>         <mailto:essen at ninenines.eu>
+>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>> wrote:
+>
+>              On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+>
+>                  I am having very good luck with Cowboy so far, but I
+>         have some
+>                  questions:
+>
+>                  1. There doesn't appear to be any way to do client
+>         certificate
+>                  authorization in Cowboy, although I see there is an
+>         example for
+>                  doing
+>                  exactly that with Ranch.  I think I could modify Cowboy
+>         to do what I
+>                  want, but I thought I would ask if there were other options
+>                  before doing
+>                  that.
+>
+>
+>              Same as Ranch really, you just gotta take the socket and
+>         then call
+>              the ssl functions.
+>
+>
+>         Yes, but in cowboy there's no API to get at the socket.
+>
+>
+>     There is the undocumented function cowboy_req:get/1 which is meant
+>     for that kind of "special" use.
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From daniel.goertzen at gmail.com  Fri Jun  6 15:59:43 2014
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Fri, 6 Jun 2014 08:59:43 -0500
+Subject: [99s-extend] cowboy client cert auth, basic auth
+In-Reply-To: <5390E022.40403@ninenines.eu>
+References: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>
+ <538F9411.6070108@ninenines.eu>
+ <CAJCf5RyYUNPmVcLEV+VyKpA24x0Pjb15+7doeugeQ=ZEJSpc6w@mail.gmail.com>
+ <53902478.40303@ninenines.eu>
+ <CAJCf5Ry4Okkua__YtfU8bO5=AvYKPsXzU+1EqyXsK7tx2q6K8w@mail.gmail.com>
+ <5390E022.40403@ninenines.eu>
+Message-ID: <CAJCf5Rz4HUayBM4vjoq=ukxYWL2xvKjm+j_KAE8uL_bTQkVD+w@mail.gmail.com>
+
+Okay, I see how I can wrap cowboy_protocol:init() to perhaps add cert
+information to env or stuff it in an ets table / gproc / process
+dictionary.  Is this what you mean?  I think that will work for me.
+
+My immediate application is to provide a secure RESTful API for a network
+appliance.  Think securing the Web of Things.  I really do want to get in
+the client's face if they don't have the right certificate.
+
+I'm late in saying this, but thank you for making Cowboy so easy to read
+and understand.
+
+Cheers,
+Dan.
+
+
+
+On Thu, Jun 5, 2014 at 4:24 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Misunderstood what you needed then.
+>
+> Note that the services that are completely blocked from anyone who doesn't
+> have the right cert are virtually non-existent, it doesn't make sense to
+> add a feature for it.
+>
+> You can do that kind of thing by having custom code creating the protocol
+> process by the way. There's no need to patch Cowboy for that.
+>
+>
+> On 06/05/2014 11:01 PM, Daniel Goertzen wrote:
+>
+>> But then I would have to check the client cert for each and every
+>> request.  I should have to check the cert only once at connect time and
+>> then be able to pass the result of that check in the request to each
+>> handler.
+>>
+>> Anyway I've gone ahead and implemented what I need in a generic manner
+>> and it seems to work well.  I think it would be a useful addition to
+>> Cowboy.  If you agree I could write some more documentation for it.
+>>
+>> https://github.com/goertzenator/cowboy/tree/onconnect
+>>
+>> I added a "onconnect" hook and "connection metadata" to cowboy_req.  The
+>> connection metadata works like existing metadata, but is preserved from
+>> request to request on the same connection.  The onconnect hook provides
+>> initial values for the connection metadata.
+>>
+>> Dan.
+>>
+>>
+>>
+>>
+>> On Thu, Jun 5, 2014 at 3:04 AM, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     On 06/05/2014 01:44 AM, Daniel Goertzen wrote:
+>>
+>>
+>>
+>>
+>>         On Wed, Jun 4, 2014 at 4:48 PM, Lo?c Hoguin <essen at ninenines.eu
+>>         <mailto:essen at ninenines.eu>
+>>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>> wrote:
+>>
+>>              On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+>>
+>>                  I am having very good luck with Cowboy so far, but I
+>>         have some
+>>                  questions:
+>>
+>>                  1. There doesn't appear to be any way to do client
+>>         certificate
+>>                  authorization in Cowboy, although I see there is an
+>>         example for
+>>                  doing
+>>                  exactly that with Ranch.  I think I could modify Cowboy
+>>         to do what I
+>>                  want, but I thought I would ask if there were other
+>> options
+>>                  before doing
+>>                  that.
+>>
+>>
+>>              Same as Ranch really, you just gotta take the socket and
+>>         then call
+>>              the ssl functions.
+>>
+>>
+>>         Yes, but in cowboy there's no API to get at the socket.
+>>
+>>
+>>     There is the undocumented function cowboy_req:get/1 which is meant
+>>     for that kind of "special" use.
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     http://ninenines.eu
+>>
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140606/b992565e/attachment.html>
+
+From essen at ninenines.eu  Fri Jun  6 16:09:56 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 06 Jun 2014 16:09:56 +0200
+Subject: [99s-extend] cowboy client cert auth, basic auth
+In-Reply-To: <CAJCf5Rz4HUayBM4vjoq=ukxYWL2xvKjm+j_KAE8uL_bTQkVD+w@mail.gmail.com>
+References: <CAJCf5Ry4T701NtypmLkmZhbx1hWvwV-df9zF+iypVOkdPCULDQ@mail.gmail.com>	<538F9411.6070108@ninenines.eu>	<CAJCf5RyYUNPmVcLEV+VyKpA24x0Pjb15+7doeugeQ=ZEJSpc6w@mail.gmail.com>	<53902478.40303@ninenines.eu>	<CAJCf5Ry4Okkua__YtfU8bO5=AvYKPsXzU+1EqyXsK7tx2q6K8w@mail.gmail.com>	<5390E022.40403@ninenines.eu>
+ <CAJCf5Rz4HUayBM4vjoq=ukxYWL2xvKjm+j_KAE8uL_bTQkVD+w@mail.gmail.com>
+Message-ID: <5391CBB4.7060606@ninenines.eu>
+
+On 06/06/2014 03:59 PM, Daniel Goertzen wrote:
+> Okay, I see how I can wrap cowboy_protocol:init() to perhaps add cert
+> information to env or stuff it in an ets table / gproc / process
+> dictionary.  Is this what you mean?  I think that will work for me.
+
+Something like that, yes. Process dictionary is probably the quick and 
+dirty way, env would be cleaner but take more code as you then have to 
+move it from env to handler opts.
+
+> My immediate application is to provide a secure RESTful API for a
+> network appliance.  Think securing the Web of Things.  I really do want
+> to get in the client's face if they don't have the right certificate.
+>
+> I'm late in saying this, but thank you for making Cowboy so easy to read
+> and understand.
+>
+> Cheers,
+> Dan.
+>
+>
+>
+> On Thu, Jun 5, 2014 at 4:24 PM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     Misunderstood what you needed then.
+>
+>     Note that the services that are completely blocked from anyone who
+>     doesn't have the right cert are virtually non-existent, it doesn't
+>     make sense to add a feature for it.
+>
+>     You can do that kind of thing by having custom code creating the
+>     protocol process by the way. There's no need to patch Cowboy for that.
+>
+>
+>     On 06/05/2014 11:01 PM, Daniel Goertzen wrote:
+>
+>         But then I would have to check the client cert for each and every
+>         request.  I should have to check the cert only once at connect
+>         time and
+>         then be able to pass the result of that check in the request to each
+>         handler.
+>
+>         Anyway I've gone ahead and implemented what I need in a generic
+>         manner
+>         and it seems to work well.  I think it would be a useful addition to
+>         Cowboy.  If you agree I could write some more documentation for it.
+>
+>         https://github.com/__goertzenator/cowboy/tree/__onconnect
+>         <https://github.com/goertzenator/cowboy/tree/onconnect>
+>
+>         I added a "onconnect" hook and "connection metadata" to
+>         cowboy_req.  The
+>         connection metadata works like existing metadata, but is
+>         preserved from
+>         request to request on the same connection.  The onconnect hook
+>         provides
+>         initial values for the connection metadata.
+>
+>         Dan.
+>
+>
+>
+>
+>         On Thu, Jun 5, 2014 at 3:04 AM, Lo?c Hoguin <essen at ninenines.eu
+>         <mailto:essen at ninenines.eu>
+>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>> wrote:
+>
+>              On 06/05/2014 01:44 AM, Daniel Goertzen wrote:
+>
+>
+>
+>
+>                  On Wed, Jun 4, 2014 at 4:48 PM, Lo?c Hoguin
+>         <essen at ninenines.eu <mailto:essen at ninenines.eu>
+>                  <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>
+>                  <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>
+>         <mailto:essen at ninenines.eu <mailto:essen at ninenines.eu>>>> wrote:
+>
+>                       On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+>
+>                           I am having very good luck with Cowboy so far,
+>         but I
+>                  have some
+>                           questions:
+>
+>                           1. There doesn't appear to be any way to do client
+>                  certificate
+>                           authorization in Cowboy, although I see there
+>         is an
+>                  example for
+>                           doing
+>                           exactly that with Ranch.  I think I could
+>         modify Cowboy
+>                  to do what I
+>                           want, but I thought I would ask if there were
+>         other options
+>                           before doing
+>                           that.
+>
+>
+>                       Same as Ranch really, you just gotta take the
+>         socket and
+>                  then call
+>                       the ssl functions.
+>
+>
+>                  Yes, but in cowboy there's no API to get at the socket.
+>
+>
+>              There is the undocumented function cowboy_req:get/1 which
+>         is meant
+>              for that kind of "special" use.
+>
+>
+>              --
+>              Lo?c Hoguin
+>         http://ninenines.eu
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From essen at ninenines.eu  Tue Jun 10 12:38:10 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 10 Jun 2014 12:38:10 +0200
+Subject: [99s-extend] [ANN] Cowboy and Ranch 0.10
+Message-ID: <5396E012.4070900@ninenines.eu>
+
+Hello!
+
+I just pushed Cowboy 0.10 and Ranch 0.10.
+
+   https://github.com/extend/cowboy
+   https://github.com/extend/ranch
+
+The Cowboy changelog can be found here: 
+https://github.com/extend/cowboy/blob/master/CHANGELOG.md
+
+This release sees the addition of functions for reading multipart! (And 
+there are also functions for creating multipart bodies in the cowlib 
+library if you need them.) The old multipart interface got removed.
+
+The other big change is a rework of the body reading interface, again. 
+Users have reported having timeout issues sometimes so the new interface 
+allows you to configure read length/timeout so you can control the rate 
+of transfer *per body function call*.
+
+The functions init_stream, stream_body and skip_body have been 
+deprecated and will be removed in 1.0 (alongside one clause of the 
+body/2 and body_qs/2 functions).
+
+Current code *should* be compatible but you are really encouraged to 
+test and remove dead code introduced by this change.
+
+The changes in Ranch are mostly small so I won't bore you with the details.
+
+The next step will be to release 1.0 sometimes this summer. Work on 2.0 
+will start immediately after that but 2.0 is planned to be released 
+after Erlang 18.0 is out. We'll have a new version bump for every Erlang 
+version basically. More details later.
+
+Hope you enjoy this release, and that I didn't break your code (too much)!
+
+Enjoy.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From roger at differentpla.net  Wed Jun 11 14:38:59 2014
+From: roger at differentpla.net (Roger Lipscombe)
+Date: Wed, 11 Jun 2014 13:38:59 +0100
+Subject: [99s-extend] Stop ranch listeners without dropping connections
+Message-ID: <CAJgnQd-Rc7HpqeFe4xYBShvxjN27n0-VJLf6+P7yr4gTnJ=B1Q@mail.gmail.com>
+
+Using ranch, is there any way to stop the listener (and acceptors)
+without dropping the existing connections?
+
+I ask because I'd like to start another instance of my server on the
+same box and have the old instance continue to handle its existing
+connections for a while.
+
+It looks to me that if I call ranch:stop_listener, it'll kill the
+ranch_listener_sup, which will also kill the ranch_conns_sup (and the
+existing connections).
+
+If I manually do a supervisor:terminate_child(ListenerPid,
+ranch_acceptors_sup), the acceptors go away, but the socket is still
+open, which means that I can't start another instance of my server.
+
+Thoughts?
+
+From essen at ninenines.eu  Mon Jun 23 13:36:50 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 23 Jun 2014 13:36:50 +0200
+Subject: [99s-extend] Stop ranch listeners without dropping connections
+In-Reply-To: <CAJgnQd-Rc7HpqeFe4xYBShvxjN27n0-VJLf6+P7yr4gTnJ=B1Q@mail.gmail.com>
+References: <CAJgnQd-Rc7HpqeFe4xYBShvxjN27n0-VJLf6+P7yr4gTnJ=B1Q@mail.gmail.com>
+Message-ID: <53A81152.9020404@ninenines.eu>
+
+It is not possible at this point. Please open a ticket.
+
+On 06/11/2014 02:38 PM, Roger Lipscombe wrote:
+> Using ranch, is there any way to stop the listener (and acceptors)
+> without dropping the existing connections?
+>
+> I ask because I'd like to start another instance of my server on the
+> same box and have the old instance continue to handle its existing
+> connections for a while.
+>
+> It looks to me that if I call ranch:stop_listener, it'll kill the
+> ranch_listener_sup, which will also kill the ranch_conns_sup (and the
+> existing connections).
+>
+> If I manually do a supervisor:terminate_child(ListenerPid,
+> ranch_acceptors_sup), the acceptors go away, but the socket is still
+> open, which means that I can't start another instance of my server.
+>
+> Thoughts?
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From roger at differentpla.net  Mon Jun 23 15:55:47 2014
+From: roger at differentpla.net (Roger Lipscombe)
+Date: Mon, 23 Jun 2014 14:55:47 +0100
+Subject: [99s-extend] Stop ranch listeners without dropping connections
+In-Reply-To: <53A81152.9020404@ninenines.eu>
+References: <CAJgnQd-Rc7HpqeFe4xYBShvxjN27n0-VJLf6+P7yr4gTnJ=B1Q@mail.gmail.com>
+ <53A81152.9020404@ninenines.eu>
+Message-ID: <CAJgnQd8XTjZeLAW4iP4s67B1pWyCf8yom_UfWeoApreVmmv+tA@mail.gmail.com>
+
+Done: https://github.com/extend/ranch/issues/83
+
+On 23 June 2014 12:36, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> It is not possible at this point. Please open a ticket.
+>
+>
+> On 06/11/2014 02:38 PM, Roger Lipscombe wrote:
+>>
+>> Using ranch, is there any way to stop the listener (and acceptors)
+>> without dropping the existing connections?
+>>
+>> I ask because I'd like to start another instance of my server on the
+>> same box and have the old instance continue to handle its existing
+>> connections for a while.
+>>
+>> It looks to me that if I call ranch:stop_listener, it'll kill the
+>> ranch_listener_sup, which will also kill the ranch_conns_sup (and the
+>> existing connections).
+>>
+>> If I manually do a supervisor:terminate_child(ListenerPid,
+>> ranch_acceptors_sup), the acceptors go away, but the socket is still
+>> open, which means that I can't start another instance of my server.
+>>
+>> Thoughts?
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+

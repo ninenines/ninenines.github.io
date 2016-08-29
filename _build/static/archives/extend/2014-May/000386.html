@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] REST responses
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20responses&In-Reply-To=%3C537BA2EA.5080108%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000384.html">
+   <LINK REL="Next"  HREF="000388.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] REST responses</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20REST%20responses&In-Reply-To=%3C537BA2EA.5080108%40ninenines.eu%3E"
+       TITLE="[99s-extend] REST responses">essen at ninenines.eu
+       </A><BR>
+    <I>Tue May 20 20:46:02 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000384.html">[99s-extend] REST responses
+</A></li>
+        <LI>Next message: <A HREF="000388.html">[99s-extend] REST responses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#386">[ date ]</a>
+              <a href="thread.html#386">[ thread ]</a>
+              <a href="subject.html#386">[ subject ]</a>
+              <a href="author.html#386">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+On 05/20/2014 06:27 PM, Paulo F. Oliveira wrote:
+&gt;<i> Hello.
+</I>&gt;<i>
+</I>&gt;<i> First of all, thanks for the great work you've done with cowboy. I've
+</I>&gt;<i> been using it with a fait amount of success and I'm a fairly new Erlang
+</I>&gt;<i> developer. I'm mainly interested in the REST &quot;interface&quot; of the
+</I>&gt;<i> application and its way of doing RESTful things, and I like the way you
+</I>&gt;<i> did it (what with all the content_types_provided, service_available,
+</I>&gt;<i> etc. functions). I've tested the way the system reacted to the different
+</I>&gt;<i> Accept, Content-Type, etc. headers and always got very well-opinionated
+</I>&gt;<i> responses (406, 415, ...).
+</I>&gt;<i>
+</I>&gt;<i> A couple of questions remain though (I'm sorry if they've been asked
+</I>&gt;<i> already but I've searched the web for answers and read the available
+</I>&gt;<i> docs and couldn't find them):
+</I>&gt;<i>
+</I>&gt;<i> 1. is it expected that, if I use cowboy_req:reply/2 in a GET handler
+</I>&gt;<i> (coming from content_types_provided), the onresponse/4 hook be called
+</I>&gt;<i> twice? I guess one is due to the reply and the other one due to the
+</I>&gt;<i> workflow of the request, but is there a way to prevent the second execution?
+</I>
+If you reply from a callback you must call {halt, Req, State} to stop 
+processing.
+
+&gt;<i> 2. if I want to JSON-parse ALL my requests should I a) use the
+</I>&gt;<i> onrequest/1 hook or b) do this on a per-request basis? Because I'd like
+</I>&gt;<i> to reply with a 400 ASAP but keep going if the JSON validates (I'm going
+</I>&gt;<i> to use JSON-schema for validating input); and, if possible, have the
+</I>&gt;<i> JSON-parsed body stored somewhere for future manipulation.
+</I>
+It makes little sense to do it before the accept callback you define. 
+Not only because you will duplicate content-type checks and whatnot, but 
+also because you don't actually win anything from doing this. If you are 
+using JSON, then JSON processing will take infinitely more resources 
+than the REST code.
+
+&gt;<i> 3. I haven't seen examples that made use of the State (from the function
+</I>&gt;<i> returns). When should I use this instead of the Request metadata? I'd
+</I>&gt;<i> like to be able to set a generic error state for a request (either in
+</I>&gt;<i> meta ou State) and that have a &quot;standard&quot; error response be created at a
+</I>&gt;<i> later time (in a unique function, for example - e.g. onresponse/4).
+</I>
+State is for the functions within the current module. Look at 
+cowboy_static for an example.
+
+&gt;<i> 4. is there anything like a catch-all exception handler? I'd like to
+</I>&gt;<i> catch exceptions that occur anywhere so I could log them and analyze
+</I>&gt;<i> them at a later moment.
+</I>
+You can add your own error_logger handler, or use something like lager. 
+All errors end up sending a message to error_logger.
+
+&gt;<i> I'm probably abusing the onresponse/onrequest hooks already, so your
+</I>&gt;<i> answers should help me clarify this.
+</I>
+Sounds like it!
+
+&gt;<i> Thanks.
+</I>&gt;<i>
+</I>&gt;<i> - Paulo
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000384.html">[99s-extend] REST responses
+</A></li>
+	<LI>Next message: <A HREF="000388.html">[99s-extend] REST responses
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#386">[ date ]</a>
+              <a href="thread.html#386">[ thread ]</a>
+              <a href="subject.html#386">[ subject ]</a>
+              <a href="author.html#386">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

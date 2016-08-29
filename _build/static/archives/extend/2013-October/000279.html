@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] timeout in cowboy loop handler
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwbh8xH9Etiev66oA90p7aw3RjffnYoBd8b3Kuab0Bg6WQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000278.html">
+   <LINK REL="Next"  HREF="000280.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] timeout in cowboy loop handler</H1>
+    <B>akonsu</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3CCA%2BeMAwbh8xH9Etiev66oA90p7aw3RjffnYoBd8b3Kuab0Bg6WQ%40mail.gmail.com%3E"
+       TITLE="[99s-extend] timeout in cowboy loop handler">akonsu at gmail.com
+       </A><BR>
+    <I>Wed Oct 16 06:42:02 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000278.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+        <LI>Next message: <A HREF="000280.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#279">[ date ]</a>
+              <a href="thread.html#279">[ thread ]</a>
+              <a href="subject.html#279">[ subject ]</a>
+              <a href="author.html#279">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>ok. the data that I need to send are coming as erlang messages to the
+process that runs my handler. so it sounds like if I want to use the
+&quot;normal&quot; cowboy_http_handler, then I need a receive loop inside handle(Req,
+State) callback, right? Basically, my response stream will potentially
+never end, I do not know how to handle this properly in cowboy...
+
+
+2013/10/16 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;
+
+&gt;<i> Loop handlers are designed to wait for a long time with the socket *idle*
+</I>&gt;<i> and then eventually send one response then close the socket. Things like
+</I>&gt;<i> long-polling.
+</I>&gt;<i>
+</I>&gt;<i> What you are doing is just streaming, for which you do not need a timeout
+</I>&gt;<i> because the socket isn't idle. You are just sending a large response, and
+</I>&gt;<i> normal handlers are perfectly capable of doing that.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20131016/abe38a1a/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20131016/abe38a1a/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000278.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+	<LI>Next message: <A HREF="000280.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#279">[ date ]</a>
+              <a href="thread.html#279">[ thread ]</a>
+              <a href="subject.html#279">[ subject ]</a>
+              <a href="author.html#279">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

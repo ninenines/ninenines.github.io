@@ -1,0 +1,1977 @@
+From ivan at llaisdy.com  Tue Jul  9 18:11:50 2013
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Tue, 09 Jul 2013 17:11:50 +0100
+Subject: [99s-extend] Cowboy: http request maximum body size
+Message-ID: <51DC3646.70207@llaisdy.com>
+
+Dear All
+
+ From the source [1], it looks like the default maximum request body 
+size is 8 million bytes, but this can be set per request, up to 
+infinity.  In the latter case there seems to be no upper limit set by 
+the server at all, and it will keep reading until some external force 
+makes it stop.
+
+That looks handy, if it means I don't have to stipulate a maximum 
+request body size (as long as I make sure the machine cowboy is running 
+on has a sensible amount of memory).
+
+Is that the case?  If not, please correct.
+
+With thanks and best wishes
+
+Ivan
+
+[1] https://github.com/extend/cowboy/blob/master/src/cowboy_req.erl#L720-746
+
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From akuleshov at tpip.net  Wed Jul 17 16:47:43 2013
+From: akuleshov at tpip.net (Alexander Kuleshov)
+Date: Wed, 17 Jul 2013 16:47:43 +0200 (CEST)
+Subject: [99s-extend] Serve static files with cowboy from some applications
+Message-ID: <1124365136.645865.1374072463432.JavaMail.root@tpip.net>
+
+Hello,
+
+I have a web application which used cowboy (from master). I need to serve some static files, it's usual web application but i can use usual dispatch something like this:
+
+    Dispatch = cowboy_router:compile([
+        {'_', [
+                {<<"/static/v/[...]">>, cowboy_static, [
+                    {etag, {attributes, [filepath, filesize, inode, mtime]}},
+                    {mimetypes, [
+                            {<<".js">> , [<<"application/javascript">>]},
+                            {<<".css">>, [<<"text/css">>]},
+                            {<<".gif">>, [<<"image/gif">>]},
+                            {<<".png">>, [<<"image/png">>]},
+                            {<<".jpg">>, [<<"image/jpeg">>]},
+                            {<<".html">>, [<<"text/html">>]}
+                    ]},
+                    {directory, {priv_dir, my_app, [<<"static">>]}}
+                ]}
+        ]}
+    ])
+
+And i try to explain why. In fact, i have one application (this application) which used cowboy and many plugins for it. Every plugin is an erlang application and also every application has own static files. I need routing something like this:
+
+if path /static/v/my_app/index.html than serve index.html from my_app
+
+if path /static/v/other_app/test.js that serve test.js from other_app.
+
+and etc....
+
+Main goal to change: `my_app` from here: {directory, {priv_dir, my_app, [<<"static">>]} dynamically or write custom static handler.
+
+How to do it correctly with cowboy?
+
+Thank you.
+
+-- 
+Alex Kuleshov
+Software Developer
+
+email: ak at travelping.com
+phone: +77172227194
+mobile: +77019442517
+
+----------------- enabling your networks ---------------------
+Travelping GmbH               phone: +49-391-8190990
+Roentgenstr. 13               fax: +49-391-819099299
+D-39108 Magdeburg             email: info at travelping.com
+GERMANY                       web: http://www.travelping.com
+
+Company Registration: Amtsgericht Stendal Reg No.: HRB 10578
+Geschaeftsfuehrer: Holger Winkelmann | VAT ID No.: DE236673780
+--------------------------------------------------------------
+
+
+From adrian at id3as.co.uk  Thu Jul 18 12:15:11 2013
+From: adrian at id3as.co.uk (Adrian Roe)
+Date: Thu, 18 Jul 2013 11:15:11 +0100
+Subject: [99s-extend] Cowboy handler linked processes
+Message-ID: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+
+We have been using spawn_linked workers to handle tasks that live for the lifetime of a single HTTP request
+
+Although in the cowboy guide it is clear that Cowboy can use "One Process of Many Requests" I am surprised that this is the case even if the handler crashes.  For example, our use case is to copy a large file to the server over HTTP where a worker process relays the file contents to long term storage.  The worker process is spawn_linked from the HTTP handler and (for our use case) should die if the handler stops.
+
+If the client stops the upload (for example by browsing away, or losing connectivity) we correctly receive an error (see sample Lager trace below), but what we are seeing is that spawn_linked processes are NOT being killed.
+
+Is this intended behaviour - I accept it makes sense to reuse the processes but should this continue to be the case even if the previous use of the process crashed?  If it is intended behaviour I think the docs should highlight this as we've been leaking processes for some time now, but I've always seen it as erlang's job to look after related process trees in the event of error.  Our current workaround is to hold a list of linked processes in process storage and then kill them in the terminate handler which is ugly in the extreme!!  We don't know the PIDS of the linked processes until it is too late to return State to Cowboy (i.e. we are already in our handle code)...
+
+Kind regards
+
+Adrian
+
+16:09:32.347 [info] Trailer upload failed with reason {case_clause,{error,closed}}
+16:09:32.348 [error] ** Cowboy handler upload_trailer_resource terminating in handle/2
+   for the reason error:{case_clause,{error,closed}}
+** Handler state was {state,undefined,0,undefined,undefined,undefined}
+** Request was [{socket,#Port<0.11230>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1987.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,<<"54.225.117.108">>},{host_info,undefined},{port,8000},{path,<<"/upload_trailer">>},{path_info,undef
+ined},{qs,<<"name=linux-7.4.21.zip&size=54015414">>},{qs_vals,undefined},{bindings,[]},{headers,[{<<"host">>,<<"54.225.117.108:8000">>},{<<"connection">>,<<"keep-alive">>},{<<"content-length">>,<<"54015414">>},{<<"origin">>,<<"http://54.225.117.108:8000">>},{<<"user-agent">>,<<"M
+ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36">>},{<<"content-type">>,<<>>},{<<"accept">>,<<"*/*">>},{<<"referer">>,<<"http://54.225.117.108:8000/">>},{<<"accept-encoding">>,<<"gzip,deflate,sdch">>},{<<"acce
+pt-language">>,<<"en-US,en;q=0.8">>},{<<"cookie">>,<<"__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5; id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93">>}]},{p_headers,[{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+fined},{buffer,<<>>},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,<<>>},{onresponse,undefined}]
+** Stacktrace: [{i_cowboy,stream_body,0,[{file,"src/i_cowboy.erl"},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,"src/endpoints/upload_trailer_resource.erl"}
+,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,202}]},{upload_trailer_resource,sequence,2,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,106}]},{upload_trailer_resource,process_request,1,[{file,"src/endpo
+ints/upload_trailer_resource.erl"},{line,212}]},{i_cowboy,do,3,[{file,"src/i_cowboy.erl"},{line,29}]},{cowboy_handler,handler_handle,4,[{file,"src/cowboy_handler.erl"},{line,119}]}]
+
+
+-- 
+Dr Adrian Roe
+Director
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130718/d65f1aaf/attachment.html>
+
+From essen at ninenines.eu  Thu Jul 18 12:17:13 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 18 Jul 2013 12:17:13 +0200
+Subject: [99s-extend] Serve static files with cowboy from some
+	applications
+In-Reply-To: <1124365136.645865.1374072463432.JavaMail.root@tpip.net>
+References: <1124365136.645865.1374072463432.JavaMail.root@tpip.net>
+Message-ID: <51E7C0A9.8050308@ninenines.eu>
+
+On 07/17/2013 04:47 PM, Alexander Kuleshov wrote:
+> Hello,
+>
+> I have a web application which used cowboy (from master). I need to serve some static files, it's usual web application but i can use usual dispatch something like this:
+>
+>      Dispatch = cowboy_router:compile([
+>          {'_', [
+>                  {<<"/static/v/[...]">>, cowboy_static, [
+>                      {etag, {attributes, [filepath, filesize, inode, mtime]}},
+>                      {mimetypes, [
+>                              {<<".js">> , [<<"application/javascript">>]},
+>                              {<<".css">>, [<<"text/css">>]},
+>                              {<<".gif">>, [<<"image/gif">>]},
+>                              {<<".png">>, [<<"image/png">>]},
+>                              {<<".jpg">>, [<<"image/jpeg">>]},
+>                              {<<".html">>, [<<"text/html">>]}
+>                      ]},
+>                      {directory, {priv_dir, my_app, [<<"static">>]}}
+>                  ]}
+>          ]}
+>      ])
+>
+> And i try to explain why. In fact, i have one application (this application) which used cowboy and many plugins for it. Every plugin is an erlang application and also every application has own static files. I need routing something like this:
+>
+> if path /static/v/my_app/index.html than serve index.html from my_app
+>
+> if path /static/v/other_app/test.js that serve test.js from other_app.
+>
+> and etc....
+>
+> Main goal to change: `my_app` from here: {directory, {priv_dir, my_app, [<<"static">>]} dynamically or write custom static handler.
+>
+> How to do it correctly with cowboy?
+
+Why don't you add one rule per application?
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Thu Jul 18 12:20:36 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 18 Jul 2013 12:20:36 +0200
+Subject: [99s-extend] Cowboy handler linked processes
+In-Reply-To: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+References: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+Message-ID: <51E7C174.2030501@ninenines.eu>
+
+I don't know what happens but there's two things I know:
+
+  *  Handlers don't trap_exit, so if the linked process crashes, they 
+crash too
+  *  If the handler crashes, we close the connection and stop the 
+handler; if not this is a bug
+
+After your log message the handler should stop unless there's a bug 
+somewhere.
+
+On 07/18/2013 12:15 PM, Adrian Roe wrote:
+> We have been using spawn_linked workers to handle tasks that live for
+> the lifetime of a single HTTP request
+>
+> Although in the cowboy guide it is clear that Cowboy can use "One
+> Process of Many Requests" I am surprised that this is the case even if
+> the handler crashes.  For example, our use case is to copy a large file
+> to the server over HTTP where a worker process relays the file contents
+> to long term storage.  The worker process is spawn_linked from the HTTP
+> handler and (for our use case) should die if the handler stops.
+>
+> If the client stops the upload (for example by browsing away, or losing
+> connectivity) we correctly receive an error (see sample Lager trace
+> below), but what we are seeing is that spawn_linked processes are NOT
+> being killed.
+>
+> Is this intended behaviour - I accept it makes sense to reuse the
+> processes but should this continue to be the case even if the previous
+> use of the process crashed?  If it is intended behaviour I think the
+> docs should highlight this as we've been leaking processes for some time
+> now, but I've always seen it as erlang's job to look after related
+> process trees in the event of error.  Our current workaround is to hold
+> a list of linked processes in process storage and then kill them in the
+> terminate handler which is ugly in the extreme!!  We don't know the PIDS
+> of the linked processes until it is too late to return State to Cowboy
+> (i.e. we are already in our handle code)...
+>
+> Kind regards
+>
+> Adrian
+>
+> 16:09:32.347 [info] Trailer upload failed with reason
+> {case_clause,{error,closed}}
+> 16:09:32.348 [error] ** Cowboy handler upload_trailer_resource
+> terminating in handle/2
+>     for the reason error:{case_clause,{error,closed}}
+> ** Handler state was {state,undefined,0,undefined,undefined,undefined}
+> ** Request was
+> [{socket,#Port<0.11230>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1987.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,<<"54.225.117.108">>},{host_info,undefined},{port,8000},{path,<<"/upload_trailer">>},{path_info,undef
+> ined},{qs,<<"name=linux-7.4.21.zip&size=54015414">>},{qs_vals,undefined},{bindings,[]},{headers,[{<<"host">>,<<"54.225.117.108:8000">>},{<<"connection">>,<<"keep-alive">>},{<<"content-length">>,<<"54015414">>},{<<"origin">>,<<"http://54.225.117.108:8000">>},{<<"user-agent">>,<<"M
+> ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML,
+> like Gecko) Chrome/28.0.1500.71
+> Safari/537.36">>},{<<"content-type">>,<<>>},{<<"accept">>,<<"*/*">>},{<<"referer">>,<<"http://54.225.117.108:8000/">>},{<<"accept-encoding">>,<<"gzip,deflate,sdch">>},{<<"acce
+> pt-language">>,<<"en-US,en;q=0.8">>},{<<"cookie">>,<<"__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5;
+> id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93">>}]},{p_headers,[{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+> fined},{buffer,<<>>},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,<<>>},{onresponse,undefined}]
+> ** Stacktrace:
+> [{i_cowboy,stream_body,0,[{file,"src/i_cowboy.erl"},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,"src/endpoints/upload_trailer_resource.erl"}
+> ,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,202}]},{upload_trailer_resource,sequence,2,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,106}]},{upload_trailer_resource,process_request,1,[{file,"src/endpo
+> ints/upload_trailer_resource.erl"},{line,212}]},{i_cowboy,do,3,[{file,"src/i_cowboy.erl"},{line,29}]},{cowboy_handler,handler_handle,4,[{file,"src/cowboy_handler.erl"},{line,119}]}]
+>
+>
+> --
+> Dr Adrian Roe
+> Director
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From adrian at id3as.co.uk  Thu Jul 18 12:31:45 2013
+From: adrian at id3as.co.uk (Adrian Roe)
+Date: Thu, 18 Jul 2013 11:31:45 +0100
+Subject: [99s-extend] Cowboy handler linked processes
+In-Reply-To: <51E7C174.2030501@ninenines.eu>
+References: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+ <51E7C174.2030501@ninenines.eu>
+Message-ID: <D3A4F0636AFF477EB95B379DC4F28DC8@id3as.co.uk>
+
+My issue is the other way round.  My handler crashes - and terminate gets called, but the linked process is NOT stopped (unless I stop it in terminate having stashed any processes I need to stop in the process dictionary - this is what I'm currently doing, but yuck!)
+
+.  My question is whether it wouldn't be better to no re-use the handler process that has crashed and replace it so that handler's can use the canonical erlang way of stopping related processes rather than having to do it by hand.    
+
+Obviously if the handler does not crash there's no need to kill the process, so the current efficiency saving works in the "normal" case/  
+
+--  
+Dr Adrian Roe
+Director
+
+
+On Thursday, 18 July 2013 at 11:20, Lo?c Hoguin wrote:
+
+> I don't know what happens but there's two things I know:
+>  
+> * Handlers don't trap_exit, so if the linked process crashes, they  
+> crash too
+> * If the handler crashes, we close the connection and stop the  
+> handler; if not this is a bug
+>  
+> After your log message the handler should stop unless there's a bug  
+> somewhere.
+>  
+> On 07/18/2013 12:15 PM, Adrian Roe wrote:
+> > We have been using spawn_linked workers to handle tasks that live for
+> > the lifetime of a single HTTP request
+> >  
+> > Although in the cowboy guide it is clear that Cowboy can use "One
+> > Process of Many Requests" I am surprised that this is the case even if
+> > the handler crashes. For example, our use case is to copy a large file
+> > to the server over HTTP where a worker process relays the file contents
+> > to long term storage. The worker process is spawn_linked from the HTTP
+> > handler and (for our use case) should die if the handler stops.
+> >  
+> > If the client stops the upload (for example by browsing away, or losing
+> > connectivity) we correctly receive an error (see sample Lager trace
+> > below), but what we are seeing is that spawn_linked processes are NOT
+> > being killed.
+> >  
+> > Is this intended behaviour - I accept it makes sense to reuse the
+> > processes but should this continue to be the case even if the previous
+> > use of the process crashed? If it is intended behaviour I think the
+> > docs should highlight this as we've been leaking processes for some time
+> > now, but I've always seen it as erlang's job to look after related
+> > process trees in the event of error. Our current workaround is to hold
+> > a list of linked processes in process storage and then kill them in the
+> > terminate handler which is ugly in the extreme!! We don't know the PIDS
+> > of the linked processes until it is too late to return State to Cowboy
+> > (i.e. we are already in our handle code)...
+> >  
+> > Kind regards
+> >  
+> > Adrian
+> >  
+> > 16:09:32.347 [info] Trailer upload failed with reason
+> > {case_clause,{error,closed}}
+> > 16:09:32.348 [error] ** Cowboy handler upload_trailer_resource
+> > terminating in handle/2
+> > for the reason error:{case_clause,{error,closed}}
+> > ** Handler state was {state,undefined,0,undefined,undefined,undefined}
+> > ** Request was
+> > [{socket,#Port<0.11230>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1987.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,<<"54.225.117.108">>},{host_info,undefined},{port,8000},{path,<<"/upload_trailer">>},{path_info,undef
+> > ined},{qs,<<"name=linux-7.4.21.zip&size=54015414">>},{qs_vals,undefined},{bindings,[]},{headers,[{<<"host">>,<<"54.225.117.108:8000">>},{<<"connection">>,<<"keep-alive">>},{<<"content-length">>,<<"54015414">>},{<<"origin">>,<<"http://54.225.117.108:8000">>},{<<"user-agent">>,<<"M
+> > ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML,
+> > like Gecko) Chrome/28.0.1500.71
+> > Safari/537.36">>},{<<"content-type">>,<<>>},{<<"accept">>,<<"*/*">>},{<<"referer">>,<<"http://54.225.117.108:8000/">>},{<<"accept-encoding">>,<<"gzip,deflate,sdch">>},{<<"acce
+> > pt-language">>,<<"en-US,en;q=0.8">>},{<<"cookie">>,<<"__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5;
+> > id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93">>}]},{p_headers,[{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+> > fined},{buffer,<<>>},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,<<>>},{onresponse,undefined}]
+> > ** Stacktrace:
+> > [{i_cowboy,stream_body,0,[{file,"src/i_cowboy.erl"},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,"src/endpoints/upload_trailer_resource.erl"}
+> > ,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,202}]},{upload_trailer_resource,sequence,2,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,106}]},{upload_trailer_resource,process_request,1,[{file,"src/endpo
+> > ints/upload_trailer_resource.erl"},{line,212}]},{i_cowboy,do,3,[{file,"src/i_cowboy.erl"},{line,29}]},{cowboy_handler,handler_handle,4,[{file,"src/cowboy_handler.erl"},{line,119}]}]
+> >  
+> >  
+> > --
+> > Dr Adrian Roe
+> > Director
+> >  
+> >  
+> >  
+> > _______________________________________________
+> > Extend mailing list
+> > Extend at lists.ninenines.eu (mailto:Extend at lists.ninenines.eu)
+> > http://lists.ninenines.eu:81/listinfo/extend
+> >  
+>  
+>  
+>  
+> --  
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>  
+>  
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130718/c50bef17/attachment.html>
+
+From essen at ninenines.eu  Thu Jul 18 12:36:04 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 18 Jul 2013 12:36:04 +0200
+Subject: [99s-extend] Cowboy handler linked processes
+In-Reply-To: <D3A4F0636AFF477EB95B379DC4F28DC8@id3as.co.uk>
+References: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+ <51E7C174.2030501@ninenines.eu>
+ <D3A4F0636AFF477EB95B379DC4F28DC8@id3as.co.uk>
+Message-ID: <51E7C514.5040504@ninenines.eu>
+
+I don't think the problem is that the handler is reused, we don't reuse 
+them if there's an error. However we do catch errors to print them in 
+the logs, and then the process stops normally. If you link without 
+trap_exit you receive a normal exit signal which is ignored and doesn't 
+kill your process. I suppose we should throw an exit signal when we got 
+an error, after logging everything, instead of stopping normally.
+
+On 07/18/2013 12:31 PM, Adrian Roe wrote:
+> My issue is the other way round.  My handler crashes - and terminate
+> gets called, but the linked process is NOT stopped (unless I stop it in
+> terminate having stashed any processes I need to stop in the process
+> dictionary - this is what I'm currently doing, but yuck!)
+>
+> .  My question is whether it wouldn't be better to no re-use the handler
+> process that has crashed and replace it so that handler's can use the
+> canonical erlang way of stopping related processes rather than having to
+> do it by hand.
+>
+> Obviously if the handler does not crash there's no need to kill the
+> process, so the current efficiency saving works in the "normal" case/
+>
+> --
+> Dr Adrian Roe
+> Director
+>
+> On Thursday, 18 July 2013 at 11:20, Lo?c Hoguin wrote:
+>
+>> I don't know what happens but there's two things I know:
+>>
+>> * Handlers don't trap_exit, so if the linked process crashes, they
+>> crash too
+>> * If the handler crashes, we close the connection and stop the
+>> handler; if not this is a bug
+>>
+>> After your log message the handler should stop unless there's a bug
+>> somewhere.
+>>
+>> On 07/18/2013 12:15 PM, Adrian Roe wrote:
+>>> We have been using spawn_linked workers to handle tasks that live for
+>>> the lifetime of a single HTTP request
+>>>
+>>> Although in the cowboy guide it is clear that Cowboy can use "One
+>>> Process of Many Requests" I am surprised that this is the case even if
+>>> the handler crashes. For example, our use case is to copy a large file
+>>> to the server over HTTP where a worker process relays the file contents
+>>> to long term storage. The worker process is spawn_linked from the HTTP
+>>> handler and (for our use case) should die if the handler stops.
+>>>
+>>> If the client stops the upload (for example by browsing away, or losing
+>>> connectivity) we correctly receive an error (see sample Lager trace
+>>> below), but what we are seeing is that spawn_linked processes are NOT
+>>> being killed.
+>>>
+>>> Is this intended behaviour - I accept it makes sense to reuse the
+>>> processes but should this continue to be the case even if the previous
+>>> use of the process crashed? If it is intended behaviour I think the
+>>> docs should highlight this as we've been leaking processes for some time
+>>> now, but I've always seen it as erlang's job to look after related
+>>> process trees in the event of error. Our current workaround is to hold
+>>> a list of linked processes in process storage and then kill them in the
+>>> terminate handler which is ugly in the extreme!! We don't know the PIDS
+>>> of the linked processes until it is too late to return State to Cowboy
+>>> (i.e. we are already in our handle code)...
+>>>
+>>> Kind regards
+>>>
+>>> Adrian
+>>>
+>>> 16:09:32.347 [info] Trailer upload failed with reason
+>>> {case_clause,{error,closed}}
+>>> 16:09:32.348 [error] ** Cowboy handler upload_trailer_resource
+>>> terminating in handle/2
+>>> for the reason error:{case_clause,{error,closed}}
+>>> ** Handler state was {state,undefined,0,undefined,undefined,undefined}
+>>> ** Request was
+>>> [{socket,#Port<0.11230>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1987.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,<<"54.225.117.108">>},{host_info,undefined},{port,8000},{path,<<"/upload_trailer">>},{path_info,undef
+>>> ined},{qs,<<"name=linux-7.4.21.zip&size=54015414">>},{qs_vals,undefined},{bindings,[]},{headers,[{<<"host">>,<<"54.225.117.108:8000">>},{<<"connection">>,<<"keep-alive">>},{<<"content-length">>,<<"54015414">>},{<<"origin">>,<<"http://54.225.117.108:8000">>},{<<"user-agent">>,<<"M
+>>> ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML,
+>>> like Gecko) Chrome/28.0.1500.71
+>>> Safari/537.36">>},{<<"content-type">>,<<>>},{<<"accept">>,<<"*/*">>},{<<"referer">>,<<"http://54.225.117.108:8000/">>},{<<"accept-encoding">>,<<"gzip,deflate,sdch">>},{<<"acce
+>>> pt-language">>,<<"en-US,en;q=0.8">>},{<<"cookie">>,<<"__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5;
+>>> id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93">>}]},{p_headers,[{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+>>> fined},{buffer,<<>>},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,<<>>},{onresponse,undefined}]
+>>> ** Stacktrace:
+>>> [{i_cowboy,stream_body,0,[{file,"src/i_cowboy.erl"},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,"src/endpoints/upload_trailer_resource.erl"}
+>>> ,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,202}]},{upload_trailer_resource,sequence,2,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,106}]},{upload_trailer_resource,process_request,1,[{file,"src/endpo
+>>> ints/upload_trailer_resource.erl"},{line,212}]},{i_cowboy,do,3,[{file,"src/i_cowboy.erl"},{line,29}]},{cowboy_handler,handler_handle,4,[{file,"src/cowboy_handler.erl"},{line,119}]}]
+>>>
+>>>
+>>> --
+>>> Dr Adrian Roe
+>>> Director
+>>>
+>>>
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From adrian at id3as.co.uk  Thu Jul 18 12:37:30 2013
+From: adrian at id3as.co.uk (Adrian Roe)
+Date: Thu, 18 Jul 2013 11:37:30 +0100
+Subject: [99s-extend] Cowboy handler linked processes
+In-Reply-To: <51E7C514.5040504@ninenines.eu>
+References: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+ <51E7C174.2030501@ninenines.eu>
+ <D3A4F0636AFF477EB95B379DC4F28DC8@id3as.co.uk>
+ <51E7C514.5040504@ninenines.eu>
+Message-ID: <66E9A8B267A946AF8F527593BBFD26B0@id3as.co.uk>
+
+That would be perfect!  Do you want me to make the change and issue a pull request?  
+
+--  
+Dr Adrian Roe
+Director
+
+
+On Thursday, 18 July 2013 at 11:36, Lo?c Hoguin wrote:
+
+> I don't think the problem is that the handler is reused, we don't reuse  
+> them if there's an error. However we do catch errors to print them in  
+> the logs, and then the process stops normally. If you link without  
+> trap_exit you receive a normal exit signal which is ignored and doesn't  
+> kill your process. I suppose we should throw an exit signal when we got  
+> an error, after logging everything, instead of stopping normally.
+>  
+> On 07/18/2013 12:31 PM, Adrian Roe wrote:
+> > My issue is the other way round. My handler crashes - and terminate
+> > gets called, but the linked process is NOT stopped (unless I stop it in
+> > terminate having stashed any processes I need to stop in the process
+> > dictionary - this is what I'm currently doing, but yuck!)
+> >  
+> > . My question is whether it wouldn't be better to no re-use the handler
+> > process that has crashed and replace it so that handler's can use the
+> > canonical erlang way of stopping related processes rather than having to
+> > do it by hand.
+> >  
+> > Obviously if the handler does not crash there's no need to kill the
+> > process, so the current efficiency saving works in the "normal" case/
+> >  
+> > --
+> > Dr Adrian Roe
+> > Director
+> >  
+> > On Thursday, 18 July 2013 at 11:20, Lo?c Hoguin wrote:
+> >  
+> > > I don't know what happens but there's two things I know:
+> > >  
+> > > * Handlers don't trap_exit, so if the linked process crashes, they
+> > > crash too
+> > > * If the handler crashes, we close the connection and stop the
+> > > handler; if not this is a bug
+> > >  
+> > > After your log message the handler should stop unless there's a bug
+> > > somewhere.
+> > >  
+> > > On 07/18/2013 12:15 PM, Adrian Roe wrote:
+> > > > We have been using spawn_linked workers to handle tasks that live for
+> > > > the lifetime of a single HTTP request
+> > > >  
+> > > > Although in the cowboy guide it is clear that Cowboy can use "One
+> > > > Process of Many Requests" I am surprised that this is the case even if
+> > > > the handler crashes. For example, our use case is to copy a large file
+> > > > to the server over HTTP where a worker process relays the file contents
+> > > > to long term storage. The worker process is spawn_linked from the HTTP
+> > > > handler and (for our use case) should die if the handler stops.
+> > > >  
+> > > > If the client stops the upload (for example by browsing away, or losing
+> > > > connectivity) we correctly receive an error (see sample Lager trace
+> > > > below), but what we are seeing is that spawn_linked processes are NOT
+> > > > being killed.
+> > > >  
+> > > > Is this intended behaviour - I accept it makes sense to reuse the
+> > > > processes but should this continue to be the case even if the previous
+> > > > use of the process crashed? If it is intended behaviour I think the
+> > > > docs should highlight this as we've been leaking processes for some time
+> > > > now, but I've always seen it as erlang's job to look after related
+> > > > process trees in the event of error. Our current workaround is to hold
+> > > > a list of linked processes in process storage and then kill them in the
+> > > > terminate handler which is ugly in the extreme!! We don't know the PIDS
+> > > > of the linked processes until it is too late to return State to Cowboy
+> > > > (i.e. we are already in our handle code)...
+> > > >  
+> > > > Kind regards
+> > > >  
+> > > > Adrian
+> > > >  
+> > > > 16:09:32.347 [info] Trailer upload failed with reason
+> > > > {case_clause,{error,closed}}
+> > > > 16:09:32.348 [error] ** Cowboy handler upload_trailer_resource
+> > > > terminating in handle/2
+> > > > for the reason error:{case_clause,{error,closed}}
+> > > > ** Handler state was {state,undefined,0,undefined,undefined,undefined}
+> > > > ** Request was
+> > > > [{socket,#Port<0.11230>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1987.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,<<"54.225.117.108">>},{host_info,undefined},{port,8000},{path,<<"/upload_trailer">>},{path_info,undef
+> > > > ined},{qs,<<"name=linux-7.4.21.zip&size=54015414">>},{qs_vals,undefined},{bindings,[]},{headers,[{<<"host">>,<<"54.225.117.108:8000">>},{<<"connection">>,<<"keep-alive">>},{<<"content-length">>,<<"54015414">>},{<<"origin">>,<<"http://54.225.117.108:8000">>},{<<"user-agent">>,<<"M
+> > > > ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML,
+> > > > like Gecko) Chrome/28.0.1500.71
+> > > > Safari/537.36">>},{<<"content-type">>,<<>>},{<<"accept">>,<<"*/*">>},{<<"referer">>,<<"http://54.225.117.108:8000/">>},{<<"accept-encoding">>,<<"gzip,deflate,sdch">>},{<<"acce
+> > > > pt-language">>,<<"en-US,en;q=0.8">>},{<<"cookie">>,<<"__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5;
+> > > > id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93">>}]},{p_headers,[{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+> > > > fined},{buffer,<<>>},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,<<>>},{onresponse,undefined}]
+> > > > ** Stacktrace:
+> > > > [{i_cowboy,stream_body,0,[{file,"src/i_cowboy.erl"},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,"src/endpoints/upload_trailer_resource.erl"}
+> > > > ,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,202}]},{upload_trailer_resource,sequence,2,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,106}]},{upload_trailer_resource,process_request,1,[{file,"src/endpo
+> > > > ints/upload_trailer_resource.erl"},{line,212}]},{i_cowboy,do,3,[{file,"src/i_cowboy.erl"},{line,29}]},{cowboy_handler,handler_handle,4,[{file,"src/cowboy_handler.erl"},{line,119}]}]
+> > > >  
+> > > >  
+> > > > --
+> > > > Dr Adrian Roe
+> > > > Director
+> > > >  
+> > > >  
+> > > >  
+> > > > _______________________________________________
+> > > > Extend mailing list
+> > > > Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+> > > > http://lists.ninenines.eu:81/listinfo/extend
+> > > >  
+> > >  
+> > >  
+> > >  
+> > > --
+> > > Lo?c Hoguin
+> > > Erlang Cowboy
+> > > Nine Nines
+> > > http://ninenines.eu
+> > >  
+> >  
+> >  
+>  
+>  
+>  
+> --  
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>  
+>  
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130718/79e075b8/attachment.html>
+
+From essen at ninenines.eu  Thu Jul 18 12:38:13 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 18 Jul 2013 12:38:13 +0200
+Subject: [99s-extend] Cowboy handler linked processes
+In-Reply-To: <66E9A8B267A946AF8F527593BBFD26B0@id3as.co.uk>
+References: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+ <51E7C174.2030501@ninenines.eu>
+ <D3A4F0636AFF477EB95B379DC4F28DC8@id3as.co.uk>
+ <51E7C514.5040504@ninenines.eu>
+ <66E9A8B267A946AF8F527593BBFD26B0@id3as.co.uk>
+Message-ID: <51E7C595.5050905@ninenines.eu>
+
+If you got time sure, I won't have much time until Monday. Have fun!
+
+On 07/18/2013 12:37 PM, Adrian Roe wrote:
+> That would be perfect!  Do you want me to make the change and issue a
+> pull request?
+>
+> --
+> Dr Adrian Roe
+> Director
+>
+> On Thursday, 18 July 2013 at 11:36, Lo?c Hoguin wrote:
+>
+>> I don't think the problem is that the handler is reused, we don't reuse
+>> them if there's an error. However we do catch errors to print them in
+>> the logs, and then the process stops normally. If you link without
+>> trap_exit you receive a normal exit signal which is ignored and doesn't
+>> kill your process. I suppose we should throw an exit signal when we got
+>> an error, after logging everything, instead of stopping normally.
+>>
+>> On 07/18/2013 12:31 PM, Adrian Roe wrote:
+>>> My issue is the other way round. My handler crashes - and terminate
+>>> gets called, but the linked process is NOT stopped (unless I stop it in
+>>> terminate having stashed any processes I need to stop in the process
+>>> dictionary - this is what I'm currently doing, but yuck!)
+>>>
+>>> . My question is whether it wouldn't be better to no re-use the handler
+>>> process that has crashed and replace it so that handler's can use the
+>>> canonical erlang way of stopping related processes rather than having to
+>>> do it by hand.
+>>>
+>>> Obviously if the handler does not crash there's no need to kill the
+>>> process, so the current efficiency saving works in the "normal" case/
+>>>
+>>> --
+>>> Dr Adrian Roe
+>>> Director
+>>>
+>>> On Thursday, 18 July 2013 at 11:20, Lo?c Hoguin wrote:
+>>>
+>>>> I don't know what happens but there's two things I know:
+>>>>
+>>>> * Handlers don't trap_exit, so if the linked process crashes, they
+>>>> crash too
+>>>> * If the handler crashes, we close the connection and stop the
+>>>> handler; if not this is a bug
+>>>>
+>>>> After your log message the handler should stop unless there's a bug
+>>>> somewhere.
+>>>>
+>>>> On 07/18/2013 12:15 PM, Adrian Roe wrote:
+>>>>> We have been using spawn_linked workers to handle tasks that live for
+>>>>> the lifetime of a single HTTP request
+>>>>>
+>>>>> Although in the cowboy guide it is clear that Cowboy can use "One
+>>>>> Process of Many Requests" I am surprised that this is the case even if
+>>>>> the handler crashes. For example, our use case is to copy a large file
+>>>>> to the server over HTTP where a worker process relays the file contents
+>>>>> to long term storage. The worker process is spawn_linked from the HTTP
+>>>>> handler and (for our use case) should die if the handler stops.
+>>>>>
+>>>>> If the client stops the upload (for example by browsing away, or losing
+>>>>> connectivity) we correctly receive an error (see sample Lager trace
+>>>>> below), but what we are seeing is that spawn_linked processes are NOT
+>>>>> being killed.
+>>>>>
+>>>>> Is this intended behaviour - I accept it makes sense to reuse the
+>>>>> processes but should this continue to be the case even if the previous
+>>>>> use of the process crashed? If it is intended behaviour I think the
+>>>>> docs should highlight this as we've been leaking processes for some
+>>>>> time
+>>>>> now, but I've always seen it as erlang's job to look after related
+>>>>> process trees in the event of error. Our current workaround is to hold
+>>>>> a list of linked processes in process storage and then kill them in the
+>>>>> terminate handler which is ugly in the extreme!! We don't know the PIDS
+>>>>> of the linked processes until it is too late to return State to Cowboy
+>>>>> (i.e. we are already in our handle code)...
+>>>>>
+>>>>> Kind regards
+>>>>>
+>>>>> Adrian
+>>>>>
+>>>>> 16:09:32.347 [info] Trailer upload failed with reason
+>>>>> {case_clause,{error,closed}}
+>>>>> 16:09:32.348 [error] ** Cowboy handler upload_trailer_resource
+>>>>> terminating in handle/2
+>>>>> for the reason error:{case_clause,{error,closed}}
+>>>>> ** Handler state was {state,undefined,0,undefined,undefined,undefined}
+>>>>> ** Request was
+>>>>> [{socket,#Port<0.11230>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1987.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,<<"54.225.117.108">>},{host_info,undefined},{port,8000},{path,<<"/upload_trailer">>},{path_info,undef
+>>>>> ined},{qs,<<"name=linux-7.4.21.zip&size=54015414">>},{qs_vals,undefined},{bindings,[]},{headers,[{<<"host">>,<<"54.225.117.108:8000">>},{<<"connection">>,<<"keep-alive">>},{<<"content-length">>,<<"54015414">>},{<<"origin">>,<<"http://54.225.117.108:8000">>},{<<"user-agent">>,<<"M
+>>>>> ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36
+>>>>> (KHTML,
+>>>>> like Gecko) Chrome/28.0.1500.71
+>>>>> Safari/537.36">>},{<<"content-type">>,<<>>},{<<"accept">>,<<"*/*">>},{<<"referer">>,<<"http://54.225.117.108:8000/">>},{<<"accept-encoding">>,<<"gzip,deflate,sdch">>},{<<"acce
+>>>>> pt-language">>,<<"en-US,en;q=0.8">>},{<<"cookie">>,<<"__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5;
+>>>>> id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93">>}]},{p_headers,[{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+>>>>> fined},{buffer,<<>>},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,<<>>},{onresponse,undefined}]
+>>>>> ** Stacktrace:
+>>>>> [{i_cowboy,stream_body,0,[{file,"src/i_cowboy.erl"},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,"src/endpoints/upload_trailer_resource.erl"}
+>>>>> ,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,202}]},{upload_trailer_resource,sequence,2,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,106}]},{upload_trailer_resource,process_request,1,[{file,"src/endpo
+>>>>> ints/upload_trailer_resource.erl"},{line,212}]},{i_cowboy,do,3,[{file,"src/i_cowboy.erl"},{line,29}]},{cowboy_handler,handler_handle,4,[{file,"src/cowboy_handler.erl"},{line,119}]}]
+>>>>>
+>>>>>
+>>>>> --
+>>>>> Dr Adrian Roe
+>>>>> Director
+>>>>>
+>>>>>
+>>>>>
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>>
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> Erlang Cowboy
+>>>> Nine Nines
+>>>> http://ninenines.eu
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From adrian at id3as.co.uk  Thu Jul 18 19:55:20 2013
+From: adrian at id3as.co.uk (Adrian Roe)
+Date: Thu, 18 Jul 2013 18:55:20 +0100
+Subject: [99s-extend] Cowboy handler linked processes
+In-Reply-To: <51E7C595.5050905@ninenines.eu>
+References: <D87A912B55F24C449853E92826558374@id3as.co.uk>
+ <51E7C174.2030501@ninenines.eu>
+ <D3A4F0636AFF477EB95B379DC4F28DC8@id3as.co.uk>
+ <51E7C514.5040504@ninenines.eu>
+ <66E9A8B267A946AF8F527593BBFD26B0@id3as.co.uk>
+ <51E7C595.5050905@ninenines.eu>
+Message-ID: <545C0D63E95147B48DA892A0ECB4382E@id3as.co.uk>
+
+I suspect it's just a case of adding a throw to error_terminate in cowboy_protocol, maybe with threading the reason back (though I don't really care what's thrown), but also fear there may be unintended consequences as all I've done is skim your code briefly!  If you are able to look at it then great - if not I'll muddle through.  I'm travelling so it would be mid next week at the earliest anyway.  
+
+Cheers
+
+Adrian  
+
+--  
+Dr Adrian Roe
+Director
+
+
+On Thursday, 18 July 2013 at 11:38, Lo?c Hoguin wrote:
+
+> If you got time sure, I won't have much time until Monday. Have fun!
+>  
+> On 07/18/2013 12:37 PM, Adrian Roe wrote:
+> > That would be perfect! Do you want me to make the change and issue a
+> > pull request?
+> >  
+> > --
+> > Dr Adrian Roe
+> > Director
+> >  
+> > On Thursday, 18 July 2013 at 11:36, Lo?c Hoguin wrote:
+> >  
+> > > I don't think the problem is that the handler is reused, we don't reuse
+> > > them if there's an error. However we do catch errors to print them in
+> > > the logs, and then the process stops normally. If you link without
+> > > trap_exit you receive a normal exit signal which is ignored and doesn't
+> > > kill your process. I suppose we should throw an exit signal when we got
+> > > an error, after logging everything, instead of stopping normally.
+> > >  
+> > > On 07/18/2013 12:31 PM, Adrian Roe wrote:
+> > > > My issue is the other way round. My handler crashes - and terminate
+> > > > gets called, but the linked process is NOT stopped (unless I stop it in
+> > > > terminate having stashed any processes I need to stop in the process
+> > > > dictionary - this is what I'm currently doing, but yuck!)
+> > > >  
+> > > > . My question is whether it wouldn't be better to no re-use the handler
+> > > > process that has crashed and replace it so that handler's can use the
+> > > > canonical erlang way of stopping related processes rather than having to
+> > > > do it by hand.
+> > > >  
+> > > > Obviously if the handler does not crash there's no need to kill the
+> > > > process, so the current efficiency saving works in the "normal" case/
+> > > >  
+> > > > --
+> > > > Dr Adrian Roe
+> > > > Director
+> > > >  
+> > > > On Thursday, 18 July 2013 at 11:20, Lo?c Hoguin wrote:
+> > > >  
+> > > > > I don't know what happens but there's two things I know:
+> > > > >  
+> > > > > * Handlers don't trap_exit, so if the linked process crashes, they
+> > > > > crash too
+> > > > > * If the handler crashes, we close the connection and stop the
+> > > > > handler; if not this is a bug
+> > > > >  
+> > > > > After your log message the handler should stop unless there's a bug
+> > > > > somewhere.
+> > > > >  
+> > > > > On 07/18/2013 12:15 PM, Adrian Roe wrote:
+> > > > > > We have been using spawn_linked workers to handle tasks that live for
+> > > > > > the lifetime of a single HTTP request
+> > > > > >  
+> > > > > > Although in the cowboy guide it is clear that Cowboy can use "One
+> > > > > > Process of Many Requests" I am surprised that this is the case even if
+> > > > > > the handler crashes. For example, our use case is to copy a large file
+> > > > > > to the server over HTTP where a worker process relays the file contents
+> > > > > > to long term storage. The worker process is spawn_linked from the HTTP
+> > > > > > handler and (for our use case) should die if the handler stops.
+> > > > > >  
+> > > > > > If the client stops the upload (for example by browsing away, or losing
+> > > > > > connectivity) we correctly receive an error (see sample Lager trace
+> > > > > > below), but what we are seeing is that spawn_linked processes are NOT
+> > > > > > being killed.
+> > > > > >  
+> > > > > > Is this intended behaviour - I accept it makes sense to reuse the
+> > > > > > processes but should this continue to be the case even if the previous
+> > > > > > use of the process crashed? If it is intended behaviour I think the
+> > > > > > docs should highlight this as we've been leaking processes for some
+> > > > > > time
+> > > > > > now, but I've always seen it as erlang's job to look after related
+> > > > > > process trees in the event of error. Our current workaround is to hold
+> > > > > > a list of linked processes in process storage and then kill them in the
+> > > > > > terminate handler which is ugly in the extreme!! We don't know the PIDS
+> > > > > > of the linked processes until it is too late to return State to Cowboy
+> > > > > > (i.e. we are already in our handle code)...
+> > > > > >  
+> > > > > > Kind regards
+> > > > > >  
+> > > > > > Adrian
+> > > > > >  
+> > > > > > 16:09:32.347 [info] Trailer upload failed with reason
+> > > > > > {case_clause,{error,closed}}
+> > > > > > 16:09:32.348 [error] ** Cowboy handler upload_trailer_resource
+> > > > > > terminating in handle/2
+> > > > > > for the reason error:{case_clause,{error,closed}}
+> > > > > > ** Handler state was {state,undefined,0,undefined,undefined,undefined}
+> > > > > > ** Request was
+> > > > > > [{socket,#Port<0.11230>},{transport,ranch_tcp},{connection,keepalive},{pid,<0.1987.0>},{method,<<"POST">>},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,<<"54.225.117.108">>},{host_info,undefined},{port,8000},{path,<<"/upload_trailer">>},{path_info,undef
+> > > > > > ined},{qs,<<"name=linux-7.4.21.zip&size=54015414">>},{qs_vals,undefined},{bindings,[]},{headers,[{<<"host">>,<<"54.225.117.108:8000">>},{<<"connection">>,<<"keep-alive">>},{<<"content-length">>,<<"54015414">>},{<<"origin">>,<<"http://54.225.117.108:8000">>},{<<"user-agent">>,<<"M
+> > > > > > ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36
+> > > > > > (KHTML,
+> > > > > > like Gecko) Chrome/28.0.1500.71
+> > > > > > Safari/537.36">>},{<<"content-type">>,<<>>},{<<"accept">>,<<"*/*">>},{<<"referer">>,<<"http://54.225.117.108:8000/">>},{<<"accept-encoding">>,<<"gzip,deflate,sdch">>},{<<"acce
+> > > > > > pt-language">>,<<"en-US,en;q=0.8">>},{<<"cookie">>,<<"__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5;
+> > > > > > id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93">>}]},{p_headers,[{<<"connection">>,[<<"keep-alive">>]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+> > > > > > fined},{buffer,<<>>},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,<<>>},{onresponse,undefined}]
+> > > > > > ** Stacktrace:
+> > > > > > [{i_cowboy,stream_body,0,[{file,"src/i_cowboy.erl"},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,"src/endpoints/upload_trailer_resource.erl"}
+> > > > > > ,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,202}]},{upload_trailer_resource,sequence,2,[{file,"src/endpoints/upload_trailer_resource.erl"},{line,106}]},{upload_trailer_resource,process_request,1,[{file,"src/endpo
+> > > > > > ints/upload_trailer_resource.erl"},{line,212}]},{i_cowboy,do,3,[{file,"src/i_cowboy.erl"},{line,29}]},{cowboy_handler,handler_handle,4,[{file,"src/cowboy_handler.erl"},{line,119}]}]
+> > > > > >  
+> > > > > >  
+> > > > > > --
+> > > > > > Dr Adrian Roe
+> > > > > > Director
+> > > > > >  
+> > > > > >  
+> > > > > >  
+> > > > > > _______________________________________________
+> > > > > > Extend mailing list
+> > > > > > Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+> > > > > > http://lists.ninenines.eu:81/listinfo/extend
+> > > > > >  
+> > > > >  
+> > > > >  
+> > > > >  
+> > > > > --
+> > > > > Lo?c Hoguin
+> > > > > Erlang Cowboy
+> > > > > Nine Nines
+> > > > > http://ninenines.eu
+> > > > >  
+> > > >  
+> > > >  
+> > >  
+> > >  
+> > >  
+> > > --
+> > > Lo?c Hoguin
+> > > Erlang Cowboy
+> > > Nine Nines
+> > > http://ninenines.eu
+> > >  
+> >  
+> >  
+>  
+>  
+>  
+> --  
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>  
+>  
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130718/a3961a6f/attachment.html>
+
+From lee.sylvester at gmail.com  Tue Jul 23 15:12:08 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Tue, 23 Jul 2013 14:12:08 +0100
+Subject: [99s-extend] Cowboy HTTPS Issue
+Message-ID: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+
+Hi guys,
+
+So, I'm trying to run Cowboy with SSL, but keep getting an error with the SSL module:
+
+application: ssl
+    exited: {bad_return,
+                {{ssl_app,start,[normal,[]]},
+                 {'EXIT',
+                     {undef,
+                         [{ssl_app,start,[normal,[]],[]},
+                          {application_master,start_it_old,4,
+                              [{file,"application_master.erl"},
+                               {line,274}]}]}}}}
+    type: temporary
+
+
+The way I'm starting Cowboy is like this:
+
+	Env = [
+		{env, [{dispatch, Dispatch}]},
+		{onrequest, fun http_utils:set_request_cors/1}
+	],
+
+	case http_server:is_secure() of
+		true ->
+			cowboy:start_https(https, 100, [
+				{ip, Ip}, {port, Port},
+				{certfile, binary_to_list(http_server:secure_cert())},
+				{keyfile, binary_to_list(http_server:secure_key())},
+				{reuseaddr, true},
+				{fail_if_no_peer_cert, true}
+			], Env);
+		_ ->
+			{ok, _} = cowboy:start_http(http, 100, Options, Env)
+	end,
+
+Does anyone know why I might be getting this issue?
+
+Thanks,
+Lee
+
+
+
+
+From essen at ninenines.eu  Tue Jul 23 15:41:42 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 23 Jul 2013 15:41:42 +0200
+Subject: [99s-extend] Cowboy HTTPS Issue
+In-Reply-To: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+References: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+Message-ID: <51EE8816.1040801@ninenines.eu>
+
+You need to include and start the public_key and ssl applications.
+
+On 07/23/2013 03:12 PM, Lee Sylvester wrote:
+> Hi guys,
+>
+> So, I'm trying to run Cowboy with SSL, but keep getting an error with the SSL module:
+>
+> application: ssl
+>      exited: {bad_return,
+>                  {{ssl_app,start,[normal,[]]},
+>                   {'EXIT',
+>                       {undef,
+>                           [{ssl_app,start,[normal,[]],[]},
+>                            {application_master,start_it_old,4,
+>                                [{file,"application_master.erl"},
+>                                 {line,274}]}]}}}}
+>      type: temporary
+>
+>
+> The way I'm starting Cowboy is like this:
+>
+> 	Env = [
+> 		{env, [{dispatch, Dispatch}]},
+> 		{onrequest, fun http_utils:set_request_cors/1}
+> 	],
+>
+> 	case http_server:is_secure() of
+> 		true ->
+> 			cowboy:start_https(https, 100, [
+> 				{ip, Ip}, {port, Port},
+> 				{certfile, binary_to_list(http_server:secure_cert())},
+> 				{keyfile, binary_to_list(http_server:secure_key())},
+> 				{reuseaddr, true},
+> 				{fail_if_no_peer_cert, true}
+> 			], Env);
+> 		_ ->
+> 			{ok, _} = cowboy:start_http(http, 100, Options, Env)
+> 	end,
+>
+> Does anyone know why I might be getting this issue?
+>
+> Thanks,
+> Lee
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lee.sylvester at gmail.com  Tue Jul 23 15:59:00 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Tue, 23 Jul 2013 14:59:00 +0100
+Subject: [99s-extend] Cowboy HTTPS Issue
+In-Reply-To: <51EE8816.1040801@ninenines.eu>
+References: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+ <51EE8816.1040801@ninenines.eu>
+Message-ID: <CC9B7706-2788-4614-9740-C8149FCD3FD2@gmail.com>
+
+Thank you, Loic.  I'd forgotten to update my releases folder.
+
+I now have it running, but when I access an endpoint, I get
+
+=ERROR REPORT==== 23-Jul-2013::09:56:29 ===
+SSL: 1159: error:[<<48,130,6,220,48,130,5,196,160,3,2,1,2,2,16,15,199,72,40,33,
+                    126,49,13,  [snip]  45,193>>,
+                  <<48,130,6  [snip]  118,247,97>>] /usr/certs/cert.pem
+  [{ssl_connection,init_certificates,8,
+                   [{file,"ssl_connection.erl"},{line,1155}]},
+   {ssl_connection,ssl_init,2,[{file,"ssl_connection.erl"},{line,1110}]},
+   {ssl_connection,init,1,[{file,"ssl_connection.erl"},{line,303}]},
+   {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,239}]}]
+
+Not a very helpful error.  I'm assuming the cert isn't being accepted by the SSL module?
+
+Thanks,
+Lee
+
+
+
+On 23 Jul 2013, at 14:41, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> You need to include and start the public_key and ssl applications.
+> 
+> On 07/23/2013 03:12 PM, Lee Sylvester wrote:
+>> Hi guys,
+>> 
+>> So, I'm trying to run Cowboy with SSL, but keep getting an error with the SSL module:
+>> 
+>> application: ssl
+>>     exited: {bad_return,
+>>                 {{ssl_app,start,[normal,[]]},
+>>                  {'EXIT',
+>>                      {undef,
+>>                          [{ssl_app,start,[normal,[]],[]},
+>>                           {application_master,start_it_old,4,
+>>                               [{file,"application_master.erl"},
+>>                                {line,274}]}]}}}}
+>>     type: temporary
+>> 
+>> 
+>> The way I'm starting Cowboy is like this:
+>> 
+>> 	Env = [
+>> 		{env, [{dispatch, Dispatch}]},
+>> 		{onrequest, fun http_utils:set_request_cors/1}
+>> 	],
+>> 
+>> 	case http_server:is_secure() of
+>> 		true ->
+>> 			cowboy:start_https(https, 100, [
+>> 				{ip, Ip}, {port, Port},
+>> 				{certfile, binary_to_list(http_server:secure_cert())},
+>> 				{keyfile, binary_to_list(http_server:secure_key())},
+>> 				{reuseaddr, true},
+>> 				{fail_if_no_peer_cert, true}
+>> 			], Env);
+>> 		_ ->
+>> 			{ok, _} = cowboy:start_http(http, 100, Options, Env)
+>> 	end,
+>> 
+>> Does anyone know why I might be getting this issue?
+>> 
+>> Thanks,
+>> Lee
+>> 
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>> 
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Tue Jul 23 16:00:13 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 23 Jul 2013 16:00:13 +0200
+Subject: [99s-extend] Cowboy HTTPS Issue
+In-Reply-To: <CC9B7706-2788-4614-9740-C8149FCD3FD2@gmail.com>
+References: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+ <51EE8816.1040801@ninenines.eu>
+ <CC9B7706-2788-4614-9740-C8149FCD3FD2@gmail.com>
+Message-ID: <51EE8C6D.5060601@ninenines.eu>
+
+No idea. You'll probably have more luck asking erlang-questions for SSL 
+issues.
+
+On 07/23/2013 03:59 PM, Lee Sylvester wrote:
+> Thank you, Loic.  I'd forgotten to update my releases folder.
+>
+> I now have it running, but when I access an endpoint, I get
+>
+> =ERROR REPORT==== 23-Jul-2013::09:56:29 ===
+> SSL: 1159: error:[<<48,130,6,220,48,130,5,196,160,3,2,1,2,2,16,15,199,72,40,33,
+>                      126,49,13,  [snip]  45,193>>,
+>                    <<48,130,6  [snip]  118,247,97>>] /usr/certs/cert.pem
+>    [{ssl_connection,init_certificates,8,
+>                     [{file,"ssl_connection.erl"},{line,1155}]},
+>     {ssl_connection,ssl_init,2,[{file,"ssl_connection.erl"},{line,1110}]},
+>     {ssl_connection,init,1,[{file,"ssl_connection.erl"},{line,303}]},
+>     {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,239}]}]
+>
+> Not a very helpful error.  I'm assuming the cert isn't being accepted by the SSL module?
+>
+> Thanks,
+> Lee
+>
+>
+>
+> On 23 Jul 2013, at 14:41, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> You need to include and start the public_key and ssl applications.
+>>
+>> On 07/23/2013 03:12 PM, Lee Sylvester wrote:
+>>> Hi guys,
+>>>
+>>> So, I'm trying to run Cowboy with SSL, but keep getting an error with the SSL module:
+>>>
+>>> application: ssl
+>>>      exited: {bad_return,
+>>>                  {{ssl_app,start,[normal,[]]},
+>>>                   {'EXIT',
+>>>                       {undef,
+>>>                           [{ssl_app,start,[normal,[]],[]},
+>>>                            {application_master,start_it_old,4,
+>>>                                [{file,"application_master.erl"},
+>>>                                 {line,274}]}]}}}}
+>>>      type: temporary
+>>>
+>>>
+>>> The way I'm starting Cowboy is like this:
+>>>
+>>> 	Env = [
+>>> 		{env, [{dispatch, Dispatch}]},
+>>> 		{onrequest, fun http_utils:set_request_cors/1}
+>>> 	],
+>>>
+>>> 	case http_server:is_secure() of
+>>> 		true ->
+>>> 			cowboy:start_https(https, 100, [
+>>> 				{ip, Ip}, {port, Port},
+>>> 				{certfile, binary_to_list(http_server:secure_cert())},
+>>> 				{keyfile, binary_to_list(http_server:secure_key())},
+>>> 				{reuseaddr, true},
+>>> 				{fail_if_no_peer_cert, true}
+>>> 			], Env);
+>>> 		_ ->
+>>> 			{ok, _} = cowboy:start_http(http, 100, Options, Env)
+>>> 	end,
+>>>
+>>> Does anyone know why I might be getting this issue?
+>>>
+>>> Thanks,
+>>> Lee
+>>>
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lee.sylvester at gmail.com  Tue Jul 23 16:01:07 2013
+From: lee.sylvester at gmail.com (Lee Sylvester)
+Date: Tue, 23 Jul 2013 15:01:07 +0100
+Subject: [99s-extend] Cowboy HTTPS Issue
+In-Reply-To: <51EE8C6D.5060601@ninenines.eu>
+References: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+ <51EE8816.1040801@ninenines.eu>
+ <CC9B7706-2788-4614-9740-C8149FCD3FD2@gmail.com>
+ <51EE8C6D.5060601@ninenines.eu>
+Message-ID: <9B85045F-0FA0-4CCE-8F57-863CCF83E28C@gmail.com>
+
+Okay, thanks Lo?c.  I'll try my luck there :-)
+
+Regards,
+Lee
+
+
+
+On 23 Jul 2013, at 15:00, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> No idea. You'll probably have more luck asking erlang-questions for SSL issues.
+> 
+> On 07/23/2013 03:59 PM, Lee Sylvester wrote:
+>> Thank you, Loic.  I'd forgotten to update my releases folder.
+>> 
+>> I now have it running, but when I access an endpoint, I get
+>> 
+>> =ERROR REPORT==== 23-Jul-2013::09:56:29 ===
+>> SSL: 1159: error:[<<48,130,6,220,48,130,5,196,160,3,2,1,2,2,16,15,199,72,40,33,
+>>                     126,49,13,  [snip]  45,193>>,
+>>                   <<48,130,6  [snip]  118,247,97>>] /usr/certs/cert.pem
+>>   [{ssl_connection,init_certificates,8,
+>>                    [{file,"ssl_connection.erl"},{line,1155}]},
+>>    {ssl_connection,ssl_init,2,[{file,"ssl_connection.erl"},{line,1110}]},
+>>    {ssl_connection,init,1,[{file,"ssl_connection.erl"},{line,303}]},
+>>    {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,239}]}]
+>> 
+>> Not a very helpful error.  I'm assuming the cert isn't being accepted by the SSL module?
+>> 
+>> Thanks,
+>> Lee
+>> 
+>> 
+>> 
+>> On 23 Jul 2013, at 14:41, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>> 
+>>> You need to include and start the public_key and ssl applications.
+>>> 
+>>> On 07/23/2013 03:12 PM, Lee Sylvester wrote:
+>>>> Hi guys,
+>>>> 
+>>>> So, I'm trying to run Cowboy with SSL, but keep getting an error with the SSL module:
+>>>> 
+>>>> application: ssl
+>>>>     exited: {bad_return,
+>>>>                 {{ssl_app,start,[normal,[]]},
+>>>>                  {'EXIT',
+>>>>                      {undef,
+>>>>                          [{ssl_app,start,[normal,[]],[]},
+>>>>                           {application_master,start_it_old,4,
+>>>>                               [{file,"application_master.erl"},
+>>>>                                {line,274}]}]}}}}
+>>>>     type: temporary
+>>>> 
+>>>> 
+>>>> The way I'm starting Cowboy is like this:
+>>>> 
+>>>> 	Env = [
+>>>> 		{env, [{dispatch, Dispatch}]},
+>>>> 		{onrequest, fun http_utils:set_request_cors/1}
+>>>> 	],
+>>>> 
+>>>> 	case http_server:is_secure() of
+>>>> 		true ->
+>>>> 			cowboy:start_https(https, 100, [
+>>>> 				{ip, Ip}, {port, Port},
+>>>> 				{certfile, binary_to_list(http_server:secure_cert())},
+>>>> 				{keyfile, binary_to_list(http_server:secure_key())},
+>>>> 				{reuseaddr, true},
+>>>> 				{fail_if_no_peer_cert, true}
+>>>> 			], Env);
+>>>> 		_ ->
+>>>> 			{ok, _} = cowboy:start_http(http, 100, Options, Env)
+>>>> 	end,
+>>>> 
+>>>> Does anyone know why I might be getting this issue?
+>>>> 
+>>>> Thanks,
+>>>> Lee
+>>>> 
+>>>> 
+>>>> _______________________________________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>> 
+>>> 
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>> 
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From edgurgel at gmail.com  Tue Jul 23 16:15:36 2013
+From: edgurgel at gmail.com (Eduardo Gurgel)
+Date: Tue, 23 Jul 2013 11:15:36 -0300
+Subject: [99s-extend] OPTIONS and is_authorized
+Message-ID: <CAKAMJXjzVKTA_VJPm_bJxr+hKBEYVK7hCz24ZkDu8gvZO4X_Rw@mail.gmail.com>
+
+What's the best way to skip is_authorized callback for OPTIONS methods? For
+all my rest handlers?
+
+Thanks in advance for any help you are able to provide.
+
+-- 
+Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130723/3e51c337/attachment.html>
+
+From list1 at gjunka.com  Thu Jul 25 11:24:24 2013
+From: list1 at gjunka.com (Grzegorz Junka)
+Date: Thu, 25 Jul 2013 10:24:24 +0100
+Subject: [99s-extend] Cowboy HTTPS Issue
+In-Reply-To: <9B85045F-0FA0-4CCE-8F57-863CCF83E28C@gmail.com>
+References: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+ <51EE8816.1040801@ninenines.eu>
+ <CC9B7706-2788-4614-9740-C8149FCD3FD2@gmail.com>
+ <51EE8C6D.5060601@ninenines.eu>
+ <9B85045F-0FA0-4CCE-8F57-863CCF83E28C@gmail.com>
+Message-ID: <51F0EEC8.4080408@gjunka.com>
+
+Maybe the problem is with Erlang not seeing the crypto libraries? You 
+can verify that quickly by executing "crypto:start()." in the Erlang 
+shell. See this post for info:
+
+http://stackoverflow.com/questions/4742184/rebar-error-exit-on-create-app-crypto-start/14776521#14776521
+
+Greg
+
+On 23/07/2013 15:01, Lee Sylvester wrote:
+> Okay, thanks Lo?c.  I'll try my luck there :-)
+>
+> Regards,
+> Lee
+>
+>
+>
+> On 23 Jul 2013, at 15:00, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> No idea. You'll probably have more luck asking erlang-questions for SSL issues.
+>>
+>> On 07/23/2013 03:59 PM, Lee Sylvester wrote:
+>>> Thank you, Loic.  I'd forgotten to update my releases folder.
+>>>
+>>> I now have it running, but when I access an endpoint, I get
+>>>
+>>> =ERROR REPORT==== 23-Jul-2013::09:56:29 ===
+>>> SSL: 1159: error:[<<48,130,6,220,48,130,5,196,160,3,2,1,2,2,16,15,199,72,40,33,
+>>>                      126,49,13,  [snip]  45,193>>,
+>>>                    <<48,130,6  [snip]  118,247,97>>] /usr/certs/cert.pem
+>>>    [{ssl_connection,init_certificates,8,
+>>>                     [{file,"ssl_connection.erl"},{line,1155}]},
+>>>     {ssl_connection,ssl_init,2,[{file,"ssl_connection.erl"},{line,1110}]},
+>>>     {ssl_connection,init,1,[{file,"ssl_connection.erl"},{line,303}]},
+>>>     {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,239}]}]
+>>>
+>>> Not a very helpful error.  I'm assuming the cert isn't being accepted by the SSL module?
+>>>
+>>> Thanks,
+>>> Lee
+>>>
+>>>
+>>>
+>>> On 23 Jul 2013, at 14:41, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>>
+>>>> You need to include and start the public_key and ssl applications.
+>>>>
+>>>> On 07/23/2013 03:12 PM, Lee Sylvester wrote:
+>>>>> Hi guys,
+>>>>>
+>>>>> So, I'm trying to run Cowboy with SSL, but keep getting an error with the SSL module:
+>>>>>
+>>>>> application: ssl
+>>>>>      exited: {bad_return,
+>>>>>                  {{ssl_app,start,[normal,[]]},
+>>>>>                   {'EXIT',
+>>>>>                       {undef,
+>>>>>                           [{ssl_app,start,[normal,[]],[]},
+>>>>>                            {application_master,start_it_old,4,
+>>>>>                                [{file,"application_master.erl"},
+>>>>>                                 {line,274}]}]}}}}
+>>>>>      type: temporary
+>>>>>
+>>>>>
+>>>>> The way I'm starting Cowboy is like this:
+>>>>>
+>>>>> 	Env = [
+>>>>> 		{env, [{dispatch, Dispatch}]},
+>>>>> 		{onrequest, fun http_utils:set_request_cors/1}
+>>>>> 	],
+>>>>>
+>>>>> 	case http_server:is_secure() of
+>>>>> 		true ->
+>>>>> 			cowboy:start_https(https, 100, [
+>>>>> 				{ip, Ip}, {port, Port},
+>>>>> 				{certfile, binary_to_list(http_server:secure_cert())},
+>>>>> 				{keyfile, binary_to_list(http_server:secure_key())},
+>>>>> 				{reuseaddr, true},
+>>>>> 				{fail_if_no_peer_cert, true}
+>>>>> 			], Env);
+>>>>> 		_ ->
+>>>>> 			{ok, _} = cowboy:start_http(http, 100, Options, Env)
+>>>>> 	end,
+>>>>>
+>>>>> Does anyone know why I might be getting this issue?
+>>>>>
+>>>>> Thanks,
+>>>>> Lee
+>>>>>
+>>>>>
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu
+>>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>>>
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> Erlang Cowboy
+>>>> Nine Nines
+>>>> http://ninenines.eu
+>>
+>> -- 
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+
+From essen at ninenines.eu  Thu Jul 25 11:25:02 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 25 Jul 2013 11:25:02 +0200
+Subject: [99s-extend] Cowboy HTTPS Issue
+In-Reply-To: <51F0EEC8.4080408@gjunka.com>
+References: <420FF871-86CC-4956-924A-514047C614EB@gmail.com>
+ <51EE8816.1040801@ninenines.eu>
+ <CC9B7706-2788-4614-9740-C8149FCD3FD2@gmail.com>
+ <51EE8C6D.5060601@ninenines.eu>
+ <9B85045F-0FA0-4CCE-8F57-863CCF83E28C@gmail.com>
+ <51F0EEC8.4080408@gjunka.com>
+Message-ID: <51F0EEEE.8050002@ninenines.eu>
+
+Cowboy requires crypto to start.
+
+On 07/25/2013 11:24 AM, Grzegorz Junka wrote:
+> Maybe the problem is with Erlang not seeing the crypto libraries? You
+> can verify that quickly by executing "crypto:start()." in the Erlang
+> shell. See this post for info:
+>
+> http://stackoverflow.com/questions/4742184/rebar-error-exit-on-create-app-crypto-start/14776521#14776521
+>
+>
+> Greg
+>
+> On 23/07/2013 15:01, Lee Sylvester wrote:
+>> Okay, thanks Lo?c.  I'll try my luck there :-)
+>>
+>> Regards,
+>> Lee
+>>
+>>
+>>
+>> On 23 Jul 2013, at 15:00, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>
+>>> No idea. You'll probably have more luck asking erlang-questions for
+>>> SSL issues.
+>>>
+>>> On 07/23/2013 03:59 PM, Lee Sylvester wrote:
+>>>> Thank you, Loic.  I'd forgotten to update my releases folder.
+>>>>
+>>>> I now have it running, but when I access an endpoint, I get
+>>>>
+>>>> =ERROR REPORT==== 23-Jul-2013::09:56:29 ===
+>>>> SSL: 1159:
+>>>> error:[<<48,130,6,220,48,130,5,196,160,3,2,1,2,2,16,15,199,72,40,33,
+>>>>                      126,49,13,  [snip]  45,193>>,
+>>>>                    <<48,130,6  [snip]  118,247,97>>]
+>>>> /usr/certs/cert.pem
+>>>>    [{ssl_connection,init_certificates,8,
+>>>>                     [{file,"ssl_connection.erl"},{line,1155}]},
+>>>>
+>>>> {ssl_connection,ssl_init,2,[{file,"ssl_connection.erl"},{line,1110}]},
+>>>>     {ssl_connection,init,1,[{file,"ssl_connection.erl"},{line,303}]},
+>>>>     {proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,239}]}]
+>>>>
+>>>> Not a very helpful error.  I'm assuming the cert isn't being
+>>>> accepted by the SSL module?
+>>>>
+>>>> Thanks,
+>>>> Lee
+>>>>
+>>>>
+>>>>
+>>>> On 23 Jul 2013, at 14:41, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>>>
+>>>>> You need to include and start the public_key and ssl applications.
+>>>>>
+>>>>> On 07/23/2013 03:12 PM, Lee Sylvester wrote:
+>>>>>> Hi guys,
+>>>>>>
+>>>>>> So, I'm trying to run Cowboy with SSL, but keep getting an error
+>>>>>> with the SSL module:
+>>>>>>
+>>>>>> application: ssl
+>>>>>>      exited: {bad_return,
+>>>>>>                  {{ssl_app,start,[normal,[]]},
+>>>>>>                   {'EXIT',
+>>>>>>                       {undef,
+>>>>>>                           [{ssl_app,start,[normal,[]],[]},
+>>>>>>                            {application_master,start_it_old,4,
+>>>>>>                                [{file,"application_master.erl"},
+>>>>>>                                 {line,274}]}]}}}}
+>>>>>>      type: temporary
+>>>>>>
+>>>>>>
+>>>>>> The way I'm starting Cowboy is like this:
+>>>>>>
+>>>>>>     Env = [
+>>>>>>         {env, [{dispatch, Dispatch}]},
+>>>>>>         {onrequest, fun http_utils:set_request_cors/1}
+>>>>>>     ],
+>>>>>>
+>>>>>>     case http_server:is_secure() of
+>>>>>>         true ->
+>>>>>>             cowboy:start_https(https, 100, [
+>>>>>>                 {ip, Ip}, {port, Port},
+>>>>>>                 {certfile,
+>>>>>> binary_to_list(http_server:secure_cert())},
+>>>>>>                 {keyfile, binary_to_list(http_server:secure_key())},
+>>>>>>                 {reuseaddr, true},
+>>>>>>                 {fail_if_no_peer_cert, true}
+>>>>>>             ], Env);
+>>>>>>         _ ->
+>>>>>>             {ok, _} = cowboy:start_http(http, 100, Options, Env)
+>>>>>>     end,
+>>>>>>
+>>>>>> Does anyone know why I might be getting this issue?
+>>>>>>
+>>>>>> Thanks,
+>>>>>> Lee
+>>>>>>
+>>>>>>
+>>>>>> _______________________________________________
+>>>>>> Extend mailing list
+>>>>>> Extend at lists.ninenines.eu
+>>>>>> http://lists.ninenines.eu:81/listinfo/extend
+>>>>>>
+>>>>>
+>>>>> --
+>>>>> Lo?c Hoguin
+>>>>> Erlang Cowboy
+>>>>> Nine Nines
+>>>>> http://ninenines.eu
+>>>
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From samset at wanadoo.fr  Fri Jul 26 18:08:37 2013
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 26 Jul 2013 18:08:37 +0200
+Subject: [99s-extend] query string with # sign
+Message-ID: <5D960DEE-E0EE-4084-AF7D-127E8C9F8B37@wanadoo.fr>
+
+Hi, 
+
+It seems that Cowboy removes the data after the # sign from the query string (GET) before handing the req to the handler.
+Is there any way to change this behavior ?
+
+Thank you.
+
+Samir
+
+From essen at ninenines.eu  Fri Jul 26 18:11:15 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 26 Jul 2013 18:11:15 +0200
+Subject: [99s-extend] query string with # sign
+In-Reply-To: <5D960DEE-E0EE-4084-AF7D-127E8C9F8B37@wanadoo.fr>
+References: <5D960DEE-E0EE-4084-AF7D-127E8C9F8B37@wanadoo.fr>
+Message-ID: <51F29FA3.9020400@ninenines.eu>
+
+On 07/26/2013 06:08 PM, Samir Sow wrote:
+> Hi,
+>
+> It seems that Cowboy removes the data after the # sign from the query string (GET) before handing the req to the handler.
+> Is there any way to change this behavior ?
+
+Look for the commit that removed "cowboy_req:fragment/1".
+
+But be aware that #fragments aren't expected to be sent by an HTTP 
+request and that browsers don't send it either. You probably should use 
+the query string for that.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From samset at wanadoo.fr  Fri Jul 26 18:25:07 2013
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 26 Jul 2013 18:25:07 +0200
+Subject: [99s-extend] query string with # sign
+In-Reply-To: <51F29FA3.9020400@ninenines.eu>
+References: <5D960DEE-E0EE-4084-AF7D-127E8C9F8B37@wanadoo.fr>
+ <51F29FA3.9020400@ninenines.eu>
+Message-ID: <B60CADF5-5D57-4E53-9ACA-BEF2C5526AF2@wanadoo.fr>
+
+Thank you Loic
+
+I'm not http protocol fluent.
+Could you explain me what you mean by "you should use the query string for that" ?
+
+Samir 
+On 26 juil. 2013, at 18:11, Lo?c Hoguin wrote:
+
+> On 07/26/2013 06:08 PM, Samir Sow wrote:
+>> Hi,
+>> 
+>> It seems that Cowboy removes the data after the # sign from the query string (GET) before handing the req to the handler.
+>> Is there any way to change this behavior ?
+> 
+> Look for the commit that removed "cowboy_req:fragment/1".
+> 
+> But be aware that #fragments aren't expected to be sent by an HTTP request and that browsers don't send it either. You probably should use the query string for that.
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Fri Jul 26 18:25:52 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 26 Jul 2013 18:25:52 +0200
+Subject: [99s-extend] query string with # sign
+In-Reply-To: <B60CADF5-5D57-4E53-9ACA-BEF2C5526AF2@wanadoo.fr>
+References: <5D960DEE-E0EE-4084-AF7D-127E8C9F8B37@wanadoo.fr>
+ <51F29FA3.9020400@ninenines.eu>
+ <B60CADF5-5D57-4E53-9ACA-BEF2C5526AF2@wanadoo.fr>
+Message-ID: <51F2A310.5030001@ninenines.eu>
+
+/path/to/resource?f=value
+
+instead of
+
+/path/to/resource#value
+
+On 07/26/2013 06:25 PM, Samir Sow wrote:
+> Thank you Loic
+>
+> I'm not http protocol fluent.
+> Could you explain me what you mean by "you should use the query string for that" ?
+>
+> Samir
+> On 26 juil. 2013, at 18:11, Lo?c Hoguin wrote:
+>
+>> On 07/26/2013 06:08 PM, Samir Sow wrote:
+>>> Hi,
+>>>
+>>> It seems that Cowboy removes the data after the # sign from the query string (GET) before handing the req to the handler.
+>>> Is there any way to change this behavior ?
+>>
+>> Look for the commit that removed "cowboy_req:fragment/1".
+>>
+>> But be aware that #fragments aren't expected to be sent by an HTTP request and that browsers don't send it either. You probably should use the query string for that.
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From samset at wanadoo.fr  Fri Jul 26 18:39:02 2013
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 26 Jul 2013 18:39:02 +0200
+Subject: [99s-extend] query string with # sign
+In-Reply-To: <51F2A310.5030001@ninenines.eu>
+References: <5D960DEE-E0EE-4084-AF7D-127E8C9F8B37@wanadoo.fr>
+ <51F29FA3.9020400@ninenines.eu>
+ <B60CADF5-5D57-4E53-9ACA-BEF2C5526AF2@wanadoo.fr>
+ <51F2A310.5030001@ninenines.eu>
+Message-ID: <056A51D7-8AD0-45C9-87CF-CC1CC744AE62@wanadoo.fr>
+
+
+Actually my query is something like
+
+/path?=key=*value, value#&key=value2....
+But in the request i only receive the data before the # (the pound is removed)
+
+
+On 26 juil. 2013, at 18:25, Lo?c Hoguin wrote:
+
+> /path/to/resource?f=value
+> 
+> instead of
+> 
+> /path/to/resource#value
+> 
+> On 07/26/2013 06:25 PM, Samir Sow wrote:
+>> Thank you Loic
+>> 
+>> I'm not http protocol fluent.
+>> Could you explain me what you mean by "you should use the query string for that" ?
+>> 
+>> Samir
+>> On 26 juil. 2013, at 18:11, Lo?c Hoguin wrote:
+>> 
+>>> On 07/26/2013 06:08 PM, Samir Sow wrote:
+>>>> Hi,
+>>>> 
+>>>> It seems that Cowboy removes the data after the # sign from the query string (GET) before handing the req to the handler.
+>>>> Is there any way to change this behavior ?
+>>> 
+>>> Look for the commit that removed "cowboy_req:fragment/1".
+>>> 
+>>> But be aware that #fragments aren't expected to be sent by an HTTP request and that browsers don't send it either. You probably should use the query string for that.
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> Erlang Cowboy
+>>> Nine Nines
+>>> http://ninenines.eu
+>> 
+> 
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+
+
+From essen at ninenines.eu  Fri Jul 26 18:42:41 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 26 Jul 2013 18:42:41 +0200
+Subject: [99s-extend] query string with # sign
+In-Reply-To: <056A51D7-8AD0-45C9-87CF-CC1CC744AE62@wanadoo.fr>
+References: <5D960DEE-E0EE-4084-AF7D-127E8C9F8B37@wanadoo.fr>
+ <51F29FA3.9020400@ninenines.eu>
+ <B60CADF5-5D57-4E53-9ACA-BEF2C5526AF2@wanadoo.fr>
+ <51F2A310.5030001@ninenines.eu>
+ <056A51D7-8AD0-45C9-87CF-CC1CC744AE62@wanadoo.fr>
+Message-ID: <51F2A701.1040309@ninenines.eu>
+
+You have to encode the value (urlencode algorithm), some characters, 
+like #, have a special meaning. Cowboy will urldecode automatically and 
+give you the # you expect.
+
+On 07/26/2013 06:39 PM, Samir Sow wrote:
+>
+> Actually my query is something like
+>
+> /path?=key=*value, value#&key=value2....
+> But in the request i only receive the data before the # (the pound is removed)
+>
+>
+> On 26 juil. 2013, at 18:25, Lo?c Hoguin wrote:
+>
+>> /path/to/resource?f=value
+>>
+>> instead of
+>>
+>> /path/to/resource#value
+>>
+>> On 07/26/2013 06:25 PM, Samir Sow wrote:
+>>> Thank you Loic
+>>>
+>>> I'm not http protocol fluent.
+>>> Could you explain me what you mean by "you should use the query string for that" ?
+>>>
+>>> Samir
+>>> On 26 juil. 2013, at 18:11, Lo?c Hoguin wrote:
+>>>
+>>>> On 07/26/2013 06:08 PM, Samir Sow wrote:
+>>>>> Hi,
+>>>>>
+>>>>> It seems that Cowboy removes the data after the # sign from the query string (GET) before handing the req to the handler.
+>>>>> Is there any way to change this behavior ?
+>>>>
+>>>> Look for the commit that removed "cowboy_req:fragment/1".
+>>>>
+>>>> But be aware that #fragments aren't expected to be sent by an HTTP request and that browsers don't send it either. You probably should use the query string for that.
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> Erlang Cowboy
+>>>> Nine Nines
+>>>> http://ninenines.eu
+>>>
+>>
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+

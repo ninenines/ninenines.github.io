@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] websocket over ssl
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20websocket%20over%20ssl&In-Reply-To=%3C54B13550.5050504%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000484.html">
+   <LINK REL="Next"  HREF="000486.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] websocket over ssl</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20websocket%20over%20ssl&In-Reply-To=%3C54B13550.5050504%40ninenines.eu%3E"
+       TITLE="[99s-extend] websocket over ssl">essen at ninenines.eu
+       </A><BR>
+    <I>Sat Jan 10 15:21:04 CET 2015</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000484.html">[99s-extend] websocket over ssl
+</A></li>
+        <LI>Next message: <A HREF="000486.html">[99s-extend] websocket over ssl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#485">[ date ]</a>
+              <a href="thread.html#485">[ thread ]</a>
+              <a href="subject.html#485">[ subject ]</a>
+              <a href="author.html#485">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Assuming you have no problem understanding HTTPS, the only differences 
+between plain Websocket and HTTPS Websocket are as follow:
+
+In your browser, your <A HREF="ws://">ws://</A> links become <A HREF="wss://">wss://</A> links.
+
+In Cowboy, use start_https instead of start_http. There is no change 
+required in your code otherwise.
+
+It may or may not be possible to use <A HREF="wss://">wss://</A> from an HTTP page or <A HREF="ws://">ws://</A> 
+from an HTTPS page, I'm not too up to date on that one. Otherwise, <A HREF="ws://">ws://</A> 
+from HTTP page or <A HREF="wss://">wss://</A> from HTTPS page works as intended.
+
+There is no requirement that a Websocket connection is initiated on a 
+new TCP connection. I am not sure if browsers reuse connections or not.
+
+On 01/10/2015 02:55 PM, <A HREF="https://lists.ninenines.eu/listinfo/extend">e at bestmx.net</A> wrote:
+&gt;<i> Hello all.
+</I>&gt;<i>
+</I>&gt;<i> I am trying to alter my cowboy-based websocket server from plain to SSL
+</I>&gt;<i> connection.
+</I>&gt;<i> And I found out that I have failed to understand very basics of the
+</I>&gt;<i> combination of WS and SSL.
+</I>&gt;<i>
+</I>&gt;<i> As far as i've understood the very nature of the WS it is a bit altered
+</I>&gt;<i> http connection (i open the http connection first, and then i change its
+</I>&gt;<i> status to WS)
+</I>&gt;<i>
+</I>&gt;<i> On the other hand the whole &quot;HTTP story&quot; could be wrapped into SSL, so
+</I>&gt;<i> that SSL is an outer layer of data encoding (as seen transparent by an
+</I>&gt;<i> application)
+</I>&gt;<i>
+</I>&gt;<i> thus,
+</I>&gt;<i> if I open HTTPS connection (which implies SSL enveloping) and then alter
+</I>&gt;<i> the connection status to WS, the whole &quot;WS story&quot; appears naturally
+</I>&gt;<i> INSIDE THE PREVIOUSLY ESTABLISHED SSL CONNECTION.
+</I>&gt;<i>
+</I>&gt;<i> Is it true?
+</I>&gt;<i>
+</I>&gt;<i> In this regard i can hardly find a place in this world for the &quot;WSS&quot;
+</I>&gt;<i> term, what does it stand for?
+</I>&gt;<i>
+</I>&gt;<i> Please, help me fit it in my head.
+</I>&gt;<i>
+</I>&gt;<i> However, i might be confusing some Client-Side entities, that are
+</I>&gt;<i> involved in the process of starting up my WebSocket.
+</I>&gt;<i>
+</I>&gt;<i> I am using a Browser with JavaScript.
+</I>&gt;<i>
+</I>&gt;<i> The semantics of the very WebSocket.start() operation is not enough
+</I>&gt;<i> clear to me. Please, do not laugh.
+</I>&gt;<i>
+</I>&gt;<i> when i do JS WebSocket.start() does it:
+</I>&gt;<i> (a) opens an http connection and then alters it to WS
+</I>&gt;<i> (b) alters the connection in the context of which the JS process is running
+</I>&gt;<i> ????
+</I>&gt;<i>
+</I>&gt;<i> I'll be damned if the answer was lying on the surface of the internet!
+</I>&gt;<i>
+</I>&gt;<i> The third part of this ugly question is about cowboy actually.
+</I>&gt;<i> How all these entities mentioned above do map into my_app.erl file?
+</I>&gt;<i> what particular bits of cowboy's &quot;configuration&quot; (may i call this
+</I>&gt;<i> particular piece of code a &quot;setup&quot; or &quot;config&quot;?) affect what aspects of
+</I>&gt;<i> the connection initialization.
+</I>&gt;<i>
+</I>&gt;<i> well, i am afraid it could be put in a simpler way:
+</I>&gt;<i> &quot;Exactly When and Where the WSS story begins?&quot;
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000484.html">[99s-extend] websocket over ssl
+</A></li>
+	<LI>Next message: <A HREF="000486.html">[99s-extend] websocket over ssl
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#485">[ date ]</a>
+              <a href="thread.html#485">[ thread ]</a>
+              <a href="subject.html#485">[ subject ]</a>
+              <a href="author.html#485">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

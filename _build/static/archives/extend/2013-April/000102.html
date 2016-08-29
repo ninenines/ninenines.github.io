@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Distributed model?
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Distributed%20model%3F&In-Reply-To=%3CD7BCE9BB-C9D2-4423-92EC-14D4DC841D6F%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000101.html">
+   <LINK REL="Next"  HREF="000103.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Distributed model?</H1>
+    <B>Lee Sylvester</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Distributed%20model%3F&In-Reply-To=%3CD7BCE9BB-C9D2-4423-92EC-14D4DC841D6F%40gmail.com%3E"
+       TITLE="[99s-extend] Distributed model?">lee.sylvester at gmail.com
+       </A><BR>
+    <I>Thu Apr 11 14:55:29 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000101.html">[99s-extend] Distributed model?
+</A></li>
+        <LI>Next message: <A HREF="000103.html">[99s-extend] Distributed model?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#102">[ date ]</a>
+              <a href="thread.html#102">[ thread ]</a>
+              <a href="subject.html#102">[ subject ]</a>
+              <a href="author.html#102">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thank you, Jeremy, that's good advice.  It's not so much a chat platform, but I guess it would resemble one in architecture.  The part I'm concerned about, though, is should I be avoiding the internal Erlang messaging between connections (over many nodes) for heavy messaging?
+
+Thanks,
+Lee
+
+
+
+On 11 Apr 2013, at 08:04, Jeremy Ong &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">jeremy at quarkgames.com</A>&gt; wrote:
+
+&gt;<i> I see. I assume this is for a chat server of some sort?
+</I>&gt;<i> 
+</I>&gt;<i> You don't want the user process sending all these messages because the
+</I>&gt;<i> user process wouldn't be able to do anything useful (like receive
+</I>&gt;<i> messages) in the meantime.
+</I>&gt;<i> 
+</I>&gt;<i> Better is to implement a pubsub process for each channel of
+</I>&gt;<i> communication (i.e. one process per room) or rely on Redis pubsub or
+</I>&gt;<i> something if speed is extremely important.
+</I>&gt;<i> 
+</I>&gt;<i> There is no way to get around the O(N) complexity of broadcasting.
+</I>&gt;<i> 
+</I>&gt;<i> On Wed, Apr 10, 2013 at 11:49 PM, Lee Sylvester &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">lee.sylvester at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;<i> Thanks Jeremy, but what about inter-node communication?  If I have a user on node A sending a message to 10k users located on 10 other nodes, what is the best way to handle that?  Especially if this user is sending several messages and expecting replies.  Should I use the standard Erlang inter-process messaging or should I implement an MQ on top to handle this?
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> Thanks,
+</I>&gt;&gt;<i> Lee
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;<i> On 11 Apr 2013, at 07:29, Jeremy Ong &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">jeremy at quarkgames.com</A>&gt; wrote:
+</I>&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> Make all the machines identically and add an haproxy (or equivalent)
+</I>&gt;&gt;&gt;<i> machine to load balance between all of them. Haproxy can handle many
+</I>&gt;&gt;&gt;<i> many requests. Keep in mind that with tcp, the load balancer is just
+</I>&gt;&gt;&gt;<i> accepting the socket but then the client communicates with the actual
+</I>&gt;&gt;&gt;<i> application server directly afterwards.
+</I>&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;<i> On Wed, Apr 10, 2013 at 10:51 PM, Lee Sylvester &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">lee.sylvester at gmail.com</A>&gt; wrote:
+</I>&gt;&gt;&gt;&gt;<i> Hi guys,
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> So, I have my Cowboy / Bullet server working nicely, now, with much thanks to members on this list.  I'm now looking at the best means of clustering this app.  I want to set this up so that, should the connection count get very high (which it will), then I should only have to throw more machines at this problem and it'll all go away.
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> I've got most of the logic working for this, but what I'm worried about is sending a lot of content over the erlang inter-node connection.  I've heard hogging this line can be both a bottleneck and can potentially interrupt the heartbeat between nodes.  With this in mind, should I look at adding a ZMQ layer or some such to facilitate this?  What is the general solution to high traffic between nodes?
+</I>&gt;&gt;&gt;&gt;<i> 
+</I>&gt;&gt;&gt;&gt;<i> Thanks,
+</I>&gt;&gt;&gt;&gt;<i> Lee
+</I>&gt;&gt;&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;&gt;&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;&gt;<i> 
+</I>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000101.html">[99s-extend] Distributed model?
+</A></li>
+	<LI>Next message: <A HREF="000103.html">[99s-extend] Distributed model?
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#102">[ date ]</a>
+              <a href="thread.html#102">[ thread ]</a>
+              <a href="subject.html#102">[ subject ]</a>
+              <a href="author.html#102">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

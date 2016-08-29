@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] 505 error
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20505%20error&In-Reply-To=%3C7E836341-BC4B-4575-AAFC-9F610A5610AE%40gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000113.html">
+   <LINK REL="Next"  HREF="000115.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] 505 error</H1>
+    <B>Lee Sylvester</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20505%20error&In-Reply-To=%3C7E836341-BC4B-4575-AAFC-9F610A5610AE%40gmail.com%3E"
+       TITLE="[99s-extend] 505 error">lee.sylvester at gmail.com
+       </A><BR>
+    <I>Mon Apr 22 14:59:54 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000113.html">[99s-extend] Cowboy CORS
+</A></li>
+        <LI>Next message: <A HREF="000115.html">[99s-extend] 505 error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#114">[ date ]</a>
+              <a href="thread.html#114">[ thread ]</a>
+              <a href="subject.html#114">[ subject ]</a>
+              <a href="author.html#114">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi guys,
+
+So, I was getting a CORS issue when connecting to my Bullet impl, which I have since fixed.  I am now able to use these from many machines from many locations.  However, I have found some machines to be getting a 505 error when making a POST request to the Cowboy instance:
+
+Request URL:<A HREF="http://www.example.com">http://www.example.com</A>
+Request Method:OPTIONS
+Status Code:505 HTTP Version Not Supported
+Request Headersview source
+Accept:*/*
+Accept-Charset:ISO-8859-1,utf-8;q=0.7,*;q=0.3
+Accept-Encoding:gzip,deflate,sdch
+Accept-Language:en-US,en;q=0.8
+Access-Control-Request-Headers:origin, method, content-type
+Access-Control-Request-Method:POST
+Connection:keep-alive
+Host:www.example.com
+Origin:<A HREF="http://www.test.com">http://www.test.com</A>
+Referer:<A HREF="http://www.test.com/">http://www.test.com/</A>
+User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31
+Response Headersview source
+connection:close
+content-length:0
+date:Mon, 22 Apr 2013 12:22:50 GMT
+server:Cowboy
+
+To get around the CORS issue, I set up an onrequest hook, which points to the function:
+
+set_request_cors(Req) -&gt;
+	Req2 = cowboy_req:set_resp_header(&lt;&lt;&quot;Access-Control-Allow-Methods&quot;&gt;&gt;, &lt;&lt;&quot;GET, POST, OPTIONS&quot;&gt;&gt;, Req),
+	Req3 = cowboy_req:set_resp_header(&lt;&lt;&quot;Access-Control-Allow-Headers&quot;&gt;&gt;, &lt;&lt;&quot;Content-Type, X-Requested-With, Origin, Method&quot;&gt;&gt;, Req2),
+	cowboy_req:set_resp_header(&lt;&lt;&quot;Access-Control-Allow-Origin&quot;&gt;&gt;, &lt;&lt;&quot;*&quot;&gt;&gt;, Req3).
+
+I'm afraid I don't have any more info, but this issue is completely eluding me.
+
+Thanks,
+Lee
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000113.html">[99s-extend] Cowboy CORS
+</A></li>
+	<LI>Next message: <A HREF="000115.html">[99s-extend] 505 error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#114">[ date ]</a>
+              <a href="thread.html#114">[ thread ]</a>
+              <a href="subject.html#114">[ subject ]</a>
+              <a href="author.html#114">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

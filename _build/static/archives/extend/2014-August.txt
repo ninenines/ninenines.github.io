@@ -1,0 +1,2532 @@
+From samset at wanadoo.fr  Mon Aug  4 18:39:26 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Mon, 4 Aug 2014 18:39:26 +0200
+Subject: [99s-extend] ranch dispatch error ver 1.0.0
+Message-ID: <923834FE-1A66-44E6-923A-9C15BF16E181@wanadoo.fr>
+
+Hi,
+
+I?ve moved a working http server to https.
+SSL handshaking is ok but i got the following Ranch error :
+
+[error] Ranch listener https_mta had connection process started with cowboy_protocol:start_link/4 at <0.601.0> exit with reason: {badarg,[{binary,match,[[<<"com">>,<<"oockit">>,<<"www">>],<<".">>],[]},{cowboy_router,split_host,2,[{file,"src/cowboy_router.erl"},{line,305}]},{cowboy_router,match,3,[{file,"src/cowboy_router.erl"},{line,240}]},{cowboy_router,execute,2,[{file,"src/cowboy_router.erl"},{line,169}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]}
+
+call is
+
+curl --cacert priv/cert/root.crt "https://www.oockit.com:7171/mtagw?
+
+
+dispatch is 
+
+[{'_', [
+        {["/static/[...]"], cowboy_static, [{directory, {priv_dir, ?APP, [<<"static">>]}},
+        {mimetypes, {fun mimetypes:path_to_mimes/2, default}}]},
+	{"/mtagw", hck_mta, []}
+    ]}]).
+
+
+Any clue ?
+
+Thanks
+
+sincerely
+
+Samir
+
+
+From essen at ninenines.eu  Mon Aug  4 18:49:32 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 04 Aug 2014 18:49:32 +0200
+Subject: [99s-extend] ranch dispatch error ver 1.0.0
+In-Reply-To: <923834FE-1A66-44E6-923A-9C15BF16E181@wanadoo.fr>
+References: <923834FE-1A66-44E6-923A-9C15BF16E181@wanadoo.fr>
+Message-ID: <53DFB99C.9060401@ninenines.eu>
+
+Surely there's something else that you're not showing there. For some 
+reason you got a list of segments in the error, and we haven't had that 
+for a very long time. Do you have an onrequest hook or middleware that 
+does weird things perhaps?
+
+On 08/04/2014 06:39 PM, Samir Sow wrote:
+> Hi,
+>
+> I?ve moved a working http server to https.
+> SSL handshaking is ok but i got the following Ranch error :
+>
+> [error] Ranch listener https_mta had connection process started with cowboy_protocol:start_link/4 at <0.601.0> exit with reason: {badarg,[{binary,match,[[<<"com">>,<<"oockit">>,<<"www">>],<<".">>],[]},{cowboy_router,split_host,2,[{file,"src/cowboy_router.erl"},{line,305}]},{cowboy_router,match,3,[{file,"src/cowboy_router.erl"},{line,240}]},{cowboy_router,execute,2,[{file,"src/cowboy_router.erl"},{line,169}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]}
+>
+> call is
+>
+> curl --cacert priv/cert/root.crt "https://www.oockit.com:7171/mtagw?
+>
+>
+> dispatch is
+>
+> [{'_', [
+>          {["/static/[...]"], cowboy_static, [{directory, {priv_dir, ?APP, [<<"static">>]}},
+>          {mimetypes, {fun mimetypes:path_to_mimes/2, default}}]},
+> 	{"/mtagw", hck_mta, []}
+>      ]}]).
+>
+>
+> Any clue ?
+>
+> Thanks
+>
+> sincerely
+>
+> Samir
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samset at wanadoo.fr  Mon Aug  4 19:50:36 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Mon, 4 Aug 2014 19:50:36 +0200
+Subject: [99s-extend] ranch dispatch error ver 1.0.0
+In-Reply-To: <53DFB99C.9060401@ninenines.eu>
+References: <923834FE-1A66-44E6-923A-9C15BF16E181@wanadoo.fr>
+ <53DFB99C.9060401@ninenines.eu>
+Message-ID: <76854630-A55A-4A7D-9CC0-4BA78636AFAA@wanadoo.fr>
+
+I?m not sure i understand your question.
+
+I?ve only started a cowboy https server with a handler.
+The http version was working fine.
+
+Sincerely
+
+Samir
+
+On 4 ao?t 2014, at 18:49, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Surely there's something else that you're not showing there. For some reason you got a list of segments in the error, and we haven't had that for a very long time. Do you have an onrequest hook or middleware that does weird things perhaps?
+> 
+> On 08/04/2014 06:39 PM, Samir Sow wrote:
+>> Hi,
+>> 
+>> I?ve moved a working http server to https.
+>> SSL handshaking is ok but i got the following Ranch error :
+>> 
+>> [error] Ranch listener https_mta had connection process started with cowboy_protocol:start_link/4 at <0.601.0> exit with reason: {badarg,[{binary,match,[[<<"com">>,<<"oockit">>,<<"www">>],<<".">>],[]},{cowboy_router,split_host,2,[{file,"src/cowboy_router.erl"},{line,305}]},{cowboy_router,match,3,[{file,"src/cowboy_router.erl"},{line,240}]},{cowboy_router,execute,2,[{file,"src/cowboy_router.erl"},{line,169}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]}
+>> 
+>> call is
+>> 
+>> curl --cacert priv/cert/root.crt "https://www.oockit.com:7171/mtagw?
+>> 
+>> 
+>> dispatch is
+>> 
+>> [{'_', [
+>>         {["/static/[...]"], cowboy_static, [{directory, {priv_dir, ?APP, [<<"static">>]}},
+>>         {mimetypes, {fun mimetypes:path_to_mimes/2, default}}]},
+>> 	{"/mtagw", hck_mta, []}
+>>     ]}]).
+>> 
+>> 
+>> Any clue ?
+>> 
+>> Thanks
+>> 
+>> sincerely
+>> 
+>> Samir
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>> 
+> 
+> -- 
+> Lo?c Hoguin
+> http://ninenines.eu
+
+
+From essen at ninenines.eu  Mon Aug  4 19:59:57 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 04 Aug 2014 19:59:57 +0200
+Subject: [99s-extend] ranch dispatch error ver 1.0.0
+In-Reply-To: <76854630-A55A-4A7D-9CC0-4BA78636AFAA@wanadoo.fr>
+References: <923834FE-1A66-44E6-923A-9C15BF16E181@wanadoo.fr>
+ <53DFB99C.9060401@ninenines.eu>
+ <76854630-A55A-4A7D-9CC0-4BA78636AFAA@wanadoo.fr>
+Message-ID: <53DFCA1D.60001@ninenines.eu>
+
+I'm saying it can't be the only difference.
+
+On 08/04/2014 07:50 PM, Samir Sow wrote:
+> I?m not sure i understand your question.
+>
+> I?ve only started a cowboy https server with a handler.
+> The http version was working fine.
+>
+> Sincerely
+>
+> Samir
+>
+> On 4 ao?t 2014, at 18:49, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> Surely there's something else that you're not showing there. For some reason you got a list of segments in the error, and we haven't had that for a very long time. Do you have an onrequest hook or middleware that does weird things perhaps?
+>>
+>> On 08/04/2014 06:39 PM, Samir Sow wrote:
+>>> Hi,
+>>>
+>>> I?ve moved a working http server to https.
+>>> SSL handshaking is ok but i got the following Ranch error :
+>>>
+>>> [error] Ranch listener https_mta had connection process started with cowboy_protocol:start_link/4 at <0.601.0> exit with reason: {badarg,[{binary,match,[[<<"com">>,<<"oockit">>,<<"www">>],<<".">>],[]},{cowboy_router,split_host,2,[{file,"src/cowboy_router.erl"},{line,305}]},{cowboy_router,match,3,[{file,"src/cowboy_router.erl"},{line,240}]},{cowboy_router,execute,2,[{file,"src/cowboy_router.erl"},{line,169}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]}
+>>>
+>>> call is
+>>>
+>>> curl --cacert priv/cert/root.crt "https://www.oockit.com:7171/mtagw?
+>>>
+>>>
+>>> dispatch is
+>>>
+>>> [{'_', [
+>>>          {["/static/[...]"], cowboy_static, [{directory, {priv_dir, ?APP, [<<"static">>]}},
+>>>          {mimetypes, {fun mimetypes:path_to_mimes/2, default}}]},
+>>> 	{"/mtagw", hck_mta, []}
+>>>      ]}]).
+>>>
+>>>
+>>> Any clue ?
+>>>
+>>> Thanks
+>>>
+>>> sincerely
+>>>
+>>> Samir
+>>>
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> https://lists.ninenines.eu/listinfo/extend
+>>>
+>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samset at wanadoo.fr  Mon Aug  4 20:16:06 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Mon, 4 Aug 2014 20:16:06 +0200
+Subject: [99s-extend] ranch dispatch error ver 1.0.0
+In-Reply-To: <53DFCA1D.60001@ninenines.eu>
+References: <923834FE-1A66-44E6-923A-9C15BF16E181@wanadoo.fr>
+ <53DFB99C.9060401@ninenines.eu>
+ <76854630-A55A-4A7D-9CC0-4BA78636AFAA@wanadoo.fr>
+ <53DFCA1D.60001@ninenines.eu>
+Message-ID: <CFF6583D-0F8F-4A6D-9376-A24EA6D289CB@wanadoo.fr>
+
+I can assure you it?s the only one :)
+
+Samir
+
+On 4 ao?t 2014, at 19:59, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> I'm saying it can't be the only difference.
+> 
+> On 08/04/2014 07:50 PM, Samir Sow wrote:
+>> I?m not sure i understand your question.
+>> 
+>> I?ve only started a cowboy https server with a handler.
+>> The http version was working fine.
+>> 
+>> Sincerely
+>> 
+>> Samir
+>> 
+>> On 4 ao?t 2014, at 18:49, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>> 
+>>> Surely there's something else that you're not showing there. For some reason you got a list of segments in the error, and we haven't had that for a very long time. Do you have an onrequest hook or middleware that does weird things perhaps?
+>>> 
+>>> On 08/04/2014 06:39 PM, Samir Sow wrote:
+>>>> Hi,
+>>>> 
+>>>> I?ve moved a working http server to https.
+>>>> SSL handshaking is ok but i got the following Ranch error :
+>>>> 
+>>>> [error] Ranch listener https_mta had connection process started with cowboy_protocol:start_link/4 at <0.601.0> exit with reason: {badarg,[{binary,match,[[<<"com">>,<<"oockit">>,<<"www">>],<<".">>],[]},{cowboy_router,split_host,2,[{file,"src/cowboy_router.erl"},{line,305}]},{cowboy_router,match,3,[{file,"src/cowboy_router.erl"},{line,240}]},{cowboy_router,execute,2,[{file,"src/cowboy_router.erl"},{line,169}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]}
+>>>> 
+>>>> call is
+>>>> 
+>>>> curl --cacert priv/cert/root.crt "https://www.oockit.com:7171/mtagw?
+>>>> 
+>>>> 
+>>>> dispatch is
+>>>> 
+>>>> [{'_', [
+>>>>         {["/static/[...]"], cowboy_static, [{directory, {priv_dir, ?APP, [<<"static">>]}},
+>>>>         {mimetypes, {fun mimetypes:path_to_mimes/2, default}}]},
+>>>> 	{"/mtagw", hck_mta, []}
+>>>>     ]}]).
+>>>> 
+>>>> 
+>>>> Any clue ?
+>>>> 
+>>>> Thanks
+>>>> 
+>>>> sincerely
+>>>> 
+>>>> Samir
+>>>> 
+>>>> _______________________________________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> https://lists.ninenines.eu/listinfo/extend
+>>>> 
+>>> 
+>>> --
+>>> Lo?c Hoguin
+>>> http://ninenines.eu
+>> 
+> 
+> -- 
+> Lo?c Hoguin
+> http://ninenines.eu
+
+
+From essen at ninenines.eu  Mon Aug  4 20:24:15 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Mon, 04 Aug 2014 20:24:15 +0200
+Subject: [99s-extend] ranch dispatch error ver 1.0.0
+In-Reply-To: <CFF6583D-0F8F-4A6D-9376-A24EA6D289CB@wanadoo.fr>
+References: <923834FE-1A66-44E6-923A-9C15BF16E181@wanadoo.fr>
+ <53DFB99C.9060401@ninenines.eu>
+ <76854630-A55A-4A7D-9CC0-4BA78636AFAA@wanadoo.fr>
+ <53DFCA1D.60001@ninenines.eu>
+ <CFF6583D-0F8F-4A6D-9376-A24EA6D289CB@wanadoo.fr>
+Message-ID: <53DFCFCF.4010900@ninenines.eu>
+
+Well I don't have any idea then. Cowboy is tested with http and https, 
+both with and without compression enabled. There's never been any 
+difference of the kind, the only difference is timing related.
+
+On 08/04/2014 08:16 PM, Samir Sow wrote:
+> I can assure you it?s the only one :)
+>
+> Samir
+>
+> On 4 ao?t 2014, at 19:59, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>
+>> I'm saying it can't be the only difference.
+>>
+>> On 08/04/2014 07:50 PM, Samir Sow wrote:
+>>> I?m not sure i understand your question.
+>>>
+>>> I?ve only started a cowboy https server with a handler.
+>>> The http version was working fine.
+>>>
+>>> Sincerely
+>>>
+>>> Samir
+>>>
+>>> On 4 ao?t 2014, at 18:49, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>>
+>>>> Surely there's something else that you're not showing there. For some reason you got a list of segments in the error, and we haven't had that for a very long time. Do you have an onrequest hook or middleware that does weird things perhaps?
+>>>>
+>>>> On 08/04/2014 06:39 PM, Samir Sow wrote:
+>>>>> Hi,
+>>>>>
+>>>>> I?ve moved a working http server to https.
+>>>>> SSL handshaking is ok but i got the following Ranch error :
+>>>>>
+>>>>> [error] Ranch listener https_mta had connection process started with cowboy_protocol:start_link/4 at <0.601.0> exit with reason: {badarg,[{binary,match,[[<<"com">>,<<"oockit">>,<<"www">>],<<".">>],[]},{cowboy_router,split_host,2,[{file,"src/cowboy_router.erl"},{line,305}]},{cowboy_router,match,3,[{file,"src/cowboy_router.erl"},{line,240}]},{cowboy_router,execute,2,[{file,"src/cowboy_router.erl"},{line,169}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]}
+>>>>>
+>>>>> call is
+>>>>>
+>>>>> curl --cacert priv/cert/root.crt "https://www.oockit.com:7171/mtagw?
+>>>>>
+>>>>>
+>>>>> dispatch is
+>>>>>
+>>>>> [{'_', [
+>>>>>          {["/static/[...]"], cowboy_static, [{directory, {priv_dir, ?APP, [<<"static">>]}},
+>>>>>          {mimetypes, {fun mimetypes:path_to_mimes/2, default}}]},
+>>>>> 	{"/mtagw", hck_mta, []}
+>>>>>      ]}]).
+>>>>>
+>>>>>
+>>>>> Any clue ?
+>>>>>
+>>>>> Thanks
+>>>>>
+>>>>> sincerely
+>>>>>
+>>>>> Samir
+>>>>>
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu
+>>>>> https://lists.ninenines.eu/listinfo/extend
+>>>>>
+>>>>
+>>>> --
+>>>> Lo?c Hoguin
+>>>> http://ninenines.eu
+>>>
+>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samset at wanadoo.fr  Mon Aug  4 20:25:25 2014
+From: samset at wanadoo.fr (Samir Sow)
+Date: Mon, 4 Aug 2014 20:25:25 +0200
+Subject: [99s-extend] Fwd:  ranch dispatch error ver 1.0.0
+References: <CFF6583D-0F8F-4A6D-9376-A24EA6D289CB@wanadoo.fr>
+Message-ID: <F1A671F7-04DD-4294-A340-AB122406274F@wanadoo.fr>
+
+
+I found my mistake.
+
+I?ve a typo error - used a token instead of a function call in the dispatch object.
+I apologize for the disturbance.
+
+Thank you.
+
+Sincerely
+
+Samir
+
+Begin forwarded message:
+
+> From: Samir Sow <samset at wanadoo.fr>
+> Subject: Re: [99s-extend] ranch dispatch error ver 1.0.0
+> Date: 4 ao?t 2014 20:16:06 UTC+2
+> To: Lo?c Hoguin <essen at ninenines.eu>
+> Cc: extend at lists.ninenines.eu
+> 
+> I can assure you it?s the only one :)
+> 
+> Samir
+> 
+> On 4 ao?t 2014, at 19:59, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> 
+>> I'm saying it can't be the only difference.
+>> 
+>> On 08/04/2014 07:50 PM, Samir Sow wrote:
+>>> I?m not sure i understand your question.
+>>> 
+>>> I?ve only started a cowboy https server with a handler.
+>>> The http version was working fine.
+>>> 
+>>> Sincerely
+>>> 
+>>> Samir
+>>> 
+>>> On 4 ao?t 2014, at 18:49, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>>> 
+>>>> Surely there's something else that you're not showing there. For some reason you got a list of segments in the error, and we haven't had that for a very long time. Do you have an onrequest hook or middleware that does weird things perhaps?
+>>>> 
+>>>> On 08/04/2014 06:39 PM, Samir Sow wrote:
+>>>>> Hi,
+>>>>> 
+>>>>> I?ve moved a working http server to https.
+>>>>> SSL handshaking is ok but i got the following Ranch error :
+>>>>> 
+>>>>> [error] Ranch listener https_mta had connection process started with cowboy_protocol:start_link/4 at <0.601.0> exit with reason: {badarg,[{binary,match,[[<<"com">>,<<"oockit">>,<<"www">>],<<".">>],[]},{cowboy_router,split_host,2,[{file,"src/cowboy_router.erl"},{line,305}]},{cowboy_router,match,3,[{file,"src/cowboy_router.erl"},{line,240}]},{cowboy_router,execute,2,[{file,"src/cowboy_router.erl"},{line,169}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,435}]}]}
+>>>>> 
+>>>>> call is
+>>>>> 
+>>>>> curl --cacert priv/cert/root.crt "https://www.oockit.com:7171/mtagw?
+>>>>> 
+>>>>> 
+>>>>> dispatch is
+>>>>> 
+>>>>> [{'_', [
+>>>>>        {["/static/[...]"], cowboy_static, [{directory, {priv_dir, ?APP, [<<"static">>]}},
+>>>>>        {mimetypes, {fun mimetypes:path_to_mimes/2, default}}]},
+>>>>> 	{"/mtagw", hck_mta, []}
+>>>>>    ]}]).
+>>>>> 
+>>>>> 
+>>>>> Any clue ?
+>>>>> 
+>>>>> Thanks
+>>>>> 
+>>>>> sincerely
+>>>>> 
+>>>>> Samir
+>>>>> 
+>>>>> _______________________________________________
+>>>>> Extend mailing list
+>>>>> Extend at lists.ninenines.eu
+>>>>> https://lists.ninenines.eu/listinfo/extend
+>>>>> 
+>>>> 
+>>>> --
+>>>> Lo?c Hoguin
+>>>> http://ninenines.eu
+>>> 
+>> 
+>> -- 
+>> Lo?c Hoguin
+>> http://ninenines.eu
+> 
+
+
+From paulo.ferraz.oliveira at gmail.com  Tue Aug  5 12:58:10 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 5 Aug 2014 11:58:10 +0100
+Subject: [99s-extend] Broken links for REST flowcharts
+Message-ID: <CA+dV7cSRzu0Mnz-JqzBnp2JqjVB=Cx5XswuBU-7BT7nZi9=1tQ@mail.gmail.com>
+
+Hi.
+
+The image links are broken for the REST flowcharts' guide, part of cowboy.
+
+http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/rest_start.png
+(for example)
+should probably be
+http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_start.png
+according to the hierarchy here:
+https://github.com/ninenines/ninenines.github.io/tree/master/docs/en/cowboy/1.0/guide
+
+Thanks.
+
+- Paulo F. Oliveira
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140805/2c08b12c/attachment.html>
+
+From essen at ninenines.eu  Tue Aug  5 13:19:12 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 05 Aug 2014 13:19:12 +0200
+Subject: [99s-extend] Broken links for REST flowcharts
+In-Reply-To: <CA+dV7cSRzu0Mnz-JqzBnp2JqjVB=Cx5XswuBU-7BT7nZi9=1tQ@mail.gmail.com>
+References: <CA+dV7cSRzu0Mnz-JqzBnp2JqjVB=Cx5XswuBU-7BT7nZi9=1tQ@mail.gmail.com>
+Message-ID: <53E0BDB0.70401@ninenines.eu>
+
+Fixed, thanks.
+
+On 08/05/2014 12:58 PM, Paulo F. Oliveira wrote:
+> Hi.
+>
+> The image links are broken for the REST flowcharts' guide, part of cowboy.
+>
+> http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/rest_start.png
+> (for example)
+> should probably be
+> http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_start.png
+> according to the hierarchy here:
+> https://github.com/ninenines/ninenines.github.io/tree/master/docs/en/cowboy/1.0/guide
+>
+> Thanks.
+>
+> - Paulo F. Oliveira
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From essen at ninenines.eu  Tue Aug  5 14:43:47 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 05 Aug 2014 14:43:47 +0200
+Subject: [99s-extend] [ANN] Cowboy 1.0
+Message-ID: <53E0D183.1060206@ninenines.eu>
+
+Hello!
+
+Cowboy 1.0 has been released.
+
+Cowboy is a small and fast HTTP server for Erlang with support for 
+Webmachine-like REST, Websocket and more.
+
+   https://github.com/ninenines/cowboy
+
+Cowboy is the work of more than 80 people. I would like to congratulate 
+everyone for the great work done so far. Thank you!
+
+Please see the CHANGELOG for details on what's changed.
+
+   https://github.com/ninenines/cowboy/blob/master/CHANGELOG.md
+
+This release marks the beginning of the 1.0.x branch which will contain 
+backward compatible fixes. This branch will be maintained at least until 
+Cowboy 2.0 gets released (longer if sponsors request it). It is highly 
+recommended that you follow this branch if you were following master 
+before, as master will receive backward incompatible changes starting 
+tomorrow.
+
+Cowboy is now fully documented. It has a user guide, a function 
+reference manual, and a wealth of examples. You can also install man 
+pages as explained in the README of the project.
+
+   http://ninenines.eu/docs/en/cowboy/1.0/guide/
+   http://ninenines.eu/docs/en/cowboy/1.0/manual/
+   https://github.com/ninenines/cowboy/tree/master/examples
+
+Following a discussion on the Erlang mailing lists the Getting Started 
+chapter was reworked and greatly simplified, in parts due to the 
+improvements made to erlang.mk. Feedback is of course always welcome.
+
+   http://ninenines.eu/docs/en/cowboy/1.0/guide/getting_started/
+
+Starting tomorrow the master branch will receive backward incompatible 
+changes. Most of the planned changes are detailed in the ROADMAP. You 
+are welcome to suggest additional changes.
+
+   https://github.com/ninenines/cowboy/blob/master/ROADMAP.md
+
+Cowboy 2.0 is planned to be released at around the same time Erlang/OTP 
+18.0 comes out. There are no plans for a Cowboy 1.1 at this time, 
+although that may change in the coming months if there is interest in 
+new features.
+
+Ranch also got upgraded to 1.0, although there was no changes from the 
+previous release.
+
+   https://github.com/ninenines/ranch
+
+Thanks to everyone who made this project what it is today!
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From max.lapshin at gmail.com  Tue Aug  5 15:33:27 2014
+From: max.lapshin at gmail.com (Max Lapshin)
+Date: Tue, 5 Aug 2014 17:33:27 +0400
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 1.0
+In-Reply-To: <53E0D183.1060206@ninenines.eu>
+References: <53E0D183.1060206@ninenines.eu>
+Message-ID: <CAMxVRxAwOt8y83P7wSxhDiOVJe7OZn5AFqowRACBqCSCbf7Qhw@mail.gmail.com>
+
+Loic, it is very cool!
+
+Thanks.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140805/a3d520b7/attachment.html>
+
+From gumm at sigma-star.com  Tue Aug  5 17:56:25 2014
+From: gumm at sigma-star.com (Jesse Gumm)
+Date: Tue, 5 Aug 2014 10:56:25 -0500
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 1.0
+In-Reply-To: <53E0D183.1060206@ninenines.eu>
+References: <53E0D183.1060206@ninenines.eu>
+Message-ID: <CAPTXyXcOJic72bbd8VCANqGoJNRZ44-HOQgm=mwa-=jcUDnt4Q@mail.gmail.com>
+
+Congrats Loic!
+
+--
+Jesse Gumm
+Owner, Sigma Star Systems
+414.940.4866 || sigma-star.com || @jessegumm
+On Aug 5, 2014 7:43 AM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+> Hello!
+>
+> Cowboy 1.0 has been released.
+>
+> Cowboy is a small and fast HTTP server for Erlang with support for
+> Webmachine-like REST, Websocket and more.
+>
+>   https://github.com/ninenines/cowboy
+>
+> Cowboy is the work of more than 80 people. I would like to congratulate
+> everyone for the great work done so far. Thank you!
+>
+> Please see the CHANGELOG for details on what's changed.
+>
+>   https://github.com/ninenines/cowboy/blob/master/CHANGELOG.md
+>
+> This release marks the beginning of the 1.0.x branch which will contain
+> backward compatible fixes. This branch will be maintained at least until
+> Cowboy 2.0 gets released (longer if sponsors request it). It is highly
+> recommended that you follow this branch if you were following master
+> before, as master will receive backward incompatible changes starting
+> tomorrow.
+>
+> Cowboy is now fully documented. It has a user guide, a function reference
+> manual, and a wealth of examples. You can also install man pages as
+> explained in the README of the project.
+>
+>   http://ninenines.eu/docs/en/cowboy/1.0/guide/
+>   http://ninenines.eu/docs/en/cowboy/1.0/manual/
+>   https://github.com/ninenines/cowboy/tree/master/examples
+>
+> Following a discussion on the Erlang mailing lists the Getting Started
+> chapter was reworked and greatly simplified, in parts due to the
+> improvements made to erlang.mk. Feedback is of course always welcome.
+>
+>   http://ninenines.eu/docs/en/cowboy/1.0/guide/getting_started/
+>
+> Starting tomorrow the master branch will receive backward incompatible
+> changes. Most of the planned changes are detailed in the ROADMAP. You are
+> welcome to suggest additional changes.
+>
+>   https://github.com/ninenines/cowboy/blob/master/ROADMAP.md
+>
+> Cowboy 2.0 is planned to be released at around the same time Erlang/OTP
+> 18.0 comes out. There are no plans for a Cowboy 1.1 at this time, although
+> that may change in the coming months if there is interest in new features.
+>
+> Ranch also got upgraded to 1.0, although there was no changes from the
+> previous release.
+>
+>   https://github.com/ninenines/ranch
+>
+> Thanks to everyone who made this project what it is today!
+>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+> _______________________________________________
+> erlang-questions mailing list
+> erlang-questions at erlang.org
+> http://erlang.org/mailman/listinfo/erlang-questions
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140805/fb1bc75c/attachment.html>
+
+From lloyd at writersglen.com  Tue Aug  5 19:34:33 2014
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Tue, 5 Aug 2014 13:34:33 -0400 (EDT)
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 1.0
+In-Reply-To: <53E0D183.1060206@ninenines.eu>
+References: <53E0D183.1060206@ninenines.eu>
+Message-ID: <1407260073.80138967@apps.rackspace.com>
+
+Tip of the hat, Lo?c et. al.
+
+Outstanding and much appreciated work.
+
+Best to all,
+
+Lloyd
+
+-----Original Message-----
+From: "Lo?c Hoguin" <essen at ninenines.eu>
+Sent: Tuesday, August 5, 2014 8:43am
+To: "Erlang" <erlang-questions at erlang.org>, Extend at lists.ninenines.eu
+Subject: [erlang-questions] [ANN] Cowboy 1.0
+
+Hello!
+
+Cowboy 1.0 has been released.
+
+Cowboy is a small and fast HTTP server for Erlang with support for 
+Webmachine-like REST, Websocket and more.
+
+   https://github.com/ninenines/cowboy
+
+Cowboy is the work of more than 80 people. I would like to congratulate 
+everyone for the great work done so far. Thank you!
+
+Please see the CHANGELOG for details on what's changed.
+
+   https://github.com/ninenines/cowboy/blob/master/CHANGELOG.md
+
+This release marks the beginning of the 1.0.x branch which will contain 
+backward compatible fixes. This branch will be maintained at least until 
+Cowboy 2.0 gets released (longer if sponsors request it). It is highly 
+recommended that you follow this branch if you were following master 
+before, as master will receive backward incompatible changes starting 
+tomorrow.
+
+Cowboy is now fully documented. It has a user guide, a function 
+reference manual, and a wealth of examples. You can also install man 
+pages as explained in the README of the project.
+
+   http://ninenines.eu/docs/en/cowboy/1.0/guide/
+   http://ninenines.eu/docs/en/cowboy/1.0/manual/
+   https://github.com/ninenines/cowboy/tree/master/examples
+
+Following a discussion on the Erlang mailing lists the Getting Started 
+chapter was reworked and greatly simplified, in parts due to the 
+improvements made to erlang.mk. Feedback is of course always welcome.
+
+   http://ninenines.eu/docs/en/cowboy/1.0/guide/getting_started/
+
+Starting tomorrow the master branch will receive backward incompatible 
+changes. Most of the planned changes are detailed in the ROADMAP. You 
+are welcome to suggest additional changes.
+
+   https://github.com/ninenines/cowboy/blob/master/ROADMAP.md
+
+Cowboy 2.0 is planned to be released at around the same time Erlang/OTP 
+18.0 comes out. There are no plans for a Cowboy 1.1 at this time, 
+although that may change in the coming months if there is interest in 
+new features.
+
+Ranch also got upgraded to 1.0, although there was no changes from the 
+previous release.
+
+   https://github.com/ninenines/ranch
+
+Thanks to everyone who made this project what it is today!
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+_______________________________________________
+erlang-questions mailing list
+erlang-questions at erlang.org
+http://erlang.org/mailman/listinfo/erlang-questions
+
+
+
+From paulo.ferraz.oliveira at gmail.com  Tue Aug  5 22:33:17 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 5 Aug 2014 21:33:17 +0100
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 1.0
+In-Reply-To: <CAMuJbHgMSNLnCuf5x2+Nx1zUFhHy3=0rTGtLNbLJ=FfDU=tjfQ@mail.gmail.com>
+References: <53E0D183.1060206@ninenines.eu>
+ <CAMxVRxAwOt8y83P7wSxhDiOVJe7OZn5AFqowRACBqCSCbf7Qhw@mail.gmail.com>
+ <CAMuJbHgMSNLnCuf5x2+Nx1zUFhHy3=0rTGtLNbLJ=FfDU=tjfQ@mail.gmail.com>
+Message-ID: <CA+dV7cRYs3nfweJjUYLh-cCuuxmFbngoFUdDjoYgYwkky3LFNQ@mail.gmail.com>
+
+Hi, Federico.
+
+Check this out for the "why" regarding your question:
+https://github.com/ninenines/cowboy/issues/715
+
+It's one of the reasons (I haven't detected others yet) stopping me from
+moving to 1.0, unfortunately (I have some projects depending on these
+status codes already), but as soon as I have some time and look at all the
+_major_ differences between 0.9.0 and 1.0 I think I'll make the move. For
+the time being, I have found no issues with the REST part of cowboy (the
+one I use).
+
+Thank you, Lo?c et all for the effort and for keeping it open source.
+
+Regards.
+
+- Paulo F. Oliveira
+
+
+On 5 August 2014 15:18, Federico Carrone <federico.carrone at gmail.com> wrote:
+
+> Congratulations Loic. I really love cowboy.
+>
+> I got only one question: Why did you change the reply with 400 instead of
+> 422 in cowboy_rest for unprocessable entities?
+>
+> Regards,
+> Federico.
+>
+>
+>
+> On Tue, Aug 5, 2014 at 10:33 AM, Max Lapshin <max.lapshin at gmail.com>
+> wrote:
+>
+>> Loic, it is very cool!
+>>
+>> Thanks.
+>>
+>> _______________________________________________
+>> erlang-questions mailing list
+>> erlang-questions at erlang.org
+>> http://erlang.org/mailman/listinfo/erlang-questions
+>>
+>>
+>
+>
+> --
+> http://federicocarrone.com/
+>
+> _______________________________________________
+> erlang-questions mailing list
+> erlang-questions at erlang.org
+> http://erlang.org/mailman/listinfo/erlang-questions
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140805/f3705f7b/attachment.html>
+
+From essen at ninenines.eu  Tue Aug  5 22:55:34 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 05 Aug 2014 22:55:34 +0200
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 1.0
+In-Reply-To: <CA+dV7cRYs3nfweJjUYLh-cCuuxmFbngoFUdDjoYgYwkky3LFNQ@mail.gmail.com>
+References: <53E0D183.1060206@ninenines.eu>
+ <CAMxVRxAwOt8y83P7wSxhDiOVJe7OZn5AFqowRACBqCSCbf7Qhw@mail.gmail.com>
+ <CAMuJbHgMSNLnCuf5x2+Nx1zUFhHy3=0rTGtLNbLJ=FfDU=tjfQ@mail.gmail.com>
+ <CA+dV7cRYs3nfweJjUYLh-cCuuxmFbngoFUdDjoYgYwkky3LFNQ@mail.gmail.com>
+Message-ID: <53E144C6.7040701@ninenines.eu>
+
+You can easily send 422 and return halt instead of returning false if 
+you need to keep that, it'll just be 2 lines instead of 1. :)
+
+On 08/05/2014 10:33 PM, Paulo F. Oliveira wrote:
+> Hi, Federico.
+>
+> Check this out for the "why" regarding your question:
+> https://github.com/ninenines/cowboy/issues/715
+>
+> It's one of the reasons (I haven't detected others yet) stopping me from
+> moving to 1.0, unfortunately (I have some projects depending on these
+> status codes already), but as soon as I have some time and look at all
+> the _major_ differences between 0.9.0 and 1.0 I think I'll make the
+> move. For the time being, I have found no issues with the REST part of
+> cowboy (the one I use).
+>
+> Thank you, Lo?c et all for the effort and for keeping it open source.
+>
+> Regards.
+>
+> - Paulo F. Oliveira
+>
+>
+> On 5 August 2014 15:18, Federico Carrone <federico.carrone at gmail.com
+> <mailto:federico.carrone at gmail.com>> wrote:
+>
+>     Congratulations Loic. I really love cowboy.
+>
+>     I got only one question: Why did you change the reply with 400
+>     instead of 422 in cowboy_rest for unprocessable entities?
+>
+>     Regards,
+>     Federico.
+>
+>
+>
+>     On Tue, Aug 5, 2014 at 10:33 AM, Max Lapshin <max.lapshin at gmail.com
+>     <mailto:max.lapshin at gmail.com>> wrote:
+>
+>         Loic, it is very cool!
+>
+>         Thanks.
+>
+>         _______________________________________________
+>         erlang-questions mailing list
+>         erlang-questions at erlang.org <mailto:erlang-questions at erlang.org>
+>         http://erlang.org/mailman/listinfo/erlang-questions
+>
+>
+>
+>
+>     --
+>     http://federicocarrone.com/
+>
+>     _______________________________________________
+>     erlang-questions mailing list
+>     erlang-questions at erlang.org <mailto:erlang-questions at erlang.org>
+>     http://erlang.org/mailman/listinfo/erlang-questions
+>
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From paulo.ferraz.oliveira at gmail.com  Tue Aug  5 23:01:38 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 5 Aug 2014 22:01:38 +0100
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 1.0
+In-Reply-To: <53E144C6.7040701@ninenines.eu>
+References: <53E0D183.1060206@ninenines.eu>
+ <CAMxVRxAwOt8y83P7wSxhDiOVJe7OZn5AFqowRACBqCSCbf7Qhw@mail.gmail.com>
+ <CAMuJbHgMSNLnCuf5x2+Nx1zUFhHy3=0rTGtLNbLJ=FfDU=tjfQ@mail.gmail.com>
+ <CA+dV7cRYs3nfweJjUYLh-cCuuxmFbngoFUdDjoYgYwkky3LFNQ@mail.gmail.com>
+ <53E144C6.7040701@ninenines.eu>
+Message-ID: <CA+dV7cRNHiuZcJzc+x3=eVuEsty3-8pE_2XqBOpVdg4MSch_AA@mail.gmail.com>
+
+Yes, it should be _that_ easy for the 400 > 422 :D, but is that the only
+important difference I should be aware of, then? I haven't written any real
+tests, for the time being, to guarantee backward compatibility for
+dependants...
+
+In any case, I'm thinking about updating the dependencies in the future (I
+own one of them and the other one is an internal project, for the time
+being).
+
+Thanks for the tip.
+
+Cheers.
+
+- Paulo F. Oliveira
+
+
+On 5 August 2014 21:55, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> You can easily send 422 and return halt instead of returning false if you
+> need to keep that, it'll just be 2 lines instead of 1. :)
+>
+> On 08/05/2014 10:33 PM, Paulo F. Oliveira wrote:
+>
+>> Hi, Federico.
+>>
+>> Check this out for the "why" regarding your question:
+>> https://github.com/ninenines/cowboy/issues/715
+>>
+>> It's one of the reasons (I haven't detected others yet) stopping me from
+>> moving to 1.0, unfortunately (I have some projects depending on these
+>> status codes already), but as soon as I have some time and look at all
+>> the _major_ differences between 0.9.0 and 1.0 I think I'll make the
+>> move. For the time being, I have found no issues with the REST part of
+>> cowboy (the one I use).
+>>
+>> Thank you, Lo?c et all for the effort and for keeping it open source.
+>>
+>> Regards.
+>>
+>> - Paulo F. Oliveira
+>>
+>>
+>> On 5 August 2014 15:18, Federico Carrone <federico.carrone at gmail.com
+>> <mailto:federico.carrone at gmail.com>> wrote:
+>>
+>>     Congratulations Loic. I really love cowboy.
+>>
+>>     I got only one question: Why did you change the reply with 400
+>>     instead of 422 in cowboy_rest for unprocessable entities?
+>>
+>>     Regards,
+>>     Federico.
+>>
+>>
+>>
+>>     On Tue, Aug 5, 2014 at 10:33 AM, Max Lapshin <max.lapshin at gmail.com
+>>     <mailto:max.lapshin at gmail.com>> wrote:
+>>
+>>         Loic, it is very cool!
+>>
+>>         Thanks.
+>>
+>>         _______________________________________________
+>>         erlang-questions mailing list
+>>         erlang-questions at erlang.org <mailto:erlang-questions at erlang.org>
+>>         http://erlang.org/mailman/listinfo/erlang-questions
+>>
+>>
+>>
+>>
+>>     --
+>>     http://federicocarrone.com/
+>>
+>>     _______________________________________________
+>>     erlang-questions mailing list
+>>     erlang-questions at erlang.org <mailto:erlang-questions at erlang.org>
+>>     http://erlang.org/mailman/listinfo/erlang-questions
+>>
+>>
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140805/34528764/attachment.html>
+
+From essen at ninenines.eu  Tue Aug  5 23:06:19 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 05 Aug 2014 23:06:19 +0200
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 1.0
+In-Reply-To: <CA+dV7cRNHiuZcJzc+x3=eVuEsty3-8pE_2XqBOpVdg4MSch_AA@mail.gmail.com>
+References: <53E0D183.1060206@ninenines.eu>	<CAMxVRxAwOt8y83P7wSxhDiOVJe7OZn5AFqowRACBqCSCbf7Qhw@mail.gmail.com>	<CAMuJbHgMSNLnCuf5x2+Nx1zUFhHy3=0rTGtLNbLJ=FfDU=tjfQ@mail.gmail.com>	<CA+dV7cRYs3nfweJjUYLh-cCuuxmFbngoFUdDjoYgYwkky3LFNQ@mail.gmail.com>	<53E144C6.7040701@ninenines.eu>
+ <CA+dV7cRNHiuZcJzc+x3=eVuEsty3-8pE_2XqBOpVdg4MSch_AA@mail.gmail.com>
+Message-ID: <53E1474B.1080407@ninenines.eu>
+
+If you were already at the previous version (0.10) then that plus a 400 
+instead of 500 when header parsing fails are pretty much the only changes.
+
+There's some more if you were at 0.9, mostly the body reading interface 
+changed to prevent annoying timeout issues.
+
+On 08/05/2014 11:01 PM, Paulo F. Oliveira wrote:
+> Yes, it should be _that_ easy for the 400 > 422 :D, but is that the only
+> important difference I should be aware of, then? I haven't written any
+> real tests, for the time being, to guarantee backward compatibility for
+> dependants...
+>
+> In any case, I'm thinking about updating the dependencies in the future
+> (I own one of them and the other one is an internal project, for the
+> time being).
+>
+> Thanks for the tip.
+>
+> Cheers.
+>
+> - Paulo F. Oliveira
+>
+>
+> On 5 August 2014 21:55, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     You can easily send 422 and return halt instead of returning false
+>     if you need to keep that, it'll just be 2 lines instead of 1. :)
+>
+>     On 08/05/2014 10:33 PM, Paulo F. Oliveira wrote:
+>
+>         Hi, Federico.
+>
+>         Check this out for the "why" regarding your question:
+>         https://github.com/ninenines/__cowboy/issues/715
+>         <https://github.com/ninenines/cowboy/issues/715>
+>
+>         It's one of the reasons (I haven't detected others yet) stopping
+>         me from
+>         moving to 1.0, unfortunately (I have some projects depending on
+>         these
+>         status codes already), but as soon as I have some time and look
+>         at all
+>         the _major_ differences between 0.9.0 and 1.0 I think I'll make the
+>         move. For the time being, I have found no issues with the REST
+>         part of
+>         cowboy (the one I use).
+>
+>         Thank you, Lo?c et all for the effort and for keeping it open
+>         source.
+>
+>         Regards.
+>
+>         - Paulo F. Oliveira
+>
+>
+>         On 5 August 2014 15:18, Federico Carrone
+>         <federico.carrone at gmail.com <mailto:federico.carrone at gmail.com>
+>         <mailto:federico.carrone at __gmail.com
+>         <mailto:federico.carrone at gmail.com>>> wrote:
+>
+>              Congratulations Loic. I really love cowboy.
+>
+>              I got only one question: Why did you change the reply with 400
+>              instead of 422 in cowboy_rest for unprocessable entities?
+>
+>              Regards,
+>              Federico.
+>
+>
+>
+>              On Tue, Aug 5, 2014 at 10:33 AM, Max Lapshin
+>         <max.lapshin at gmail.com <mailto:max.lapshin at gmail.com>
+>              <mailto:max.lapshin at gmail.com
+>         <mailto:max.lapshin at gmail.com>>__> wrote:
+>
+>                  Loic, it is very cool!
+>
+>                  Thanks.
+>
+>                  _________________________________________________
+>                  erlang-questions mailing list
+>         erlang-questions at erlang.org <mailto:erlang-questions at erlang.org>
+>         <mailto:erlang-questions at __erlang.org
+>         <mailto:erlang-questions at erlang.org>>
+>         http://erlang.org/mailman/__listinfo/erlang-questions
+>         <http://erlang.org/mailman/listinfo/erlang-questions>
+>
+>
+>
+>
+>              --
+>         http://federicocarrone.com/
+>
+>              _________________________________________________
+>              erlang-questions mailing list
+>         erlang-questions at erlang.org <mailto:erlang-questions at erlang.org>
+>         <mailto:erlang-questions at __erlang.org
+>         <mailto:erlang-questions at erlang.org>>
+>         http://erlang.org/mailman/__listinfo/erlang-questions
+>         <http://erlang.org/mailman/listinfo/erlang-questions>
+>
+>
+>
+>
+>         _________________________________________________
+>         Extend mailing list
+>         Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>         https://lists.ninenines.eu/__listinfo/extend
+>         <https://lists.ninenines.eu/listinfo/extend>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     http://ninenines.eu
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From michael.wittig at tullius-walden.com  Wed Aug 13 11:17:51 2014
+From: michael.wittig at tullius-walden.com (Michael Wittig)
+Date: Wed, 13 Aug 2014 11:17:51 +0200
+Subject: [99s-extend] eunit suppoort in erlang.mk?
+Message-ID: <CAAgJJDuQ4RLXMU7YB3CK6ZvE7RcOyGO1-Xwa4736r1HYyhDOmQ@mail.gmail.com>
+
+hi,
+
+is it possible to run eunit tests when executing make tests?
+I have my tests directly in the modules (e.g. xyz_server)
+
+Regards,
+
+Michael
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140813/7903a29a/attachment.html>
+
+From chaehb at gmail.com  Thu Aug 14 03:20:05 2014
+From: chaehb at gmail.com (chaehb)
+Date: Thu, 14 Aug 2014 10:20:05 +0900
+Subject: [99s-extend] couldn't quit in Erlang 17.1
+In-Reply-To: <53D4C59E.2010909@ninenines.eu>
+References: <5E6EEC48-13CF-48A9-BD48-DC339D93B75D@gmail.com>
+ <53D4C59E.2010909@ninenines.eu>
+Message-ID: <159B6EFE-5869-4503-ADD7-5547D8A0A6B2@gmail.com>
+
+
+On 2014. 7. 27., at ?? 6:25, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Does it happen with ssl_hello_world?
+> 
+> On 07/26/2014 09:06 AM, chaehb wrote:
+>> Hi, everybody.
+>> 
+>> After Erlang updated to 17.1,
+>> when I run q(). command on erlang console, cowboy couldn't quitted but print series of messages..
+>> 
+>> (after ok signal printed)
+>> 
+>> ?...
+>> =ERROR REPORT==== 26-Jul-2014::15:23:33 ===
+>> Error in process <0.334.0> on node ?...my node name...' with exit value: {{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,"src/ranch_acceptor.erl"},{line,28}]}]}
+>> ?.
+>> 
+>> Before erlang updated (in 17.0), application could be normally quitted exactly same codes and environments.
+>> 
+>> This is only appeared when I only use ssl(https).
+>> But when use only http with same dispatch rules, cowboy normally quitted.
+>> 
+
+I?ve try to do more tests with ssl_hello_world in cowboy(v1.0)  and various Erlang/OTP versions.
+
+If ErlangOTP < 17.0, http/https works fine.
+If ErlangOTP >= 17.1(17.1.x,17.2 in github), http works fine but with https the same errors appeared.
+
+*****
+When I edited ranch_accepter.erl > line 40 
+	{error, Reason} when Reason =/= closed -> 
+	to
+	{error, Reason} ->
+,
+https work and app was normally quitted.
+
+When I printed, Reason == closed.
+
+
+From lists at tuli.pe  Thu Aug 14 17:44:25 2014
+From: lists at tuli.pe (Camille Troillard)
+Date: Thu, 14 Aug 2014 17:44:25 +0200
+Subject: [99s-extend] cowboy_rest and response headers
+Message-ID: <16D8B25C-9FED-4688-8710-8B0811A8A4F6@tuli.pe>
+
+Hello,
+
+I would like to set a Content-Range header in the response of a HEAD request.
+Can I do that within the context of a cowboy_rest handler?
+Ideally, I wish to let cowboy_rest reply and just specify this additional header.
+
+
+Best,
+Camille
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140814/64f862ef/attachment.html>
+
+From essen at ninenines.eu  Thu Aug 14 17:50:09 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 14 Aug 2014 17:50:09 +0200
+Subject: [99s-extend] cowboy_rest and response headers
+In-Reply-To: <16D8B25C-9FED-4688-8710-8B0811A8A4F6@tuli.pe>
+References: <16D8B25C-9FED-4688-8710-8B0811A8A4F6@tuli.pe>
+Message-ID: <53ECDAB1.8060504@ninenines.eu>
+
+Use cowboy_req:set_resp_header and return the Req this function gives you.
+
+On 08/14/2014 05:44 PM, Camille Troillard wrote:
+> Hello,
+>
+> I would like to set a Content-Range header in the response of a HEAD
+> request.
+> Can I do that within the context of a cowboy_rest handler?
+> Ideally, I wish to let cowboy_rest reply and just specify this
+> additional header.
+>
+>
+> Best,
+> Camille
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From stephane at wirtel.be  Sun Aug 24 01:58:12 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Sun, 24 Aug 2014 01:58:12 +0200
+Subject: [99s-extend] How to use the PUT verb with Cowboy_Rest ?
+Message-ID: <273F5C1E-4CAF-4BD6-8229-64EA2788E970@wirtel.be>
+
+Hi all,
+
+1. I would like to use the cowboy_rest protocol with cowboy 1.0 but I 
+have a small crash.
+
+Here is my code:
+
+https://www.friendpaste.com/7O3X4fG4u31gBg9MgW5xg4
+
+Could you tell me if I correctly use cowboy_rest for the PUT verb? I 
+have seen is_conflict/2, but I don't know how to use it.
+
+2. I would like to change the response code, but I get the error. Is it 
+possible?
+
+Thank you.
+
+Regards,
+
+Stephane
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From daniel.goertzen at gmail.com  Sun Aug 24 02:16:02 2014
+From: daniel.goertzen at gmail.com (Daniel Goertzen)
+Date: Sat, 23 Aug 2014 19:16:02 -0500
+Subject: [99s-extend] How to use the PUT verb with Cowboy_Rest ?
+In-Reply-To: <273F5C1E-4CAF-4BD6-8229-64EA2788E970@wirtel.be>
+References: <273F5C1E-4CAF-4BD6-8229-64EA2788E970@wirtel.be>
+Message-ID: <CAJCf5RxAZR2jx3Bf-XmYMPYs-i4rk8-Ba4xYqMWv=AjM3P33SQ@mail.gmail.com>
+
+You should implement the resource_exists() callback; this will let the rest
+module pick a 200 vs 201.  If the db name was incorrect, I think you are
+just supposed to return false from the put callback.  I can't remember the
+http code for that case.
+
+Regards,
+Dan.
+
+
+On Sat, Aug 23, 2014 at 6:58 PM, St?phane Wirtel <stephane at wirtel.be> wrote:
+
+> Hi all,
+>
+> 1. I would like to use the cowboy_rest protocol with cowboy 1.0 but I have
+> a small crash.
+>
+> Here is my code:
+>
+> https://www.friendpaste.com/7O3X4fG4u31gBg9MgW5xg4
+>
+> Could you tell me if I correctly use cowboy_rest for the PUT verb? I have
+> seen is_conflict/2, but I don't know how to use it.
+>
+> 2. I would like to change the response code, but I get the error. Is it
+> possible?
+>
+> Thank you.
+>
+> Regards,
+>
+> Stephane
+>
+> --
+> St?phane Wirtel - http://wirtel.be - @matrixise
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140823/51e1d345/attachment.html>
+
+From stephane at wirtel.be  Sun Aug 24 02:22:22 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Sun, 24 Aug 2014 02:22:22 +0200
+Subject: [99s-extend] How to use the PUT verb with Cowboy_Rest ?
+In-Reply-To: <CAJCf5RxAZR2jx3Bf-XmYMPYs-i4rk8-Ba4xYqMWv=AjM3P33SQ@mail.gmail.com>
+References: <273F5C1E-4CAF-4BD6-8229-64EA2788E970@wirtel.be>
+ <CAJCf5RxAZR2jx3Bf-XmYMPYs-i4rk8-Ba4xYqMWv=AjM3P33SQ@mail.gmail.com>
+Message-ID: <5C66851E-7B69-426A-9444-51C81E8EBE59@wirtel.be>
+
+resource_exists is used by POST
+is_conflict is used by PUT (from the code)
+but in the case where my database already exists, I need to return 412 
+and not 409.
+
+and I know I don't respect the default value returned by Cowboy_rest.
+
+On 24 Aug 2014, at 2:16, Daniel Goertzen wrote:
+
+> You should implement the resource_exists() callback; this will let the 
+> rest
+> module pick a 200 vs 201.  If the db name was incorrect, I think you 
+> are
+> just supposed to return false from the put callback.  I can't remember 
+> the
+> http code for that case.
+>
+> Regards,
+> Dan.
+>
+>
+> On Sat, Aug 23, 2014 at 6:58 PM, St?phane Wirtel <stephane at wirtel.be> 
+> wrote:
+>
+>> Hi all,
+>>
+>> 1. I would like to use the cowboy_rest protocol with cowboy 1.0 but I 
+>> have
+>> a small crash.
+>>
+>> Here is my code:
+>>
+>> https://www.friendpaste.com/7O3X4fG4u31gBg9MgW5xg4
+>>
+>> Could you tell me if I correctly use cowboy_rest for the PUT verb? I 
+>> have
+>> seen is_conflict/2, but I don't know how to use it.
+>>
+>> 2. I would like to change the response code, but I get the error. Is 
+>> it
+>> possible?
+>>
+>> Thank you.
+>>
+>> Regards,
+>>
+>> Stephane
+>>
+>> --
+>> St?phane Wirtel - http://wirtel.be - @matrixise
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From edgurgel at gmail.com  Sun Aug 24 02:25:54 2014
+From: edgurgel at gmail.com (Eduardo Gurgel)
+Date: Sun, 24 Aug 2014 12:25:54 +1200
+Subject: [99s-extend] How to use the PUT verb with Cowboy_Rest ?
+In-Reply-To: <5C66851E-7B69-426A-9444-51C81E8EBE59@wirtel.be>
+References: <273F5C1E-4CAF-4BD6-8229-64EA2788E970@wirtel.be>
+ <CAJCf5RxAZR2jx3Bf-XmYMPYs-i4rk8-Ba4xYqMWv=AjM3P33SQ@mail.gmail.com>
+ <5C66851E-7B69-426A-9444-51C81E8EBE59@wirtel.be>
+Message-ID: <CAKAMJXhPm0vZdTrhW3Zg=zyowQzc0AczhptyTAVyX404pvc3XA@mail.gmail.com>
+
+I think you can always halt the processing and do the reply by yourself:
+
+{ok, Req2} = cowboy_req:reply(412, Req),
+{halt, Req2, State}.
+
+
+On Sun, Aug 24, 2014 at 12:22 PM, St?phane Wirtel <stephane at wirtel.be>
+wrote:
+
+> resource_exists is used by POST
+> is_conflict is used by PUT (from the code)
+> but in the case where my database already exists, I need to return 412 and
+> not 409.
+>
+> and I know I don't respect the default value returned by Cowboy_rest.
+>
+>
+> On 24 Aug 2014, at 2:16, Daniel Goertzen wrote:
+>
+>  You should implement the resource_exists() callback; this will let the
+>> rest
+>> module pick a 200 vs 201.  If the db name was incorrect, I think you are
+>> just supposed to return false from the put callback.  I can't remember the
+>> http code for that case.
+>>
+>> Regards,
+>> Dan.
+>>
+>>
+>> On Sat, Aug 23, 2014 at 6:58 PM, St?phane Wirtel <stephane at wirtel.be>
+>> wrote:
+>>
+>>  Hi all,
+>>>
+>>> 1. I would like to use the cowboy_rest protocol with cowboy 1.0 but I
+>>> have
+>>> a small crash.
+>>>
+>>> Here is my code:
+>>>
+>>> https://www.friendpaste.com/7O3X4fG4u31gBg9MgW5xg4
+>>>
+>>> Could you tell me if I correctly use cowboy_rest for the PUT verb? I have
+>>> seen is_conflict/2, but I don't know how to use it.
+>>>
+>>> 2. I would like to change the response code, but I get the error. Is it
+>>> possible?
+>>>
+>>> Thank you.
+>>>
+>>> Regards,
+>>>
+>>> Stephane
+>>>
+>>> --
+>>> St?phane Wirtel - http://wirtel.be - @matrixise
+>>> _______________________________________________
+>>> Extend mailing list
+>>> Extend at lists.ninenines.eu
+>>> https://lists.ninenines.eu/listinfo/extend
+>>>
+>>>
+>
+> --
+> St?phane Wirtel - http://wirtel.be - @matrixise
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+
+
+-- 
+Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140824/89d3a7f6/attachment.html>
+
+From stephane at wirtel.be  Sun Aug 24 02:52:58 2014
+From: stephane at wirtel.be (Stephane Wirtel)
+Date: Sun, 24 Aug 2014 02:52:58 +0200
+Subject: [99s-extend] How to use the PUT verb with Cowboy_Rest ?
+In-Reply-To: <CAKAMJXhPm0vZdTrhW3Zg=zyowQzc0AczhptyTAVyX404pvc3XA@mail.gmail.com>
+References: <273F5C1E-4CAF-4BD6-8229-64EA2788E970@wirtel.be>
+ <CAJCf5RxAZR2jx3Bf-XmYMPYs-i4rk8-Ba4xYqMWv=AjM3P33SQ@mail.gmail.com>
+ <5C66851E-7B69-426A-9444-51C81E8EBE59@wirtel.be>
+ <CAKAMJXhPm0vZdTrhW3Zg=zyowQzc0AczhptyTAVyX404pvc3XA@mail.gmail.com>
+Message-ID: <864BDA07-F0F6-43A3-8D6C-12056DFE6C5E@wirtel.be>
+
+Ok I will try asap, thanks
+
+> On 24 ao?t 2014, at 02:25 AM, Eduardo Gurgel <edgurgel at gmail.com> wrote:
+> 
+> I think you can always halt the processing and do the reply by yourself:
+> 
+> {ok, Req2} = cowboy_req:reply(412, Req),
+> {halt, Req2, State}.
+> 
+> 
+>> On Sun, Aug 24, 2014 at 12:22 PM, St?phane Wirtel <stephane at wirtel.be> wrote:
+>> resource_exists is used by POST
+>> is_conflict is used by PUT (from the code)
+>> but in the case where my database already exists, I need to return 412 and not 409.
+>> 
+>> and I know I don't respect the default value returned by Cowboy_rest.
+>> 
+>> 
+>> On 24 Aug 2014, at 2:16, Daniel Goertzen wrote:
+>> 
+>>> You should implement the resource_exists() callback; this will let the rest
+>>> module pick a 200 vs 201.  If the db name was incorrect, I think you are
+>>> just supposed to return false from the put callback.  I can't remember the
+>>> http code for that case.
+>>> 
+>>> Regards,
+>>> Dan.
+>>> 
+>>> 
+>>> On Sat, Aug 23, 2014 at 6:58 PM, St?phane Wirtel <stephane at wirtel.be> wrote:
+>>> 
+>>>> Hi all,
+>>>> 
+>>>> 1. I would like to use the cowboy_rest protocol with cowboy 1.0 but I have
+>>>> a small crash.
+>>>> 
+>>>> Here is my code:
+>>>> 
+>>>> https://www.friendpaste.com/7O3X4fG4u31gBg9MgW5xg4
+>>>> 
+>>>> Could you tell me if I correctly use cowboy_rest for the PUT verb? I have
+>>>> seen is_conflict/2, but I don't know how to use it.
+>>>> 
+>>>> 2. I would like to change the response code, but I get the error. Is it
+>>>> possible?
+>>>> 
+>>>> Thank you.
+>>>> 
+>>>> Regards,
+>>>> 
+>>>> Stephane
+>>>> 
+>>>> --
+>>>> St?phane Wirtel - http://wirtel.be - @matrixise
+>>>> _______________________________________________
+>>>> Extend mailing list
+>>>> Extend at lists.ninenines.eu
+>>>> https://lists.ninenines.eu/listinfo/extend
+>> 
+>> 
+>> --
+>> St?phane Wirtel - http://wirtel.be - @matrixise
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+> 
+> 
+> 
+> -- 
+> Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140824/f35e1e51/attachment.html>
+
+From stephane at wirtel.be  Sun Aug 24 11:54:58 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Sun, 24 Aug 2014 11:54:58 +0200
+Subject: [99s-extend] Full example of cowboy_rest?
+Message-ID: <E2ADBA0D-9198-4933-A50E-0675C1CD4FFF@wirtel.be>
+
+Hi all,
+
+Do you have a concrete example of cowboy_rest ? with POST, GET, HEAD, 
+PUT and DELETE ?
+
+POST will use resource_exists and allow_missing_post
+PUT will use is_conflict
+DELETE delete_resource, etc...
+
+Currently, I started with the example with put_json and get_json and in 
+the functions, I fetch the Method and I use the pattern matching with 
+the Method, but I think it's not the right solution.
+
+What are the best practices?
+
+The examples in the repository of cowboy don't cover all the 
+possibilities of a simple rest api with these verbs.
+
+Thanks in advance,
+
+Stephane
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From paulo.ferraz.oliveira at gmail.com  Tue Aug 26 01:11:44 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 26 Aug 2014 00:11:44 +0100
+Subject: [99s-extend] Full example of cowboy_rest?
+In-Reply-To: <E2ADBA0D-9198-4933-A50E-0675C1CD4FFF@wirtel.be>
+References: <E2ADBA0D-9198-4933-A50E-0675C1CD4FFF@wirtel.be>
+Message-ID: <CA+dV7cQXP3wEq5bn=3qWQ2EKuR39WZsRHCS+4Q1wgvLgDucjng@mail.gmail.com>
+
+Hello, St?phane.
+
+On 24 August 2014 10:54, St?phane Wirtel <stephane at wirtel.be> wrote:
+>
+> Hi all,
+>
+> Do you have a concrete example of cowboy_rest ? with POST, GET, HEAD, PUT and DELETE ?
+
+AFAIK, from the official examples, the correct answer is "no", there
+is no "complete" example (does it even make sense to have one?).
+
+On the other hand, I've been using Cowboy for a couple of months now,
+and find these docs (REST flowcharts -
+http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/) to be
+very useful, and they might also help you. You should find the time to
+read the complete REST guide/manual as a lot of useful information can
+be found there and a very nice effort was put into not wasting words
+and going straight to the point.
+
+...
+
+> What are the best practices?
+
+For what specifically?
+
+> The examples in the repository of cowboy don't cover all the possibilities of a simple rest api with these verbs.
+
+That is a fact. I, for one, tend to have a _template_ source code file
+from where I get the functions that I need (only not to have to write
+2/3 lines of code every time), and that I "chain" looking at the
+flowcharts. [I also have a lib for JSON parsing and validating, query
+string validation, etc...] This might not always be very easy (to
+"chain" it all together, but it shouldn't be that hard either"), but
+my approach is usually "OK, so I want a route to have GET, PUT and
+DELETE... what are the related methods that I'll most probably
+require? resource_exists (serves all methods), is_conflict (serves
+PUT), delete_resource (serves DELETE), delete_completed (serves
+DELETE)" and then I think about replying with a body or not (in the
+case of GET there will almost always be a body, in the case of PUT
+your method call might result in a 204 and in the case of DELETE there
+may or not be a body). I then code the methods, test the API, checking
+that the codes I get make sense (404, 200, 409, 204, 202, ...
+depending on the conditions I want set) and then slightly document
+this for the users of the API (if the API is complicated and requires
+a lot of documentation there might be something wrong with it). For
+documentation purposes you can either go with a "[VERB] route
+accepts...?..., serves...?..., and the result codes are...?..." simple
+doc or something more elaborate like
+https://helloreverb.com/developers/swagger.
+
+Hope it helps.
+
+- Paulo F. Oliveira
+
+>
+> Thanks in advance,
+>
+> Stephane
+>
+> --
+> St?phane Wirtel - http://wirtel.be - @matrixise
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+From stephane at wirtel.be  Tue Aug 26 23:59:50 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Tue, 26 Aug 2014 23:59:50 +0200
+Subject: [99s-extend] cowboy_rest and delete_completed and response
+Message-ID: <1E843973-E0BD-41FA-AC69-53BEECAD5489@wirtel.be>
+
+Hi all,
+
+I work with two content-types (json, msgpack).
+
+In the DELETE verb, I need to return an object and in this case, I work 
+on delete_resource/2 and delete_completed/2.
+The problem is, how can I return a body in function of the content-type? 
+because after delete_completed, there is a call to the 
+cowboy_rest:has_resp_body function and I need to set the body of the 
+response.
+
+delete_completed(Req, State) ->
+	Body = Json or MsgPack ?  <-- Which content ?
+
+	Req2 = cowboy_req:set_resp_body(Body, Req),
+	{true, Req2, State}.
+
+Ok, but in this case, what's the reason of content_types_provided/2 and 
+content_types_accepted/2 ?
+
+Thank you,
+
+Stephane
+
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From essen at ninenines.eu  Wed Aug 27 00:03:45 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 27 Aug 2014 01:03:45 +0300
+Subject: [99s-extend] cowboy_rest and delete_completed and response
+In-Reply-To: <1E843973-E0BD-41FA-AC69-53BEECAD5489@wirtel.be>
+References: <1E843973-E0BD-41FA-AC69-53BEECAD5489@wirtel.be>
+Message-ID: <53FD0441.1070701@ninenines.eu>
+
+Call cowboy_req:meta(media_type, Req) to retrieve it.
+
+On 08/27/2014 12:59 AM, St?phane Wirtel wrote:
+> Hi all,
+>
+> I work with two content-types (json, msgpack).
+>
+> In the DELETE verb, I need to return an object and in this case, I work
+> on delete_resource/2 and delete_completed/2.
+> The problem is, how can I return a body in function of the content-type?
+> because after delete_completed, there is a call to the
+> cowboy_rest:has_resp_body function and I need to set the body of the
+> response.
+>
+> delete_completed(Req, State) ->
+>      Body = Json or MsgPack ?  <-- Which content ?
+>
+>      Req2 = cowboy_req:set_resp_body(Body, Req),
+>      {true, Req2, State}.
+>
+> Ok, but in this case, what's the reason of content_types_provided/2 and
+> content_types_accepted/2 ?
+>
+> Thank you,
+>
+> Stephane
+>
+>
+> --
+> St?phane Wirtel - http://wirtel.be - @matrixise
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From stephane at wirtel.be  Wed Aug 27 00:12:00 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Wed, 27 Aug 2014 00:12:00 +0200
+Subject: [99s-extend] cowboy_rest and delete_completed and response
+In-Reply-To: <53FD0441.1070701@ninenines.eu>
+References: <1E843973-E0BD-41FA-AC69-53BEECAD5489@wirtel.be>
+ <53FD0441.1070701@ninenines.eu>
+Message-ID: <90BE6FF2-659A-487A-AB91-C968658CE3D3@wirtel.be>
+
+What's the purpose of the callbacks in content_types_accepted and 
+content_types_provided?
+
+I prefer set the response in the State to the callbacks and they convert 
+it to the right format.
+
+Example:
+
+delete_completed(Req, State) ->
+	Response = [{<<"ok">>, <<"dbname">>}],
+	{true, Req, State#state{response=Response}}.
+
+get_json(Req, #{response=Response}=State) ->
+	Body = jsx:encode(Response),
+	{Body, Req, State}.
+
+get_msgpack(Req, #{response=Response}=State) ->
+	Body = msgpack:pack(Response, [{format, jsx}],
+	{Body, Req, State}.
+
+
+
+On 27 Aug 2014, at 0:03, Lo?c Hoguin wrote:
+
+> Call cowboy_req:meta(media_type, Req) to retrieve it.
+>
+> On 08/27/2014 12:59 AM, St?phane Wirtel wrote:
+>> Hi all,
+>>
+>> I work with two content-types (json, msgpack).
+>>
+>> In the DELETE verb, I need to return an object and in this case, I 
+>> work
+>> on delete_resource/2 and delete_completed/2.
+>> The problem is, how can I return a body in function of the 
+>> content-type?
+>> because after delete_completed, there is a call to the
+>> cowboy_rest:has_resp_body function and I need to set the body of the
+>> response.
+>>
+>> delete_completed(Req, State) ->
+>>   Body = Json or MsgPack ?  <-- Which content ?
+>>
+>>   Req2 = cowboy_req:set_resp_body(Body, Req),
+>>   {true, Req2, State}.
+>>
+>> Ok, but in this case, what's the reason of content_types_provided/2 
+>> and
+>> content_types_accepted/2 ?
+>>
+>> Thank you,
+>>
+>> Stephane
+>>
+>>
+>> --
+>> St?phane Wirtel - http://wirtel.be - @matrixise
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>
+> -- 
+> Lo?c Hoguin
+> http://ninenines.eu
+
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From stephane at wirtel.be  Wed Aug 27 11:29:46 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Wed, 27 Aug 2014 11:29:46 +0200
+Subject: [99s-extend] I need your feedback about this cowboy_rest handler.
+Message-ID: <C5A27633-46B8-47E3-816C-BFB44584E6CC@wirtel.be>
+
+Hi all,
+
+This night, I wrote an example because I wanted to show you my work.
+
+I have one handler for the concept of collections (in this case, tasks).
+
+In this handler, I want these following methods:
+
+POST /:collection
+GET /:collection
+DELETE /:collection
+PUT /:collection
+HEAD /:collection
+
+:collection is a string, example: /tasks1
+
+HEAD /:collection (/tasks1)
+StatusCode:
+	* 200 ok
+	* 404 not found
+
+GET /:collection (/tasks1)
+Gets information about the collection
+StatusCode:
+	* 200 ok
+	* 404 not found
+
+PUT /:collection (/tasks1)
+Create a new collection of tasks
+Status_Code:
+	* 201 created
+	Response: an object, in msgpack or json and I need to had a location 
+header
+	* 412 precondition failed, the collection name already exists
+	Response: an object, in msgpack or json with the error (already exists)
+
+POST /:collection (/tasks1)
+Add a new item in the collection, a new task
+StatusCode:
+	* 201 created
+	* 202 accepted
+	* 404 not found (error in the collection name)
+Response: need to add a location header and return an object in msgpack 
+or json.
+
+DELETE /:collection (/tasks1)
+Delete all the tasks
+Status_Code:
+	* 200 ok.
+	* 404 not found
+In the case of 200, we need to return an object in msgpack or json.
+
+
+I provided a code and If you can help me, because I think cowboy_rest is 
+a good solution, but I also think I will have some problems with my 
+service.
+
+Examples:
+* delete_completed, I need to write the serialisation in the 
+delete_completed function and not with the help of the defined callbacks 
+of content_types_provided.
+* for PUT, I need to return a location header, should I add it in the 
+is_conflict
+function?
+* for PUT, how I have a 201? I have read the rest_flowchart and I need 
+to specify the location header ok, but where? in the is_conflict 
+function?
+
+So, do you have time to help me, because with this example, I can 
+propose it to the cowboy repository.
+https://github.com/matrixise/demo_rest/blob/master/src/collection_handler.erl
+
+You can propose your PR, comments or remarks, but I would like to use 
+cowboy_rest.
+
+Regards,
+
+Stephane
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From essen at ninenines.eu  Wed Aug 27 12:03:41 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 27 Aug 2014 13:03:41 +0300
+Subject: [99s-extend] I need your feedback about this cowboy_rest
+	handler.
+In-Reply-To: <C5A27633-46B8-47E3-816C-BFB44584E6CC@wirtel.be>
+References: <C5A27633-46B8-47E3-816C-BFB44584E6CC@wirtel.be>
+Message-ID: <53FDACFD.7020204@ninenines.eu>
+
+Hey,
+
+On 08/27/2014 12:29 PM, St?phane Wirtel wrote:
+> Hi all,
+>
+> This night, I wrote an example because I wanted to show you my work.
+>
+> I have one handler for the concept of collections (in this case, tasks).
+>
+> In this handler, I want these following methods:
+>
+> POST /:collection
+> GET /:collection
+> DELETE /:collection
+> PUT /:collection
+> HEAD /:collection
+>
+> :collection is a string, example: /tasks1
+>
+> HEAD /:collection (/tasks1)
+> StatusCode:
+>      * 200 ok
+>      * 404 not found
+>
+> GET /:collection (/tasks1)
+> Gets information about the collection
+> StatusCode:
+>      * 200 ok
+>      * 404 not found
+>
+> PUT /:collection (/tasks1)
+> Create a new collection of tasks
+> Status_Code:
+>      * 201 created
+>      Response: an object, in msgpack or json and I need to had a
+> location header
+>      * 412 precondition failed, the collection name already exists
+>      Response: an object, in msgpack or json with the error (already
+> exists)
+>
+> POST /:collection (/tasks1)
+> Add a new item in the collection, a new task
+> StatusCode:
+>      * 201 created
+>      * 202 accepted
+>      * 404 not found (error in the collection name)
+> Response: need to add a location header and return an object in msgpack
+> or json.
+>
+> DELETE /:collection (/tasks1)
+> Delete all the tasks
+> Status_Code:
+>      * 200 ok.
+>      * 404 not found
+> In the case of 200, we need to return an object in msgpack or json.
+>
+>
+> I provided a code and If you can help me, because I think cowboy_rest is
+> a good solution, but I also think I will have some problems with my
+> service.
+>
+> Examples:
+> * delete_completed, I need to write the serialisation in the
+> delete_completed function and not with the help of the defined callbacks
+> of content_types_provided.
+
+What's the problem? The callbacks you set in content_types_provided are 
+there to provide the *resource*. If you set a body in response to the 
+DELETE method you are not sending the resource but information about the 
+result of the operation.
+
+> * for PUT, I need to return a location header, should I add it in the
+> is_conflict
+> function?
+
+I would say in the callback you set in content_types_accepted. But...
+
+> * for PUT, how I have a 201? I have read the rest_flowchart and I need
+> to specify the location header ok, but where? in the is_conflict function?
+
+Why do you need a 201? If you PUT a collection to /:collection then this 
+is already the location of the collection. I am not sure what you are 
+trying to do there exactly?
+
+> So, do you have time to help me, because with this example, I can
+> propose it to the cowboy repository.
+> https://github.com/matrixise/demo_rest/blob/master/src/collection_handler.erl
+>
+>
+> You can propose your PR, comments or remarks, but I would like to use
+> cowboy_rest.
+>
+> Regards,
+>
+> Stephane
+>
+> --
+> St?phane Wirtel - http://wirtel.be - @matrixise
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From stephane at wirtel.be  Wed Aug 27 12:35:33 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Wed, 27 Aug 2014 12:35:33 +0200
+Subject: [99s-extend] I need your feedback about this cowboy_rest
+	handler.
+In-Reply-To: <53FDACFD.7020204@ninenines.eu>
+References: <C5A27633-46B8-47E3-816C-BFB44584E6CC@wirtel.be>
+ <53FDACFD.7020204@ninenines.eu>
+Message-ID: <C563DB6C-5C79-4E13-929B-25C64B13DCD0@wirtel.be>
+
+On 27 Aug 2014, at 12:03, Lo?c Hoguin wrote:
+
+> Hey,
+>
+> On 08/27/2014 12:29 PM, St?phane Wirtel wrote:
+>> Hi all,
+>>
+>> This night, I wrote an example because I wanted to show you my work.
+>>
+>> I have one handler for the concept of collections (in this case, 
+>> tasks).
+>>
+>> In this handler, I want these following methods:
+>>
+>> POST /:collection
+>> GET /:collection
+>> DELETE /:collection
+>> PUT /:collection
+>> HEAD /:collection
+>>
+>> :collection is a string, example: /tasks1
+>>
+>> HEAD /:collection (/tasks1)
+>> StatusCode:
+>>  * 200 ok
+>>  * 404 not found
+>>
+>> GET /:collection (/tasks1)
+>> Gets information about the collection
+>> StatusCode:
+>>  * 200 ok
+>>  * 404 not found
+>>
+>> PUT /:collection (/tasks1)
+>> Create a new collection of tasks
+>> Status_Code:
+>>  * 201 created
+>>  Response: an object, in msgpack or json and I need to had a
+>> location header
+>>  * 412 precondition failed, the collection name already exists
+>>  Response: an object, in msgpack or json with the error (already
+>> exists)
+>>
+>> POST /:collection (/tasks1)
+>> Add a new item in the collection, a new task
+>> StatusCode:
+>>  * 201 created
+>>  * 202 accepted
+>>  * 404 not found (error in the collection name)
+>> Response: need to add a location header and return an object in 
+>> msgpack
+>> or json.
+>>
+>> DELETE /:collection (/tasks1)
+>> Delete all the tasks
+>> Status_Code:
+>>  * 200 ok.
+>>  * 404 not found
+>> In the case of 200, we need to return an object in msgpack or json.
+>>
+>>
+>> I provided a code and If you can help me, because I think cowboy_rest 
+>> is
+>> a good solution, but I also think I will have some problems with my
+>> service.
+>>
+>> Examples:
+>> * delete_completed, I need to write the serialisation in the
+>> delete_completed function and not with the help of the defined 
+>> callbacks
+>> of content_types_provided.
+>
+> What's the problem? The callbacks you set in content_types_provided 
+> are there to provide the *resource*. If you set a body in response to 
+> the DELETE method you are not sending the resource but information 
+> about the result of the operation.
+Ok, in this case, I understand. thanks
+>
+>> * for PUT, I need to return a location header, should I add it in the
+>> is_conflict
+>> function?
+>
+> I would say in the callback you set in content_types_accepted. But...
+Works fine in the is_conflict function.
+>
+>> * for PUT, how I have a 201? I have read the rest_flowchart and I 
+>> need
+>> to specify the location header ok, but where? in the is_conflict 
+>> function?
+>
+> Why do you need a 201? If you PUT a collection to /:collection then 
+> this is already the location of the collection. I am not sure what you 
+> are trying to do there exactly?
+In this case, the PUT method is used for the creation of the resource 
+and not for the update. This is the reason of the 201 status code.
+
+In the rest_flowchart graph for the PUT/POST methods, what is the node 
+"new resource" ? Is it just the {true, Req, State} from the callback 
+defined in the content_types_accepted?
+
+PS: I retested and now, I have my 201 with PUT, just resource_exists has 
+to return false and not true ;-)
+
+Thanks
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From essen at ninenines.eu  Wed Aug 27 12:53:19 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 27 Aug 2014 13:53:19 +0300
+Subject: [99s-extend] I need your feedback about this cowboy_rest
+	handler.
+In-Reply-To: <C563DB6C-5C79-4E13-929B-25C64B13DCD0@wirtel.be>
+References: <C5A27633-46B8-47E3-816C-BFB44584E6CC@wirtel.be>
+ <53FDACFD.7020204@ninenines.eu>
+ <C563DB6C-5C79-4E13-929B-25C64B13DCD0@wirtel.be>
+Message-ID: <53FDB89F.2080308@ninenines.eu>
+
+>>> * for PUT, how I have a 201? I have read the rest_flowchart and I need
+>>> to specify the location header ok, but where? in the is_conflict
+>>> function?
+>>
+>> Why do you need a 201? If you PUT a collection to /:collection then
+>> this is already the location of the collection. I am not sure what you
+>> are trying to do there exactly?
+> In this case, the PUT method is used for the creation of the resource
+> and not for the update. This is the reason of the 201 status code.
+>
+> In the rest_flowchart graph for the PUT/POST methods, what is the node
+> "new resource" ? Is it just the {true, Req, State} from the callback
+> defined in the content_types_accepted?
+>
+> PS: I retested and now, I have my 201 with PUT, just resource_exists has
+> to return false and not true ;-)
+
+My bad I was a little confusing in my previous answer. You are right, if 
+the resource doesn't exist and PUT is used we get a 201 automatically. 
+The location header must only be provided if the resource was created 
+elsewhere.
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From stephane at wirtel.be  Wed Aug 27 15:26:11 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Wed, 27 Aug 2014 15:26:11 +0200
+Subject: [99s-extend] I need your feedback about this cowboy_rest
+	handler.
+In-Reply-To: <53FDB89F.2080308@ninenines.eu>
+References: <C5A27633-46B8-47E3-816C-BFB44584E6CC@wirtel.be>
+ <53FDACFD.7020204@ninenines.eu>
+ <C563DB6C-5C79-4E13-929B-25C64B13DCD0@wirtel.be>
+ <53FDB89F.2080308@ninenines.eu>
+Message-ID: <426265B5-9DC3-4068-A377-C3B4441A6F45@wirtel.be>
+
+On 27 Aug 2014, at 12:53, Lo?c Hoguin wrote:
+
+>>>> * for PUT, how I have a 201? I have read the rest_flowchart and I 
+>>>> need
+>>>> to specify the location header ok, but where? in the is_conflict
+>>>> function?
+>>>
+>>> Why do you need a 201? If you PUT a collection to /:collection then
+>>> this is already the location of the collection. I am not sure what 
+>>> you
+>>> are trying to do there exactly?
+>> In this case, the PUT method is used for the creation of the resource
+>> and not for the update. This is the reason of the 201 status code.
+>>
+>> In the rest_flowchart graph for the PUT/POST methods, what is the 
+>> node
+>> "new resource" ? Is it just the {true, Req, State} from the callback
+>> defined in the content_types_accepted?
+>>
+>> PS: I retested and now, I have my 201 with PUT, just resource_exists 
+>> has
+>> to return false and not true ;-)
+>
+> My bad I was a little confusing in my previous answer. You are right, 
+> if the resource doesn't exist and PUT is used we get a 201 
+> automatically. The location header must only be provided if the 
+> resource was created elsewhere.
+
+Don't worry and thank you for your answers.
+
+Stephane
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From a.brandon.clark at gmail.com  Wed Aug 27 21:06:25 2014
+From: a.brandon.clark at gmail.com (Brandon Clark)
+Date: Wed, 27 Aug 2014 12:06:25 -0700
+Subject: [99s-extend] Which erlang.mk?
+Message-ID: <CA+_xk0k0LEftN+Lmn-BaYpmxYaSYuaOq1Et=8cX_R5u3O_Kkng@mail.gmail.com>
+
+Greetings!
+
+I'm trying to resurrect one of my neglected ranch applications.  It uses
+Common Test, erlang.mk, and relx all in the usual way.  When I run make
+tests with all fresh dependencies, I get this:
+
+Doing /home/brandon/src/my_proj/deps/ranch...
+
+make[1]: *** No rule to make target `build-tests'.  Stop.
+
+make: *** [build-deps-tests] Error 2
+
+
+A diff of my erlang.mk and deps/ranch/erlang.mk shows they are dramatically
+different.  Mine came from here just this morning:
+
+https://raw.*github.com <http://github.com>*/extend/
+erlang.mk/master/erlang.mk
+
+Which one is the "right" one for creating new apps?
+
+
+Thank you!
+
+~BC
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140827/91c1e017/attachment.html>
+
+From essen at ninenines.eu  Wed Aug 27 23:26:26 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 28 Aug 2014 00:26:26 +0300
+Subject: [99s-extend] Which erlang.mk?
+In-Reply-To: <CA+_xk0k0LEftN+Lmn-BaYpmxYaSYuaOq1Et=8cX_R5u3O_Kkng@mail.gmail.com>
+References: <CA+_xk0k0LEftN+Lmn-BaYpmxYaSYuaOq1Et=8cX_R5u3O_Kkng@mail.gmail.com>
+Message-ID: <53FE4D02.9050804@ninenines.eu>
+
+The one you downloaded from github is the correct one. It's a new 
+version compared to the older one. A few small things changed, 
+including, in this case, that build-tests was renamed to something like 
+ct-build-tests (please open it to make sure of the name).
+
+The new version allows greater customization and has a better package 
+index feature and other things, but breaking compatibility with older 
+Makefiles. The new version is labeled 1 (beginning of erlang.mk file) 
+while the older one has no such label.
+
+On 08/27/2014 10:06 PM, Brandon Clark wrote:
+> Greetings!
+>
+> I'm trying to resurrect one of my neglected ranch applications.  It uses
+> Common Test, erlang.mk <http://erlang.mk>, and relx all in the usual
+> way.  When I run make tests with all fresh dependencies, I get this:
+>
+> Doing /home/brandon/src/my_proj/deps/ranch...
+>
+> make[1]: *** No rule to make target `build-tests'.  Stop.
+>
+> make: *** [build-deps-tests] Error 2
+>
+>
+> A diff of my erlang.mk <http://erlang.mk> and deps/ranch/erlang.mk
+> <http://erlang.mk> shows they are dramatically different.  Mine came
+> from here just this morning:
+>
+> https://raw._github.com
+> <http://github.com>_/extend/erlang.mk/master/erlang.mk
+> <http://erlang.mk/master/erlang.mk>
+>
+> Which one is the "right" one for creating new apps?
+>
+>
+> Thank you!
+>
+> ~BC
+>
+>
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From stephane at wirtel.be  Wed Aug 27 23:41:25 2014
+From: stephane at wirtel.be (=?utf-8?q?St=C3=A9phane?= Wirtel)
+Date: Wed, 27 Aug 2014 23:41:25 +0200
+Subject: [99s-extend] cowboy_rest : PUT and resource_exists vs is_conflict ?
+Message-ID: <5F045BA1-B52D-43BD-8E61-061CD2B4DFC9@wirtel.be>
+
+Hi all,
+
+For the PUT method, the flow is 
+
+resource_exists
+if method == PUT then go to the is_conflict function.
+In each function, we need to check if the resource already exists or not.
+
+I think we check twice, is it normal?
+
+Thank you,
+
+Stephane
+
+--
+St?phane Wirtel - http://wirtel.be - @matrixise
+
+From essen at ninenines.eu  Wed Aug 27 23:48:41 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 28 Aug 2014 00:48:41 +0300
+Subject: [99s-extend] cowboy_rest : PUT and resource_exists vs
+ is_conflict ?
+In-Reply-To: <5F045BA1-B52D-43BD-8E61-061CD2B4DFC9@wirtel.be>
+References: <5F045BA1-B52D-43BD-8E61-061CD2B4DFC9@wirtel.be>
+Message-ID: <53FE5239.6080008@ninenines.eu>
+
+For some callbacks you may need to check but only if you need to perform 
+a different operation when it does/doesn't. For example if you write to 
+files a PUT is the same operation either way, but if you write to an SQL 
+DB you will want to do INSERT/UPDATE depending on that. Same goes for 
+is_conflict and others, it depends.
+
+So sometimes you need to keep that info around in the state and 
+sometimes you don't.
+
+On 08/28/2014 12:41 AM, St?phane Wirtel wrote:
+> Hi all,
+>
+> For the PUT method, the flow is
+>
+> resource_exists
+> if method == PUT then go to the is_conflict function.
+> In each function, we need to check if the resource already exists or not.
+>
+> I think we check twice, is it normal?
+>
+> Thank you,
+>
+> Stephane
+>
+> --
+> St?phane Wirtel - http://wirtel.be - @matrixise
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From paulo.ferraz.oliveira at gmail.com  Sat Aug 30 00:15:56 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Fri, 29 Aug 2014 23:15:56 +0100
+Subject: [99s-extend] I need your feedback about this cowboy_rest
+	handler.
+In-Reply-To: <426265B5-9DC3-4068-A377-C3B4441A6F45@wirtel.be>
+References: <C5A27633-46B8-47E3-816C-BFB44584E6CC@wirtel.be>
+ <53FDACFD.7020204@ninenines.eu>
+ <C563DB6C-5C79-4E13-929B-25C64B13DCD0@wirtel.be>
+ <53FDB89F.2080308@ninenines.eu>
+ <426265B5-9DC3-4068-A377-C3B4441A6F45@wirtel.be>
+Message-ID: <CA+dV7cRD-UszqUz9gv5KH4rtmW+gC6a7tEJYQco66i891+Tqbg@mail.gmail.com>
+
+PUT _should_ (there is no police here though) be used to either create
+a resource or completely update it (it's refered to as "upsert" by
+some; in Redis, for example, a similar concept would be "set").
+Partial modifications should be made using PATCH. POST is what is
+commonly used to create a resource. According to
+http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html 412 is used
+when "[t]he precondition given in one or more of the request-header
+fields evaluated to false when it was tested on the server." (also:
+http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.24).
+
+- Paulo F. Oliveira
+
+On 27 August 2014 14:26, St?phane Wirtel <stephane at wirtel.be> wrote:
+> On 27 Aug 2014, at 12:53, Lo?c Hoguin wrote:
+>
+>>>>> * for PUT, how I have a 201? I have read the rest_flowchart and I need
+>>>>> to specify the location header ok, but where? in the is_conflict
+>>>>> function?
+>>>>
+>>>>
+>>>> Why do you need a 201? If you PUT a collection to /:collection then
+>>>> this is already the location of the collection. I am not sure what you
+>>>> are trying to do there exactly?
+>>>
+>>> In this case, the PUT method is used for the creation of the resource
+>>> and not for the update. This is the reason of the 201 status code.
+>>>
+>>> In the rest_flowchart graph for the PUT/POST methods, what is the node
+>>> "new resource" ? Is it just the {true, Req, State} from the callback
+>>> defined in the content_types_accepted?
+>>>
+>>> PS: I retested and now, I have my 201 with PUT, just resource_exists has
+>>> to return false and not true ;-)
+>>
+>>
+>> My bad I was a little confusing in my previous answer. You are right, if
+>> the resource doesn't exist and PUT is used we get a 201 automatically. The
+>> location header must only be provided if the resource was created elsewhere.
+>
+>
+> Don't worry and thank you for your answers.
+>
+> Stephane
+>
+>
+> --
+> St?phane Wirtel - http://wirtel.be - @matrixise
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+

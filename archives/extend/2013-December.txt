@@ -1,0 +1,260 @@
+From dagurg at gmail.com  Thu Dec 12 11:57:42 2013
+From: dagurg at gmail.com (Dagur Gunnarsson)
+Date: Thu, 12 Dec 2013 10:57:42 +0000
+Subject: [99s-extend] (no subject)
+Message-ID: <CAGYgXH-Jyoa+ziKxr-u+Lu7W4bkQrFx=f56ggBh39ao_YAyEhg@mail.gmail.com>
+
+Hi,
+
+I am using cowboy for our financial webservice platform.  We use token
+based authentication, but I want to give certain ip adresses full access
+without authentication.  I tried :
+
+{{IP, Port}, Req2} = cowboy_req:peer(Req).
+
+but IP is always {127,0,0,1} - even on production (where request
+are comming from different networks)
+
+So my question is basically, Is there any way for me to see
+frow which IP adresses the request is comming ?
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131212/2697fbaa/attachment.html>
+
+From essen at ninenines.eu  Thu Dec 12 12:06:10 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 12 Dec 2013 12:06:10 +0100
+Subject: [99s-extend] (no subject)
+In-Reply-To: <CAGYgXH-Jyoa+ziKxr-u+Lu7W4bkQrFx=f56ggBh39ao_YAyEhg@mail.gmail.com>
+References: <CAGYgXH-Jyoa+ziKxr-u+Lu7W4bkQrFx=f56ggBh39ao_YAyEhg@mail.gmail.com>
+Message-ID: <52A998A2.7050303@ninenines.eu>
+
+Hi,
+
+It sounds like you have a proxy of some kind on the same machine. The 
+proxy would likely set a header with the real IP in it, or at least have 
+an option for it.
+
+On 12/12/2013 11:57 AM, Dagur Gunnarsson wrote:
+> Hi,
+> I am using cowboy for our financial webservice platform.  We use token
+> based authentication, but I want to give certain ip adresses full access
+> without authentication.  I tried :
+> {{|IP||, ||Port||}, ||Req2||} = ||cowboy_req:peer||(||Req||).|
+> ||
+> |but IP is always {127,0,0,1} - even on production (where request|
+> |are comming from different networks)|
+> ||
+> |So my question is basically, Is there any way for me to see |
+> |frow which ||IP adresses the request is comming ?|
+> ||
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From dch at jsonified.com  Thu Dec 12 14:00:07 2013
+From: dch at jsonified.com (Dave Cottlehuber)
+Date: Thu, 12 Dec 2013 14:00:07 +0100
+Subject: [99s-extend] (no subject)
+In-Reply-To: <52A998A2.7050303@ninenines.eu>
+References: <CAGYgXH-Jyoa+ziKxr-u+Lu7W4bkQrFx=f56ggBh39ao_YAyEhg@mail.gmail.com>
+ <52A998A2.7050303@ninenines.eu>
+Message-ID: <etPan.52a9b357.66334873.3f3f@akai.jsonified.com>
+
+On 12. Dezember 2013 at 12:06:20, Lo?c Hoguin (essen at ninenines.eu) wrote:
+>  
+> Hi,
+>  
+> It sounds like you have a proxy of some kind on the same machine.  
+> The
+> proxy would likely set a header with the real IP in it, or at least  
+> have
+> an option for it.
+
+Hey Dagur,
+
+Look through all headers, normally a proxy will set something like X-Forwarded-For or similar.
+
+A+
+Dave
+
+
+
+
+From cjsvance at gmail.com  Sun Dec 15 06:48:20 2013
+From: cjsvance at gmail.com (Christopher Vance)
+Date: Sun, 15 Dec 2013 16:48:20 +1100
+Subject: [99s-extend] erlang.mk:109 sed \s is not portable
+Message-ID: <CA+Z8kA7UwsDP2KeLSBEqQ2GBZZwCTgDoD8SOJ8RZ47-StQE6XQ@mail.gmail.com>
+
+I have recently started using erlang.mk on MacOS X and OpenBSD, and have
+discovered that the sed escape \s on line 109 for inserting the module list
+in *.app does not work as intended on these OSs, because they do not use
+GNU sed. (\s just means the letter 's', not whitespace as in perl.) I
+expect all other BSD-based OSs to have the same issue.
+
+Please consider using [[:space:]] instead. This works on both MacOS X and
+OpenBSD, as well as on Linux.
+
+-- 
+Christopher Vance
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131215/7c20ac97/attachment.html>
+
+From essen at ninenines.eu  Sun Dec 15 10:12:07 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sun, 15 Dec 2013 10:12:07 +0100
+Subject: [99s-extend] erlang.mk:109 sed \s is not portable
+In-Reply-To: <CA+Z8kA7UwsDP2KeLSBEqQ2GBZZwCTgDoD8SOJ8RZ47-StQE6XQ@mail.gmail.com>
+References: <CA+Z8kA7UwsDP2KeLSBEqQ2GBZZwCTgDoD8SOJ8RZ47-StQE6XQ@mail.gmail.com>
+Message-ID: <52AD7267.8070905@ninenines.eu>
+
+This has been fixed for a few weeks now. Please check the bug tracker 
+(or commit log) next time, as this is where bugs get reported/fixed.
+
+Thanks.
+
+On 12/15/2013 06:48 AM, Christopher Vance wrote:
+> I have recently started using erlang.mk on MacOS X and OpenBSD, and have
+> discovered that the sed escape \s on line 109 for inserting the module list
+> in *.app does not work as intended on these OSs, because they do not use
+> GNU sed. (\s just means the letter 's', not whitespace as in perl.) I
+> expect all other BSD-based OSs to have the same issue.
+>
+> Please consider using [[:space:]] instead. This works on both MacOS X and
+> OpenBSD, as well as on Linux.
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From lloyd at writersglen.com  Fri Dec 27 00:49:28 2013
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Thu, 26 Dec 2013 18:49:28 -0500 (EST)
+Subject: [99s-extend] Make error
+Message-ID: <1388101768.1769116@apps.rackspace.com>
+
+Hello,
+
+*** GOAL: 
+
+Modify rest_pastebin in Cowboy examples.
+
+*** PROCEDULE 1: 
+
+- Pulled Cowboy, including examples into local workstation
+- Copied rest_pastebin to a separate directory
+- Execute make
+      Make compiles just fine
+
+*** PROCEDUE 2 -- resulting in error
+
+- delete the entire rest_pastebin application and recopy from the Cowboy pull
+- change all module names and references from rest_pastebin to tagr. Thus rest_pastebin_sup.erl becomes tagr_sup.erl
+- Execute make
+      Make returns:
+
+...
+make[1]: Leaving directory `/home/lloyd/Erl/CB/tagr/deps/cowboy'
+ ERLC   toppage_handler.erl tagr_sup.erl tagr_app.erl
+ ERLC   toppage_handler.erl tagr_sup.erl tagr_app.erl
+ APP    tagr .app.src
+cat: src/tagr: No such file or directory
+cat: .app.src: No such file or directory
+sed: can't read .app: No such file or directory
+make: *** [app] Error 2
+
+Note that the filename tagr.app.src has somehow been modified to tagr .app.src
+
+But here's the directory listing: 
+
+-rw-rw-r-- 1 lloyd lloyd  436 Dec 26 18:21 tagr_app.erl
+-rw-rw-r-- 1 lloyd lloyd  299 Dec 26 18:22 tagr.app.src
+-rw-rw-r-- 1 lloyd lloyd  382 Dec 26 18:22 tagr_sup.erl
+-rw-rw-r-- 1 lloyd lloyd 3568 Dec 26 18:23 toppage_handler.erl
+
+I can load tagr.app.src in Vim. Using find I've searched for tagr and .app.src with negative results.
+
+Further mystery. I substituted Rebar for relx. Tagr now compiles just fine.
+
+*** Discussion
+
+I stumbled on this problem after making fairly extensive modifications to rest_pastebin. Through much of the process it compiled just fine until it didn't. And from then on I could not get it to compile. I tried everything I could think of: careful source code review (at least 10 passes), searching for tagr .app.src, trying different names (e.g. tagger), rebooting my computer, etc., etc.
+
+Eventually I reduced the problem to the absolute minimum: Change the string rest_pastebin to tagr everywhere relevant. 
+
+It's possible I'm missing something somewhere. But where should I look? Otherwise, is it possible that there is a subtle bug in relx?
+
+
+Many thanks,
+
+Lloyd
+
+
+
+
+
+ 
+
+
+ 
+
+
+
+*********************************************
+My books:
+
+THE GOSPEL OF ASHES
+http://thegospelofashes.com
+
+Strength is not enough. Do they have the courage 
+and the cunning? Can they survive long enough to 
+save the lives of millions?  
+
+FREEIN' PANCHO
+http://freeinpancho.com
+
+A community of misfits help a troubled boy find his way 
+
+AYA TAKEO
+http://ayatakeo.com
+
+Star-crossed love, war and power in an alternative 
+universe
+
+Available through Amazon or by request from your 
+favorite bookstore
+
+
+**********************************************
+
+
+
+From essen at ninenines.eu  Fri Dec 27 00:55:05 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 27 Dec 2013 00:55:05 +0100
+Subject: [99s-extend] Make error
+Message-ID: <ykskfckfvyx95ji4gap81brc.1388102105925@email.android.com>
+
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131227/35c9f6e5/attachment.html>
+

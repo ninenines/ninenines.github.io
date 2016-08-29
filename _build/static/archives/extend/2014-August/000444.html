@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Full example of cowboy_rest?
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Full%20example%20of%20cowboy_rest%3F&In-Reply-To=%3CCA%2BdV7cQXP3wEq5bn%3D3qWQ2EKuR39WZsRHCS%2B4Q1wgvLgDucjng%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000443.html">
+   <LINK REL="Next"  HREF="000445.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Full example of cowboy_rest?</H1>
+    <B>Paulo F. Oliveira</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Full%20example%20of%20cowboy_rest%3F&In-Reply-To=%3CCA%2BdV7cQXP3wEq5bn%3D3qWQ2EKuR39WZsRHCS%2B4Q1wgvLgDucjng%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Full example of cowboy_rest?">paulo.ferraz.oliveira at gmail.com
+       </A><BR>
+    <I>Tue Aug 26 01:11:44 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000443.html">[99s-extend] Full example of cowboy_rest?
+</A></li>
+        <LI>Next message: <A HREF="000445.html">[99s-extend] cowboy_rest and delete_completed and response
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#444">[ date ]</a>
+              <a href="thread.html#444">[ thread ]</a>
+              <a href="subject.html#444">[ subject ]</a>
+              <a href="author.html#444">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello, St&#233;phane.
+
+On 24 August 2014 10:54, St&#233;phane Wirtel &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">stephane at wirtel.be</A>&gt; wrote:
+&gt;<i>
+</I>&gt;<i> Hi all,
+</I>&gt;<i>
+</I>&gt;<i> Do you have a concrete example of cowboy_rest ? with POST, GET, HEAD, PUT and DELETE ?
+</I>
+AFAIK, from the official examples, the correct answer is &quot;no&quot;, there
+is no &quot;complete&quot; example (does it even make sense to have one?).
+
+On the other hand, I've been using Cowboy for a couple of months now,
+and find these docs (REST flowcharts -
+<A HREF="http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/">http://ninenines.eu/docs/en/cowboy/1.0/guide/rest_flowcharts/</A>) to be
+very useful, and they might also help you. You should find the time to
+read the complete REST guide/manual as a lot of useful information can
+be found there and a very nice effort was put into not wasting words
+and going straight to the point.
+
+...
+
+&gt;<i> What are the best practices?
+</I>
+For what specifically?
+
+&gt;<i> The examples in the repository of cowboy don't cover all the possibilities of a simple rest api with these verbs.
+</I>
+That is a fact. I, for one, tend to have a _template_ source code file
+from where I get the functions that I need (only not to have to write
+2/3 lines of code every time), and that I &quot;chain&quot; looking at the
+flowcharts. [I also have a lib for JSON parsing and validating, query
+string validation, etc...] This might not always be very easy (to
+&quot;chain&quot; it all together, but it shouldn't be that hard either&quot;), but
+my approach is usually &quot;OK, so I want a route to have GET, PUT and
+DELETE... what are the related methods that I'll most probably
+require? resource_exists (serves all methods), is_conflict (serves
+PUT), delete_resource (serves DELETE), delete_completed (serves
+DELETE)&quot; and then I think about replying with a body or not (in the
+case of GET there will almost always be a body, in the case of PUT
+your method call might result in a 204 and in the case of DELETE there
+may or not be a body). I then code the methods, test the API, checking
+that the codes I get make sense (404, 200, 409, 204, 202, ...
+depending on the conditions I want set) and then slightly document
+this for the users of the API (if the API is complicated and requires
+a lot of documentation there might be something wrong with it). For
+documentation purposes you can either go with a &quot;[VERB] route
+accepts...?..., serves...?..., and the result codes are...?...&quot; simple
+doc or something more elaborate like
+<A HREF="https://helloreverb.com/developers/swagger.">https://helloreverb.com/developers/swagger.</A>
+
+Hope it helps.
+
+- Paulo F. Oliveira
+
+&gt;<i>
+</I>&gt;<i> Thanks in advance,
+</I>&gt;<i>
+</I>&gt;<i> Stephane
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> St&#233;phane Wirtel - <A HREF="http://wirtel.be">http://wirtel.be</A> - @matrixise
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I></PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000443.html">[99s-extend] Full example of cowboy_rest?
+</A></li>
+	<LI>Next message: <A HREF="000445.html">[99s-extend] cowboy_rest and delete_completed and response
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#444">[ date ]</a>
+              <a href="thread.html#444">[ thread ]</a>
+              <a href="subject.html#444">[ subject ]</a>
+              <a href="author.html#444">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

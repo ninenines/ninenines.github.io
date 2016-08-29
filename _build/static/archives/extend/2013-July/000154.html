@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy handler linked processes
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20handler%20linked%20processes&In-Reply-To=%3CD87A912B55F24C449853E92826558374%40id3as.co.uk%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000155.html">
+   <LINK REL="Next"  HREF="000156.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy handler linked processes</H1>
+    <B>Adrian Roe</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20handler%20linked%20processes&In-Reply-To=%3CD87A912B55F24C449853E92826558374%40id3as.co.uk%3E"
+       TITLE="[99s-extend] Cowboy handler linked processes">adrian at id3as.co.uk
+       </A><BR>
+    <I>Thu Jul 18 12:15:11 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000155.html">[99s-extend] Serve static files with cowboy from some	applications
+</A></li>
+        <LI>Next message: <A HREF="000156.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#154">[ date ]</a>
+              <a href="thread.html#154">[ thread ]</a>
+              <a href="subject.html#154">[ subject ]</a>
+              <a href="author.html#154">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>We have been using spawn_linked workers to handle tasks that live for the lifetime of a single HTTP request
+
+Although in the cowboy guide it is clear that Cowboy can use &quot;One Process of Many Requests&quot; I am surprised that this is the case even if the handler crashes.  For example, our use case is to copy a large file to the server over HTTP where a worker process relays the file contents to long term storage.  The worker process is spawn_linked from the HTTP handler and (for our use case) should die if the handler stops.
+
+If the client stops the upload (for example by browsing away, or losing connectivity) we correctly receive an error (see sample Lager trace below), but what we are seeing is that spawn_linked processes are NOT being killed.
+
+Is this intended behaviour - I accept it makes sense to reuse the processes but should this continue to be the case even if the previous use of the process crashed?  If it is intended behaviour I think the docs should highlight this as we've been leaking processes for some time now, but I've always seen it as erlang's job to look after related process trees in the event of error.  Our current workaround is to hold a list of linked processes in process storage and then kill them in the terminate handler which is ugly in the extreme!!  We don't know the PIDS of the linked processes until it is too late to return State to Cowboy (i.e. we are already in our handle code)...
+
+Kind regards
+
+Adrian
+
+16:09:32.347 [info] Trailer upload failed with reason {case_clause,{error,closed}}
+16:09:32.348 [error] ** Cowboy handler upload_trailer_resource terminating in handle/2
+   for the reason error:{case_clause,{error,closed}}
+** Handler state was {state,undefined,0,undefined,undefined,undefined}
+** Request was [{socket,#Port&lt;0.11230&gt;},{transport,ranch_tcp},{connection,keepalive},{pid,&lt;0.1987.0&gt;},{method,&lt;&lt;&quot;POST&quot;&gt;&gt;},{version,'HTTP/1.1'},{peer,{{84,92,32,116},64136}},{host,&lt;&lt;&quot;54.225.117.108&quot;&gt;&gt;},{host_info,undefined},{port,8000},{path,&lt;&lt;&quot;/upload_trailer&quot;&gt;&gt;},{path_info,undef
+ined},{qs,&lt;&lt;&quot;name=linux-7.4.21.zip&amp;size=54015414&quot;&gt;&gt;},{qs_vals,undefined},{bindings,[]},{headers,[{&lt;&lt;&quot;host&quot;&gt;&gt;,&lt;&lt;&quot;54.225.117.108:8000&quot;&gt;&gt;},{&lt;&lt;&quot;connection&quot;&gt;&gt;,&lt;&lt;&quot;keep-alive&quot;&gt;&gt;},{&lt;&lt;&quot;content-length&quot;&gt;&gt;,&lt;&lt;&quot;54015414&quot;&gt;&gt;},{&lt;&lt;&quot;origin&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://54.225.117.108:8000">http://54.225.117.108:8000</A>&quot;&gt;&gt;},{&lt;&lt;&quot;user-agent&quot;&gt;&gt;,&lt;&lt;&quot;M
+ozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36&quot;&gt;&gt;},{&lt;&lt;&quot;content-type&quot;&gt;&gt;,&lt;&lt;&gt;&gt;},{&lt;&lt;&quot;accept&quot;&gt;&gt;,&lt;&lt;&quot;*/*&quot;&gt;&gt;},{&lt;&lt;&quot;referer&quot;&gt;&gt;,&lt;&lt;&quot;<A HREF="http://54.225.117.108:8000/">http://54.225.117.108:8000/</A>&quot;&gt;&gt;},{&lt;&lt;&quot;accept-encoding&quot;&gt;&gt;,&lt;&lt;&quot;gzip,deflate,sdch&quot;&gt;&gt;},{&lt;&lt;&quot;acce
+pt-language&quot;&gt;&gt;,&lt;&lt;&quot;en-US,en;q=0.8&quot;&gt;&gt;},{&lt;&lt;&quot;cookie&quot;&gt;&gt;,&lt;&lt;&quot;__jwpusr=cbc133d7-1b49-443c-8a13-364660cc93e5; id3as_manager=f4803c004d71dde3b64394f6e6f44faa54970e93&quot;&gt;&gt;}]},{p_headers,[{&lt;&lt;&quot;connection&quot;&gt;&gt;,[&lt;&lt;&quot;keep-alive&quot;&gt;&gt;]}]},{cookies,undefined},{meta,[]},{body_state,waiting},{multipart,unde
+fined},{buffer,&lt;&lt;&gt;&gt;},{resp_compress,true},{resp_state,waiting},{resp_headers,[]},{resp_body,&lt;&lt;&gt;&gt;},{onresponse,undefined}]
+** Stacktrace: [{i_cowboy,stream_body,0,[{file,&quot;src/i_cowboy.erl&quot;},{line,76}]},{upload_trailer_resource,stream_upload_file,4,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;},{line,247}]},{upload_trailer_resource,upload_file,1,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;}
+,{line,237}]},{upload_trailer_resource,head_or_post,1,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;},{line,202}]},{upload_trailer_resource,sequence,2,[{file,&quot;src/endpoints/upload_trailer_resource.erl&quot;},{line,106}]},{upload_trailer_resource,process_request,1,[{file,&quot;src/endpo
+ints/upload_trailer_resource.erl&quot;},{line,212}]},{i_cowboy,do,3,[{file,&quot;src/i_cowboy.erl&quot;},{line,29}]},{cowboy_handler,handler_handle,4,[{file,&quot;src/cowboy_handler.erl&quot;},{line,119}]}]
+
+
+-- 
+Dr Adrian Roe
+Director
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130718/d65f1aaf/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130718/d65f1aaf/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000155.html">[99s-extend] Serve static files with cowboy from some	applications
+</A></li>
+	<LI>Next message: <A HREF="000156.html">[99s-extend] Cowboy handler linked processes
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#154">[ date ]</a>
+              <a href="thread.html#154">[ thread ]</a>
+              <a href="subject.html#154">[ subject ]</a>
+              <a href="author.html#154">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

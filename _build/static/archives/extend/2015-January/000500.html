@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy + SSL
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20%2B%20SSL&In-Reply-To=%3C54C64FA0.7040808%40bestmx.net%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000499.html">
+   <LINK REL="Next"  HREF="000496.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy + SSL</H1>
+    <B>e at bestmx.net</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20%2B%20SSL&In-Reply-To=%3C54C64FA0.7040808%40bestmx.net%3E"
+       TITLE="[99s-extend] Cowboy + SSL">e at bestmx.net
+       </A><BR>
+    <I>Mon Jan 26 15:30:56 CET 2015</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000499.html">[99s-extend] Cowboy + SSL
+</A></li>
+        <LI>Next message: <A HREF="000496.html">[99s-extend] Rewriting URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#500">[ date ]</a>
+              <a href="thread.html#500">[ thread ]</a>
+              <a href="subject.html#500">[ subject ]</a>
+              <a href="author.html#500">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>&gt;<i> Hey, this is a known issue with recent Erlang versions:
+</I>&gt;<i> <A HREF="https://github.com/ninenines/ranch/issues/90">https://github.com/ninenines/ranch/issues/90</A>
+</I>
+sorry i didn't know a keyword for googling this issue
+
+well, it seems to me very interesting problem -- basically a dependency 
+that appears in runtime (if i do not pass an ssl socket to the ranch, 
+there will be no dependency).
+
+i dare to suggest few alternative approaches to the solution:
+
+(A) make the shutdown state distinguishable for the 'ranch_acceptor', so 
+that not to crash in one particular sub case of the preliminary socket 
+close. (a terrible STATEFUL solution, i do not dare to suggest how to 
+pass this state to the acceptor)
+
+(B) make it possible *in general* to pass additional dependencies to the 
+applications that your application depends on. (as for now i can define 
+in my .app.src any arbitrary deps for the &quot;top&quot; application, and then 
+this .app.src will be processed anyway, there is no harm in improving 
+this .app preparation procedure one step further, in order to affect 
+.app files of subordinate applications. (it is perhaps a suggestion for 
+relx devs, anyway, nobody forbid us to discuss it))
+
+there are some alternative ways to achieve (B)
+
+(B1)
+it would be a mere change of the type of the 'applications' option in 
+.app.src -- we may make it a tree instead of a list.
+for example:
+
+{applications, [
+         kernel,
+         stdlib,
+         mnesia,
+         {cowboy, [{ranch, [ssl]}]}
+]}
+%% which reads: my app requires all these,
+%% and cowboy must require ranch and ranch must require ssl
+
+it could (or should?) be shortened to:
+
+(B2)
+%% my app requires all these,
+%% and *IF* 'ranch' is somehow required then it must require ssl
+{applications, [
+         kernel,
+         stdlib,
+         mnesia,
+         cowboy,
+	{ranch, [ssl]}
+]}
+
+this in turn makes separation possible:
+
+(B3)
+we specify all applications we require as a plain list, and then we 
+specify PARTIAL ORDER: we need some certain pairs of applications to be 
+started in certain sequences.
+
+{applications, [
+         kernel,
+         stdlib,
+         mnesia,
+	ssl,
+         cowboy
+]},
+{sequence, [
+  	[ssl, ranch],
+]}
+
+%% which reads: my app requires those apps to start
+%% and among these it requires the ssl to be started BEFORE ranch
+
+%% generally we may specify any amount
+%% of subsequences we care about:
+{sequence, [
+  	[ssl, ranch],
+  	[ranch, cowboy_lib, cowboy],
+  	[appA1, appA2, appA3, ...],
+         ...
+]}
+
+of course the specified sequence MIGHT BE IMPOSSIBLE (self-refuting) and 
+it needs to be verified, which is formally possible.
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000499.html">[99s-extend] Cowboy + SSL
+</A></li>
+	<LI>Next message: <A HREF="000496.html">[99s-extend] Rewriting URLs
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#500">[ date ]</a>
+              <a href="thread.html#500">[ thread ]</a>
+              <a href="subject.html#500">[ subject ]</a>
+              <a href="author.html#500">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

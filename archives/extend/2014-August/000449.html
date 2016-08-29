@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] I need your feedback about this cowboy_rest	handler.
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20I%20need%20your%20feedback%20about%20this%20cowboy_rest%0A%09handler.&In-Reply-To=%3C53FDACFD.7020204%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000448.html">
+   <LINK REL="Next"  HREF="000450.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] I need your feedback about this cowboy_rest	handler.</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20I%20need%20your%20feedback%20about%20this%20cowboy_rest%0A%09handler.&In-Reply-To=%3C53FDACFD.7020204%40ninenines.eu%3E"
+       TITLE="[99s-extend] I need your feedback about this cowboy_rest	handler.">essen at ninenines.eu
+       </A><BR>
+    <I>Wed Aug 27 12:03:41 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000448.html">[99s-extend] I need your feedback about this cowboy_rest handler.
+</A></li>
+        <LI>Next message: <A HREF="000450.html">[99s-extend] I need your feedback about this cowboy_rest	handler.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#449">[ date ]</a>
+              <a href="thread.html#449">[ thread ]</a>
+              <a href="subject.html#449">[ subject ]</a>
+              <a href="author.html#449">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hey,
+
+On 08/27/2014 12:29 PM, St&#233;phane Wirtel wrote:
+&gt;<i> Hi all,
+</I>&gt;<i>
+</I>&gt;<i> This night, I wrote an example because I wanted to show you my work.
+</I>&gt;<i>
+</I>&gt;<i> I have one handler for the concept of collections (in this case, tasks).
+</I>&gt;<i>
+</I>&gt;<i> In this handler, I want these following methods:
+</I>&gt;<i>
+</I>&gt;<i> POST /:collection
+</I>&gt;<i> GET /:collection
+</I>&gt;<i> DELETE /:collection
+</I>&gt;<i> PUT /:collection
+</I>&gt;<i> HEAD /:collection
+</I>&gt;<i>
+</I>&gt;<i> :collection is a string, example: /tasks1
+</I>&gt;<i>
+</I>&gt;<i> HEAD /:collection (/tasks1)
+</I>&gt;<i> StatusCode:
+</I>&gt;<i>      * 200 ok
+</I>&gt;<i>      * 404 not found
+</I>&gt;<i>
+</I>&gt;<i> GET /:collection (/tasks1)
+</I>&gt;<i> Gets information about the collection
+</I>&gt;<i> StatusCode:
+</I>&gt;<i>      * 200 ok
+</I>&gt;<i>      * 404 not found
+</I>&gt;<i>
+</I>&gt;<i> PUT /:collection (/tasks1)
+</I>&gt;<i> Create a new collection of tasks
+</I>&gt;<i> Status_Code:
+</I>&gt;<i>      * 201 created
+</I>&gt;<i>      Response: an object, in msgpack or json and I need to had a
+</I>&gt;<i> location header
+</I>&gt;<i>      * 412 precondition failed, the collection name already exists
+</I>&gt;<i>      Response: an object, in msgpack or json with the error (already
+</I>&gt;<i> exists)
+</I>&gt;<i>
+</I>&gt;<i> POST /:collection (/tasks1)
+</I>&gt;<i> Add a new item in the collection, a new task
+</I>&gt;<i> StatusCode:
+</I>&gt;<i>      * 201 created
+</I>&gt;<i>      * 202 accepted
+</I>&gt;<i>      * 404 not found (error in the collection name)
+</I>&gt;<i> Response: need to add a location header and return an object in msgpack
+</I>&gt;<i> or json.
+</I>&gt;<i>
+</I>&gt;<i> DELETE /:collection (/tasks1)
+</I>&gt;<i> Delete all the tasks
+</I>&gt;<i> Status_Code:
+</I>&gt;<i>      * 200 ok.
+</I>&gt;<i>      * 404 not found
+</I>&gt;<i> In the case of 200, we need to return an object in msgpack or json.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> I provided a code and If you can help me, because I think cowboy_rest is
+</I>&gt;<i> a good solution, but I also think I will have some problems with my
+</I>&gt;<i> service.
+</I>&gt;<i>
+</I>&gt;<i> Examples:
+</I>&gt;<i> * delete_completed, I need to write the serialisation in the
+</I>&gt;<i> delete_completed function and not with the help of the defined callbacks
+</I>&gt;<i> of content_types_provided.
+</I>
+What's the problem? The callbacks you set in content_types_provided are 
+there to provide the *resource*. If you set a body in response to the 
+DELETE method you are not sending the resource but information about the 
+result of the operation.
+
+&gt;<i> * for PUT, I need to return a location header, should I add it in the
+</I>&gt;<i> is_conflict
+</I>&gt;<i> function?
+</I>
+I would say in the callback you set in content_types_accepted. But...
+
+&gt;<i> * for PUT, how I have a 201? I have read the rest_flowchart and I need
+</I>&gt;<i> to specify the location header ok, but where? in the is_conflict function?
+</I>
+Why do you need a 201? If you PUT a collection to /:collection then this 
+is already the location of the collection. I am not sure what you are 
+trying to do there exactly?
+
+&gt;<i> So, do you have time to help me, because with this example, I can
+</I>&gt;<i> propose it to the cowboy repository.
+</I>&gt;<i> <A HREF="https://github.com/matrixise/demo_rest/blob/master/src/collection_handler.erl">https://github.com/matrixise/demo_rest/blob/master/src/collection_handler.erl</A>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> You can propose your PR, comments or remarks, but I would like to use
+</I>&gt;<i> cowboy_rest.
+</I>&gt;<i>
+</I>&gt;<i> Regards,
+</I>&gt;<i>
+</I>&gt;<i> Stephane
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> St&#233;phane Wirtel - <A HREF="http://wirtel.be">http://wirtel.be</A> - @matrixise
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>
+-- 
+Lo&#239;c Hoguin
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000448.html">[99s-extend] I need your feedback about this cowboy_rest handler.
+</A></li>
+	<LI>Next message: <A HREF="000450.html">[99s-extend] I need your feedback about this cowboy_rest	handler.
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#449">[ date ]</a>
+              <a href="thread.html#449">[ thread ]</a>
+              <a href="subject.html#449">[ subject ]</a>
+              <a href="author.html#449">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

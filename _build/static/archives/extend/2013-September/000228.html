@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy load test
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20load%20test&In-Reply-To=%3C5236044B.5040905%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000227.html">
+   <LINK REL="Next"  HREF="000229.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy load test</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20load%20test&In-Reply-To=%3C5236044B.5040905%40ninenines.eu%3E"
+       TITLE="[99s-extend] Cowboy load test">essen at ninenines.eu
+       </A><BR>
+    <I>Sun Sep 15 21:02:35 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000227.html">[99s-extend] Cowboy load test
+</A></li>
+        <LI>Next message: <A HREF="000229.html">[99s-extend] Cowboy load test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#228">[ date ]</a>
+              <a href="thread.html#228">[ thread ]</a>
+              <a href="subject.html#228">[ subject ]</a>
+              <a href="author.html#228">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>This sounds like you have too many timers, or something else is using 
+the CPU. 40k connections is literally nothing. Also make sure the 
+clients are on a separate VM/machine.
+
+Either way 99% CPU for 10k sounds high, I've had that with 0 CPU (though 
+on real hardware).
+
+Someone a couple years back got above 1 million after fixing 'too many 
+timers issues' but I don't think it was on a medium instance.
+
+On 09/15/2013 07:01 PM, Joe Freeman wrote:
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> I've started work on a project using Clojure, but I was wondering
+</I>&gt;<i> whether (and secretly hoping that) Erlang would be a better fit, so I've
+</I>&gt;<i> been load testing a few web server frameworks. I'm particularly
+</I>&gt;<i> interested in how the server can handle a large number of concurrent
+</I>&gt;<i> WebSocket connections, and the test I've been running is similar to Eric
+</I>&gt;<i> Moritz's [1].
+</I>&gt;<i>
+</I>&gt;<i> I've setup a simple Cowboy 'echo' server running on an EC2 instance
+</I>&gt;<i> (m1.medium, as in Eric's test) which could comfortably handle 10k
+</I>&gt;<i> concurrent WebSocket requests (as in Eric's results), while echoing
+</I>&gt;<i> about 200 messages/second. The CPU usage of the VM at this point is
+</I>&gt;<i> about 99%, but the server continues to handle up to 40k concurrent
+</I>&gt;<i> connections with a consistent average response time (&lt;30ms). Pushing the
+</I>&gt;<i> test beyond this number results in a spike in response times and lots of
+</I>&gt;<i> connection timeouts.
+</I>&gt;<i>
+</I>&gt;<i> 40k connections seems pretty good, but when comparing this to the same
+</I>&gt;<i> test against a couple of Clojure/JVM-based frameworks (specifically
+</I>&gt;<i> Aleph/Netty and http-kit) I find I can get higher numbers of concurrent
+</I>&gt;<i> connections with slightly better average response times (100k
+</I>&gt;<i> connections, &lt;10ms response time) using much less CPU (~20%). In fact,
+</I>&gt;<i> memory seems to be the limiting factor.
+</I>&gt;<i>
+</I>&gt;<i> So I have two questions:
+</I>&gt;<i>
+</I>&gt;<i> 1) Should I be concerned about the CPU usage in the Erlang/Cowboy test?
+</I>&gt;<i> I have limited experience with Erlang so far, but 100% CPU feels like a
+</I>&gt;<i> bad thing.
+</I>&gt;<i>
+</I>&gt;<i> 2) Is there any way to increase the performance of the cowboy server?
+</I>&gt;<i> Are there any Erlang VM parameters I can change? The fact that the
+</I>&gt;<i> Clojure/JVM tests (on the same machine) have managed to get to 100k
+</I>&gt;<i> connections suggests that the limitation isn't being imposed by the
+</I>&gt;<i> operating system (I've applied changes various changes to sysctl and
+</I>&gt;<i> ulimit).
+</I>&gt;<i>
+</I>&gt;<i> (Perhaps an echo server isn't the best way to compare HTTP servers, but
+</I>&gt;<i> it feels like a good starting point.)
+</I>&gt;<i>
+</I>&gt;<i> Thanks for any help.
+</I>&gt;<i>
+</I>&gt;<i> [1] <A HREF="https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md">https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md</A> -
+</I>&gt;<i> the GitHub repo actually contains code for an Aleph server, but results
+</I>&gt;<i> from this aren't included in the summary here.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000227.html">[99s-extend] Cowboy load test
+</A></li>
+	<LI>Next message: <A HREF="000229.html">[99s-extend] Cowboy load test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#228">[ date ]</a>
+              <a href="thread.html#228">[ thread ]</a>
+              <a href="subject.html#228">[ subject ]</a>
+              <a href="author.html#228">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

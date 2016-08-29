@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] cowboy client cert auth, basic auth
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20cowboy%20client%20cert%20auth%2C%20basic%20auth&In-Reply-To=%3CCAJCf5Ry4Okkua__YtfU8bO5%3DAvYKPsXzU%2B1EqyXsK7tx2q6K8w%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000396.html">
+   <LINK REL="Next"  HREF="000398.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] cowboy client cert auth, basic auth</H1>
+    <B>Daniel Goertzen</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20cowboy%20client%20cert%20auth%2C%20basic%20auth&In-Reply-To=%3CCAJCf5Ry4Okkua__YtfU8bO5%3DAvYKPsXzU%2B1EqyXsK7tx2q6K8w%40mail.gmail.com%3E"
+       TITLE="[99s-extend] cowboy client cert auth, basic auth">daniel.goertzen at gmail.com
+       </A><BR>
+    <I>Thu Jun  5 23:01:12 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000396.html">[99s-extend] cowboy client cert auth, basic auth
+</A></li>
+        <LI>Next message: <A HREF="000398.html">[99s-extend] cowboy client cert auth, basic auth
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#397">[ date ]</a>
+              <a href="thread.html#397">[ thread ]</a>
+              <a href="subject.html#397">[ subject ]</a>
+              <a href="author.html#397">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>But then I would have to check the client cert for each and every request.
+I should have to check the cert only once at connect time and then be able
+to pass the result of that check in the request to each handler.
+
+Anyway I've gone ahead and implemented what I need in a generic manner and
+it seems to work well.  I think it would be a useful addition to Cowboy.
+If you agree I could write some more documentation for it.
+
+<A HREF="https://github.com/goertzenator/cowboy/tree/onconnect">https://github.com/goertzenator/cowboy/tree/onconnect</A>
+
+I added a &quot;onconnect&quot; hook and &quot;connection metadata&quot; to cowboy_req.  The
+connection metadata works like existing metadata, but is preserved from
+request to request on the same connection.  The onconnect hook provides
+initial values for the connection metadata.
+
+Dan.
+
+
+
+
+On Thu, Jun 5, 2014 at 3:04 AM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt; wrote:
+
+&gt;<i> On 06/05/2014 01:44 AM, Daniel Goertzen wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Wed, Jun 4, 2014 at 4:48 PM, Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>
+</I>&gt;&gt;<i> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt; wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     On 06/04/2014 10:08 PM, Daniel Goertzen wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         I am having very good luck with Cowboy so far, but I have some
+</I>&gt;&gt;<i>         questions:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>         1. There doesn't appear to be any way to do client certificate
+</I>&gt;&gt;<i>         authorization in Cowboy, although I see there is an example for
+</I>&gt;&gt;<i>         doing
+</I>&gt;&gt;<i>         exactly that with Ranch.  I think I could modify Cowboy to do
+</I>&gt;&gt;<i> what I
+</I>&gt;&gt;<i>         want, but I thought I would ask if there were other options
+</I>&gt;&gt;<i>         before doing
+</I>&gt;&gt;<i>         that.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Same as Ranch really, you just gotta take the socket and then call
+</I>&gt;&gt;<i>     the ssl functions.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Yes, but in cowboy there's no API to get at the socket.
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> There is the undocumented function cowboy_req:get/1 which is meant for
+</I>&gt;<i> that kind of &quot;special&quot; use.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Lo&#239;c Hoguin
+</I>&gt;<i> <A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>&gt;<i>
+</I>-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20140605/3ba15fb3/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20140605/3ba15fb3/attachment.html</A>&gt;
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000396.html">[99s-extend] cowboy client cert auth, basic auth
+</A></li>
+	<LI>Next message: <A HREF="000398.html">[99s-extend] cowboy client cert auth, basic auth
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#397">[ date ]</a>
+              <a href="thread.html#397">[ thread ]</a>
+              <a href="subject.html#397">[ subject ]</a>
+              <a href="author.html#397">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

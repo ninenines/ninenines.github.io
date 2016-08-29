@@ -1,0 +1,961 @@
+From dave at dloh.org  Mon May  6 04:23:00 2013
+From: dave at dloh.org (Dave Goehrig)
+Date: Sun, 5 May 2013 22:23:00 -0400
+Subject: [99s-extend] No draft-hybi-00 hixie-76 support?
+Message-ID: <40605B6A-E45F-491A-9B9D-70B2C5675F0F@dloh.org>
+
+Looking at the websocket code it doesn't seem to support the still rather widely adopted hybi-00 draft.  This is pretty fatal for use with mobile. 
+
+Patches wanted?
+
+Dave
+
+From dave at dloh.org  Mon May  6 04:44:58 2013
+From: dave at dloh.org (Dave Goehrig)
+Date: Sun, 5 May 2013 22:44:58 -0400
+Subject: [99s-extend] Draft hybi-00 and hixie-76 support
+Message-ID: <8AA3BDB9-9A43-40AA-8C13-9444353B4F32@dloh.org>
+
+Does cowboy currently support draft-hybi-00 of the websocket protocol?  My current testing seems like it does not. And a cursory review of the code failed to show anything other than more recent versions of the spec being tested for. 
+
+Patches welcome?
+
+Dave
+
+From jeremy at quarkgames.com  Mon May  6 05:47:44 2013
+From: jeremy at quarkgames.com (Jeremy Ong)
+Date: Sun, 5 May 2013 20:47:44 -0700
+Subject: [99s-extend] Draft hybi-00 and hixie-76 support
+In-Reply-To: <8AA3BDB9-9A43-40AA-8C13-9444353B4F32@dloh.org>
+References: <8AA3BDB9-9A43-40AA-8C13-9444353B4F32@dloh.org>
+Message-ID: <CAKD1GY5zqZqGVv2KXcJg_yuE+HEzj4D5xEP+Xe=4kF4sZfRP5A@mail.gmail.com>
+
+if you are talking about the websocket protocol version that did not
+have length delimited messaging and stuff, this has been deprecated
+for a while. An older version exists that supports it though.
+
+On Sun, May 5, 2013 at 7:44 PM, Dave Goehrig <dave at dloh.org> wrote:
+> Does cowboy currently support draft-hybi-00 of the websocket protocol?  My current testing seems like it does not. And a cursory review of the code failed to show anything other than more recent versions of the spec being tested for.
+>
+> Patches welcome?
+>
+> Dave
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+From essen at ninenines.eu  Mon May  6 13:27:28 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 06 May 2013 13:27:28 +0200
+Subject: [99s-extend] Draft hybi-00 and hixie-76 support
+In-Reply-To: <CAKD1GY5zqZqGVv2KXcJg_yuE+HEzj4D5xEP+Xe=4kF4sZfRP5A@mail.gmail.com>
+References: <8AA3BDB9-9A43-40AA-8C13-9444353B4F32@dloh.org>
+ <CAKD1GY5zqZqGVv2KXcJg_yuE+HEzj4D5xEP+Xe=4kF4sZfRP5A@mail.gmail.com>
+Message-ID: <518793A0.9020604@ninenines.eu>
+
+It was removed after 0.6.1 because it was in the way of improving the 
+more recent Websocket versions. You can easily port the module to 
+current Cowboy if you need it.
+
+On 05/06/2013 05:47 AM, Jeremy Ong wrote:
+> if you are talking about the websocket protocol version that did not
+> have length delimited messaging and stuff, this has been deprecated
+> for a while. An older version exists that supports it though.
+>
+> On Sun, May 5, 2013 at 7:44 PM, Dave Goehrig <dave at dloh.org> wrote:
+>> Does cowboy currently support draft-hybi-00 of the websocket protocol?  My current testing seems like it does not. And a cursory review of the code failed to show anything other than more recent versions of the spec being tested for.
+>>
+>> Patches welcome?
+>>
+>> Dave
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Mon May  6 17:38:44 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 06 May 2013 17:38:44 +0200
+Subject: [99s-extend] cowboy websocket and wamp
+In-Reply-To: <CAAh+K4zu6f1CM1Dij7XsnUCLXXqaS3E6ZugABuaiST99Pz+KnA@mail.gmail.com>
+References: <CAAh+K4zu6f1CM1Dij7XsnUCLXXqaS3E6ZugABuaiST99Pz+KnA@mail.gmail.com>
+Message-ID: <5187CE84.5060406@ninenines.eu>
+
+It's a JSON based protocol, so I suppose you need to write a Websocket 
+handler that implements that protocol using one of the JSON libraries 
+available in Erlang like jsx for example.
+
+On 04/30/2013 08:59 PM, Gregory de Souza wrote:
+> Hi,
+> I'm new to the community and am exploring cowboy for a project.
+>
+> Can anyone offer guidance/links on how to use cowboy's websocket support
+> with WAMP (http://wamp.ws/)?
+> The cowboy docs mention bullet
+> <https://github.com/extend/bullet?source=cr> as a convenient
+> client/server lib (with an AJAX fallback) which is great, but I'd like
+> to use WAMP's RPC and PubSub so I'm unsure how to proceed.
+>
+> Any tips would be appreciated!
+>
+> Thanks in advance
+> --
+> Gregory | @gdesouza <http://twitter.com/gdesouza> | http://blog.gdesouza.me
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From quiquepaz at gmail.com  Sun May 12 13:42:38 2013
+From: quiquepaz at gmail.com (Enrique Paz)
+Date: Sun, 12 May 2013 13:42:38 +0200
+Subject: [99s-extend] Cowboy: retrieving "just set" cookies
+Message-ID: <CAD4tsQ5wUFt2S_QSbRHc8BBnbagdQvu8Uz=bvdi4jWRjnPphKw@mail.gmail.com>
+
+Hi,
+
+I have a piece of code that receives a cowboy_req:http_req() object and
+depending on some Context sets 1 or more cookies
+using cowboy_req:set_resp_cookie/4.
+
+add_cookies(Req, Context) -> ReqWithCookiesSet
+
+I want to write a unit test for it, checking that the right cookies are set
+for the right Context.  How can I do that? I miss something like
+cowboy_req:get_resp_cookie/2 or so.
+
+Thx in advance for your help.
+
+-- 
+Enrique
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130512/dd43116e/attachment.html>
+
+From essen at ninenines.eu  Sun May 12 13:44:44 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sun, 12 May 2013 13:44:44 +0200
+Subject: [99s-extend] Cowboy: retrieving "just set" cookies
+In-Reply-To: <CAD4tsQ5wUFt2S_QSbRHc8BBnbagdQvu8Uz=bvdi4jWRjnPphKw@mail.gmail.com>
+References: <CAD4tsQ5wUFt2S_QSbRHc8BBnbagdQvu8Uz=bvdi4jWRjnPphKw@mail.gmail.com>
+Message-ID: <518F80AC.6060408@ninenines.eu>
+
+It sets a set-cookie header directly. You can retrieve all response 
+headers by calling something like cowboy_req:get(resp_headers, Req).
+
+On 05/12/2013 01:42 PM, Enrique Paz wrote:
+> Hi,
+>
+> I have a piece of code that receives a cowboy_req:http_req() object and
+> depending on some Context sets 1 or more cookies
+> using cowboy_req:set_resp_cookie/4.
+>
+> add_cookies(Req, Context) -> ReqWithCookiesSet
+>
+> I want to write a unit test for it, checking that the right cookies are
+> set for the right Context.  How can I do that? I miss something like
+> cowboy_req:get_resp_cookie/2 or so.
+>
+> Thx in advance for your help.
+>
+> --
+> Enrique
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From quiquepaz at gmail.com  Sun May 12 13:59:44 2013
+From: quiquepaz at gmail.com (Enrique Paz)
+Date: Sun, 12 May 2013 13:59:44 +0200
+Subject: [99s-extend] Cowboy: retrieving "just set" cookies
+In-Reply-To: <518F80AC.6060408@ninenines.eu>
+References: <CAD4tsQ5wUFt2S_QSbRHc8BBnbagdQvu8Uz=bvdi4jWRjnPphKw@mail.gmail.com>
+ <518F80AC.6060408@ninenines.eu>
+Message-ID: <CAD4tsQ7Tb+rj0exA+0LJfN5gzwXMafFd=GospJGpp-wh_izb-w@mail.gmail.com>
+
+Ok, thx, I missed that one :)
+
+
+2013/5/12 Lo?c Hoguin <essen at ninenines.eu>
+
+> It sets a set-cookie header directly. You can retrieve all response
+> headers by calling something like cowboy_req:get(resp_headers, Req).
+>
+>
+> On 05/12/2013 01:42 PM, Enrique Paz wrote:
+>
+>> Hi,
+>>
+>> I have a piece of code that receives a cowboy_req:http_req() object and
+>> depending on some Context sets 1 or more cookies
+>> using cowboy_req:set_resp_cookie/4.
+>>
+>> add_cookies(Req, Context) -> ReqWithCookiesSet
+>>
+>> I want to write a unit test for it, checking that the right cookies are
+>> set for the right Context.  How can I do that? I miss something like
+>> cowboy_req:get_resp_cookie/2 or so.
+>>
+>> Thx in advance for your help.
+>>
+>> --
+>> Enrique
+>>
+>>
+>> ______________________________**_________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+
+
+
+-- 
+quique
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130512/65929751/attachment.html>
+
+From ivan at llaisdy.com  Wed May 15 12:56:57 2013
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Wed, 15 May 2013 11:56:57 +0100
+Subject: [99s-extend] "access.log" for Cowboy
+Message-ID: <519369F9.4090008@llaisdy.com>
+
+Dear All
+
+I'm using cowboy for a restful web application, and I've set up 
+on_request_hook and on_response_hook to log requests and responses.
+
+I'm using lager for logging and at the moment the above log messages are 
+just going out to the console.log file (via lager:info/2).
+
+I'd like to have these log messages sent to a separate file, e.g., 
+"access.log", that contains only the request & response logs.
+
+Is anyone doing something like this now?  I think it's not an unusual 
+pattern with web servers.  Can I do this with lager (i.e., send only 
+messages at level X, not level X or above)?  Is there a more appropriate 
+logging mechanism?
+
+With thanks and best wishes
+
+Ivan
+
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From hq at mtod.org  Wed May 15 13:09:45 2013
+From: hq at mtod.org (Adam Rutkowski)
+Date: Wed, 15 May 2013 13:09:45 +0200
+Subject: [99s-extend] "access.log" for Cowboy
+In-Reply-To: <519369F9.4090008@llaisdy.com>
+References: <519369F9.4090008@llaisdy.com>
+Message-ID: <AC6D0689-4837-4211-8F0A-655B5CDB930E@mtod.org>
+
+
+On 15 May 2013, at 12:56, Ivan Uemlianin wrote:
+> 
+> Is anyone doing something like this now?  I think it's not an unusual pattern with web servers.  Can I do this with lager (i.e., send only messages at level X, not level X or above)?  Is there a more appropriate logging mechanism?
+
+See lager's tracing feature. You can tag your messages and redirect them to a specific backend. 
+Since 353dd21fde tracing is configurable.
+
+A.
+
+From ivan at llaisdy.com  Wed May 15 13:40:47 2013
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Wed, 15 May 2013 12:40:47 +0100
+Subject: [99s-extend] SOLVED  --  Re:  "access.log" for Cowboy
+In-Reply-To: <AC6D0689-4837-4211-8F0A-655B5CDB930E@mtod.org>
+References: <519369F9.4090008@llaisdy.com>
+ <AC6D0689-4837-4211-8F0A-655B5CDB930E@mtod.org>
+Message-ID: <5193743F.4010007@llaisdy.com>
+
+Thanks!  I got that working.
+
+When I start cowboy, I call
+
+   {ok, Trace} = lager:trace_file("path/to//access.log",
+                                 [{type, access}]),
+
+When you say
+
+ > Since 353dd21fde tracing is configurable.
+
+Do you mean the above could go in a .config file?  I haven't found 
+anything to that effect.  I'll keep looking.
+
+Best wishes
+
+Ivan
+
+
+On 15/05/2013 12:09, Adam Rutkowski wrote:
+>
+> On 15 May 2013, at 12:56, Ivan Uemlianin wrote:
+>>
+>> Is anyone doing something like this now?  I think it's not an unusual pattern with web servers.  Can I do this with lager (i.e., send only messages at level X, not level X or above)?  Is there a more appropriate logging mechanism?
+>
+> See lager's tracing feature. You can tag your messages and redirect them to a specific backend.
+> Since 353dd21fde tracing is configurable.
+>
+> A.
+>
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From hq at mtod.org  Wed May 15 13:56:09 2013
+From: hq at mtod.org (Adam Rutkowski)
+Date: Wed, 15 May 2013 13:56:09 +0200
+Subject: [99s-extend] SOLVED  --  Re:  "access.log" for Cowboy
+In-Reply-To: <5193743F.4010007@llaisdy.com>
+References: <519369F9.4090008@llaisdy.com>
+ <AC6D0689-4837-4211-8F0A-655B5CDB930E@mtod.org>
+ <5193743F.4010007@llaisdy.com>
+Message-ID: <DD8A9168-6838-4627-9E34-002120DBBEE9@mtod.org>
+
+
+On 15 May 2013, at 13:40, Ivan Uemlianin wrote:
+
+> Thanks!  I got that working.
+> 
+> When I start cowboy, I call
+> 
+>  {ok, Trace} = lager:trace_file("path/to//access.log",
+>                                [{type, access}]),
+> 
+> When you say
+> 
+> > Since 353dd21fde tracing is configurable.
+> 
+> Do you mean the above could go in a .config file?  I haven't found anything to that effect.  I'll keep looking.
+
+See https://github.com/basho/lager/pull/134
+
+From ivan at llaisdy.com  Wed May 15 14:43:28 2013
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Wed, 15 May 2013 13:43:28 +0100
+Subject: [99s-extend] SOLVED  --  Re:  "access.log" for Cowboy
+In-Reply-To: <DD8A9168-6838-4627-9E34-002120DBBEE9@mtod.org>
+References: <519369F9.4090008@llaisdy.com>
+ <AC6D0689-4837-4211-8F0A-655B5CDB930E@mtod.org>
+ <5193743F.4010007@llaisdy.com>
+ <DD8A9168-6838-4627-9E34-002120DBBEE9@mtod.org>
+Message-ID: <519382F0.4040309@llaisdy.com>
+
+Thanks for this.  I've tried it.  It seems to be adding a trace to an 
+already existing log file (which is already handling log messagse of a 
+certain level).  e.g., it uses lager:trace not lager:trace_file.
+
+I can't set it up so the trace file receives *only* trace messages.  I'l 
+revert to the lager:trace_file call.
+
+Best wishes
+
+Ivan
+
+
+Below is the config I've been using.
+
+  {lager, [
+           {handlers,
+	   [
+	    {lager_console_backend, info},
+	    {lager_file_backend,
+	     [
+	      [{file, "log/error.log"}, {level, error},
+                {size, 10485760},
+	       {date, "$D0"}, {count, 5}],
+	      [{file, "log/console.log"}, {level, info},
+                {size, 10485760},
+	       {date, "$D0"}, {count, 5}],
+	      [{file, "log/access.log"},
+                {size, 10485760},
+	       {date, "$D0"}, {count, 5}]
+	     ]}
+	   ]},
+	  {traces,
+	   [
+	    {{lager_file_backend, "log/access.log"},
+              [{type, access}], debug}
+	   ]}
+          ]},
+
+
+On 15/05/2013 12:56, Adam Rutkowski wrote:
+>
+> On 15 May 2013, at 13:40, Ivan Uemlianin wrote:
+>
+>> Thanks!  I got that working.
+>>
+>> When I start cowboy, I call
+>>
+>>   {ok, Trace} = lager:trace_file("path/to//access.log",
+>>                                 [{type, access}]),
+>>
+>> When you say
+>>
+>>> Since 353dd21fde tracing is configurable.
+>>
+>> Do you mean the above could go in a .config file?  I haven't found anything to that effect.  I'll keep looking.
+>
+> See https://github.com/basho/lager/pull/134
+>
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From hq at mtod.org  Wed May 15 15:33:28 2013
+From: hq at mtod.org (Adam Rutkowski)
+Date: Wed, 15 May 2013 15:33:28 +0200
+Subject: [99s-extend] SOLVED  --  Re:  "access.log" for Cowboy
+In-Reply-To: <519382F0.4040309@llaisdy.com>
+References: <519369F9.4090008@llaisdy.com>
+ <AC6D0689-4837-4211-8F0A-655B5CDB930E@mtod.org>
+ <5193743F.4010007@llaisdy.com>
+ <DD8A9168-6838-4627-9E34-002120DBBEE9@mtod.org>
+ <519382F0.4040309@llaisdy.com>
+Message-ID: <E5A88FAB-2D1D-4D93-8281-DC024EA91BDD@mtod.org>
+
+
+On 15 May 2013, at 14:43, Ivan Uemlianin wrote:
+
+> Thanks for this.  I've tried it.  It seems to be adding a trace to an already existing log file (which is already handling log messagse of a certain level).  e.g., it uses lager:trace not lager:trace_file.
+> 
+> I can't set it up so the trace file receives *only* trace messages.  I'l revert to the lager:trace_file call.
+
+The following setup works for me:
+
+[
+
+{lager, [
+    {colored, true},
+    {handlers, [
+      {lager_console_backend, info},
+      {lager_file_backend, [
+                {file, "log/error.log"}, {level, error}, {size, 10485760}, {date, "$D0"}, {count, 5}]},
+      {lager_file_backend, [
+                {file, "log/cdr.log"}, {level, none}, {size, 1000}, {date, "$D0"}, {count, 5}]}
+      ]},
+    {crash_log, "log/crash.log"},
+
+
+{traces,
+[
+{{lager_file_backend, "log/cdr.log"}, [{type, cdr}], debug}
+]}
+
+]}
+
+
+].
+
+Hope it helps, take care.
+A.
+
+From ivan at llaisdy.com  Wed May 15 15:47:05 2013
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Wed, 15 May 2013 14:47:05 +0100
+Subject: [99s-extend] REALLY SOLVED -- Re: SOLVED -- Re: "access.log" for
+ Cowboy
+In-Reply-To: <E5A88FAB-2D1D-4D93-8281-DC024EA91BDD@mtod.org>
+References: <519369F9.4090008@llaisdy.com>
+ <AC6D0689-4837-4211-8F0A-655B5CDB930E@mtod.org>
+ <5193743F.4010007@llaisdy.com>
+ <DD8A9168-6838-4627-9E34-002120DBBEE9@mtod.org>
+ <519382F0.4040309@llaisdy.com>
+ <E5A88FAB-2D1D-4D93-8281-DC024EA91BDD@mtod.org>
+Message-ID: <519391D9.1000207@llaisdy.com>
+
+Thanks!  That works for me too: it was the "{level, none}" that did it. 
+(I've also spruced up my syntax for lager 2.*)
+
+Thanks for your help and patience.
+
+Ivan
+
+
+On 15/05/2013 14:33, Adam Rutkowski wrote:
+>
+> On 15 May 2013, at 14:43, Ivan Uemlianin wrote:
+>
+>> Thanks for this.  I've tried it.  It seems to be adding a trace to an already existing log file (which is already handling log messagse of a certain level).  e.g., it uses lager:trace not lager:trace_file.
+>>
+>> I can't set it up so the trace file receives *only* trace messages.  I'l revert to the lager:trace_file call.
+>
+> The following setup works for me:
+>
+> [
+>
+> {lager, [
+>      {colored, true},
+>      {handlers, [
+>        {lager_console_backend, info},
+>        {lager_file_backend, [
+>                  {file, "log/error.log"}, {level, error}, {size, 10485760}, {date, "$D0"}, {count, 5}]},
+>        {lager_file_backend, [
+>                  {file, "log/cdr.log"}, {level, none}, {size, 1000}, {date, "$D0"}, {count, 5}]}
+>        ]},
+>      {crash_log, "log/crash.log"},
+>
+>
+> {traces,
+> [
+> {{lager_file_backend, "log/cdr.log"}, [{type, cdr}], debug}
+> ]}
+>
+> ]}
+>
+>
+> ].
+>
+> Hope it helps, take care.
+> A.
+>
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From chatlano at googlemail.com  Fri May 17 17:41:11 2013
+From: chatlano at googlemail.com (Witali Monastyrjow)
+Date: Fri, 17 May 2013 17:41:11 +0200
+Subject: [99s-extend] question to rest handler
+Message-ID: <CALt=J4P4vpHWTJ9D7JKbv04PU=ktAsqMdbFnjF3zNLt7Kg9NmA@mail.gmail.com>
+
+Hi all,
+
+I am learning cowboy by building a small application with rest interface.
+I have a hello_world rest handler and I want to implement POST method that
+returns
+json as response to a client. Therefor I implemented  callbacks
+allowed_methods,
+content_types_accepted and hello_json. The docu says user callbacks can
+return {Value, Req, State} and also can return {halt, Req, State}. It is
+not really clear
+what that Value should be. So I tried {ok, Req, State} and {true, Req,
+State} and with
+both values I have
+
+=ERROR REPORT==== 11-May-2013::16:06:40 ===
+Error in process <0.6649.0> with exit value:
+{function_clause,[{cowboy_req,reply,[303,....
+
+and client gets right response. If I use {halt, Req, State} the client gets
+right response too
+and there is no errors. So, Is it right way to write a POST callback and
+what Values can
+be used for user callbacks? I write my code below.
+
+amike,
+Vitali
+
+allowed_methods(Req, State) ->
+{[<<"POST">>, <<"DELETE">>], Req, State}.
+
+content_types_accepted(Req, State) ->
+{[
+    {{<<"application">>, <<"x-www-form-urlencoded">>, []}, hello_json}
+ ], Req, State}.
+
+hello_json(Req, State) ->
+{ok, Req2} = cowboy_req:reply(200, [{<<"content-type">>,
+<<"application/json">>} ], <<"{\"rest\": \"Hello World!\"}">>, Req),
+{halt, Req2, State}.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130517/629071b8/attachment.html>
+
+From essen at ninenines.eu  Fri May 17 18:15:47 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 17 May 2013 18:15:47 +0200
+Subject: [99s-extend] question to rest handler
+In-Reply-To: <CALt=J4P4vpHWTJ9D7JKbv04PU=ktAsqMdbFnjF3zNLt7Kg9NmA@mail.gmail.com>
+References: <CALt=J4P4vpHWTJ9D7JKbv04PU=ktAsqMdbFnjF3zNLt7Kg9NmA@mail.gmail.com>
+Message-ID: <519657B3.1080104@ninenines.eu>
+
+All the callbacks are explained in 
+http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_rest
+
+In your case take a special look at content_types_accepted.
+
+On 05/17/2013 05:41 PM, Witali Monastyrjow wrote:
+> Hi all,
+>
+> I am learning cowboy by building a small application with rest interface.
+> I have a hello_world rest handler and I want to implement POST method
+> that returns
+> json as response to a client. Therefor I implemented  callbacks
+> allowed_methods,
+> content_types_accepted and hello_json. The docu says user callbacks can
+> return {Value, Req, State} and also can return {halt, Req, State}. It is
+> not really clear
+> what that Value should be. So I tried {ok, Req, State} and {true, Req,
+> State} and with
+> both values I have
+>
+> =ERROR REPORT==== 11-May-2013::16:06:40 ===
+> Error in process <0.6649.0> with exit value:
+> {function_clause,[{cowboy_req,reply,[303,....
+>
+> and client gets right response. If I use {halt, Req, State} the client
+> gets right response too
+> and there is no errors. So, Is it right way to write a POST callback and
+> what Values can
+> be used for user callbacks? I write my code below.
+>
+> amike,
+> Vitali
+>
+> allowed_methods(Req, State) ->
+> {[<<"POST">>, <<"DELETE">>], Req, State}.
+>
+> content_types_accepted(Req, State) ->
+> {[
+>      {{<<"application">>, <<"x-www-form-urlencoded">>, []}, hello_json}
+>   ], Req, State}.
+>
+> hello_json(Req, State) ->
+> {ok, Req2} = cowboy_req:reply(200, [{<<"content-type">>,
+> <<"application/json">>} ], <<"{\"rest\": \"Hello World!\"}">>, Req),
+> {halt, Req2, State}.
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From edgurgel at gmail.com  Mon May 20 03:01:24 2013
+From: edgurgel at gmail.com (Eduardo Gurgel)
+Date: Sun, 19 May 2013 22:01:24 -0300
+Subject: [99s-extend] Cowboy Middleware and websockets
+Message-ID: <CAKAMJXjRWpXjD9iJ2F3ETtPU++nRUitpgg+-vG08Q1vLfD6+zQ@mail.gmail.com>
+
+I want to write a cowboy middleware that works only on non-websocket
+requests. How can I achieve this? Is there any way that I ask the Request
+if this is a websocket request?
+
+Thank you
+
+-- 
+Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130519/db7f08ab/attachment.html>
+
+From edgurgel at gmail.com  Mon May 20 13:53:33 2013
+From: edgurgel at gmail.com (Eduardo Gurgel)
+Date: Mon, 20 May 2013 08:53:33 -0300
+Subject: [99s-extend] Cowboy Middleware and websockets
+In-Reply-To: <CAKAMJXjRWpXjD9iJ2F3ETtPU++nRUitpgg+-vG08Q1vLfD6+zQ@mail.gmail.com>
+References: <CAKAMJXjRWpXjD9iJ2F3ETtPU++nRUitpgg+-vG08Q1vLfD6+zQ@mail.gmail.com>
+Message-ID: <CAKAMJXiqOr1kvg5YpGdgAfzqx8TKbieSmGA_=O=CkL4DyNKkLg@mail.gmail.com>
+
+On Sun, May 19, 2013 at 10:01 PM, Eduardo Gurgel <edgurgel at gmail.com> wrote:
+
+> I want to write a cowboy middleware that works only on non-websocket
+> requests. How can I achieve this? Is there any way that I ask the Request
+> if this is a websocket request?
+>
+>
+Thinking about my question, I see that the middleware (if it's behind the
+cowboy_handler) can't figure if the connection will be upgraded or not.
+
+Still, it would be cool if I could select which routes will be applied to
+my middleware.
+
+Am I making any sense? :)
+
+-- 
+Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130520/3cc045e8/attachment.html>
+
+From essen at ninenines.eu  Mon May 20 15:25:53 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 20 May 2013 15:25:53 +0200
+Subject: [99s-extend] Cowboy Middleware and websockets
+In-Reply-To: <CAKAMJXiqOr1kvg5YpGdgAfzqx8TKbieSmGA_=O=CkL4DyNKkLg@mail.gmail.com>
+References: <CAKAMJXjRWpXjD9iJ2F3ETtPU++nRUitpgg+-vG08Q1vLfD6+zQ@mail.gmail.com>
+ <CAKAMJXiqOr1kvg5YpGdgAfzqx8TKbieSmGA_=O=CkL4DyNKkLg@mail.gmail.com>
+Message-ID: <519A2461.1000305@ninenines.eu>
+
+On 05/20/2013 01:53 PM, Eduardo Gurgel wrote:
+>
+>
+>
+> On Sun, May 19, 2013 at 10:01 PM, Eduardo Gurgel <edgurgel at gmail.com
+> <mailto:edgurgel at gmail.com>> wrote:
+>
+>     I want to write a cowboy middleware that works only on non-websocket
+>     requests. How can I achieve this? Is there any way that I ask the
+>     Request if this is a websocket request?
+>
+>
+> Thinking about my question, I see that the middleware (if it's behind
+> the cowboy_handler) can't figure if the connection will be upgraded or not.
+>
+> Still, it would be cool if I could select which routes will be applied
+> to my middleware.
+
+You have the Req which can help you do things based on host or path, and 
+you also have the environment, which contains the name of the handler 
+that's gonna be used if you execute your middleware after cowboy_router.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From edgurgel at gmail.com  Mon May 20 16:06:20 2013
+From: edgurgel at gmail.com (Eduardo Gurgel)
+Date: Mon, 20 May 2013 11:06:20 -0300
+Subject: [99s-extend] Cowboy Middleware and websockets
+In-Reply-To: <519A2461.1000305@ninenines.eu>
+References: <CAKAMJXjRWpXjD9iJ2F3ETtPU++nRUitpgg+-vG08Q1vLfD6+zQ@mail.gmail.com>
+ <CAKAMJXiqOr1kvg5YpGdgAfzqx8TKbieSmGA_=O=CkL4DyNKkLg@mail.gmail.com>
+ <519A2461.1000305@ninenines.eu>
+Message-ID: <CAKAMJXgzxmyP3Z_ZmzE631vjtp1nK66CKj+tdTLrPhYqmbQG0Q@mail.gmail.com>
+
+On Mon, May 20, 2013 at 10:25 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> On 05/20/2013 01:53 PM, Eduardo Gurgel wrote:
+>
+>>
+>>
+>>
+>> On Sun, May 19, 2013 at 10:01 PM, Eduardo Gurgel <edgurgel at gmail.com
+>> <mailto:edgurgel at gmail.com>> wrote:
+>>
+>>     I want to write a cowboy middleware that works only on non-websocket
+>>     requests. How can I achieve this? Is there any way that I ask the
+>>     Request if this is a websocket request?
+>>
+>>
+>> Thinking about my question, I see that the middleware (if it's behind
+>> the cowboy_handler) can't figure if the connection will be upgraded or
+>> not.
+>>
+>> Still, it would be cool if I could select which routes will be applied
+>> to my middleware.
+>>
+>
+> You have the Req which can help you do things based on host or path, and
+> you also have the environment, which contains the name of the handler
+> that's gonna be used if you execute your middleware after cowboy_router.
+>
+>
+Perfect! The environment can help me :)
+
+
+Thank you, again!
+
+-- 
+Eduardo
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130520/5134ba32/attachment.html>
+
+From Kevin.Brown at turner.com  Mon May 20 20:54:20 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Mon, 20 May 2013 18:54:20 +0000
+Subject: [99s-extend] REALLY SOLVED -- Re: SOLVED -- Re: "access.log"
+ for Cowboy
+In-Reply-To: <519391D9.1000207@llaisdy.com>
+Message-ID: <CDBFE88D.BC24%kevin.brown@turner.com>
+
+Would there be any interest in an access_combined log format?
+
+http://httpd.apache.org/docs/2.2/logs.html
+
+
+
+On 5/15/13 9:47 AM, "Ivan Uemlianin" <ivan at llaisdy.com> wrote:
+
+>Thanks!  That works for me too: it was the "{level, none}" that did it.
+>(I've also spruced up my syntax for lager 2.*)
+>
+>Thanks for your help and patience.
+>
+>Ivan
+>
+>
+>On 15/05/2013 14:33, Adam Rutkowski wrote:
+>>
+>> On 15 May 2013, at 14:43, Ivan Uemlianin wrote:
+>>
+>>> Thanks for this.  I've tried it.  It seems to be adding a trace to an
+>>>already existing log file (which is already handling log messagse of a
+>>>certain level).  e.g., it uses lager:trace not lager:trace_file.
+>>>
+>>> I can't set it up so the trace file receives *only* trace messages.
+>>>I'l revert to the lager:trace_file call.
+>>
+>> The following setup works for me:
+>>
+>> [
+>>
+>> {lager, [
+>>      {colored, true},
+>>      {handlers, [
+>>        {lager_console_backend, info},
+>>        {lager_file_backend, [
+>>                  {file, "log/error.log"}, {level, error}, {size,
+>>10485760}, {date, "$D0"}, {count, 5}]},
+>>        {lager_file_backend, [
+>>                  {file, "log/cdr.log"}, {level, none}, {size, 1000},
+>>{date, "$D0"}, {count, 5}]}
+>>        ]},
+>>      {crash_log, "log/crash.log"},
+>>
+>>
+>> {traces,
+>> [
+>> {{lager_file_backend, "log/cdr.log"}, [{type, cdr}], debug}
+>> ]}
+>>
+>> ]}
+>>
+>>
+>> ].
+>>
+>> Hope it helps, take care.
+>> A.
+>>
+>
+>-- 
+>============================================================
+>Ivan A. Uemlianin PhD
+>Llaisdy
+>Speech Technology Research and Development
+>
+>                     ivan at llaisdy.com
+>                      www.llaisdy.com
+>                          llaisdy.wordpress.com
+>               github.com/llaisdy
+>                      www.linkedin.com/in/ivanuemlianin
+>
+>                         festina lente
+>============================================================
+>_______________________________________________
+>Extend mailing list
+>Extend at lists.ninenines.eu
+>http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+
+

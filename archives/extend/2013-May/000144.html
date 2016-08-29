@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] question to rest handler
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20question%20to%20rest%20handler&In-Reply-To=%3C519657B3.1080104%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000143.html">
+   <LINK REL="Next"  HREF="000145.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] question to rest handler</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20question%20to%20rest%20handler&In-Reply-To=%3C519657B3.1080104%40ninenines.eu%3E"
+       TITLE="[99s-extend] question to rest handler">essen at ninenines.eu
+       </A><BR>
+    <I>Fri May 17 18:15:47 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000143.html">[99s-extend] question to rest handler
+</A></li>
+        <LI>Next message: <A HREF="000145.html">[99s-extend] Cowboy Middleware and websockets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#144">[ date ]</a>
+              <a href="thread.html#144">[ thread ]</a>
+              <a href="subject.html#144">[ subject ]</a>
+              <a href="author.html#144">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>All the callbacks are explained in 
+<A HREF="http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_rest">http://ninenines.eu/docs/en/cowboy/HEAD/manual/cowboy_rest</A>
+
+In your case take a special look at content_types_accepted.
+
+On 05/17/2013 05:41 PM, Witali Monastyrjow wrote:
+&gt;<i> Hi all,
+</I>&gt;<i>
+</I>&gt;<i> I am learning cowboy by building a small application with rest interface.
+</I>&gt;<i> I have a hello_world rest handler and I want to implement POST method
+</I>&gt;<i> that returns
+</I>&gt;<i> json as response to a client. Therefor I implemented  callbacks
+</I>&gt;<i> allowed_methods,
+</I>&gt;<i> content_types_accepted and hello_json. The docu says user callbacks can
+</I>&gt;<i> return {Value, Req, State} and also can return {halt, Req, State}. It is
+</I>&gt;<i> not really clear
+</I>&gt;<i> what that Value should be. So I tried {ok, Req, State} and {true, Req,
+</I>&gt;<i> State} and with
+</I>&gt;<i> both values I have
+</I>&gt;<i>
+</I>&gt;<i> =ERROR REPORT==== 11-May-2013::16:06:40 ===
+</I>&gt;<i> Error in process &lt;0.6649.0&gt; with exit value:
+</I>&gt;<i> {function_clause,[{cowboy_req,reply,[303,....
+</I>&gt;<i>
+</I>&gt;<i> and client gets right response. If I use {halt, Req, State} the client
+</I>&gt;<i> gets right response too
+</I>&gt;<i> and there is no errors. So, Is it right way to write a POST callback and
+</I>&gt;<i> what Values can
+</I>&gt;<i> be used for user callbacks? I write my code below.
+</I>&gt;<i>
+</I>&gt;<i> amike,
+</I>&gt;<i> Vitali
+</I>&gt;<i>
+</I>&gt;<i> allowed_methods(Req, State) -&gt;
+</I>&gt;<i> {[&lt;&lt;&quot;POST&quot;&gt;&gt;, &lt;&lt;&quot;DELETE&quot;&gt;&gt;], Req, State}.
+</I>&gt;<i>
+</I>&gt;<i> content_types_accepted(Req, State) -&gt;
+</I>&gt;<i> {[
+</I>&gt;<i>      {{&lt;&lt;&quot;application&quot;&gt;&gt;, &lt;&lt;&quot;x-www-form-urlencoded&quot;&gt;&gt;, []}, hello_json}
+</I>&gt;<i>   ], Req, State}.
+</I>&gt;<i>
+</I>&gt;<i> hello_json(Req, State) -&gt;
+</I>&gt;<i> {ok, Req2} = cowboy_req:reply(200, [{&lt;&lt;&quot;content-type&quot;&gt;&gt;,
+</I>&gt;<i> &lt;&lt;&quot;application/json&quot;&gt;&gt;} ], &lt;&lt;&quot;{\&quot;rest\&quot;: \&quot;Hello World!\&quot;}&quot;&gt;&gt;, Req),
+</I>&gt;<i> {halt, Req2, State}.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000143.html">[99s-extend] question to rest handler
+</A></li>
+	<LI>Next message: <A HREF="000145.html">[99s-extend] Cowboy Middleware and websockets
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#144">[ date ]</a>
+              <a href="thread.html#144">[ thread ]</a>
+              <a href="subject.html#144">[ subject ]</a>
+              <a href="author.html#144">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

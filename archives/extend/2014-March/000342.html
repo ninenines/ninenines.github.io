@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy pre request filter
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20pre%20request%20filter&In-Reply-To=%3CCACE%3DTJqaoxrqsCSnN44s_5x4MabgWBVfaN_pecVrShnUuU-9aQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000341.html">
+   <LINK REL="Next"  HREF="000346.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy pre request filter</H1>
+    <B>Mark Nijhof</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20pre%20request%20filter&In-Reply-To=%3CCACE%3DTJqaoxrqsCSnN44s_5x4MabgWBVfaN_pecVrShnUuU-9aQ%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Cowboy pre request filter">mark.nijhof at cre8ivethought.com
+       </A><BR>
+    <I>Thu Mar  6 10:52:01 CET 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000341.html">[99s-extend] Cowboy pre request filter
+</A></li>
+        <LI>Next message: <A HREF="000346.html">[99s-extend] Trying to grok erlang.mk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#342">[ date ]</a>
+              <a href="thread.html#342">[ thread ]</a>
+              <a href="subject.html#342">[ subject ]</a>
+              <a href="author.html#342">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>I also found the answer to my own question: custom middleware
+
+I just created:
+
+   1 -module(authentication_middleware).
+   2
+   3 -behaviour(cowboy_middleware).
+   4
+   5 -export([execute/2]).
+   6
+   7 execute(Req, Env) -&gt;
+   8
+   9     {Path, Req1} = cowboy_req:path(Req),
+  10
+  11     case Path of
+  12         &lt;&lt;&quot;/login.html&quot;&gt;&gt; -&gt;
+  13             {ok, Req1, Env};
+  14         &lt;&lt;&quot;/do_login&quot;&gt;&gt; -&gt;
+  15             {ok, Req1, Env};
+  16         _ -&gt;
+  17             case id3as_security:is_request_authenticated(Req1) of
+  18                 {error, eauth, Req2} -&gt;
+  19                     {ok, Req4} = cowboy_req:reply(303,
+[{&lt;&lt;&quot;Location&quot;&gt;&gt;, &lt;&lt;&quot;/login.html&quot;&gt;&gt;}], &quot;&quot;, Req2),
+  20                     {halt, Req4};
+  21                 {authenticated, _Id, Req2} -&gt;
+  22                    {ok, Req2, Env}
+  23             end
+  24     end.
+
+And put this between the cowboy_router and cowboy_handler and life is all
+good.
+
+-Mark
+
+
+
+On Thu, Mar 6, 2014 at 12:47 AM, Mark Nijhof &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">mark.nijhof at cre8ivethought.com</A>
+&gt;<i> wrote:
+</I>
+&gt;<i> Hi,
+</I>&gt;<i>
+</I>&gt;<i> I want to create a module that basically sits between the incoming request
+</I>&gt;<i> and the http handler for that request to ensure a request is authenticated
+</I>&gt;<i> (using a cookie), if the request is not authenticated then I like to
+</I>&gt;<i> redirect to a specific login page (which should not be filtered).
+</I>&gt;<i>
+</I>&gt;<i> Is this possible with Cowboy? Should I use the onrequest hook (not sure if
+</I>&gt;<i> I can force redirects from there) for that or is there a better way?
+</I>&gt;<i>
+</I>&gt;<i> Cheers,
+</I>&gt;<i>
+</I>&gt;<i> -Mark
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Mark Nijhof
+</I>&gt;<i> t:   @MarkNijhof &lt;<A HREF="https://twitter.com/MarkNijhof">https://twitter.com/MarkNijhof</A>&gt;
+</I>&gt;<i> s:  marknijhof
+</I>&gt;<i>
+</I>&gt;<i>
+</I>
+
+-- 
+Mark Nijhof
+t:   @MarkNijhof &lt;<A HREF="https://twitter.com/MarkNijhof">https://twitter.com/MarkNijhof</A>&gt;
+s:  marknijhof
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20140306/24422ef2/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20140306/24422ef2/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000341.html">[99s-extend] Cowboy pre request filter
+</A></li>
+	<LI>Next message: <A HREF="000346.html">[99s-extend] Trying to grok erlang.mk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#342">[ date ]</a>
+              <a href="thread.html#342">[ thread ]</a>
+              <a href="subject.html#342">[ subject ]</a>
+              <a href="author.html#342">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

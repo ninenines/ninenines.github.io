@@ -101,8 +101,8 @@ process enter hibernation until a message is received.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>However it is largely recommended that you set a timeout
 value. The next example sets a timeout value of 30s and
 also makes the process hibernate.</p></div>
@@ -111,8 +111,8 @@ also makes the process hibernate.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #008080">#state</span>{}, <span style="color: #993399">30000</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #993399">30000</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -131,8 +131,8 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">info</span></span>({<span style="color: #FF6600">reply</span>, <span style="color: #009900">Body</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [], <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>),
-    {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>};
+    <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [], <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>),
+    {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
 <span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #009900">_Msg</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Do note that the <code>reply</code> tuple here may be any message
@@ -163,9 +163,9 @@ and the loop is stopped by sending an <code>eof</code> message.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">_Opts</span>) <span style="color: #990000">-&gt;</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunked_reply</span></span>(<span style="color: #993399">200</span>, [], <span style="color: #009900">Req</span>),
-    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req2</span>, <span style="color: #008080">#state</span>{}}<span style="color: #990000">.</span>
+    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span>
 
 <span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #FF6600">eof</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};

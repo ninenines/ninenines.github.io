@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy helloworld make fails with missing_beam_file (hipe)
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20helloworld%20make%20fails%20with%0A%20missing_beam_file%20%28hipe%29&In-Reply-To=%3C1380401005.2981.27620409.32622BC4%40webmail.messagingengine.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000253.html">
+   <LINK REL="Next"  HREF="000245.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy helloworld make fails with missing_beam_file (hipe)</H1>
+    <B>Tristan Sloughter</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20helloworld%20make%20fails%20with%0A%20missing_beam_file%20%28hipe%29&In-Reply-To=%3C1380401005.2981.27620409.32622BC4%40webmail.messagingengine.com%3E"
+       TITLE="[99s-extend] Cowboy helloworld make fails with missing_beam_file (hipe)">tristan.sloughter at gmail.com
+       </A><BR>
+    <I>Sat Sep 28 22:43:25 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000253.html">[99s-extend] Cowboy helloworld make fails with	missing_beam_file (hipe)
+</A></li>
+        <LI>Next message: <A HREF="000245.html">[99s-extend] Cowboy: Having problems with Getting Started
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#254">[ date ]</a>
+              <a href="thread.html#254">[ thread ]</a>
+              <a href="subject.html#254">[ subject ]</a>
+              <a href="author.html#254">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Yea, since I doubt the OTP team (or anyone) will fix the fact that it
+installs a broken hipe we've decided to just warn on broken apps during
+the discovery phase. So it'll only fail if the broken app is also
+suppose to be part of the release.
+
+
+
+Finishing up the relx patch right now.
+
+
+
+--
+Tristan Sloughter
+<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>
+
+
+
+
+
+On Sat, Sep 28, 2013, at 01:41 PM, Matthew Hegarty wrote:
+
+Got it to work.  I apparently had a few versions of hipe in my Erlang
+lib dir:
+
+$ /usr/local/lib/erlang/lib $ ll -ld hipe*
+drwxr-xr-x  9 root root 4096 Feb 11  2013 hipe-3.10/
+drwxr-xr-x  9 root root 4096 Mar  1  2013 hipe-3.10.1/
+drwxr-xr-x 10 root root 4096 Jul  2 11:31 hipe-3.10.2/
+drwxr-xr-x 10 root root 4096 Sep 21 17:36 hipe-3.10.2.1/
+
+They must have come from previous erlang installations (compilation
+from source).  The solution was to remove the older versions and leave
+only the latest one.  Maybe relx should be able to handle this?
+
+thanks for the responses
+
+Matt
+
+
+
+On 26 September 2013 21:36, Matthew Hegarty &lt;[1]<A HREF="https://lists.ninenines.eu/listinfo/extend">mrhegarty at gmail.com</A>&gt;
+wrote:
+
+yes it exists.  I believe hipe is enabled by default when I compile.
+
+however there is no
+
+ /usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam
+ /usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam
+
+which is what relx is apparently looking for.
+Do you know where does relx get these paths from?
+
+
+
+On 26 September 2013 20:04, Tristan Sloughter
+&lt;[2]<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>&gt; wrote:
+
+Did you enable hipe when you compiled? Does
+/usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam exist?
+
+--
+Tristan Sloughter
+[3]<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>
+
+
+
+On Thu, Sep 26, 2013, at 12:03 PM, Matthew Hegarty wrote:
+
+hi
+
+I compiled Erlang from source (downloaded from [4]erlang.org)
+
+
+
+On 25 September 2013 17:25, Tristan Sloughter
+&lt;[5]<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>&gt; wrote:
+
+I ran into the same thing. I assume you installed Erlang from the
+Erlang
+
+Solutions repo?
+
+
+
+Install erlang-hipe package. Or remove
+
+/usr/local/lib/erlang/lib/hipe-3.10.2.1 entirely.
+
+
+
+Their packages install a broken hipe app, missing lots of beams, for
+
+some reason. But if you install the hipe package it'll install what is
+
+missing. I told them about this but I haven't heard back.
+
+
+
+--
+
+  Tristan Sloughter
+
+  [6]<A HREF="https://lists.ninenines.eu/listinfo/extend">tsloughter at fastmail.fm</A>
+
+
+
+
+On Wed, Sep 25, 2013, at 08:09 AM, Lo&#239;c Hoguin wrote:
+&gt;<i> Why does it look for hipe at all to begin with?
+</I>&gt;<i>
+</I>&gt;<i> I'll ping tristan about it.
+</I>&gt;<i>
+</I>&gt;<i> On 09/22/2013 10:59 PM, Matthew Hegarty wrote:
+</I>&gt;<i> &gt; hi
+</I>&gt;<i> &gt; Just starting out so I'm trying to run cowboy's helloworld
+</I>&gt;<i> &gt; in cowboy/examples/hello_world, running make fails with:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; ===&gt; Provider (rlx_prv_discover) failed with: {error,
+</I>&gt;<i> &gt;
+</I>{rlx_app_discovery,
+&gt;<i> &gt;
+</I>[{missing_beam_file,
+&gt;<i> &gt;                                                           hipe,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; &lt;&lt;&quot;/usr/local/lib/erlang/lib/hipe-3.10/ebin/hipe.beam&quot;&gt;&gt;},
+</I>&gt;<i> &gt;
+</I>{missing_beam_file,
+&gt;<i> &gt;                                                           hipe,
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; &lt;&lt;&quot;/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/hipe.beam&quot;&gt;&gt;}]}}
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; there is no hipe.beam in
+</I>/usr/local/lib/erlang/lib/hipe-3.10.1/ebin/, it
+&gt;<i> &gt; is in /usr/local/lib/erlang/lib/hipe-3.10.2.1/ebin/hipe.beam.
+</I>&gt;<i> &gt; I've tried passing the correct dir to relx using --lib-dir but I
+</I>still
+&gt;<i> &gt; get the same error.
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; Any ideas what's going wrong?
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; erl: Erlang R16B02 (erts-5.10.3)
+</I>&gt;<i> &gt; relx: 0.0.0+build.275.refca03701
+</I>&gt;<i> &gt; rebar: rebar 2.1.0-pre R16B02 20130922_191744 git
+</I>2.1.0-pre-46-g78fa8fc
+&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; On 22 September 2013 21:55, Matthew Hegarty &lt;[7]<A HREF="https://lists.ninenines.eu/listinfo/extend">mrhegarty at gmail.com</A>
+</I>&gt;<i> &gt; &lt;mailto:[8]<A HREF="https://lists.ninenines.eu/listinfo/extend">mrhegarty at gmail.com</A>&gt;&gt; wrote:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;     hi
+</I>&gt;<i> &gt;     Just starting out so I've got latest versions of apps.
+</I>&gt;<i> &gt;     in cowboy/examples/hello_world, running make fails with:
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt;
+</I>&gt;<i> &gt; _______________________________________________
+</I>&gt;<i> &gt; Extend mailing list
+</I>&gt;<i> &gt; [9]<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> &gt; [10]<A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i> &gt;
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>
+&gt;<i> Lo&#239;c Hoguin
+</I>
+
+
+&gt;<i> Erlang Cowboy
+</I>
+&gt;<i> Nine Nines
+</I>
+&gt;<i> [11]<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+</I>
+&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> [12]<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> [13]<A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>
+
+--
+
+  Tristan Sloughter
+
+  [14]<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>
+
+References
+
+1. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">mrhegarty at gmail.com</A>
+2. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>
+3. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>
+4. <A HREF="http://erlang.org/">http://erlang.org/</A>
+5. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>
+6. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">tsloughter at fastmail.fm</A>
+7. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">mrhegarty at gmail.com</A>
+8. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">mrhegarty at gmail.com</A>
+9. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+  10. <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+  11. <A HREF="http://ninenines.eu/">http://ninenines.eu/</A>
+  12. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+  13. <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+  14. mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">tristan.sloughter at gmail.com</A>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130928/41b322fd/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130928/41b322fd/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000253.html">[99s-extend] Cowboy helloworld make fails with	missing_beam_file (hipe)
+</A></li>
+	<LI>Next message: <A HREF="000245.html">[99s-extend] Cowboy: Having problems with Getting Started
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#254">[ date ]</a>
+              <a href="thread.html#254">[ thread ]</a>
+              <a href="subject.html#254">[ subject ]</a>
+              <a href="author.html#254">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

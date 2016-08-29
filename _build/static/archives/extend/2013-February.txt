@@ -1,0 +1,948 @@
+From jeremy at quarkgames.com  Mon Feb  4 21:10:21 2013
+From: jeremy at quarkgames.com (Jeremy Ong)
+Date: Mon, 4 Feb 2013 12:10:21 -0800
+Subject: [99s-extend] Cowboy Makefile
+In-Reply-To: <5101B89A.50604@gjunka.com>
+References: <5101B89A.50604@gjunka.com>
+Message-ID: <CAKD1GY7+fvMOR6PhOz=QGAi8r2T_Obf4gCjaH4hN_=J+hNyw4w@mail.gmail.com>
+
+It is rebar compatible
+
+https://github.com/extend/cowboy/blob/master/rebar.config
+
+I use it with rebar all the time.
+
+
+On Thu, Jan 24, 2013 at 2:41 PM, Grzegorz Junka <list1 at gjunka.com> wrote:
+
+> Hi,
+> I understand the move away from Rebar but I'd like to see the project to
+> be still Rebar-compatible. Would that be a problem? Mainly I am thinking
+> about dependencies. The Cowboy Makefile assumes that Ranch is in its deps
+> folder. If Cowboy is a part of a bigger application, and most often it will
+> be in such a role rather than a standalone application, then all
+> dependencies should be kept in one place. In that case it would be the main
+> project's deps folder, not Cowboy's deps folder. Can the compilation
+> process be split into compiling Cowboy dependencies separately from Cowboy
+> itself?
+>
+> something like:
+>
+> all: compile-deps compile-cowboy
+>
+> Then if Cowboy is a dependency itself it may be just compiled without the
+> dependency (as it will be compiled when the main project is compiled).
+>
+> ______________________________**_________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130204/3c258140/attachment.html>
+
+From list1 at gjunka.com  Mon Feb  4 22:50:14 2013
+From: list1 at gjunka.com (Grzegorz Junka)
+Date: Mon, 04 Feb 2013 21:50:14 +0000
+Subject: [99s-extend] Cowboy Makefile
+In-Reply-To: <CAKD1GY7+fvMOR6PhOz=QGAi8r2T_Obf4gCjaH4hN_=J+hNyw4w@mail.gmail.com>
+References: <5101B89A.50604@gjunka.com>
+ <CAKD1GY7+fvMOR6PhOz=QGAi8r2T_Obf4gCjaH4hN_=J+hNyw4w@mail.gmail.com>
+Message-ID: <51102D16.8030000@gjunka.com>
+
+deps/ranch:
+@mkdir -p $(DEPS_DIR)
+git clone -n -- https://github.com/extend/ranch.git $(DEPS_DIR)/ranch
+cd $(DEPS_DIR)/ranch ; git checkout -q $(RANCH_VSN)
+
+
+Am I to understand that the only way of having the dependencies in 
+another folder than cowboy/deps is to use Rebar (e.g. if compiling using 
+the makefile it will always assume that dependencies are in local deps 
+folder)?
+
+Would be good to have a target to compile cowboy without dependencies.
+
+
+On 04/02/2013 20:10, Jeremy Ong wrote:
+> It is rebar compatible
+>
+> https://github.com/extend/cowboy/blob/master/rebar.config
+>
+> I use it with rebar all the time.
+>
+>
+> On Thu, Jan 24, 2013 at 2:41 PM, Grzegorz Junka <list1 at gjunka.com 
+> <mailto:list1 at gjunka.com>> wrote:
+>
+>     Hi,
+>     I understand the move away from Rebar but I'd like to see the
+>     project to be still Rebar-compatible. Would that be a problem?
+>     Mainly I am thinking about dependencies. The Cowboy Makefile
+>     assumes that Ranch is in its deps folder. If Cowboy is a part of a
+>     bigger application, and most often it will be in such a role
+>     rather than a standalone application, then all dependencies should
+>     be kept in one place. In that case it would be the main project's
+>     deps folder, not Cowboy's deps folder. Can the compilation process
+>     be split into compiling Cowboy dependencies separately from Cowboy
+>     itself?
+>
+>     something like:
+>
+>     all: compile-deps compile-cowboy
+>
+>     Then if Cowboy is a dependency itself it may be just compiled
+>     without the dependency (as it will be compiled when the main
+>     project is compiled).
+>
+>     _______________________________________________
+>     Extend mailing list
+>     Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>     http://lists.ninenines.eu:81/listinfo/extend
+>
+>
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130204/c34e6aa6/attachment.html>
+
+From essen at ninenines.eu  Mon Feb  4 22:58:39 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Mon, 04 Feb 2013 22:58:39 +0100
+Subject: [99s-extend] Cowboy Makefile
+In-Reply-To: <51102D16.8030000@gjunka.com>
+References: <5101B89A.50604@gjunka.com>
+ <CAKD1GY7+fvMOR6PhOz=QGAi8r2T_Obf4gCjaH4hN_=J+hNyw4w@mail.gmail.com>
+ <51102D16.8030000@gjunka.com>
+Message-ID: <51102F0F.6060607@ninenines.eu>
+
+Cowboy is still compatible with rebar like before, there's no change you 
+need to do.
+
+If however you would like to compile using the Makefile regardless, 
+there's a small thing that needs to be fixed before it's good.
+
+On 02/04/2013 10:50 PM, Grzegorz Junka wrote:
+> deps/ranch:
+> @mkdir -p $(DEPS_DIR)
+> git clone -n -- https://github.com/extend/ranch.git $(DEPS_DIR)/ranch
+> cd $(DEPS_DIR)/ranch ; git checkout -q $(RANCH_VSN)
+>
+>
+> Am I to understand that the only way of having the dependencies in
+> another folder than cowboy/deps is to use Rebar (e.g. if compiling using
+> the makefile it will always assume that dependencies are in local deps
+> folder)?
+>
+> Would be good to have a target to compile cowboy without dependencies.
+>
+>
+> On 04/02/2013 20:10, Jeremy Ong wrote:
+>> It is rebar compatible
+>>
+>> https://github.com/extend/cowboy/blob/master/rebar.config
+>>
+>> I use it with rebar all the time.
+>>
+>>
+>> On Thu, Jan 24, 2013 at 2:41 PM, Grzegorz Junka <list1 at gjunka.com
+>> <mailto:list1 at gjunka.com>> wrote:
+>>
+>>     Hi,
+>>     I understand the move away from Rebar but I'd like to see the
+>>     project to be still Rebar-compatible. Would that be a problem?
+>>     Mainly I am thinking about dependencies. The Cowboy Makefile
+>>     assumes that Ranch is in its deps folder. If Cowboy is a part of a
+>>     bigger application, and most often it will be in such a role
+>>     rather than a standalone application, then all dependencies should
+>>     be kept in one place. In that case it would be the main project's
+>>     deps folder, not Cowboy's deps folder. Can the compilation process
+>>     be split into compiling Cowboy dependencies separately from Cowboy
+>>     itself?
+>>
+>>     something like:
+>>
+>>     all: compile-deps compile-cowboy
+>>
+>>     Then if Cowboy is a dependency itself it may be just compiled
+>>     without the dependency (as it will be compiled when the main
+>>     project is compiled).
+>>
+>>     _______________________________________________
+>>     Extend mailing list
+>>     Extend at lists.ninenines.eu <mailto:Extend at lists.ninenines.eu>
+>>     http://lists.ninenines.eu:81/listinfo/extend
+>>
+>>
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From elinsn at gmail.com  Thu Feb  7 11:04:05 2013
+From: elinsn at gmail.com (Sergey Yelin)
+Date: Thu, 7 Feb 2013 14:04:05 +0400
+Subject: [99s-extend] Big body via REST
+Message-ID: <AF88F919-0224-438A-8CD6-CAFBEA30C86A@gmail.com>
+
+Hi list,
+
+how properly send big response (hundreds of megabytes) via REST callback? As far as I can see REST handler in cowboy handles special case for callback functions (cowboy_rest.erl, line 844): {stream, StreamFun} - is it right place for stream big response from SQL database?
+
+Thanks in advance.
+
+---
+Best regards,
+Sergey Yelin.
+
+From essen at ninenines.eu  Thu Feb  7 15:41:03 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 07 Feb 2013 15:41:03 +0100
+Subject: [99s-extend] Big body via REST
+In-Reply-To: <AF88F919-0224-438A-8CD6-CAFBEA30C86A@gmail.com>
+References: <AF88F919-0224-438A-8CD6-CAFBEA30C86A@gmail.com>
+Message-ID: <5113BCFF.5010506@ninenines.eu>
+
+On 02/07/2013 11:04 AM, Sergey Yelin wrote:
+> Hi list,
+>
+> how properly send big response (hundreds of megabytes) via REST callback? As far as I can see REST handler in cowboy handles special case for callback functions (cowboy_rest.erl, line 844): {stream, StreamFun} - is it right place for stream big response from SQL database?
+
+Hey,
+
+If you know the size, reply with {stream, Size, StreamFun}, otherwise 
+{stream, StreamFun}, with StreamFun the function that will send all the 
+data to the socket.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From elinsn at gmail.com  Thu Feb  7 15:46:31 2013
+From: elinsn at gmail.com (Sergey Yelin)
+Date: Thu, 7 Feb 2013 18:46:31 +0400
+Subject: [99s-extend] Big body via REST
+In-Reply-To: <5113BCFF.5010506@ninenines.eu>
+References: <AF88F919-0224-438A-8CD6-CAFBEA30C86A@gmail.com>
+ <5113BCFF.5010506@ninenines.eu>
+Message-ID: <76D0E7F7-1819-44D0-A692-8A7C0E965D2C@gmail.com>
+
+Ok, thanks.
+
+On Feb 7, 2013, at 6:41 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> On 02/07/2013 11:04 AM, Sergey Yelin wrote:
+>> Hi list,
+>> 
+>> how properly send big response (hundreds of megabytes) via REST callback? As far as I can see REST handler in cowboy handles special case for callback functions (cowboy_rest.erl, line 844): {stream, StreamFun} - is it right place for stream big response from SQL database?
+> 
+> Hey,
+> 
+> If you know the size, reply with {stream, Size, StreamFun}, otherwise {stream, StreamFun}, with StreamFun the function that will send all the data to the socket.
+> 
+> -- 
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+
+---
+Best regards,
+Sergey Yelin.
+
+
+
+
+
+From john at jkemp.net  Fri Feb  8 14:08:24 2013
+From: john at jkemp.net (John Kemp)
+Date: Fri, 08 Feb 2013 08:08:24 -0500
+Subject: [99s-extend] How to send multiple messages in response to one
+	message from Cowboy
+Message-ID: <5114F8C8.9020807@jkemp.net>
+
+Hi,
+
+I see that with websocket_info/3 I can prompt Cowboy to send a message 
+to a connected client by sending a "system message".
+
+How can I send multiple reply messages to a client which has sent a request?
+
+Is the way to do that by calling websocket_info/3 directly (multiple 
+times) from within my websocket_handle call?
+
+Cheers,
+
+JohnK
+
+
+From john at jkemp.net  Fri Feb  8 19:34:36 2013
+From: john at jkemp.net (John Kemp)
+Date: Fri, 08 Feb 2013 13:34:36 -0500
+Subject: [99s-extend] How to send multiple messages in response to one
+ message from Cowboy
+In-Reply-To: <5114F8C8.9020807@jkemp.net>
+References: <5114F8C8.9020807@jkemp.net>
+Message-ID: <5115453C.1040808@jkemp.net>
+
+Answering my own question - multiple messages can be sent in reply by 
+including a list of 'reply' tuples in the websocket_handle response. I 
+found this by looking at cowboy_websocket_handler.erl in the source tree.
+
+-callback websocket_handle({text | binary | ping | pong, binary()}, Req, 
+State)
+	-> {ok, Req, State}
+	| {ok, Req, State, hibernate}
+
+	| {reply, cowboy_websocket:frame() | [cowboy_websocket:frame()], Req, 
+State}
+	| {reply, cowboy_websocket:frame() | [cowboy_websocket:frame()], Req, 
+State, hibernate}
+
+	| {shutdown, Req, State}
+	when Req::cowboy_req:req(), State::state().
+
+JohnK
+
+On 02/08/2013 08:08 AM, John Kemp wrote:
+> Hi,
+>
+> I see that with websocket_info/3 I can prompt Cowboy to send a message
+> to a connected client by sending a "system message".
+>
+> How can I send multiple reply messages to a client which has sent a
+> request?
+>
+> Is the way to do that by calling websocket_info/3 directly (multiple
+> times) from within my websocket_handle call?
+>
+> Cheers,
+>
+> JohnK
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+
+
+From bip at kivra.com  Sun Feb 10 20:12:27 2013
+From: bip at kivra.com (Bip Thelin)
+Date: Sun, 10 Feb 2013 20:12:27 +0100
+Subject: [99s-extend] Cowboy questions
+Message-ID: <64B371DF-D6AA-4105-954E-C22EBA61EDFC@kivra.com>
+
+Hi,
+
+ I'm playing around with a middleware and request/responsehooks. A couple of questions that have surfaced:
+* Say I map a module to "/my/path[...]" and then curl "/my/path/even/more/stuff". Is there a way to retrieve the "rest" of the matched path, i.e. like cowboy_req:path_info/1 but just the rest, not the total path. The result I want is: [<<"even">>, <<"more">>, <<"stuff">>].
+* I've been trying to use a responsehook to ensure that a default content-type is set if none is specified. Been trying with cowboy_req:reply, coboy_req:set_resp_headers, etc. It doesn't seem to work that well. What's the preferred way?
+
+Regards,
+-Bip Thelin
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130210/1b9560c2/attachment.html>
+
+From essen at ninenines.eu  Tue Feb 12 18:36:12 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 12 Feb 2013 18:36:12 +0100
+Subject: [99s-extend] [ANN] Cowboy 0.8.0
+Message-ID: <511A7D8C.5050107@ninenines.eu>
+
+Hello there!
+
+Cowboy 0.8 has been released. Cowboy is a small, fast and modular HTTP, 
+REST and Websocket server.
+
+   https://github.com/extend/cowboy/
+
+The number of contributors who helped make this release considerably 
+increased. Cowboy is available thanks to the code contributions from 50 
+users, double from the last release where 25 contributed.
+
+The number of users has also greatly increased. Cowboy is being used in 
+ad bidding, set-top boxes, live TV events, content streaming services, 
+and many more exciting areas.
+
+This new version has many highlights. You can take a look at the 
+changelog for detailed information about the many changes.
+
+   https://github.com/extend/cowboy/blob/master/CHANGELOG.md
+
+Cowboy scalability has been greatly improved in this version. This has 
+been observed many times in production, including in the AdGear Tracker 
+project (http://ferd.ca/rtb-where-erlang-blooms.html) where updated 
+nodes were able to handle 2 times more requests compared to older nodes. 
+This improvement cannot be observed in "hello world" types of 
+benchmarks. An article will soon be published to explain the reasons for 
+this.
+
+Cowboy now features a brand new user guide. It is still a work in 
+progress, so please open a ticket on Github if something is missing or 
+incorrect.
+
+   http://ninenines.eu/docs/en/cowboy/HEAD/guide/introduction
+
+Remaining work before 1.0 include REST improvements and SPDY support. 
+The rest of the API should now be very close to stable.
+
+I am looking for a good writer who would like to co-author a Cowboy 
+book. The book will be accessible to people who don't know Erlang but 
+will also contain everything there is to know about Cowboy, making it 
+suitable for both beginners and experts. Contact me if you are interested.
+
+I now take donations in addition to commercial support options, to allow 
+individual users to help the project stay alive and kicking.
+
+   http://ninenines.eu/support
+
+Hope you enjoy it. As always, please send me as much feedback as 
+possible to help me improve things even more, preferrably through Github 
+tickets if it's related to code or documentation.
+
+Thanks for reading.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From jeremy at quarkgames.com  Tue Feb 12 18:37:18 2013
+From: jeremy at quarkgames.com (Jeremy Ong)
+Date: Tue, 12 Feb 2013 09:37:18 -0800
+Subject: [99s-extend] [ANN] Cowboy 0.8.0
+In-Reply-To: <511A7D8C.5050107@ninenines.eu>
+References: <511A7D8C.5050107@ninenines.eu>
+Message-ID: <CAKD1GY5BkoTPtZrPhsp7hoWvXPKfqLX4-SKHzs6ecZ12KrRJMA@mail.gmail.com>
+
+Congrats!
+
+
+On Tue, Feb 12, 2013 at 9:36 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Hello there!
+>
+> Cowboy 0.8 has been released. Cowboy is a small, fast and modular HTTP,
+> REST and Websocket server.
+>
+>   https://github.com/extend/**cowboy/ <https://github.com/extend/cowboy/>
+>
+> The number of contributors who helped make this release considerably
+> increased. Cowboy is available thanks to the code contributions from 50
+> users, double from the last release where 25 contributed.
+>
+> The number of users has also greatly increased. Cowboy is being used in ad
+> bidding, set-top boxes, live TV events, content streaming services, and
+> many more exciting areas.
+>
+> This new version has many highlights. You can take a look at the changelog
+> for detailed information about the many changes.
+>
+>   https://github.com/extend/**cowboy/blob/master/CHANGELOG.**md<https://github.com/extend/cowboy/blob/master/CHANGELOG.md>
+>
+> Cowboy scalability has been greatly improved in this version. This has
+> been observed many times in production, including in the AdGear Tracker
+> project (http://ferd.ca/rtb-where-**erlang-blooms.html<http://ferd.ca/rtb-where-erlang-blooms.html>)
+> where updated nodes were able to handle 2 times more requests compared to
+> older nodes. This improvement cannot be observed in "hello world" types of
+> benchmarks. An article will soon be published to explain the reasons for
+> this.
+>
+> Cowboy now features a brand new user guide. It is still a work in
+> progress, so please open a ticket on Github if something is missing or
+> incorrect.
+>
+>   http://ninenines.eu/docs/en/**cowboy/HEAD/guide/introduction<http://ninenines.eu/docs/en/cowboy/HEAD/guide/introduction>
+>
+> Remaining work before 1.0 include REST improvements and SPDY support. The
+> rest of the API should now be very close to stable.
+>
+> I am looking for a good writer who would like to co-author a Cowboy book.
+> The book will be accessible to people who don't know Erlang but will also
+> contain everything there is to know about Cowboy, making it suitable for
+> both beginners and experts. Contact me if you are interested.
+>
+> I now take donations in addition to commercial support options, to allow
+> individual users to help the project stay alive and kicking.
+>
+>   http://ninenines.eu/support
+>
+> Hope you enjoy it. As always, please send me as much feedback as possible
+> to help me improve things even more, preferrably through Github tickets if
+> it's related to code or documentation.
+>
+> Thanks for reading.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> ______________________________**_________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130212/09008370/attachment.html>
+
+From max.lapshin at gmail.com  Tue Feb 12 18:44:28 2013
+From: max.lapshin at gmail.com (Max Lapshin)
+Date: Tue, 12 Feb 2013 20:44:28 +0300
+Subject: [99s-extend] [erlang-questions]  [ANN] Cowboy 0.8.0
+In-Reply-To: <CAKD1GY5BkoTPtZrPhsp7hoWvXPKfqLX4-SKHzs6ecZ12KrRJMA@mail.gmail.com>
+References: <511A7D8C.5050107@ninenines.eu>
+ <CAKD1GY5BkoTPtZrPhsp7hoWvXPKfqLX4-SKHzs6ecZ12KrRJMA@mail.gmail.com>
+Message-ID: <CAMxVRxAREhN_WmD-__STe_VG6hS_RNoy9VAN0TwwHG9wJ1AYEg@mail.gmail.com>
+
+Great, Loic.
+
+As I've told already, it would be great to listen to your experience about
+issues that you meet on high loads: smooth scaling, predictionable
+behaviour of server, etc.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130212/dc0291b4/attachment.html>
+
+From Christopher.Phillips at turner.com  Wed Feb 13 14:52:10 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Wed, 13 Feb 2013 13:52:10 +0000
+Subject: [99s-extend] Cowboy REST Logic
+Message-ID: <CD41053B.266D%christopher.phillips@turner.com>
+
+
+  In 6.1, and still in 8.0, there is some logic that surprised me, and I wanted to see if it was intentional, or if I'm missing something.
+
+  If I set up a POST such that it's a create, I get back a 303, rather than a 201, on successful create. This came as a bit of a surprise; I know from Webmachine, if it's a new resource being created, a POST will return a 201 (N11 to P11 in Webmachine's v3 diagram).
+
+  Is this intentional? The logic seems to be post_is_create/2 -> create_path/2 -> put_resource/3 -> choose_content_type/5 -> next/3 -> respond(_, _, 303). It may be that this is a better response, rather than a 201 with the location header, but it came as a surprise given web machine's behavior.
+
+  For background, I'm attempting to migrate some web machine code to Cowboy, which is serving a RESTful API to a Javascript client. The client is making CORS calls. Receiving a 303 and a Location header seemed to mean that the call was redirected before the client side code ever saw it (not sure what the browser was doing; I was expecting another request, but I wasn't quite lucid enough to check for that last night when working on it); a 201 allows me to examine the location.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130213/a992c0b6/attachment.html>
+
+From gumm at sigma-star.com  Wed Feb 13 14:46:07 2013
+From: gumm at sigma-star.com (Jesse Gumm)
+Date: Wed, 13 Feb 2013 07:46:07 -0600
+Subject: [99s-extend] [erlang-questions] [ANN] Cowboy 0.8.0
+In-Reply-To: <511A7D8C.5050107@ninenines.eu>
+References: <511A7D8C.5050107@ninenines.eu>
+Message-ID: <CAPTXyXd9BYynUj5Tp8Mmk7uL8VEByQHSwJZ_20Q-gkZEz=J=Kg@mail.gmail.com>
+
+Great news!
+
+Congrats!
+On Feb 12, 2013 11:36 AM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+> Hello there!
+>
+> Cowboy 0.8 has been released. Cowboy is a small, fast and modular HTTP,
+> REST and Websocket server.
+>
+>   https://github.com/extend/**cowboy/ <https://github.com/extend/cowboy/>
+>
+> The number of contributors who helped make this release considerably
+> increased. Cowboy is available thanks to the code contributions from 50
+> users, double from the last release where 25 contributed.
+>
+> The number of users has also greatly increased. Cowboy is being used in ad
+> bidding, set-top boxes, live TV events, content streaming services, and
+> many more exciting areas.
+>
+> This new version has many highlights. You can take a look at the changelog
+> for detailed information about the many changes.
+>
+>   https://github.com/extend/**cowboy/blob/master/CHANGELOG.**md<https://github.com/extend/cowboy/blob/master/CHANGELOG.md>
+>
+> Cowboy scalability has been greatly improved in this version. This has
+> been observed many times in production, including in the AdGear Tracker
+> project (http://ferd.ca/rtb-where-**erlang-blooms.html<http://ferd.ca/rtb-where-erlang-blooms.html>)
+> where updated nodes were able to handle 2 times more requests compared to
+> older nodes. This improvement cannot be observed in "hello world" types of
+> benchmarks. An article will soon be published to explain the reasons for
+> this.
+>
+> Cowboy now features a brand new user guide. It is still a work in
+> progress, so please open a ticket on Github if something is missing or
+> incorrect.
+>
+>   http://ninenines.eu/docs/en/**cowboy/HEAD/guide/introduction<http://ninenines.eu/docs/en/cowboy/HEAD/guide/introduction>
+>
+> Remaining work before 1.0 include REST improvements and SPDY support. The
+> rest of the API should now be very close to stable.
+>
+> I am looking for a good writer who would like to co-author a Cowboy book.
+> The book will be accessible to people who don't know Erlang but will also
+> contain everything there is to know about Cowboy, making it suitable for
+> both beginners and experts. Contact me if you are interested.
+>
+> I now take donations in addition to commercial support options, to allow
+> individual users to help the project stay alive and kicking.
+>
+>   http://ninenines.eu/support
+>
+> Hope you enjoy it. As always, please send me as much feedback as possible
+> to help me improve things even more, preferrably through Github tickets if
+> it's related to code or documentation.
+>
+> Thanks for reading.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> ______________________________**_________________
+> erlang-questions mailing list
+> erlang-questions at erlang.org
+> http://erlang.org/mailman/**listinfo/erlang-questions<http://erlang.org/mailman/listinfo/erlang-questions>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130213/41b12a6d/attachment.html>
+
+From essen at ninenines.eu  Wed Feb 13 16:34:54 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 13 Feb 2013 16:34:54 +0100
+Subject: [99s-extend] Cowboy REST Logic
+In-Reply-To: <CD41053B.266D%christopher.phillips@turner.com>
+References: <CD41053B.266D%christopher.phillips@turner.com>
+Message-ID: <511BB29E.3090705@ninenines.eu>
+
+On 02/13/2013 02:52 PM, Phillips, Christopher wrote:
+>
+>    In 6.1, and still in 8.0, there is some logic that surprised me, and
+> I wanted to see if it was intentional, or if I'm missing something.
+>
+>    If I set up a POST such that it's a create, I get back a 303, rather
+> than a 201, on successful create. This came as a bit of a surprise; I
+> know from Webmachine, if it's a new resource being created, a POST will
+> return a 201 (N11 to P11 in Webmachine's v3 diagram).
+>
+>    Is this intentional? The logic seems to be post_is_create/2 ->
+> create_path/2 -> put_resource/3 -> choose_content_type/5 -> next/3 ->
+> respond(_, _, 303). It may be that this is a better response, rather
+> than a 201 with the location header, but it came as a surprise given web
+> machine's behavior.
+
+This difference is probably not intentional. Please open a ticket. :)
+
+>    For background, I'm attempting to migrate some web machine code to
+> Cowboy, which is serving a RESTful API to a Javascript client. The
+> client is making CORS calls. Receiving a 303 and a Location header
+> seemed to mean that the call was redirected before the client side code
+> ever saw it (not sure what the browser was doing; I was expecting
+> another request, but I wasn't quite lucid enough to check for that last
+> night when working on it); a 201 allows me to examine the location.
+
+Would be interested to know more about your CORS implementation, that's 
+something I would like to have in the guide.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Christopher.Phillips at turner.com  Wed Feb 13 17:01:27 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Wed, 13 Feb 2013 16:01:27 +0000
+Subject: [99s-extend] Cowboy REST Logic
+In-Reply-To: <511BB29E.3090705@ninenines.eu>
+Message-ID: <CD411D79.2699%christopher.phillips@turner.com>
+
+  Will do. I actually like the 303 due to a bug in Firefox with examining
+headers, but 201 seems like the canonical approach.
+  
+  CORS is actually pretty easy to open up fully, and the more restrictive
+you want to be the harder it gets. We're not using credentials, and we
+haven't tightened the domain to just those we expect, either, but it
+basically amounts to adding the following to options/2 for the pre-flight -
+
+  * Access-Control-Allow-Origin (with the origins we want to allow; * for
+anything), 
+  * Access-Control-Allow-Headers (which we're setting to the same as the
+client requests for convenience's sake)
+  *Access-Control-Expose-Headers (for any headers beyond content-type that
+the client wants access to; we have Location for the 201 mentioned above.
+
+
+And the following to any request being passed back, as seems reasonable -
+
+  * Access-Control-Allow-Origin as in options
+  * Access-Control-Expose-Headers as in options
+
+
+ I'm appending them in resource_exists/2 because I know that will be hit
+by everything. If your logic is more complex (you want to allow PUTs from
+site1, but deletes from site2, etc), you'll need to break that apart a bit
+and conditionally check origin. We're relying on a firewall to protect
+against direct calls from external servers, and we'll be tightening the
+allowed domains and looking into validating the session with a token to
+prevent CSRFs (as CORS means any existing CSRF vuln becomes a bit more
+severe). 
+
+
+I suspect there's some redundancy there; we have a future story for
+tightening things up, but in terms of just opening it up and getting
+things working, that?s all that I had to do.
+
+
+On 2/13/13 10:34 AM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+>On 02/13/2013 02:52 PM, Phillips, Christopher wrote:
+>>
+>>    In 6.1, and still in 8.0, there is some logic that surprised me, and
+>> I wanted to see if it was intentional, or if I'm missing something.
+>>
+>>    If I set up a POST such that it's a create, I get back a 303, rather
+>> than a 201, on successful create. This came as a bit of a surprise; I
+>> know from Webmachine, if it's a new resource being created, a POST will
+>> return a 201 (N11 to P11 in Webmachine's v3 diagram).
+>>
+>>    Is this intentional? The logic seems to be post_is_create/2 ->
+>> create_path/2 -> put_resource/3 -> choose_content_type/5 -> next/3 ->
+>> respond(_, _, 303). It may be that this is a better response, rather
+>> than a 201 with the location header, but it came as a surprise given web
+>> machine's behavior.
+>
+>This difference is probably not intentional. Please open a ticket. :)
+>
+>>    For background, I'm attempting to migrate some web machine code to
+>> Cowboy, which is serving a RESTful API to a Javascript client. The
+>> client is making CORS calls. Receiving a 303 and a Location header
+>> seemed to mean that the call was redirected before the client side code
+>> ever saw it (not sure what the browser was doing; I was expecting
+>> another request, but I wasn't quite lucid enough to check for that last
+>> night when working on it); a 201 allows me to examine the location.
+>
+>Would be interested to know more about your CORS implementation, that's
+>something I would like to have in the guide.
+>
+>-- 
+>Lo?c Hoguin
+>Erlang Cowboy
+>Nine Nines
+>http://ninenines.eu
+>
+
+
+
+
+From essen at ninenines.eu  Thu Feb 14 17:29:23 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 14 Feb 2013 17:29:23 +0100
+Subject: [99s-extend] [ANN] Bullet 0.4.0
+Message-ID: <511D10E3.3090000@ninenines.eu>
+
+Quick announcement: Bullet 0.4.0 has been released. This version is 
+compatible with newly released Cowboy 0.8.0.
+
+   https://github.com/extend/bullet
+
+Bullet is a simple and efficient Websocket alternative especially useful 
+when you need an always connected socket to the server. It uses 
+Websocket internally when it's available.
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From list1 at gjunka.com  Mon Feb 18 17:01:30 2013
+From: list1 at gjunka.com (Grzegorz Junka)
+Date: Mon, 18 Feb 2013 16:01:30 +0000
+Subject: [99s-extend] sub_description is not a valid app configuration option
+Message-ID: <5122505A.7010801@gjunka.com>
+
+Hi,
+I am trying to compile a release with some applications for which ranch 
+and cowboy are dependencies. This is what I am getting on the console:
+
+reltool: Unexpected item sub_description in app file 
+"/usr/home/somepath/deps/ranch/ebin/ranch.app".
+reltool: Unexpected item sub_description in app file 
+"/usr/home/somepath/deps/cowboy/ebin/cowboy.app".
+
+When looking it up on Erlang documentation it seems that sub_description 
+is not a valid configuration options in the .app file. Is there any 
+chance to put it rather as a comment?
+
+
+
+From essen at ninenines.eu  Wed Feb 20 19:58:31 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 20 Feb 2013 19:58:31 +0100
+Subject: [99s-extend] [ANN] Bullet 0.4.1
+Message-ID: <51251CD7.2010107@ninenines.eu>
+
+Version update to fix a bug that broke POST with non-Websocket transports.
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Christopher.Phillips at turner.com  Thu Feb 21 20:29:36 2013
+From: Christopher.Phillips at turner.com (Phillips, Christopher)
+Date: Thu, 21 Feb 2013 19:29:36 +0000
+Subject: [99s-extend] Arbitrary 500 from REST handler?
+Message-ID: <CD4BDFCE.2D43%christopher.phillips@turner.com>
+
+
+  I have a case where I am creating a resource through a POST. There are a number of places where the create can fail in a known manner, and we need to alert the user to the specifics of why. Is there a way to throw an arbitrary 500, with message, from within the REST handler? I can obviously just erlang:error(whatever), but the message content is ignored, and there is no way to pass back an updated response when doing that.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130221/fc119c69/attachment.html>
+
+From essen at ninenines.eu  Thu Feb 21 20:38:35 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 21 Feb 2013 20:38:35 +0100
+Subject: [99s-extend] Arbitrary 500 from REST handler?
+In-Reply-To: <CD4BDFCE.2D43%christopher.phillips@turner.com>
+References: <CD4BDFCE.2D43%christopher.phillips@turner.com>
+Message-ID: <512677BB.6030004@ninenines.eu>
+
+On 02/21/2013 08:29 PM, Phillips, Christopher wrote:
+>
+>    I have a case where I am creating a resource through a POST. There
+> are a number of places where the create can fail in a known manner, and
+> we need to alert the user to the specifics of why. Is there a way to
+> throw an arbitrary 500, with message, from within the REST handler? I
+> can obviously just erlang:error(whatever), but the message content is
+> ignored, and there is no way to pass back an updated response when doing
+> that.
+
+Use cowboy_req:reply and then return {halt, Req2, State} to stop execution.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Fri Feb 22 15:41:58 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 22 Feb 2013 15:41:58 +0100
+Subject: [99s-extend] Cowboy 0.8.1
+Message-ID: <512783B6.4060403@ninenines.eu>
+
+Just tagged Cowboy 0.8.1.
+
+   https://github.com/extend/cowboy/
+
+Please see the CHANGELOG.md file.
+
+I am hoping to tag a new minor version every couple weeks now that the 
+bigger API changes have been done.
+
+Next version should have the remaining REST API changes, bringing it 
+much closer to being stable, with only additions planned subsequently.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Sat Feb 23 16:52:47 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sat, 23 Feb 2013 16:52:47 +0100
+Subject: [99s-extend] Directory traversal vulnerability on Windows platform
+Message-ID: <5128E5CF.5010106@ninenines.eu>
+
+A directory traversal vulnerability affecting all Windows platforms has 
+been discovered. Please follow these instructions to find out if you are 
+affected. Please take immediate action if you are.
+
+### Am I affected?
+
+You are if you match all of the following requirements:
+
+  *  You run Cowboy in production on the Windows platform
+  *  You make use of `cowboy_static` (or `cowboy_http_static` in older 
+versions)
+
+### How serious is it?
+
+This vulnerability allows an attacker to request any file from your 
+system (only limited by the access rights of the user running the Erlang 
+VM). The attacker cannot list files through this vulnerability. This 
+however does not reduce the seriousness of this vulnerability as an 
+attacker can always use brute force or any other method to try to find 
+files on your system.
+
+### How can I fix it?
+
+No patch is currently available.
+
+You should temporarily switch to using IIS or any other web server for 
+serving the static files, or use a CDN instead.
+
+### How can I make sure this will not happen again?
+
+A fully cross-platform fix will be pushed to Cowboy in the coming days.
+
+This issue exists essentially because Windows isn't a supported platform 
+and we do not have the resources or knowledge to make the Windows 
+experience safe and smooth.
+
+If you are a Windows user, you can ensure that kind of issue does not 
+happen again by becoming a regular contributor and making sure the team 
+is aware of any potential issue that may arise on Windows.
+
+### Why disclose?
+
+Essentially for three reasons:
+
+  *  Considering the known user base, a very low number of people might 
+be hit by this issue
+  *  A temporary fix is readily available
+  *  Community help is needed to ensure a proper fix gets merged
+
+The following ticket can be used for tracking this issue:
+
+   https://github.com/extend/cowboy/issues/447
+
+Please ping this ticket if you are affected. Ignore if you are not. Thanks.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+

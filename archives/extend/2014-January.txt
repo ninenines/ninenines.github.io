@@ -1,0 +1,99 @@
+From me at xiao-jia.com  Wed Jan 15 06:42:46 2014
+From: me at xiao-jia.com (Xiao Jia)
+Date: Wed, 15 Jan 2014 13:42:46 +0800
+Subject: [99s-extend] Parsing binary example in ranch guide
+Message-ID: <CAO0g3iHXt7b4rwwUv7KShiCLno=y2htz6i+0Pn6OnVgF++NYmg@mail.gmail.com>
+
+Hi,
+
+I am learning how to use ranch and reading this page:
+
+    http://ninenines.eu/docs/en/ranch/HEAD/guide/parsers
+
+
+<< Size:32, _/bits >> = Buffer,
+case Buffer of
+    << Frame:Size/binary, Rest/bits >> ->
+        handle_frame(Frame, Buffer);
+    _ ->
+        get_more_data(Buffer)
+end.
+
+
+Shouldn't it be
+
+    handle_frame(Frame, Rest);
+
+instead?
+
+-- 
+Regards,
+Xiao Jia
+
+
+From essen at ninenines.eu  Wed Jan 15 08:51:32 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Wed, 15 Jan 2014 08:51:32 +0100
+Subject: [99s-extend] Parsing binary example in ranch guide
+In-Reply-To: <CAO0g3iHXt7b4rwwUv7KShiCLno=y2htz6i+0Pn6OnVgF++NYmg@mail.gmail.com>
+References: <CAO0g3iHXt7b4rwwUv7KShiCLno=y2htz6i+0Pn6OnVgF++NYmg@mail.gmail.com>
+Message-ID: <52D63E04.5090300@ninenines.eu>
+
+Yes.
+
+Feel free to open a PR, thanks!
+
+On 01/15/2014 06:42 AM, Xiao Jia wrote:
+> Hi,
+>
+> I am learning how to use ranch and reading this page:
+>
+>      http://ninenines.eu/docs/en/ranch/HEAD/guide/parsers
+>
+>
+> << Size:32, _/bits >> = Buffer,
+> case Buffer of
+>      << Frame:Size/binary, Rest/bits >> ->
+>          handle_frame(Frame, Buffer);
+>      _ ->
+>          get_more_data(Buffer)
+> end.
+>
+>
+> Shouldn't it be
+>
+>      handle_frame(Frame, Rest);
+>
+> instead?
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+
+From me at xiao-jia.com  Fri Jan 17 03:15:24 2014
+From: me at xiao-jia.com (Xiao Jia)
+Date: Fri, 17 Jan 2014 10:15:24 +0800
+Subject: [99s-extend] Restart listeners if ranch_sup fails
+Message-ID: <CAO0g3iGA7tKuBu+Wov6kcRQGUBH7EbJ-yTSxMhz5VCu2JLCAnA@mail.gmail.com>
+
+>From http://ninenines.eu/docs/en/ranch/HEAD/guide/embedded/
+
+    "It is recommended that your architecture makes sure that all
+listeners are restarted if ranch_supfails."
+
+Does it imply that we should use rest_for_one instead of one_for_one
+in the example code below?
+
+    {ok, {{one_for_one, 10, 10}, [RanchSupSpec, ListenerSpec]}}
+
+=>
+
+    {ok, {{rest_for_one, 10, 10}, [RanchSupSpec, ListenerSpec]}}
+
+-- 
+Regards,
+Xiao Jia
+
+

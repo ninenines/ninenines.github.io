@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy Makefile
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20Makefile&In-Reply-To=%3C51102F0F.6060607%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000044.html">
+   <LINK REL="Next"  HREF="000046.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy Makefile</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20Makefile&In-Reply-To=%3C51102F0F.6060607%40ninenines.eu%3E"
+       TITLE="[99s-extend] Cowboy Makefile">essen at ninenines.eu
+       </A><BR>
+    <I>Mon Feb  4 22:58:39 CET 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000044.html">[99s-extend] Cowboy Makefile
+</A></li>
+        <LI>Next message: <A HREF="000046.html">[99s-extend] Big body via REST
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#45">[ date ]</a>
+              <a href="thread.html#45">[ thread ]</a>
+              <a href="subject.html#45">[ subject ]</a>
+              <a href="author.html#45">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Cowboy is still compatible with rebar like before, there's no change you 
+need to do.
+
+If however you would like to compile using the Makefile regardless, 
+there's a small thing that needs to be fixed before it's good.
+
+On 02/04/2013 10:50 PM, Grzegorz Junka wrote:
+&gt;<i> deps/ranch:
+</I>&gt;<i> @mkdir -p $(DEPS_DIR)
+</I>&gt;<i> git clone -n -- <A HREF="https://github.com/extend/ranch.git">https://github.com/extend/ranch.git</A> $(DEPS_DIR)/ranch
+</I>&gt;<i> cd $(DEPS_DIR)/ranch ; git checkout -q $(RANCH_VSN)
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> Am I to understand that the only way of having the dependencies in
+</I>&gt;<i> another folder than cowboy/deps is to use Rebar (e.g. if compiling using
+</I>&gt;<i> the makefile it will always assume that dependencies are in local deps
+</I>&gt;<i> folder)?
+</I>&gt;<i>
+</I>&gt;<i> Would be good to have a target to compile cowboy without dependencies.
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> On 04/02/2013 20:10, Jeremy Ong wrote:
+</I>&gt;&gt;<i> It is rebar compatible
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> <A HREF="https://github.com/extend/cowboy/blob/master/rebar.config">https://github.com/extend/cowboy/blob/master/rebar.config</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I use it with rebar all the time.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> On Thu, Jan 24, 2013 at 2:41 PM, Grzegorz Junka &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">list1 at gjunka.com</A>
+</I>&gt;&gt;<i> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">list1 at gjunka.com</A>&gt;&gt; wrote:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Hi,
+</I>&gt;&gt;<i>     I understand the move away from Rebar but I'd like to see the
+</I>&gt;&gt;<i>     project to be still Rebar-compatible. Would that be a problem?
+</I>&gt;&gt;<i>     Mainly I am thinking about dependencies. The Cowboy Makefile
+</I>&gt;&gt;<i>     assumes that Ranch is in its deps folder. If Cowboy is a part of a
+</I>&gt;&gt;<i>     bigger application, and most often it will be in such a role
+</I>&gt;&gt;<i>     rather than a standalone application, then all dependencies should
+</I>&gt;&gt;<i>     be kept in one place. In that case it would be the main project's
+</I>&gt;&gt;<i>     deps folder, not Cowboy's deps folder. Can the compilation process
+</I>&gt;&gt;<i>     be split into compiling Cowboy dependencies separately from Cowboy
+</I>&gt;&gt;<i>     itself?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     something like:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     all: compile-deps compile-cowboy
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     Then if Cowboy is a dependency itself it may be just compiled
+</I>&gt;&gt;<i>     without the dependency (as it will be compiled when the main
+</I>&gt;&gt;<i>     project is compiled).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>     _______________________________________________
+</I>&gt;&gt;<i>     Extend mailing list
+</I>&gt;&gt;<i>     <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>&gt;
+</I>&gt;&gt;<i>     <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000044.html">[99s-extend] Cowboy Makefile
+</A></li>
+	<LI>Next message: <A HREF="000046.html">[99s-extend] Big body via REST
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#45">[ date ]</a>
+              <a href="thread.html#45">[ thread ]</a>
+              <a href="subject.html#45">[ subject ]</a>
+              <a href="author.html#45">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

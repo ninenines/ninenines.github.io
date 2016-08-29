@@ -1,0 +1,233 @@
+From pdtwonotes at gmail.com  Sun Feb 15 23:50:58 2015
+From: pdtwonotes at gmail.com (Paul Dickson)
+Date: Sun, 15 Feb 2015 17:50:58 -0500
+Subject: [99s-extend] callbacks for additional methods
+Message-ID: <1424040658.19383.6.camel@gmail.com>
+
+I am writing a CalDAV handler, which is a type of WebDAV server.  CalDAV
+defines a bunch of
+additional methods beyond what a typical web browser would use, such as
+REPORT and PROPFIND.
+
+I have written the allowed_methods and known_methods callbacks to report
+that all these methods
+are acceptable.  My content_types_provided has an entry for
+"application/xml", which is how these
+extra methods turn up.
+
+When I connect to my server using the calendar function of Evolution,
+one of the first things it does
+is a REPORT method, which is sort of a query.  This gets as far as
+content_types_provided, but after
+that it does not call the function I identified in
+content_types_provided.
+
+What is the best way to handle the non-standard methods that do not have
+defined callbacks?
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150215/9d2f5de1/attachment.html>
+
+From samset at wanadoo.fr  Fri Feb 27 18:07:08 2015
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 27 Feb 2015 18:07:08 +0100
+Subject: [99s-extend] Body length and content-length mismatch
+Message-ID: <4E148D98-CFDB-40D4-8532-8E46C8F09DB0@wanadoo.fr>
+
+Hi,
+
+I?m facing an issue with the cowboy_req:body call.
+
+The header show a length of 2 while the body itself is a binary string which has a size greater than 2 for sure.
+Trying to use cowboy_req:body with the length option does not make any difference.
+
+How can i retrieve the data ?
+Any clue ?
+
+Thank you
+
+{ok,{<<"basic">>,{<<?xxxxx at xxxxxx">>,<<?xxxxxxx">>}},
+          {http_req,
+              {sslsocket,
+                  {gen_tcp,#Port<0.13250>,tls_connection,<0.298.0>},
+                  <0.407.0>},
+              ranch_ssl,keepalive,<0.408.0>,<<"POST">>,'HTTP/1.1',
+              {{xxxxxxxxx},16220},
+              <<?xxxx">>,undefined,xxxx,<<?xxxxx">>,undefined,
+              <<>>,undefined,
+              [{res_1,<<?xxxx">>}],
+              [{<<"content-type">>,<<"application/json">>},
+               {<<"content-length">>,<<"2">>},
+               {<<"te">>,<<>>},
+               {<<"host">>,<<?xxxxx">>},
+               {<<"authorization">>,
+                <<"Basic xxxxxxxxxxxxxx">>},
+               {<<"connection">>,<<"keep-alive">>}],
+              [{<<"authorization">>,
+                {<<"basic">>,{<<?xxxxxx">>,<<?xxxxxx">>}}},
+               {<<"connection">>,[<<"keep-alive">>]}],
+              undefined,[],waiting,
+              <<"{\"login\":\?xxxx at xxxxxx\",\?xxxx\":\?xxxx\"}{\"login\":\?xxxx at xxxx\",\?xxxx\":\?xxxxx\"}">>,
+              undefined,false,waiting,
+              [{<<"Access-Control-Allow-Credentials">>,<<"true">>},
+               {<<"Access-Control-Allow-Origin">>,
+                <<"http://xxxxxxxxx">>}],
+              <<>>,undefined}}
+Samir
+
+
+
+From essen at ninenines.eu  Fri Feb 27 18:11:42 2015
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Fri, 27 Feb 2015 18:11:42 +0100
+Subject: [99s-extend] Body length and content-length mismatch
+In-Reply-To: <4E148D98-CFDB-40D4-8532-8E46C8F09DB0@wanadoo.fr>
+References: <4E148D98-CFDB-40D4-8532-8E46C8F09DB0@wanadoo.fr>
+Message-ID: <54F0A54E.2010205@ninenines.eu>
+
+It looks like the client is telling you BS.
+
+On 02/27/2015 06:07 PM, Samir Sow wrote:
+> Hi,
+>
+> I?m facing an issue with the cowboy_req:body call.
+>
+> The header show a length of 2 while the body itself is a binary string which has a size greater than 2 for sure.
+> Trying to use cowboy_req:body with the length option does not make any difference.
+>
+> How can i retrieve the data ?
+> Any clue ?
+>
+> Thank you
+>
+> {ok,{<<"basic">>,{<<?xxxxx at xxxxxx">>,<<?xxxxxxx">>}},
+>            {http_req,
+>                {sslsocket,
+>                    {gen_tcp,#Port<0.13250>,tls_connection,<0.298.0>},
+>                    <0.407.0>},
+>                ranch_ssl,keepalive,<0.408.0>,<<"POST">>,'HTTP/1.1',
+>                {{xxxxxxxxx},16220},
+>                <<?xxxx">>,undefined,xxxx,<<?xxxxx">>,undefined,
+>                <<>>,undefined,
+>                [{res_1,<<?xxxx">>}],
+>                [{<<"content-type">>,<<"application/json">>},
+>                 {<<"content-length">>,<<"2">>},
+>                 {<<"te">>,<<>>},
+>                 {<<"host">>,<<?xxxxx">>},
+>                 {<<"authorization">>,
+>                  <<"Basic xxxxxxxxxxxxxx">>},
+>                 {<<"connection">>,<<"keep-alive">>}],
+>                [{<<"authorization">>,
+>                  {<<"basic">>,{<<?xxxxxx">>,<<?xxxxxx">>}}},
+>                 {<<"connection">>,[<<"keep-alive">>]}],
+>                undefined,[],waiting,
+>                <<"{\"login\":\?xxxx at xxxxxx\",\?xxxx\":\?xxxx\"}{\"login\":\?xxxx at xxxx\",\?xxxx\":\?xxxxx\"}">>,
+
+And looking at this (the buffer of already received data, presumably 
+your whole body, it looks like you receive 2 things. Perhaps the client 
+gives you the count of things instead of the length?
+
+Either way if the client provides a wrong content-type you should reject 
+the connection.
+
+>                undefined,false,waiting,
+>                [{<<"Access-Control-Allow-Credentials">>,<<"true">>},
+>                 {<<"Access-Control-Allow-Origin">>,
+>                  <<"http://xxxxxxxxx">>}],
+>                <<>>,undefined}}
+> Samir
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samset at wanadoo.fr  Fri Feb 27 18:33:56 2015
+From: samset at wanadoo.fr (Samir Sow)
+Date: Fri, 27 Feb 2015 18:33:56 +0100
+Subject: [99s-extend] Body length and content-length mismatch
+In-Reply-To: <54F0A54E.2010205@ninenines.eu>
+References: <4E148D98-CFDB-40D4-8532-8E46C8F09DB0@wanadoo.fr>
+ <54F0A54E.2010205@ninenines.eu>
+Message-ID: <62EAECE1-086A-4788-845A-11A1BC6C16AA@wanadoo.fr>
+
+Yes.
+i?m using httpc. It does not like  wrapping a binary string inside a [].
+I?ll fix my body.
+
+Thank you.
+
+Sincerely.
+
+
+
+> On 27 f?vr. 2015, at 18:11, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> 
+> It looks like the client is telling you BS.
+> 
+> On 02/27/2015 06:07 PM, Samir Sow wrote:
+>> Hi,
+>> 
+>> I?m facing an issue with the cowboy_req:body call.
+>> 
+>> The header show a length of 2 while the body itself is a binary string which has a size greater than 2 for sure.
+>> Trying to use cowboy_req:body with the length option does not make any difference.
+>> 
+>> How can i retrieve the data ?
+>> Any clue ?
+>> 
+>> Thank you
+>> 
+>> {ok,{<<"basic">>,{<<?xxxxx at xxxxxx">>,<<?xxxxxxx">>}},
+>>           {http_req,
+>>               {sslsocket,
+>>                   {gen_tcp,#Port<0.13250>,tls_connection,<0.298.0>},
+>>                   <0.407.0>},
+>>               ranch_ssl,keepalive,<0.408.0>,<<"POST">>,'HTTP/1.1',
+>>               {{xxxxxxxxx},16220},
+>>               <<?xxxx">>,undefined,xxxx,<<?xxxxx">>,undefined,
+>>               <<>>,undefined,
+>>               [{res_1,<<?xxxx">>}],
+>>               [{<<"content-type">>,<<"application/json">>},
+>>                {<<"content-length">>,<<"2">>},
+>>                {<<"te">>,<<>>},
+>>                {<<"host">>,<<?xxxxx">>},
+>>                {<<"authorization">>,
+>>                 <<"Basic xxxxxxxxxxxxxx">>},
+>>                {<<"connection">>,<<"keep-alive">>}],
+>>               [{<<"authorization">>,
+>>                 {<<"basic">>,{<<?xxxxxx">>,<<?xxxxxx">>}}},
+>>                {<<"connection">>,[<<"keep-alive">>]}],
+>>               undefined,[],waiting,
+>>               <<"{\"login\":\?xxxx at xxxxxx\",\?xxxx\":\?xxxx\"}{\"login\":\?xxxx at xxxx\",\?xxxx\":\?xxxxx\"}">>,
+> 
+> And looking at this (the buffer of already received data, presumably your whole body, it looks like you receive 2 things. Perhaps the client gives you the count of things instead of the length?
+> 
+> Either way if the client provides a wrong content-type you should reject the connection.
+> 
+>>               undefined,false,waiting,
+>>               [{<<"Access-Control-Allow-Credentials">>,<<"true">>},
+>>                {<<"Access-Control-Allow-Origin">>,
+>>                 <<"http://xxxxxxxxx">>}],
+>>               <<>>,undefined}}
+>> Samir
+>> 
+>> 
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>> 
+> 
+> -- 
+> Lo?c Hoguin
+> http://ninenines.eu
+
+

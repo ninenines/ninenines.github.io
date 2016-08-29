@@ -1,0 +1,108 @@
+<tt>
+Long&nbsp;story&nbsp;short,&nbsp;I&nbsp;solved&nbsp;the&nbsp;problem&nbsp;by&nbsp;adding {max_connections,&nbsp;50000}&nbsp;to&nbsp;cowboy:start_https&nbsp;because&nbsp;it&nbsp;default&nbsp;to&nbsp;1024&nbsp;at &lt;a&nbsp;href=&quot;https://github.com/extend/ranch/blob/master/src/ranch_listener_sup.erl#L30&quot;&gt;https://github.com/extend/ranch/blob/master/src/ranch_listener_sup.erl#L30&lt;/a&gt;&lt;div&gt;<br>
+&lt;br&gt;&lt;/div&gt;&lt;div&gt;However,&nbsp;before&nbsp;I&nbsp;figured&nbsp;out&nbsp;that&nbsp;setting,&nbsp;I&nbsp;did&nbsp;run&nbsp;eprof&nbsp;and&nbsp;these&nbsp;are&nbsp;the&nbsp;function&nbsp;calls&nbsp;it&nbsp;was&nbsp;spending&nbsp;most&nbsp;of&nbsp;it&#39;s&nbsp;time&nbsp;on&lt;br&gt;&lt;div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;FUNCTION&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; CALLS&nbsp; &nbsp; &nbsp; %&nbsp; &nbsp;TIME&nbsp; [uS&nbsp;/&nbsp;CALLS]&lt;/div&gt;<br>
+&lt;div&gt;--------&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; -----&nbsp; &nbsp; ---&nbsp; &nbsp;----&nbsp; [----------]&lt;/div&gt;&lt;/div&gt;&lt;div&gt;dict:get_slot/2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;174&nbsp; &nbsp;1.73&nbsp; &nbsp;1658&nbsp; [&nbsp; &nbsp; &nbsp; 9.53]&lt;/div&gt;&lt;div&gt;&lt;div&gt;dict:on_bucket/3&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 171&nbsp; &nbsp;1.77&nbsp; &nbsp;1701&nbsp; [&nbsp; &nbsp; &nbsp; 9.95]&lt;/div&gt;<br>
+&lt;div&gt;erlang:setelement/3&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;684&nbsp; &nbsp;3.23&nbsp; &nbsp;3098&nbsp; [&nbsp; &nbsp; &nbsp; 4.53]&lt;/div&gt;&lt;div&gt;dict:store_bkt_val/3&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 600&nbsp; &nbsp;5.24&nbsp; &nbsp;5028&nbsp; [&nbsp; &nbsp; &nbsp; 8.38]&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Then&nbsp;I&nbsp;ran&nbsp;etop&nbsp;and&nbsp;it&nbsp;showed&nbsp;that&nbsp;ranch_acceptor:maybe_wait&nbsp;had&nbsp;the&nbsp;most&nbsp;reductions&nbsp;were,&nbsp;so&nbsp;I&nbsp;looked&nbsp;at&nbsp;the&nbsp;code&nbsp;in&nbsp;that &lt;a&nbsp;href=&quot;https://github.com/extend/ranch/blob/master/src/ranch_acceptor.erl#L72&quot;&gt;https://github.com/extend/ranch/blob/master/src/ranch_acceptor.erl#L72&lt;/a&gt;&nbsp;and&nbsp;realized&nbsp;that&nbsp;like&nbsp;a&nbsp;newb&nbsp;I&nbsp;did&nbsp;not&nbsp;set&nbsp;the&nbsp;maximum&nbsp;connections&nbsp;for&nbsp;the&nbsp;listener&nbsp;:)&lt;/div&gt;<br>
+&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Problem&nbsp;solved.&nbsp;Looks&nbsp;like&nbsp;I&nbsp;won&#39;t&nbsp;need&nbsp;to&nbsp;put&nbsp;HAProxy&nbsp;in&nbsp;front&nbsp;of&nbsp;Cowboy&nbsp;after&nbsp;all.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Thank&nbsp;you,&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;rambocoder&lt;/div&gt;&lt;br&gt;&lt;div&nbsp;class=&quot;gmail_quote&quot;&gt;On&nbsp;Fri,&nbsp;Dec&nbsp;21,&nbsp;2012&nbsp;at&nbsp;11:51&nbsp;AM,&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;span&nbsp;dir=&quot;ltr&quot;&gt;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&lt;/span&gt;&nbsp;wrote:&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;Can&nbsp;you&nbsp;try&nbsp;enabling&nbsp;eprof&nbsp;to&nbsp;see&nbsp;where&nbsp;the&nbsp;VM&nbsp;spends&nbsp;its&nbsp;time?&lt;div&nbsp;class=&quot;im&quot;&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+On&nbsp;12/21/2012&nbsp;05:49&nbsp;PM,&nbsp;rambocoder&nbsp;wrote:&lt;br&gt;<br>
+&lt;/div&gt;&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;&lt;div&nbsp;class=&quot;im&quot;&gt;<br>
+In&nbsp;my&nbsp;preliminary&nbsp;testing,&nbsp;I&nbsp;used&nbsp;Jmeter&nbsp;this&nbsp;morning&nbsp;since&nbsp;it&#39;s&nbsp;an&lt;br&gt;<br>
+easy&nbsp;GUI&nbsp;load&nbsp;testing&nbsp;app&nbsp;and&nbsp;this&nbsp;is&nbsp;what&nbsp;I&nbsp;am&nbsp;seeing:&lt;br&gt;<br>
+&lt;br&gt;<br>
+With&nbsp;R15B03-01&nbsp;[smp:4:4]&nbsp;[async-threads:4]&nbsp;[hipe]&nbsp;[kernel-poll:true],&lt;br&gt;<br>
+when&nbsp;I&nbsp;establish&nbsp;1K&nbsp;concurrent&nbsp;connections&nbsp;via&nbsp;HTTPS,&nbsp;each&nbsp;connection&lt;br&gt;<br>
+takes&nbsp;up&nbsp;about&nbsp;68K&nbsp;of&nbsp;memory.&lt;br&gt;<br>
+&lt;br&gt;<br>
+Unfortunately,&nbsp;after&nbsp;about&nbsp;1050-1200&nbsp;connections,&nbsp;on&nbsp;my&nbsp;test&nbsp;server&nbsp;the&lt;br&gt;<br>
+Erlang&nbsp;scheduler&nbsp;jumps&nbsp;to&nbsp;100%&nbsp;CPU&nbsp;utilization&nbsp;on&nbsp;all&nbsp;4&nbsp;schedulers,&lt;br&gt;<br>
+while&nbsp;up&nbsp;to&nbsp;that&nbsp;point&nbsp;the&nbsp;scheduler&#39;s&nbsp;load&nbsp;was&nbsp;oscillating&nbsp;up&nbsp;and&nbsp;down.&lt;br&gt;<br>
+Using&nbsp;the&nbsp;Observer,&nbsp;there&nbsp;is&nbsp;only&nbsp;1&nbsp;ssl_connection_sup&nbsp; in&nbsp;the&nbsp;ssl&lt;br&gt;<br>
+application,&nbsp;having&nbsp;to&nbsp;deal&nbsp;with&nbsp;1000+&nbsp;gen_fsm&nbsp;workers,&nbsp;so&nbsp;that&nbsp;might&nbsp;be&lt;br&gt;<br>
+the&nbsp;bottleneck.&nbsp;Since&nbsp;the&nbsp;ulimit&nbsp;on&nbsp;my&nbsp;server&nbsp;is&nbsp;50000&nbsp;I&nbsp;don&#39;t&nbsp;think&nbsp;I&lt;br&gt;<br>
+am&nbsp;hitting&nbsp;any&nbsp;type&nbsp;of&nbsp;file&nbsp;handler&#39;s&nbsp;limit.&lt;br&gt;<br>
+&lt;br&gt;<br>
+Loïc&nbsp;and&nbsp;the&nbsp;group,&nbsp;am&nbsp;I&nbsp;missing&nbsp;some&nbsp;setting&nbsp;that&nbsp;is&nbsp;causing&nbsp;the&lt;br&gt;<br>
+scheduler&nbsp;to&nbsp;go&nbsp;to&nbsp;100%&nbsp;CPU&nbsp;and&nbsp;the&nbsp;run&nbsp;que&nbsp;in&nbsp;observer&nbsp;to&nbsp;be&nbsp;99?&lt;br&gt;<br>
+&lt;br&gt;<br>
+Sincerely,&lt;br&gt;<br>
+&lt;br&gt;<br>
+rambocoder&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+On&nbsp;Fri,&nbsp;Dec&nbsp;21,&nbsp;2012&nbsp;at&nbsp;6:45&nbsp;AM,&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;div&nbsp;class=&quot;im&quot;&gt;<br>
+&lt;mailto:&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&gt;&nbsp;wrote:&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;On&nbsp;12/21/2012&nbsp;04:34&nbsp;AM,&nbsp;rambocoder&nbsp;wrote:&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;Does&nbsp;anybody&nbsp;know&nbsp;either&nbsp;from&nbsp;benchmarks&nbsp;or&nbsp;real&nbsp;world&nbsp;data&nbsp;what&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;is&nbsp;the&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;average&nbsp;memory&nbsp;footprint&nbsp;of&nbsp;each&nbsp;concurrent&nbsp;HTTPS&nbsp;connection&nbsp;to&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;cowboy?&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;I&nbsp;don&#39;t&nbsp;have&nbsp;anything,&nbsp;sorry.&nbsp;I&#39;m&nbsp;guessing&nbsp;it&nbsp;consumes&nbsp;a&nbsp;lot&nbsp;more&lt;br&gt;<br>
+ &nbsp; &nbsp;than&nbsp;TCP&nbsp;though.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;SSL&nbsp;app&nbsp;in&nbsp;Erlang&nbsp;reuses&nbsp;SSL&nbsp;session-ids&nbsp;so&nbsp;I&nbsp;am&nbsp;not&nbsp;sure&nbsp;if&nbsp;the&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;Apache&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;Bench&nbsp;I&nbsp;test&nbsp;with&nbsp;reuses&nbsp;the&nbsp;session&nbsp;id&nbsp;or&nbsp;it&nbsp;does&nbsp;not.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;I&nbsp;wouldn&#39;t&nbsp;know,&nbsp;but&nbsp;I&nbsp;wouldn&#39;t&nbsp;trust&nbsp;Apache&nbsp;Bench&nbsp;doing&nbsp;the&nbsp;right&lt;br&gt;<br>
+ &nbsp; &nbsp;thing.&nbsp;Any&nbsp;other&nbsp;benchmark&nbsp;tool&nbsp;usually&nbsp;works&nbsp;better&nbsp;in&nbsp;my&nbsp;experience.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;BTW,&nbsp;what&nbsp;makes&nbsp;an&nbsp;erlang&nbsp;api&nbsp;&quot;documented&quot;&nbsp;vs&nbsp;&quot;undocumented&quot;.&nbsp;For&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;example&nbsp;ssl:session_info/1&nbsp;function&nbsp;here&nbsp;(&lt;br&gt;&lt;/div&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;&lt;a&nbsp;href=&quot;https://github.com/erlang/otp/__blob/maint/lib/ssl/src/ssl.__erl#L411&quot;&nbsp;target=&quot;_blank&quot;&gt;https://github.com/erlang/otp/&lt;u&gt;&lt;/u&gt;__blob/maint/lib/ssl/src/ssl._&lt;u&gt;&lt;/u&gt;_erl#L411&lt;/a&gt;&lt;div&nbsp;class=&quot;im&quot;&gt;&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;&lt;&lt;a&nbsp;href=&quot;https://github.com/erlang/otp/blob/maint/lib/ssl/src/ssl.erl#L411&quot;&nbsp;target=&quot;_blank&quot;&gt;https://github.com/erlang/&lt;u&gt;&lt;/u&gt;otp/blob/maint/lib/ssl/src/&lt;u&gt;&lt;/u&gt;ssl.erl#L411&lt;/a&gt;&gt;&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;)&nbsp;has&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;a&nbsp;spec&nbsp;and&nbsp;a&nbsp;short&nbsp;doc,&nbsp;but&nbsp;session_info&nbsp;is&nbsp;not&nbsp;described&lt;br&gt;&lt;/div&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;&lt;a&nbsp;href=&quot;http://www.erlang.org/doc/man/__ssl.html&quot;&nbsp;target=&quot;_blank&quot;&gt;http://www.erlang.org/doc/man/&lt;u&gt;&lt;/u&gt;__ssl.html&lt;/a&gt;&lt;div&nbsp;class=&quot;im&quot;&gt;&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;&lt;&lt;a&nbsp;href=&quot;http://www.erlang.org/doc/man/ssl.html&quot;&nbsp;target=&quot;_blank&quot;&gt;http://www.erlang.org/doc/&lt;u&gt;&lt;/u&gt;man/ssl.html&lt;/a&gt;&gt;&nbsp;.ssl:session_info/1&nbsp;is&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;a&nbsp;useful&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;function&nbsp;to&nbsp;be&nbsp;able&nbsp;to&nbsp;track&nbsp;if&nbsp;the&nbsp;load&nbsp;generator&nbsp;is&nbsp;reusing&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;the&nbsp;SSL&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;session_id&nbsp;or&nbsp;it&nbsp;is&nbsp;generating&nbsp;new&nbsp;one,&nbsp;because&nbsp;that&nbsp;would&nbsp;make&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;all&nbsp;the&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;difference&nbsp;during&nbsp;measurement&nbsp;due&nbsp;to&nbsp;Erlang&nbsp;caching&nbsp;SSL&nbsp;sessions&lt;br&gt;<br>
+ &nbsp; &nbsp; &nbsp; &nbsp;by&nbsp;default.&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;The&nbsp;documentation&nbsp;is&nbsp;separate&nbsp;(they&#39;re&nbsp;not&nbsp;using&nbsp;edoc).&nbsp;It&#39;s&nbsp;perhaps&lt;br&gt;<br>
+ &nbsp; &nbsp;not&nbsp;deemed&nbsp;useful&nbsp;enough&nbsp;for&nbsp;documenting&nbsp;it.&nbsp;I&nbsp;wouldn&#39;t&nbsp;worry&nbsp;about&lt;br&gt;<br>
+ &nbsp; &nbsp;using&nbsp;it&nbsp;for&nbsp;measurements&nbsp;though.&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;Try&nbsp;asking&nbsp;Ingela&nbsp;on&nbsp;the&nbsp;ML&nbsp;about&nbsp;it,&nbsp;perhaps&nbsp;they&nbsp;just&nbsp;forgot&nbsp;to&lt;br&gt;<br>
+ &nbsp; &nbsp;document&nbsp;it.&lt;br&gt;<br>
+&lt;br&gt;<br>
+ &nbsp; &nbsp;--&lt;br&gt;<br>
+ &nbsp; &nbsp;Loďc&nbsp;Hoguin&lt;br&gt;<br>
+ &nbsp; &nbsp;Erlang&nbsp;Cowboy&lt;br&gt;<br>
+ &nbsp; &nbsp;Nine&nbsp;Nines&lt;br&gt;<br>
+ &nbsp; &nbsp;&lt;a&nbsp;href=&quot;http://ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;http://ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;&lt;/div&gt;<br>
+______________________________&lt;u&gt;&lt;/u&gt;_________________&lt;br&gt;<br>
+Extend&nbsp;mailing&nbsp;list&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;mailto:Extend@lists.ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;Extend@lists.ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;http://lists.ninenines.eu:81/listinfo/extend&quot;&nbsp;target=&quot;_blank&quot;&gt;http://lists.ninenines.eu:81/&lt;u&gt;&lt;/u&gt;listinfo/extend&lt;/a&gt;&lt;br&gt;<br>
+&lt;br&gt;&lt;span&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;font&nbsp;color=&quot;#888888&quot;&gt;<br>
+&lt;/font&gt;&lt;/span&gt;&lt;/blockquote&gt;&lt;span&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;font&nbsp;color=&quot;#888888&quot;&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;<br>
+--&nbsp;&lt;br&gt;<br>
+Loïc&nbsp;Hoguin&lt;/font&gt;&lt;/span&gt;&lt;div&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;div&nbsp;class=&quot;h5&quot;&gt;&lt;br&gt;<br>
+Erlang&nbsp;Cowboy&lt;br&gt;<br>
+Nine&nbsp;Nines&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;http://ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;http://ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;/div&gt;&lt;/div&gt;&lt;/blockquote&gt;&lt;/div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;<br>
+
+</tt>

@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] timeout in cowboy loop handler
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3C525E10FE.2020107%40ninenines.eu%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000275.html">
+   <LINK REL="Next"  HREF="000277.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] timeout in cowboy loop handler</H1>
+    <B>Lo&#239;c Hoguin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20timeout%20in%20cowboy%20loop%20handler&In-Reply-To=%3C525E10FE.2020107%40ninenines.eu%3E"
+       TITLE="[99s-extend] timeout in cowboy loop handler">essen at ninenines.eu
+       </A><BR>
+    <I>Wed Oct 16 06:07:26 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000275.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+        <LI>Next message: <A HREF="000277.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#276">[ date ]</a>
+              <a href="thread.html#276">[ thread ]</a>
+              <a href="subject.html#276">[ subject ]</a>
+              <a href="author.html#276">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>On 10/16/2013 05:48 AM, akonsu wrote:
+&gt;<i> 1. do you mean that there is no way on the server side to tell if the
+</I>&gt;<i> client has disconnected?
+</I>
+There are ways, and Cowboy will happily detect them. There's also the 
+problem that a side may be closed without the other side knowing about 
+it, which is why you need timeouts.
+
+&gt;<i> 2. if I use a normal handler, I will still run into the same problem, it
+</I>&gt;<i> does not matter which handler I use, from the standpoint of deciding
+</I>&gt;<i> whether the client is still there, right?
+</I>
+If the client is gone, the send will fail. Normal handlers are pretty 
+much the same except they don't have a timeout, because your code has an 
+explicit end.
+
+&gt;<i> I am confused as to how I can implement my streaming and not drop the
+</I>&gt;<i> connection on each client and yet make sure I do close the connections
+</I>&gt;<i> when the clients disconnect...
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> 2013/10/15 Lo&#239;c Hoguin &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A> &lt;mailto:<A HREF="https://lists.ninenines.eu/listinfo/extend">essen at ninenines.eu</A>&gt;&gt;
+</I>&gt;<i>
+</I>&gt;<i>     Infinite is bad practice, yes. Infinite means some connections will
+</I>&gt;<i>     *never* be closed, eating FDs and memory for nothing.
+</I>&gt;<i>
+</I>&gt;<i>     I'm not sure why you want to receive messages, you could just use a
+</I>&gt;<i>     normal handler that asks for more data, sends it, ask for more data,
+</I>&gt;<i>     sends it, etc.
+</I>&gt;<i>
+</I>
+
+-- 
+Lo&#239;c Hoguin
+Erlang Cowboy
+Nine Nines
+<A HREF="http://ninenines.eu">http://ninenines.eu</A>
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000275.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+	<LI>Next message: <A HREF="000277.html">[99s-extend] timeout in cowboy loop handler
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#276">[ date ]</a>
+              <a href="thread.html#276">[ thread ]</a>
+              <a href="subject.html#276">[ subject ]</a>
+              <a href="author.html#276">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

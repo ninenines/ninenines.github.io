@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20SOLVED%20%20--%20%20Re%3A%20%20%22access.log%22%20for%20Cowboy&In-Reply-To=%3CE5A88FAB-2D1D-4D93-8281-DC024EA91BDD%40mtod.org%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000140.html">
+   <LINK REL="Next"  HREF="000142.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy</H1>
+    <B>Adam Rutkowski</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20SOLVED%20%20--%20%20Re%3A%20%20%22access.log%22%20for%20Cowboy&In-Reply-To=%3CE5A88FAB-2D1D-4D93-8281-DC024EA91BDD%40mtod.org%3E"
+       TITLE="[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy">hq at mtod.org
+       </A><BR>
+    <I>Wed May 15 15:33:28 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000140.html">[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+</A></li>
+        <LI>Next message: <A HREF="000142.html">[99s-extend] REALLY SOLVED -- Re: SOLVED -- Re: &quot;access.log&quot; for Cowboy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#141">[ date ]</a>
+              <a href="thread.html#141">[ thread ]</a>
+              <a href="subject.html#141">[ subject ]</a>
+              <a href="author.html#141">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+On 15 May 2013, at 14:43, Ivan Uemlianin wrote:
+
+&gt;<i> Thanks for this.  I've tried it.  It seems to be adding a trace to an already existing log file (which is already handling log messagse of a certain level).  e.g., it uses lager:trace not lager:trace_file.
+</I>&gt;<i> 
+</I>&gt;<i> I can't set it up so the trace file receives *only* trace messages.  I'l revert to the lager:trace_file call.
+</I>
+The following setup works for me:
+
+[
+
+{lager, [
+    {colored, true},
+    {handlers, [
+      {lager_console_backend, info},
+      {lager_file_backend, [
+                {file, &quot;log/error.log&quot;}, {level, error}, {size, 10485760}, {date, &quot;$D0&quot;}, {count, 5}]},
+      {lager_file_backend, [
+                {file, &quot;log/cdr.log&quot;}, {level, none}, {size, 1000}, {date, &quot;$D0&quot;}, {count, 5}]}
+      ]},
+    {crash_log, &quot;log/crash.log&quot;},
+
+
+{traces,
+[
+{{lager_file_backend, &quot;log/cdr.log&quot;}, [{type, cdr}], debug}
+]}
+
+]}
+
+
+].
+
+Hope it helps, take care.
+A.
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000140.html">[99s-extend] SOLVED  --  Re:  &quot;access.log&quot; for Cowboy
+</A></li>
+	<LI>Next message: <A HREF="000142.html">[99s-extend] REALLY SOLVED -- Re: SOLVED -- Re: &quot;access.log&quot; for Cowboy
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#141">[ date ]</a>
+              <a href="thread.html#141">[ thread ]</a>
+              <a href="subject.html#141">[ subject ]</a>
+              <a href="author.html#141">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

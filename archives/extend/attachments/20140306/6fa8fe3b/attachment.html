@@ -1,0 +1,67 @@
+<tt>
+&lt;div&nbsp;dir=&quot;ltr&quot;&gt;Thank&nbsp;you&nbsp;for&nbsp;answer.&nbsp;&lt;br&gt;Is&nbsp;it&nbsp;common&nbsp;way&nbsp;(for&nbsp;OTP-based&nbsp;application)&nbsp;to&nbsp;store&nbsp;tests&nbsp;in&nbsp;`tests`&nbsp;subdirectory&nbsp;rather&nbsp;then&nbsp;in&nbsp;`src/tests/`?&lt;br&gt;&lt;/div&gt;&lt;div&nbsp;class=&quot;gmail_extra&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;div&nbsp;class=&quot;gmail_quote&quot;&gt;On&nbsp;Thu,&nbsp;Mar&nbsp;6,&nbsp;2014&nbsp;at&nbsp;4:40&nbsp;PM,&nbsp;Loïc&nbsp;Hoguin&nbsp;&lt;span&nbsp;dir=&quot;ltr&quot;&gt;&lt;&lt;a&nbsp;href=&quot;mailto:essen@ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;essen@ninenines.eu&lt;/a&gt;&gt;&lt;/span&gt;&nbsp;wrote:&lt;br&gt;<br>
+&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;Tests&nbsp;should&nbsp;be&nbsp;in&nbsp;./tests,&nbsp;not&nbsp;./src/tests.&lt;br&gt;<br>
+&lt;br&gt;<br>
+If&nbsp;you&nbsp;put&nbsp;them&nbsp;in&nbsp;./tests&nbsp;everything&nbsp;you&nbsp;mentioned&nbsp;will&nbsp;work.&lt;div&nbsp;class=&quot;&quot;&gt;&lt;br&gt;<br>
+&lt;br&gt;<br>
+On&nbsp;03/03/2014&nbsp;09:49&nbsp;PM,&nbsp;Anton&nbsp;Koval&#39;&nbsp;wrote:&lt;br&gt;<br>
+&lt;/div&gt;&lt;blockquote&nbsp;class=&quot;gmail_quote&quot;&nbsp;style=&quot;margin:0&nbsp;0&nbsp;0&nbsp;.8ex;border-left:1px&nbsp;#ccc&nbsp;solid;padding-left:1ex&quot;&gt;&lt;div&nbsp;class=&quot;&quot;&gt;<br>
+Hello,&lt;br&gt;<br>
+&lt;br&gt;<br>
+I&nbsp;have&nbsp;next&nbsp;structure&nbsp;of&nbsp;my&nbsp;project:&lt;br&gt;<br>
+.&lt;br&gt;<br>
+├──&nbsp;deps&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;cowboy&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;cowlib&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;erlang_iconv&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;erlydtl&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;mochiweb_xpath&lt;br&gt;<br>
+│&nbsp; &nbsp;└──&nbsp;ranch&lt;br&gt;<br>
+├──&nbsp;ebin&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;fetchers.beam&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;parsers.beam&lt;br&gt;<br>
+│&nbsp; &nbsp;└──&nbsp;wasearch_sup.beam&lt;br&gt;&lt;/div&gt;<br>
+├──&nbsp;&lt;a&nbsp;href=&quot;http://erlang.mk&quot;&nbsp;target=&quot;_blank&quot;&gt;erlang.mk&lt;/a&gt;&nbsp;&lt;&lt;a&nbsp;href=&quot;http://erlang.mk&quot;&nbsp;target=&quot;_blank&quot;&gt;http://erlang.mk&lt;/a&gt;&gt;&lt;div&gt;&lt;div&nbsp;class=&quot;h5&quot;&gt;&lt;br&gt;<br>
+├──&nbsp;Makefile&lt;br&gt;<br>
+├──&nbsp;_rel&lt;br&gt;<br>
+│&nbsp; &nbsp;└──&nbsp;....&lt;br&gt;<br>
+├──&nbsp;relx&lt;br&gt;<br>
+├──&nbsp;relx.config&lt;br&gt;<br>
+├──&nbsp;src&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;fetchers.erl&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;main_handler.erl&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;parsers.erl&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;tests&lt;br&gt;<br>
+│&nbsp; &nbsp;│&nbsp; &nbsp;├──&nbsp;parsers_SUITE_data&lt;br&gt;<br>
+│&nbsp; &nbsp;│&nbsp; &nbsp;├──&nbsp;parsers_SUITE.erl&lt;br&gt;<br>
+│&nbsp; &nbsp;│&nbsp; &nbsp;├──&nbsp;....&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;wasearch_app.erl&lt;br&gt;<br>
+│&nbsp; &nbsp;├──&nbsp;wasearch.app.src&lt;br&gt;<br>
+│&nbsp; &nbsp;└──&nbsp;wasearch_sup.erl&lt;br&gt;<br>
+└──&nbsp;templates&lt;br&gt;<br>
+ &nbsp; &nbsp; └──&nbsp;index.dtl&lt;br&gt;<br>
+&lt;br&gt;<br>
+I&nbsp;would&nbsp;prefer&nbsp;to&nbsp;store&nbsp;tests&nbsp;not&nbsp;in&nbsp;`src`&nbsp;directory&nbsp;but&nbsp;rather&nbsp;in&lt;br&gt;<br>
+`tests`&nbsp;subdirectory.&lt;br&gt;<br>
+Erlang.mk&nbsp;README&nbsp;says:&nbsp;You&nbsp;can&nbsp;run&nbsp;an&nbsp;individual&nbsp;test&nbsp;suite&nbsp;by&nbsp;using&nbsp;the&lt;br&gt;<br>
+special&nbsp;|test_*|&nbsp;targets.&nbsp;For&nbsp;example&nbsp;if&nbsp;you&nbsp;have&nbsp;a&nbsp;common_test&nbsp;suite&lt;br&gt;<br>
+named&nbsp;|spdy|&nbsp;and&nbsp;you&nbsp;want&nbsp;to&nbsp;run&nbsp;only&nbsp;this&nbsp;suite&nbsp;and&nbsp;not&nbsp;the&nbsp;others,&nbsp;you&lt;br&gt;<br>
+can&nbsp;use&nbsp;the&nbsp;|make&nbsp;test_spdy|&nbsp;command.&lt;br&gt;<br>
+And&nbsp;of&nbsp;course&nbsp;`make&nbsp;test_parsers`&nbsp; returns&nbsp;`no&nbsp;rule&nbsp;to&nbsp;make&nbsp;target`&nbsp;error.&lt;br&gt;<br>
+Is&nbsp;there&nbsp;a&nbsp;way&nbsp;to&nbsp;run&nbsp;suites&nbsp;from&nbsp;custom&nbsp;directory&nbsp;with&lt;br&gt;<br>
+`make_&lt;mod_name_with_suite&gt;`&nbsp;command?&lt;br&gt;<br>
+&lt;br&gt;<br>
+&lt;br&gt;&lt;/div&gt;&lt;/div&gt;<br>
+______________________________&lt;u&gt;&lt;/u&gt;_________________&lt;br&gt;<br>
+Extend&nbsp;mailing&nbsp;list&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;mailto:Extend@lists.ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;Extend@lists.ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;https://lists.ninenines.eu/listinfo/extend&quot;&nbsp;target=&quot;_blank&quot;&gt;https://lists.ninenines.eu/&lt;u&gt;&lt;/u&gt;listinfo/extend&lt;/a&gt;&lt;br&gt;<br>
+&lt;br&gt;&lt;span&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;font&nbsp;color=&quot;#888888&quot;&gt;<br>
+&lt;/font&gt;&lt;/span&gt;&lt;/blockquote&gt;&lt;span&nbsp;class=&quot;HOEnZb&quot;&gt;&lt;font&nbsp;color=&quot;#888888&quot;&gt;<br>
+&lt;br&gt;<br>
+--&nbsp;&lt;br&gt;<br>
+Loïc&nbsp;Hoguin&lt;br&gt;<br>
+&lt;a&nbsp;href=&quot;http://ninenines.eu&quot;&nbsp;target=&quot;_blank&quot;&gt;http://ninenines.eu&lt;/a&gt;&lt;br&gt;<br>
+&lt;/font&gt;&lt;/span&gt;&lt;/blockquote&gt;&lt;/div&gt;&lt;br&gt;&lt;/div&gt;<br>
+
+</tt>

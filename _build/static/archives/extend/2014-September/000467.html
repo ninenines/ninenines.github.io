@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Newbie%2C%20Cowboy%20%2B%20Websocket%20%2B%20Audio%20Recording&In-Reply-To=%3CCA%2Bycm%3D5YMMKFpZnfGrOBLu5Jn4WFAiX7BmwbKBti2YsVmJ5JjQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000466.html">
+   
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Newbie, Cowboy + Websocket + Audio Recording</H1>
+    <B>Juan Mat&#237;as</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Newbie%2C%20Cowboy%20%2B%20Websocket%20%2B%20Audio%20Recording&In-Reply-To=%3CCA%2Bycm%3D5YMMKFpZnfGrOBLu5Jn4WFAiX7BmwbKBti2YsVmJ5JjQ%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Newbie, Cowboy + Websocket + Audio Recording">jmrepetti at gmail.com
+       </A><BR>
+    <I>Tue Sep 30 12:38:15 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000466.html">[99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+</A></li>
+        
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#467">[ date ]</a>
+              <a href="thread.html#467">[ thread ]</a>
+              <a href="subject.html#467">[ subject ]</a>
+              <a href="author.html#467">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Thanks, that fixed the error. Now I'm having other but I'll investigate.
+
+
+
+On Tue, Sep 30, 2014 at 12:53 AM, Eduardo Gurgel &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">edgurgel at gmail.com</A>&gt; wrote:
+
+&gt;<i> Looking on the output it says:
+</I>&gt;<i>
+</I>&gt;<i> *{reason,badarith} *on this line:
+</I>&gt;<i>
+</I>&gt;<i> RecorderPid ! {rec, _Frame/binary},
+</I>&gt;<i>
+</I>&gt;<i> This may help you somehow.
+</I>&gt;<i>
+</I>&gt;<i> BTW, variables starting with _ are usually used to show unused variables
+</I>&gt;<i> and stop warnings from the compiler.
+</I>&gt;<i>
+</I>&gt;<i> On 30 September 2014 05:52, Juan Mat&#237;as &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">jmrepetti at gmail.com</A>&gt; wrote:
+</I>&gt;<i>
+</I>&gt;&gt;<i> Hello list, I hope this is the right place to ask this.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I'm learning Erlang, and I wanted to create a Cowboy app to record audio
+</I>&gt;&gt;<i> from a web browser.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Based on the websocket example in the Cowboy source code, I get the user
+</I>&gt;&gt;<i> mic input and send this input to the websocket.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> I created a &quot;recorder&quot; module, which functionality is to save the data to
+</I>&gt;&gt;<i> the a file.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> *#rawe_handler.erl*-module(rawec_handler).
+</I>&gt;&gt;<i> -behaviour(cowboy_websocket_handler).
+</I>&gt;&gt;<i> ......
+</I>&gt;&gt;<i> init(_, _, _) -&gt;
+</I>&gt;&gt;<i>   case whereis(recorder) of
+</I>&gt;&gt;<i>     undefined -&gt;
+</I>&gt;&gt;<i>         RecorderPid = recorder:start(),
+</I>&gt;&gt;<i>         register(recorder, RecorderPid);
+</I>&gt;&gt;<i>     _ -&gt; ok
+</I>&gt;&gt;<i>   end,
+</I>&gt;&gt;<i>     {upgrade, protocol, cowboy_websocket}.
+</I>&gt;&gt;<i> .....
+</I>&gt;&gt;<i> websocket_handle(_Frame, Req, State) -&gt;
+</I>&gt;&gt;<i>   RecorderPid = whereis(recorder),
+</I>&gt;&gt;<i>   RecorderPid ! {rec, _Frame/binary},
+</I>&gt;&gt;<i>     {ok, Req, State}.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> *#recorder.erl*
+</I>&gt;&gt;<i> -module(recorder).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> -export([start/0, recorder_fun/1]).
+</I>&gt;&gt;<i> -compile([debug_info]).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> recorder_fun(IoDevice) -&gt;
+</I>&gt;&gt;<i>   receive
+</I>&gt;&gt;<i>     {rec, Data} -&gt;
+</I>&gt;&gt;<i>       ok = file:write(IoDevice, Data),
+</I>&gt;&gt;<i>       io:format(Data),
+</I>&gt;&gt;<i>       recorder_fun(IoDevice);
+</I>&gt;&gt;<i>     {stop, _} -&gt;
+</I>&gt;&gt;<i>       %%Close file
+</I>&gt;&gt;<i>       file:close(IoDevice)
+</I>&gt;&gt;<i>     end.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> start() -&gt;
+</I>&gt;&gt;<i>   {ok, IoDevice} = file:open(&quot;/tmp/test_binary.wav&quot;, [write,
+</I>&gt;&gt;<i> binary]),
+</I>&gt;&gt;<i>   spawn(recorder, recorder_fun, [IoDevice]).
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> When I start the console, and allow the microphone on the browser, I see
+</I>&gt;&gt;<i> this error on the console:
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> =ERROR REPORT==== 29-Sep-2014::18:13:03 ===
+</I>&gt;&gt;<i> Ranch listener http had connection process started with
+</I>&gt;&gt;<i> cowboy_protocol:start_link/4 at &lt;0.178.0&gt; exit with reason:
+</I>&gt;&gt;<i> *{[{reason,badarith},{mfa,{rawec_handler,websocket_handle,3*}},{stacktrace,[{rawec_handler,websocket_handle,3,[{file,&quot;src/rawec_handler.erl&quot;},{line,35}]},{cowboy_websocket,handler_call,7,[{file,&quot;src/cowboy_websocket.erl&quot;},{line,588}]},{cowboy_protocol,execute,4,[{file,&quot;src/cowboy_protocol.erl&quot;},{line,435}]}]},{msg,{binary,&lt;&lt;0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0....(ETC,
+</I>&gt;&gt;<i> DATA STREAM CONTINUES)
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Probably my approach to do this is totally wrong. I there any obvious
+</I>&gt;&gt;<i> problem here?
+</I>&gt;&gt;<i> Can someone point me to a right direction?. Maybe I should write directly
+</I>&gt;&gt;<i> to a file in the *websocket_handle *funcion, but how can I keep a file
+</I>&gt;&gt;<i> opened during the streaming?
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> The github repo is here: <A HREF="https://github.com/jmrepetti/rawec">https://github.com/jmrepetti/rawec</A> with the
+</I>&gt;&gt;<i> whole source code if you want to take a look.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> Thanks in advance,
+</I>&gt;&gt;<i> Matias.
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i> _______________________________________________
+</I>&gt;&gt;<i> Extend mailing list
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;&gt;<i>
+</I>&gt;&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> --
+</I>&gt;<i> Eduardo
+</I>&gt;<i>
+</I>
+
+
+-- 
+Mat&#237;as
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20140930/ef46837f/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20140930/ef46837f/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000466.html">[99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+</A></li>
+	
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#467">[ date ]</a>
+              <a href="thread.html#467">[ thread ]</a>
+              <a href="subject.html#467">[ subject ]</a>
+              <a href="author.html#467">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

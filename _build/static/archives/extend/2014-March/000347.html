@@ -1,0 +1,221 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Trying to grok erlang.mk
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Trying%20to%20grok%20erlang.mk&In-Reply-To=%3C5319BD87.2020109%40llaisdy.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000346.html">
+   <LINK REL="Next"  HREF="000348.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Trying to grok erlang.mk</H1>
+    <B>Ivan Uemlianin</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Trying%20to%20grok%20erlang.mk&In-Reply-To=%3C5319BD87.2020109%40llaisdy.com%3E"
+       TITLE="[99s-extend] Trying to grok erlang.mk">ivan at llaisdy.com
+       </A><BR>
+    <I>Fri Mar  7 13:37:27 CET 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000346.html">[99s-extend] Trying to grok erlang.mk
+</A></li>
+        <LI>Next message: <A HREF="000348.html">[99s-extend] Trying to grok erlang.mk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#347">[ date ]</a>
+              <a href="thread.html#347">[ thread ]</a>
+              <a href="subject.html#347">[ subject ]</a>
+              <a href="author.html#347">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Dear Lloyd
+
+I've just tried this with file layout and contents copied from your 
+email, and make works fine here I'm afraid.
+
+One odd thing I noticed in your make output ...
+
+ &gt; /min$ make
+ &gt;   ERLC   min.erl
+ &gt;   APP    min .app.src
+ &gt; cat: src/min: No such file or directory
+ &gt; cat: .app.src: No such file or directory
+ &gt; sed: can't read .app: No such file or directory
+ &gt; make: *** [app] Error 2
+
+... is that in the APP line, the filename min.app.src has a space in it, 
+and it looks (in the cat lines) like it's broken down into src/min and 
+.app.src (ie ./.app.src).  I can't imagine why that's happening, but 
+that's what's causing the problem I should think.
+
+ &gt; 2) How can I structure directories and make files for a project
+ &gt;    that involves several applications?
+
+I don't know if it's the &quot;correct&quot; way with erlang.mk but, as a refugee 
+from rebar, I have apps set out rebar-style and use old-school recursive 
+make. e.g.:
+
+max/
+   erlang.mk
+   Makefile
+   apps/
+     app1/
+       Makefile
+       src/
+     app2/
+       Makefile
+       src/
+
+Top level Makefile doesn't need to include erlang.mk, and has lines like:
+
+all:
+	$(MAKE) -C apps/app1
+	$(MAKE) -C apps/app2
+
+Lower level Makefiles include erlang.mk.
+
+Best wishes
+
+Ivan
+
+
+On 06/03/2014 20:29, <A HREF="https://lists.ninenines.eu/listinfo/extend">lloyd at writersglen.com</A> wrote:
+&gt;<i> Hello,
+</I>&gt;<i>
+</I>&gt;<i> To secure my understanding of erlang.mk, I've been trying to create the simplest possible example I can imagine. Which gives me this:
+</I>&gt;<i>
+</I>&gt;<i> min
+</I>&gt;<i>     erlang.mk
+</I>&gt;<i>     Makefile
+</I>&gt;<i>     src
+</I>&gt;<i>        min.app.src
+</I>&gt;<i>        min.erl
+</I>&gt;<i>
+</I>&gt;<i> *** Where Makefile is:
+</I>&gt;<i>
+</I>&gt;<i> PROJECT = min
+</I>&gt;<i>
+</I>&gt;<i> include erlang.mk
+</I>&gt;<i>
+</I>&gt;<i> *** min.app.src is:
+</I>&gt;<i>
+</I>&gt;<i> {application, min,
+</I>&gt;<i>           [{description,[]},
+</I>&gt;<i>            {vsn,&quot;0.1.0&quot;},
+</I>&gt;<i>            {registered,[]},
+</I>&gt;<i>            {applications,[kernel,stdlib]},
+</I>&gt;<i>            {env,[]},
+</I>&gt;<i>            {modules,[]}]}.
+</I>&gt;<i>
+</I>&gt;<i> *** and min.erl is:
+</I>&gt;<i>
+</I>&gt;<i> -module(min).
+</I>&gt;<i>
+</I>&gt;<i> -export([hello/0]).
+</I>&gt;<i>
+</I>&gt;<i> hello() -&gt;
+</I>&gt;<i>     io:format(&quot;Hello min!~n~n&quot;).
+</I>&gt;<i>
+</I>&gt;<i> *** But when I call make, I get this:
+</I>&gt;<i>
+</I>&gt;<i> /min$ make
+</I>&gt;<i>   ERLC   min.erl
+</I>&gt;<i>   APP    min .app.src
+</I>&gt;<i> cat: src/min: No such file or directory
+</I>&gt;<i> cat: .app.src: No such file or directory
+</I>&gt;<i> sed: can't read .app: No such file or directory
+</I>&gt;<i> make: *** [app] Error 2
+</I>&gt;<i>
+</I>&gt;<i> *** Observations
+</I>&gt;<i>
+</I>&gt;<i> min.erl compiles just  fine
+</I>&gt;<i> min.app.src breaks the compile
+</I>&gt;<i>
+</I>&gt;<i> *** Questions:
+</I>&gt;<i>
+</I>&gt;<i> 1) How can I correct this?
+</I>&gt;<i> 2) How can I structure directories and make files for a project that involves several applications?
+</I>&gt;<i>
+</I>&gt;<i> Many thanks,
+</I>&gt;<i>
+</I>&gt;<i> LRP
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> *********************************************
+</I>&gt;<i> My books:
+</I>&gt;<i>
+</I>&gt;<i> THE GOSPEL OF ASHES
+</I>&gt;<i> <A HREF="http://thegospelofashes.com">http://thegospelofashes.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Strength is not enough. Do they have the courage
+</I>&gt;<i> and the cunning? Can they survive long enough to
+</I>&gt;<i> save the lives of millions?
+</I>&gt;<i>
+</I>&gt;<i> FREEIN' PANCHO
+</I>&gt;<i> <A HREF="http://freeinpancho.com">http://freeinpancho.com</A>
+</I>&gt;<i>
+</I>&gt;<i> A community of misfits help a troubled boy find his way
+</I>&gt;<i>
+</I>&gt;<i> AYA TAKEO
+</I>&gt;<i> <A HREF="http://ayatakeo.com">http://ayatakeo.com</A>
+</I>&gt;<i>
+</I>&gt;<i> Star-crossed love, war and power in an alternative
+</I>&gt;<i> universe
+</I>&gt;<i>
+</I>&gt;<i> Available through Amazon or by request from your
+</I>&gt;<i> favorite bookstore
+</I>&gt;<i>
+</I>&gt;<i>
+</I>&gt;<i> **********************************************
+</I>&gt;<i>
+</I>&gt;<i> _______________________________________________
+</I>&gt;<i> Extend mailing list
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i> <A HREF="https://lists.ninenines.eu/listinfo/extend">https://lists.ninenines.eu/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     <A HREF="https://lists.ninenines.eu/listinfo/extend">ivan at llaisdy.com</A>
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000346.html">[99s-extend] Trying to grok erlang.mk
+</A></li>
+	<LI>Next message: <A HREF="000348.html">[99s-extend] Trying to grok erlang.mk
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#347">[ date ]</a>
+              <a href="thread.html#347">[ thread ]</a>
+              <a href="subject.html#347">[ subject ]</a>
+              <a href="author.html#347">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

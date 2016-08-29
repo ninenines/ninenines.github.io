@@ -1,0 +1,85 @@
+From ethrbh at gmail.com  Mon Jul 13 12:47:54 2015
+From: ethrbh at gmail.com (Robert Balogh)
+Date: Mon, 13 Jul 2015 12:47:54 +0200
+Subject: [99s-extend] help to combine websocket with basic authentication
+Message-ID: <CAA4OwwW-m9+esdjEv-jJv=wZixcisP=OXgAcE5nHVYD2O3NfrA@mail.gmail.com>
+
+hello,
+
+Sorry that I turned to the list again, but I would like to get some help
+from you. I have a websocket based application, based on the
+cowboy/examples/websocket. It is working well. Now I would like to add a
+basic authentication, and I saw, there is an example how to do this. I
+checked the cowboy/examples/rest_basic_auth example.
+So I tried "add" the aut. example into my websocket app by doing the
+following steps:
+ - add new module for handle the authentication
+   do_basic_auth.erl
+ - update cowboy_router:compile function call when star application with
+{"/", do_basic_auth, []}
+
+Once the compilation done, I can start the app and I get the "basic auth"
+window in the browser when connecting to localhost:8080, but the "ordinary"
+index.html does not appears when I set the correct auth data (user/pwd). I
+am pretty sure that I made something wrong, I do not see what I did wrong,
+thus I kindly ask you, please try help me.
+
+The project what I am working on can be seen in the github:
+   https://github.com/ethrbh/websocket_2
+
+thanks fro your help,
+/Robi
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20150713/eb33ab46/attachment.html>
+
+From e at bestmx.net  Mon Jul 13 13:01:53 2015
+From: e at bestmx.net (e at bestmx.net)
+Date: Mon, 13 Jul 2015 13:01:53 +0200
+Subject: [99s-extend] help to combine websocket with basic authentication
+In-Reply-To: <CAA4OwwW-m9+esdjEv-jJv=wZixcisP=OXgAcE5nHVYD2O3NfrA@mail.gmail.com>
+References: <CAA4OwwW-m9+esdjEv-jJv=wZixcisP=OXgAcE5nHVYD2O3NfrA@mail.gmail.com>
+Message-ID: <55A39AA1.2080801@bestmx.net>
+
+> Now I would like to add a
+> basic authentication, and I saw, there is an example how to do this. I
+> checked the cowboy/examples/rest_basic_auth example.
+
+may i ask?
+why do you want "basic"
+while using WS, which keeps state implicitly.
+
+"basic" is a CRUTCH for stateless environments,
+but you have cowboy that naturally passes the "State" variable trough 
+handlers.
+
+also, do you remember that "basic" gives you no option to logout?
+
+
+> So I tried "add" the aut. example into my websocket app by doing the
+> following steps:
+>   - add new module for handle the authentication
+>     do_basic_auth.erl
+>   - update cowboy_router:compile function call when star application with
+> {"/", do_basic_auth, []}
+>
+> Once the compilation done, I can start the app and I get the "basic auth"
+> window in the browser when connecting to localhost:8080, but the "ordinary"
+> index.html does not appears when I set the correct auth data (user/pwd). I
+> am pretty sure that I made something wrong, I do not see what I did wrong,
+> thus I kindly ask you, please try help me.
+>
+> The project what I am working on can be seen in the github:
+>     https://github.com/ethrbh/websocket_2
+>
+> thanks fro your help,
+> /Robi
+>
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+

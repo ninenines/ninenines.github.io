@@ -1,0 +1,619 @@
+From essen at ninenines.eu  Thu Nov 14 17:23:36 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 14 Nov 2013 17:23:36 +0100
+Subject: [99s-extend] Cowboy and Ranch 0.9.0 released
+Message-ID: <5284F908.9000605@ninenines.eu>
+
+Hello shiny people,
+
+Cowboy 0.9.0 has been released. Ranch 0.9.0 has been released too! So 
+let's start with that.
+
+Ranch 0.9.0 is just stability improvements, better error reporting and a 
+couple new SSL options.
+
+Cowboy 0.9.0 is using it of course, and also has official SPDY support 
+(documented and everything!), a revamped cowboy_static (built-in 
+mimetypes support, and also documented), tons of additions to the guide, 
+tons of user patches and other changes you can find here:
+
+   *  https://github.com/extend/cowboy/blob/master/CHANGELOG.md
+
+Which reminds me, I want to thank all 70 awesome contributors (myself 
+included) that make the Cowboy project so fun to work on! So, thank you!
+
+When upgrading, please be aware that:
+
+   *  A dependency has been added, cowlib
+   *  Various undocumented functions have been moved to cowlib
+   *  The options for cowboy_static changed a lot, so read the guide
+   *  You need to set ERL_LIBS or equivalent for cowboy_static to find 
+your private directory now
+
+You can find the updated guide on http://ninenines.eu BUT do note that 
+I'm migrating the site so if you do not see "Contribute to this site" in 
+the bottom left next to "Contact", then you are on the old version and 
+should probably head to github for your documentation needs, or use the 
+files in your clone directly. I also have improvements left to make to 
+the site to make navigating documentation easier, so stay tuned!
+
+Speaking of the guide, now all the examples, but also the getting 
+started chapter of the guide, are releases. I am hopeful that this will 
+make more people use releases by default instead of an awful start.sh 
+script.
+
+For details on what's coming up next, see the ROADMAP. Next step (0.10) 
+is finishing the request body work, fixing some timeout issues and 
+adding proper multipart support for both requests and responses. This 
+will be the last significant step before 1.0. I have hopes that all this 
+will be ready around the time R17 is released.
+
+So yeah, enjoy! And as always please forward any feedback, especially 
+related to the user guide as this is my main focus now.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From barcojie at gmail.com  Fri Nov 15 02:57:17 2013
+From: barcojie at gmail.com (Barco You)
+Date: Fri, 15 Nov 2013 09:57:17 +0800
+Subject: [99s-extend] [erlang-questions] Cowboy and Ranch 0.9.0 released
+In-Reply-To: <5284F908.9000605@ninenines.eu>
+References: <5284F908.9000605@ninenines.eu>
+Message-ID: <CA+qFv3totg6BgkLDdNPJQnj9BD=TYjfqj+R_BzTij29Uj=55DQ@mail.gmail.com>
+
+Very excited to hear of this. Cowboy is very good to use.
+On Nov 15, 2013 12:23 AM, "Lo?c Hoguin" <essen at ninenines.eu> wrote:
+
+> Hello shiny people,
+>
+> Cowboy 0.9.0 has been released. Ranch 0.9.0 has been released too! So
+> let's start with that.
+>
+> Ranch 0.9.0 is just stability improvements, better error reporting and a
+> couple new SSL options.
+>
+> Cowboy 0.9.0 is using it of course, and also has official SPDY support
+> (documented and everything!), a revamped cowboy_static (built-in mimetypes
+> support, and also documented), tons of additions to the guide, tons of user
+> patches and other changes you can find here:
+>
+>   *  https://github.com/extend/cowboy/blob/master/CHANGELOG.md
+>
+> Which reminds me, I want to thank all 70 awesome contributors (myself
+> included) that make the Cowboy project so fun to work on! So, thank you!
+>
+> When upgrading, please be aware that:
+>
+>   *  A dependency has been added, cowlib
+>   *  Various undocumented functions have been moved to cowlib
+>   *  The options for cowboy_static changed a lot, so read the guide
+>   *  You need to set ERL_LIBS or equivalent for cowboy_static to find your
+> private directory now
+>
+> You can find the updated guide on http://ninenines.eu BUT do note that
+> I'm migrating the site so if you do not see "Contribute to this site" in
+> the bottom left next to "Contact", then you are on the old version and
+> should probably head to github for your documentation needs, or use the
+> files in your clone directly. I also have improvements left to make to the
+> site to make navigating documentation easier, so stay tuned!
+>
+> Speaking of the guide, now all the examples, but also the getting started
+> chapter of the guide, are releases. I am hopeful that this will make more
+> people use releases by default instead of an awful start.sh script.
+>
+> For details on what's coming up next, see the ROADMAP. Next step (0.10) is
+> finishing the request body work, fixing some timeout issues and adding
+> proper multipart support for both requests and responses. This will be the
+> last significant step before 1.0. I have hopes that all this will be ready
+> around the time R17 is released.
+>
+> So yeah, enjoy! And as always please forward any feedback, especially
+> related to the user guide as this is my main focus now.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> _______________________________________________
+> erlang-questions mailing list
+> erlang-questions at erlang.org
+> http://erlang.org/mailman/listinfo/erlang-questions
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131115/79d7b0ce/attachment.html>
+
+From akonsu at gmail.com  Sun Nov 17 17:43:56 2013
+From: akonsu at gmail.com (akonsu)
+Date: Sun, 17 Nov 2013 11:43:56 -0500
+Subject: [99s-extend] concurrently calling cowboy_req:chunk
+Message-ID: <CA+eMAwa0MJF-4Z+V3SRNq5YLdJkpV6SDzTQnCEvdddpeENVv7w@mail.gmail.com>
+
+Hello,
+
+if I call cowboy_req:chunk on the same Req from several processes that run
+simultaneously, I am guaranteed that the chunks that these processes write
+to the socket will not interleave with each other?
+
+thanks
+Konstantin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131117/41119d53/attachment.html>
+
+From Kevin.Brown at turner.com  Wed Nov 20 22:30:37 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Wed, 20 Nov 2013 21:30:37 +0000
+Subject: [99s-extend] cowboy 0.9.0: badarg ets:lookup_element cowboy_clock
+In-Reply-To: <CA+eMAwa0MJF-4Z+V3SRNq5YLdJkpV6SDzTQnCEvdddpeENVv7w@mail.gmail.com>
+Message-ID: <CEB29324.12B9C%kevin.brown@turner.com>
+
+Cowfolk ,
+
+
+Just upgraded to cowboy 0.9.0  from 0.8.7.   Seeing this cowboy_clock error on all REST requests.    Anyone seen it?  Investigating now.
+
+{badarg,[{ets,lookup_element,[cowboy_clock,rfc1123,2],[]}
+
+
+
+=ERROR REPORT==== 20-Nov-2013::16:24:59 ===
+
+Ranch listener http had connection process started with cowboy_protocol:start_link/4 at <0.326.0> exit with reason: {badarg,[{ets,lookup_element,[cowboy_clock,rfc1123,2],[]},{cowboy_clock,rfc1123,0,[{file,"src/cowboy_clock.erl"},{line,62}]},{cowboy_req,reply_no_compress,8,[{file,"src/cowboy_req.erl"},{line,1056}]},{cowboy_req,reply,4,[{file,"src/cowboy_req.erl"},{line,1009}]},{cowboy_rest,respond,3,[{file,"src/cowboy_rest.erl"},{line,996}]},{cowboy_rest,set_resp_body,2,[{file,"src/cowboy_rest.erl"},{line,876}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,529}]}]}
+
+
+-kb
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131120/6c3ab980/attachment.html>
+
+From essen at ninenines.eu  Wed Nov 20 22:55:57 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 20 Nov 2013 22:55:57 +0100
+Subject: [99s-extend] cowboy 0.9.0: badarg ets:lookup_element
+	cowboy_clock
+In-Reply-To: <CEB29324.12B9C%kevin.brown@turner.com>
+References: <CEB29324.12B9C%kevin.brown@turner.com>
+Message-ID: <528D2FED.40309@ninenines.eu>
+
+On 11/20/2013 10:30 PM, Brown, Kevin wrote:
+> Cowfolk ,
+>
+>
+> Just upgraded to cowboy 0.9.0  from 0.8.7.   Seeing
+> this cowboy_clock error on all REST requests.    Anyone seen it?
+>   Investigating now.
+>
+> {badarg,[{ets,lookup_element,[cowboy_clock,rfc1123,2],[]}
+>
+>
+> =ERROR REPORT==== 20-Nov-2013::16:24:59 ===
+>
+> Ranch listener http had connection process started with
+> cowboy_protocol:start_link/4 at <0.326.0> exit with reason:
+> {badarg,[{ets,lookup_element,[cowboy_clock,rfc1123,2],[]},{cowboy_clock,rfc1123,0,[{file,"src/cowboy_clock.erl"},{line,62}]},{cowboy_req,reply_no_compress,8,[{file,"src/cowboy_req.erl"},{line,1056}]},{cowboy_req,reply,4,[{file,"src/cowboy_req.erl"},{line,1009}]},{cowboy_rest,respond,3,[{file,"src/cowboy_rest.erl"},{line,996}]},{cowboy_rest,set_resp_body,2,[{file,"src/cowboy_rest.erl"},{line,876}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,529}]}]}
+
+That hasn't changed.
+
+Chances are when you upgraded, somehow, the ets table or the key was 
+deleted. Table is cowboy_clock and key rfc1123 if you want to check quickly.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Kevin.Brown at turner.com  Wed Nov 20 23:11:10 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Wed, 20 Nov 2013 22:11:10 +0000
+Subject: [99s-extend] cowboy 0.9.0: badarg ets:lookup_element
+	cowboy_clock
+In-Reply-To: <CEB29324.12B9C%kevin.brown@turner.com>
+Message-ID: <CEB29D07.12C3B%kevin.brown@turner.com>
+
+cowboy_clock not started.    Not sure why that is, but..
+
+From: <Brown>, Kevin <kevin.brown at turner.com<mailto:kevin.brown at turner.com>>
+Date: Wednesday, November 20, 2013 at 4:29 PM
+To: "extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>" <extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>>
+Subject: cowboy 0.9.0: badarg ets:lookup_element cowboy_clock
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131120/82981048/attachment.html>
+
+From essen at ninenines.eu  Wed Nov 20 23:21:01 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Wed, 20 Nov 2013 23:21:01 +0100
+Subject: [99s-extend] cowboy 0.9.0: badarg ets:lookup_element
+	cowboy_clock
+In-Reply-To: <CEB29D07.12C3B%kevin.brown@turner.com>
+References: <CEB29D07.12C3B%kevin.brown@turner.com>
+Message-ID: <528D35CD.1010300@ninenines.eu>
+
+On 11/20/2013 11:11 PM, Brown, Kevin wrote:
+> cowboy_clock not started.    Not sure why that is, but..
+
+Sounds like the Cowboy application didn't start then.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From Kevin.Brown at turner.com  Wed Nov 20 23:32:09 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Wed, 20 Nov 2013 22:32:09 +0000
+Subject: [99s-extend] cowboy 0.9.0: badarg ets:lookup_element
+	cowboy_clock
+In-Reply-To: <CEB29D07.12C3B%kevin.brown@turner.com>
+Message-ID: <CEB2A293.12C42%kevin.brown@turner.com>
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131120/7808a87a/attachment.html>
+
+From Kevin.Brown at turner.com  Wed Nov 20 23:34:27 2013
+From: Kevin.Brown at turner.com (Brown, Kevin)
+Date: Wed, 20 Nov 2013 22:34:27 +0000
+Subject: [99s-extend] cowboy 0.9.0: badarg ets:lookup_element
+	cowboy_clock
+In-Reply-To: <CEB29D07.12C3B%kevin.brown@turner.com>
+Message-ID: <CEB2A2A6.12C43%kevin.brown@turner.com>
+
+Because I wasn?t starting cow_lib.   Don?t ask.
+
+From: <Brown>, Kevin <kevin.brown at turner.com<mailto:kevin.brown at turner.com>>
+Date: Wednesday, November 20, 2013 at 5:11 PM
+To: "extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>" <extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>>
+Subject: Re: cowboy 0.9.0: badarg ets:lookup_element cowboy_clock
+
+cowboy_clock not started.    Not sure why that is, but..
+
+From: <Brown>, Kevin <kevin.brown at turner.com<mailto:kevin.brown at turner.com>>
+Date: Wednesday, November 20, 2013 at 4:29 PM
+To: "extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>" <extend at lists.ninenines.eu<mailto:extend at lists.ninenines.eu>>
+Subject: cowboy 0.9.0: badarg ets:lookup_element cowboy_clock
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131120/792230f4/attachment.html>
+
+From janwillem.luiten at gmail.com  Thu Nov 21 10:11:43 2013
+From: janwillem.luiten at gmail.com (J.W. Luiten)
+Date: Thu, 21 Nov 2013 10:11:43 +0100
+Subject: [99s-extend] Cowboy and stable
+Message-ID: <9D6FADA9-0BF9-4E9A-BBC1-8149E154FC6D@gmail.com>
+
+Hello,
+
+For a Cowboy-based project I?m trying to use stable (dvv/stable, written by Vladimir Dronnikov). I keep running into problems. I contacted Vladimir and he stated that the current version of stable was compatible with Cowboy 0.8 and that he didn?t have the time to keep up with new cowboy releases. Is any of the list members using stable in a cowboy based project?
+
+Kind regards,
+
+Jan Willem Luiten
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131121/7d69dbf7/attachment.html>
+
+From ivan at llaisdy.com  Thu Nov 21 10:20:09 2013
+From: ivan at llaisdy.com (Ivan Uemlianin)
+Date: Thu, 21 Nov 2013 09:20:09 +0000
+Subject: [99s-extend] Cowboy and stable
+In-Reply-To: <9D6FADA9-0BF9-4E9A-BBC1-8149E154FC6D@gmail.com>
+References: <9D6FADA9-0BF9-4E9A-BBC1-8149E154FC6D@gmail.com>
+Message-ID: <528DD049.7080708@llaisdy.com>
+
+IIRC There were major changes around 0.8.3-8.4 when parts of the api 
+changed.  I haven't upgraded to 0.9 yet but I imagine there will be 
+further changes there (e.g., there is a new dependency: cow_lib).
+
+Ivan
+
+
+On 21/11/2013 09:11, J.W. Luiten wrote:
+> Hello,
+>
+> For a Cowboy-based project I?m trying to use stable (dvv/stable
+> <https://github.com/dvv/stable>, written by Vladimir Dronnikov). I keep
+> running into problems. I contacted Vladimir and he stated that the
+> current version of stable was compatible with Cowboy 0.8 and that he
+> didn?t have the time to keep up with new cowboy releases. Is any of the
+> list members using stable in a cowboy based project?
+>
+> Kind regards,
+>
+> Jan Willem Luiten
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+>
+
+-- 
+============================================================
+Ivan A. Uemlianin PhD
+Llaisdy
+Speech Technology Research and Development
+
+                     ivan at llaisdy.com
+                      www.llaisdy.com
+                          llaisdy.wordpress.com
+               github.com/llaisdy
+                      www.linkedin.com/in/ivanuemlianin
+
+                         festina lente
+============================================================
+
+
+From samset at wanadoo.fr  Thu Nov 21 15:58:09 2013
+From: samset at wanadoo.fr (Samir Sow)
+Date: Thu, 21 Nov 2013 15:58:09 +0100
+Subject: [99s-extend] multiple handler instances
+Message-ID: <EB58E3EC-A4B1-45B3-828F-31204BAF6EC0@wanadoo.fr>
+
+Hi,
+
+I have an issue.
+
+I'd like to start 2 http handler in the same application
+So i did to cowboy:start_http call + different port + dispatch route sets in the supervisor init method.
+
+When the application starts there is no error but when i look the network tables i only see the binding for the first call.
+If i comment out the first call i see the second binding.
+
+Is there any limitation ?
+If yes any workaround to share ?
+
+Thank you.
+
+
+Samir Sow
+
+From samset at wanadoo.fr  Thu Nov 21 16:23:43 2013
+From: samset at wanadoo.fr (Samir Sow)
+Date: Thu, 21 Nov 2013 16:23:43 +0100
+Subject: [99s-extend] Fwd: multiple handler instances
+References: <EB58E3EC-A4B1-45B3-828F-31204BAF6EC0@wanadoo.fr>
+Message-ID: <C7CA47A5-D20F-4AD5-BC6A-73CF937285D5@wanadoo.fr>
+
+
+Solved.
+I overlooked to have different refs for each call.
+
+Samir Sow
+
+Begin forwarded message:
+
+> From: Samir Sow <samset at wanadoo.fr>
+> Date: 21 novembre 2013 15:58:09 HNEC
+> To: extend at lists.ninenines.eu
+> Subject: multiple handler instances 
+> 
+> Hi,
+> 
+> I have an issue.
+> 
+> I'd like to start 2 http handler in the same application
+> So i did to cowboy:start_http call + different port + dispatch route sets in the supervisor init method.
+> 
+> When the application starts there is no error but when i look the network tables i only see the binding for the first call.
+> If i comment out the first call i see the second binding.
+> 
+> Is there any limitation ?
+> If yes any workaround to share ?
+> 
+> Thank you.
+> 
+> 
+> Samir Sow
+
+
+
+From essen at ninenines.eu  Fri Nov 22 18:48:50 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 22 Nov 2013 18:48:50 +0100
+Subject: [99s-extend] Server migration
+Message-ID: <528F9902.6080704@ninenines.eu>
+
+Hello,
+
+I'll be migrating the mailing lists to a new server as of right now. 
+They should be back whenever the DNS updates for you.
+
+In the meantime, if you have a really important question, please check 
+the IRC channel #ninenines on Freenode. Service should be back for 
+everyone on Monday.
+
+Thanks for your comprehension.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Sun Nov 24 12:27:09 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sun, 24 Nov 2013 12:27:09 +0100
+Subject: [99s-extend] Checking if new server works properly
+Message-ID: <5291E28D.9040206@ninenines.eu>
+
+Test 1 2 3.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From lloyd at writersglen.com  Sat Nov 23 04:13:30 2013
+From: lloyd at writersglen.com (lloyd at writersglen.com)
+Date: Fri, 22 Nov 2013 22:13:30 -0500 (EST)
+Subject: [99s-extend] erlang.mk vs. rebar
+Message-ID: <1385176410.168318460@apps.rackspace.com>
+
+
+Hello,
+ 
+Does erlang.mk replace rebar?
+ 
+Thanks,
+ 
+LRP
+ 
+*********************************************
+My books:
+
+THE GOSPEL OF ASHES
+http://thegospelofashes.com
+
+Strength is not enough. Do they have the courage 
+and the cunning? Can they survive long enough to 
+save the lives of millions?  
+
+FREEIN' PANCHO
+http://freeinpancho.com
+
+A community of misfits help a troubled boy find his way 
+
+AYA TAKEO
+http://ayatakeo.com
+
+Star-crossed love, war and power in an alternative 
+universe
+
+Available through Amazon or by request from your 
+favorite bookstore
+
+
+**********************************************
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131122/11ccc1ef/attachment.html>
+
+From essen at ninenines.eu  Sun Nov 24 14:07:43 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Sun, 24 Nov 2013 14:07:43 +0100
+Subject: [99s-extend] erlang.mk vs. rebar
+In-Reply-To: <1385176410.168318460@apps.rackspace.com>
+References: <1385176410.168318460@apps.rackspace.com>
+Message-ID: <5291FA1F.70300@ninenines.eu>
+
+erlang.mk can replace rebar, yes.
+
+On 11/23/2013 04:13 AM, lloyd at writersglen.com wrote:
+> Hello,
+>
+> Does erlang.mk replace rebar?
+>
+> Thanks,
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From essen at ninenines.eu  Fri Nov 22 20:49:20 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Fri, 22 Nov 2013 20:49:20 +0100
+Subject: [99s-extend] Server migration
+In-Reply-To: <528F9902.6080704@ninenines.eu>
+References: <528F9902.6080704@ninenines.eu>
+Message-ID: <528FB540.9090307@ninenines.eu>
+
+On 11/22/2013 06:48 PM, Lo?c Hoguin wrote:
+> Hello,
+>
+> I'll be migrating the mailing lists to a new server as of right now.
+> They should be back whenever the DNS updates for you.
+>
+> In the meantime, if you have a really important question, please check
+> the IRC channel #ninenines on Freenode. Service should be back for
+> everyone on Monday.
+>
+> Thanks for your comprehension.
+
+The migration is a success. Please check http://lists.ninenines.eu to 
+know if service is back for you before sending an email. The old server 
+is refusing all emails now. Thanks!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From akonsu at gmail.com  Wed Nov 27 06:35:38 2013
+From: akonsu at gmail.com (akonsu)
+Date: Wed, 27 Nov 2013 00:35:38 -0500
+Subject: [99s-extend] error saying that Ranch listener process has terminated
+Message-ID: <CA+eMAwbdnM25bx0GnzH77Mxu+rJ_+T+Tq0MahW=GBwPX_2w69w@mail.gmail.com>
+
+Hello,
+
+I am seeing an error report in my logs:
+
+=ERROR REPORT==== 27-Nov-2013::00:22:33 ===
+Ranch listener http had connection process started with
+cowboy_protocol:start_link/4 at <0.4803.9> exit with reason: {error,closed}
+
+looks like this is not worth investigating. can someone please comment on
+this error?
+
+thanks
+Konstantin
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131127/20905d98/attachment.html>
+
+From kaveh.shahbazian at gmail.com  Wed Nov 27 19:23:09 2013
+From: kaveh.shahbazian at gmail.com (Kaveh Shahbazian)
+Date: Wed, 27 Nov 2013 21:53:09 +0330
+Subject: [99s-extend] On a Basic Cowboy Sample
+Message-ID: <CAAX_u6ikHY+VMEJMAX3SkVYahWvUbf-P_D6qAFvQwhEpF2ofnQ@mail.gmail.com>
+
+Hi;
+
+A post on this can be found
+here<http://dc0d.tumblr.com/post/68278862491/toddling-cowboy-carful-a-windows-on-your-way>(code
+on
+GitHub <https://github.com/dc0d/lucky_luke>).
+
+?Are these things this way for a reason? (Because otherwise we I can not
+get samples to run.)
+
+1 - I have to add 'cowboy' to application list in myapp.app.src.
+2 - I have to add '{http_port, 9000}' to 'env' in myapp.app.src (where in
+the code should I add it?).
+3 - I have to explicitly make sure 'cowlib' is started (ok =
+application:start(cowlib) and I did not see this anywhere but whitout this,
+it won't work).
+
+Thanks;
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20131127/11da2202/attachment.html>
+

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy load test
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20load%20test&In-Reply-To=%3CCAOBKReerkZKL_Rm9j7X4FH3YUbFHZDGHiVojNgO7WepOWCc_eQ%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   
+   <LINK REL="Next"  HREF="000228.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy load test</H1>
+    <B>Joe Freeman</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20load%20test&In-Reply-To=%3CCAOBKReerkZKL_Rm9j7X4FH3YUbFHZDGHiVojNgO7WepOWCc_eQ%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Cowboy load test">joe.freeman at bitroot.com
+       </A><BR>
+    <I>Sun Sep 15 19:01:30 CEST 2013</I>
+    <P><UL>
+        
+        <LI>Next message: <A HREF="000228.html">[99s-extend] Cowboy load test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#227">[ date ]</a>
+              <a href="thread.html#227">[ thread ]</a>
+              <a href="subject.html#227">[ subject ]</a>
+              <a href="author.html#227">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hi,
+
+I've started work on a project using Clojure, but I was wondering whether
+(and secretly hoping that) Erlang would be a better fit, so I've been load
+testing a few web server frameworks. I'm particularly interested in how the
+server can handle a large number of concurrent WebSocket connections, and
+the test I've been running is similar to Eric Moritz's [1].
+
+I've setup a simple Cowboy 'echo' server running on an EC2 instance
+(m1.medium, as in Eric's test) which could comfortably handle 10k
+concurrent WebSocket requests (as in Eric's results), while echoing about
+200 messages/second. The CPU usage of the VM at this point is about 99%,
+but the server continues to handle up to 40k concurrent connections with a
+consistent average response time (&lt;30ms). Pushing the test beyond this
+number results in a spike in response times and lots of connection timeouts.
+
+40k connections seems pretty good, but when comparing this to the same test
+against a couple of Clojure/JVM-based frameworks (specifically Aleph/Netty
+and http-kit) I find I can get higher numbers of concurrent connections
+with slightly better average response times (100k connections, &lt;10ms
+response time) using much less CPU (~20%). In fact, memory seems to be the
+limiting factor.
+
+So I have two questions:
+
+1) Should I be concerned about the CPU usage in the Erlang/Cowboy test? I
+have limited experience with Erlang so far, but 100% CPU feels like a bad
+thing.
+
+2) Is there any way to increase the performance of the cowboy server? Are
+there any Erlang VM parameters I can change? The fact that the Clojure/JVM
+tests (on the same machine) have managed to get to 100k connections
+suggests that the limitation isn't being imposed by the operating system
+(I've applied changes various changes to sysctl and ulimit).
+
+(Perhaps an echo server isn't the best way to compare HTTP servers, but it
+feels like a good starting point.)
+
+Thanks for any help.
+
+[1] <A HREF="https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md">https://github.com/ericmoritz/wsdemo/blob/results-v1/results.md</A> - the
+GitHub repo actually contains code for an Aleph server, but results from
+this aren't included in the summary here.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130915/c9a5340e/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130915/c9a5340e/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	
+	<LI>Next message: <A HREF="000228.html">[99s-extend] Cowboy load test
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#227">[ date ]</a>
+              <a href="thread.html#227">[ thread ]</a>
+              <a href="subject.html#227">[ subject ]</a>
+              <a href="author.html#227">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

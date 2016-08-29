@@ -1,0 +1,545 @@
+From adelzhang at qq.com  Thu Jul  3 09:40:12 2014
+From: adelzhang at qq.com (Adel Zhang)
+Date: Thu, 03 Jul 2014 15:40:12 +0800
+Subject: [99s-extend] tring to understand ranch_conns_sup
+Message-ID: <op.xievlal52w9y7f@zgc-201309221420>
+
+Ranch uses a tcp acceptor pool to accept connections concurrently. But the  
+acceptor process
+needs to wait for the *only one* ranch_conns_sup spawning the protocol  
+process.
+
+Is ranch_conns_sup maybe a bottleneck?
+
+Thanks.
+
+From essen at ninenines.eu  Thu Jul  3 09:55:13 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 03 Jul 2014 09:55:13 +0200
+Subject: [99s-extend] tring to understand ranch_conns_sup
+In-Reply-To: <op.xievlal52w9y7f@zgc-201309221420>
+References: <op.xievlal52w9y7f@zgc-201309221420>
+Message-ID: <53B50C61.9050601@ninenines.eu>
+
+Have you observed ranch_conns_sup be a bottleneck? In practice it 
+shouldn't be.
+
+On 07/03/2014 09:40 AM, Adel Zhang wrote:
+> Ranch uses a tcp acceptor pool to accept connections concurrently. But
+> the acceptor process
+> needs to wait for the *only one* ranch_conns_sup spawning the protocol
+> process.
+>
+> Is ranch_conns_sup maybe a bottleneck?
+>
+> Thanks.
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samuelrivas at gmail.com  Tue Jul  8 09:12:43 2014
+From: samuelrivas at gmail.com (Samuel)
+Date: Tue, 8 Jul 2014 09:12:43 +0200
+Subject: [99s-extend] [cowboy REST] returning {true, URL} to PUT
+Message-ID: <CAH2nEUgJj1f8_RnXqeKqB1tFaDh=qzztOo9XF94S9auQ93dskg@mail.gmail.com>
+
+Hi,
+
+According to the documentation I should be able to return a new
+location when handling a PUT request when using cowboy_rest protocol:
+
+    The AcceptResource value is the name of the callback that will be
+called if the
+    content-type matches. It is defined as follow.
+
+    Value type: true | {true, URL} | false
+
+That works for "true" and "false" but not for "{true, URL}", in that
+case the Ranch listener crashes badly[1].
+
+Looking into cowboy_rest.erl I see that the {true, URL} form is
+restricted to POST requests:
+https://github.com/extend/cowboy/blob/master/src/cowboy_rest.erl#L784
+
+Is that intentional or should I submit a patch to add at least PUT and
+PATCH to that condition (or remove all of them if that is not guarding
+against something horrible)?
+
+Regards
+
+[1] Ranch crash log:
+Ranch listener http_acceptor had connection process started with
+cowboy_protocol:start_link/4 at <0.2660.0> exit with reason:
+{{case_clause,{{true,"/url"},{http_req,#Port<0.15864>,ranch_tcp,keepalive,<0.2660.0>,<<"PUT">>,'HTTP/1.1',{{127,0,0,1},56983},<<"localhost">>,undefined,8080,<<"/order">>,undefined,<<>>,undefined,[],[{<<"user-agent">>,<<"curl/7.22.0
+(x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4
+libidn/1.23 librtmp/2.3">>},{<<"host">>,<<"localhost:8080">>},{<<"accept">>,<<"*/*">>},{<<"content-type">>,<<"application/json">>}],[{<<"content-type">>,{<<"application">>,<<"json">>,[]}},{<<"if-modified-since">>,undefined},{<<"if-none-match">>,undefined},{<<"if-unmodified-since">>,undefined},{<<"if-match">>,undefined},{<<"accept">>,[{{<<"*">>,<<"*">>,[]},1000,[]}]}],undefined,[{charset,undefined},{media_type,{<<"text">>,<<"html">>,[]}}],waiting,undefined,<<>>,false,waiting,[{<<"content-type">>,[<<"text">>,<<"/">>,<<"html">>,<<>>]}],<<>>,undefined},{state}}},[{cowboy_rest,process_content_type,3,[{file,"src/cowboy_rest.erl"},{line,780}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,529}]}]}
+-- 
+Samuel
+
+From essen at ninenines.eu  Tue Jul  8 11:57:12 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 08 Jul 2014 11:57:12 +0200
+Subject: [99s-extend] [cowboy REST] returning {true, URL} to PUT
+In-Reply-To: <CAH2nEUgJj1f8_RnXqeKqB1tFaDh=qzztOo9XF94S9auQ93dskg@mail.gmail.com>
+References: <CAH2nEUgJj1f8_RnXqeKqB1tFaDh=qzztOo9XF94S9auQ93dskg@mail.gmail.com>
+Message-ID: <53BBC078.80006@ninenines.eu>
+
+It's not enabled for PATCH or PUT because it makes little sense for 
+them. PATCH and PUT are typically used directly on the URI of the 
+resource, even when creating it. While you can return a "better URI" for 
+the created resource for them, this should be seen as a special case 
+rather than the norm. You can still do it by setting the location header 
+manually and Cowboy will react accordingly.
+
+On 07/08/2014 09:12 AM, Samuel wrote:
+> Hi,
+>
+> According to the documentation I should be able to return a new
+> location when handling a PUT request when using cowboy_rest protocol:
+>
+>      The AcceptResource value is the name of the callback that will be
+> called if the
+>      content-type matches. It is defined as follow.
+>
+>      Value type: true | {true, URL} | false
+>
+> That works for "true" and "false" but not for "{true, URL}", in that
+> case the Ranch listener crashes badly[1].
+>
+> Looking into cowboy_rest.erl I see that the {true, URL} form is
+> restricted to POST requests:
+> https://github.com/extend/cowboy/blob/master/src/cowboy_rest.erl#L784
+>
+> Is that intentional or should I submit a patch to add at least PUT and
+> PATCH to that condition (or remove all of them if that is not guarding
+> against something horrible)?
+>
+> Regards
+>
+> [1] Ranch crash log:
+> Ranch listener http_acceptor had connection process started with
+> cowboy_protocol:start_link/4 at <0.2660.0> exit with reason:
+> {{case_clause,{{true,"/url"},{http_req,#Port<0.15864>,ranch_tcp,keepalive,<0.2660.0>,<<"PUT">>,'HTTP/1.1',{{127,0,0,1},56983},<<"localhost">>,undefined,8080,<<"/order">>,undefined,<<>>,undefined,[],[{<<"user-agent">>,<<"curl/7.22.0
+> (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4
+> libidn/1.23 librtmp/2.3">>},{<<"host">>,<<"localhost:8080">>},{<<"accept">>,<<"*/*">>},{<<"content-type">>,<<"application/json">>}],[{<<"content-type">>,{<<"application">>,<<"json">>,[]}},{<<"if-modified-since">>,undefined},{<<"if-none-match">>,undefined},{<<"if-unmodified-since">>,undefined},{<<"if-match">>,undefined},{<<"accept">>,[{{<<"*">>,<<"*">>,[]},1000,[]}]}],undefined,[{charset,undefined},{media_type,{<<"text">>,<<"html">>,[]}}],waiting,undefined,<<>>,false,waiting,[{<<"content-type">>,[<<"text">>,<<"/">>,<<"html">>,<<>>]}],<<>>,undefined},{state}}},[{cowboy_rest,process_content_type,3,[{file,"src/cowboy_rest.erl"},{line,780}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,529}]}]}
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samuelrivas at gmail.com  Tue Jul  8 13:32:45 2014
+From: samuelrivas at gmail.com (Samuel)
+Date: Tue, 8 Jul 2014 13:32:45 +0200
+Subject: [99s-extend] [cowboy REST] returning {true, URL} to PUT
+In-Reply-To: <53BBC078.80006@ninenines.eu>
+References: <CAH2nEUgJj1f8_RnXqeKqB1tFaDh=qzztOo9XF94S9auQ93dskg@mail.gmail.com>
+ <53BBC078.80006@ninenines.eu>
+Message-ID: <CAH2nEUi9qkU4tjeYMNzQeppJ4me3p3z2UPqfSB-dQ6G4x_ExyA@mail.gmail.com>
+
+Ok, thanks. That should probably be mentioned in the documentation of
+content_types_accepted, as it says {true, URI} is a valid output for
+the provided function.
+
+Just out of curiosity from a non-so-expert in REST. The API spec
+(which I am not the author of) says the PUT call should create a
+resource with a unique id and return the URI of the created resource
+in the Location header. That is something like PUT /some/resource
+should return /some/resource/1234 in the Location. some/resource is
+fixed but 1234 would be generated for each instance of /some/resource.
+Is that considered nonsensical?
+
+On 8 July 2014 11:57, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> It's not enabled for PATCH or PUT because it makes little sense for them.
+> PATCH and PUT are typically used directly on the URI of the resource, even
+> when creating it. While you can return a "better URI" for the created
+> resource for them, this should be seen as a special case rather than the
+> norm. You can still do it by setting the location header manually and Cowboy
+> will react accordingly.
+>
+>
+> On 07/08/2014 09:12 AM, Samuel wrote:
+>>
+>> Hi,
+>>
+>> According to the documentation I should be able to return a new
+>> location when handling a PUT request when using cowboy_rest protocol:
+>>
+>>      The AcceptResource value is the name of the callback that will be
+>> called if the
+>>      content-type matches. It is defined as follow.
+>>
+>>      Value type: true | {true, URL} | false
+>>
+>> That works for "true" and "false" but not for "{true, URL}", in that
+>> case the Ranch listener crashes badly[1].
+>>
+>> Looking into cowboy_rest.erl I see that the {true, URL} form is
+>> restricted to POST requests:
+>> https://github.com/extend/cowboy/blob/master/src/cowboy_rest.erl#L784
+>>
+>> Is that intentional or should I submit a patch to add at least PUT and
+>> PATCH to that condition (or remove all of them if that is not guarding
+>> against something horrible)?
+>>
+>> Regards
+>>
+>> [1] Ranch crash log:
+>> Ranch listener http_acceptor had connection process started with
+>> cowboy_protocol:start_link/4 at <0.2660.0> exit with reason:
+>>
+>> {{case_clause,{{true,"/url"},{http_req,#Port<0.15864>,ranch_tcp,keepalive,<0.2660.0>,<<"PUT">>,'HTTP/1.1',{{127,0,0,1},56983},<<"localhost">>,undefined,8080,<<"/order">>,undefined,<<>>,undefined,[],[{<<"user-agent">>,<<"curl/7.22.0
+>> (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4
+>> libidn/1.23
+>> librtmp/2.3">>},{<<"host">>,<<"localhost:8080">>},{<<"accept">>,<<"*/*">>},{<<"content-type">>,<<"application/json">>}],[{<<"content-type">>,{<<"application">>,<<"json">>,[]}},{<<"if-modified-since">>,undefined},{<<"if-none-match">>,undefined},{<<"if-unmodified-since">>,undefined},{<<"if-match">>,undefined},{<<"accept">>,[{{<<"*">>,<<"*">>,[]},1000,[]}]}],undefined,[{charset,undefined},{media_type,{<<"text">>,<<"html">>,[]}}],waiting,undefined,<<>>,false,waiting,[{<<"content-type">>,[<<"text">>,<<"/">>,<<"html">>,<<>>]}],<<>>,undefined},{state}}},[{cowboy_rest,process_content_type,3,[{file,"src/cowboy_rest.erl"},{line,780}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,529}]}]}
+>>
+>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+
+
+
+-- 
+Samuel
+
+From essen at ninenines.eu  Tue Jul  8 13:42:00 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 08 Jul 2014 13:42:00 +0200
+Subject: [99s-extend] [cowboy REST] returning {true, URL} to PUT
+In-Reply-To: <CAH2nEUi9qkU4tjeYMNzQeppJ4me3p3z2UPqfSB-dQ6G4x_ExyA@mail.gmail.com>
+References: <CAH2nEUgJj1f8_RnXqeKqB1tFaDh=qzztOo9XF94S9auQ93dskg@mail.gmail.com>
+ <53BBC078.80006@ninenines.eu>
+ <CAH2nEUi9qkU4tjeYMNzQeppJ4me3p3z2UPqfSB-dQ6G4x_ExyA@mail.gmail.com>
+Message-ID: <53BBD908.6020909@ninenines.eu>
+
+That's what POST should do.
+
+Compare:
+
+PUT /some/resource/1234 -> no redirect needed
+POST /some/resource -> creates /some/resource/1234, redirects
+
+If /some/resource is a collection then PUT on that collection is 
+supposed to replace it entirely.
+
+Again it's possible for PUT to create a resource elsewhere, but 
+typically the redirect would be from something like 
+http://api.yourservice.com/resource/1234 to 
+http://cloudthingy.server137.yourservice.com/whatever/resource/1234 and 
+not to do what POST is intended for.
+
+On 07/08/2014 01:32 PM, Samuel wrote:
+> Ok, thanks. That should probably be mentioned in the documentation of
+> content_types_accepted, as it says {true, URI} is a valid output for
+> the provided function.
+>
+> Just out of curiosity from a non-so-expert in REST. The API spec
+> (which I am not the author of) says the PUT call should create a
+> resource with a unique id and return the URI of the created resource
+> in the Location header. That is something like PUT /some/resource
+> should return /some/resource/1234 in the Location. some/resource is
+> fixed but 1234 would be generated for each instance of /some/resource.
+> Is that considered nonsensical?
+>
+> On 8 July 2014 11:57, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>> It's not enabled for PATCH or PUT because it makes little sense for them.
+>> PATCH and PUT are typically used directly on the URI of the resource, even
+>> when creating it. While you can return a "better URI" for the created
+>> resource for them, this should be seen as a special case rather than the
+>> norm. You can still do it by setting the location header manually and Cowboy
+>> will react accordingly.
+>>
+>>
+>> On 07/08/2014 09:12 AM, Samuel wrote:
+>>>
+>>> Hi,
+>>>
+>>> According to the documentation I should be able to return a new
+>>> location when handling a PUT request when using cowboy_rest protocol:
+>>>
+>>>       The AcceptResource value is the name of the callback that will be
+>>> called if the
+>>>       content-type matches. It is defined as follow.
+>>>
+>>>       Value type: true | {true, URL} | false
+>>>
+>>> That works for "true" and "false" but not for "{true, URL}", in that
+>>> case the Ranch listener crashes badly[1].
+>>>
+>>> Looking into cowboy_rest.erl I see that the {true, URL} form is
+>>> restricted to POST requests:
+>>> https://github.com/extend/cowboy/blob/master/src/cowboy_rest.erl#L784
+>>>
+>>> Is that intentional or should I submit a patch to add at least PUT and
+>>> PATCH to that condition (or remove all of them if that is not guarding
+>>> against something horrible)?
+>>>
+>>> Regards
+>>>
+>>> [1] Ranch crash log:
+>>> Ranch listener http_acceptor had connection process started with
+>>> cowboy_protocol:start_link/4 at <0.2660.0> exit with reason:
+>>>
+>>> {{case_clause,{{true,"/url"},{http_req,#Port<0.15864>,ranch_tcp,keepalive,<0.2660.0>,<<"PUT">>,'HTTP/1.1',{{127,0,0,1},56983},<<"localhost">>,undefined,8080,<<"/order">>,undefined,<<>>,undefined,[],[{<<"user-agent">>,<<"curl/7.22.0
+>>> (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4
+>>> libidn/1.23
+>>> librtmp/2.3">>},{<<"host">>,<<"localhost:8080">>},{<<"accept">>,<<"*/*">>},{<<"content-type">>,<<"application/json">>}],[{<<"content-type">>,{<<"application">>,<<"json">>,[]}},{<<"if-modified-since">>,undefined},{<<"if-none-match">>,undefined},{<<"if-unmodified-since">>,undefined},{<<"if-match">>,undefined},{<<"accept">>,[{{<<"*">>,<<"*">>,[]},1000,[]}]}],undefined,[{charset,undefined},{media_type,{<<"text">>,<<"html">>,[]}}],waiting,undefined,<<>>,false,waiting,[{<<"content-type">>,[<<"text">>,<<"/">>,<<"html">>,<<>>]}],<<>>,undefined},{state}}},[{cowboy_rest,process_content_type,3,[{file,"src/cowboy_rest.erl"},{line,780}]},{cowboy_protocol,execute,4,[{file,"src/cowboy_protocol.erl"},{line,529}]}]}
+>>>
+>>
+>> --
+>> Lo?c Hoguin
+>> http://ninenines.eu
+>
+>
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From samuelrivas at gmail.com  Tue Jul  8 13:49:35 2014
+From: samuelrivas at gmail.com (Samuel)
+Date: Tue, 8 Jul 2014 13:49:35 +0200
+Subject: [99s-extend] [cowboy REST] returning {true, URL} to PUT
+In-Reply-To: <53BBD908.6020909@ninenines.eu>
+References: <CAH2nEUgJj1f8_RnXqeKqB1tFaDh=qzztOo9XF94S9auQ93dskg@mail.gmail.com>
+ <53BBC078.80006@ninenines.eu>
+ <CAH2nEUi9qkU4tjeYMNzQeppJ4me3p3z2UPqfSB-dQ6G4x_ExyA@mail.gmail.com>
+ <53BBD908.6020909@ninenines.eu>
+Message-ID: <CAH2nEUhEWO8AOHBa6WJJaN6jch5FzASAq7NUyQG3U9b4dKeTow@mail.gmail.com>
+
+> Compare:
+>
+> PUT /some/resource/1234 -> no redirect needed
+> POST /some/resource -> creates /some/resource/1234, redirects
+>
+> If /some/resource is a collection then PUT on that collection is supposed to
+> replace it entirely.
+
+Great, thanks for the explanation. I'll try to discuss that with the
+authors of the API
+
+-- 
+Samuel
+
+From paulo.ferraz.oliveira at gmail.com  Tue Jul  8 15:17:32 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 8 Jul 2014 14:17:32 +0100
+Subject: [99s-extend] HTTP Basic Auth base64 decode fails
+Message-ID: <CA+dV7cS+1dfOHFZrMyognVSbVEdX45Rf264ndo0N8nCb1BmnmA@mail.gmail.com>
+
+Hello, y'all.
+
+I'm using HTTP Basic Auth in my API. While calling
+cowboy_req:parse_header(<<"authorization>>", ... with an _invalid_
+Authorization header such as "Authorization: Basic Test1" I get an error
+500 back and an error log message on the server.
+
+1. Is this the expected behavior? [if I understand correctly, my request is
+going through authorization(UserPass, Type = <<"basic">>) and this has no
+check for the string being correctly encoded]
+
+2. what would be the best way to guard against this "error"?
+
+Thanks.
+
+- Paulo F. Oliveira
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140708/35d8806d/attachment.html>
+
+From essen at ninenines.eu  Tue Jul  8 15:21:28 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Tue, 08 Jul 2014 15:21:28 +0200
+Subject: [99s-extend] HTTP Basic Auth base64 decode fails
+In-Reply-To: <CA+dV7cS+1dfOHFZrMyognVSbVEdX45Rf264ndo0N8nCb1BmnmA@mail.gmail.com>
+References: <CA+dV7cS+1dfOHFZrMyognVSbVEdX45Rf264ndo0N8nCb1BmnmA@mail.gmail.com>
+Message-ID: <53BBF058.3090103@ninenines.eu>
+
+Parsing of any header may crash. Some may also return an error tuple, 
+though that behavior slowly changes and it will always crash in 2.0. So 
+just wrap the call around a try/catch if you need to handle the error.
+
+Note that at this exact moment I'm working on returning 400 instead of 
+500 automatically when parsing headers end up crashing (and possibly 
+other situations later on).
+
+On 07/08/2014 03:17 PM, Paulo F. Oliveira wrote:
+> Hello, y'all.
+>
+> I'm using HTTP Basic Auth in my API. While calling
+> cowboy_req:parse_header(<<"authorization>>", ... with an _invalid_
+> Authorization header such as "Authorization: Basic Test1" I get an error
+> 500 back and an error log message on the server.
+>
+> 1. Is this the expected behavior? [if I understand correctly, my request
+> is going through authorization(UserPass, Type = <<"basic">>) and this
+> has no check for the string being correctly encoded]
+>
+> 2. what would be the best way to guard against this "error"?
+>
+> Thanks.
+>
+> - Paulo F. Oliveira
+>
+>
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+
+From paulo.ferraz.oliveira at gmail.com  Tue Jul  8 15:25:58 2014
+From: paulo.ferraz.oliveira at gmail.com (Paulo F. Oliveira)
+Date: Tue, 8 Jul 2014 14:25:58 +0100
+Subject: [99s-extend] HTTP Basic Auth base64 decode fails
+In-Reply-To: <53BBF058.3090103@ninenines.eu>
+References: <CA+dV7cS+1dfOHFZrMyognVSbVEdX45Rf264ndo0N8nCb1BmnmA@mail.gmail.com>
+ <53BBF058.3090103@ninenines.eu>
+Message-ID: <CA+dV7cRxf-uKJKx-xPhKcm6TXXKLc4H3OVOC2GVQy58V5nASzg@mail.gmail.com>
+
+Great, thanks.
+
+I saw some changes "from 422 to 400" in recent versions (PUT and POST).
+Thanks for the heads up. As long as they're document, no harm shall come of
+these changes.
+
+In any case, if I see it happen very often live I'll "protect" it agains
+the _bad_ header :-).
+
+Cheers.
+
+- Paulo F. Oliveira
+
+
+On 8 July 2014 14:21, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Parsing of any header may crash. Some may also return an error tuple,
+> though that behavior slowly changes and it will always crash in 2.0. So
+> just wrap the call around a try/catch if you need to handle the error.
+>
+> Note that at this exact moment I'm working on returning 400 instead of 500
+> automatically when parsing headers end up crashing (and possibly other
+> situations later on).
+>
+>
+> On 07/08/2014 03:17 PM, Paulo F. Oliveira wrote:
+>
+>> Hello, y'all.
+>>
+>> I'm using HTTP Basic Auth in my API. While calling
+>> cowboy_req:parse_header(<<"authorization>>", ... with an _invalid_
+>> Authorization header such as "Authorization: Basic Test1" I get an error
+>> 500 back and an error log message on the server.
+>>
+>> 1. Is this the expected behavior? [if I understand correctly, my request
+>> is going through authorization(UserPass, Type = <<"basic">>) and this
+>> has no check for the string being correctly encoded]
+>>
+>> 2. what would be the best way to guard against this "error"?
+>>
+>> Thanks.
+>>
+>> - Paulo F. Oliveira
+>>
+>>
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> https://lists.ninenines.eu/listinfo/extend
+>>
+>>
+> --
+> Lo?c Hoguin
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20140708/497ef9a1/attachment.html>
+
+From chaehb at gmail.com  Sat Jul 26 09:06:15 2014
+From: chaehb at gmail.com (chaehb)
+Date: Sat, 26 Jul 2014 16:06:15 +0900
+Subject: [99s-extend] couldn't quit in Erlang 17.1
+Message-ID: <5E6EEC48-13CF-48A9-BD48-DC339D93B75D@gmail.com>
+
+Hi, everybody.
+
+After Erlang updated to 17.1,
+when I run q(). command on erlang console, cowboy couldn't quitted but print series of messages..
+
+(after ok signal printed)
+
+?...
+=ERROR REPORT==== 26-Jul-2014::15:23:33 ===
+Error in process <0.334.0> on node ?...my node name...' with exit value: {{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,"src/ranch_acceptor.erl"},{line,28}]}]}
+?.
+
+Before erlang updated (in 17.0), application could be normally quitted exactly same codes and environments.
+
+This is only appeared when I only use ssl(https).
+But when use only http with same dispatch rules, cowboy normally quitted.
+
+What?s wrong? or Normal ?
+
+my environment : 
+OS : Mac OS X Mavricks
+Erlang/OTP : 17.1 from Homebrew
+release tool : relx
+Cowboy and others : latest 
+
+From essen at ninenines.eu  Sun Jul 27 11:25:50 2014
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Sun, 27 Jul 2014 11:25:50 +0200
+Subject: [99s-extend] couldn't quit in Erlang 17.1
+In-Reply-To: <5E6EEC48-13CF-48A9-BD48-DC339D93B75D@gmail.com>
+References: <5E6EEC48-13CF-48A9-BD48-DC339D93B75D@gmail.com>
+Message-ID: <53D4C59E.2010909@ninenines.eu>
+
+Does it happen with ssl_hello_world?
+
+On 07/26/2014 09:06 AM, chaehb wrote:
+> Hi, everybody.
+>
+> After Erlang updated to 17.1,
+> when I run q(). command on erlang console, cowboy couldn't quitted but print series of messages..
+>
+> (after ok signal printed)
+>
+> ?...
+> =ERROR REPORT==== 26-Jul-2014::15:23:33 ===
+> Error in process <0.334.0> on node ?...my node name...' with exit value: {{case_clause,{error,closed}},[{ranch_acceptor,loop,3,[{file,"src/ranch_acceptor.erl"},{line,28}]}]}
+> ?.
+>
+> Before erlang updated (in 17.0), application could be normally quitted exactly same codes and environments.
+>
+> This is only appeared when I only use ssl(https).
+> But when use only http with same dispatch rules, cowboy normally quitted.
+>
+> What?s wrong? or Normal ?
+>
+> my environment :
+> OS : Mac OS X Mavricks
+> Erlang/OTP : 17.1 from Homebrew
+> release tool : relx
+> Cowboy and others : latest
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> https://lists.ninenines.eu/listinfo/extend
+>
+
+-- 
+Lo?c Hoguin
+http://ninenines.eu
+

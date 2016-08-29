@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Newbie%2C%20Cowboy%20%2B%20Websocket%20%2B%20Audio%20Recording&In-Reply-To=%3CCA%2Bycm%3D6T4gu%3D48%3DVfP3aiVdJFAg--s%2BxGaT2RtGm1KU8qyLiTw%40mail.gmail.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000461.html">
+   <LINK REL="Next"  HREF="000466.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Newbie, Cowboy + Websocket + Audio Recording</H1>
+    <B>Juan Mat&#237;as</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Newbie%2C%20Cowboy%20%2B%20Websocket%20%2B%20Audio%20Recording&In-Reply-To=%3CCA%2Bycm%3D6T4gu%3D48%3DVfP3aiVdJFAg--s%2BxGaT2RtGm1KU8qyLiTw%40mail.gmail.com%3E"
+       TITLE="[99s-extend] Newbie, Cowboy + Websocket + Audio Recording">jmrepetti at gmail.com
+       </A><BR>
+    <I>Mon Sep 29 18:52:16 CEST 2014</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000461.html">[99s-extend] :binding doc
+</A></li>
+        <LI>Next message: <A HREF="000466.html">[99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#465">[ date ]</a>
+              <a href="thread.html#465">[ thread ]</a>
+              <a href="subject.html#465">[ subject ]</a>
+              <a href="author.html#465">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello list, I hope this is the right place to ask this.
+
+I'm learning Erlang, and I wanted to create a Cowboy app to record audio
+from a web browser.
+
+Based on the websocket example in the Cowboy source code, I get the user
+mic input and send this input to the websocket.
+
+I created a &quot;recorder&quot; module, which functionality is to save the data to
+the a file.
+
+
+*#rawe_handler.erl*-module(rawec_handler).
+-behaviour(cowboy_websocket_handler).
+......
+init(_, _, _) -&gt;
+  case whereis(recorder) of
+    undefined -&gt;
+        RecorderPid = recorder:start(),
+        register(recorder, RecorderPid);
+    _ -&gt; ok
+  end,
+    {upgrade, protocol, cowboy_websocket}.
+.....
+websocket_handle(_Frame, Req, State) -&gt;
+  RecorderPid = whereis(recorder),
+  RecorderPid ! {rec, _Frame/binary},
+    {ok, Req, State}.
+
+*#recorder.erl*
+-module(recorder).
+
+-export([start/0, recorder_fun/1]).
+-compile([debug_info]).
+
+recorder_fun(IoDevice) -&gt;
+  receive
+    {rec, Data} -&gt;
+      ok = file:write(IoDevice, Data),
+      io:format(Data),
+      recorder_fun(IoDevice);
+    {stop, _} -&gt;
+      %%Close file
+      file:close(IoDevice)
+    end.
+
+start() -&gt;
+  {ok, IoDevice} = file:open(&quot;/tmp/test_binary.wav&quot;, [write,
+binary]),
+  spawn(recorder, recorder_fun, [IoDevice]).
+
+
+When I start the console, and allow the microphone on the browser, I see
+this error on the console:
+
+=ERROR REPORT==== 29-Sep-2014::18:13:03 ===
+Ranch listener http had connection process started with
+cowboy_protocol:start_link/4 at &lt;0.178.0&gt; exit with reason:
+*{[{reason,badarith},{mfa,{rawec_handler,websocket_handle,3*}},{stacktrace,[{rawec_handler,websocket_handle,3,[{file,&quot;src/rawec_handler.erl&quot;},{line,35}]},{cowboy_websocket,handler_call,7,[{file,&quot;src/cowboy_websocket.erl&quot;},{line,588}]},{cowboy_protocol,execute,4,[{file,&quot;src/cowboy_protocol.erl&quot;},{line,435}]}]},{msg,{binary,&lt;&lt;0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0....(ETC,
+DATA STREAM CONTINUES)
+
+Probably my approach to do this is totally wrong. I there any obvious
+problem here?
+Can someone point me to a right direction?. Maybe I should write directly
+to a file in the *websocket_handle *funcion, but how can I keep a file
+opened during the streaming?
+
+The github repo is here: <A HREF="https://github.com/jmrepetti/rawec">https://github.com/jmrepetti/rawec</A> with the whole
+source code if you want to take a look.
+
+
+Thanks in advance,
+Matias.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20140929/84fe21a4/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20140929/84fe21a4/attachment.html</A>&gt;
+</PRE>
+
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000461.html">[99s-extend] :binding doc
+</A></li>
+	<LI>Next message: <A HREF="000466.html">[99s-extend] Newbie, Cowboy + Websocket + Audio Recording
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#465">[ date ]</a>
+              <a href="thread.html#465">[ thread ]</a>
+              <a href="subject.html#465">[ subject ]</a>
+              <a href="author.html#465">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

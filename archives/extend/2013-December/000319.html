@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Make error
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Make%20error&In-Reply-To=%3C1388101768.1769116%40apps.rackspace.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000318.html">
+   <LINK REL="Next"  HREF="000320.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Make error</H1>
+    <B>lloyd at writersglen.com</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Make%20error&In-Reply-To=%3C1388101768.1769116%40apps.rackspace.com%3E"
+       TITLE="[99s-extend] Make error">lloyd at writersglen.com
+       </A><BR>
+    <I>Fri Dec 27 00:49:28 CET 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000318.html">[99s-extend] erlang.mk:109 sed \s is not portable
+</A></li>
+        <LI>Next message: <A HREF="000320.html">[99s-extend] Make error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#319">[ date ]</a>
+              <a href="thread.html#319">[ thread ]</a>
+              <a href="subject.html#319">[ subject ]</a>
+              <a href="author.html#319">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>Hello,
+
+*** GOAL: 
+
+Modify rest_pastebin in Cowboy examples.
+
+*** PROCEDULE 1: 
+
+- Pulled Cowboy, including examples into local workstation
+- Copied rest_pastebin to a separate directory
+- Execute make
+      Make compiles just fine
+
+*** PROCEDUE 2 -- resulting in error
+
+- delete the entire rest_pastebin application and recopy from the Cowboy pull
+- change all module names and references from rest_pastebin to tagr. Thus rest_pastebin_sup.erl becomes tagr_sup.erl
+- Execute make
+      Make returns:
+
+...
+make[1]: Leaving directory `/home/lloyd/Erl/CB/tagr/deps/cowboy'
+ ERLC   toppage_handler.erl tagr_sup.erl tagr_app.erl
+ ERLC   toppage_handler.erl tagr_sup.erl tagr_app.erl
+ APP    tagr .app.src
+cat: src/tagr: No such file or directory
+cat: .app.src: No such file or directory
+sed: can't read .app: No such file or directory
+make: *** [app] Error 2
+
+Note that the filename tagr.app.src has somehow been modified to tagr .app.src
+
+But here's the directory listing: 
+
+-rw-rw-r-- 1 lloyd lloyd  436 Dec 26 18:21 tagr_app.erl
+-rw-rw-r-- 1 lloyd lloyd  299 Dec 26 18:22 tagr.app.src
+-rw-rw-r-- 1 lloyd lloyd  382 Dec 26 18:22 tagr_sup.erl
+-rw-rw-r-- 1 lloyd lloyd 3568 Dec 26 18:23 toppage_handler.erl
+
+I can load tagr.app.src in Vim. Using find I've searched for tagr and .app.src with negative results.
+
+Further mystery. I substituted Rebar for relx. Tagr now compiles just fine.
+
+*** Discussion
+
+I stumbled on this problem after making fairly extensive modifications to rest_pastebin. Through much of the process it compiled just fine until it didn't. And from then on I could not get it to compile. I tried everything I could think of: careful source code review (at least 10 passes), searching for tagr .app.src, trying different names (e.g. tagger), rebooting my computer, etc., etc.
+
+Eventually I reduced the problem to the absolute minimum: Change the string rest_pastebin to tagr everywhere relevant. 
+
+It's possible I'm missing something somewhere. But where should I look? Otherwise, is it possible that there is a subtle bug in relx?
+
+
+Many thanks,
+
+Lloyd
+
+
+
+
+
+ 
+
+
+ 
+
+
+
+*********************************************
+My books:
+
+THE GOSPEL OF ASHES
+<A HREF="http://thegospelofashes.com">http://thegospelofashes.com</A>
+
+Strength is not enough. Do they have the courage 
+and the cunning? Can they survive long enough to 
+save the lives of millions?  
+
+FREEIN' PANCHO
+<A HREF="http://freeinpancho.com">http://freeinpancho.com</A>
+
+A community of misfits help a troubled boy find his way 
+
+AYA TAKEO
+<A HREF="http://ayatakeo.com">http://ayatakeo.com</A>
+
+Star-crossed love, war and power in an alternative 
+universe
+
+Available through Amazon or by request from your 
+favorite bookstore
+
+
+**********************************************
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000318.html">[99s-extend] erlang.mk:109 sed \s is not portable
+</A></li>
+	<LI>Next message: <A HREF="000320.html">[99s-extend] Make error
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#319">[ date ]</a>
+              <a href="thread.html#319">[ thread ]</a>
+              <a href="subject.html#319">[ subject ]</a>
+              <a href="author.html#319">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

@@ -70,15 +70,18 @@
 <h1 class="lined-header"><span>Introduction</span></h1>
 
 <div class="paragraph"><p>Cowboy is a small, fast and modular HTTP server written in Erlang.</p></div>
-<div class="paragraph"><p>Cowboy aims to provide a complete HTTP stack, including its derivatives
-Websocket and REST. Cowboy currently supports HTTP/1.0, HTTP/1.1, HTTP/2,
-Websocket (all implemented drafts + standard) and Webmachine-based REST.</p></div>
+<div class="paragraph"><p>Cowboy aims to provide a complete <a href="../modern_web">modern Web stack</a>.
+This includes HTTP/1.1, HTTP/2, Websocket, Server-Sent Events and
+Webmachine-based REST.</p></div>
+<div class="paragraph"><p>Cowboy comes with functions for introspection and tracing, enabling
+developers to know precisely what is happening at any time. Its modular
+design also easily enable developers to add instrumentation.</p></div>
 <div class="paragraph"><p>Cowboy is a high quality project. It has a small code base, is very
 efficient (both in latency and memory use) and can easily be embedded
 in another application.</p></div>
 <div class="paragraph"><p>Cowboy is clean Erlang code. It includes hundreds of tests and its code
 is fully compliant with the Dialyzer. It is also well documented and
-features both a Function Reference and a User Guide.</p></div>
+features a Function Reference, a User Guide and numerous Tutorials.</p></div>
 <div class="sect1">
 <h2 id="_prerequisites">Prerequisites</h2>
 <div class="sectionbody">
@@ -90,17 +93,34 @@ will be detailed throughout the guide.</p></div>
 <div class="sect1">
 <h2 id="_supported_platforms">Supported platforms</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Cowboy is tested and supported on Linux.</p></div>
+<div class="paragraph"><p>Cowboy is tested and supported on Linux, FreeBSD, Windows and OSX.</p></div>
 <div class="paragraph"><p>Cowboy has been reported to work on other platforms, but we make no
 guarantee that the experience will be safe and smooth. You are advised
 to perform the necessary testing and security audits prior to deploying
 on other platforms.</p></div>
-<div class="paragraph"><p>Cowboy is developed for Erlang/OTP 17.0, 17.1.2 and 17.3. By the time
-this branch gets released the target version will probably be 18.0 and
-above.</p></div>
-<div class="paragraph"><p>Cowboy may be compiled on other Erlang versions with small source code
-modifications but there is no guarantee that it will work as expected.</p></div>
-<div class="paragraph"><p>Cowboy uses the maps data type which was introduced in Erlang 17.0.</p></div>
+<div class="paragraph"><p>Cowboy is developed for Erlang/OTP 19.0 and newer.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_license">License</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy uses the ISC License.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Copyright (c) 2011-2016, Loïc Hoguin &lt;essen@ninenines.eu&gt;
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.</code></pre>
+</div></div>
 </div>
 </div>
 <div class="sect1">
@@ -114,9 +134,11 @@ modifications but there is no guarantee that it will work as expected.</p></div>
 <div class="sectionbody">
 <div class="paragraph"><p>In the HTTP protocol, the method name is case sensitive. All standard
 method names are uppercase.</p></div>
-<div class="paragraph"><p>Header names are case insensitive. Cowboy converts all the request
-header names to lowercase, and expects your application to provide
-lowercase header names in the response.</p></div>
+<div class="paragraph"><p>Header names are case insensitive. When using HTTP/1.1, Cowboy converts
+all the request header names to lowercase. HTTP/2 requires clients to
+send them as lowercase. Any other header name is expected to be provided
+lowercased, including when querying information about the request or
+when sending responses.</p></div>
 <div class="paragraph"><p>The same applies to any other case insensitive value.</p></div>
 </div>
 </div>

@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Cowboy REST Logic
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20REST%20Logic&In-Reply-To=%3CCD41053B.266D%25christopher.phillips%40turner.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000056.html">
+   <LINK REL="Next"  HREF="000057.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Cowboy REST Logic</H1>
+    <B>Phillips, Christopher</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Cowboy%20REST%20Logic&In-Reply-To=%3CCD41053B.266D%25christopher.phillips%40turner.com%3E"
+       TITLE="[99s-extend] Cowboy REST Logic">Christopher.Phillips at turner.com
+       </A><BR>
+    <I>Wed Feb 13 14:52:10 CET 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000056.html">[99s-extend] [erlang-questions] [ANN] Cowboy 0.8.0
+</A></li>
+        <LI>Next message: <A HREF="000057.html">[99s-extend] Cowboy REST Logic
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+  In 6.1, and still in 8.0, there is some logic that surprised me, and I wanted to see if it was intentional, or if I'm missing something.
+
+  If I set up a POST such that it's a create, I get back a 303, rather than a 201, on successful create. This came as a bit of a surprise; I know from Webmachine, if it's a new resource being created, a POST will return a 201 (N11 to P11 in Webmachine's v3 diagram).
+
+  Is this intentional? The logic seems to be post_is_create/2 -&gt; create_path/2 -&gt; put_resource/3 -&gt; choose_content_type/5 -&gt; next/3 -&gt; respond(_, _, 303). It may be that this is a better response, rather than a 201 with the location header, but it came as a surprise given web machine's behavior.
+
+  For background, I'm attempting to migrate some web machine code to Cowboy, which is serving a RESTful API to a Javascript client. The client is making CORS calls. Receiving a 303 and a Location header seemed to mean that the call was redirected before the client side code ever saw it (not sure what the browser was doing; I was expecting another request, but I wasn't quite lucid enough to check for that last night when working on it); a 201 allows me to examine the location.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: &lt;<A HREF="http://lists.ninenines.eu/archives/extend/attachments/20130213/a992c0b6/attachment.html">http://lists.ninenines.eu/archives/extend/attachments/20130213/a992c0b6/attachment.html</A>&gt;
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000056.html">[99s-extend] [erlang-questions] [ANN] Cowboy 0.8.0
+</A></li>
+	<LI>Next message: <A HREF="000057.html">[99s-extend] Cowboy REST Logic
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#55">[ date ]</a>
+              <a href="thread.html#55">[ thread ]</a>
+              <a href="subject.html#55">[ subject ]</a>
+              <a href="author.html#55">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

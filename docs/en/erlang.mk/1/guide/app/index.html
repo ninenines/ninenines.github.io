@@ -216,6 +216,14 @@ your situation.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+<code>PROJECT_MOD</code>
+</dt>
+<dd>
+<p>
+        The application callback module.
+</p>
+</dd>
+<dt class="hdlist1">
 <code>PROJECT_REGISTERED</code>
 </dt>
 <dd>
@@ -246,17 +254,7 @@ your situation.</p></div>
 <div class="paragraph"><p>There&#8217;s no need for quotes or anything. The relevant part of
 the Cowboy Makefile follows, if you need an example:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">PROJECT =</span> cowboy
-<span style="color: #009900">PROJECT_DESCRIPTION =</span> Small<span style="color: #990000">,</span> fast<span style="color: #990000">,</span> modular HTTP server<span style="color: #990000">.</span>
-<span style="color: #009900">PROJECT_VERSION =</span> 2.0.0-pre.2
-<span style="color: #009900">PROJECT_REGISTERED =</span> cowboy_clock
-
-<span style="color: #009900">LOCAL_DEPS =</span> crypto
-<span style="color: #009900">DEPS =</span> cowlib ranch</tt></pre></div></div>
+<div class="content"></div></div>
 <div class="paragraph"><p>Any space before and after the value is dropped.</p></div>
 <div class="paragraph"><p><a href="../deps">Dependencies</a> are covered in details in
 the next chapter.</p></div>
@@ -439,33 +437,19 @@ the <a href="http://www.erlang.org/doc/man/erlc.html">erlc Manual</a> for the
 full list.</p></div>
 <div class="paragraph"><p>By default, Erlang.mk will set the following options:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">ERLC_OPTS =</span> -Werror <span style="color: #990000">+</span>debug_info <span style="color: #990000">+</span>warn_export_vars <span style="color: #990000">+</span>warn_shadow_vars <span style="color: #990000">+</span>warn_obsolete_guard</tt></pre></div></div>
+<div class="content"></div></div>
 <div class="paragraph"><p>In other words: warnings as errors, debug info (recommended) and
 enable warnings for exported variables, shadow variables and
 obsolete guard functions.</p></div>
 <div class="paragraph"><p>You can redefine this variable in your Makefile to change it
 completely, either before or after including Erlang.mk:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">ERLC_OPTS =</span> <span style="color: #990000">+</span>debug_info</tt></pre></div></div>
+<div class="content"></div></div>
 <div class="paragraph"><p>You can also filter out some options from the defaults Erlang.mk
 sets, by defining ERLC_OPTS after including Erlang.mk using the
 <code>:=</code> operator.</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>include erlang.mk
-
-<span style="color: #990000">ERLC_OPTS :=</span> <span style="color: #009900">$(</span>filter-out -Werror<span style="color: #990000">,</span><span style="color: #009900">$(ERLC_OPTS))</span></tt></pre></div></div>
+<div class="content"></div></div>
 </div>
 <div class="sect3">
 <h4 id="_erlc_exclude">ERLC_EXCLUDE</h4>
@@ -475,11 +459,7 @@ not normally need it.</p></div>
 <div class="paragraph"><p>To exclude a module, simply list it in the variable, either
 before or after including Erlang.mk:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">ERLC_EXCLUDE =</span> cowboy_http2</tt></pre></div></div>
+<div class="content"></div></div>
 </div>
 </div>
 </div>
@@ -525,11 +505,7 @@ when you have behaviors used by other modules in your project.</p></div>
 the dependency tracking file every time you compile. You can
 do this by adding the following line to your <em>Makefile</em>:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>NO_MAKEDEP <span style="color: #990000">?=</span> <span style="color: #993399">1</span></tt></pre></div></div>
+<div class="content"></div></div>
 <div class="paragraph"><p>As you can see, the snippet above uses <code>?=</code> instead of a
 simple equal sign. This is to allow you to temporarily override
 this value when you do make substantial changes to your project
@@ -559,18 +535,7 @@ file is generated. To do this, you would add your hook before
 or after including the <em>erlang.mk</em> file.</p></div>
 <div class="paragraph"><p>The easiest way is after:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">PROJECT =</span> example
-
-include erlang.mk
-
-<span style="color: #009900">$(PROJECT)</span>.d<span style="color: #990000">::</span> src/generated_mod.erl
-
-src/generated_mod.erl<span style="color: #990000">::</span> gen-mod.sh
-        <span style="color: #009900">$(gen_verbose)</span> <span style="color: #990000">.</span>/gen-mod.sh <span style="color: #009900">$@</span></tt></pre></div></div>
+<div class="content"></div></div>
 <div class="paragraph"><p>In this case we use <code>$(gen_verbose)</code> to hide the details of
 the build by default. Erlang.mk will simply say what file
 is it currently generating.</p></div>
@@ -582,20 +547,7 @@ modified.</p></div>
 Erlang.mk, don&#8217;t forget to set the <code>.DEFAULT_GOAL</code> variable,
 otherwise nothing will get built:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">PROJECT =</span> example
-
-.DEFAULT_GOAL <span style="color: #990000">=</span> all
-
-<span style="color: #009900">$(PROJECT)</span>.d<span style="color: #990000">::</span> src/generated_mod.erl
-
-include erlang.mk
-
-src/generated_mod.erl<span style="color: #990000">::</span> gen-mod.sh
-        <span style="color: #009900">$(gen_verbose)</span> <span style="color: #990000">.</span>/gen-mod.sh <span style="color: #009900">$@</span></tt></pre></div></div>
+<div class="content"></div></div>
 </div>
 </div>
 <div class="sect1">

@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+ <HEAD>
+   <TITLE> [99s-extend] Response headers
+   </TITLE>
+   <LINK REL="Index" HREF="index.html" >
+   <LINK REL="made" HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Response%20headers&In-Reply-To=%3CCD81FF59.4478%25christopher.phillips%40turner.com%3E">
+   <META NAME="robots" CONTENT="index,nofollow">
+   <style type="text/css">
+       pre {
+           white-space: pre-wrap;       /* css-2.1, curent FF, Opera, Safari */
+           }
+   </style>
+   <META http-equiv="Content-Type" content="text/html; charset=us-ascii">
+   <LINK REL="Previous"  HREF="000075.html">
+   <LINK REL="Next"  HREF="000077.html">
+ </HEAD>
+ <BODY BGCOLOR="#ffffff">
+   <H1>[99s-extend] Response headers</H1>
+    <B>Phillips, Christopher</B> 
+    <A HREF="mailto:extend%40lists.ninenines.eu?Subject=Re%3A%20%5B99s-extend%5D%20Response%20headers&In-Reply-To=%3CCD81FF59.4478%25christopher.phillips%40turner.com%3E"
+       TITLE="[99s-extend] Response headers">Christopher.Phillips at turner.com
+       </A><BR>
+    <I>Wed Apr  3 22:35:36 CEST 2013</I>
+    <P><UL>
+        <LI>Previous message: <A HREF="000075.html">[99s-extend] Response headers
+</A></li>
+        <LI>Next message: <A HREF="000077.html">[99s-extend] Response headers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#76">[ date ]</a>
+              <a href="thread.html#76">[ thread ]</a>
+              <a href="subject.html#76">[ subject ]</a>
+              <a href="author.html#76">[ author ]</a>
+         </LI>
+       </UL>
+    <HR>  
+<!--beginarticle-->
+<PRE>
+  Sure. Right now, Cowboy doesn't parse the headers, but you can manually
+parse them in your handler. I've got them working in my implementation
+pretty well, I'll try and break it down a bit here.
+
+  A good, basic overview of what the requests the browser will send, and
+what your responses should look like, is here:
+<A HREF="https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS">https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS</A>
+
+
+
+HANDLING PRE-FLIGHTS -
+  Pre-flights are the OPTION requests the browser automatically sends off
+when you make a CORS request using a verb other than GET, or POST with one
+of three acceptable content types. They're defined well in the above link.
+
+  You can read off the requested headers the actual call wants to send in
+the OPTIONS preflight with
+
+	{Headers, NewRequest } =
+cowboy_req:header(&lt;&lt;&quot;access-control-request-headers&quot;&gt;&gt;, Request)
+
+  Headers will either be the binary, or undefined. If the binary, you
+either need to manually parse it and choose to allow/disallow the request
+from continuing based on it, or, if you just want to allow all headers
+trivially, just pipe that back into the request, a la -
+
+        Request2 = 
+cowboy_req:set_resp_header(&lt;&lt;&quot;access-control-allow-headers&quot;&gt;&gt;,
+binary_to_list(Headers), NewRequest)
+
+  (As a reminder, it can be undefined. You'll need to check for that
+before passing it into the above. If it's undefined, you don't need to add
+the access-control-allow-headers header).
+
+
+
+  As part of the pre-flight request, you also need to handle what methods
+are allowed. This looks something like -
+
+	PreflightedRequest =
+cowboy_req:set_resp_header(&lt;&lt;&quot;access-control-allow-methods&quot;&gt;&gt;, &lt;&lt;&quot;GET,
+POST, DELETE, PUT&quot;&gt;&gt;, Request2)
+
+  If I wanted to allow gets, posts, deletes, and puts. You can also choose
+to read off the access-control-request-method header sent from the client,
+but I don't see the point; your list of allowed methods doesn't need to
+change based on that (the user is requesting a POST, why does that change
+whether you allow a POST or not? But I digress).
+
+
+
+
+
+FOR ALL CALLS (both pre-flights and the actual call)
+  Respond with acceptable origin. If you want any domain to access this
+resource (not advised, unless this is a public, readonly resource, but
+good for testing), you can do -
+
+  	NewRequest = 
+cowboy_req:set_resp_header(&lt;&lt;&quot;access-control-allow-origin&quot;&gt;&gt;, &lt;&lt;&quot;*&quot;&gt;&gt;,
+Request)
+
+
+  If you want to filter out the allowed domains, it looks like -
+
+	Origin = cowboy_req:header(&lt;&lt;&quot;origin&quot;&gt;&gt;, Request) %Get the origin that
+the browser sent you
+
+        %Do logic to check Origin, and any other data that would decide
+whether this request is allowed; it will only apply on a CORS request from
+another browser.
+        
+	%If it passes, pass Origin back as the value for the
+access-control-allow-origin header.
+        NewRequest =
+cowboy_req:set_resp_header(&lt;&lt;&quot;access-control-allow-origin&quot;&gt;&gt;, Origin,
+Request)
+
+
+
+FOR ONLY THE ACTUAL CALL
+  If you want to send custom headers back to your Javascript client (or
+read any standard header beyond content-type), you need to explicitly
+allow them. This looks like (if I wanted to expose the 'server' header so
+my client Javascript can see that it's Cowboy on the backend) -
+
+  	ExposedHeaderRequest =
+cowboy_req:set_resp_header(&lt;&lt;&quot;access-control-expose-headers&quot;&gt;&gt;,
+&lt;&lt;&quot;server&quot;&gt;&gt;, Request)
+
+
+
+
+  That's basically it I believe. There is also a max age, and a allow
+credentials header (which is really more of a require credentials);
+they're pretty straightforwardly explained on that page I linked above,
+but I haven't played with them personally.
+
+
+  Caveats I ran into were largely being aware that same domain requests do
+NOT supply any of the CORS headers, not even the origin header (so you can
+get undefined and have to handle those cases), as well as understanding
+the ramifications of allowing cross domain requests. Also, if you want to
+develop while disconnected (or if it's not easy to grab another domain),
+use your hosts file to declare a fake domain pointed to 127.0.0.1, load
+your page from that, explicitly define your AJAX calls to localhost. Note
+too that there is a bug in Firefox at present when you try and get all the
+request headers. It returns an empty list. You can get individual ones if
+you know the name (I.e., getResponseHeader(&quot;server&quot;) will work,
+getAllResponseHeaders() returns an empty string). This is further
+compounded by jQuery building its own XHR that loads headers by calling
+getAllResponseHeaders, so in Firefox, using jQuery, you can get back zero
+headers. Don't know if that affects you, but it's an issue it took me a
+good while to diagnose, and which we've had to bear in mind.
+
+
+
+   
+On 4/3/13 3:33 PM, &quot;Lee Sylvester&quot; &lt;<A HREF="https://lists.ninenines.eu/listinfo/extend">lee.sylvester at gmail.com</A>&gt; wrote:
+
+&gt;<i>Hi list,
+</I>&gt;<i>
+</I>&gt;<i>I'd like to set up my handler to use CORS.  Can anyone tell me how I can
+</I>&gt;<i>modify the headers for my handler to support this?
+</I>&gt;<i>
+</I>&gt;<i>Thanks loads,
+</I>&gt;<i>Lee
+</I>&gt;<i>_______________________________________________
+</I>&gt;<i>Extend mailing list
+</I>&gt;<i><A HREF="https://lists.ninenines.eu/listinfo/extend">Extend at lists.ninenines.eu</A>
+</I>&gt;<i><A HREF="http://lists.ninenines.eu:81/listinfo/extend">http://lists.ninenines.eu:81/listinfo/extend</A>
+</I>&gt;<i>
+</I>
+
+
+</PRE>
+
+<!--endarticle-->
+    <HR>
+    <P><UL>
+        <!--threads-->
+	<LI>Previous message: <A HREF="000075.html">[99s-extend] Response headers
+</A></li>
+	<LI>Next message: <A HREF="000077.html">[99s-extend] Response headers
+</A></li>
+         <LI> <B>Messages sorted by:</B> 
+              <a href="date.html#76">[ date ]</a>
+              <a href="thread.html#76">[ thread ]</a>
+              <a href="subject.html#76">[ subject ]</a>
+              <a href="author.html#76">[ author ]</a>
+         </LI>
+       </UL>
+
+<hr>
+<a href="https://lists.ninenines.eu/listinfo/extend">More information about the Extend
+mailing list</a><br>
+</body></html>

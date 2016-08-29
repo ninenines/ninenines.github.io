@@ -1,0 +1,418 @@
+From essen at ninenines.eu  Tue Nov 13 10:04:17 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 13 Nov 2012 10:04:17 +0100
+Subject: [99s-extend] Proposal for Cowboy Routing
+Message-ID: <50A20D11.9020504@ninenines.eu>
+
+Hello!
+
+I have put my thoughts on routing at the following gist:
+
+   https://gist.github.com/4064759
+
+Please comment or cry in terror if you're against it!
+
+Thanks.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From thomas at oinksoft.com  Tue Nov 13 15:12:59 2012
+From: thomas at oinksoft.com (Thomas Allen)
+Date: Tue, 13 Nov 2012 09:12:59 -0500
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <50A20D11.9020504@ninenines.eu>
+References: <50A20D11.9020504@ninenines.eu>
+Message-ID: <20121113141259.GB17626@members.linode.com>
+
+On Tue, Nov 13, 2012 at 10:04:17AM +0100, Lo?c Hoguin wrote:
+> Hello!
+> 
+> I have put my thoughts on routing at the following gist:
+> 
+>   https://gist.github.com/4064759
+> 
+> Please comment or cry in terror if you're against it!
+
+I think that this looks very good. The current router handles all of my
+use cases, and this bit of sugar will definitely help to speed up
+development.
+
+As an aside, have you considered adding optional slash-add
+functionality, so that /a/b will match "/a/b/"? This is pretty easy to
+set up at the server level, but the front-line server doesn't know about
+our dispatch rules and so it doesn't know if there is a matching
+dispatch rule for the slash-added version of a given URL.
+
+Thomas
+
+
+From essen at ninenines.eu  Tue Nov 13 15:14:03 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 13 Nov 2012 15:14:03 +0100
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <20121113141259.GB17626@members.linode.com>
+References: <50A20D11.9020504@ninenines.eu>
+ <20121113141259.GB17626@members.linode.com>
+Message-ID: <50A255AB.8090207@ninenines.eu>
+
+On 11/13/2012 03:12 PM, Thomas Allen wrote:
+> On Tue, Nov 13, 2012 at 10:04:17AM +0100, Lo?c Hoguin wrote:
+>> Hello!
+>>
+>> I have put my thoughts on routing at the following gist:
+>>
+>>    https://gist.github.com/4064759
+>>
+>> Please comment or cry in terror if you're against it!
+>
+> I think that this looks very good. The current router handles all of my
+> use cases, and this bit of sugar will definitely help to speed up
+> development.
+>
+> As an aside, have you considered adding optional slash-add
+> functionality, so that /a/b will match "/a/b/"? This is pretty easy to
+> set up at the server level, but the front-line server doesn't know about
+> our dispatch rules and so it doesn't know if there is a matching
+> dispatch rule for the slash-added version of a given URL.
+
+/a/b already matches /a/b/.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From thomas at oinksoft.com  Tue Nov 13 15:35:29 2012
+From: thomas at oinksoft.com (Thomas Allen)
+Date: Tue, 13 Nov 2012 09:35:29 -0500
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <50A255AB.8090207@ninenines.eu>
+References: <50A20D11.9020504@ninenines.eu>
+ <20121113141259.GB17626@members.linode.com>
+ <50A255AB.8090207@ninenines.eu>
+Message-ID: <20121113143529.GC17626@members.linode.com>
+
+On Tue, Nov 13, 2012 at 03:14:03PM +0100, Lo?c Hoguin wrote:
+> /a/b already matches /a/b/.
+
+Sorry for not being more precise: /a/b would result in a 301 redirect to
+/a/b/
+
+Thomas
+
+
+From essen at ninenines.eu  Tue Nov 13 15:41:35 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 13 Nov 2012 15:41:35 +0100
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <20121113143529.GC17626@members.linode.com>
+References: <50A20D11.9020504@ninenines.eu>
+ <20121113141259.GB17626@members.linode.com> <50A255AB.8090207@ninenines.eu>
+ <20121113143529.GC17626@members.linode.com>
+Message-ID: <50A25C1F.1050804@ninenines.eu>
+
+On 11/13/2012 03:35 PM, Thomas Allen wrote:
+> On Tue, Nov 13, 2012 at 03:14:03PM +0100, Lo?c Hoguin wrote:
+>> /a/b already matches /a/b/.
+>
+> Sorry for not being more precise: /a/b would result in a 301 redirect to
+> /a/b/
+
+Oh alright. Well they are equivalent URLs, so if you really need to 
+redirect I would do so in the handler directly, or through a request hook.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From thomas at oinksoft.com  Tue Nov 13 16:12:14 2012
+From: thomas at oinksoft.com (Thomas Allen)
+Date: Tue, 13 Nov 2012 10:12:14 -0500
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <50A25C1F.1050804@ninenines.eu>
+References: <50A20D11.9020504@ninenines.eu>
+ <20121113141259.GB17626@members.linode.com>
+ <50A255AB.8090207@ninenines.eu>
+ <20121113143529.GC17626@members.linode.com>
+ <50A25C1F.1050804@ninenines.eu>
+Message-ID: <20121113151214.GE17626@members.linode.com>
+
+On Tue, Nov 13, 2012 at 03:41:35PM +0100, Lo?c Hoguin wrote:
+> Oh alright. Well they are equivalent URLs, so if you really need to
+> redirect I would do so in the handler directly, or through a request
+> hook.
+
+I suppose this suggests my next question ... how would one accomplish
+this right now in Cowboy? I hope I'm correct in assuming that this will
+involve cowboy_dispatcher:match/3 in an onrequest fun, but I do not
+understand how I will use match/3 with what I get from
+cowboy_req:path/1.
+
+Thomas
+
+
+From essen at ninenines.eu  Tue Nov 13 16:22:48 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 13 Nov 2012 16:22:48 +0100
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <20121113151214.GE17626@members.linode.com>
+References: <50A20D11.9020504@ninenines.eu>
+ <20121113141259.GB17626@members.linode.com> <50A255AB.8090207@ninenines.eu>
+ <20121113143529.GC17626@members.linode.com> <50A25C1F.1050804@ninenines.eu>
+ <20121113151214.GE17626@members.linode.com>
+Message-ID: <50A265C8.8060505@ninenines.eu>
+
+On 11/13/2012 04:12 PM, Thomas Allen wrote:
+> On Tue, Nov 13, 2012 at 03:41:35PM +0100, Lo?c Hoguin wrote:
+>> Oh alright. Well they are equivalent URLs, so if you really need to
+>> redirect I would do so in the handler directly, or through a request
+>> hook.
+>
+> I suppose this suggests my next question ... how would one accomplish
+> this right now in Cowboy? I hope I'm correct in assuming that this will
+> involve cowboy_dispatcher:match/3 in an onrequest fun, but I do not
+> understand how I will use match/3 with what I get from
+> cowboy_req:path/1.
+
+No, just check that cowboy_req:path/1 ends with $/, and if it doesn't 
+then redirect.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From dch at jsonified.com  Tue Nov 13 16:42:53 2012
+From: dch at jsonified.com (Dave Cottlehuber)
+Date: Tue, 13 Nov 2012 16:42:53 +0100
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <50A20D11.9020504@ninenines.eu>
+References: <50A20D11.9020504@ninenines.eu>
+Message-ID: <CAL+Y1nunQttGU4=nTQkUZ6tfx7xAi+X4aDJeWAAHnFKsC3C81w@mail.gmail.com>
+
+On 13 November 2012 10:04, Lo?c Hoguin <essen at ninenines.eu> wrote:
+> Hello!
+>
+> I have put my thoughts on routing at the following gist:
+>
+>   https://gist.github.com/4064759
+>
+> Please comment or cry in terror if you're against it!
+>
+> Thanks.
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> _______________________________________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/listinfo/extend
+
+I actually commented on the gist, here's a copy for the ML:
+
+== dch ==
+
+Looks very useful for me. I've not heard of imbrication until today, I
+assume it is closest to nested optional components as used above.
+
+Having regex capability in the constraints would be great:
+
+{"/cars/:name/:color", [{color, in, [blue, red, pink]}], Handler,
+Opts} might be {"/cars/:name/:color", [{color, regex, "^(blue | red |
+pink)$", [other_re_parameters]) , Handler, Opts} for example.
+
+== Lo?c ==
+
+Yes, regex will be a possible constraint. Also checking for integer
+value. Not sure what else we'll want.
+
+A+
+Dave
+
+
+From essen at ninenines.eu  Tue Nov 13 16:46:15 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Tue, 13 Nov 2012 16:46:15 +0100
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <CAL+Y1nunQttGU4=nTQkUZ6tfx7xAi+X4aDJeWAAHnFKsC3C81w@mail.gmail.com>
+References: <50A20D11.9020504@ninenines.eu>
+ <CAL+Y1nunQttGU4=nTQkUZ6tfx7xAi+X4aDJeWAAHnFKsC3C81w@mail.gmail.com>
+Message-ID: <50A26B47.20001@ninenines.eu>
+
+On 11/13/2012 04:42 PM, Dave Cottlehuber wrote:
+> On 13 November 2012 10:04, Lo?c Hoguin <essen at ninenines.eu> wrote:
+>> Hello!
+>>
+>> I have put my thoughts on routing at the following gist:
+>>
+>>    https://gist.github.com/4064759
+>>
+>> Please comment or cry in terror if you're against it!
+>>
+>> Thanks.
+>>
+>> --
+>> Lo?c Hoguin
+>> Erlang Cowboy
+>> Nine Nines
+>> http://ninenines.eu
+>> _______________________________________________
+>> Extend mailing list
+>> Extend at lists.ninenines.eu
+>> http://lists.ninenines.eu:81/listinfo/extend
+>
+> I actually commented on the gist, here's a copy for the ML:
+>
+> == dch ==
+>
+> Looks very useful for me. I've not heard of imbrication until today, I
+> assume it is closest to nested optional components as used above.
+>
+> Having regex capability in the constraints would be great:
+>
+> {"/cars/:name/:color", [{color, in, [blue, red, pink]}], Handler,
+> Opts} might be {"/cars/:name/:color", [{color, regex, "^(blue | red |
+> pink)$", [other_re_parameters]) , Handler, Opts} for example.
+>
+> == Lo?c ==
+>
+> Yes, regex will be a possible constraint. Also checking for integer
+> value. Not sure what else we'll want.
+
+I'll add to that that in the case of integer, we could very well bind 
+the value as an integer instead of as a binary, and avoid all these 
+pesky list_to_integer(binary_to_list(Value)).
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From thomas at oinksoft.com  Tue Nov 13 17:10:04 2012
+From: thomas at oinksoft.com (Thomas Allen)
+Date: Tue, 13 Nov 2012 11:10:04 -0500
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <50A265C8.8060505@ninenines.eu>
+References: <50A20D11.9020504@ninenines.eu>
+ <20121113141259.GB17626@members.linode.com>
+ <50A255AB.8090207@ninenines.eu>
+ <20121113143529.GC17626@members.linode.com>
+ <50A25C1F.1050804@ninenines.eu>
+ <20121113151214.GE17626@members.linode.com>
+ <50A265C8.8060505@ninenines.eu>
+Message-ID: <20121113161004.GF17626@members.linode.com>
+
+On Tue, Nov 13, 2012 at 04:22:48PM +0100, Lo?c Hoguin wrote:
+> No, just check that cowboy_req:path/1 ends with $/, and if it
+> doesn't then redirect.
+
+OK, so what I'm going for is to actually check for a valid URL with the
+slash. I got it to work in current cowboy, but shield your eyes ...
+
+I do this "middleware" thing often ... this might be a misnomer as I
+think some definitions of middleware specify that it be able to wrap the
+request *and* the response. I digress ...
+
+    %%% foo_app.erl:
+
+    {ok, _} = cowboy:start_http(http, ?ACCEPTORS,
+        [{port, ?PORT}],
+        [{dispatch, Dispatch},
+         {onrequest, fun(Req) ->
+             foo_middleware:all(Dispatch, Req)
+          end}]
+    ),
+
+
+    %% foo_middleware.erl:
+
+    -define(MIDDLEWARE, [
+        fun foo_middleware:slash/2,
+        fun foo_middleware:session/2,
+        fun foo_middleware:user/2
+    ]).
+
+    all(Dispatch, Req) ->
+        lists:foldl(fun(F, CurReq) -> F(Dispatch, CurReq) end, Req,
+            ?MIDDLEWARE).
+
+    %% ...
+
+    slash(Dispatch, Req) ->
+        {Path, _} = cowboy_req:path(Req),
+        case binary:last(Path) of
+            $/ -> Req;
+            _ ->
+                SlashPath = <<Path/bitstring, "/">>,
+                {Host, _} = cowboy_req:host(Req),
+                Match = cowboy_dispatcher:match(Dispatch, Host,
+                    SlashPath),
+                case element(1, Match) of
+                    ok ->
+                        cowboy_req:reply(301,
+                            [{<<"Location">>, SlashPath}], <<>>, Req);
+                    error -> Req
+                end
+        end.
+
+So, I assume that any path not ending in "/" won't match. Another
+version of this could toss that assumption, but then you're performing
+an extra match on every request ... much better to use a '_' rule in
+that case.
+
+One thing that is icky about using a fallback '_' handler, and the
+reason I've elected to use onrequest for this example, is that I do not
+see a way to access cowboy_protocol's state.dispatch to access these
+rules. So, I enclose them in my `onrequest` fun. Would it be possible to
+expose Dispatch? This has many applications, particularly for URL
+reversing.
+
+Perhaps I am missing several things ;^)
+
+Thomas
+
+
+From essen at ninenines.eu  Thu Nov 29 11:46:10 2012
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 29 Nov 2012 11:46:10 +0100
+Subject: [99s-extend] Proposal for Cowboy Routing
+In-Reply-To: <50A20D11.9020504@ninenines.eu>
+References: <50A20D11.9020504@ninenines.eu>
+Message-ID: <50B73CF2.1010208@ninenines.eu>
+
+On 11/13/2012 10:04 AM, Lo?c Hoguin wrote:
+> Hello!
+>
+> I have put my thoughts on routing at the following gist:
+>
+>    https://gist.github.com/4064759
+>
+> Please comment or cry in terror if you're against it!
+
+I have added more infos and changes as you can see in the comments here: 
+https://gist.github.com/4064759#comments Please feedback.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+

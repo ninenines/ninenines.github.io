@@ -1,0 +1,1000 @@
+From max.lapshin at gmail.com  Thu Jan  3 10:30:30 2013
+From: max.lapshin at gmail.com (Max Lapshin)
+Date: Thu, 3 Jan 2013 12:30:30 +0300
+Subject: [99s-extend] [erlang-questions] [ANN] Ranch 0.6.0 Xmas Edition
+	Released
+In-Reply-To: <50D8DA63.2060600@ninenines.eu>
+References: <50D8DA63.2060600@ninenines.eu>
+Message-ID: <CAMxVRxA9uqXbfcP9=_CmTDk-ZBycmZijeOa_TyJXQvSPzvwfbg@mail.gmail.com>
+
+Loic, it would be great to hear a bit, what problems have you met with.
+
+What issues with stability can be in acceptor pool?
+
+Also I have question about updating protocol options: have you done
+something with the problem that after updating protocol options existing
+workers are running with old config?
+
+On Tuesday, December 25, 2012, Lo?c Hoguin wrote:
+
+> Ho ho ho!
+>
+> I have just tagged version 0.6.0 of the Ranch project!
+>
+> Ranch is a socket acceptor pool for TCP protocols.
+>
+>   https://github.com/extend/**ranch <https://github.com/extend/ranch>
+>
+> Ranch is used by the next version of Cowboy, 0.8.0, set to be released
+> early February, but also in Basho's Riak multi-data center replication
+> amongst others.
+>
+> All tickets have been resolved. A significant contribution was made by
+> Andrew Majorov to improve the fault tolerance capabilities of the
+> application, making sure it always restarts properly when things go wrong.
+> This has been made possible thanks to the amazing project from Daniel Luna,
+> chaos_monkey (https://github.com/dluna/**chaos_monkey<https://github.com/dluna/chaos_monkey>
+> ).
+>
+> The guide has also been improved and completed.
+>
+>   http://ninenines.eu/docs/en/**ranch/HEAD/guide/introduction<http://ninenines.eu/docs/en/ranch/HEAD/guide/introduction>
+>
+> If the guide isn't enough, drop by our new IRC channel dedicated to
+> Cowboy, Ranch and all our other projects! #ninenines on Freenode.
+>
+> Following is the list of change since last time:
+>
+>  *  Improve fault tolerance thanks to chaos_monkey testing
+>  *  Add 'nodelay' option to transports
+>  *  Add 'verify' option to ranch_ssl transport
+>  *  Add 'socket' option to pass an already open socket to the listener
+>  *  Add Transport:sendfile/2 function (uses a fallback if unavailable)
+>  *  Allow IP tuples in Transport:connect/3
+>  *  Add ranch:set_max_connections/2 to update the value live
+>  *  Add ranch:get_max_connections/1 to retrieve it
+>
+> We are always looking for feedback, especially now that there is no ticket
+> left open on this project. If you are using Ranch and have questions or
+> needs that it doesn't cover, please send them to us.
+>
+> Commercial support will be available starting from January, ping me if you
+> are interested. Details will be announced at a later time on the
+> ninenines.eu mailing list.
+>
+> I want to thank all contributors for helping this project by opening
+> tickets, sending patches and offering feedback. I am as always very
+> grateful for any and all contributions. I wouldn't have made it this far
+> without the tremendous help I receive everyday.
+>
+> Thanks to all and have a nice holiday!
+>
+> --
+> Lo?c Hoguin
+> Erlang Santa
+> Nine Nines
+> http://ninenines.eu
+> ______________________________**_________________
+> erlang-questions mailing list
+> erlang-questions at erlang.org
+> http://erlang.org/mailman/**listinfo/erlang-questions<http://erlang.org/mailman/listinfo/erlang-questions>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130103/bae06e70/attachment.html>
+
+From essen at ninenines.eu  Thu Jan  3 13:46:56 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 03 Jan 2013 13:46:56 +0100
+Subject: [99s-extend] [erlang-questions] [ANN] Ranch 0.6.0 Xmas Edition
+	Released
+In-Reply-To: <CAMxVRxA9uqXbfcP9=_CmTDk-ZBycmZijeOa_TyJXQvSPzvwfbg@mail.gmail.com>
+References: <50D8DA63.2060600@ninenines.eu>
+ <CAMxVRxA9uqXbfcP9=_CmTDk-ZBycmZijeOa_TyJXQvSPzvwfbg@mail.gmail.com>
+Message-ID: <50E57DC0.5090408@ninenines.eu>
+
+Haven't had any stability issue. What we did here is ensure that when 
+any process gets killed for any reason, especially reasons we can't 
+foresee, Ranch continues to work as expected.
+
+Ranch not updating protocol options for existing connections isn't a 
+problem, it won't be "fixed". Ranch can't guess how connection processes 
+are implemented. It's up to you to allow this if you need it. The 
+upgrade updates the options for all acceptors and all future 
+connections, that's it.
+
+On 01/03/2013 10:30 AM, Max Lapshin wrote:
+> Loic, it would be great to hear a bit, what problems have you met with.
+>
+> What issues with stability can be in acceptor pool?
+>
+> Also I have question about updating protocol options: have you done
+> something with the problem that after updating protocol options existing
+> workers are running with old config?
+>
+> On Tuesday, December 25, 2012, Lo?c Hoguin wrote:
+>
+>     Ho ho ho!
+>
+>     I have just tagged version 0.6.0 of the Ranch project!
+>
+>     Ranch is a socket acceptor pool for TCP protocols.
+>
+>     https://github.com/extend/__ranch <https://github.com/extend/ranch>
+>
+>     Ranch is used by the next version of Cowboy, 0.8.0, set to be
+>     released early February, but also in Basho's Riak multi-data center
+>     replication amongst others.
+>
+>     All tickets have been resolved. A significant contribution was made
+>     by Andrew Majorov to improve the fault tolerance capabilities of the
+>     application, making sure it always restarts properly when things go
+>     wrong. This has been made possible thanks to the amazing project
+>     from Daniel Luna, chaos_monkey
+>     (https://github.com/dluna/__chaos_monkey
+>     <https://github.com/dluna/chaos_monkey>).
+>
+>     The guide has also been improved and completed.
+>
+>     http://ninenines.eu/docs/en/__ranch/HEAD/guide/introduction
+>     <http://ninenines.eu/docs/en/ranch/HEAD/guide/introduction>
+>
+>     If the guide isn't enough, drop by our new IRC channel dedicated to
+>     Cowboy, Ranch and all our other projects! #ninenines on Freenode.
+>
+>     Following is the list of change since last time:
+>
+>       *  Improve fault tolerance thanks to chaos_monkey testing
+>       *  Add 'nodelay' option to transports
+>       *  Add 'verify' option to ranch_ssl transport
+>       *  Add 'socket' option to pass an already open socket to the listener
+>       *  Add Transport:sendfile/2 function (uses a fallback if unavailable)
+>       *  Allow IP tuples in Transport:connect/3
+>       *  Add ranch:set_max_connections/2 to update the value live
+>       *  Add ranch:get_max_connections/1 to retrieve it
+>
+>     We are always looking for feedback, especially now that there is no
+>     ticket left open on this project. If you are using Ranch and have
+>     questions or needs that it doesn't cover, please send them to us.
+>
+>     Commercial support will be available starting from January, ping me
+>     if you are interested. Details will be announced at a later time on
+>     the ninenines.eu <http://ninenines.eu> mailing list.
+>
+>     I want to thank all contributors for helping this project by opening
+>     tickets, sending patches and offering feedback. I am as always very
+>     grateful for any and all contributions. I wouldn't have made it this
+>     far without the tremendous help I receive everyday.
+>
+>     Thanks to all and have a nice holiday!
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Santa
+>     Nine Nines
+>     http://ninenines.eu
+>     _________________________________________________
+>     erlang-questions mailing list
+>     erlang-questions at erlang.org
+>     http://erlang.org/mailman/__listinfo/erlang-questions
+>     <http://erlang.org/mailman/listinfo/erlang-questions>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From max.lapshin at gmail.com  Thu Jan  3 14:32:16 2013
+From: max.lapshin at gmail.com (Max Lapshin)
+Date: Thu, 3 Jan 2013 16:32:16 +0300
+Subject: [99s-extend] [erlang-questions] [ANN] Ranch 0.6.0 Xmas Edition
+	Released
+In-Reply-To: <50E57DC0.5090408@ninenines.eu>
+References: <50D8DA63.2060600@ninenines.eu>
+ <CAMxVRxA9uqXbfcP9=_CmTDk-ZBycmZijeOa_TyJXQvSPzvwfbg@mail.gmail.com>
+ <50E57DC0.5090408@ninenines.eu>
+Message-ID: <CAMxVRxDm1E4YXfvYp2CVoXchTpGRZK85XnMat_YhRK9CJGrtqA@mail.gmail.com>
+
+I mean situation that after cowboy:update_options existing acceptors are
+still working with old routes.
+Currently it is useless API, so I have to stop cowboy and start it back.
+
+
+On Thu, Jan 3, 2013 at 4:46 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Haven't had any stability issue. What we did here is ensure that when any
+> process gets killed for any reason, especially reasons we can't foresee,
+> Ranch continues to work as expected.
+>
+> Ranch not updating protocol options for existing connections isn't a
+> problem, it won't be "fixed". Ranch can't guess how connection processes
+> are implemented. It's up to you to allow this if you need it. The upgrade
+> updates the options for all acceptors and all future connections, that's it.
+>
+>
+> On 01/03/2013 10:30 AM, Max Lapshin wrote:
+>
+>> Loic, it would be great to hear a bit, what problems have you met with.
+>>
+>> What issues with stability can be in acceptor pool?
+>>
+>> Also I have question about updating protocol options: have you done
+>> something with the problem that after updating protocol options existing
+>> workers are running with old config?
+>>
+>> On Tuesday, December 25, 2012, Lo?c Hoguin wrote:
+>>
+>>     Ho ho ho!
+>>
+>>     I have just tagged version 0.6.0 of the Ranch project!
+>>
+>>     Ranch is a socket acceptor pool for TCP protocols.
+>>
+>>     https://github.com/extend/__**ranch<https://github.com/extend/__ranch><
+>> https://github.com/extend/**ranch <https://github.com/extend/ranch>>
+>>
+>>
+>>     Ranch is used by the next version of Cowboy, 0.8.0, set to be
+>>     released early February, but also in Basho's Riak multi-data center
+>>     replication amongst others.
+>>
+>>     All tickets have been resolved. A significant contribution was made
+>>     by Andrew Majorov to improve the fault tolerance capabilities of the
+>>     application, making sure it always restarts properly when things go
+>>     wrong. This has been made possible thanks to the amazing project
+>>     from Daniel Luna, chaos_monkey
+>>     (https://github.com/dluna/__**chaos_monkey<https://github.com/dluna/__chaos_monkey>
+>>     <https://github.com/dluna/**chaos_monkey<https://github.com/dluna/chaos_monkey>
+>> >).
+>>
+>>
+>>     The guide has also been improved and completed.
+>>
+>>     http://ninenines.eu/docs/en/__**ranch/HEAD/guide/introduction<http://ninenines.eu/docs/en/__ranch/HEAD/guide/introduction>
+>>
+>>     <http://ninenines.eu/docs/en/**ranch/HEAD/guide/introduction<http://ninenines.eu/docs/en/ranch/HEAD/guide/introduction>
+>> >
+>>
+>>     If the guide isn't enough, drop by our new IRC channel dedicated to
+>>     Cowboy, Ranch and all our other projects! #ninenines on Freenode.
+>>
+>>     Following is the list of change since last time:
+>>
+>>       *  Improve fault tolerance thanks to chaos_monkey testing
+>>       *  Add 'nodelay' option to transports
+>>       *  Add 'verify' option to ranch_ssl transport
+>>       *  Add 'socket' option to pass an already open socket to the
+>> listener
+>>       *  Add Transport:sendfile/2 function (uses a fallback if
+>> unavailable)
+>>       *  Allow IP tuples in Transport:connect/3
+>>       *  Add ranch:set_max_connections/2 to update the value live
+>>       *  Add ranch:get_max_connections/1 to retrieve it
+>>
+>>     We are always looking for feedback, especially now that there is no
+>>     ticket left open on this project. If you are using Ranch and have
+>>     questions or needs that it doesn't cover, please send them to us.
+>>
+>>     Commercial support will be available starting from January, ping me
+>>     if you are interested. Details will be announced at a later time on
+>>     the ninenines.eu <http://ninenines.eu> mailing list.
+>>
+>>
+>>     I want to thank all contributors for helping this project by opening
+>>     tickets, sending patches and offering feedback. I am as always very
+>>     grateful for any and all contributions. I wouldn't have made it this
+>>     far without the tremendous help I receive everyday.
+>>
+>>     Thanks to all and have a nice holiday!
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     Erlang Santa
+>>     Nine Nines
+>>     http://ninenines.eu
+>>     ______________________________**___________________
+>>     erlang-questions mailing list
+>>     erlang-questions at erlang.org
+>>     http://erlang.org/mailman/__**listinfo/erlang-questions<http://erlang.org/mailman/__listinfo/erlang-questions>
+>>     <http://erlang.org/mailman/**listinfo/erlang-questions<http://erlang.org/mailman/listinfo/erlang-questions>
+>> >
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130103/f6c7fd25/attachment.html>
+
+From essen at ninenines.eu  Thu Jan  3 14:51:48 2013
+From: essen at ninenines.eu (=?UTF-8?B?TG/Dr2MgSG9ndWlu?=)
+Date: Thu, 03 Jan 2013 14:51:48 +0100
+Subject: [99s-extend] [erlang-questions] [ANN] Ranch 0.6.0 Xmas Edition
+	Released
+In-Reply-To: <CAMxVRxDm1E4YXfvYp2CVoXchTpGRZK85XnMat_YhRK9CJGrtqA@mail.gmail.com>
+References: <50D8DA63.2060600@ninenines.eu>
+ <CAMxVRxA9uqXbfcP9=_CmTDk-ZBycmZijeOa_TyJXQvSPzvwfbg@mail.gmail.com>
+ <50E57DC0.5090408@ninenines.eu>
+ <CAMxVRxDm1E4YXfvYp2CVoXchTpGRZK85XnMat_YhRK9CJGrtqA@mail.gmail.com>
+Message-ID: <50E58CF4.9080804@ninenines.eu>
+
+Existing acceptors were using the old options for the next connection 
+and then switched to the new options. But that has been fixed a long 
+time ago. Ranch doesn't have that issue.
+
+On 01/03/2013 02:32 PM, Max Lapshin wrote:
+> I mean situation that after cowboy:update_options existing acceptors are
+> still working with old routes.
+> Currently it is useless API, so I have to stop cowboy and start it back.
+>
+>
+> On Thu, Jan 3, 2013 at 4:46 PM, Lo?c Hoguin <essen at ninenines.eu
+> <mailto:essen at ninenines.eu>> wrote:
+>
+>     Haven't had any stability issue. What we did here is ensure that
+>     when any process gets killed for any reason, especially reasons we
+>     can't foresee, Ranch continues to work as expected.
+>
+>     Ranch not updating protocol options for existing connections isn't a
+>     problem, it won't be "fixed". Ranch can't guess how connection
+>     processes are implemented. It's up to you to allow this if you need
+>     it. The upgrade updates the options for all acceptors and all future
+>     connections, that's it.
+>
+>
+>     On 01/03/2013 10:30 AM, Max Lapshin wrote:
+>
+>         Loic, it would be great to hear a bit, what problems have you
+>         met with.
+>
+>         What issues with stability can be in acceptor pool?
+>
+>         Also I have question about updating protocol options: have you done
+>         something with the problem that after updating protocol options
+>         existing
+>         workers are running with old config?
+>
+>         On Tuesday, December 25, 2012, Lo?c Hoguin wrote:
+>
+>              Ho ho ho!
+>
+>              I have just tagged version 0.6.0 of the Ranch project!
+>
+>              Ranch is a socket acceptor pool for TCP protocols.
+>
+>         https://github.com/extend/____ranch
+>         <https://github.com/extend/__ranch>
+>         <https://github.com/extend/__ranch
+>         <https://github.com/extend/ranch>>
+>
+>
+>              Ranch is used by the next version of Cowboy, 0.8.0, set to be
+>              released early February, but also in Basho's Riak
+>         multi-data center
+>              replication amongst others.
+>
+>              All tickets have been resolved. A significant contribution
+>         was made
+>              by Andrew Majorov to improve the fault tolerance
+>         capabilities of the
+>              application, making sure it always restarts properly when
+>         things go
+>              wrong. This has been made possible thanks to the amazing
+>         project
+>              from Daniel Luna, chaos_monkey
+>              (https://github.com/dluna/____chaos_monkey
+>         <https://github.com/dluna/__chaos_monkey>
+>              <https://github.com/dluna/__chaos_monkey
+>         <https://github.com/dluna/chaos_monkey>>).
+>
+>
+>              The guide has also been improved and completed.
+>
+>         http://ninenines.eu/docs/en/____ranch/HEAD/guide/introduction
+>         <http://ninenines.eu/docs/en/__ranch/HEAD/guide/introduction>
+>
+>
+>         <http://ninenines.eu/docs/en/__ranch/HEAD/guide/introduction
+>         <http://ninenines.eu/docs/en/ranch/HEAD/guide/introduction>>
+>
+>              If the guide isn't enough, drop by our new IRC channel
+>         dedicated to
+>              Cowboy, Ranch and all our other projects! #ninenines on
+>         Freenode.
+>
+>              Following is the list of change since last time:
+>
+>                *  Improve fault tolerance thanks to chaos_monkey testing
+>                *  Add 'nodelay' option to transports
+>                *  Add 'verify' option to ranch_ssl transport
+>                *  Add 'socket' option to pass an already open socket to
+>         the listener
+>                *  Add Transport:sendfile/2 function (uses a fallback if
+>         unavailable)
+>                *  Allow IP tuples in Transport:connect/3
+>                *  Add ranch:set_max_connections/2 to update the value live
+>                *  Add ranch:get_max_connections/1 to retrieve it
+>
+>              We are always looking for feedback, especially now that
+>         there is no
+>              ticket left open on this project. If you are using Ranch
+>         and have
+>              questions or needs that it doesn't cover, please send them
+>         to us.
+>
+>              Commercial support will be available starting from January,
+>         ping me
+>              if you are interested. Details will be announced at a later
+>         time on
+>              the ninenines.eu <http://ninenines.eu>
+>         <http://ninenines.eu> mailing list.
+>
+>
+>              I want to thank all contributors for helping this project
+>         by opening
+>              tickets, sending patches and offering feedback. I am as
+>         always very
+>              grateful for any and all contributions. I wouldn't have
+>         made it this
+>              far without the tremendous help I receive everyday.
+>
+>              Thanks to all and have a nice holiday!
+>
+>              --
+>              Lo?c Hoguin
+>              Erlang Santa
+>              Nine Nines
+>         http://ninenines.eu
+>              ___________________________________________________
+>              erlang-questions mailing list
+>         erlang-questions at erlang.org <mailto:erlang-questions at erlang.org>
+>         http://erlang.org/mailman/____listinfo/erlang-questions
+>         <http://erlang.org/mailman/__listinfo/erlang-questions>
+>              <http://erlang.org/mailman/__listinfo/erlang-questions
+>         <http://erlang.org/mailman/listinfo/erlang-questions>>
+>
+>
+>
+>     --
+>     Lo?c Hoguin
+>     Erlang Cowboy
+>     Nine Nines
+>     http://ninenines.eu
+>
+>
+
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From max.lapshin at gmail.com  Thu Jan  3 15:00:56 2013
+From: max.lapshin at gmail.com (Max Lapshin)
+Date: Thu, 3 Jan 2013 17:00:56 +0300
+Subject: [99s-extend] [erlang-questions] [ANN] Ranch 0.6.0 Xmas Edition
+	Released
+In-Reply-To: <50E58CF4.9080804@ninenines.eu>
+References: <50D8DA63.2060600@ninenines.eu>
+ <CAMxVRxA9uqXbfcP9=_CmTDk-ZBycmZijeOa_TyJXQvSPzvwfbg@mail.gmail.com>
+ <50E57DC0.5090408@ninenines.eu>
+ <CAMxVRxDm1E4YXfvYp2CVoXchTpGRZK85XnMat_YhRK9CJGrtqA@mail.gmail.com>
+ <50E58CF4.9080804@ninenines.eu>
+Message-ID: <CAMxVRxDw9b8Gqg7O-+XVWV_1fyTX-QaBXgZK8wRy1QetoVYBLQ@mail.gmail.com>
+
+ok
+
+
+On Thu, Jan 3, 2013 at 5:51 PM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Existing acceptors were using the old options for the next connection and
+> then switched to the new options. But that has been fixed a long time ago.
+> Ranch doesn't have that issue.
+>
+>
+> On 01/03/2013 02:32 PM, Max Lapshin wrote:
+>
+>> I mean situation that after cowboy:update_options existing acceptors are
+>> still working with old routes.
+>> Currently it is useless API, so I have to stop cowboy and start it back.
+>>
+>>
+>> On Thu, Jan 3, 2013 at 4:46 PM, Lo?c Hoguin <essen at ninenines.eu
+>> <mailto:essen at ninenines.eu>> wrote:
+>>
+>>     Haven't had any stability issue. What we did here is ensure that
+>>     when any process gets killed for any reason, especially reasons we
+>>     can't foresee, Ranch continues to work as expected.
+>>
+>>     Ranch not updating protocol options for existing connections isn't a
+>>     problem, it won't be "fixed". Ranch can't guess how connection
+>>     processes are implemented. It's up to you to allow this if you need
+>>     it. The upgrade updates the options for all acceptors and all future
+>>     connections, that's it.
+>>
+>>
+>>     On 01/03/2013 10:30 AM, Max Lapshin wrote:
+>>
+>>         Loic, it would be great to hear a bit, what problems have you
+>>         met with.
+>>
+>>         What issues with stability can be in acceptor pool?
+>>
+>>         Also I have question about updating protocol options: have you
+>> done
+>>         something with the problem that after updating protocol options
+>>         existing
+>>         workers are running with old config?
+>>
+>>         On Tuesday, December 25, 2012, Lo?c Hoguin wrote:
+>>
+>>              Ho ho ho!
+>>
+>>              I have just tagged version 0.6.0 of the Ranch project!
+>>
+>>              Ranch is a socket acceptor pool for TCP protocols.
+>>
+>>         https://github.com/extend/____**ranch<https://github.com/extend/____ranch>
+>>         <https://github.com/extend/__**ranch<https://github.com/extend/__ranch>
+>> >
+>>
+>>         <https://github.com/extend/__**ranch<https://github.com/extend/__ranch>
+>>         <https://github.com/extend/**ranch<https://github.com/extend/ranch>
+>> >>
+>>
+>>
+>>              Ranch is used by the next version of Cowboy, 0.8.0, set to be
+>>              released early February, but also in Basho's Riak
+>>         multi-data center
+>>              replication amongst others.
+>>
+>>              All tickets have been resolved. A significant contribution
+>>         was made
+>>              by Andrew Majorov to improve the fault tolerance
+>>         capabilities of the
+>>              application, making sure it always restarts properly when
+>>         things go
+>>              wrong. This has been made possible thanks to the amazing
+>>         project
+>>              from Daniel Luna, chaos_monkey
+>>              (https://github.com/dluna/____**chaos_monkey<https://github.com/dluna/____chaos_monkey>
+>>         <https://github.com/dluna/__**chaos_monkey<https://github.com/dluna/__chaos_monkey>
+>> >
+>>
+>>              <https://github.com/dluna/__**chaos_monkey<https://github.com/dluna/__chaos_monkey>
+>>         <https://github.com/dluna/**chaos_monkey<https://github.com/dluna/chaos_monkey>
+>> >>).
+>>
+>>
+>>              The guide has also been improved and completed.
+>>
+>>         http://ninenines.eu/docs/en/__**__ranch/HEAD/guide/**introduction<http://ninenines.eu/docs/en/____ranch/HEAD/guide/introduction>
+>>         <http://ninenines.eu/docs/en/_**_ranch/HEAD/guide/introduction<http://ninenines.eu/docs/en/__ranch/HEAD/guide/introduction>
+>> **>
+>>
+>>
+>>
+>>         <http://ninenines.eu/docs/en/_**_ranch/HEAD/guide/introduction<http://ninenines.eu/docs/en/__ranch/HEAD/guide/introduction>
+>>         <http://ninenines.eu/docs/en/**ranch/HEAD/guide/introduction<http://ninenines.eu/docs/en/ranch/HEAD/guide/introduction>
+>> >**>
+>>
+>>              If the guide isn't enough, drop by our new IRC channel
+>>         dedicated to
+>>              Cowboy, Ranch and all our other projects! #ninenines on
+>>         Freenode.
+>>
+>>              Following is the list of change since last time:
+>>
+>>                *  Improve fault tolerance thanks to chaos_monkey testing
+>>                *  Add 'nodelay' option to transports
+>>                *  Add 'verify' option to ranch_ssl transport
+>>                *  Add 'socket' option to pass an already open socket to
+>>         the listener
+>>                *  Add Transport:sendfile/2 function (uses a fallback if
+>>         unavailable)
+>>                *  Allow IP tuples in Transport:connect/3
+>>                *  Add ranch:set_max_connections/2 to update the value live
+>>                *  Add ranch:get_max_connections/1 to retrieve it
+>>
+>>              We are always looking for feedback, especially now that
+>>         there is no
+>>              ticket left open on this project. If you are using Ranch
+>>         and have
+>>              questions or needs that it doesn't cover, please send them
+>>         to us.
+>>
+>>              Commercial support will be available starting from January,
+>>         ping me
+>>              if you are interested. Details will be announced at a later
+>>         time on
+>>              the ninenines.eu <http://ninenines.eu>
+>>         <http://ninenines.eu> mailing list.
+>>
+>>
+>>              I want to thank all contributors for helping this project
+>>         by opening
+>>              tickets, sending patches and offering feedback. I am as
+>>         always very
+>>              grateful for any and all contributions. I wouldn't have
+>>         made it this
+>>              far without the tremendous help I receive everyday.
+>>
+>>              Thanks to all and have a nice holiday!
+>>
+>>              --
+>>              Lo?c Hoguin
+>>              Erlang Santa
+>>              Nine Nines
+>>         http://ninenines.eu
+>>              ______________________________**_____________________
+>>              erlang-questions mailing list
+>>         erlang-questions at erlang.org <mailto:erlang-questions@**erlang.org<erlang-questions at erlang.org>
+>> >
+>>         http://erlang.org/mailman/____**listinfo/erlang-questions<http://erlang.org/mailman/____listinfo/erlang-questions>
+>>         <http://erlang.org/mailman/__**listinfo/erlang-questions<http://erlang.org/mailman/__listinfo/erlang-questions>
+>> >
+>>
+>>              <http://erlang.org/mailman/__**listinfo/erlang-questions<http://erlang.org/mailman/__listinfo/erlang-questions>
+>>         <http://erlang.org/mailman/**listinfo/erlang-questions<http://erlang.org/mailman/listinfo/erlang-questions>
+>> >>
+>>
+>>
+>>
+>>     --
+>>     Lo?c Hoguin
+>>     Erlang Cowboy
+>>     Nine Nines
+>>     http://ninenines.eu
+>>
+>>
+>>
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130103/d9dbc1a5/attachment.html>
+
+From essen at ninenines.eu  Thu Jan  3 22:52:46 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 03 Jan 2013 22:52:46 +0100
+Subject: [99s-extend] Call for testers: middleware support
+Message-ID: <50E5FDAE.60904@ninenines.eu>
+
+Hello!
+
+Been a year. How' ya been?
+
+Added middleware support. Probably broke things. Please test and open 
+tickets if I did?
+
+https://github.com/extend/cowboy/commit/1b3f510b7e8d5413901ba72adfe361773f3e9097
+
+Thanks.
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From thomas at oinksoft.com  Fri Jan  4 15:31:21 2013
+From: thomas at oinksoft.com (Thomas Allen)
+Date: Fri, 04 Jan 2013 09:31:21 -0500
+Subject: [99s-extend] Call for testers: middleware support
+In-Reply-To: <50E5FDAE.60904@ninenines.eu>
+References: <50E5FDAE.60904@ninenines.eu>
+Message-ID: <50E6E7B9.70402@oinksoft.com>
+
+Thank you L?ic, this looks much cleaner than what I've used in its place.
+
+Thomas
+
+
+On 01/03/2013 04:52 PM, Lo?c Hoguin wrote:
+> Hello!
+>
+> Been a year. How' ya been?
+>
+> Added middleware support. Probably broke things. Please test and open
+> tickets if I did?
+>
+> https://github.com/extend/cowboy/commit/1b3f510b7e8d5413901ba72adfe361773f3e9097
+>
+>
+> Thanks.
+>
+
+
+From kozlov-ter at yandex.ru  Tue Jan  8 22:36:56 2013
+From: kozlov-ter at yandex.ru (=?koi8-r?B?68/azM/XIPfR3sXTzMHX?=)
+Date: Wed, 09 Jan 2013 01:36:56 +0400
+Subject: [99s-extend] Cowboy, how call my database select function
+Message-ID: <1816031357681016@web3d.yandex.ru>
+
+Hello!
+Prompt please, beginning to study the Erlang.
+I have a library for working with ?Redis.
+Plugged it into the project Cowboy with the help of Rebar.
+After the launch of a Cowboy through the script in the console ERL, I see that the function (eredis_db:get_script) is  works and I get the desired result:
+
+EDB R15B03 (erts-5.9.3.1) [source] [async-threads:0] [hipe] [kernel-poll:false]
+Eshell V5.9.3.1 (abort with ^G)
+1> eredis_db:get_script("example", "test").
+
+Tell me how can I use this function in a Cowboy, in hendlers.
+I hope I could explain clearly.
+-- 
+Engineer CAM 
+Vyacheslav Kozlov 
+LLC "TER" 
+http://www.ter-energo.ru
+tel.+7910909xxxx
+
+
+From thomas at oinksoft.com  Wed Jan  9 00:12:02 2013
+From: thomas at oinksoft.com (Thomas Allen)
+Date: Tue, 08 Jan 2013 18:12:02 -0500
+Subject: [99s-extend] Cowboy, how call my database select function
+In-Reply-To: <1816031357681016@web3d.yandex.ru>
+References: <1816031357681016@web3d.yandex.ru>
+Message-ID: <50ECA7C2.5030808@oinksoft.com>
+
+On 1/8/13 4:36 PM, ?????? ???????? wrote:
+> I hope I could explain clearly.
+
+This was not quite clear to me, but I'll do my best.
+
+> Tell me how can I use this function in a Cowboy, in hendlers.
+
+Well, you'd use it like any other Erlang function. If it's in a handler, 
+you probably want to use init/3 or handle/2:
+
+handle(Req, State) ->
+     _EredisScript = eredis_db:get_script("example", "test"),
+     {ok, Resp} = cowboy_req:reply(200, Req),
+     {ok, Resp, State}.
+
+See other examples of implementing `cowboy_http_handler' behaviour in 
+the Cowboy documentation and in the examples included with the library.
+
+Thomas Allen
+
+
+From essen at ninenines.eu  Thu Jan 17 19:33:26 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 17 Jan 2013 19:33:26 +0100
+Subject: [99s-extend] [ANN] Ranch 0.6.1
+Message-ID: <50F843F6.5060809@ninenines.eu>
+
+Short, quick and semi-private announcement: Ranch 0.6.1 has been tagged.
+
+It includes a few guide updates, the addition of the raw option for 
+specifying platform-specific socket options, and performance 
+improvements when using the {max_connections, infinity} option.
+
+Enjoy!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From jeremy at quarkgames.com  Thu Jan 17 20:42:38 2013
+From: jeremy at quarkgames.com (Jeremy Ong)
+Date: Thu, 17 Jan 2013 11:42:38 -0800
+Subject: [99s-extend] [ANN] Ranch 0.6.1
+In-Reply-To: <50F843F6.5060809@ninenines.eu>
+References: <50F843F6.5060809@ninenines.eu>
+Message-ID: <CAKD1GY5xDutk6NxxT131q1AwMNou3YDSOvg21tr35rs9YZop5w@mail.gmail.com>
+
+Thanks Lo?c!
+
+
+On Thu, Jan 17, 2013 at 10:33 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Short, quick and semi-private announcement: Ranch 0.6.1 has been tagged.
+>
+> It includes a few guide updates, the addition of the raw option for
+> specifying platform-specific socket options, and performance improvements
+> when using the {max_connections, infinity} option.
+>
+> Enjoy!
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> ______________________________**_________________
+> Extend mailing list
+> Extend at lists.ninenines.eu
+> http://lists.ninenines.eu:81/**listinfo/extend<http://lists.ninenines.eu:81/listinfo/extend>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130117/19bfde40/attachment.html>
+
+From essen at ninenines.eu  Thu Jan 24 22:23:31 2013
+From: essen at ninenines.eu (=?ISO-8859-1?Q?Lo=EFc_Hoguin?=)
+Date: Thu, 24 Jan 2013 22:23:31 +0100
+Subject: [99s-extend] Cowboy feedback needed
+Message-ID: <5101A653.400@ninenines.eu>
+
+Hey,
+
+I'm looking into perhaps starting a project related to Cowboy and could 
+use some feedback from users, particularly in the realm of numbers.
+
+If you use Cowboy and have it in production where:
+
+  *  Latency is vital
+  *  Throughput is vital
+  *  Concurrent number of connections is huge
+  *  Load is huge (or would be with another solution)
+
+Then I'd like to hear from you!
+
+Please send me average numbers, statistics, graphs or anything where I 
+can see how well it performs for you! In private if you prefer. Tell me 
+if I can quote you or your company about it. Please answer even if we 
+briefly discussed it in the past.
+
+(If you found that it didn't perform enough for your needs you should 
+probably open a ticket, or, if you can't, send me a private email.)
+
+Looking forward to the feedback. Thanks!
+
+-- 
+Lo?c Hoguin
+Erlang Cowboy
+Nine Nines
+http://ninenines.eu
+
+
+From list1 at gjunka.com  Thu Jan 24 23:41:30 2013
+From: list1 at gjunka.com (Grzegorz Junka)
+Date: Thu, 24 Jan 2013 22:41:30 +0000
+Subject: [99s-extend] Cowboy Makefile
+Message-ID: <5101B89A.50604@gjunka.com>
+
+Hi,
+I understand the move away from Rebar but I'd like to see the project to 
+be still Rebar-compatible. Would that be a problem? Mainly I am thinking 
+about dependencies. The Cowboy Makefile assumes that Ranch is in its 
+deps folder. If Cowboy is a part of a bigger application, and most often 
+it will be in such a role rather than a standalone application, then all 
+dependencies should be kept in one place. In that case it would be the 
+main project's deps folder, not Cowboy's deps folder. Can the 
+compilation process be split into compiling Cowboy dependencies 
+separately from Cowboy itself?
+
+something like:
+
+all: compile-deps compile-cowboy
+
+Then if Cowboy is a dependency itself it may be just compiled without 
+the dependency (as it will be compiled when the main project is compiled).
+
+
+
+From barcojie at gmail.com  Fri Jan 25 06:53:17 2013
+From: barcojie at gmail.com (Barco You)
+Date: Fri, 25 Jan 2013 13:53:17 +0800
+Subject: [99s-extend] [erlang-questions] Cowboy feedback needed
+In-Reply-To: <5101A653.400@ninenines.eu>
+References: <5101A653.400@ninenines.eu>
+Message-ID: <CA+qFv3vi-JoOVy52Uu7mjBg4Fd_Xr0rGykj1bJUFkkbWxhF4HQ@mail.gmail.com>
+
+Hi Loic,
+
+I'd like to send feedback very much. But right now Cowboy is just used as
+demo in my company --- BesTV (www.bestv.com.cn), which is the largest IPTV
+and intenetTV operator in China. Although I think Cowby is good, the
+production environment is still dominated by Java and mainstream HTTP
+servers. Because I'm from Ericsson, I hope to promote Erlang here but it's
+not so easy. I would send the data if Cowboy would be used in production
+and fully tested.
+
+Thank you!
+Barco
+
+On Fri, Jan 25, 2013 at 5:23 AM, Lo?c Hoguin <essen at ninenines.eu> wrote:
+
+> Hey,
+>
+> I'm looking into perhaps starting a project related to Cowboy and could
+> use some feedback from users, particularly in the realm of numbers.
+>
+> If you use Cowboy and have it in production where:
+>
+>  *  Latency is vital
+>  *  Throughput is vital
+>  *  Concurrent number of connections is huge
+>  *  Load is huge (or would be with another solution)
+>
+> Then I'd like to hear from you!
+>
+> Please send me average numbers, statistics, graphs or anything where I can
+> see how well it performs for you! In private if you prefer. Tell me if I
+> can quote you or your company about it. Please answer even if we briefly
+> discussed it in the past.
+>
+> (If you found that it didn't perform enough for your needs you should
+> probably open a ticket, or, if you can't, send me a private email.)
+>
+> Looking forward to the feedback. Thanks!
+>
+> --
+> Lo?c Hoguin
+> Erlang Cowboy
+> Nine Nines
+> http://ninenines.eu
+> ______________________________**_________________
+> erlang-questions mailing list
+> erlang-questions at erlang.org
+> http://erlang.org/mailman/**listinfo/erlang-questions<http://erlang.org/mailman/listinfo/erlang-questions>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://lists.ninenines.eu/archives/extend/attachments/20130125/7d0820aa/attachment.html>
+
+From mjtruog at gmail.com  Fri Jan 25 07:26:27 2013
+From: mjtruog at gmail.com (Michael Truog)
+Date: Thu, 24 Jan 2013 22:26:27 -0800
+Subject: [99s-extend] [erlang-questions] Cowboy feedback needed
+In-Reply-To: <5101A653.400@ninenines.eu>
+References: <5101A653.400@ninenines.eu>
+Message-ID: <51022593.7090306@gmail.com>
+
+A comparison (summary) of cowboy 0.6.1 and misultin 0.9 final in the context of CloudI is here:
+https://github.com/okeuday/CloudI/blob/master/src/tests/http_req/loadtest/results_v1_1_0/201210_summary.pdf
+(the raw Tsung results are also within the same directory)
+
+The results are just showing the latency when putting cowboy and misultin under 10kreq/s load with both 20k and 40k connections, when the requests go through CloudI messaging into all the supported programming languages (Erlang, C/C++, pure-Java, Python/C, pure-Python, and pure-Ruby.... the "pure" part is where only the target language is used to create the CloudI API, which does the Erlang binary term format CloudI request encoding/decoding).  So, the test is showing the performance of a simple HTTP GET query parameter parse/response using XML (the XML is based on historical misultin testing).
+
+For these tests, it showed cowboy always has less latency which is significant, if the programming language internal latency is not significant.  The cpu usage of cowboy was slightly lower than misultin for high connection counts (40k instead of 20k).  The memory usage of cowboy was significantly lower than misultin.  The test results are for R15B01 and R15B02, just due to when I did the loadtesting.
+
+I will continue to do similar loadtests in the future to make sure and evaluate performance with more recent Erlang releases, as time allows, but the Tsung configurations are within the repository for people to test their own (hardware) environments.
+
+On 01/24/2013 01:23 PM, Lo?c Hoguin wrote:
+> Hey,
+>
+> I'm looking into perhaps starting a project related to Cowboy and could use some feedback from users, particularly in the realm of numbers.
+>
+> If you use Cowboy and have it in production where:
+>
+>  *  Latency is vital
+>  *  Throughput is vital
+>  *  Concurrent number of connections is huge
+>  *  Load is huge (or would be with another solution)
+>
+> Then I'd like to hear from you!
+>
+> Please send me average numbers, statistics, graphs or anything where I can see how well it performs for you! In private if you prefer. Tell me if I can quote you or your company about it. Please answer even if we briefly discussed it in the past.
+>
+> (If you found that it didn't perform enough for your needs you should probably open a ticket, or, if you can't, send me a private email.)
+>
+> Looking forward to the feedback. Thanks!
+>
+
+
+
