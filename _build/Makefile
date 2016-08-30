@@ -5,7 +5,7 @@ PROJECTS = $(sort $(notdir $(basename $(wildcard data/projects/*.toml))))
 all: docs
 	hugo --theme=ninenines -d ..
 
-server: docs
+server:
 	hugo server --theme=ninenines
 
 clean: DOC_FILES = $(filter-out static/docs/en/cowboy/1.0,$(wildcard static/docs/en/*/*))

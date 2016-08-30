@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.15" />
+    <meta name="generator" content="Hugo 0.16" />
 
     <title>Nine Nines: REST handlers</title>
 
@@ -151,7 +151,195 @@ cellspacing="0" cellpadding="4">
 </tr>
 <tr>
 <td align="left" valign="top"><p class="table">content_types_provided</p></td>
-<td align="center" valign="top"><p class="table">`$$[</p></td>
+<td align="center" valign="top"><p class="table"><code>[{{ &lt;&lt;"text"&gt;&gt;, &lt;&lt;"html"&gt;&gt;, '*'}, to_html}]</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">delete_completed</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">delete_resource</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">expires</p></td>
+<td align="center" valign="top"><p class="table"><code>undefined</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">forbidden</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">generate_etag</p></td>
+<td align="center" valign="top"><p class="table"><code>undefined</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">is_authorized</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">is_conflict</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">known_methods</p></td>
+<td align="center" valign="top"><p class="table"><code>[&lt;&lt;"GET"&gt;&gt;, &lt;&lt;"HEAD"&gt;&gt;, &lt;&lt;"POST"&gt;&gt;, &lt;&lt;"PUT"&gt;&gt;, &lt;&lt;"PATCH"&gt;&gt;, &lt;&lt;"DELETE"&gt;&gt;, &lt;&lt;"OPTIONS"&gt;&gt;]</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">languages_provided</p></td>
+<td align="center" valign="top"><p class="table">skip</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">last_modified</p></td>
+<td align="center" valign="top"><p class="table"><code>undefined</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">malformed_request</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">moved_permanently</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">moved_temporarily</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">multiple_choices</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">options</p></td>
+<td align="center" valign="top"><p class="table"><code>ok</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">previously_existed</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">resource_exists</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">service_available</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">uri_too_long</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">valid_content_headers</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">valid_entity_length</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">variances</p></td>
+<td align="center" valign="top"><p class="table"><code>[]</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph"><p>As you can see, Cowboy tries to move on with the request whenever
+possible by using well thought out default values.</p></div>
+<div class="paragraph"><p>In addition to these, there can be any number of user-defined
+callbacks that are specified through <code>content_types_accepted/2</code>
+and <code>content_types_provided/2</code>. They can take any name, however
+it is recommended to use a separate prefix for the callbacks of
+each function. For example, <code>from_html</code> and <code>to_html</code> indicate
+in the first case that we&#8217;re accepting a resource given as HTML,
+and in the second case that we send one as HTML.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_meta_data">Meta data</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy will set informative meta values at various points of the
+execution. You can retrieve them using <code>cowboy_req:meta/{2,3}</code>.
+The values are defined in the following table.</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="50%" />
+<col width="50%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Meta key   </th>
+<th align="left" valign="top"> Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">media_type</p></td>
+<td align="left" valign="top"><p class="table">The content-type negotiated for the response entity.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">language</p></td>
+<td align="left" valign="top"><p class="table">The language negotiated for the response entity.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">charset</p></td>
+<td align="left" valign="top"><p class="table">The charset negotiated for the response entity.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph"><p>They can be used to send a proper body with the response to a
+request that used a method other than HEAD or GET.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_response_headers">Response headers</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy will set response headers automatically over the execution
+of the REST code. They are listed in the following table.</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="50%" />
+<col width="50%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Header name      </th>
+<th align="left" valign="top"> Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">content-language</p></td>
+<td align="left" valign="top"><p class="table">Language used in the response body</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">content-type</p></td>
+<td align="left" valign="top"><p class="table">Media type and charset of the response body</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">etag</p></td>
+<td align="left" valign="top"><p class="table">Etag of the resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">expires</p></td>
+<td align="left" valign="top"><p class="table">Expiration date of the resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">last-modified</p></td>
+<td align="left" valign="top"><p class="table">Last modification date for the resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">location</p></td>
+<td align="left" valign="top"><p class="table">Relative or absolute URI to the requested resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">vary</p></td>
+<td align="left" valign="top"><p class="table">List of headers that may change the representation of the resource</p></td>
 </tr>
 </tbody>
 </table>
