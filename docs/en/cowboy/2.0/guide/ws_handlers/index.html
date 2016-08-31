@@ -134,15 +134,15 @@ http://www.gnu.org/software/src-highlite -->
         <span style="font-style: italic"><span style="color: #9A1900">%% Register process here...</span></span>
         {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span>
 
-<span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #FF6600">post_init</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+<span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #FF6600">post_init</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
         <span style="font-style: italic"><span style="color: #9A1900">%% Perform post_init initialization here...</span></span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_handling_frames_from_the_client">Handling frames from the client</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Cowboy will call <code>websocket_handle/3</code> whenever a text, binary,
+<div class="paragraph"><p>Cowboy will call <code>websocket_handle/2</code> whenever a text, binary,
 ping or pong frame arrives from the client. Note that in the
 case of ping and pong frames, no action is expected as Cowboy
 automatically replies to ping frames.</p></div>
@@ -155,16 +155,16 @@ ignores all others.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">Frame</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">text</span>, <span style="color: #990000">_</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, <span style="color: #009900">Frame</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-<span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">_Frame</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">Frame</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">text</span>, <span style="color: #990000">_</span>}, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">reply</span>, <span style="color: #009900">Frame</span>, <span style="color: #009900">State</span>};
+<span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">_Frame</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_handling_erlang_messages">Handling Erlang messages</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Cowboy will call <code>websocket_info/3</code> whenever an Erlang message
+<div class="paragraph"><p>Cowboy will call <code>websocket_info/2</code> whenever an Erlang message
 arrives.</p></div>
 <div class="paragraph"><p>The handler can decide to send frames to the socket, stop
 or just continue without sending anything.</p></div>
@@ -175,10 +175,10 @@ and ignores all others.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>({<span style="font-weight: bold"><span style="color: #000080">log</span></span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-<span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>({<span style="font-weight: bold"><span style="color: #000080">log</span></span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">State</span>};
+<span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -195,13 +195,13 @@ tuple.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #FF6600">hello_world</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #FF6600">hello_world</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
         {<span style="color: #FF6600">reply</span>, [
                 {<span style="color: #FF6600">text</span>, <span style="color: #FF0000">"Hello"</span>},
                 {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"world!"</span><span style="color: #990000">&gt;&gt;</span>},
                 {<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #993399">0</span><span style="color: #990000">:</span><span style="color: #993399">8000</span><span style="color: #990000">&gt;&gt;</span>}
-        ], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-<span style="font-style: italic"><span style="color: #9A1900">%% More websocket_info/3 clauses here...</span></span></tt></pre></div></div>
+        ], <span style="color: #009900">State</span>};
+<span style="font-style: italic"><span style="color: #9A1900">%% More websocket_info/2 clauses here...</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Note that the payload for text and binary frames is of type
 <code>iodata()</code>, meaning it can be either a <code>binary()</code> or an
 <code>iolist()</code>.</p></div>

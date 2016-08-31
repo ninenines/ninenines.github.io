@@ -83,7 +83,7 @@
 be implemented by handlers. The <code>init/2</code> and <code>terminate/3</code>
 callbacks are common to all handler types and are documented
 in the manual for the <a href="cowboy_handler.asciidoc">cowboy_handler</a> module.</p></div>
-<div class="paragraph"><p>The <code>websocket_handle/3</code> and <code>websocket_info/3</code> callbacks are
+<div class="paragraph"><p>The <code>websocket_handle/2</code> and <code>websocket_info/2</code> callbacks are
 specific to Websocket handlers and will be called as many times
 as necessary until the Websocket connection is closed.</p></div>
 <div class="paragraph"><p>The <code>init/2</code> callback can be used to negotiate Websocket protocol
@@ -224,20 +224,19 @@ timeout
 <h2 id="_callbacks">Callbacks</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_websocket_handle_inframe_req_state_8594_ret">websocket_handle(InFrame, Req, State) &#8594; Ret</h3>
+<h3 id="_websocket_handle_inframe_state_8594_ret">websocket_handle(InFrame, State) &#8594; Ret</h3>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Ret</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-        | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
-        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
-        | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+<pre><tt><span style="color: #009900">Ret</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">State</span>}
 
 <span style="color: #009900">InFrame</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">text</span> | <span style="font-weight: bold"><span style="color: #000080">binary</span></span> | <span style="color: #FF6600">ping</span> | <span style="color: #FF6600">pong</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
-<span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
 <span style="color: #009900">State</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
 <span style="color: #009900">OutFrame</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()</tt></pre></div></div>
 <div class="paragraph"><p>Handle the data received from the Websocket connection.</p></div>
@@ -251,20 +250,19 @@ it receives new data from the Websocket connection or an
 Erlang message.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_websocket_info_info_req_state_8594_ret">websocket_info(Info, Req, State) &#8594; Ret</h3>
+<h3 id="_websocket_info_info_state_8594_ret">websocket_info(Info, State) &#8594; Ret</h3>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Ret</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-        | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
-        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
-        | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+<pre><tt><span style="color: #009900">Ret</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">State</span>}
+        | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+        | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">State</span>}
 
 <span style="color: #009900">Info</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
-<span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
 <span style="color: #009900">State</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
 <span style="color: #009900">OutFrame</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()</tt></pre></div></div>
 <div class="paragraph"><p>Handle the Erlang message received.</p></div>
