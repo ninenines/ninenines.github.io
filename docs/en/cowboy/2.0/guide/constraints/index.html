@@ -69,36 +69,53 @@
 
 <h1 class="lined-header"><span>Constraints</span></h1>
 
-<div class="paragraph"><p>Cowboy provides an optional constraints based validation feature
-when interacting with user input.</p></div>
-<div class="paragraph"><p>Constraints are first used during routing. The router uses
-constraints to more accurately match bound values, allowing
-to create routes where a segment is an integer for example,
-and rejecting the others.</p></div>
-<div class="paragraph"><p>Constraints are also used when performing a match operation
-on input data, like the query string or cookies. There, a
-default value can also be provided for optional values.</p></div>
-<div class="paragraph"><p>Finally, constraints can be used to not only validate input,
-but also convert said input into proper Erlang terms, all in
-one step.</p></div>
+<div class="paragraph"><p>Constraints are validation and conversion functions applied
+to user input.</p></div>
+<div class="paragraph"><p>They are used in various places in Cowboy, including the
+router and the request match functions.</p></div>
 <div class="sect1">
-<h2 id="_structure">Structure</h2>
+<h2 id="_syntax">Syntax</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Constraints are provided as a list of fields and for each
-field a list of constraints for that field can be provided.</p></div>
-<div class="paragraph"><p>Fields are either the name of the field; the name and
-one or more constraints; or the name, one or more constraints
-and a default value.</p></div>
-<div class="paragraph"><p>When no default value is provided then the field is required.
-Otherwise the default value is used.</p></div>
-<div class="paragraph"><p>All constraints for a field will be used to match its value
-in the order they are given. If the value is modified by a
-constraint, the next constraint receives the updated value.</p></div>
+<div class="paragraph"><p>Constraints are provided as a list of fields. For each field
+in the list, specific constraints can be applied, as well as
+a default value if the field is missing.</p></div>
+<div class="paragraph"><p>A field can take the form of an atom <code>field</code>, a tuple with
+constraints <code>{field, Constraints}</code> or a tuple with constraints
+and a default value <code>{field, Constraints, Default}</code>.
+The <code>field</code> form indicates the field is mandatory.</p></div>
+<div class="paragraph"><p>Note that when used with the router, only the second form
+makes sense, as it does not use the default and the field
+is always defined.</p></div>
+<div class="paragraph"><p>Constraints for each field are provided as an ordered list
+of atoms or funs to apply. Built-in constraints are provided
+as atoms, while custom constraints are provided as funs.</p></div>
+<div class="paragraph"><p>When multiple constraints are provided, they are applied in
+the order given. If the value has been modified by a constraint
+then the next one receives the new value.</p></div>
+<div class="paragraph"><p>For example, the following constraints will first validate
+and convert the field <code>my_value</code> to an integer, and then
+check that the integer is positive:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PositiveFun</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>(<span style="color: #009900">V</span>) <span style="font-weight: bold"><span style="color: #0000FF">when</span></span> <span style="color: #009900">V</span> <span style="color: #990000">&gt;</span> <span style="color: #993399">0</span> <span style="color: #990000">-&gt;</span> <span style="color: #000080">true</span>; (<span style="color: #990000">_</span>) <span style="color: #990000">-&gt;</span> <span style="color: #000080">false</span> <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>,
+{<span style="color: #FF6600">my_value</span>, [<span style="color: #FF6600">int</span>, <span style="color: #009900">PositiveFun</span>]}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>When there&#8217;s only one constraint, it can be provided directly
+without wrapping it into a list:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #FF6600">my_value</span>, <span style="color: #FF6600">int</span>}</tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_built_in_constraints">Built-in constraints</h2>
 <div class="sectionbody">
+<div class="paragraph"><p>Built-in constraints are specified as an atom:</p></div>
 <div class="tableblock">
 <table rules="all"
 width="100%"
@@ -115,7 +132,7 @@ cellspacing="0" cellpadding="4">
 <tbody>
 <tr>
 <td align="left" valign="top"><p class="table">int</p></td>
-<td align="left" valign="top"><p class="table">Convert binary value to integer.</p></td>
+<td align="left" valign="top"><p class="table">Converts binary value to integer.</p></td>
 </tr>
 <tr>
 <td align="left" valign="top"><p class="table">nonempty</p></td>
@@ -127,15 +144,34 @@ cellspacing="0" cellpadding="4">
 </div>
 </div>
 <div class="sect1">
-<h2 id="_custom_constraint">Custom constraint</h2>
+<h2 id="_custom_constraints">Custom constraints</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>In addition to the predefined constraints, Cowboy will accept
-a fun. This fun must accept one argument and return one of
-<code>true</code>, <code>{true, NewValue}</code> or <code>false</code>. The result indicates
-whether the value matches the constraint, and if it does it
-can optionally be modified. This allows converting the value
-to a more appropriate Erlang term.</p></div>
-<div class="paragraph"><p>Note that constraint functions SHOULD be pure and MUST NOT crash.</p></div>
+<div class="paragraph"><p>Custom constraints are specified as a fun. This fun takes
+a single argument and must return one of <code>true</code>, <code>{true, NewValue}</code>
+or <code>false</code>.</p></div>
+<div class="paragraph"><p><code>true</code> indicates the input is valid, <code>false</code> otherwise.
+The <code>{true, NewValue}</code> tuple is returned when the input
+is valid and the value has been converted. For example,
+the following constraint will convert the binary input
+to an integer:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Value0</span>) <span style="font-weight: bold"><span style="color: #0000FF">when</span></span> <span style="font-weight: bold"><span style="color: #000080">is_binary</span></span>(<span style="color: #009900">Value0</span>) <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #0000FF">try</span></span> <span style="font-weight: bold"><span style="color: #000000">binary_to_integer</span></span>(<span style="color: #009900">Value0</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+                <span style="color: #009900">Value</span> <span style="color: #990000">-&gt;</span> {<span style="color: #000080">true</span>, <span style="color: #009900">Value</span>}
+        <span style="font-weight: bold"><span style="color: #0000FF">catch</span></span> <span style="color: #990000">_:_</span> <span style="color: #990000">-&gt;</span>
+                <span style="color: #000080">false</span>
+        <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Constraint functions should only crash because the programmer
+made an error when chaining constraints incorrectly (for example
+if the constraints were <code>[int, int]</code>, and not because of input.
+If the input is invalid then <code>false</code> must be returned.</p></div>
+<div class="paragraph"><p>In our snippet, the <code>is_binary/1</code> guard will crash only
+because of a programmer error, and the try block is there
+to ensure that we do not crash when the input is invalid.</p></div>
 </div>
 </div>
 

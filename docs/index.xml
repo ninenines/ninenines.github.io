@@ -1083,36 +1083,53 @@ when the connection has been closed.&lt;/p&gt;&lt;/div&gt;
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>http://ninenines.eu/docs/en/cowboy/2.0/guide/constraints/</guid>
-      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Cowboy provides an optional constraints based validation feature
-when interacting with user input.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are first used during routing. The router uses
-constraints to more accurately match bound values, allowing
-to create routes where a segment is an integer for example,
-and rejecting the others.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are also used when performing a match operation
-on input data, like the query string or cookies. There, a
-default value can also be provided for optional values.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Finally, constraints can be used to not only validate input,
-but also convert said input into proper Erlang terms, all in
-one step.&lt;/p&gt;&lt;/div&gt;
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are validation and conversion functions applied
+to user input.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;They are used in various places in Cowboy, including the
+router and the request match functions.&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;sect1&#34;&gt;
-&lt;h2 id=&#34;_structure&#34;&gt;Structure&lt;/h2&gt;
+&lt;h2 id=&#34;_syntax&#34;&gt;Syntax&lt;/h2&gt;
 &lt;div class=&#34;sectionbody&#34;&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are provided as a list of fields and for each
-field a list of constraints for that field can be provided.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Fields are either the name of the field; the name and
-one or more constraints; or the name, one or more constraints
-and a default value.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When no default value is provided then the field is required.
-Otherwise the default value is used.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;All constraints for a field will be used to match its value
-in the order they are given. If the value is modified by a
-constraint, the next constraint receives the updated value.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints are provided as a list of fields. For each field
+in the list, specific constraints can be applied, as well as
+a default value if the field is missing.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;A field can take the form of an atom &lt;code&gt;field&lt;/code&gt;, a tuple with
+constraints &lt;code&gt;{field, Constraints}&lt;/code&gt; or a tuple with constraints
+and a default value &lt;code&gt;{field, Constraints, Default}&lt;/code&gt;.
+The &lt;code&gt;field&lt;/code&gt; form indicates the field is mandatory.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that when used with the router, only the second form
+makes sense, as it does not use the default and the field
+is always defined.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraints for each field are provided as an ordered list
+of atoms or funs to apply. Built-in constraints are provided
+as atoms, while custom constraints are provided as funs.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When multiple constraints are provided, they are applied in
+the order given. If the value has been modified by a constraint
+then the next one receives the new value.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;For example, the following constraints will first validate
+and convert the field &lt;code&gt;my_value&lt;/code&gt; to an integer, and then
+check that the integer is positive:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;PositiveFun&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;fun&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;V&lt;/span&gt;) &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;when&lt;/span&gt;&lt;/span&gt; &lt;span style=&#34;color: #009900&#34;&gt;V&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #993399&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000080&#34;&gt;true&lt;/span&gt;; (&lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;) &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000080&#34;&gt;false&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;end&lt;/span&gt;&lt;/span&gt;,
+{&lt;span style=&#34;color: #FF6600&#34;&gt;my_value&lt;/span&gt;, [&lt;span style=&#34;color: #FF6600&#34;&gt;int&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;PositiveFun&lt;/span&gt;]}&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When there&amp;#8217;s only one constraint, it can be provided directly
+without wrapping it into a list:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;{&lt;span style=&#34;color: #FF6600&#34;&gt;my_value&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;int&lt;/span&gt;}&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&#34;sect1&#34;&gt;
 &lt;h2 id=&#34;_built_in_constraints&#34;&gt;Built-in constraints&lt;/h2&gt;
 &lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Built-in constraints are specified as an atom:&lt;/p&gt;&lt;/div&gt;
 &lt;div class=&#34;tableblock&#34;&gt;
 &lt;table rules=&#34;all&#34;
 width=&#34;100%&#34;
@@ -1129,7 +1146,7 @@ cellspacing=&#34;0&#34; cellpadding=&#34;4&#34;&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;int&lt;/p&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Convert binary value to integer.&lt;/p&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;Converts binary value to integer.&lt;/p&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td align=&#34;left&#34; valign=&#34;top&#34;&gt;&lt;p class=&#34;table&#34;&gt;nonempty&lt;/p&gt;&lt;/td&gt;
@@ -1141,15 +1158,34 @@ cellspacing=&#34;0&#34; cellpadding=&#34;4&#34;&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&#34;sect1&#34;&gt;
-&lt;h2 id=&#34;_custom_constraint&#34;&gt;Custom constraint&lt;/h2&gt;
+&lt;h2 id=&#34;_custom_constraints&#34;&gt;Custom constraints&lt;/h2&gt;
 &lt;div class=&#34;sectionbody&#34;&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In addition to the predefined constraints, Cowboy will accept
-a fun. This fun must accept one argument and return one of
-&lt;code&gt;true&lt;/code&gt;, &lt;code&gt;{true, NewValue}&lt;/code&gt; or &lt;code&gt;false&lt;/code&gt;. The result indicates
-whether the value matches the constraint, and if it does it
-can optionally be modified. This allows converting the value
-to a more appropriate Erlang term.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Note that constraint functions SHOULD be pure and MUST NOT crash.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Custom constraints are specified as a fun. This fun takes
+a single argument and must return one of &lt;code&gt;true&lt;/code&gt;, &lt;code&gt;{true, NewValue}&lt;/code&gt;
+or &lt;code&gt;false&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;&lt;code&gt;true&lt;/code&gt; indicates the input is valid, &lt;code&gt;false&lt;/code&gt; otherwise.
+The &lt;code&gt;{true, NewValue}&lt;/code&gt; tuple is returned when the input
+is valid and the value has been converted. For example,
+the following constraint will convert the binary input
+to an integer:&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite --&gt;
+&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;fun&lt;/span&gt;&lt;/span&gt; (&lt;span style=&#34;color: #009900&#34;&gt;Value0&lt;/span&gt;) &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;when&lt;/span&gt;&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000080&#34;&gt;is_binary&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Value0&lt;/span&gt;) &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;try&lt;/span&gt;&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;binary_to_integer&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Value0&lt;/span&gt;) &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;of&lt;/span&gt;&lt;/span&gt;
+                &lt;span style=&#34;color: #009900&#34;&gt;Value&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; {&lt;span style=&#34;color: #000080&#34;&gt;true&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;Value&lt;/span&gt;}
+        &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;catch&lt;/span&gt;&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;_:_&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt;
+                &lt;span style=&#34;color: #000080&#34;&gt;false&lt;/span&gt;
+        &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #0000FF&#34;&gt;end&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Constraint functions should only crash because the programmer
+made an error when chaining constraints incorrectly (for example
+if the constraints were &lt;code&gt;[int, int]&lt;/code&gt;, and not because of input.
+If the input is invalid then &lt;code&gt;false&lt;/code&gt; must be returned.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In our snippet, the &lt;code&gt;is_binary/1&lt;/code&gt; guard will crash only
+because of a programmer error, and the try block is there
+to ensure that we do not crash when the input is invalid.&lt;/p&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 </description>

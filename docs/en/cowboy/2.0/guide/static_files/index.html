@@ -69,22 +69,15 @@
 
 <h1 class="lined-header"><span>Static files</span></h1>
 
-<div class="paragraph"><p>Cowboy comes with a special handler built as a REST handler
-and designed specifically for serving static files. It is
-provided as a convenience and provides a quick solution for
-serving files during development.</p></div>
+<div class="paragraph"><p>Cowboy comes with a ready to use handler for serving static
+files. It is provided as a convenience for serving files
+during development.</p></div>
 <div class="paragraph"><p>For systems in production, consider using one of the many
 Content Distribution Network (CDN) available on the market,
-as they are the best solution for serving files. They are
-covered in the next chapter. If you decide against using a
-CDN solution, then please look at the chapter after that,
-as it explains how to efficiently serve static files on
-your own.</p></div>
+as they are the best solution for serving files.</p></div>
 <div class="paragraph"><p>The static handler can serve either one file or all files
-from a given directory. It can also send etag headers for
-client-side caching.</p></div>
-<div class="paragraph"><p>To use the static file handler, simply add routes for it
-with the appropriate options.</p></div>
+from a given directory. The etag generation and mime types
+can be configured.</p></div>
 <div class="sect1">
 <h2 id="_serve_one_file">Serve one file</h2>
 <div class="sectionbody">
@@ -95,7 +88,7 @@ the <code>/</code> path, for example. The path configured is relative
 to the given application&#8217;s private directory.</p></div>
 <div class="paragraph"><p>The following rule will serve the file <em>static/index.html</em>
 from the application <code>my_app</code>'s priv directory whenever the
-path <code>/</code> is accessed.</p></div>
+path <code>/</code> is accessed:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -103,7 +96,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>{<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">cowboy_static</span>, {<span style="color: #FF6600">priv_file</span>, <span style="color: #FF6600">my_app</span>, <span style="color: #FF0000">"static/index.html"</span>}}</tt></pre></div></div>
 <div class="paragraph"><p>You can also specify the absolute path to a file, or the
-path to the file relative to the current directory.</p></div>
+path to the file relative to the current directory:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -125,7 +118,7 @@ may be found in subfolders.</p></div>
 private directory.</p></div>
 <div class="paragraph"><p>The following rule will serve any file found in the application
 <code>my_app</code>'s priv directory inside the <code>static/assets</code> folder
-whenever the requested path begins with <code>/assets/</code>.</p></div>
+whenever the requested path begins with <code>/assets/</code>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -133,7 +126,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>{<span style="color: #FF0000">"/assets/[...]"</span>, <span style="color: #FF6600">cowboy_static</span>, {<span style="color: #FF6600">priv_dir</span>, <span style="color: #FF6600">my_app</span>, <span style="color: #FF0000">"static/assets"</span>}}</tt></pre></div></div>
 <div class="paragraph"><p>You can also specify the absolute path to the directory or
-set it relative to the current directory.</p></div>
+set it relative to the current directory:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -159,7 +152,7 @@ of hundreds of mimetypes that should cover almost any need
 you may have. You can of course create your own function.</p></div>
 <div class="paragraph"><p>To use the default function, you should not have to configure
 anything, as it is the default. If you insist, though, the
-following will do the job.</p></div>
+following will do the job:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -171,7 +164,7 @@ http://www.gnu.org/software/src-highlite -->
 a list of less used options, like mimetypes or etag. All option
 types have this optional field.</p></div>
 <div class="paragraph"><p>To use the function that will detect almost any mimetype,
-the following configuration will do.</p></div>
+the following configuration will do:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -181,7 +174,7 @@ http://www.gnu.org/software/src-highlite -->
     [{<span style="color: #FF6600">mimetypes</span>, <span style="color: #FF6600">cow_mimetypes</span>, <span style="color: #FF6600">all</span>}]}}</tt></pre></div></div>
 <div class="paragraph"><p>You probably noticed the pattern by now. The configuration
 expects a module and a function name, so you can use any
-of your own functions instead.</p></div>
+of your own functions instead:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -201,7 +194,7 @@ A browser receiving such file will attempt to download it
 directly to disk.</p></div>
 <div class="paragraph"><p>Finally, the mimetype can be hard-coded for all files.
 This is especially useful in combination with the <code>file</code>
-and <code>priv_file</code> options as it avoids needless computation.</p></div>
+and <code>priv_file</code> options as it avoids needless computation:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -220,7 +213,7 @@ can not be applied to all systems though. It would perform
 rather poorly over a cluster of nodes, for example, as the
 file metadata will vary from server to server, giving a
 different etag on each server.</p></div>
-<div class="paragraph"><p>You can however change the way the etag is calculated.</p></div>
+<div class="paragraph"><p>You can however change the way the etag is calculated:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -233,7 +226,7 @@ file on disk, the size of the file and the last modification
 time. In a distributed setup, you would typically use the
 file path to retrieve an etag value that is identical across
 all your servers.</p></div>
-<div class="paragraph"><p>You can also completely disable etag handling.</p></div>
+<div class="paragraph"><p>You can also completely disable etag handling:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
