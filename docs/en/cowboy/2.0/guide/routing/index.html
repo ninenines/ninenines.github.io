@@ -70,16 +70,15 @@
 <h1 class="lined-header"><span>Routing</span></h1>
 
 <div class="paragraph"><p>Cowboy does nothing by default.</p></div>
-<div class="paragraph"><p>To make Cowboy useful, you need to map URLs to Erlang modules that will
+<div class="paragraph"><p>To make Cowboy useful, you need to map URIs to Erlang modules that will
 handle the requests. This is called routing.</p></div>
 <div class="paragraph"><p>When Cowboy receives a request, it tries to match the requested host and
-path to the resources given in the dispatch rules. If it matches, then
-the associated Erlang code will be executed.</p></div>
-<div class="paragraph"><p>Routing rules are given per host. Cowboy will first match on the host,
-and then try to find a matching path.</p></div>
-<div class="paragraph"><p>Routes need to be compiled before they can be used by Cowboy.</p></div>
+path to the configured routes. When there&#8217;s a match, the route&#8217;s
+associated handler is executed.</p></div>
+<div class="paragraph"><p>Routes need to be compiled before they can be used by Cowboy.
+The result of the compilation is the dispatch rules.</p></div>
 <div class="sect1">
-<h2 id="_structure">Structure</h2>
+<h2 id="_syntax">Syntax</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>The general structure for the routes is defined as follow.</p></div>
 <div class="listingblock">
@@ -287,10 +286,12 @@ values, if any.</p></div>
 <div class="sect1">
 <h2 id="_compilation">Compilation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The structure defined in this chapter needs to be compiled before it is
-passed to Cowboy. This allows Cowboy to efficiently lookup the correct
-handler to run instead of having to parse the routes repeatedly.</p></div>
-<div class="paragraph"><p>This can be done with a simple call to <code>cowboy_router:compile/1</code>.</p></div>
+<div class="paragraph"><p>The routes must be compiled before Cowboy can use them. The compilation
+step normalizes the routes to simplify the code and speed up the
+execution, but the routes are still looked up one by one in the end.
+Faster compilation strategies could be to compile the routes directly
+to Erlang code, but would require heavier dependencies.</p></div>
+<div class="paragraph"><p>To compile routes, just call the appropriate function:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -305,8 +306,6 @@ http://www.gnu.org/software/src-highlite -->
     [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
     #{<span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}}
 )<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Note that this function will return <code>{error, badarg}</code> if the structure
-given is incorrect.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -314,14 +313,14 @@ given is incorrect.</p></div>
 <div class="sectionbody">
 <div class="paragraph"><p>You can use the <code>cowboy:set_env/3</code> function for updating the dispatch
 list used by routing. This will apply to all new connections accepted
-by the listener.</p></div>
+by the listener:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">cowboy:set_env</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #FF6600">dispatch</span>, <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>(<span style="color: #009900">Dispatch</span>))<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Note that you need to compile the routes before updating.</p></div>
+<div class="paragraph"><p>Note that you need to compile the routes again before updating.</p></div>
 </div>
 </div>
 
