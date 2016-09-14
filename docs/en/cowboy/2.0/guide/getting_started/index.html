@@ -170,14 +170,14 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">start</span></span>(<span style="color: #009900">_Type</span>, <span style="color: #009900">_Args</span>) <span style="color: #990000">-&gt;</span>
-        <span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
-                {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">hello_handler</span>, []}]}
-        ]),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #993399">100</span>,
-                [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
-                #{<span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}}
-        ),
-        <span style="font-weight: bold"><span style="color: #000000">hello_erlang_sup:start_link</span></span>()<span style="color: #990000">.</span></tt></pre></div></div>
+    <span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
+        {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">hello_handler</span>, []}]}
+    ]),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #FF6600">my_http_listener</span>, <span style="color: #993399">100</span>,
+        [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
+        #{<span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}}
+    ),
+    <span style="font-weight: bold"><span style="color: #000000">hello_erlang_sup:start_link</span></span>()<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Routes are explained in details in the <a href="../routing">Routing</a>
 chapter. For this tutorial we map the path <code>/</code> to the handler
 module <code>hello_handler</code>. This module doesn&#8217;t exist yet.</p></div>
@@ -208,11 +208,11 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req0</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        <span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>,
-                #{<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>},
-                <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello Erlang!"</span><span style="color: #990000">&gt;&gt;</span>,
-                <span style="color: #009900">Req0</span>),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    <span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>,
+        #{<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>},
+        <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello Erlang!"</span><span style="color: #990000">&gt;&gt;</span>,
+        <span style="color: #009900">Req0</span>),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>What the above code does is send a <code>200 OK</code> reply, with the
 Content-type header set to <code>text/plain</code> and the response
 body set to <code>Hello Erlang!</code>.</p></div>

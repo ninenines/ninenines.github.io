@@ -90,7 +90,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Cowboy will perform the Websocket handshake immediately. Note
 that the handshake will fail if the client did not request an
 upgrade to Websocket.</p></div>
@@ -125,19 +125,19 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-                <span style="color: #000080">undefined</span> <span style="color: #990000">-&gt;</span>
-                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-                <span style="color: #009900">Subprotocols</span> <span style="color: #990000">-&gt;</span>
-                        <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">lists:keymember</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mqtt"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #993399">1</span>, <span style="color: #009900">Subprotocols</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-                                <span style="color: #000080">true</span> <span style="color: #990000">-&gt;</span>
-                                        <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>,
-                                                <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mqtt"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>),
-                                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>};
-                                <span style="color: #000080">false</span> <span style="color: #990000">-&gt;</span>
-                                        {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-                        <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
-        <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+        <span style="color: #000080">undefined</span> <span style="color: #990000">-&gt;</span>
+            {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
+        <span style="color: #009900">Subprotocols</span> <span style="color: #990000">-&gt;</span>
+            <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">lists:keymember</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mqtt"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #993399">1</span>, <span style="color: #009900">Subprotocols</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
+                <span style="color: #000080">true</span> <span style="color: #990000">-&gt;</span>
+                    <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>,
+                        <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mqtt"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>),
+                    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>};
+                <span style="color: #000080">false</span> <span style="color: #990000">-&gt;</span>
+                    {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+            <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -161,8 +161,8 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_init</span></span>(<span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000000">erlang:start_timer</span></span>(<span style="color: #993399">1000</span>, <span style="font-weight: bold"><span style="color: #000080">self</span></span>(), <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    <span style="font-weight: bold"><span style="color: #000000">erlang:start_timer</span></span>(<span style="color: #993399">1000</span>, <span style="font-weight: bold"><span style="color: #000080">self</span></span>(), <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>All Websocket callbacks share the same return values. This
 means that we can send frames to the client right after
 the upgrade:</p></div>
@@ -172,7 +172,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_init</span></span>(<span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>}, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>}, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -190,9 +190,9 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">Frame</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">text</span>, <span style="color: #990000">_</span>}, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, <span style="color: #009900">Frame</span>, <span style="color: #009900">State</span>};
+    {<span style="color: #FF6600">reply</span>, <span style="color: #009900">Frame</span>, <span style="color: #009900">State</span>};
 <span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">_Frame</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Note that ping and pong frames require no action from the
 handler as Cowboy will automatically reply to ping frames.
 They are provided for informative purposes only.</p></div>
@@ -213,9 +213,9 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>({<span style="font-weight: bold"><span style="color: #000080">log</span></span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">State</span>};
+    {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #009900">Text</span>}, <span style="color: #009900">State</span>};
 <span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -230,7 +230,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>To send one frame, return a reply tuple with the frame to send:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
@@ -238,7 +238,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>}, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>}, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>You can send frames of any type: text, binary, ping, pong
 or close frames.</p></div>
 <div class="paragraph"><p>To send many frames at once, return a reply tuple with the
@@ -249,11 +249,11 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, [
-                {<span style="color: #FF6600">text</span>, <span style="color: #FF0000">"Hello"</span>},
-                {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"world!"</span><span style="color: #990000">&gt;&gt;</span>},
-                {<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #993399">0</span><span style="color: #990000">:</span><span style="color: #993399">8000</span><span style="color: #990000">&gt;&gt;</span>}
-        ], <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">reply</span>, [
+        {<span style="color: #FF6600">text</span>, <span style="color: #FF0000">"Hello"</span>},
+        {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"world!"</span><span style="color: #990000">&gt;&gt;</span>},
+        {<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #993399">0</span><span style="color: #990000">:</span><span style="color: #993399">8000</span><span style="color: #990000">&gt;&gt;</span>}
+    ], <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>They are sent in the given order.</p></div>
 </div>
 </div>
@@ -282,7 +282,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #993399">60000</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #993399">60000</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>This value cannot be changed once it is set. It defaults to
 <code>infinity</code>.</p></div>
 </div>
@@ -299,13 +299,13 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_init</span></span>(<span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span>
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span>
 
 <span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">_Frame</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span>
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span>
 
 <span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>}, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">reply</span>, {<span style="color: #FF6600">text</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello!"</span><span style="color: #990000">&gt;&gt;</span>}, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>It is highly recommended to write your handlers with
 hibernate enabled, as this allows to greatly reduce the
 memory usage. Do note however that an increase in the
@@ -325,7 +325,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">_Info</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">stop</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">stop</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>Sending a <code>close</code> frame will immediately initiate the closing
 of the Websocket connection. Note that when sending a list of
 frames that include a close frame, any frame found after the
