@@ -41,19 +41,22 @@ docs-$1-$2: tmp/$1
 			| sed -n '/^= /,$$$$p' \
 			| sed -n '/^$$$$/,$$$$p' \
 			| sed 's/^= /== /' >> content/docs/en/$1/$3/guide.asciidoc; \
-		rm tmp/$1/doc/src/guide/book.asciidoc; \
+		mv tmp/$1/doc/src/guide/book.asciidoc tmp/$1/doc/src/guide/book.asciidoc.bak; \
 		for f in tmp/$1/doc/src/guide/*.asciidoc; do \
 			printf "%s\n" "+++" "project = \"$1\"" "version = \"$3\"" "doctype = \"guide\"" \
 				> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			echo -n "title = \"" >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			echo -n `sed -n '1,/^== .*/ s/^== //p' $$$$f` >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			echo "\"" >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
+			echo -n "weight = " >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
+			echo "`cat tmp/$1/doc/src/guide/book.asciidoc.bak | grep ^include:: | sed 's/include::\(.*.asciidoc\).*/\1/'` :`basename $$$$f`" | tr '\n' ' ' | awk -F: '{print index($$$$1, $$$$2)}' >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			echo "+++" >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			echo >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			sed '1,/^$$$$/d' $$$$f | sed 's/^=== /== /' \
 				| sed 's/xref:/link:..\//' | sed 's/image::/image::..\//' \
 				>> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 		done; \
+		rm tmp/$1/doc/src/guide/book.asciidoc.bak; \
 		mkdir -p static/docs/en/$1/$3/guide/; \
 		cp tmp/$1/doc/src/guide/* static/docs/en/$1/$3/guide/; \
 	fi
