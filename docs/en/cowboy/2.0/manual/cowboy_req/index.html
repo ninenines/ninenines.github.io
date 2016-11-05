@@ -78,1277 +78,363 @@
 <div class="sect1">
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The <code>cowboy_req</code> module provides functions to access, manipulate
+<div class="paragraph"><p>The module <code>cowboy_req</code> provides functions to access, manipulate
 and respond to requests.</p></div>
-<div class="paragraph"><p>The functions in this module follow patterns for their return types,
-based on the kind of function.</p></div>
+<div class="paragraph"><p>There are four types of functions in this module. They can be
+differentiated by their name and their return type:</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Type         </th>
+<th align="left" valign="top"> Name pattern              </th>
+<th align="left" valign="top"> Return type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">access</p></td>
+<td align="left" valign="top"><p class="table">no verb, parse_*, match_*</p></td>
+<td align="left" valign="top"><p class="table"><code>Value</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">question</p></td>
+<td align="left" valign="top"><p class="table">has_*</p></td>
+<td align="left" valign="top"><p class="table"><code>boolean()</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">modification</p></td>
+<td align="left" valign="top"><p class="table">set_*</p></td>
+<td align="left" valign="top"><p class="table"><code>Req</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">action</p></td>
+<td align="left" valign="top"><p class="table">any other verb</p></td>
+<td align="left" valign="top"><p class="table"><code>ok | {Result, Value, Req}</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph"><p>Any <code>Req</code> returned must be used in place of the one passed as
+argument. Functions that perform an action in particular write
+state in the Req object to make sure you are using the function
+correctly. For example, it&#8217;s only possible to send one response,
+and to read the body once.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exports">Exports</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Raw request:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-access: <code>Value</code>
+<a href="../cowboy_req.method">cowboy_req:method(3)</a> - HTTP method
 </p>
 </li>
 <li>
 <p>
-action: <code>ok | {Result, Req} | {Result, Value, Req}</code>
+<a href="../cowboy_req.version">cowboy_req:version(3)</a> - HTTP version
 </p>
 </li>
 <li>
 <p>
-modification: <code>Req</code>
+<a href="../cowboy_req.scheme">cowboy_req:scheme(3)</a> - URI scheme
 </p>
 </li>
 <li>
 <p>
-question: <code>boolean()</code>
+<a href="../cowboy_req.host">cowboy_req:host(3)</a> - URI host name
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.port">cowboy_req:port(3)</a> - URI port number
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.path">cowboy_req:path(3)</a> - URI path
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.qs">cowboy_req:qs(3)</a> - URI query string
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.uri">cowboy_req:uri(3)</a> - Reconstructed URI
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.header">cowboy_req:header(3)</a> - HTTP header
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.headers">cowboy_req:headers(3)</a> - HTTP headers
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.peer">cowboy_req:peer(3)</a> - Peer address and port
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Whenever <code>Req</code> is returned, you must use this returned value and
-ignore any previous you may have had. This value contains various
-values which are necessary for Cowboy to keep track of the request
-and response states.</p></div>
-<div class="paragraph"><p>All functions which perform an action should only be called once.
-This includes reading the request body or replying. Cowboy will
-throw an error on the second call when it detects suspicious behavior.</p></div>
-<div class="paragraph"><p>It is highly discouraged to pass the Req object to another process.
-Doing so and calling <code>cowboy_req</code> functions from it leads to
-undefined behavior.</p></div>
+<div class="paragraph"><p>Processed request:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../cowboy_req.parse_qs">cowboy_req:parse_qs(3)</a> - Parse the query string
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.match_qs">cowboy_req:match_qs(3)</a> - Match the query string against constraints
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.parse_header">cowboy_req:parse_header(3)</a> - Parse the given HTTP header
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.parse_cookies">cowboy_req:parse_cookies(3)</a> - Parse cookie headers
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.match_cookies">cowboy_req:match_cookies(3)</a> - Match cookies against constraints
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.binding">cowboy_req:binding(3)</a> - Access a value bound from the route
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.bindings">cowboy_req:bindings(3)</a> - Access all values bound from the route
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.host_info">cowboy_req:host_info(3)</a> - Access the route&#8217;s heading host segments
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.path_info">cowboy_req:path_info(3)</a> - Access the route&#8217;s trailing path segments
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Request body:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../cowboy_req.has_body">cowboy_req:has_body(3)</a> - Is there a request body?
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.body_length">cowboy_req:body_length(3)</a> - Body length
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.read_body">cowboy_req:read_body(3)</a> - Read the request body
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.read_urlencoded_body">cowboy_req:read_urlencoded_body(3)</a> - Read and parse a urlencoded request body
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.read_part">cowboy_req:read_part(3)</a> - Read the next part of a multipart body
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.read_part_body">cowboy_req:read_part_body(3)</a> - Read the current part&#8217;s body in a multipart body
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Response:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../cowboy_req.set_resp_cookie">cowboy_req:set_resp_cookie(3)</a> - Set a cookie
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a> - Set a response header
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.has_resp_header">cowboy_req:has_resp_header(3)</a> - Is the given response header set?
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.delete_resp_header">cowboy_req:delete_resp_header(3)</a> - Delete a response header
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.set_resp_body">cowboy_req:set_resp_body(3)</a> - Set the response body
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.has_resp_body">cowboy_req:has_resp_body(3)</a> - Is there a response body?
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.reply">cowboy_req:reply(3)</a> - Send the response
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a> - Send the response and stream its body
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.stream_body">cowboy_req:stream_body(3)</a> - Send a chunk of the response body
+</p>
+</li>
+<li>
+<p>
+<a href="../cowboy_req.push">cowboy_req:push(3)</a> - Push a resource to the client
+</p>
+</li>
+</ul></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_types">Types</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_body_opts_option">body_opts() = [Option]</h3>
+<h3 id="_push_opts">push_opts()</h3>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Option</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">continue</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
-        | {<span style="font-weight: bold"><span style="color: #000080">length</span></span>, <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()}
-        | {<span style="color: #FF6600">read_length</span>, <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()}
-        | {<span style="color: #FF6600">read_timeout</span>, <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()}
-        | {<span style="color: #FF6600">transfer_decode</span>, <span style="font-weight: bold"><span style="color: #000000">transfer_decode_fun</span></span>(), <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}
-        | {<span style="color: #FF6600">content_decode</span>, <span style="font-weight: bold"><span style="color: #000000">content_decode_fun</span></span>()}</tt></pre></div></div>
-<div class="paragraph"><p>Request body reading options.</p></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">push_opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">method</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),            <span style="font-style: italic"><span style="color: #9A1900">%% case sensitive</span></span>
+    <span style="color: #0000FF">scheme</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),            <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+    <span style="color: #0000FF">host</span>   <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),            <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+    <span style="color: #0000FF">port</span>   <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">inet:port_number</span></span>(),
+    <span style="color: #0000FF">qs</span>     <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()             <span style="font-style: italic"><span style="color: #9A1900">%% case sensitive</span></span>
+}</tt></pre></div></div>
+<div class="paragraph"><p>Push options.</p></div>
+<div class="paragraph"><p>By default, Cowboy will use the GET method, an empty query string,
+and take the scheme, host and port directly from the current
+request&#8217;s URI.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_cookie_opts_option">cookie_opts() = [Option]</h3>
+<h3 id="_read_body_opts">read_body_opts()</h3>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Option</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">max_age</span>, <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()}
-        | {<span style="color: #FF6600">domain</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
-        | {<span style="color: #FF6600">path</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
-        | {<span style="color: #FF6600">secure</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
-        | {<span style="color: #FF6600">http_only</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}</tt></pre></div></div>
-<div class="paragraph"><p>Cookie options.</p></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">read_body_opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="font-weight: bold"><span style="color: #000080">length</span></span>  <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">period</span>  <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()
+}</tt></pre></div></div>
+<div class="paragraph"><p>Body reading options.</p></div>
+<div class="paragraph"><p>The defaults are function-specific.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_req_opaque_to_the_user">req() - opaque to the user</h3>
+<h3 id="_req">req()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">req</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #FF6600">method</span>  <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),               <span style="font-style: italic"><span style="color: #9A1900">%% case sensitive</span></span>
+    <span style="color: #FF6600">version</span> <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:http_version</span></span>() | <span style="font-weight: bold"><span style="color: #000080">atom</span></span>(),
+    <span style="color: #FF6600">scheme</span>  <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),               <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+    <span style="color: #FF6600">host</span>    <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),               <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+    <span style="color: #FF6600">port</span>    <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">inet:port_number</span></span>(),
+    <span style="color: #FF6600">path</span>    <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),               <span style="font-style: italic"><span style="color: #9A1900">%% case sensitive</span></span>
+    <span style="color: #FF6600">qs</span>      <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(),               <span style="font-style: italic"><span style="color: #9A1900">%% case sensitive</span></span>
+    <span style="color: #FF6600">headers</span> <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:http_headers</span></span>(),
+    <span style="color: #FF6600">peer</span>    <span style="color: #990000">:=</span> {<span style="font-weight: bold"><span style="color: #000000">inet:ip_address</span></span>(), <span style="font-weight: bold"><span style="color: #000000">inet:port_number</span></span>()}
+}</tt></pre></div></div>
 <div class="paragraph"><p>The Req object.</p></div>
-<div class="paragraph"><p>All functions in this module receive a <code>Req</code> as argument,
-and some of them return a new object labelled <code>Req2</code> in
-the function descriptions below.</p></div>
+<div class="paragraph"><p>Contains information about the request and response. While
+some fields are publicly documented, others aren&#8217;t and shouldn&#8217;t
+be used.</p></div>
+<div class="paragraph"><p>You may add custom fields if required. Make sure to namespace
+them by prepending an underscore and the name of your application:</p></div>
+<div class="listingblock">
+<div class="title">Setting a custom field</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req</span>#{<span style="color: #009900">_myapp_auth_method</span> <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">pubkey</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+<div class="sect2">
+<h3 id="_resp_body">resp_body()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">resp_body</span></span>() <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()
+    | {<span style="color: #FF6600">sendfile</span>, <span style="color: #009900">Offset</span>, <span style="color: #009900">Length</span>, <span style="color: #009900">Filename</span>}
+
+<span style="color: #009900">Offset</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()
+<span style="color: #009900">Length</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">pos_integer</span></span>()
+<span style="color: #009900">Filename</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">file:name_all</span></span>()</tt></pre></div></div>
+<div class="paragraph"><p>Response body.</p></div>
+<div class="paragraph"><p>It can take two forms: the actual data to be sent or a
+tuple indicating which file to send.</p></div>
+<div class="paragraph"><p>When sending data directly, the type is either a binary or
+an iolist. Iolists are an efficient way to build output.
+Instead of concatenating strings or binaries, you can simply
+build a list containing the fragments you want to send in the
+order they should be sent:</p></div>
+<div class="listingblock">
+<div class="title">Example iolists usage</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #993399">1</span><span style="color: #990000">&gt;</span> <span style="color: #009900">RespBody</span> <span style="color: #990000">=</span> [<span style="color: #FF0000">"Hello "</span>, [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"world"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">$!</span>]]<span style="color: #990000">.</span>
+[<span style="color: #FF0000">"Hello "</span>,[<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"world"</span><span style="color: #990000">&gt;&gt;</span>,<span style="color: #993399">33</span>]]
+<span style="color: #993399">2</span><span style="color: #990000">&gt;</span> <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"~s~n"</span>, [<span style="color: #009900">RespBody</span>])<span style="color: #990000">.</span>
+<span style="color: #009900">Hello</span> <span style="color: #FF6600">world</span><span style="color: #990000">!</span></tt></pre></div></div>
+<div class="paragraph"><p>When using the sendfile tuple, the <code>Length</code> value is mandatory
+and must be higher than 0. It is sent with the response in the
+content-length header.</p></div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_request_related_exports">Request related exports</h2>
+<h2 id="_see_also">See also</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_binding_name_req_8594_binding_name_req_undefined">binding(Name, Req) &#8594; binding(Name, Req, undefined)</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:binding/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_binding_name_req_default_8594_value">binding(Name, Req, Default) &#8594; Value</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = atom()
-</dt>
-<dd>
-<p>
-Binding name.
-</p>
-</dd>
-<dt class="hdlist1">
-Default = any()
-</dt>
-<dd>
-<p>
-Default value.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = any() | Default
-</dt>
-<dd>
-<p>
-Binding value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the value for the given binding.</p></div>
-<div class="paragraph"><p>By default the value is a binary, however constraints may change
-the type of this value (for example automatically converting
-numbers to integer).</p></div>
-</div>
-<div class="sect2">
-<h3 id="_bindings_req_8594_name_value">bindings(Req) &#8594; [{Name, Value}]</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = atom()
-</dt>
-<dd>
-<p>
-Binding name.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = any()
-</dt>
-<dd>
-<p>
-Binding value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return all bindings.</p></div>
-<div class="paragraph"><p>By default the value is a binary, however constraints may change
-the type of this value (for example automatically converting
-numbers to integer).</p></div>
-</div>
-<div class="sect2">
-<h3 id="_header_name_req_8594_header_name_req_undefined">header(Name, Req) &#8594; header(Name, Req, undefined)</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:header/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_header_name_req_default_8594_value">header(Name, Req, Default) &#8594; Value</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Request header name.
-</p>
-</dd>
-<dt class="hdlist1">
-Default = any()
-</dt>
-<dd>
-<p>
-Default value.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = binary() | Default
-</dt>
-<dd>
-<p>
-Request header value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the value for the given header.</p></div>
-<div class="paragraph"><p>While header names are case insensitive, this function expects
-the name to be a lowercase binary.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_headers_req_8594_headers">headers(Req) &#8594; Headers</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Headers = cowboy:http_headers()
-</dt>
-<dd>
-<p>
-Request headers.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return all headers.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_host_req_8594_host">host(Req) &#8594; Host</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Host = binary()
-</dt>
-<dd>
-<p>
-Requested host.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the requested host.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_host_info_req_8594_hostinfo">host_info(Req) &#8594; HostInfo</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-HostInfo = cowboy_router:tokens() | undefined
-</dt>
-<dd>
-<p>
-Extra tokens for the host.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the extra tokens from matching against <code>...</code> during routing.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_host_url_req_8594_hosturl">host_url(Req) &#8594; HostURL</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-HostURL = binary() | undefined
-</dt>
-<dd>
-<p>
-Requested URL, without the path component.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the requested URL excluding the path component.</p></div>
-<div class="paragraph"><p>This function will always return <code>undefined</code> until the
-<code>cowboy_router</code> middleware has been executed.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_match_cookies_fields_req_8594_map">match_cookies(Fields, Req) &#8594; Map</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Fields = cowboy:fields()
-</dt>
-<dd>
-<p>
-Cookie fields match rules.
-</p>
-</dd>
-<dt class="hdlist1">
-Map = map()
-</dt>
-<dd>
-<p>
-Cookie fields matched.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Match cookies against the given fields.</p></div>
-<div class="paragraph"><p>Cowboy will only return the cookie values specified in the
-fields list, and ignore all others. Fields can be either
-the name of the cookie requested; the name along with a
-list of constraints; or the name, a list of constraints
-and a default value in case the cookie is missing.</p></div>
-<div class="paragraph"><p>This function will crash if the cookie is missing and no
-default value is provided. This function will also crash
-if a constraint fails.</p></div>
-<div class="paragraph"><p>The name of the cookie must be provided as an atom. The
-key of the returned map will be that atom. The value may
-be converted through the use of constraints, making this
-function able to extract, validate and convert values all
-in one step.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_match_qs_fields_req_8594_map">match_qs(Fields, Req) &#8594; Map</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Fields = cowboy:fields()
-</dt>
-<dd>
-<p>
-Query string fields match rules.
-</p>
-</dd>
-<dt class="hdlist1">
-Map = map()
-</dt>
-<dd>
-<p>
-Query string fields matched.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Match the query string against the given fields.</p></div>
-<div class="paragraph"><p>Cowboy will only return the query string values specified
-in the fields list, and ignore all others. Fields can be
-either the key requested; the key along with a list of
-constraints; or the key, a list of constraints and a
-default value in case the key is missing.</p></div>
-<div class="paragraph"><p>This function will crash if the key is missing and no
-default value is provided. This function will also crash
-if a constraint fails.</p></div>
-<div class="paragraph"><p>The key must be provided as an atom. The key of the
-returned map will be that atom. The value may be converted
-through the use of constraints, making this function able
-to extract, validate and convert values all in one step.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_meta_name_req_8594_meta_name_req_undefined">meta(Name, Req) &#8594; meta(Name, Req, undefined)</h3>
-<div class="paragraph"><p>Alias for <code>cowboy_req:meta/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_meta_name_req_default_8594_value">meta(Name, Req, Default) &#8594; Value</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = atom()
-</dt>
-<dd>
-<p>
-Metadata name.
-</p>
-</dd>
-<dt class="hdlist1">
-Default = any()
-</dt>
-<dd>
-<p>
-Default value.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = any()
-</dt>
-<dd>
-<p>
-Metadata value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return metadata about the request.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_method_req_8594_method">method(Req) &#8594; Method</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Method = binary()
-</dt>
-<dd>
-<p>
-Request method.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the method.</p></div>
-<div class="paragraph"><p>Methods are case sensitive. Standard methods are always uppercase.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_parse_cookies_req_8594_name_value">parse_cookies(Req) &#8594; [{Name, Value}]</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Cookie name.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = binary()
-</dt>
-<dd>
-<p>
-Cookie value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Parse and return all cookies.</p></div>
-<div class="paragraph"><p>Cookie names are case sensitive.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_parse_header_name_req_8594_see_below">parse_header(Name, Req) &#8594; see below</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:parse_header/3</code>.</p></div>
-<div class="paragraph"><p>The <code>parse_header/2</code> function will call <code>parser_header/3</code> with a
-different default value depending on the header being parsed. The
-following table summarizes the default values used.</p></div>
-<div class="tableblock">
-<table rules="all"
-width="100%"
-frame="border"
-cellspacing="0" cellpadding="4">
-<col width="50%" />
-<col width="50%" />
-<thead>
-<tr>
-<th align="left" valign="top"> Header name       </th>
-<th align="center" valign="top"> Header value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left" valign="top"><p class="table">content-length</p></td>
-<td align="center" valign="top"><p class="table"><code>0</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">cookie</p></td>
-<td align="center" valign="top"><p class="table"><code>[]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">transfer-encoding</p></td>
-<td align="center" valign="top"><p class="table"><code>[&lt;&lt;"identity"&gt;&gt;]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">Any other header</p></td>
-<td align="center" valign="top"><p class="table"><code>undefined</code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_parse_header_name_req_default_8594_parsedvalue_default">parse_header(Name, Req, Default) &#8594; ParsedValue | Default</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Request header name.
-</p>
-</dd>
-<dt class="hdlist1">
-Default = any()
-</dt>
-<dd>
-<p>
-Default value.
-</p>
-</dd>
-<dt class="hdlist1">
-ParsedValue - see below
-</dt>
-<dd>
-<p>
-Parsed request header value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Parse the given header.</p></div>
-<div class="paragraph"><p>While header names are case insensitive, this function expects
-the name to be a lowercase binary.</p></div>
-<div class="paragraph"><p>The parsed value differs depending on the header being parsed. The
-following table summarizes the different types returned.</p></div>
-<div class="tableblock">
-<table rules="all"
-width="100%"
-frame="border"
-cellspacing="0" cellpadding="4">
-<col width="50%" />
-<col width="50%" />
-<thead>
-<tr>
-<th align="left" valign="top"> Header name            </th>
-<th align="center" valign="top"> Type of parsed header value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left" valign="top"><p class="table">accept</p></td>
-<td align="center" valign="top"><p class="table"><code>[{{Type, SubType, Params}, Quality, AcceptExt}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">accept-charset</p></td>
-<td align="center" valign="top"><p class="table"><code>[{Charset, Quality}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">accept-encoding</p></td>
-<td align="center" valign="top"><p class="table"><code>[{Encoding, Quality}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">accept-language</p></td>
-<td align="center" valign="top"><p class="table"><code>[{LanguageTag, Quality}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">authorization</p></td>
-<td align="center" valign="top"><p class="table"><code>{AuthType, Credentials}</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">content-length</p></td>
-<td align="center" valign="top"><p class="table"><code>non_neg_integer()</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">content-type</p></td>
-<td align="center" valign="top"><p class="table"><code>{Type, SubType, ContentTypeParams}</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">cookie</p></td>
-<td align="center" valign="top"><p class="table"><code>[{binary(), binary()}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">expect</p></td>
-<td align="center" valign="top"><p class="table"><code>[Expect | {Expect, ExpectValue, Params}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">if-match</p></td>
-<td align="center" valign="top"><p class="table"><code>'*' | [{weak | strong, OpaqueTag}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">if-modified-since</p></td>
-<td align="center" valign="top"><p class="table"><code>calendar:datetime()</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">if-none-match</p></td>
-<td align="center" valign="top"><p class="table"><code>'*' | [{weak | strong, OpaqueTag}]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">if-unmodified-since</p></td>
-<td align="center" valign="top"><p class="table"><code>calendar:datetime()</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">range</p></td>
-<td align="center" valign="top"><p class="table"><code>{Unit, [Range]}</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">sec-websocket-protocol</p></td>
-<td align="center" valign="top"><p class="table"><code>[binary()]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">transfer-encoding</p></td>
-<td align="center" valign="top"><p class="table"><code>[binary()]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">upgrade</p></td>
-<td align="center" valign="top"><p class="table"><code>[binary()]</code></p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">x-forwarded-for</p></td>
-<td align="center" valign="top"><p class="table"><code>[binary()]</code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="paragraph"><p>Types for the above table:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Type = SubType = Charset = Encoding = LanguageTag = binary()
-</p>
-</li>
-<li>
-<p>
-AuthType = Expect = OpaqueTag = Unit = binary()
-</p>
-</li>
-<li>
-<p>
-Params = ContentTypeParams = [{binary(), binary()}]
-</p>
-</li>
-<li>
-<p>
-Quality = 0..1000
-</p>
-</li>
-<li>
-<p>
-AcceptExt = [{binary(), binary()} | binary()]
-</p>
-</li>
-<li>
-<p>
-Credentials - see below
-</p>
-</li>
-<li>
-<p>
-Range = {non_neg_integer(), non_neg_integer() | infinity} | neg_integer()
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>The cookie names and values, the values of the sec-websocket-protocol
-and x-forwarded-for headers, the values in <code>AcceptExt</code> and <code>Params</code>,
-the authorization <code>Credentials</code>, the <code>ExpectValue</code> and <code>OpaqueTag</code>
-are case sensitive. All values in <code>ContentTypeParams</code> are case sensitive
-except the value of the charset parameter, which is case insensitive.
-All other values are case insensitive and will be returned as lowercase.</p></div>
-<div class="paragraph"><p>The headers accept, accept-encoding and cookie headers can return
-an empty list. Some other headers are expected to have a value if provided
-and may crash if the value is missing.</p></div>
-<div class="paragraph"><p>The authorization header parsing code currently only supports basic
-HTTP authentication. The <code>Credentials</code> type is thus <code>{Username, Password}</code>
-with <code>Username</code> and <code>Password</code> being <code>binary()</code>.</p></div>
-<div class="paragraph"><p>The range header value <code>Range</code> can take three forms:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<code>{From, To}</code>: from <code>From</code> to <code>To</code> units
-</p>
-</li>
-<li>
-<p>
-<code>{From, infinity}</code>: everything after <code>From</code> units
-</p>
-</li>
-<li>
-<p>
-<code>-Final</code>: the final <code>Final</code> units
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>An <code>undefined</code> tuple will be returned if Cowboy doesn&#8217;t know how
-to parse the requested header.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_parse_qs_req_8594_name_value">parse_qs(Req) &#8594; [{Name, Value}]</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Query string field name.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = binary() | true
-</dt>
-<dd>
-<p>
-Query string field value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the request&#8217;s query string as a list of tuples.</p></div>
-<div class="paragraph"><p>The atom <code>true</code> is returned for keys which have no value.
-Keys with no value are different from keys with an empty
-value in that they do not have a <code>=</code> indicating the presence
-of a value.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_path_req_8594_path">path(Req) &#8594; Path</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Path = binary()
-</dt>
-<dd>
-<p>
-Requested path.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the requested path.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_path_info_req_8594_pathinfo">path_info(Req) &#8594; PathInfo</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-PathInfo = cowboy_router:tokens() | undefined
-</dt>
-<dd>
-<p>
-Extra tokens for the path.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the extra tokens from matching against <code>...</code> during routing.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_peer_req_8594_peer">peer(Req) &#8594; Peer</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Peer = <code>{inet:ip_address(), inet:port_number()}</code>
-</dt>
-<dd>
-<p>
-Peer IP address and port number.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the client&#8217;s IP address and port number.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_port_req_8594_port">port(Req) &#8594; Port</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Port = inet:port_number()
-</dt>
-<dd>
-<p>
-Requested port number.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the request&#8217;s port.</p></div>
-<div class="paragraph"><p>The port returned by this function is obtained by parsing
-the host header. It may be different than the actual port
-the client used to connect to the Cowboy server.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_qs_req_8594_querystring">qs(Req) &#8594; QueryString</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-QueryString = binary()
-</dt>
-<dd>
-<p>
-Unprocessed query string.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the request&#8217;s query string.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_set_meta_name_value_req_8594_req2">set_meta(Name, Value, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = atom()
-</dt>
-<dd>
-<p>
-Metadata name.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = any()
-</dt>
-<dd>
-<p>
-Metadata value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Set metadata about the request.</p></div>
-<div class="paragraph"><p>An existing value will be overwritten.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_url_req_8594_url">url(Req) &#8594; URL</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-URL = binary() | undefined
-</dt>
-<dd>
-<p>
-Requested URL.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the requested URL.</p></div>
-<div class="paragraph"><p>This function will always return <code>undefined</code> until the
-<code>cowboy_router</code> middleware has been executed.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_version_req_8594_version">version(Req) &#8594; Version</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Version = cowboy:http_version()
-</dt>
-<dd>
-<p>
-Client&#8217;s advertised HTTP version.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the HTTP version used for this request.</p></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_request_body_related_exports">Request body related exports</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_body_req_8594_body_req">body(Req) &#8594; body(Req, [])</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:body/2</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_body_req_opts_8594_ok_data_req2_more_data_req2">body(Req, Opts) &#8594; {ok, Data, Req2} | {more, Data, Req2}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Opts = [body_opt()]
-</dt>
-<dd>
-<p>
-Request body reading options.
-</p>
-</dd>
-<dt class="hdlist1">
-Data = binary()
-</dt>
-<dd>
-<p>
-Data read from the body.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Read the request body.</p></div>
-<div class="paragraph"><p>This function will read a chunk of the request body. If there is
-more data to be read after this function call, then a <code>more</code> tuple
-is returned. Otherwise an <code>ok</code> tuple is returned.</p></div>
-<div class="paragraph"><p>Cowboy will automatically send a <code>100 Continue</code> reply if
-required. If this behavior is not desirable, it can be disabled
-by setting the <code>continue</code> option to <code>false</code>.</p></div>
-<div class="paragraph"><p>Cowboy will by default attempt to read up to 8MB of the body,
-but in chunks of 1MB. It will use a timeout of 15s per chunk.
-All these values can be changed using the <code>length</code>, <code>read_length</code>
-and <code>read_timeout</code> options respectively. Note that the size
-of the data may not be the same as requested as the decoding
-functions may grow or shrink it, and Cowboy makes not attempt
-at returning an exact amount.</p></div>
-<div class="paragraph"><p>Cowboy will properly handle chunked transfer-encoding by
-default. If any other transfer-encoding or content-encoding
-has been used for the request, custom decoding functions
-can be used. The <code>content_decode</code> and <code>transfer_decode</code>
-options allow setting the decode functions manually.</p></div>
-<div class="paragraph"><p>After the body has been streamed fully, Cowboy will remove
-the transfer-encoding header from the Req object, and add
-the content-length header if it wasn&#8217;t already there.</p></div>
-<div class="paragraph"><p>This function can only be called once. Cowboy will not cache
-the result of this call.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_body_length_req_8594_length">body_length(Req) &#8594; Length</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Length = non_neg_integer() | undefined
-</dt>
-<dd>
-<p>
-Length of the request body.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the length of the request body.</p></div>
-<div class="paragraph"><p>The length will only be returned if the request does not
-use any transfer-encoding and if the content-length header
-is present.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_body_qs_req_8594_body_qs_req_length_64000_read_length_64000_read_timeout_5000">body_qs(Req) &#8594; body_qs(Req, [{length, 64000}, {read_length, 64000}, {read_timeout, 5000}])</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:body_qs/2</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_body_qs_req_opts_8594_ok_name_value_req2_badlength_req2">body_qs(Req, Opts) &#8594; {ok, [{Name, Value}], Req2} | {badlength, Req2}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Opts = [body_opt()]
-</dt>
-<dd>
-<p>
-Request body reading options.
-</p>
-</dd>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Field name.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = binary() | true
-</dt>
-<dd>
-<p>
-Field value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the request body as a list of tuples.</p></div>
-<div class="paragraph"><p>This function will parse the body assuming the content-type
-application/x-www-form-urlencoded, commonly used for the
-query string.</p></div>
-<div class="paragraph"><p>This function calls <code>body/2</code> for reading the body, with the
-same options it received. By default it will attempt to read
-a body of 64KB in one chunk, with a timeout of 5s. If the
-body is larger then a <code>badlength</code> tuple is returned.</p></div>
-<div class="paragraph"><p>This function can only be called once. Cowboy will not cache
-the result of this call.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_has_body_req_8594_boolean">has_body(Req) &#8594; boolean()</h3>
-<div class="paragraph"><p>Return whether the request has a body.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_part_req_8594_part_req_length_64000_read_length_64000_read_timeout_5000">part(Req) &#8594; part(Req, [{length, 64000}, {read_length, 64000}, {read_timeout, 5000}])</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:part/2</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_part_req_opts_8594_ok_headers_req2_done_req2">part(Req, Opts) &#8594; {ok, Headers, Req2} | {done, Req2}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Opts = [body_opt()]
-</dt>
-<dd>
-<p>
-Request body reading options.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = cow_multipart:headers()
-</dt>
-<dd>
-<p>
-Part&#8217;s headers.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Read the headers for the next part of the multipart message.</p></div>
-<div class="paragraph"><p>Cowboy will skip any data remaining until the beginning of
-the next part. This includes the preamble to the multipart
-message but also the body of a previous part if it hasn&#8217;t
-been read. Both are skipped automatically when calling this
-function.</p></div>
-<div class="paragraph"><p>The headers returned are MIME headers, NOT HTTP headers.
-They can be parsed using the functions from the <code>cow_multipart</code>
-module. In addition, the <code>cow_multipart:form_data/1</code> function
-can be used to quickly figure out <code>multipart/form-data</code> messages.
-It takes the list of headers and returns whether this part is
-a simple form field or a file being uploaded.</p></div>
-<div class="paragraph"><p>Note that once a part has been read, or skipped, it cannot
-be read again.</p></div>
-<div class="paragraph"><p>This function calls <code>body/2</code> for reading the body, with the
-same options it received. By default it will only read chunks
-of 64KB with a timeout of 5s. This is tailored for reading
-part headers, not for skipping the previous part&#8217;s body.
-You might want to consider skipping large parts manually.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_part_body_req_8594_part_body_req">part_body(Req) &#8594; part_body(Req, [])</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:part_body/2</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_part_body_req_opts_8594_ok_data_req2_more_data_req2">part_body(Req, Opts) &#8594; {ok, Data, Req2} | {more, Data, Req2}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Opts = [body_opt()]
-</dt>
-<dd>
-<p>
-Request body reading options.
-</p>
-</dd>
-<dt class="hdlist1">
-Data = binary()
-</dt>
-<dd>
-<p>
-Part&#8217;s body.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Read the body of the current part of the multipart message.</p></div>
-<div class="paragraph"><p>This function calls <code>body/2</code> for reading the body, with the
-same options it received. It uses the same defaults.</p></div>
-<div class="paragraph"><p>If there are more data to be read from the socket for this
-part, the function will return what it could read inside a
-<code>more</code> tuple. Otherwise, it will return an <code>ok</code> tuple.</p></div>
-<div class="paragraph"><p>Calling this function again after receiving a <code>more</code> tuple
-will return another chunk of body. The last chunk will be
-returned inside an <code>ok</code> tuple.</p></div>
-<div class="paragraph"><p>Note that once the body has been read, fully or partially,
-it cannot be read again.</p></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_response_related_exports">Response related exports</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_chunk_data_req_8594_ok">chunk(Data, Req) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Data = iodata()
-</dt>
-<dd>
-<p>
-Chunk data to be sent.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Send a chunk of data.</p></div>
-<div class="paragraph"><p>This function should be called as many times as needed
-to send data chunks after calling <code>chunked_reply/{2,3}</code>.</p></div>
-<div class="paragraph"><p>When the method is HEAD, no data will actually be sent.</p></div>
-<div class="paragraph"><p>If the request uses HTTP/1.0, the data is sent directly
-without wrapping it in an HTTP/1.1 chunk, providing
-compatibility with older clients.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_chunked_reply_statuscode_req_8594_chunked_reply_statuscode_req">chunked_reply(StatusCode, Req) &#8594; chunked_reply(StatusCode, [], Req)</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:chunked_reply/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_chunked_reply_statuscode_headers_req_8594_req2">chunked_reply(StatusCode, Headers, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-StatusCode = cowboy:http_status()
-</dt>
-<dd>
-<p>
-Response status code.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = cowboy:http_headers()
-</dt>
-<dd>
-<p>
-Response headers.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Send a response using chunked transfer-encoding.</p></div>
-<div class="paragraph"><p>This function effectively sends the response status line
-and headers to the client.</p></div>
-<div class="paragraph"><p>This function will not send any body set previously. After
-this call the handler must use the <code>chunk/2</code> function
-repeatedly to send the body in as many chunks as needed.</p></div>
-<div class="paragraph"><p>If the request uses HTTP/1.0, the data is sent directly
-without wrapping it in an HTTP/1.1 chunk, providing
-compatibility with older clients.</p></div>
-<div class="paragraph"><p>This function can only be called once, with the exception
-of overriding the response in the <code>onresponse</code> hook.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_continue_req_8594_ok">continue(Req) &#8594; ok</h3>
-<div class="paragraph"><p>Send a 100 Continue intermediate reply.</p></div>
-<div class="paragraph"><p>This reply is required before the client starts sending the
-body when the request contains the <code>expect</code> header with the
-<code>100-continue</code> value.</p></div>
-<div class="paragraph"><p>Cowboy will send this automatically when required. However
-you may want to do it manually by disabling this behavior
-with the <code>continue</code> body option and then calling this
-function.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_delete_resp_header_name_req_8594_req2">delete_resp_header(Name, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Response header name.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Delete the given response header.</p></div>
-<div class="paragraph"><p>While header names are case insensitive, this function expects
-the name to be a lowercase binary.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_has_resp_body_req_8594_boolean">has_resp_body(Req) &#8594; boolean()</h3>
-<div class="paragraph"><p>Return whether a response body has been set.</p></div>
-<div class="paragraph"><p>This function will return false if a response body has
-been set with a length of 0.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_has_resp_header_name_req_8594_boolean">has_resp_header(Name, Req) &#8594; boolean()</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Response header name.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return whether the given response header has been set.</p></div>
-<div class="paragraph"><p>While header names are case insensitive, this function expects
-the name to be a lowercase binary.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_reply_statuscode_req_8594_reply_statuscode_req">reply(StatusCode, Req) &#8594; reply(StatusCode, [], Req)</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:reply/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_reply_statuscode_headers_req_see_below">reply(StatusCode, Headers, Req) - see below</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:reply/4</code>, with caveats.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_reply_statuscode_headers_body_req_8594_req2">reply(StatusCode, Headers, Body, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-StatusCode = cowboy:http_status()
-</dt>
-<dd>
-<p>
-Response status code.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = cowboy:http_headers()
-</dt>
-<dd>
-<p>
-Response headers.
-</p>
-</dd>
-<dt class="hdlist1">
-Body = iodata()
-</dt>
-<dd>
-<p>
-Response body.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Send a response.</p></div>
-<div class="paragraph"><p>This function effectively sends the response status line,
-headers and body to the client, in a single send function
-call.</p></div>
-<div class="paragraph"><p>The <code>reply/2</code> and <code>reply/3</code> functions will send the body
-set previously, if any. The <code>reply/4</code> function overrides
-any body set previously and sends <code>Body</code> instead.</p></div>
-<div class="paragraph"><p>If a body function was set, and <code>reply/2</code> or <code>reply/3</code> was
-used, it will be called before returning.</p></div>
-<div class="paragraph"><p>No more data can be sent to the client after this function
-returns.</p></div>
-<div class="paragraph"><p>This function can only be called once, with the exception
-of overriding the response in the <code>onresponse</code> hook.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_set_resp_body_body_req_8594_req2">set_resp_body(Body, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Body = iodata()
-</dt>
-<dd>
-<p>
-Response body.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Set a response body.</p></div>
-<div class="paragraph"><p>This body will not be sent if <code>chunked_reply/{2,3}</code> or
-<code>reply/4</code> is used, as they override it.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_set_resp_body_fun_fun_req_8594_req2">set_resp_body_fun(Fun, Req) &#8594; Req2</h3>
-<div class="paragraph"><p>Alias of <code>cowboy_req:set_resp_body_fun/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_set_resp_body_fun_length_fun_req_8594_req2">set_resp_body_fun(Length, Fun, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Fun = fun((Socket, Transport) &#8594; ok)
-</dt>
-<dd>
-<p>
-Fun that will send the response body.
-</p>
-</dd>
-<dt class="hdlist1">
-Socket = inet:socket()
-</dt>
-<dd>
-<p>
-Socket for this connection.
-</p>
-</dd>
-<dt class="hdlist1">
-Transport = module()
-</dt>
-<dd>
-<p>
-Transport module for this socket.
-</p>
-</dd>
-<dt class="hdlist1">
-Length = non_neg_integer()
-</dt>
-<dd>
-<p>
-Length of the response body.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Set a fun for sending the response body.</p></div>
-<div class="paragraph"><p>If a <code>Length</code> is provided, it will be sent in the
-content-length header in the response. It is recommended
-to set the length if it can be known in advance. Otherwise,
-the transfer-encoding header will be set to identity.</p></div>
-<div class="paragraph"><p>This function will only be called if the response is sent
-using the <code>reply/2</code> or <code>reply/3</code> function.</p></div>
-<div class="paragraph"><p>The fun will receive the Ranch <code>Socket</code> and <code>Transport</code> as
-arguments. Only send and sendfile operations are supported.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_set_resp_body_fun_chunked_fun_req_8594_req2">set_resp_body_fun(chunked, Fun, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Fun = fun((ChunkFun) &#8594; ok)
-</dt>
-<dd>
-<p>
-Fun that will send the response body.
-</p>
-</dd>
-<dt class="hdlist1">
-ChunkFun = funiodata( &#8594; ok)
-</dt>
-<dd>
-<p>
-Fun to call for every chunk to be sent.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Set a fun for sending the response body using chunked transfer-encoding.</p></div>
-<div class="paragraph"><p>This function will only be called if the response is sent
-using the <code>reply/2</code> or <code>reply/3</code> function.</p></div>
-<div class="paragraph"><p>The fun will receive another fun as argument. This fun is to
-be used to send chunks in a similar way to the <code>chunk/2</code> function,
-except the fun only takes one argument, the data to be sent in
-the chunk.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_set_resp_cookie_name_value_opts_req_8594_req2">set_resp_cookie(Name, Value, Opts, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = iodata()
-</dt>
-<dd>
-<p>
-Cookie name.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = iodata()
-</dt>
-<dd>
-<p>
-Cookie value.
-</p>
-</dd>
-<dt class="hdlist1">
-Opts = cookie_opts()
-</dt>
-<dd>
-<p>
-Cookie options.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Set a cookie in the response.</p></div>
-<div class="paragraph"><p>Cookie names are case sensitive.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_set_resp_header_name_value_req_8594_req2">set_resp_header(Name, Value, Req) &#8594; Req2</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name = binary()
-</dt>
-<dd>
-<p>
-Response header name.
-</p>
-</dd>
-<dt class="hdlist1">
-Value = iodata()
-</dt>
-<dd>
-<p>
-Response header value.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Set a response header.</p></div>
-<div class="paragraph"><p>You should use <code>set_resp_cookie/4</code> instead of this function
-to set cookies.</p></div>
-</div>
+<div class="paragraph"><p><a href="../cowboy_app">cowboy(7)</a></p></div>
 </div>
 </div>
 

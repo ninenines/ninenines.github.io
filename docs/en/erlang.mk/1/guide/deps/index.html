@@ -358,6 +358,60 @@ fetching those from B or C.</p></div>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_fetching_and_listing_dependencies_only">Fetching and listing dependencies only</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>You can fetch all dependencies recursively without building anything,
+with the <code>make fetch-deps</code> command. It follows the same rules described
+in the section above.</p></div>
+<div class="paragraph"><p>You can list all dependencies recursively, again without building
+anything, with the <code>make list-deps</code> command. It will obviously need
+to fetch all dependencies exactly like <code>make fetch-deps</code>. Once
+everything is fetched, it prints a sorted list of absolute paths to the
+dependencies.</p></div>
+<div class="paragraph"><p>By default, <code>fetch-deps</code> and <code>list-deps</code> work on the <code>BUILD_DEPS</code>
+and <code>DEPS</code> lists only. To also fetch/list <code>TEST_DEPS</code>, <code>DOC_DEPS</code>,
+<code>REL_DEPS</code> and/or <code>SHELL_DEPS</code>, you have two possibilities:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+You can use <code>make fetch-test-deps</code>, <code>make fetch-doc-deps</code>, <code>make
+  fetch-rel-deps</code> and <code>make fetch-shell-deps</code> commands respectively.
+  If you want to list them, you can use <code>make list-test-deps</code>, <code>make
+  list-doc-deps</code>, <code>make list-rel-deps</code> and <code>make list-shell-deps</code>
+  respectively.
+</p>
+</li>
+<li>
+<p>
+You can use <code>make fetch-deps</code> or <code>make list-deps</code> with the Makefile
+  variable <code>DEP_TYPES</code> set to a list of dependency types you want.
+  The types are <code>test</code>, <code>doc</code>, <code>rel</code> and <code>shell</code> respectively. For
+  example, you can list test and doc dependencies with <code>make list-deps
+  DEP_TYPES='test doc'</code>.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Note that only first level &#8216;TEST_DEPS<code>, `DOC_DEPS</code>, <code>REL_DEPS</code> and
+<code>SHELL_DEPS</code> are included, not dependencies&#8217; one. In other word,
+<code>make list-test-deps</code> lists the <code>TEST_DEPS</code> of your project, but not
+<code>TEST_DEPS</code> of the projects yours depend on.</p></div>
+<div class="paragraph"><p>No matter which method you use, <code>BUILD_DEPS</code> and <code>DEPS</code> are always
+included.</p></div>
+<div class="paragraph"><p>Internally, the <code>make fetch-*</code> commands store the complete list of
+dependencies in files named <code>$(ERLANG_MK_RECURSIVE_DEPS_LIST)</code>,
+<code>$(ERLANG_MK_RECURSIVE_TEST_DEPS_LIST)</code>,
+<code>$(ERLANG_MK_RECURSIVE_DOC_DEPS_LIST)</code>,
+<code>$(ERLANG_MK_RECURSIVE_REL_DEPS_LIST)</code> and
+<code>$(ERLANG_MK_RECURSIVE_SHELL_DEPS_LIST)</code>. Those files are simply printed
+by the <code>make list-*</code> commands.</p></div>
+<div class="paragraph"><p><code>make list-*</code> commands are made for human beings. If you need the list
+of dependencies in a Makefile or a script, you should use the content
+of those files directly instead. The reason is that <code>make fetch-*</code> and
+<code>make list-*</code> may have unwanted content in their output, such as actual
+fetching of dependencies.</p></div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_ignoring_unwanted_dependencies">Ignoring unwanted dependencies</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Sometimes, you may want to ignore dependencies entirely.

@@ -9,7 +9,7 @@
 
     <meta name="generator" content="Hugo 0.16" />
 
-    <title>Nine Nines: Escripts</title>
+    <title>Nine Nines: Self-extracting releases</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
 	
@@ -67,91 +67,55 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Escripts</span></h1>
+<h1 class="lined-header"><span>Self-extracting releases</span></h1>
 
-<div class="paragraph"><p>Escripts are an alternative to release. They are meant to be
-used for small command line executables written in Erlang.</p></div>
-<div class="paragraph"><p>They are not self-contained, unlike <a href="../relx">releases</a>.
-Erlang must be installed for them to run. This however means
-that they are fairly small compared to releases.</p></div>
-<div class="paragraph"><p>For self-contained executables, check <a href="../sfx">self-extracting releases</a>.</p></div>
+<div class="paragraph"><p>Erlang.mk allows you to package <a href="../relx">Relx releases</a> as
+self-extracting archives. These archives contain all the
+files in the release and come in the form of a script that
+will extract and run the release automatically.</p></div>
+<div class="paragraph"><p>This allows you to package the release as a single file
+that can then be executed.</p></div>
+<div class="paragraph"><p>This feature is currently experimental. Feedback is much
+appreciated.</p></div>
 <div class="sect1">
-<h2 id="_requirements">Requirements</h2>
+<h2 id="_generating_the_self_extracting_archive">Generating the self-extracting archive</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk uses <code>p7zip</code> by default to generate the escript
-archive. Make sure it is installed. On most systems the
-package is named <code>p7zip</code>; on Ubuntu you need <code>p7zip-full</code>.</p></div>
-<div class="paragraph"><p>If <code>p7zip</code> is unavailable, <code>zip</code> may be used by setting
-the <code>ESCRIPT_ZIP</code> variable. For example:</p></div>
+<div class="paragraph"><p>To generate a self-extracting release, all you need to do
+is pass the <code>SFX=1</code> variable to Make when you build the
+release:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make escript <span style="color: #009900">ESCRIPT_ZIP</span><span style="color: #990000">=</span>zip</tt></pre></div></div>
+<pre><tt>$ make <span style="color: #009900">SFX</span><span style="color: #990000">=</span><span style="color: #993399">1</span></tt></pre></div></div>
+<div class="paragraph"><p>This will create a self-extracting archive in
+<code>$RELX_OUTPUT_DIR/&lt;name&gt;.run</code>. For example if the release
+is named <code>hello_world</code> and <code>$RELX_OUTPUT_DIR</code> is the default,
+the file will be located at <code>_rel/hello_world.run</code>.</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_generating_an_escript">Generating an escript</h2>
+<h2 id="_running_the_release">Running the release</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Run the following command to generate an escript:</p></div>
+<div class="paragraph"><p>Simply execute the script to get started:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make escript</tt></pre></div></div>
-<div class="paragraph"><p>This will by default create an escript with the same name as
-the project, in the project&#8217;s directory. If the project is
-called <code>relx</code> then the escript will be in <code>./relx</code>.</p></div>
-<div class="paragraph"><p>You can run the escript as you would any executable:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ <span style="color: #990000">.</span>/relx</tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuration">Configuration</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>You can change the name of the escript by setting <code>ESCRIPT_NAME</code>.
-The name determines both the default output file name and the
-entry module containing the function <code>main/1</code>.</p></div>
-<div class="paragraph"><p><code>ESCRIPT_FILE</code> can be set if you need a different file name
-or location.</p></div>
-<div class="paragraph"><p>The escript header can be entirely customized. The first line
-is the shebang, set by <code>ESCRIPT_SHEBANG</code>. The second line is
-a comment, set by <code>ESCRIPT_COMMENT</code>. The third line is the
-arguments the VM will use when running the escript, set by
-<code>ESCRIPT_EMU_ARGS</code>.</p></div>
-<div class="paragraph"><p>Finally, <code>ESCRIPT_ZIP</code> can be set to customize the command used
-to create the zip file. Read on for more information.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_extra_files">Extra files</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Generating an escript is a two-part process. First, a zip file
-is created with the contents of the escript. Then a header is
-added to this file to create the escript.</p></div>
-<div class="paragraph"><p>It is possible to add commands that will be executed between
-the two steps. You can for example add extra files to the zip
-archive:</p></div>
-<div class="listingblock">
-<div class="content"></div></div>
-<div class="paragraph"><p>The <code>ESCRIPT_ZIP</code> variable contains the command to run to add
-files to the zip archive <code>ESCRIPT_ZIP_FILE</code>.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_optimizing_for_size">Optimizing for size</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk will by default compile BEAM files with debug
-information. You may want to disable this behavior to obtain
-smaller escript files. Simply set <code>ERLC_OPTS</code> to a value that
-does not include <code>+debug_info</code>.</p></div>
+<pre><tt>$ <span style="color: #990000">./</span>_rel/hello_world<span style="color: #990000">.</span>run
+Exec<span style="color: #990000">:</span> /tmp/tmp<span style="color: #990000">.</span>3eeEq7E1ta/erts-<span style="color: #993399">8.1</span>/bin/erlexec <span style="color: #990000">...</span>
+Root<span style="color: #990000">:</span> /tmp/tmp<span style="color: #990000">.</span>3eeEq7E1ta
+/tmp/tmp<span style="color: #990000">.</span>3eeEq7E1ta
+Erlang/OTP <span style="color: #993399">19</span> <span style="color: #990000">[</span>erts-<span style="color: #993399">8.1</span><span style="color: #990000">]</span> <span style="color: #990000">[</span><span style="font-weight: bold"><span style="color: #0000FF">source</span></span><span style="color: #990000">]</span> <span style="color: #990000">[</span><span style="color: #993399">64</span>-bit<span style="color: #990000">]</span> <span style="color: #990000">[</span>smp<span style="color: #990000">:</span><span style="color: #993399">4</span><span style="color: #990000">:</span><span style="color: #993399">4</span><span style="color: #990000">]</span> <span style="color: #990000">...</span>
+
+Eshell V8<span style="color: #990000">.</span><span style="color: #993399">1</span>  <span style="color: #990000">(</span>abort with <span style="color: #990000">^</span>G<span style="color: #990000">)</span>
+<span style="color: #990000">(</span>hello_world@localhost<span style="color: #990000">)</span><span style="color: #993399">1</span><span style="color: #990000">&gt;</span></tt></pre></div></div>
+<div class="paragraph"><p>As you can see the archive is extracted to a temporary
+directory before the release can be started.</p></div>
+<div class="paragraph"><p>The self-extracting script currently only supports starting
+the release in <code>console</code> mode.</p></div>
 </div>
 </div>
 
@@ -163,14 +127,14 @@ does not include <code>+debug_info</code>.</p></div>
 
 		<nav style="margin:1em 0">
 			
-				<a style="float:left" href="https://ninenines.eu/docs/en/erlang.mk/1/guide/sfx/">
-					Self-extracting releases
+				<a style="float:left" href="https://ninenines.eu/docs/en/erlang.mk/1/guide/releases/">
+					Releases
 				</a>
 			
 
 			
-				<a style="float:right" href="https://ninenines.eu/docs/en/erlang.mk/1/guide/compat/">
-					Compatibility with other build tools
+				<a style="float:right" href="https://ninenines.eu/docs/en/erlang.mk/1/guide/escripts/">
+					Escripts
 				</a>
 			
 		</nav>

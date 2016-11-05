@@ -92,6 +92,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">ssl_opt</span></span>() <span style="color: #990000">=</span> {<span style="color: #FF6600">alpn_preferred_protocols</span>, [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]}
+        | {<span style="color: #FF6600">beast_mitigation</span>, <span style="color: #FF6600">one_n_minus_one</span> | <span style="color: #FF6600">zero_n</span> | <span style="color: #FF6600">disabled</span>}
         | {<span style="color: #FF6600">cacertfile</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
         | {<span style="color: #FF6600">cacerts</span>, [<span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()]}
         | {<span style="color: #FF6600">cert</span>, <span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()}
@@ -110,6 +111,7 @@ http://www.gnu.org/software/src-highlite -->
         | {<span style="color: #FF6600">keyfile</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
         | {<span style="color: #FF6600">log_alert</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
         | {<span style="color: #FF6600">next_protocols_advertised</span>, [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]}
+        | {<span style="color: #FF6600">padding_check</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
         | {<span style="color: #FF6600">partial_chain</span>, <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>(([<span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()]) <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">trusted_ca</span>, <span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()} | <span style="color: #FF6600">unknown_ca</span>)}
         | {<span style="color: #FF6600">password</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
         | {<span style="color: #FF6600">psk_identity</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
@@ -120,6 +122,7 @@ http://www.gnu.org/software/src-highlite -->
         | {<span style="color: #FF6600">sni_fun</span>, <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>()}
         | {<span style="color: #FF6600">sni_hosts</span>, [{<span style="font-weight: bold"><span style="color: #000000">string</span></span>(), <span style="font-weight: bold"><span style="color: #000000">ssl_opt</span></span>()}]}
         | {<span style="color: #FF6600">user_lookup_fun</span>, {<span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>(), <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}}
+        | {<span style="color: #FF6600">v2_hello_compatible</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
         | {<span style="color: #FF6600">verify</span>, <span style="font-weight: bold"><span style="color: #000000">ssl:verify_type</span></span>()}
         | {<span style="color: #FF6600">verify_fun</span>, {<span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>(), <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}}
         | {<span style="color: #FF6600">versions</span>, [<span style="font-weight: bold"><span style="color: #000080">atom</span></span>()]}<span style="color: #990000">.</span></tt></pre></div></div>
@@ -148,6 +151,14 @@ alpn_preferred_protocols
 <dd>
 <p>
         Perform Application-Layer Protocol Negotiation with the given list of preferred protocols.
+</p>
+</dd>
+<dt class="hdlist1">
+beast_mitigation
+</dt>
+<dd>
+<p>
+        Change the BEAST mitigation strategy for SSL-3.0 and TLS-1.0 to interoperate with legacy software.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -303,6 +314,14 @@ nodelay (true)
 </p>
 </dd>
 <dt class="hdlist1">
+padding_check
+</dt>
+<dd>
+<p>
+        Allow disabling the block cipher padding check for TLS-1.0 to be able to interoperate with legacy software.
+</p>
+</dd>
+<dt class="hdlist1">
 partial_chain
 </dt>
 <dd>
@@ -380,6 +399,14 @@ user_lookup_fun
 <dd>
 <p>
         Function called to determine the shared secret when using PSK, or provide parameters when using SRP.
+</p>
+</dd>
+<dt class="hdlist1">
+v2_hello_compatible
+</dt>
+<dd>
+<p>
+        Accept clients that send hello messages in SSL-2.0 format while offering supported SSL/TLS versions.
 </p>
 </dd>
 <dt class="hdlist1">
