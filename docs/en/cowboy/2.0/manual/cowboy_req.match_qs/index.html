@@ -87,10 +87,18 @@ http://www.gnu.org/software/src-highlite -->
     <span style="color: #990000">-&gt;</span> #{<span style="font-weight: bold"><span style="color: #000080">atom</span></span>() <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}</tt></pre></div></div>
 <div class="paragraph"><p>Parse the query string and match specific values against
 constraints.</p></div>
-<div class="paragraph"><p>This function allows easily retrieving expected values
-from the query string, validating and converting them
-in one call. In addition, the keys are converted to
-atoms, making manipulation that much simpler.</p></div>
+<div class="paragraph"><p>Cowboy will only return the query string values specified
+in the fields list, and ignore all others. Fields can be
+either the key requested; the key along with a list of
+constraints; or the key, a list of constraints and a
+default value in case the key is missing.</p></div>
+<div class="paragraph"><p>This function will crash if the key is missing and no
+default value is provided. This function will also crash
+if a constraint fails.</p></div>
+<div class="paragraph"><p>The key must be provided as an atom. The key of the
+returned map will be that atom. The value may be converted
+through the use of constraints, making this function able
+to extract, validate and convert values all in one step.</p></div>
 </div>
 </div>
 <div class="sect1">
