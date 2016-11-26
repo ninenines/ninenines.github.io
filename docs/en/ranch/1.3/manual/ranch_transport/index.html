@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.17" />
+
+    <title>Nine Nines: ranch_transport(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch_transport(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>ranch_transport - behaviour for transport modules</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <code>ranch_transport</code> behaviour defines the interface used
+by Ranch transports.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_types">Types</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_sendfile_opts_chunk_size_non_neg_integer">sendfile_opts() = [{chunk_size, non_neg_integer()}]</h3>
+<div class="paragraph"><p>Options used by the sendfile function and callbacks.</p></div>
+<div class="paragraph"><p>Allows configuring the chunk size, in bytes. Defaults to 8191 bytes.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callbacks">Callbacks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_accept_lsocket_timeout_8594_ok_csocket_error_closed_timeout_atom">accept(LSocket, Timeout) &#8594; {ok, CSocket} | {error, closed | timeout | atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+LSocket = CSocket = any()
+</dt>
+<dd>
+<p>
+Listening socket.
+</p>
+</dd>
+<dt class="hdlist1">
+Timeout = timeout()
+</dt>
+<dd>
+<p>
+Accept timeout.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Accept a connection on the given listening socket.</p></div>
+<div class="paragraph"><p>The <code>accept_ack</code> callback will be used to initialize the socket
+after accepting the connection. This is most useful when the
+transport is not raw TCP, like with SSL for example.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_accept_ack_csocket_timeout_8594_ok">accept_ack(CSocket, Timeout) &#8594; ok</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+Timeout = timeout()
+</dt>
+<dd>
+<p>
+Ack timeout.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Perform post-accept initialization of the connection.</p></div>
+<div class="paragraph"><p>This function will be called by connection processes
+before performing any socket operation. It allows
+transports that require extra initialization to perform
+their task and make the socket ready to use.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_close_socket_8594_ok">close(Socket) &#8594; ok</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Socket = any()
+</dt>
+<dd>
+<p>
+Socket opened with listen/1 or accept/2.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Close the given socket.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_controlling_process_socket_pid_8594_ok_error_closed_not_owner_atom">controlling_process(Socket, Pid) &#8594; ok | {error, closed | not_owner | atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Socket = any()
+</dt>
+<dd>
+<p>
+Socket opened with listen/1 or accept/2.
+</p>
+</dd>
+<dt class="hdlist1">
+Pid = pid()
+</dt>
+<dd>
+<p>
+Pid of the new owner of the socket.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Change the controlling process for the given socket.</p></div>
+<div class="paragraph"><p>The controlling process is the process that is allowed to
+perform operations on the socket, and that will receive
+messages from the socket when active mode is used. When
+the controlling process dies, the socket is closed.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_listen_transopts_8594_ok_lsocket_error_atom">listen(TransOpts) &#8594; {ok, LSocket} | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+TransOpts = any()
+</dt>
+<dd>
+<p>
+Transport options.
+</p>
+</dd>
+<dt class="hdlist1">
+LSocket = any()
+</dt>
+<dd>
+<p>
+Listening socket.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Listen for connections on the given port.</p></div>
+<div class="paragraph"><p>The port is given as part of the transport options under
+the key <code>port</code>. Any other option is transport dependent.</p></div>
+<div class="paragraph"><p>The socket returned by this call can then be used to
+accept connections. It is not possible to send or receive
+data from the listening socket.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_messages_8594_ok_closed_error">messages() &#8594; {OK, Closed, Error}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+OK = Closed = Error = atom()
+</dt>
+<dd>
+<p>
+Tuple names.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Return the atoms used to identify messages sent in active mode.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_name_8594_name">name() &#8594; Name</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Name = atom()
+</dt>
+<dd>
+<p>
+Transport module name.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Return the name of the transport.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_peername_csocket_8594_ok_ip_port_error_atom">peername(CSocket) &#8594; {ok, {IP, Port}} | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+IP = inet:ip_address()
+</dt>
+<dd>
+<p>
+IP of the remote endpoint.
+</p>
+</dd>
+<dt class="hdlist1">
+Port = inet:port_number()
+</dt>
+<dd>
+<p>
+Port of the remote endpoint.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Return the IP and port of the remote endpoint.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_recv_csocket_length_timeout_8594_ok_packet_error_closed_timeout_atom">recv(CSocket, Length, Timeout) &#8594; {ok, Packet} | {error, closed | timeout | atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+Length = non_neg_integer()
+</dt>
+<dd>
+<p>
+Requested length.
+</p>
+</dd>
+<dt class="hdlist1">
+Timeout = timeout()
+</dt>
+<dd>
+<p>
+Receive timeout.
+</p>
+</dd>
+<dt class="hdlist1">
+Packet = iodata() | any()
+</dt>
+<dd>
+<p>
+Data received.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Receive data from the given socket when in passive mode.</p></div>
+<div class="paragraph"><p>Trying to receive data from a socket that is in active mode
+will return an error.</p></div>
+<div class="paragraph"><p>A length of 0 will return any data available on the socket.</p></div>
+<div class="paragraph"><p>While it is possible to use the timeout value <code>infinity</code>,
+this is highly discouraged as this could cause your process
+to get stuck waiting for data that will never come. This may
+happen when a socket becomes half-open due to a crash of the
+remote endpoint. Wi-Fi going down is another common culprit
+of this issue.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_send_csocket_packet_8594_ok_error_atom">send(CSocket, Packet) &#8594; ok | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+Packet = iodata()
+</dt>
+<dd>
+<p>
+Data to be sent.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Send data to the given socket.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_sendfile_csocket_file_8594_sendfile_csocket_file_0_0">sendfile(CSocket, File) &#8594; sendfile(CSocket, File, 0, 0, [])</h3>
+<div class="paragraph"><p>Alias of <code>ranch_transport:sendfile/5</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_sendfile_csocket_file_offset_bytes_8594_sendfile_csocket_file_offset_bytes">sendfile(CSocket, File, Offset, Bytes) &#8594; sendfile(CSocket, File, Offset, Bytes, [])</h3>
+<div class="paragraph"><p>Alias of <code>ranch_transport:sendfile/5</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_sendfile_csocket_file_offset_bytes_sfopts_8594_ok_sentbytes_error_atom">sendfile(CSocket, File, Offset, Bytes, SfOpts) &#8594; {ok, SentBytes} | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+File = file:filename_all() | file:fd()
+</dt>
+<dd>
+<p>
+Filename or file descriptor for the file to be sent.
+</p>
+</dd>
+<dt class="hdlist1">
+Offset = non_neg_integer()
+</dt>
+<dd>
+<p>
+Begin sending at this position in the file.
+</p>
+</dd>
+<dt class="hdlist1">
+Bytes = non_neg_integer()
+</dt>
+<dd>
+<p>
+Send this many bytes.
+</p>
+</dd>
+<dt class="hdlist1">
+SentBytes = non_neg_integer()
+</dt>
+<dd>
+<p>
+This many bytes were sent.
+</p>
+</dd>
+<dt class="hdlist1">
+SfOpts = sendfile_opts()
+</dt>
+<dd>
+<p>
+Sendfile options.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Send data from a file to the given socket.</p></div>
+<div class="paragraph"><p>The file may be sent full or in parts, and may be specified
+by its filename or by an already open file descriptor.</p></div>
+<div class="paragraph"><p>Transports that manipulate TCP directly may use the
+<code>file:sendfile/{2,4,5}</code> function, which calls the sendfile
+syscall where applicable (on Linux, for example). Other
+transports can use the <code>sendfile/6</code> function exported from
+this module.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_setopts_csocket_sockopts_8594_ok_error_atom">setopts(CSocket, SockOpts) &#8594; ok | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+SockOpts = any()
+</dt>
+<dd>
+<p>
+Socket options.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Change options for the given socket.</p></div>
+<div class="paragraph"><p>This is mainly useful for switching to active or passive mode
+or to set protocol-specific options.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_shutdown_csocket_how_8594_ok_error_atom">shutdown(CSocket, How) &#8594; ok | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+How = read | write | read_write
+</dt>
+<dd>
+<p>
+Which side(s) of the socket to close.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Immediately close the socket in one or two directions.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_sockname_socket_8594_ok_ip_port_error_atom">sockname(Socket) &#8594; {ok, {IP, Port}} | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Socket = any()
+</dt>
+<dd>
+<p>
+Socket opened with listen/1 or accept/2.
+</p>
+</dd>
+<dt class="hdlist1">
+IP = inet:ip_address()
+</dt>
+<dd>
+<p>
+IP of the local endpoint.
+</p>
+</dd>
+<dt class="hdlist1">
+Port = inet:port_number()
+</dt>
+<dd>
+<p>
+Port of the local endpoint.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Return the IP and port of the local endpoint.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exports">Exports</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_sendfile_transport_csocket_file_offset_bytes_sfopts_8594_ok_sentbytes_error_atom">sendfile(Transport, CSocket, File, Offset, Bytes, SfOpts) &#8594; {ok, SentBytes} | {error, atom()}</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Transport = module()
+</dt>
+<dd>
+<p>
+Transport module for this socket.
+</p>
+</dd>
+<dt class="hdlist1">
+CSocket = any()
+</dt>
+<dd>
+<p>
+Socket for this connection.
+</p>
+</dd>
+<dt class="hdlist1">
+File = file:filename_all() | file:fd()
+</dt>
+<dd>
+<p>
+Filename or file descriptor for the file to be sent.
+</p>
+</dd>
+<dt class="hdlist1">
+Offset = non_neg_integer()
+</dt>
+<dd>
+<p>
+Begin sending at this position in the file.
+</p>
+</dd>
+<dt class="hdlist1">
+Bytes = non_neg_integer()
+</dt>
+<dd>
+<p>
+Send this many bytes.
+</p>
+</dd>
+<dt class="hdlist1">
+SentBytes = non_neg_integer()
+</dt>
+<dd>
+<p>
+This many bytes were sent.
+</p>
+</dd>
+<dt class="hdlist1">
+SfOpts = sendfile_opts()
+</dt>
+<dd>
+<p>
+Sendfile options.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Send data from a file to the given socket.</p></div>
+<div class="paragraph"><p>This function emulates the function <code>file:sendfile/{2,4,5}</code>
+and may be used when transports are not manipulating TCP
+directly.</p></div>
+</div>
+</div>
+</div>
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	1.3
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/1.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/1.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/1.3/manual">1.3</a></li>
+	
+		<li><a href="/docs/en/ranch/1.2/manual">1.2</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

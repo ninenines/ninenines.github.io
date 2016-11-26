@@ -26,7 +26,7 @@ define docs-version-target
 .PHONY: docs-$1-$2
 
 docs-$1-$2: tmp/$1
-	cd tmp/$1 && git checkout $4
+	cd tmp/$1 && git checkout $4 && git reset --hard $4
 	if [ -f tmp/$1/doc/src/guide/book.asciidoc ]; then \
 		mkdir -p content/docs/en/$1/$3/guide/; \
 		echo "+++" > content/docs/en/$1/$3/guide.asciidoc; \

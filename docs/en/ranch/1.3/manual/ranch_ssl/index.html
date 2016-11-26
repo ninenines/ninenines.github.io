@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.17" />
+
+    <title>Nine Nines: ranch_ssl(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch_ssl(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>ranch_ssl - SSL transport module</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <code>ranch_ssl</code> module implements an SSL Ranch transport.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_types">Types</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_ssl_opt">ssl_opt()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">ssl_opt</span></span>() <span style="color: #990000">=</span> {<span style="color: #FF6600">alpn_preferred_protocols</span>, [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]}
+        | {<span style="color: #FF6600">beast_mitigation</span>, <span style="color: #FF6600">one_n_minus_one</span> | <span style="color: #FF6600">zero_n</span> | <span style="color: #FF6600">disabled</span>}
+        | {<span style="color: #FF6600">cacertfile</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
+        | {<span style="color: #FF6600">cacerts</span>, [<span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()]}
+        | {<span style="color: #FF6600">cert</span>, <span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()}
+        | {<span style="color: #FF6600">certfile</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
+        | {<span style="color: #FF6600">ciphers</span>, [<span style="font-weight: bold"><span style="color: #000000">ssl:erl_cipher_suite</span></span>()] | <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
+        | {<span style="color: #FF6600">client_renegotiation</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">crl_cache</span>, {<span style="font-weight: bold"><span style="color: #000000">module</span></span>(), {<span style="color: #FF6600">internal</span> | <span style="font-weight: bold"><span style="color: #000000">any</span></span>(), <span style="font-weight: bold"><span style="color: #000080">list</span></span>()}}}
+        | {<span style="color: #FF6600">crl_check</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>() | <span style="color: #FF6600">peer</span> | <span style="color: #FF6600">best_effort</span>}
+        | {<span style="color: #FF6600">depth</span>, <span style="color: #993399">0</span><span style="color: #990000">..</span><span style="color: #993399">255</span>}
+        | {<span style="color: #FF6600">dh</span>, <span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()}
+        | {<span style="color: #FF6600">dhfile</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
+        | {<span style="color: #FF6600">fail_if_no_peer_cert</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">hibernate_after</span>, <span style="font-weight: bold"><span style="color: #000080">integer</span></span>() | <span style="color: #000080">undefined</span>}
+        | {<span style="color: #FF6600">honor_cipher_order</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">key</span>, {<span style="color: #FF6600">'RSAPrivateKey'</span> | <span style="color: #FF6600">'DSAPrivateKey'</span> | <span style="color: #FF6600">'PrivateKeyInfo'</span>, <span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()}}
+        | {<span style="color: #FF6600">keyfile</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
+        | {<span style="color: #FF6600">log_alert</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">next_protocols_advertised</span>, [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]}
+        | {<span style="color: #FF6600">padding_check</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">partial_chain</span>, <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>(([<span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()]) <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">trusted_ca</span>, <span style="font-weight: bold"><span style="color: #000000">public_key:der_encoded</span></span>()} | <span style="color: #FF6600">unknown_ca</span>)}
+        | {<span style="color: #FF6600">password</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
+        | {<span style="color: #FF6600">psk_identity</span>, <span style="font-weight: bold"><span style="color: #000000">string</span></span>()}
+        | {<span style="color: #FF6600">reuse_session</span>, <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>()}
+        | {<span style="color: #FF6600">reuse_sessions</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">secure_renegotiate</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">signature_algs</span>, [{<span style="font-weight: bold"><span style="color: #000080">atom</span></span>(), <span style="font-weight: bold"><span style="color: #000080">atom</span></span>()}]}
+        | {<span style="color: #FF6600">sni_fun</span>, <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>()}
+        | {<span style="color: #FF6600">sni_hosts</span>, [{<span style="font-weight: bold"><span style="color: #000000">string</span></span>(), <span style="font-weight: bold"><span style="color: #000000">ssl_opt</span></span>()}]}
+        | {<span style="color: #FF6600">user_lookup_fun</span>, {<span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>(), <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}}
+        | {<span style="color: #FF6600">v2_hello_compatible</span>, <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()}
+        | {<span style="color: #FF6600">verify</span>, <span style="font-weight: bold"><span style="color: #000000">ssl:verify_type</span></span>()}
+        | {<span style="color: #FF6600">verify_fun</span>, {<span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>(), <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}}
+        | {<span style="color: #FF6600">versions</span>, [<span style="font-weight: bold"><span style="color: #000080">atom</span></span>()]}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>SSL-specific listen options.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_opt_ranch_tcp_opt_ssl_opt">opt() = ranch_tcp:opt() | ssl_opt()</h3>
+<div class="paragraph"><p>Listen options.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_opts_opt">opts() = [opt()]</h3>
+<div class="paragraph"><p>List of listen options.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_option_descriptions">Option descriptions</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Specifying a certificate is mandatory, either through the <code>cert</code>
+or the <code>certfile</code> option. None of the other options are required.</p></div>
+<div class="paragraph"><p>The default value is given next to the option name.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+alpn_preferred_protocols
+</dt>
+<dd>
+<p>
+        Perform Application-Layer Protocol Negotiation with the given list of preferred protocols.
+</p>
+</dd>
+<dt class="hdlist1">
+beast_mitigation
+</dt>
+<dd>
+<p>
+        Change the BEAST mitigation strategy for SSL-3.0 and TLS-1.0 to interoperate with legacy software.
+</p>
+</dd>
+<dt class="hdlist1">
+cacertfile
+</dt>
+<dd>
+<p>
+        Path to PEM encoded trusted certificates file used to verify peer certificates.
+</p>
+</dd>
+<dt class="hdlist1">
+cacerts
+</dt>
+<dd>
+<p>
+        List of DER encoded trusted certificates.
+</p>
+</dd>
+<dt class="hdlist1">
+cert
+</dt>
+<dd>
+<p>
+        DER encoded user certificate.
+</p>
+</dd>
+<dt class="hdlist1">
+certfile
+</dt>
+<dd>
+<p>
+        Path to the PEM encoded user certificate file. May also contain the private key.
+</p>
+</dd>
+<dt class="hdlist1">
+ciphers
+</dt>
+<dd>
+<p>
+        List of ciphers that clients are allowed to use.
+</p>
+</dd>
+<dt class="hdlist1">
+client_renegotiation (true)
+</dt>
+<dd>
+<p>
+        Whether to allow client-initiated renegotiation.
+</p>
+</dd>
+<dt class="hdlist1">
+crl_cache ({ssl_crl_cache, {internal, []}})
+</dt>
+<dd>
+<p>
+        Customize the module used to cache Certificate Revocation Lists.
+</p>
+</dd>
+<dt class="hdlist1">
+crl_check (false)
+</dt>
+<dd>
+<p>
+        Whether to perform CRL check on all certificates in the chain during validation.
+</p>
+</dd>
+<dt class="hdlist1">
+depth (1)
+</dt>
+<dd>
+<p>
+        Maximum of intermediate certificates allowed in the certification path.
+</p>
+</dd>
+<dt class="hdlist1">
+dh
+</dt>
+<dd>
+<p>
+        DER encoded Diffie-Hellman parameters.
+</p>
+</dd>
+<dt class="hdlist1">
+dhfile
+</dt>
+<dd>
+<p>
+        Path to the PEM encoded Diffie-Hellman parameters file.
+</p>
+</dd>
+<dt class="hdlist1">
+fail_if_no_peer_cert (false)
+</dt>
+<dd>
+<p>
+        Whether to refuse the connection if the client sends an empty certificate.
+</p>
+</dd>
+<dt class="hdlist1">
+hibernate_after (undefined)
+</dt>
+<dd>
+<p>
+        Time in ms after which SSL socket processes go into hibernation to reduce memory usage.
+</p>
+</dd>
+<dt class="hdlist1">
+honor_cipher_order (false)
+</dt>
+<dd>
+<p>
+        If true, use the server&#8217;s preference for cipher selection. If false, use the client&#8217;s preference.
+</p>
+</dd>
+<dt class="hdlist1">
+key
+</dt>
+<dd>
+<p>
+        DER encoded user private key.
+</p>
+</dd>
+<dt class="hdlist1">
+keyfile
+</dt>
+<dd>
+<p>
+        Path to the PEM encoded private key file, if different than the certfile.
+</p>
+</dd>
+<dt class="hdlist1">
+log_alert (true)
+</dt>
+<dd>
+<p>
+        If false, error reports will not be displayed.
+</p>
+</dd>
+<dt class="hdlist1">
+next_protocols_advertised
+</dt>
+<dd>
+<p>
+        List of protocols to send to the client if it supports the Next Protocol extension.
+</p>
+</dd>
+<dt class="hdlist1">
+nodelay (true)
+</dt>
+<dd>
+<p>
+        Whether to enable TCP_NODELAY.
+</p>
+</dd>
+<dt class="hdlist1">
+padding_check
+</dt>
+<dd>
+<p>
+        Allow disabling the block cipher padding check for TLS-1.0 to be able to interoperate with legacy software.
+</p>
+</dd>
+<dt class="hdlist1">
+partial_chain
+</dt>
+<dd>
+<p>
+        Claim an intermediate CA in the chain as trusted.
+</p>
+</dd>
+<dt class="hdlist1">
+password
+</dt>
+<dd>
+<p>
+        Password to the private key file, if password protected.
+</p>
+</dd>
+<dt class="hdlist1">
+psk_identity
+</dt>
+<dd>
+<p>
+        Provide the given PSK identity hint to the client during the handshake.
+</p>
+</dd>
+<dt class="hdlist1">
+reuse_session
+</dt>
+<dd>
+<p>
+        Custom policy to decide whether a session should be reused.
+</p>
+</dd>
+<dt class="hdlist1">
+reuse_sessions (false)
+</dt>
+<dd>
+<p>
+        Whether to allow session reuse.
+</p>
+</dd>
+<dt class="hdlist1">
+secure_renegotiate (false)
+</dt>
+<dd>
+<p>
+        Whether to reject renegotiation attempts that do not conform to RFC5746.
+</p>
+</dd>
+<dt class="hdlist1">
+signature_algs
+</dt>
+<dd>
+<p>
+        The TLS signature algorithm extension may be used, from TLS 1.2, to negotiate which signature algorithm to use during the TLS handshake.
+</p>
+</dd>
+<dt class="hdlist1">
+sni_fun
+</dt>
+<dd>
+<p>
+        Function called when the client requests a host using Server Name Indication. Returns options to apply.
+</p>
+</dd>
+<dt class="hdlist1">
+sni_hosts
+</dt>
+<dd>
+<p>
+        Options to apply for the host that matches what the client requested with Server Name Indication.
+</p>
+</dd>
+<dt class="hdlist1">
+user_lookup_fun
+</dt>
+<dd>
+<p>
+        Function called to determine the shared secret when using PSK, or provide parameters when using SRP.
+</p>
+</dd>
+<dt class="hdlist1">
+v2_hello_compatible
+</dt>
+<dd>
+<p>
+        Accept clients that send hello messages in SSL-2.0 format while offering supported SSL/TLS versions.
+</p>
+</dd>
+<dt class="hdlist1">
+verify (verify_none)
+</dt>
+<dd>
+<p>
+        Use <code>verify_peer</code> to request a certificate from the client.
+</p>
+</dd>
+<dt class="hdlist1">
+verify_fun
+</dt>
+<dd>
+<p>
+        Custom policy to decide whether a client certificate is valid.
+</p>
+</dd>
+<dt class="hdlist1">
+versions
+</dt>
+<dd>
+<p>
+        TLS protocol versions that will be supported.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Note that the client will not send a certificate unless the
+value for the <code>verify</code> option is set to <code>verify_peer</code>. This
+means that the <code>fail_if_no_peer_cert</code> only apply when combined
+with the <code>verify</code> option. The <code>verify_fun</code> option allows
+greater control over the client certificate validation.</p></div>
+<div class="paragraph"><p>The options <code>sni_fun</code> and <code>sni_hosts</code> are mutually exclusive.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exports">Exports</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>None.</p></div>
+</div>
+</div>
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	1.3
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/1.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/1.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/1.3/manual">1.3</a></li>
+	
+		<li><a href="/docs/en/ranch/1.2/manual">1.2</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

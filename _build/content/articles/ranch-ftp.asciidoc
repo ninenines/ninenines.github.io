@@ -197,7 +197,7 @@ loop(Socket, Transport, Buffer) ->
 			Buffer2 = << Buffer/binary, Data/binary >>,
 			{Commands, Rest} = split(Buffer2),
 			[handle(Socket, Transport, C) || C <- Commands],
-            loop(Socket, Transport);
+            loop(Socket, Transport, Rest);
         {error, _} ->
             io:format("The client disconnected~n")
     end.

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.17" />
+
+    <title>Nine Nines: Transports</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Transports</span></h1>
+
+<div class="paragraph"><p>A transport defines the interface to interact with a socket.</p></div>
+<div class="paragraph"><p>Transports can be used for connecting, listening and accepting
+connections, but also for receiving and sending data. Both
+passive and active mode are supported, although all sockets
+are initialized as passive.</p></div>
+<div class="sect1">
+<h2 id="_tcp_transport">TCP transport</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The TCP transport is a thin wrapper around <code>gen_tcp</code>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ssl_transport">SSL transport</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The SSL transport is a thin wrapper around <code>ssl</code>.</p></div>
+<div class="paragraph"><p>Ranch depends on <code>ssl</code> by default so any necessary
+dependencies will start when Ranch is started. It is
+possible to remove the dependency when the SSL transport
+will not be used. Refer to your release build tool&#8217;s
+documentation for more information.</p></div>
+<div class="paragraph"><p>When embedding Ranch listeners that have an SSL transport,
+your application must depend on the <code>ssl</code> application for
+proper behavior.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sending_and_receiving_data">Sending and receiving data</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This section assumes that <code>Transport</code> is a valid transport handler
+(like <code>ranch_tcp</code> or <code>ranch_ssl</code>) and <code>Socket</code> is a connected
+socket obtained through the listener.</p></div>
+<div class="paragraph"><p>You can send data to a socket by calling the <code>Transport:send/2</code>
+function. The data can be given as <code>iodata()</code>, which is defined as
+<code>binary() | iolist()</code>. All the following calls will work:</p></div>
+<div class="listingblock">
+<div class="title">Sending data to the socket</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Ranch is cool!"</span><span style="color: #990000">&gt;&gt;</span>)<span style="color: #990000">.</span>
+<span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #FF0000">"Ranch is cool!"</span>)<span style="color: #990000">.</span>
+<span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, [<span style="color: #FF0000">"Ranch"</span>, [<span style="color: #FF0000">"is"</span>, <span style="color: #FF0000">"cool!"</span>]])<span style="color: #990000">.</span>
+<span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, [<span style="color: #FF0000">"Ranch"</span>, [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"is"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"cool!"</span>]])<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can receive data either in passive or in active mode. Passive mode
+means that you will perform a blocking <code>Transport:recv/3</code> call, while
+active mode means that you will receive the data as a message.</p></div>
+<div class="paragraph"><p>By default, all data will be received as binary. It is possible to
+receive data as strings, although this is not recommended as binaries
+are a more efficient construct, especially for binary protocols.</p></div>
+<div class="paragraph"><p>Receiving data using passive mode requires a single function call. The
+first argument is the socket, and the third argument is a timeout duration
+before the call returns with <code>{error, timeout}</code>.</p></div>
+<div class="paragraph"><p>The second argument is the amount of data in bytes that we want to receive.
+The function will wait for data until it has received exactly this amount.
+If you are not expecting a precise size, you can specify 0 which will make
+this call return as soon as data was read, regardless of its size.</p></div>
+<div class="listingblock">
+<div class="title">Receiving data from the socket in passive mode</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">=</span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">recv</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #993399">0</span>, <span style="color: #993399">5000</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Active mode requires you to inform the socket that you want to receive
+data as a message and to write the code to actually receive it.</p></div>
+<div class="paragraph"><p>There are two kinds of active modes: <code>{active, once}</code> and
+<code>{active, true}</code>. The first will send a single message before going
+back to passive mode; the second will send messages indefinitely.
+We recommend not using the <code>{active, true}</code> mode as it could quickly
+flood your process mailbox. It&#8217;s better to keep the data in the socket
+and read it only when required.</p></div>
+<div class="paragraph"><p>Three different messages can be received:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>{OK, Socket, Data}</code>
+</p>
+</li>
+<li>
+<p>
+<code>{Closed, Socket}</code>
+</p>
+</li>
+<li>
+<p>
+<code>{Error, Socket, Reason}</code>
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The value of <code>OK</code>, <code>Closed</code> and <code>Error</code> can be different
+depending on the transport being used. To be able to properly match
+on them you must first call the <code>Transport:messages/0</code> function.</p></div>
+<div class="listingblock">
+<div class="title">Retrieving the transport&#8217;s active message identifiers</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #009900">OK</span>, <span style="color: #009900">Closed</span>, <span style="color: #009900">Error</span>} <span style="color: #990000">=</span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">messages</span></span>()<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>To start receiving messages you will need to call the <code>Transport:setopts/2</code>
+function, and do so every time you want to receive data.</p></div>
+<div class="listingblock">
+<div class="title">Receiving messages from the socket in active mode</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #009900">OK</span>, <span style="color: #009900">Closed</span>, <span style="color: #009900">Error</span>} <span style="color: #990000">=</span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">messages</span></span>(),
+<span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">setopts</span></span>(<span style="color: #009900">Socket</span>, [{<span style="color: #FF6600">active</span>, <span style="color: #FF6600">once</span>}]),
+<span style="font-weight: bold"><span style="color: #0000FF">receive</span></span>
+        {<span style="color: #009900">OK</span>, <span style="color: #009900">Socket</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">-&gt;</span>
+                <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"data received: ~p~n"</span>, [<span style="color: #009900">Data</span>]);
+        {<span style="color: #009900">Closed</span>, <span style="color: #009900">Socket</span>} <span style="color: #990000">-&gt;</span>
+                <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"socket got closed!~n"</span>);
+        {<span style="color: #009900">Error</span>, <span style="color: #009900">Socket</span>, <span style="color: #009900">Reason</span>} <span style="color: #990000">-&gt;</span>
+                <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"error happened: ~p~n"</span>, [<span style="color: #009900">Reason</span>])
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>You can easily integrate active sockets with existing Erlang code as all
+you really need is just a few more clauses when receiving messages.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sending_files">Sending files</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>As in the previous section it is assumed <code>Transport</code> is a valid transport
+handler and <code>Socket</code> is a connected socket obtained through the listener.</p></div>
+<div class="paragraph"><p>To send a whole file, with name <code>Filename</code>, over a socket:</p></div>
+<div class="listingblock">
+<div class="title">Sending a file by filename</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">SentBytes</span>} <span style="color: #990000">=</span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">sendfile</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Filename</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Or part of a file, with <code>Offset</code> greater than or equal to 0, <code>Bytes</code> number of
+bytes and chunks of size <code>ChunkSize</code>:</p></div>
+<div class="listingblock">
+<div class="title">Sending part of a file by filename in chunks</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Opts</span> <span style="color: #990000">=</span> [{<span style="color: #FF6600">chunk_size</span>, <span style="color: #009900">ChunkSize</span>}],
+{<span style="color: #FF6600">ok</span>, <span style="color: #009900">SentBytes</span>} <span style="color: #990000">=</span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">sendfile</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Filename</span>, <span style="color: #009900">Offset</span>, <span style="color: #009900">Bytes</span>, <span style="color: #009900">Opts</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>To improve efficiency when sending multiple parts of the same file it is also
+possible to use a file descriptor opened in raw mode:</p></div>
+<div class="listingblock">
+<div class="title">Sending a file opened in raw mode</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">RawFile</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">file:open</span></span>(<span style="color: #009900">Filename</span>, [<span style="color: #FF6600">raw</span>, <span style="color: #FF6600">read</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>]),
+{<span style="color: #FF6600">ok</span>, <span style="color: #009900">SentBytes</span>} <span style="color: #990000">=</span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">sendfile</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">RawFile</span>, <span style="color: #009900">Offset</span>, <span style="color: #009900">Bytes</span>, <span style="color: #009900">Opts</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_writing_a_transport_handler">Writing a transport handler</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>A transport handler is a module implementing the <code>ranch_transport</code> behavior.
+It defines a certain number of callbacks that must be written in order to
+allow transparent usage of the transport handler.</p></div>
+<div class="paragraph"><p>The behavior doesn&#8217;t define the socket options available when opening a
+socket. These do not need to be common to all transports as it&#8217;s easy enough
+to write different initialization functions for the different transports that
+will be used. With one exception though. The <code>setopts/2</code> function <strong>must</strong>
+implement the <code>{active, once}</code> and the <code>{active, true}</code> options.</p></div>
+<div class="paragraph"><p>If the transport handler doesn&#8217;t have a native implementation of <code>sendfile/5</code> a
+fallback is available, <code>ranch_transport:sendfile/6</code>. The extra first argument
+is the transport&#8217;s module. See <code>ranch_ssl</code> for an example.</p></div>
+</div>
+</div>
+
+
+
+	
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/ranch/1.3/guide/listeners/">
+					Listeners
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/ranch/1.3/guide/protocols/">
+					Protocols
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	1.3
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/1.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/1.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/1.3/guide">1.3</a></li>
+	
+		<li><a href="/docs/en/ranch/1.2/guide">1.2</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
