@@ -9,7 +9,7 @@
 
     <meta name="generator" content="Hugo 0.17" />
 
-    <title>Nine Nines: cowboy_req:header(3)</title>
+    <title>Nine Nines: cowboy_req:has_resp_header(3)</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
 	
@@ -67,12 +67,12 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>cowboy_req:header(3)</span></h1>
+<h1 class="lined-header"><span>cowboy_req:has_resp_header(3)</span></h1>
 
 <div class="sect1">
 <h2 id="_name">Name</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:header - HTTP header</p></div>
+<div class="paragraph"><p>cowboy_req:has_resp_header - Is the given response header set?</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -83,24 +83,13 @@
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">header</span></span>(<span style="color: #009900">Name</span>, <span style="color: #009900">Req</span>)          <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">header</span></span>(<span style="color: #009900">Name</span>, <span style="color: #009900">Req</span>, <span style="color: #000080">undefined</span>)
-<span style="font-weight: bold"><span style="color: #000000">header</span></span>(<span style="color: #009900">Name</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">Default</span>) <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #009900">Default</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">has_resp_header</span></span>(<span style="color: #009900">Name</span>, <span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
 
-<span style="color: #009900">Name</span>    <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()          <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
-<span style="color: #009900">Req</span>     <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
-<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()</tt></pre></div></div>
-<div class="paragraph"><p>Return the value for the given HTTP header.</p></div>
+<span style="color: #009900">Name</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()  <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Return whether the given response header has been set.</p></div>
 <div class="paragraph"><p>The header name must be given as a lowercase binary string.
 While header names are case insensitive, Cowboy requires them
 to be given as lowercase to function properly.</p></div>
-<div class="paragraph"><p>Headers can also be obtained using pattern matching:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>#{<span style="color: #FF6600">headers</span> <span style="color: #990000">:=</span> #{<span style="color: #009900">Name</span> <span style="color: #990000">:=</span> <span style="color: #009900">Value</span>}} <span style="color: #990000">=</span> <span style="color: #009900">Req</span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Note that this snippet will crash if the header is missing.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -112,7 +101,7 @@ Name
 </dt>
 <dd>
 <p>
-Desired HTTP header name as a lowercase binary string.
+Header name as a lowercase binary string.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -123,33 +112,19 @@ Req
 The Req object.
 </p>
 </dd>
-<dt class="hdlist1">
-Default
-</dt>
-<dd>
-<p>
-Default value returned when the header is missing.
-</p>
-</dd>
 </dl></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_return_value">Return value</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The header value is returned as a binary string. When the
-header is missing, the default argument is returned.</p></div>
+<div class="paragraph"><p>A boolean indicating whether the given response header has been set.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_changelog">Changelog</h2>
 <div class="sectionbody">
 <div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: Only the header value is returned, it is no longer wrapped in a tuple.
-</p>
-</li>
 <li>
 <p>
 <strong>1.0</strong>: Function introduced.
@@ -162,27 +137,22 @@ header is missing, the default argument is returned.</p></div>
 <h2 id="_examples">Examples</h2>
 <div class="sectionbody">
 <div class="listingblock">
-<div class="title">Get the accept header</div>
+<div class="title">Check whether the content-type header has been set</div>
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Accept</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"accept"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Get the content-length header with a default value</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Length</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-length"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"0"</span><span style="color: #990000">&gt;&gt;</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt><span style="color: #000080">false</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:has_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req0</span>),
+<span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/html"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req0</span>),
+<span style="color: #000080">true</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:has_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.headers">cowboy_req:headers(3)</a>,
-<a href="../cowboy_req.parse_header">cowboy_req:parse_header(3)</a></p></div>
+<a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>,
+<a href="../cowboy_req.delete_resp_header">cowboy_req:delete_resp_header(3)</a></p></div>
 </div>
 </div>
 
