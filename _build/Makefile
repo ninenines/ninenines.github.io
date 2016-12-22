@@ -55,8 +55,8 @@ docs-$1-$2: tmp/$1
 			sed '1,/^$$$$/d' $$$$f | sed 's/^=== /== /' \
 				| sed 's/xref:/link:..\//' | sed 's/image::/image::..\//' \
 				| sed 's/link:man:$1[(]7[)]/link:..\/$1_app/' \
-				| sed 's/\(link:man:[a-z_]*\):/\1./' \
-				| sed 's/link:man:\([a-z_.]*\)[1-9()]*/link:..\/\1/' \
+				| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
+				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/' \
 				>> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 		done; \
 		rm tmp/$1/doc/src/guide/book.asciidoc.bak; \
@@ -83,8 +83,8 @@ docs-$1-$2: tmp/$1
 			echo >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			sed '1,/^$$$$/d' $$$$f | sed 's/xref:/link:..\//' \
 				| sed 's/link:man:$1(7)/link:..\/$1_app/' \
-				| sed 's/\(link:man:[a-z_]*\):/\1./' \
-				| sed 's/link:man:\([a-z_.]*\)[1-9()]*/link:..\/\1/' \
+				| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
+				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/' \
 				>> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 		done \
 	fi
