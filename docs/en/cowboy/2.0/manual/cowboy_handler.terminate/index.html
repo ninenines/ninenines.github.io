@@ -9,7 +9,7 @@
 
     <meta name="generator" content="Hugo 0.17" />
 
-    <title>Nine Nines: cowboy_handler(3)</title>
+    <title>Nine Nines: cowboy_handler:terminate(3)</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
 	
@@ -67,96 +67,109 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>cowboy_handler(3)</span></h1>
+<h1 class="lined-header"><span>cowboy_handler:terminate(3)</span></h1>
 
 <div class="sect1">
 <h2 id="_name">Name</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>cowboy_handler - Plain HTTP handlers</p></div>
+<div class="paragraph"><p>cowboy_handler:terminate - Terminate the handler</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The <code>cowboy_handler</code> middleware executes the handler selected
-by the router or any other preceding middleware.</p></div>
-<div class="paragraph"><p>This middleware takes the handler module and initial state
-from the <code>handler</code> and <code>handler_opts</code> environment values,
-respectively. On completion, it adds a <code>result</code> value to
-the middleware environment, containing the return value
-of the <code>terminate/3</code> callback (if defined) and <code>ok</code> otherwise.</p></div>
-<div class="paragraph"><p>This module also defines a callback interface for handling
-HTTP requests.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_callbacks">Callbacks</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Plain HTTP handlers implement the following interface:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">Reason</span>, <span style="color: #009900">Req</span> | <span style="color: #000080">undefined</span>, <span style="color: #009900">State</span>, <span style="color: #009900">Handler</span>) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>
 
-<span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">Reason</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>  <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
-
-<span style="color: #009900">Req</span>        <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
-<span style="color: #009900">State</span>      <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
-<span style="color: #009900">Reason</span>     <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">normal</span></span>
-            | {<span style="color: #FF6600">crash</span>, <span style="color: #FF6600">error</span> | <span style="font-weight: bold"><span style="color: #000080">exit</span></span> | <span style="font-weight: bold"><span style="color: #000080">throw</span></span>, <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}</tt></pre></div></div>
-<div class="paragraph"><p>These two callbacks are common to all handlers.</p></div>
-<div class="paragraph"><p>Plain HTTP handlers do all their work in the <code>init/2</code>
-callback. Returning <code>ok</code> terminates the handler. If no
-response is sent, Cowboy will send a <code>204 No Content</code>.</p></div>
-<div class="paragraph"><p>The optional <code>terminate/3</code> callback will ultimately be called
-with the reason for the termination of the handler.
-Cowboy will terminate the process right after this. There
-is no need to perform any cleanup in this callback.</p></div>
-<div class="paragraph"><p>The following terminate reasons are defined for plain HTTP
-handlers:</p></div>
+<span style="color: #009900">Reason</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">Req</span>     <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
+<span style="color: #009900">State</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">Handler</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">module</span></span>()</tt></pre></div></div>
+<div class="paragraph"><p>Call the optional terminate callback if it is defined.</p></div>
+<div class="paragraph"><p>Make sure to use this function at the end of the execution
+of modules that implement custom handler behaviors.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_arguments">Arguments</h2>
+<div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-normal
+Reason
 </dt>
 <dd>
 <p>
-    The connection was closed normally.
+Reason for termination.
 </p>
 </dd>
 <dt class="hdlist1">
-{crash, Class, Reason}
+Req
 </dt>
 <dd>
 <p>
-    A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be
-    used to obtain more information about the crash. The function
-    <code>erlang:get_stacktrace/0</code> can also be called to obtain the
-    stacktrace of the process when the crash occurred.
+The Req object.
+</p>
+<div class="paragraph"><p>It is possible to pass <code>undefined</code> if the handler has no concept
+of requests/responses and discarded the Req object before calling
+this function.</p></div>
+</dd>
+<dt class="hdlist1">
+State
+</dt>
+<dd>
+<p>
+Handler state.
+</p>
+</dd>
+<dt class="hdlist1">
+Handler
+</dt>
+<dd>
+<p>
+Handler module.
 </p>
 </dd>
 </dl></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_exports">Exports</h2>
+<h2 id="_return_value">Return value</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The following function should be called by modules implementing
-custom handlers to execute the optional terminate callback:</p></div>
+<div class="paragraph"><p>The atom <code>ok</code> is always returned. It can be safely ignored.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changelog">Changelog</h2>
+<div class="sectionbody">
 <div class="ulist"><ul>
 <li>
 <p>
-<a href="../cowboy_handler.terminate">cowboy_handler:terminate(3)</a> - Terminate the handler
+<strong>2.0</strong>: Function introduced.
 </p>
 </li>
 </ul></div>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_examples">Examples</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Terminate a handler normally</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">cowboy_handler:terminate</span></span>(<span style="font-weight: bold"><span style="color: #000080">normal</span></span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #009900">Handler</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_see_also">See also</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy_app">cowboy(7)</a></p></div>
+<div class="paragraph"><p><a href="../cowboy_handler">cowboy_handler(3)</a></p></div>
 </div>
 </div>
 
