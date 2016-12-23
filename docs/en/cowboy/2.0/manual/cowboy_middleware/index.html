@@ -72,89 +72,110 @@
 <div class="sect1">
 <h2 id="_name">Name</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>cowboy_middleware - behaviour for middlewares</p></div>
+<div class="paragraph"><p>cowboy_middleware - Middlewares</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The <code>cowboy_middleware</code> behaviour defines the interface used
-by Cowboy middleware modules.</p></div>
+<div class="paragraph"><p>The module <code>cowboy_middleware</code> defines a callback interface for
+Cowboy middlewares.</p></div>
 <div class="paragraph"><p>Middlewares process the request sequentially in the order they
 are configured.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callbacks">Callbacks</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Middlewares implement the following interface:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">Env</span>)
+    <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">Env</span>}
+     | {<span style="color: #FF6600">suspend</span>, <span style="font-weight: bold"><span style="color: #000000">module</span></span>(), <span style="font-weight: bold"><span style="color: #000080">atom</span></span>(), [<span style="font-weight: bold"><span style="color: #000000">any</span></span>()]}
+     | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>}
+
+<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
+<span style="color: #009900">Env</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>()</tt></pre></div></div>
+<div class="paragraph"><p>The <code>execute/2</code> is the only callback that needs to be
+implemented. It must execute the middleware and return
+with instructions for Cowboy.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+ok
+</dt>
+<dd>
+<p>
+Cowboy should continue processing the request using the
+returned Req object and environment.
+</p>
+</dd>
+<dt class="hdlist1">
+suspend
+</dt>
+<dd>
+<p>
+Cowboy will hibernate the process. When resuming, Cowboy
+will apply the returned module, function and arguments.
+</p>
+</dd>
+<dt class="hdlist1">
+stop
+</dt>
+<dd>
+<p>
+Cowboy will stop middleware execution. No other middleware
+will be executed. This effectively ends the processing of
+the request.
+</p>
+</dd>
+</dl></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_types">Types</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_env_atom_any">env() = [{atom(), any()}]</h3>
-<div class="paragraph"><p>The environment variable.</p></div>
-<div class="paragraph"><p>One is created for every request. It is passed to each
-middleware module executed and subsequently returned,
-optionally with its contents modified.</p></div>
+<h3 id="_env">env()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">env</span></span>() <span style="color: #990000">::</span> #{<span style="font-weight: bold"><span style="color: #000080">atom</span></span>() <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}</tt></pre></div></div>
+<div class="paragraph"><p>Middleware environment.</p></div>
+<div class="paragraph"><p>A new environment is created for every request. The initial
+environment contained the user configured environment values
+(like <code>dispatch</code> for example) plus the <code>listener</code> value which
+contains the name of the listener for this connection.</p></div>
+<div class="paragraph"><p>Middlewares may modify the environment as necessary.</p></div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_callbacks">Callbacks</h2>
+<h2 id="_changelog">Changelog</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_execute_req_env_8594_ok_req_env_suspend_module_function_args_stop_req">execute(Req, Env) &#8594; {ok, Req, Env} | {suspend, Module, Function, Args} | {stop, Req}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Req = cowboy_req:req()
-</dt>
-<dd>
+<div class="ulist"><ul>
+<li>
 <p>
-The Req object.
+<strong>2.0</strong>: The <code>env</code> type is now a map instead of a proplist.
 </p>
-</dd>
-<dt class="hdlist1">
-Env = env()
-</dt>
-<dd>
+</li>
+<li>
 <p>
-The request environment.
+<strong>1.0</strong>: Behavior introduced.
 </p>
-</dd>
-<dt class="hdlist1">
-Module = module()
-</dt>
-<dd>
-<p>
-MFA to call when resuming the process.
-</p>
-</dd>
-<dt class="hdlist1">
-Function = atom()
-</dt>
-<dd>
-<p>
-MFA to call when resuming the process.
-</p>
-</dd>
-<dt class="hdlist1">
-Args = [any()]
-</dt>
-<dd>
-<p>
-MFA to call when resuming the process.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Execute the middleware.</p></div>
-<div class="paragraph"><p>The <code>ok</code> return value indicates that everything went well
-and that Cowboy should continue processing the request. A
-response may or may not have been sent.</p></div>
-<div class="paragraph"><p>The <code>suspend</code> return value will hibernate the process until
-an Erlang message is received. Note that when resuming, any
-previous stacktrace information will be gone.</p></div>
-<div class="paragraph"><p>The <code>stop</code> return value stops Cowboy from doing any further
-processing of the request, even if there are middlewares
-that haven&#8217;t been executed yet. The connection may be left
-open to receive more requests from the client.</p></div>
+</li>
+</ul></div>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See also</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="../cowboy_app">cowboy(7)</a></p></div>
 </div>
 </div>
 
