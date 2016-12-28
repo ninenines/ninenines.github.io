@@ -78,68 +78,66 @@
 <div class="sect1">
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The <code>cowboy_rest</code> module implements REST semantics on top of
-the HTTP protocol.</p></div>
-<div class="paragraph"><p>This module is a sub protocol that defines many callbacks
-be implemented by handlers. The <code>init/2</code> and <code>terminate/3</code>
-callbacks are common to all handler types and are documented
-in the manual for the <a href="cowboy_handler.asciidoc">cowboy_handler</a> module.</p></div>
-<div class="paragraph"><p>All other callbacks are optional, though some may become
-required depending on the return value of previous callbacks.</p></div>
+<div class="paragraph"><p>The module <code>cowboy_rest</code> implements the HTTP state machine.</p></div>
+<div class="paragraph"><p>Implementing REST handlers is not enough to provide a REST
+interface; this interface must also follow the REST
+constraints including HATEOAS (hypermedia as the engine
+of application state).</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_meta_values">Meta values</h2>
+<h2 id="_callbacks">Callbacks</h2>
 <div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-charset = binary()
-</dt>
-<dd>
-<p>
-        Negotiated charset.
-       <br />
-        This value may not be defined if no charset was negotiated.
-</p>
-</dd>
-<dt class="hdlist1">
-language = binary()
-</dt>
-<dd>
-<p>
-        Negotiated language.
-       <br />
-        This value may not be defined if no language was negotiated.
-</p>
-</dd>
-<dt class="hdlist1">
-media_type = {binary(), binary(), <em>*</em> | [{binary(), binary()}]}
-</dt>
-<dd>
-<p>
-        Negotiated media-type.
-       <br />
-        The media-type is the content-type, excluding the charset.
-       <br />
-        This value is always defined after the call to
-        <code>content_types_provided/2</code>.
-</p>
-</dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_terminate_reasons">Terminate reasons</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The following values may be received as the terminate reason
-in the optional <code>terminate/3</code> callback.</p></div>
+<div class="paragraph"><p>REST handlers implement the following interface:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
+    <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">cowboy_rest</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+     | {<span style="color: #FF6600">cowboy_rest</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+     | {<span style="color: #FF6600">cowboy_rest</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()}
+     | {<span style="color: #FF6600">cowboy_rest</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(), <span style="color: #FF6600">hibernate</span>}
+
+<span style="color: #009900">Callback</span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
+    <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+     | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">Reason</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>  <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
+
+<span style="color: #009900">Req</span>    <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
+<span style="color: #009900">State</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">Reason</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">normal</span></span>
+        | {<span style="color: #FF6600">crash</span>, <span style="color: #FF6600">error</span> | <span style="font-weight: bold"><span style="color: #000080">exit</span></span> | <span style="font-weight: bold"><span style="color: #000080">throw</span></span>, <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}
+
+<span style="color: #009900">Callback</span> <span style="color: #990000">-</span> <span style="color: #FF6600">see</span> <span style="color: #FF6600">below</span>
+<span style="color: #009900">Result</span>   <span style="color: #990000">-</span> <span style="color: #FF6600">see</span> <span style="color: #FF6600">below</span>
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #FF6600">see</span> <span style="color: #FF6600">below</span></tt></pre></div></div>
+<div class="paragraph"><p>The <code>init/2</code> callback is common to all handlers. To switch
+to the REST handler behavior, it must return <code>cowboy_rest</code>
+as the first element of the tuple.</p></div>
+<div class="paragraph"><p>The <code>Callback/2</code> above represents all the REST-specific
+callbacks. They are described in the following section
+of this manual. REST-specific callbacks differ by their
+name, semantics, result and default values. The default
+value is the one used when the callback has not been
+implemented. They otherwise all follow the same interface.</p></div>
+<div class="paragraph"><p>The <code>stop</code> tuple can be returned to stop REST processing.
+If no response was sent before then, Cowboy will send a
+<em>204 No Content</em>.</p></div>
+<div class="paragraph"><p>The optional <code>terminate/3</code> callback will ultimately be called
+with the reason for the termination of the handler.
+Cowboy will terminate the process right after this. There
+is no need to perform any cleanup in this callback.</p></div>
+<div class="paragraph"><p>The following terminate reasons are defined for loop handlers:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 normal
 </dt>
 <dd>
 <p>
-        The connection was closed normally.
+    The handler terminated normally.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -147,1133 +145,566 @@ normal
 </dt>
 <dd>
 <p>
-        A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be
-        used to obtain more information about the crash. The function
-        <code>erlang:get_stacktrace/0</code> can also be called to obtain the
-        stacktrace of the process when the crash occurred.
+    A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be
+    used to obtain more information about the crash. The function
+    <code>erlang:get_stacktrace/0</code> can also be called to obtain the
+    stacktrace of the process when the crash occurred.
 </p>
 </dd>
 </dl></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_callbacks">Callbacks</h2>
+<h2 id="_rest_callbacks">REST callbacks</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_callback_req_state_8594_value_req_state_stop_req_state">Callback(Req, State) &#8594; {Value, Req, State} | {stop, Req, State}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Callback
-</dt>
-<dd>
-<p>
-One of the REST callbacks described below.
-</p>
-</dd>
-<dt class="hdlist1">
-Req = cowboy_req:req()
-</dt>
-<dd>
-<p>
-The Req object.
-</p>
-</dd>
-<dt class="hdlist1">
-State = any()
-</dt>
-<dd>
-<p>
-Handler state.
-</p>
-</dd>
-<dt class="hdlist1">
-Value
-</dt>
-<dd>
-<p>
-See the REST callbacks description below.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Please see the REST callbacks description below for details
-on the <code>Value</code> type, the default value if the callback is
-not defined, and more general information on when the
-callback is called and what its intended use is.</p></div>
-<div class="paragraph"><p>The <code>stop</code> tuple can be returned to stop REST processing.
-It is up to the resource code to send a reply before that,
-otherwise a <code>204 No Content</code> will be sent.</p></div>
+<h3 id="_acceptcallback">AcceptCallback</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">AcceptCallback</span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="color: #000080">true</span> | {<span style="color: #000080">true</span>, <span style="color: #009900">URI</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()} | <span style="color: #000080">false</span>}
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #FF6600">crash</span></tt></pre></div></div>
+<div class="paragraph"><p>Process the request body.</p></div>
+<div class="paragraph"><p>This function should create or update the resource using the
+request body.</p></div>
+<div class="paragraph"><p>For PUT requests, the body is a representation of the resource
+that is being created or replaced.</p></div>
+<div class="paragraph"><p>For POST requests, the body is typically application-specific
+instructions on how to process the request, but it may also
+be a representation of the resource. When creating a new
+resource with POST at a different location, return <code>{true, URI}</code>
+with <code>URI</code> the new location.</p></div>
+<div class="paragraph"><p>For PATCH requests, the body is a series of instructions on
+how to update the resource. Patch files or JSON Patch are
+examples of such media types.</p></div>
+<div class="paragraph"><p>A response body may be sent. The appropriate media type, charset
+and language for the response can be retrieved from the Req
+object using the <code>media_type</code>, <code>charset</code> and <code>language</code> keys,
+respectively. The body can be set using
+<a href="../cowboy_req.set_resp_body">cowboy_req:set_resp_body(3)</a>.</p></div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_rest_callbacks_description">REST callbacks description</h2>
-<div class="sectionbody">
 <div class="sect2">
 <h3 id="_allowed_methods">allowed_methods</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-[binary()]
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-<code>[&lt;&lt;"GET"&gt;&gt;, &lt;&lt;"HEAD"&gt;&gt;, &lt;&lt;"OPTIONS"&gt;&gt;]</code>
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">allowed_methods</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]  <span style="font-style: italic"><span style="color: #9A1900">%% case sensitive</span></span>
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"GET"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"HEAD"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"OPTIONS"</span><span style="color: #990000">&gt;&gt;</span>]</tt></pre></div></div>
 <div class="paragraph"><p>Return the list of allowed methods.</p></div>
-<div class="paragraph"><p>Methods are case sensitive. Standard methods are always uppercase.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_allow_missing_post">allow_missing_post</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-POST
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-true
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">allow_missing_post</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">true</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether POST is allowed when the resource doesn&#8217;t exist.</p></div>
 <div class="paragraph"><p>Returning <code>true</code> here means that a new resource will be
-created. The URL to the created resource should also be
-returned from the <code>AcceptResource</code> callback.</p></div>
+created. The URI for the newly created resource should be
+returned from the <code>AcceptCallback</code> function.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_charsets_provided">charsets_provided</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-[binary()]
-</p>
-</dd>
-<dt class="hdlist1">
-Default behavior
-</dt>
-<dd>
-<p>
-Skip to the next step if undefined.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the list of charsets the resource provides.</p></div>
-<div class="paragraph"><p>The list must be ordered in order of preference.</p></div>
-<div class="paragraph"><p>If the accept-charset header was not sent, the first charset
-in the list will be selected. Otherwise Cowboy will select
-the most appropriate charset from the list.</p></div>
-<div class="paragraph"><p>The chosen charset will be set in the <code>Req</code> object as the meta
-value <code>charset</code>.</p></div>
-<div class="paragraph"><p>While charsets are case insensitive, this callback is expected
-to return them as lowercase binary.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">charsets_provided</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]  <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #FF6600">skip</span> <span style="color: #FF6600">this</span> <span style="color: #FF6600">step</span></tt></pre></div></div>
+<div class="paragraph"><p>Return the list of charsets the resource provides in order
+of preference.</p></div>
+<div class="paragraph"><p>During content negotiation Cowboy will pick the most
+appropriate charset for the client. The client advertises
+charsets it prefers with the accept-charset header. When
+that header is missing, Cowboy picks the first charset
+from the resource.</p></div>
+<div class="paragraph"><p>Cowboy will add the negotiated <code>charset</code> to the Req object
+after this step completes:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">req</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">charset</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()  <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+}</tt></pre></div></div>
 </div>
 <div class="sect2">
 <h3 id="_content_types_accepted">content_types_accepted</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-POST, PUT, PATCH
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-[{binary() | {Type, SubType, Params}, AcceptResource}]
-</p>
-</dd>
-<dt class="hdlist1">
-Default behavior
-</dt>
-<dd>
-<p>
-Crash if undefined.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>With types:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Type = SubType = binary()
-</p>
-</li>
-<li>
-<p>
-Params = <em>*</em> | [{binary(), binary()}]
-</p>
-</li>
-<li>
-<p>
-AcceptResource = atom()
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>Return the list of content-types the resource accepts.</p></div>
-<div class="paragraph"><p>The list must be ordered in order of preference.</p></div>
-<div class="paragraph"><p>Each content-type can be given either as a binary string or as
-a tuple containing the type, subtype and parameters.</p></div>
-<div class="paragraph"><p>Cowboy will select the most appropriate content-type from the list.
-If any parameter is acceptable, then the tuple form should be used
-with parameters set to <code>'*'</code>. If the parameters value is set to <code>[]</code>
-only content-type values with no parameters will be accepted. All
-parameter values are treated in a case sensitive manner except the
-<code>charset</code> parameter, if present, which is case insensitive.</p></div>
-<div class="paragraph"><p>This function will be called for POST, PUT and PATCH requests.
-It is entirely possible to define different callbacks for different
-methods if the handling of the request differs. Simply verify
-what the method is with <code>cowboy_req:method/1</code> and return a
-different list for each methods.</p></div>
-<div class="paragraph"><p>The <code>AcceptResource</code> value is the name of the callback that will
-be called if the content-type matches. It is defined as follows.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-true | {true, URL} | false
-</p>
-</dd>
-<dt class="hdlist1">
-Default behavior
-</dt>
-<dd>
-<p>
-Crash if undefined.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Process the request body.</p></div>
-<div class="paragraph"><p>This function should create or update the resource with the
-information contained in the request body. This information
-may be full or partial depending on the request method.</p></div>
-<div class="paragraph"><p>If the request body was processed successfully, <code>true</code> must
-be returned. If the request method is POST, <code>{true, URL}</code> may
-be returned instead, and Cowboy will redirect the client to
-the location of the newly created resource.</p></div>
-<div class="paragraph"><p>If a response body must be sent, the appropriate media-type, charset
-and language can be retrieved using the <code>cowboy_req:meta/{2,3}</code>
-functions. The respective keys are <code>media_type</code>, <code>charset</code>
-and <code>language</code>. The body can be set using <code>cowboy_req:set_resp_body/2</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">content_types_accepted</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>     <span style="color: #990000">::</span> [{<span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #009900">ParsedMime</span>, <span style="color: #009900">AcceptCallback</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">atom</span></span>()}]
+<span style="color: #009900">ParsedMime</span> <span style="color: #990000">::</span> {<span style="color: #009900">Type</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">SubType</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #FF6600">'*'</span> | <span style="color: #009900">Params</span>}
+<span style="color: #009900">Params</span>     <span style="color: #990000">::</span> [{<span style="color: #009900">Key</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Value</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}]
+
+<span style="color: #009900">Default</span>     <span style="color: #990000">-</span> <span style="color: #FF6600">crash</span></tt></pre></div></div>
+<div class="paragraph"><p>Return the list of media types the resource accepts in
+order of preference.</p></div>
+<div class="paragraph"><p>A media type is made of different parts. The media type
+<code>text/html;charset=utf-8</code> is of type <code>text</code>, subtype <code>html</code>
+and has a single parameter <code>charset</code> with value <code>utf-8</code>.</p></div>
+<div class="paragraph"><p>Cowboy will match the content-type request header against
+the media types the server accepts and select the appropriate
+callback. When that header is missing, or when the server does not
+accept this media type, the request fails and an error response
+is returned. Cowboy will execute the callback immediately otherwise.</p></div>
+<div class="paragraph"><p>An empty parameters list <code>[]</code> means that no parameters will be
+accepted. When any parameter is acceptable, the tuple form
+should be used with parameters as the atom <code>'*'</code>.</p></div>
+<div class="paragraph"><p>Cowboy treats all parameters as case sensitive, except for the
+<code>charset</code> parameter, which is known to be case insensitive. You
+should therefore always provide the charset as a lowercase
+binary string.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_content_types_provided">content_types_provided</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-[{binary() | {Type, SubType, Params}, ProvideResource}]
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-<code>[{{ &lt;&lt;"text"&gt;&gt;, &lt;&lt;"html"&gt;&gt;, '*'}, to_html}]</code>
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>With types:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Type = SubType = binary()
-</p>
-</li>
-<li>
-<p>
-Params = <em>*</em> | [{binary(), binary()}]
-</p>
-</li>
-<li>
-<p>
-ProvideResource = atom()
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>Return the list of content-types the resource provides.</p></div>
-<div class="paragraph"><p>The list must be ordered in order of preference.</p></div>
-<div class="paragraph"><p>Each content-type can be given either as a binary string or as
-a tuple containing the type, subtype and parameters.</p></div>
-<div class="paragraph"><p>Cowboy will select the most appropriate content-type from the list.
-If any parameter is acceptable, then the tuple form should be used
-with parameters set to <code>'*'</code>. If the parameters value is set to <code>[]</code>
-only content-type values with no parameters will be accepted. All
-parameter values are treated in a case sensitive manner except the
-<code>charset</code> parameter, if present, which is case insensitive.</p></div>
-<div class="paragraph"><p>The <code>ProvideResource</code> value is the name of the callback that will
-be called if the content-type matches. It will only be called when
-a representation of the resource needs to be returned. It is defined
-as follow.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-iodata() | {stream, Fun} | {stream, Len, Fun} | {chunked, ChunkedFun}
-</p>
-</dd>
-<dt class="hdlist1">
-Default behavior
-</dt>
-<dd>
-<p>
-Crash if undefined.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the response body.</p></div>
-<div class="paragraph"><p>The response body may be provided directly or through a fun.
-If a fun tuple is returned, the appropriate <code>set_resp_body_fun</code>
-function will be called. Please refer to the documentation for
-these functions for more information about the types.</p></div>
-<div class="paragraph"><p>The call to this callback happens a good time after the call to
-<code>content_types_provided/2</code>, when it is time to start rendering
-the response body.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">content_types_provided</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>     <span style="color: #990000">::</span> [{<span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #009900">ParsedMime</span>, <span style="color: #009900">ProvideCallback</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">atom</span></span>()}]
+<span style="color: #009900">ParsedMime</span> <span style="color: #990000">::</span> {<span style="color: #009900">Type</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">SubType</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #FF6600">'*'</span> | <span style="color: #009900">Params</span>}
+<span style="color: #009900">Params</span>     <span style="color: #990000">::</span> [{<span style="color: #009900">Key</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Value</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}]
+
+<span style="color: #009900">Default</span>     <span style="color: #990000">-</span> [{{ <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"html"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF6600">'*'</span>}, <span style="color: #FF6600">to_html</span>}]</tt></pre></div></div>
+<div class="paragraph"><p>Return the list of media types the resource provides in
+order of preference.</p></div>
+<div class="paragraph"><p>A media type is made of different parts. The media type
+<code>text/html;charset=utf-8</code> is of type <code>text</code>, subtype <code>html</code>
+and has a single parameter <code>charset</code> with value <code>utf-8</code>.</p></div>
+<div class="paragraph"><p>During content negotiation Cowboy will pick the most appropriate
+media type for the client. The client advertises media types it
+prefers with the accept header. When that header is missing,
+the content negotiation fails and an error response is returned.</p></div>
+<div class="paragraph"><p>The callback given for the selected media type will be called
+at the end of the execution of GET and HEAD requests when a
+representation must be sent to the client.</p></div>
+<div class="paragraph"><p>An empty parameters list <code>[]</code> means that no parameters will be
+accepted. When any parameter is acceptable, the tuple form
+should be used with parameters as the atom <code>'*'</code>.</p></div>
+<div class="paragraph"><p>Cowboy treats all parameters as case sensitive, except for the
+<code>charset</code> parameter, which is known to be case insensitive. You
+should therefore always provide the charset as a lowercase
+binary string.</p></div>
+<div class="paragraph"><p>Cowboy will add the negotiated <code>media_type</code> to the Req object
+after this step completes:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">req</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">media_type</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">ParsedMime</span>
+}</tt></pre></div></div>
 </div>
 <div class="sect2">
 <h3 id="_delete_completed">delete_completed</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-true
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return whether the delete action has been completed.</p></div>
-<div class="paragraph"><p>This function should return <code>false</code> if there is no guarantee
-that the resource gets deleted immediately from the system,
-including from any internal cache.</p></div>
-<div class="paragraph"><p>When this function returns <code>false</code>, a <code>202 Accepted</code>
-response will be sent instead of a <code>200 OK</code> or <code>204 No Content</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">delete_completed</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">true</span></tt></pre></div></div>
+<div class="paragraph"><p>Return whether the resource has been fully deleted from the
+system, including from any internal cache.</p></div>
+<div class="paragraph"><p>Returning <code>false</code> will result in a <em>202 Accepted</em> response
+being sent instead of a <em>200 OK</em> or <em>204 No Content</em>.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_delete_resource">delete_resource</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">delete_resource</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
 <div class="paragraph"><p>Delete the resource.</p></div>
-<div class="paragraph"><p>The value returned indicates if the action was successful,
-regardless of whether the resource is immediately deleted
-from the system.</p></div>
+<div class="paragraph"><p>Cowboy will send an error response when this function
+returns <code>false</code>.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_expires">expires</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-calendar:datetime() | binary() | undefined
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-undefined
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the date of expiration of the resource.</p></div>
-<div class="paragraph"><p>This date will be sent as the value of the expires header.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">expires</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">calendar:datetime</span></span>() | <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #000080">undefined</span>
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">undefined</span></tt></pre></div></div>
+<div class="paragraph"><p>Return the resource&#8217;s expiration date.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_forbidden">forbidden</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">forbidden</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether access to the resource is forbidden.</p></div>
-<div class="paragraph"><p>A <code>403 Forbidden</code> response will be sent if this
+<div class="paragraph"><p>A <em>403 Forbidden</em> response will be sent if this
 function returns <code>true</code>. This status code means that
 access is forbidden regardless of authentication,
 and that the request shouldn&#8217;t be repeated.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_generate_etag">generate_etag</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-binary() | {weak | strong, binary()}
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-undefined
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">generate_etag</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | {<span style="color: #FF6600">weak</span> | <span style="color: #FF6600">strong</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #FF6600">no</span> <span style="color: #FF6600">etag</span> <span style="color: #FF6600">value</span></tt></pre></div></div>
 <div class="paragraph"><p>Return the entity tag of the resource.</p></div>
-<div class="paragraph"><p>This value will be sent as the value of the etag header.</p></div>
-<div class="paragraph"><p>If a binary is returned, then the value will be parsed
-to the tuple form automatically. The value must be in
-the same format as the etag header, including quotes.</p></div>
+<div class="paragraph"><p>When a binary is returned, the value is automatically
+parsed to a tuple. The binary must be in the same
+format as the etag header, including quotes.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_is_authorized">is_authorized</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-true | {false, AuthHeader}
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-true
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>With types:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-AuthHead = iodata()
-</p>
-</li>
-</ul></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">is_authorized</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="color: #000080">true</span> | {<span style="color: #000080">false</span>, <span style="color: #009900">AuthHeader</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #000080">true</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether the user is authorized to perform the action.</p></div>
 <div class="paragraph"><p>This function should be used to perform any necessary
 authentication of the user before attempting to perform
 any action on the resource.</p></div>
-<div class="paragraph"><p>If the authentication fails, the value returned will be sent
-as the value for the www-authenticate header in the
-<code>401 Unauthorized</code> response.</p></div>
+<div class="paragraph"><p>When authentication fails, the <code>AuthHeader</code> value will
+be sent in the www-authenticate header for the
+<em>401 Unauthorized</em> response.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_is_conflict">is_conflict</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-PUT
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return whether the put action results in a conflict.</p></div>
-<div class="paragraph"><p>A <code>409 Conflict</code> response will be sent if this function
-returns <code>true</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">is_conflict</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
+<div class="paragraph"><p>Return whether the PUT request results in a conflict.</p></div>
+<div class="paragraph"><p>A <em>409 Conflict</em> response is sent when <code>true</code>.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_known_methods">known_methods</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-[binary()]
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-<code>[&lt;&lt;"GET"&gt;&gt;, &lt;&lt;"HEAD"&gt;&gt;, &lt;&lt;"POST"&gt;&gt;, &lt;&lt;"PUT"&gt;&gt;, &lt;&lt;"PATCH"&gt;&gt;, &lt;&lt;"DELETE"&gt;&gt;, &lt;&lt;"OPTIONS"&gt;&gt;]</code>
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">known_methods</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]  <span style="font-style: italic"><span style="color: #9A1900">%% case sensitive</span></span>
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"GET"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"HEAD"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"POST"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"PUT"</span><span style="color: #990000">&gt;&gt;</span>,
+            <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"PATCH"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"DELETE"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"OPTIONS"</span><span style="color: #990000">&gt;&gt;</span>]</tt></pre></div></div>
 <div class="paragraph"><p>Return the list of known methods.</p></div>
 <div class="paragraph"><p>The full list of methods known by the server should be
 returned, regardless of their use in the resource.</p></div>
 <div class="paragraph"><p>The default value lists the methods Cowboy knows and
 implement in <code>cowboy_rest</code>.</p></div>
-<div class="paragraph"><p>Methods are case sensitive. Standard methods are always uppercase.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_languages_provided">languages_provided</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-[binary()]
-</p>
-</dd>
-<dt class="hdlist1">
-Default behavior
-</dt>
-<dd>
-<p>
-Skip to the next step if undefined.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the list of languages the resource provides.</p></div>
-<div class="paragraph"><p>The list must be ordered in order of preference.</p></div>
-<div class="paragraph"><p>If the accept-language header was not sent, the first language
-in the list will be selected. Otherwise Cowboy will select
-the most appropriate language from the list.</p></div>
-<div class="paragraph"><p>The chosen language will be set in the <code>Req</code> object as the meta
-value <code>language</code>.</p></div>
-<div class="paragraph"><p>While languages are case insensitive, this callback is expected
-to return them as lowercase binary.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">languages_provided</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]  <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #FF6600">skip</span> <span style="color: #FF6600">this</span> <span style="color: #FF6600">step</span></tt></pre></div></div>
+<div class="paragraph"><p>Return the list of languages the resource provides in order
+of preference.</p></div>
+<div class="paragraph"><p>During content negotiation Cowboy will pick the most
+appropriate language for the client. The client advertises
+languages it prefers with the accept-language header. When
+that header is missing, Cowboy picks the first language
+from the resource.</p></div>
+<div class="paragraph"><p>Cowboy will add the negotiated <code>language</code> to the Req object
+after this step completes:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">req</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">language</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()  <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span>
+}</tt></pre></div></div>
 </div>
 <div class="sect2">
 <h3 id="_last_modified">last_modified</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-calendar:datetime()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-undefined
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the date of last modification of the resource.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">last_modified</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">calendar:datetime</span></span>()
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #FF6600">no</span> <span style="color: #FF6600">last</span> <span style="color: #FF6600">modified</span> <span style="color: #FF6600">value</span></tt></pre></div></div>
+<div class="paragraph"><p>Return the resource&#8217;s last modification date.</p></div>
 <div class="paragraph"><p>This date will be used to test against the if-modified-since
 and if-unmodified-since headers, and sent as the last-modified
-header in the response of GET and HEAD requests.</p></div>
+header in the response to GET and HEAD requests.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_malformed_request">malformed_request</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">malformed_request</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether the request is malformed.</p></div>
-<div class="paragraph"><p>Cowboy has already performed all the necessary checks
-by the time this function is called, so few resources
-are expected to implement it.</p></div>
-<div class="paragraph"><p>The check is to be done on the request itself, not on
-the request body, which is processed later.</p></div>
+<div class="paragraph"><p>A request is malformed when a component required by the
+resource is invalid. This may include the query string
+or individual headers. They should be parsed and validated
+in this function. The body should not be read at this point.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_moved_permanently">moved_permanently</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-{true, URL} | false
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>With types:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-URL = iodata()
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>Return whether the resource was permanently moved.</p></div>
-<div class="paragraph"><p>If it was, its new URL is also returned and sent in the
-location header in the response.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">moved_permanently</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> {<span style="color: #000080">true</span>, <span style="color: #009900">URI</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()} | <span style="color: #000080">false</span>
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
+<div class="paragraph"><p>Return whether the resource was permanently moved, and
+what its new location is.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_moved_temporarily">moved_temporarily</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-{true, URL} | false
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>With types:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-URL = iodata()
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>Return whether the resource was temporarily moved.</p></div>
-<div class="paragraph"><p>If it was, its new URL is also returned and sent in the
-location header in the response.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">moved_temporarily</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> {<span style="color: #000080">true</span>, <span style="color: #009900">URI</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()} | <span style="color: #000080">false</span>
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
+<div class="paragraph"><p>Return whether the resource was temporarily moved, and
+what its new location is.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_multiple_choices">multiple_choices</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return whether there are multiple representations of the resource.</p></div>
-<div class="paragraph"><p>This function should be used to inform the client if there
-are different representations of the resource, for example
-different content-type. If this function returns <code>true</code>,
-the response body should include information about these
-different representations using <code>cowboy_req:set_resp_body/2</code>.
-The content-type of the response should be the one previously
-negociated and that can be obtained by calling
-<code>cowboy_req:meta(media_type, Req)</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">multiple_choices</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
+<div class="paragraph"><p>Return whether the client should engage in reactive
+negotiation.</p></div>
+<div class="paragraph"><p>Return <code>true</code> when the server has multiple representations
+of a resource, each with their specific identifier, but is
+unable to determine which is best for the client. For
+example an image might have different sizes and the server
+is unable to determine the capabilities of the client.</p></div>
+<div class="paragraph"><p>When returning <code>true</code> the server should send a body with
+links to the different representations. If the server has
+a preferred representation it can send its link inside a
+location header.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_options">options</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-OPTIONS
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-ok
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-ok
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Handle a request for information.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">options</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}</tt></pre></div></div>
+<div class="paragraph"><p>Respond to an OPTIONS request.</p></div>
 <div class="paragraph"><p>The response should inform the client the communication
-options available for this resource.</p></div>
-<div class="paragraph"><p>By default, Cowboy will send a <code>200 OK</code> response with the
-allow header set.</p></div>
+options available for this resource. By default Cowboy
+will send a <em>200 OK</em> response with the allow header set.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_previously_existed">previously_existed</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">previously_existed</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether the resource existed previously.</p></div>
 </div>
 <div class="sect2">
+<h3 id="_providecallback">ProvideCallback</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">ProvideCallback</span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:resp_body</span></span>()
+<span style="color: #009900">Default</span>  <span style="color: #990000">-</span> <span style="color: #FF6600">crash</span></tt></pre></div></div>
+<div class="paragraph"><p>Return the response body.</p></div>
+<div class="paragraph"><p>The response body can be provided either as the actual data
+to be sent or a tuple indicating which file to send.</p></div>
+<div class="paragraph"><p>This function is called for both GET and HEAD requests. For
+the latter the body is not sent, however.</p></div>
+<div class="paragraph"><p>Note that there used to be a way to stream the response body.
+It was temporarily removed and will be added back in a later
+release.</p></div>
+</div>
+<div class="sect2">
 <h3 id="_resource_exists">resource_exists</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-true
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">resource_exists</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">true</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether the resource exists.</p></div>
-<div class="paragraph"><p>If it exists, conditional headers will be tested before
-attempting to perform the action. Otherwise, Cowboy will
-check if the resource previously existed first.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_service_available">service_available</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-true
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">service_available</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">true</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether the service is available.</p></div>
-<div class="paragraph"><p>This function can be used to test that all relevant backend
-systems are up and able to handle requests.</p></div>
-<div class="paragraph"><p>A <code>503 Service Unavailable</code> response will be sent if this
+<div class="paragraph"><p>A <em>503 Service Unavailable</em> response will be sent when this
 function returns <code>false</code>.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_uri_too_long">uri_too_long</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-false
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">uri_too_long</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">false</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether the requested URI is too long.</p></div>
-<div class="paragraph"><p>Cowboy has already performed all the necessary checks
-by the time this function is called, so few resources
-are expected to implement it.</p></div>
-<div class="paragraph"><p>A <code>414 Request-URI Too Long</code> response will be sent if this
-function returns <code>true</code>.</p></div>
+<div class="paragraph"><p>This function can be used to further restrict the length
+of the URI for this specific resource.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_valid_content_headers">valid_content_headers</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-true
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return whether the content-* headers are valid.</p></div>
-<div class="paragraph"><p>This also applies to the transfer-encoding header. This
-function must return <code>false</code> for any unknown content-*
-headers, or if the headers can&#8217;t be understood. The
-function <code>cowboy_req:parse_header/2</code> can be used to
-quickly check the headers can be parsed.</p></div>
-<div class="paragraph"><p>A <code>501 Not Implemented</code> response will be sent if this
-function returns <code>false</code>.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">valid_content_headers</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">true</span></tt></pre></div></div>
+<div class="paragraph"><p>Return whether the content headers are valid.</p></div>
+<div class="paragraph"><p>This callback can be used to reject requests that have
+invalid content header values, for example an unsupported
+content-encoding.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_valid_entity_length">valid_entity_length</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-all
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-boolean()
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-true
-</p>
-</dd>
-</dl></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">valid_entity_length</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> <span style="color: #000080">true</span></tt></pre></div></div>
 <div class="paragraph"><p>Return whether the request body length is within acceptable boundaries.</p></div>
-<div class="paragraph"><p>A <code>413 Request Entity Too Large</code> response will be sent if this
+<div class="paragraph"><p>A <em>413 Request Entity Too Large</em> response will be sent if this
 function returns <code>false</code>.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_variances">variances</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Methods
-</dt>
-<dd>
-<p>
-GET, HEAD, POST, PUT, PATCH, DELETE
-</p>
-</dd>
-<dt class="hdlist1">
-Value type
-</dt>
-<dd>
-<p>
-[binary()]
-</p>
-</dd>
-<dt class="hdlist1">
-Default value
-</dt>
-<dd>
-<p>
-[]
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Return the list of headers that affect the representation of the resource.</p></div>
-<div class="paragraph"><p>These request headers return the same resource but with different
-parameters, like another language or a different content-type.</p></div>
-<div class="paragraph"><p>Cowboy will automatically add the accept, accept-language and
-accept-charset headers to the list if the respective functions
-were defined in the resource.</p></div>
-<div class="paragraph"><p>This operation is performed right before the <code>resource_exists/2</code>
-callback. All responses past that point will contain the vary
-header which holds this list.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">variances</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #009900">Result</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Result</span>  <span style="color: #990000">::</span> [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()]  <span style="font-style: italic"><span style="color: #9A1900">%% case insensitive</span></span>
+<span style="color: #009900">Default</span> <span style="color: #990000">::</span> []</tt></pre></div></div>
+<div class="paragraph"><p>Return the list of request headers that affect the
+representation of the resource.</p></div>
+<div class="paragraph"><p>Cowboy automatically adds the accept, accept-charset and
+accept-language headers when necessary.</p></div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See also</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="../cowboy_app">cowboy(7)</a>,
+<a href="../cowboy_handler">cowboy_handler(3)</a></p></div>
 </div>
 </div>
 
