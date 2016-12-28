@@ -149,8 +149,12 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #009900">DEPS =</span> cowboy
 <span style="color: #009900">dep_cowboy_commit =</span> master
 
+<span style="color: #009900">DEP_PLUGINS =</span> cowboy
+
 include erlang.mk</tt></pre></div></div>
-<div class="paragraph"><p>If you run <code>make run</code> now, Cowboy will be included in the release
+<div class="paragraph"><p>We also tell the build system to load the plugins Cowboy provides.
+These include predefined templates that we will use soon.</p></div>
+<div class="paragraph"><p>If you do <code>make run</code> now, Cowboy will be included in the release
 and started automatically. This is not enough however, as Cowboy
 doesn&#8217;t do anything by default. We still need to tell Cowboy to
 listen for connections.</p></div>
@@ -199,7 +203,7 @@ HTTP handler.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make new <span style="color: #009900">t</span><span style="color: #990000">=</span>cowboy_http <span style="color: #009900">n</span><span style="color: #990000">=</span>hello_handler</tt></pre></div></div>
+<pre><tt>$ make new <span style="color: #009900">t</span><span style="color: #990000">=</span>cowboy<span style="color: #990000">.</span>http <span style="color: #009900">n</span><span style="color: #990000">=</span>hello_handler</tt></pre></div></div>
 <div class="paragraph"><p>Then, open the <em>src/hello_handler.erl</em> file and modify
 the <code>init/2</code> function like this to send a reply.</p></div>
 <div class="listingblock">
@@ -213,7 +217,7 @@ http://www.gnu.org/software/src-highlite -->
         <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello Erlang!"</span><span style="color: #990000">&gt;&gt;</span>,
         <span style="color: #009900">Req0</span>),
     {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>What the above code does is send a <code>200 OK</code> reply, with the
+<div class="paragraph"><p>What the above code does is send a 200 OK reply, with the
 Content-type header set to <code>text/plain</code> and the response
 body set to <code>Hello Erlang!</code>.</p></div>
 <div class="paragraph"><p>If you run the release and open <a href="http://localhost:8080">http://localhost:8080</a>
