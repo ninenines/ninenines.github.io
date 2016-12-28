@@ -39,5 +39,11 @@ $(document).ready(function() {;
 		$("#docs h2").each(function(){
 			$("<li><a href=\"#" + $(this).attr("id") + "\">" + $(this).text() + "</a></li>").appendTo("#docs-nav+ul");
 		});
+		if ($("#_rest_callbacks").length != 0){
+			$('<ul id="_rest_callbacks_nav"/>').insertAfter('#docs-nav+ul a[href="#_rest_callbacks"]');
+			$('#_rest_callbacks+div h3').each(function(){
+				$("<li><a href=\"#" + $(this).attr("id") + "\">" + $(this).text() + "</a></li>").appendTo('#docs-nav+ul a[href="#_rest_callbacks"]+ul');
+			});
+		}
 	}
 });
