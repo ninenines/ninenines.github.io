@@ -80,7 +80,7 @@ most known example of such practice is known as long polling.</p></div>
 <div class="paragraph"><p>Loop handlers can also be used for requests where a response is
 partially available and you need to stream the response body
 while the connection is open. The most known example of such
-practice is known as server-sent events.</p></div>
+practice is server-sent events.</p></div>
 <div class="paragraph"><p>While the same can be accomplished using plain HTTP handlers,
 it is recommended to use loop handlers because they are well-tested
 and allow using built-in features like hibernation and timeouts.</p></div>
@@ -131,7 +131,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">info</span></span>({<span style="color: #FF6600">reply</span>, <span style="color: #009900">Body</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, [], <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>),
+    <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, #{}, <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>),
     {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
 <span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #009900">_Msg</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
@@ -156,7 +156,7 @@ This can be done by initiating a chunked reply in the
 <code>init/2</code> callback and then using <code>cowboy_req:chunk/2</code>
 every time a message is received.</p></div>
 <div class="paragraph"><p>The following snippet does exactly that. As you can see
-a chunk is sent every time a <code>chunk</code> message is received,
+a chunk is sent every time an <code>event</code> message is received,
 and the loop is stopped by sending an <code>eof</code> message.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
@@ -164,13 +164,13 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunked_reply</span></span>(<span style="color: #993399">200</span>, [], <span style="color: #009900">Req</span>),
+    <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_reply</span></span>(<span style="color: #993399">200</span>, <span style="color: #009900">Req</span>),
     {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span>
 
 <span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #FF6600">eof</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-<span style="font-weight: bold"><span style="color: #000000">info</span></span>({<span style="color: #FF6600">chunk</span>, <span style="color: #009900">Chunk</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">cowboy_req:chunk</span></span>(<span style="color: #009900">Chunk</span>, <span style="color: #009900">Req</span>),
+<span style="font-weight: bold"><span style="color: #000000">info</span></span>({<span style="color: #FF6600">event</span>, <span style="color: #009900">Data</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #009900">Data</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Req</span>),
     {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
 <span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #009900">_Msg</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
@@ -187,6 +187,8 @@ for general instructions about cleaning up.</p></div>
 <div class="sect1">
 <h2 id="_timeout">Timeout</h2>
 <div class="sectionbody">
+<div class="paragraph"><p>Note that this feature currently does not work. It will be
+brought back in a future 2.0 pre-release.</p></div>
 <div class="paragraph"><p>By default Cowboy will not attempt to close the connection
 if there is no activity from the client. This is not always
 desirable, which is why you can set a timeout. Cowboy will
