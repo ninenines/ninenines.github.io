@@ -9,7 +9,7 @@
 
     <meta name="generator" content="Hugo 0.17" />
 
-    <title>Nine Nines: cowboy_req:delete_resp_header(3)</title>
+    <title>Nine Nines: cowboy_req:resp_headers(3)</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
 	
@@ -67,12 +67,12 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>cowboy_req:delete_resp_header(3)</span></h1>
+<h1 class="lined-header"><span>cowboy_req:resp_headers(3)</span></h1>
 
 <div class="sect1">
 <h2 id="_name">Name</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:delete_resp_header - Delete a response header</p></div>
+<div class="paragraph"><p>cowboy_req:resp_headers - Response headers</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -83,27 +83,14 @@
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">delete_resp_header</span></span>(<span style="color: #009900">Name</span>, <span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="color: #009900">Req</span>
-
-<span style="color: #009900">Name</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()  <span style="font-style: italic"><span style="color: #9A1900">%% lowercase; case insensitive</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Delete the given response header.</p></div>
-<div class="paragraph"><p>The header name must be given as a lowercase binary string.
-While header names are case insensitive, Cowboy requires them
-to be given as lowercase to function properly.</p></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">resp_headers</span></span>(<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:http_headers</span></span>()</tt></pre></div></div>
+<div class="paragraph"><p>Return all response headers.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_arguments">Arguments</h2>
 <div class="sectionbody">
 <div class="dlist"><dl>
-<dt class="hdlist1">
-Name
-</dt>
-<dd>
-<p>
-Header name as a lowercase binary string.
-</p>
-</dd>
 <dt class="hdlist1">
 Req
 </dt>
@@ -118,9 +105,8 @@ The Req object.
 <div class="sect1">
 <h2 id="_return_value">Return value</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>A new Req object is returned.</p></div>
-<div class="paragraph"><p>The returned Req object must be used from that point onward,
-otherwise the header will still be sent in the response.</p></div>
+<div class="paragraph"><p>Headers are returned as a map with keys being lowercase
+binary strings, and values as binary strings.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -129,7 +115,7 @@ otherwise the header will still be sent in the response.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-<strong>1.0</strong>: Function introduced.
+<strong>2.0</strong>: Function introduced.
 </p>
 </li>
 </ul></div>
@@ -139,23 +125,21 @@ otherwise the header will still be sent in the response.</p></div>
 <h2 id="_examples">Examples</h2>
 <div class="sectionbody">
 <div class="listingblock">
-<div class="title">Remove the content-type header from the response</div>
+<div class="title">Get all response headers</div>
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:delete_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req0</span>),</tt></pre></div></div>
+<pre><tt><span style="color: #009900">Headers</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:resp_headers</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>,
-<a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a>,
-<a href="../cowboy_req.has_resp_header">cowboy_req:has_resp_header(3)</a>,
 <a href="../cowboy_req.resp_header">cowboy_req:resp_header(3)</a>,
-<a href="../cowboy_req.resp_headers">cowboy_req:resp_headers(3)</a></p></div>
+<a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>,
+<a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a></p></div>
 </div>
 </div>
 
