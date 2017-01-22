@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.17" />
+
+    <title>Nine Nines: Don&#39;t let it crash</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+	
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/99s.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>Don&#39;t let it crash</span></h1>
+	<p class="date">
+		<span class="day">22</span>
+		<span class="month">Jan</span>
+	</p>
+</header>
+
+<div class="paragraph"><p>We have a specific mindset when writing Erlang
+programs. We focus on the normal execution of the
+program and don&#8217;t handle most of the errors that may
+occur. We sometimes call this normal execution the
+<em>happy path</em>.</p></div>
+<div class="paragraph"><p>The general pattern behind writing only for the
+<em>happy path</em>, letting the VM catch errors (writing
+them to a log for future consumption) and then
+having a supervisor restart the processes that
+failed from a clean state, has a name. We call it
+<em>let it crash</em>; and it drives many of our design
+decisions.</p></div>
+<div class="paragraph"><p>It&#8217;s a really great way to program and the results
+are fantastic compared to most other programming
+languages. And yet, <em>let it crash</em> barely convinced
+anyone that they should use Erlang. Why would that
+be?</p></div>
+<div class="paragraph"><p>You may already know that Cowboy is capable of
+handling at least 2 million Websocket connections
+on a single server. This is in large part thanks
+to the capabilities of the VM. Still, 2 million
+is good, much better than most other servers can
+do.</p></div>
+<div class="paragraph"><p>Cowboy is not just a Websocket server; it&#8217;s also
+an HTTP and HTTP/2 server, and it handles many
+related features like long polling or the parsing
+of most request headers.</p></div>
+<div class="paragraph"><p>Can you guess how large the Cowboy codebase is,
+without looking at the source?</p></div>
+<div class="paragraph"><p>Do make sure you have a clear answer in your mind
+before you go check.</p></div>
+<div class="paragraph"><p>Good, you are back. Now what were the results? If
+I am correct, you overestimated the size of Cowboy.
+Cowboy is in fact about five thousand lines of code.
+You probably thought it was at least ten thousand.
+About eighty percent of readers will have
+overestimated the size of Cowboy. And you did only
+because I mentioned it can handle millions of
+Websocket connections.</p></div>
+<div class="paragraph"><p>Numerous studies show this effect. Just mentioning
+the large number already prepared your mind to think
+in that direction. Repeating the number made you
+focus even more on it. Then the question asked for
+a number, which ended up larger than the reality.</p></div>
+<div class="paragraph"><p>The same effect can be applied to negotiation for
+example. You generally want to start by giving your
+offer (and not let the other party initiate) and
+you want to give a really large number first. You
+can also prepare your customer by mentioning an even
+larger number in the previous discussion.</p></div>
+<div class="paragraph"><p>And it&#8217;s not just numbers either. An experiment
+showed that just by looking at an image of clouds,
+customers of a pillow store were buying pillows
+more comfortable (and more expensive) than those
+who didn&#8217;t see that image.</p></div>
+<div class="paragraph"><p>This is the power of associations. It is covered in
+much larger detail in the books
+<a href="https://www.amazon.com/Influence-Psychology-Persuasion-Robert-Cialdini/dp/006124189X">Influence</a>
+and
+<a href="https://www.amazon.com/Pre-Suasion-Revolutionary-Way-Influence-Persuade/dp/1501109790">Pre-suasion</a>.
+I highly recommend reading those and applying what
+you learn to your daily life. I&#8217;m definitely not
+a professional psychologist so take this post with
+a grain of salt.</p></div>
+<div class="paragraph"><p>When selling Erlang, whether we are selling it to
+a customer or trying to convince a developer friend
+to start using it, we often talk about how Erlang
+<em>lets you sleep at night</em>, that it is auto healing
+and always gets fantastic uptimes.</p></div>
+<div class="paragraph"><p>And then we talk about <em>let it crash</em>.</p></div>
+<div class="paragraph"><p>And we describe what it means.</p></div>
+<div class="paragraph"><p>We might as well just say that Erlang crashes a lot
+and then take the door. It would have the same effect.
+It doesn&#8217;t even stop at programs crashing. You know
+what else crashes? Cars, planes, trains. Often with
+disastrous consequences. Is that really the message
+we want to convey?</p></div>
+<div class="paragraph"><p>They even <a href="https://img.youtube.com/vi/oEUBW2lCkIk/0.jpg">printed it on a t-shirt</a>!
+Keep calm and let it crash. It&#8217;s the kind of t-shirt
+you probably shouldn&#8217;t wear in an airport, and for good
+reasons. A few people did, then realized what they were
+wearing and were not too smug about it.</p></div>
+<div class="paragraph"><p>And yet this is how we sell Erlang.</p></div>
+<div class="paragraph"><p>A better way would be to focus on the positives, of
+course, but also to make sure that those positives
+are phrased in a way that prevents bad associations
+to be formed in people&#8217;s minds.</p></div>
+<div class="paragraph"><p>Instead of <em>let it crash</em>, you can say that Erlang
+has <em>auto healing mechanisms</em>. Healing is a good
+thing and accurately describes what happens in the
+system.</p></div>
+<div class="paragraph"><p>Should you need to go into more details, you will
+probably want to avoid <em>recover from crashes</em> and
+instead say <em>recover from exceptions</em>. Exceptions
+are a pretty neutral word and, should you explain
+what you mean by that, you can talk about exceptions
+that occur for reasons unrelated to Erlang, like
+hardware failure or network instability.</p></div>
+<div class="paragraph"><p>The trick is to always use positive words and
+phrases to describe Erlang, and to use external
+factors to explain how Erlang deals with failures.
+Never mention the failures internal to Erlang
+systems unless you are asked specifically, in
+which case you can say that the auto healing
+applies to all exceptions.</p></div>
+<div class="paragraph"><p>The <em>let it crash</em> philosophy is great when
+learning Erlang or when writing fault-tolerant
+systems. But it&#8217;s not going to convince anyone
+to use it unless they were already looking for
+it.</p></div>
+<div class="paragraph"><p>Do you like this post? Tell me on Twitter. I might
+make more.</p></div>
+
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul id="articles-nav" class="extra_margin">
+	
+		<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+	
+		<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+	
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/js/bootstrap-carousel.js"></script>
+    <script src="/js/bootstrap-dropdown.js"></script>
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+

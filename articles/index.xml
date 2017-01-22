@@ -6,8 +6,129 @@
     <description>Recent content in Articles-rsses on Nine Nines</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 03 Jan 2017 00:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Sun, 22 Jan 2017 00:00:00 +0100</lastBuildDate>
     <atom:link href="https://ninenines.eu/articles/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Don&#39;t let it crash</title>
+      <link>https://ninenines.eu/articles/dont-let-it-crash/</link>
+      <pubDate>Sun, 22 Jan 2017 00:00:00 +0100</pubDate>
+      
+      <guid>https://ninenines.eu/articles/dont-let-it-crash/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;We have a specific mindset when writing Erlang
+programs. We focus on the normal execution of the
+program and don&amp;#8217;t handle most of the errors that may
+occur. We sometimes call this normal execution the
+&lt;em&gt;happy path&lt;/em&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The general pattern behind writing only for the
+&lt;em&gt;happy path&lt;/em&gt;, letting the VM catch errors (writing
+them to a log for future consumption) and then
+having a supervisor restart the processes that
+failed from a clean state, has a name. We call it
+&lt;em&gt;let it crash&lt;/em&gt;; and it drives many of our design
+decisions.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It&amp;#8217;s a really great way to program and the results
+are fantastic compared to most other programming
+languages. And yet, &lt;em&gt;let it crash&lt;/em&gt; barely convinced
+anyone that they should use Erlang. Why would that
+be?&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;You may already know that Cowboy is capable of
+handling at least 2 million Websocket connections
+on a single server. This is in large part thanks
+to the capabilities of the VM. Still, 2 million
+is good, much better than most other servers can
+do.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Cowboy is not just a Websocket server; it&amp;#8217;s also
+an HTTP and HTTP/2 server, and it handles many
+related features like long polling or the parsing
+of most request headers.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Can you guess how large the Cowboy codebase is,
+without looking at the source?&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do make sure you have a clear answer in your mind
+before you go check.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Good, you are back. Now what were the results? If
+I am correct, you overestimated the size of Cowboy.
+Cowboy is in fact about five thousand lines of code.
+You probably thought it was at least ten thousand.
+About eighty percent of readers will have
+overestimated the size of Cowboy. And you did only
+because I mentioned it can handle millions of
+Websocket connections.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Numerous studies show this effect. Just mentioning
+the large number already prepared your mind to think
+in that direction. Repeating the number made you
+focus even more on it. Then the question asked for
+a number, which ended up larger than the reality.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The same effect can be applied to negotiation for
+example. You generally want to start by giving your
+offer (and not let the other party initiate) and
+you want to give a really large number first. You
+can also prepare your customer by mentioning an even
+larger number in the previous discussion.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;And it&amp;#8217;s not just numbers either. An experiment
+showed that just by looking at an image of clouds,
+customers of a pillow store were buying pillows
+more comfortable (and more expensive) than those
+who didn&amp;#8217;t see that image.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This is the power of associations. It is covered in
+much larger detail in the books
+&lt;a href=&#34;https://www.amazon.com/Influence-Psychology-Persuasion-Robert-Cialdini/dp/006124189X&#34;&gt;Influence&lt;/a&gt;
+and
+&lt;a href=&#34;https://www.amazon.com/Pre-Suasion-Revolutionary-Way-Influence-Persuade/dp/1501109790&#34;&gt;Pre-suasion&lt;/a&gt;.
+I highly recommend reading those and applying what
+you learn to your daily life. I&amp;#8217;m definitely not
+a professional psychologist so take this post with
+a grain of salt.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;When selling Erlang, whether we are selling it to
+a customer or trying to convince a developer friend
+to start using it, we often talk about how Erlang
+&lt;em&gt;lets you sleep at night&lt;/em&gt;, that it is auto healing
+and always gets fantastic uptimes.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;And then we talk about &lt;em&gt;let it crash&lt;/em&gt;.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;And we describe what it means.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;We might as well just say that Erlang crashes a lot
+and then take the door. It would have the same effect.
+It doesn&amp;#8217;t even stop at programs crashing. You know
+what else crashes? Cars, planes, trains. Often with
+disastrous consequences. Is that really the message
+we want to convey?&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;They even &lt;a href=&#34;https://img.youtube.com/vi/oEUBW2lCkIk/0.jpg&#34;&gt;printed it on a t-shirt&lt;/a&gt;!
+Keep calm and let it crash. It&amp;#8217;s the kind of t-shirt
+you probably shouldn&amp;#8217;t wear in an airport, and for good
+reasons. A few people did, then realized what they were
+wearing and were not too smug about it.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;And yet this is how we sell Erlang.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;A better way would be to focus on the positives, of
+course, but also to make sure that those positives
+are phrased in a way that prevents bad associations
+to be formed in people&amp;#8217;s minds.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Instead of &lt;em&gt;let it crash&lt;/em&gt;, you can say that Erlang
+has &lt;em&gt;auto healing mechanisms&lt;/em&gt;. Healing is a good
+thing and accurately describes what happens in the
+system.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Should you need to go into more details, you will
+probably want to avoid &lt;em&gt;recover from crashes&lt;/em&gt; and
+instead say &lt;em&gt;recover from exceptions&lt;/em&gt;. Exceptions
+are a pretty neutral word and, should you explain
+what you mean by that, you can talk about exceptions
+that occur for reasons unrelated to Erlang, like
+hardware failure or network instability.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The trick is to always use positive words and
+phrases to describe Erlang, and to use external
+factors to explain how Erlang deals with failures.
+Never mention the failures internal to Erlang
+systems unless you are asked specifically, in
+which case you can say that the auto healing
+applies to all exceptions.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The &lt;em&gt;let it crash&lt;/em&gt; philosophy is great when
+learning Erlang or when writing fault-tolerant
+systems. But it&amp;#8217;s not going to convince anyone
+to use it unless they were already looking for
+it.&lt;/p&gt;&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Do you like this post? Tell me on Twitter. I might
+make more.&lt;/p&gt;&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Cowboy 2.0 pre-release 4</title>
@@ -1521,67 +1642,6 @@ http://www.gnu.org/software/src-highlite --&gt;
 &lt;li&gt;
 &lt;p&gt;
 &lt;a href=&#34;https://github.com/extend/xerl/blob/0.5/&#34;&gt;View the source&lt;/a&gt;
-&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;&lt;/div&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Xerl: expression separator</title>
-      <link>https://ninenines.eu/articles/xerl-0.4-expression-separator/</link>
-      <pubDate>Fri, 01 Mar 2013 00:00:00 +0100</pubDate>
-      
-      <guid>https://ninenines.eu/articles/xerl-0.4-expression-separator/</guid>
-      <description>&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;As promised we are adding an expression separator this time.
-This will be short and easy.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;In the tokenizer we only need to add a line recognizing the
-comma as a valid token.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;, &lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt; {&lt;span style=&#34;color: #FF6600&#34;&gt;token&lt;/span&gt;, {&lt;span style=&#34;color: #FF6600&#34;&gt;&#39;,&#39;&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;TokenLine&lt;/span&gt;}}&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Then we need to change the following lines in the parser:&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;exprs&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;expr&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #FF6600&#34;&gt;&#39;$1&#39;&lt;/span&gt;]&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;
-&lt;span style=&#34;color: #FF6600&#34;&gt;exprs&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;expr&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;exprs&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #FF6600&#34;&gt;&#39;$1&#39;&lt;/span&gt; | &lt;span style=&#34;color: #FF6600&#34;&gt;&#39;$2&#39;&lt;/span&gt;]&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;And add a comma between the expressions on the second line:&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;exprs&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;expr&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #FF6600&#34;&gt;&#39;$1&#39;&lt;/span&gt;]&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;
-&lt;span style=&#34;color: #FF6600&#34;&gt;exprs&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;expr&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;&#39;,&#39;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;exprs&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #FF6600&#34;&gt;&#39;$1&#39;&lt;/span&gt; | &lt;span style=&#34;color: #FF6600&#34;&gt;&#39;$3&#39;&lt;/span&gt;]&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;That takes care of everything except the optional trailing
-comma at the end of our lists of expressions. We just need an
-additional rule to take care of this.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;listingblock&#34;&gt;
-&lt;div class=&#34;content&#34;&gt;&lt;!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite --&gt;
-&lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;exprs&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;expr&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;&#39;,&#39;&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #FF6600&#34;&gt;&#39;$1&#39;&lt;/span&gt;]&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;That&amp;#8217;s it.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Wondering why we don&amp;#8217;t have this optional trailing comma in
-Erlang considering how easy it was and the number of people
-complaining about it? Yeah, me too. But that&amp;#8217;s for someone else
-to answer.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;Another change I want to talk about is a simple modification
-of the compiler code to use an &lt;code&gt;#env{}&lt;/code&gt; record for
-tracking state instead of passing around individual variables.
-This will be required later on when we make modules into proper
-expressions so I thought it was a good idea to anticipate.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;ulist&#34;&gt;&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;
-&lt;a href=&#34;https://github.com/extend/xerl/blob/0.4/&#34;&gt;View the source&lt;/a&gt;
 &lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;&lt;/div&gt;
