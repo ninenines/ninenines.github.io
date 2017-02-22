@@ -111,8 +111,6 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
     <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
      | {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
-     | {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()}
-     | {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(), <span style="color: #FF6600">hibernate</span>}
 
 <span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #009900">Info</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
     <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
@@ -124,7 +122,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #009900">Req</span>    <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
 <span style="color: #009900">State</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
 <span style="color: #009900">Info</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
-<span style="color: #009900">Reason</span> <span style="color: #990000">::</span> <span style="color: #FF6600">stop</span> | <span style="color: #FF6600">timeout</span>
+<span style="color: #009900">Reason</span> <span style="color: #990000">::</span> <span style="color: #FF6600">stop</span>
         | {<span style="color: #FF6600">crash</span>, <span style="color: #FF6600">error</span> | <span style="font-weight: bold"><span style="color: #000080">exit</span></span> | <span style="font-weight: bold"><span style="color: #000080">throw</span></span>, <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}</tt></pre></div></div>
 <div class="paragraph"><p>The <code>init/2</code> callback is common to all handlers. To switch
 to the loop behavior, it must return <code>cowboy_loop</code> as the
@@ -148,16 +146,6 @@ stop
 </p>
 </dd>
 <dt class="hdlist1">
-timeout
-</dt>
-<dd>
-<p>
-    The connection has been closed due to inactivity. The timeout
-    value can be configured from <code>init/2</code>. The response sent when
-    this happens is a <code>204 No Content</code>.
-</p>
-</dd>
-<dt class="hdlist1">
 {crash, Class, Reason}
 </dt>
 <dd>
@@ -177,7 +165,7 @@ timeout
 <div class="ulist"><ul>
 <li>
 <p>
-<strong>2.0</strong>: Cowboy temporarily no longer checks the socket for data with HTTP/1.1.
+<strong>2.0</strong>: Loop handlers no longer need to handle overflow/timeouts.
 </p>
 </li>
 <li>

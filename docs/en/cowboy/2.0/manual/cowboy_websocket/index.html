@@ -84,38 +84,6 @@ for handling Websocket connections.</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_options">Options</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
-    <span style="color: #FF6600">websocket_compress</span> <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
-}</tt></pre></div></div>
-<div class="paragraph"><p>Configuration for the Websocket protocol.</p></div>
-<div class="paragraph"><p>This configuration is passed to Cowboy when starting listeners
-using <code>cowboy:start_clear/4</code> or <code>cowboy:start_tls/4</code> functions.</p></div>
-<div class="paragraph"><p>It can be updated without restarting listeners using the
-Ranch functions <code>ranch:get_protocol_options/1</code> and
-<code>ranch:set_protocol_options/2</code>.</p></div>
-<div class="paragraph"><p>The default value is given next to the option name:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-websocket_compress (false)
-</dt>
-<dd>
-<p>
-    Whether to enable the Websocket frame compression
-    extension. Frames will only be compressed for the
-    clients that support this extension.
-</p>
-</dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
 <h2 id="_callbacks">Callbacks</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Websocket handlers must implement the following callback
@@ -127,9 +95,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
     <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-     | {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
-     | {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()}
-     | {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(), <span style="color: #FF6600">hibernate</span>}
+     | {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #009900">Opts</span>}
 
 <span style="font-weight: bold"><span style="color: #000000">websocket_init</span></span>(<span style="color: #009900">State</span>)            <span style="color: #990000">-&gt;</span> <span style="color: #009900">CallResult</span>  <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
 <span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">InFrame</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #009900">CallResult</span>
@@ -139,6 +105,7 @@ http://www.gnu.org/software/src-highlite -->
 
 <span style="color: #009900">Req</span>        <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
 <span style="color: #009900">State</span>      <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">Opts</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_websocket:opts</span></span>()
 <span style="color: #009900">InFrame</span>    <span style="color: #990000">::</span> {<span style="color: #FF6600">text</span> | <span style="font-weight: bold"><span style="color: #000080">binary</span></span> | <span style="color: #FF6600">ping</span> | <span style="color: #FF6600">pong</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
 <span style="color: #009900">OutFrame</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()
 <span style="color: #009900">Info</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
@@ -276,6 +243,57 @@ timeout
 </p>
 </dd>
 </dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_types">Types</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_opts">opts()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">compress</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>(),
+    <span style="color: #0000FF">idle_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()
+}</tt></pre></div></div>
+<div class="paragraph"><p>Websocket handler options.</p></div>
+<div class="paragraph"><p>This configuration is passed to Cowboy from the <code>init/2</code>
+function:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Opts</span> <span style="color: #990000">=</span> #{<span style="color: #0000FF">compress</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">true</span>},
+    {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #009900">Opts</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The default value is given next to the option name:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+compress (false)
+</dt>
+<dd>
+<p>
+    Whether to enable the Websocket frame compression
+    extension. Frames will only be compressed for the
+    clients that support this extension.
+</p>
+</dd>
+<dt class="hdlist1">
+idle_timeout (60000)
+</dt>
+<dd>
+<p>
+    Time in milliseconds that Cowboy will keep the
+    connection open without receiving anything from
+    the client.
+</p>
+</dd>
+</dl></div>
+</div>
 </div>
 </div>
 <div class="sect1">

@@ -95,7 +95,7 @@ for plain HTTP handlers.</p></div>
 loop handler behavior. This tuple may optionally contain
 a timeout value and/or the atom <code>hibernate</code> to make the
 process enter hibernation until a message is received.</p></div>
-<div class="paragraph"><p>This snippet enables the loop handler.</p></div>
+<div class="paragraph"><p>This snippet enables the loop handler:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
@@ -103,16 +103,14 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>However it is largely recommended that you set a timeout
-value. The next example sets a timeout value of 30s and
-also makes the process hibernate.</p></div>
+<div class="paragraph"><p>This also makes the process hibernate:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #993399">30000</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -182,25 +180,6 @@ a subsequent request.</p></div>
 <div class="paragraph"><p>Please refer to the <a href="../handlers">Handlers chapter</a>
 for general instructions about cleaning up.</p></div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_timeout">Timeout</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Note that this feature currently does not work. It will be
-brought back in a future 2.0 pre-release.</p></div>
-<div class="paragraph"><p>By default Cowboy will not attempt to close the connection
-if there is no activity from the client. This is not always
-desirable, which is why you can set a timeout. Cowboy will
-close the connection if no data was received from the client
-after the configured time. The timeout only needs to be set
-once and can&#8217;t be modified afterwards.</p></div>
-<div class="paragraph"><p>Because the request may have had a body, or may be followed
-by another request, Cowboy is forced to buffer all data it
-receives. This data may grow to become too large though,
-so there is a configurable limit for it. The default buffer
-size is of 5000 bytes, but it may be changed by setting the
-<code>loop_max_buffer</code> middleware environment value.</p></div>
 </div>
 </div>
 <div class="sect1">

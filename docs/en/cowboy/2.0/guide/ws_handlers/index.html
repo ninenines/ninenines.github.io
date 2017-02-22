@@ -127,13 +127,13 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
         <span style="color: #000080">undefined</span> <span style="color: #990000">-&gt;</span>
-            {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
+            {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
         <span style="color: #009900">Subprotocols</span> <span style="color: #990000">-&gt;</span>
             <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">lists:keymember</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mqtt"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #993399">1</span>, <span style="color: #009900">Subprotocols</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
                 <span style="color: #000080">true</span> <span style="color: #990000">-&gt;</span>
                     <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"sec-websocket-protocol"</span><span style="color: #990000">&gt;&gt;</span>,
                         <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"mqtt"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>),
-                    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>};
+                    {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>};
                 <span style="color: #000080">false</span> <span style="color: #990000">-&gt;</span>
                     {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
             <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
@@ -275,14 +275,15 @@ a timeout here, to avoid having processes linger longer
 than needed.</p></div>
 <div class="paragraph"><p>The <code>init/2</code> callback can set the timeout to be used
 for the connection. For example, this would make Cowboy
-close connections idle for more than 60 seconds:</p></div>
+close connections idle for more than 30 seconds:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #993399">60000</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+    {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, #{
+        <span style="color: #0000FF">idle_timeout</span> <span style="color: #990000">=&gt;</span> <span style="color: #993399">30000</span>}}<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>This value cannot be changed once it is set. It defaults to
 <code>infinity</code>.</p></div>
 </div>

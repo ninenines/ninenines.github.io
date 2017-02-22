@@ -87,10 +87,10 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
     {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The return value may also have a <code>Timeout</code> value and/or the
-atom <code>hibernate</code>. These options are useful for long living
-connections. When they are not provided, the timeout value
-defaults to <code>infinity</code> and the hibernate value to <code>run</code>.</p></div>
+<div class="paragraph"><p>The returned tuple may also have a fourth element containing
+options for the sub protocol. No option is universal. While
+it will usually be a map of options, it doesn&#8217;t have to be.
+For example loop handlers accept the atom <code>hibernate</code>.</p></div>
 <div class="paragraph"><p>The following snippet switches to the <code>my_protocol</code> sub
 protocol, sets the timeout value to 5 seconds and enables
 hibernation:</p></div>
@@ -100,33 +100,38 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">my_protocol</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #993399">5000</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>If a sub protocol does not make use of these options, it should
-crash if it receives anything other than the default values.</p></div>
+    {<span style="color: #FF6600">my_protocol</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, #{
+        <span style="color: #0000FF">timeout</span> <span style="color: #990000">=&gt;</span> <span style="color: #993399">5000</span>,
+        <span style="color: #0000FF">compress</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">true</span>}}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Sub protocols should ignore unknown options so as to not waste
+resources doing unnecessary validation.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_upgrade">Upgrade</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>After the <code>init/2</code> function returns, Cowboy will then call the
-<code>upgrade/6</code> function. This is the only callback defined by the
-<code>cowboy_sub_protocol</code> behavior.</p></div>
+<div class="paragraph"><p>After the <code>init/2</code> function returns, Cowboy will call either
+the <code>upgrade/4</code> or the <code>upgrade/5</code> function. The former is called
+when no options were given; the latter when they were given.</p></div>
 <div class="paragraph"><p>The function is named <code>upgrade</code> because it mimics the mechanism
 of HTTP protocol upgrades. For some sub protocols, like Websocket,
 an actual upgrade is performed. For others, like REST, this is
 only an upgrade at Cowboy&#8217;s level and the client has nothing to
 do about it.</p></div>
 <div class="paragraph"><p>The upgrade callback receives the Req object, the middleware
-environment, the handler and its options, and the aforementioned
-timeout and hibernate values.</p></div>
+environment, the handler and its state, and for <code>upgrade/5</code>
+also the aformentioned options.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">upgrade</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">Env</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">HandlerOpts</span>, <span style="color: #009900">Timeout</span>, <span style="color: #009900">Hibernate</span>) <span style="color: #990000">-&gt;</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">upgrade</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">Env</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    <span style="font-style: italic"><span style="color: #9A1900">%% Sub protocol code here.</span></span>
+
+<span style="font-weight: bold"><span style="color: #000000">upgrade</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">Env</span>, <span style="color: #009900">Handler</span>, <span style="color: #009900">State</span>, <span style="color: #009900">Opts</span>) <span style="color: #990000">-&gt;</span>
     <span style="font-style: italic"><span style="color: #9A1900">%% Sub protocol code here.</span></span></tt></pre></div></div>
-<div class="paragraph"><p>This callback is expected to behave like a middleware and to
+<div class="paragraph"><p>These callbacks are expected to behave like middlewares and to
 return an updated environment and Req object.</p></div>
 <div class="paragraph"><p>Sub protocols are expected to call the <code>cowboy_handler:terminate/4</code>
 function when they terminate. This function will make sure that
