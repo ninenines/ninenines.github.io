@@ -91,9 +91,13 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
-    <span style="color: #FF6600">env</span>             <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>(),
-    <span style="color: #FF6600">middlewares</span>     <span style="color: #990000">:=</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()],
-    <span style="color: #FF6600">preface_timeout</span> <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()
+    <span style="color: #0000FF">connection_type</span>    <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">worker</span> | <span style="color: #FF6600">supervisor</span>,
+    <span style="color: #0000FF">env</span>                <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>(),
+    <span style="color: #0000FF">inactivity_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">middlewares</span>        <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()],
+    <span style="color: #0000FF">preface_timeout</span>    <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #000080">shutdown</span><span style="color: #009900">_timeout</span>   <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">stream_handlers</span>    <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()]
 }</tt></pre></div></div>
 <div class="paragraph"><p>Configuration for the HTTP/2 protocol.</p></div>
 <div class="paragraph"><p>This configuration is passed to Cowboy when starting listeners
@@ -104,11 +108,27 @@ Ranch functions <code>ranch:get_protocol_options/1</code> and
 <div class="paragraph"><p>The default value is given next to the option name:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
+connection_type (supervisor)
+</dt>
+<dd>
+<p>
+    Whether the connection process also acts as a supervisor.
+</p>
+</dd>
+<dt class="hdlist1">
 env (#{})
 </dt>
 <dd>
 <p>
     Middleware environment.
+</p>
+</dd>
+<dt class="hdlist1">
+inactivity_timeout (300000)
+</dt>
+<dd>
+<p>
+    Time in ms with nothing received at all before Cowboy closes the connection.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -125,6 +145,22 @@ preface_timeout (5000)
 <dd>
 <p>
     Time in ms Cowboy is willing to wait for the connection preface.
+</p>
+</dd>
+<dt class="hdlist1">
+shutdown_timeout (5000)
+</dt>
+<dd>
+<p>
+    Time in ms Cowboy will wait for child processes to shut down before killing them.
+</p>
+</dd>
+<dt class="hdlist1">
+stream_handlers ([cowboy_stream_h])
+</dt>
+<dd>
+<p>
+    Ordered list of stream handlers that will handle all stream events.
 </p>
 </dd>
 </dl></div>
@@ -216,7 +252,6 @@ preface_timeout (5000)
 
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="/js/bootstrap-carousel.js"></script>
     <script src="/js/bootstrap-dropdown.js"></script>
     <script src="/js/custom.js"></script>
   </body>

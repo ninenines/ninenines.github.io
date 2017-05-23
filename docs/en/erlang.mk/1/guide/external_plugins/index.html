@@ -132,6 +132,47 @@ plugins, but also select all plugins from the dependency
 in one go if they wish to do so.</p></div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_early_stage_plugins">Early-stage plugins</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Plugins declared in <code>DEP_PLUGINS</code> are loaded near the end of Erlang.mk.
+That&#8217;s why you have access to all previously initialized variables.
+However, if you want your plugin to add common dependencies to
+your applications, a regular is loaded too late in the process.
+You need to use "Early-stage plugins". They are declared using the
+<code>DEP_EARLY_PLUGINS</code> variable instead. Plugins listed in this variable
+are loaded near the beginning of Erlang.mk Otherwise, they work exactly
+the same.</p></div>
+<div class="paragraph"><p>If you only give the name of a dependency, the default file loaded is
+<em>early-plugins.mk</em>. You can specify a filename exactly like you would
+have done it with regular plugins.</p></div>
+<div class="listingblock">
+<div class="content"></div></div>
+<div class="listingblock">
+<div class="content"></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_loading_plugins_local_to_the_application">Loading  plugins local to the application</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>If the Erlang.mk plugin lives in the same directory or repository as your
+application or library, then you can load it exactly like an external
+plugin: the dependency name is simply the name of your application or
+library.</p></div>
+<div class="paragraph"><p>For example, the following Makefile loads a plugin in the <em>mk</em>
+subdirectory:</p></div>
+<div class="listingblock">
+<div class="content"></div></div>
+<div class="paragraph"><p>This also works with early-stage plugins:</p></div>
+<div class="listingblock">
+<div class="content"></div></div>
+<div class="paragraph"><p>Like external plugins, if you do not specify the path to the plugin, it
+defaults to <em>plugins.mk</em> or <em>early-plugins.mk</em>, located at the root of
+your application:</p></div>
+<div class="listingblock">
+<div class="content"></div></div>
+</div>
+</div>
 
 
 
@@ -211,7 +252,6 @@ in one go if they wish to do so.</p></div>
 
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="/js/bootstrap-carousel.js"></script>
     <script src="/js/bootstrap-dropdown.js"></script>
     <script src="/js/custom.js"></script>
   </body>

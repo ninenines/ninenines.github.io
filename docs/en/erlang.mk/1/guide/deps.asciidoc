@@ -167,6 +167,7 @@ The following table lists all existing methods:
 | hg             | hg repo commit  | Clone the Mercurial repository and update to the given version
 | svn            | svn repo        | Checkout the given SVN repository
 | cp             | cp path/to/repo | Recursively copy a local directory
+| ln             | ln path/to/repo | Symbolically link a local directory
 | hex            | hex version     | Download the given project version from hex.pm
 | fail           | N/A             | Always fail, reserved for internal use
 | legacy         | N/A             | Legacy Erlang.mk fetcher, reserved for internal use
@@ -397,9 +398,20 @@ They work exactly the same as remote dependencies, except:
 * They are not deleted on `make distclean`
 * They are not automatically added to the application resource file
 
-To properly fill the application resource file, you will
-need to define the `LOCAL_DEPS` variable for each relevant
-application, the same as for OTP applications.
+To properly fill the application resource file and compile apps in
+the right order, you will need to define the `LOCAL_DEPS` variable
+for each relevant application, the same as for OTP applications. Apps
+can depend on each other in this way, and their compilation order
+will follow the same rules as regular dependencies in `DEPS`.
+
+The top-level `LOCAL_DEPS` variable, if defined, will determine which
+apps (along with their dependencies) to build, and also which apps
+should be added to the top-level application resource file, if there
+is one. This may be useful, for example, for specifying a different
+set of apps to build for different releases. If `LOCAL_DEPS` is not
+defined, then all apps in the '$(APPS_DIR)' will be built, but none
+will be automatically added to the top-level application resource
+file.
 
 If there is a conflict between a local dependency and a
 remote dependency, then the local dependency always wins;
@@ -476,10 +488,11 @@ on the kind of project it finds the dependency to be.
 as their build tool. This essentially patches Rebar out, and
 fixes and converts the project to be compatible with Erlang.mk.
 
-* Erlang.mk projects have their 'erlang.mk' file redirect to
-the top-level project's Erlang.mk. This is to ensure that
-functionality works across all dependencies, even if the
-dependency's Erlang.mk is outdated.
+* Erlang.mk projects have their 'Makefile' patched, if necessary,
+to include the top-level project's Erlang.mk. This is to ensure
+that functionality works across all dependencies, even if the
+dependency's Erlang.mk is outdated. The patched Makefile
+can be safely committed if necessary.
 
 * Other Erlang projects get a small Erlang.mk Makefile
 generated automatically.

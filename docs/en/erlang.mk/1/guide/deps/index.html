@@ -234,6 +234,11 @@ cellspacing="0" cellpadding="4">
 <td align="center" valign="top"><p class="table">Recursively copy a local directory</p></td>
 </tr>
 <tr>
+<td align="left" valign="top"><p class="table">ln</p></td>
+<td align="center" valign="top"><p class="table">ln path/to/repo</p></td>
+<td align="center" valign="top"><p class="table">Symbolically link a local directory</p></td>
+</tr>
+<tr>
 <td align="left" valign="top"><p class="table">hex</p></td>
 <td align="center" valign="top"><p class="table">hex version</p></td>
 <td align="center" valign="top"><p class="table">Download the given project version from hex.pm</p></td>
@@ -483,9 +488,19 @@ They are not automatically added to the application resource file
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>To properly fill the application resource file, you will
-need to define the <code>LOCAL_DEPS</code> variable for each relevant
-application, the same as for OTP applications.</p></div>
+<div class="paragraph"><p>To properly fill the application resource file and compile apps in
+the right order, you will need to define the <code>LOCAL_DEPS</code> variable
+for each relevant application, the same as for OTP applications. Apps
+can depend on each other in this way, and their compilation order
+will follow the same rules as regular dependencies in <code>DEPS</code>.</p></div>
+<div class="paragraph"><p>The top-level <code>LOCAL_DEPS</code> variable, if defined, will determine which
+apps (along with their dependencies) to build, and also which apps
+should be added to the top-level application resource file, if there
+is one. This may be useful, for example, for specifying a different
+set of apps to build for different releases. If <code>LOCAL_DEPS</code> is not
+defined, then all apps in the <em>$(APPS_DIR)</em> will be built, but none
+will be automatically added to the top-level application resource
+file.</p></div>
 <div class="paragraph"><p>If there is a conflict between a local dependency and a
 remote dependency, then the local dependency always wins;
 an error will be triggered when trying to fetch the
@@ -587,10 +602,11 @@ fixes and converts the project to be compatible with Erlang.mk.
 </li>
 <li>
 <p>
-Erlang.mk projects have their <em>erlang.mk</em> file redirect to
-the top-level project&#8217;s Erlang.mk. This is to ensure that
-functionality works across all dependencies, even if the
-dependency&#8217;s Erlang.mk is outdated.
+Erlang.mk projects have their <em>Makefile</em> patched, if necessary,
+to include the top-level project&#8217;s Erlang.mk. This is to ensure
+that functionality works across all dependencies, even if the
+dependency&#8217;s Erlang.mk is outdated. The patched Makefile
+can be safely committed if necessary.
 </p>
 </li>
 <li>
@@ -730,7 +746,6 @@ The dependency directory <em>$(DEPS_DIR)</em> will not be removed on <code>make 
 
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="/js/bootstrap-carousel.js"></script>
     <script src="/js/bootstrap-dropdown.js"></script>
     <script src="/js/custom.js"></script>
   </body>

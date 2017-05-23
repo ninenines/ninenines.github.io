@@ -92,6 +92,14 @@ HTTP or Websocket.</p></div>
 <div class="paragraph"><p>The following keys are defined:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
+connect_timeout &#8658; timeout()
+</dt>
+<dd>
+<p>
+        Connection timeout. Defaults to <code>infinity</code>.
+</p>
+</dd>
+<dt class="hdlist1">
 http_opts &#8658; http_opts()
 </dt>
 <dd>
@@ -193,11 +201,38 @@ keepalive &#8658; pos_integer()
 </p>
 </dd>
 <dt class="hdlist1">
+transform_header_name &#8658; funLowercaseName :: binary( &#8594; TransformedName :: binary()) | undefined
+</dt>
+<dd>
+<p>
+        A function that will be applied to all header names before they
+        are sent to the server. Gun assumes that all header names are in
+        lower case. This function is useful if you, for example, need to
+        re-case header names in the event that the server incorrectly
+        considers header name case to be significant.
+</p>
+</dd>
+<dt class="hdlist1">
 version &#8658; <em>HTTP/1.1</em> | <em>HTTP/1.0</em>
 </dt>
 <dd>
 <p>
         HTTP version to use. Defaults to <em>HTTP/1.1</em>.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_req_opts_map">req_opts() = map()</h3>
+<div class="paragraph"><p>Configuration for a particular request.</p></div>
+<div class="paragraph"><p>The following keys are defined:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+reply_to &#8658; pid()
+</dt>
+<dd>
+<p>
+        The pid of a process that is responsible for the response handling.
 </p>
 </dd>
 </dl></div>
@@ -656,11 +691,15 @@ The pid of the Gun connection process.
 effectively closed.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_delete_connpid_path_8594_delete_connpid_path">delete(ConnPid, Path) &#8594; delete(ConnPid, Path, [])</h3>
-<div class="paragraph"><p>Alias of <code>gun:delete/3</code>.</p></div>
+<h3 id="_delete_connpid_path_8594_delete_connpid_path">delete(ConnPid, Path) &#8594; delete(ConnPid, Path, [], #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:delete/4</code>.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_delete_connpid_path_headers_8594_streamref">delete(ConnPid, Path, Headers) &#8594; StreamRef</h3>
+<h3 id="_delete_connpid_path_headers_8594_delete_connpid_path_headers">delete(ConnPid, Path, Headers) &#8594; delete(ConnPid, Path, Headers, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:delete/4</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_delete_connpid_path_headers_reqopts_8594_streamref">delete(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -684,6 +723,14 @@ Headers = [{binary(), iodata()}]
 <dd>
 <p>
 Additional request headers.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -698,11 +745,15 @@ Identifier of the stream for this request.
 <div class="paragraph"><p>Delete a resource.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_get_connpid_path_8594_get_connpid_path">get(ConnPid, Path) &#8594; get(ConnPid, Path, [])</h3>
-<div class="paragraph"><p>Alias of <code>gun:get/3</code>.</p></div>
+<h3 id="_get_connpid_path_8594_get_connpid_path">get(ConnPid, Path) &#8594; get(ConnPid, Path, [], #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:get/4</code>.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_get_connpid_path_headers_8594_streamref">get(ConnPid, Path, Headers) &#8594; StreamRef</h3>
+<h3 id="_get_connpid_path_headers_8594_get_connpid_path_headers">get(ConnPid, Path, Headers) &#8594; get(ConnPid, Path, Headers, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:get/4</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_get_connpid_path_headers_reqopts_8594_streamref">get(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -726,6 +777,14 @@ Headers = [{binary(), iodata()}]
 <dd>
 <p>
 Additional request headers.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -740,11 +799,15 @@ Identifier of the stream for this request.
 <div class="paragraph"><p>Get a resource.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_head_connpid_path_8594_head_connpid_path">head(ConnPid, Path) &#8594; head(ConnPid, Path, [])</h3>
-<div class="paragraph"><p>Alias of <code>gun:head/3</code>.</p></div>
+<h3 id="_head_connpid_path_8594_head_connpid_path">head(ConnPid, Path) &#8594; head(ConnPid, Path, [], #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:head/4</code>.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_head_connpid_path_headers_8594_streamref">head(ConnPid, Path, Headers) &#8594; StreamRef</h3>
+<h3 id="_head_connpid_path_headers_8594_head_connpid_path_headers">head(ConnPid, Path, Headers) &#8594; head(ConnPid, Path, Headers, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:head/4</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_head_connpid_path_headers_reqopts_8594_streamref">head(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -768,6 +831,14 @@ Headers = [{binary(), iodata()}]
 <dd>
 <p>
 Additional request headers.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -788,11 +859,15 @@ request was a GET, like <code>content-length</code>, it is not always
 the case and differences may exist.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_options_connpid_path_8594_options_connpid_path">options(ConnPid, Path) &#8594; options(ConnPid, Path, [])</h3>
-<div class="paragraph"><p>Alias of <code>gun:options/3</code>.</p></div>
+<h3 id="_options_connpid_path_8594_options_connpid_path">options(ConnPid, Path) &#8594; options(ConnPid, Path, [], #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:options/4</code>.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_options_connpid_path_headers_8594_streamref">options(ConnPid, Path, Headers) &#8594; StreamRef</h3>
+<h3 id="_options_connpid_path_headers_8594_options_connpid_path_headers">options(ConnPid, Path, Headers) &#8594; options(ConnPid, Path, Headers, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:options/4</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_options_connpid_path_headers_reqopts_8594_streamref">options(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -816,6 +891,14 @@ Headers = [{binary(), iodata()}]
 <dd>
 <p>
 Additional request headers.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -878,7 +961,11 @@ with instructions on how to update the resource.</p></div>
 <div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_patch_connpid_path_headers_body_8594_streamref">patch(ConnPid, Path, Headers, Body) &#8594; StreamRef</h3>
+<h3 id="_patch_connpid_path_headers_body_8594_patch_connpid_path_headers_body">patch(ConnPid, Path, Headers, Body) &#8594; patch(ConnPid, Path, Headers, Body, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:patch/5</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_patch_connpid_path_headers_body_reqopts_8594_streamref">patch(ConnPid, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -910,6 +997,14 @@ Body = iodata()
 <dd>
 <p>
 Body of the request.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -979,7 +1074,11 @@ located at a different URI.</p></div>
 <div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_post_connpid_path_headers_body_8594_streamref">post(ConnPid, Path, Headers, Body) &#8594; StreamRef</h3>
+<h3 id="_post_connpid_path_headers_body_8594_post_connpid_path_headers_body">post(ConnPid, Path, Headers, Body) &#8594; post(ConnPid, Path, Headers, Body, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:post/5</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_post_connpid_path_headers_body_reqopts_8594_streamref">post(ConnPid, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -1011,6 +1110,14 @@ Body = iodata()
 <dd>
 <p>
 Body of the request.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1079,7 +1186,11 @@ highly recommended to set both when possible.</p></div>
 <div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_put_connpid_path_headers_body_8594_streamref">put(ConnPid, Path, Headers, Body) &#8594; StreamRef</h3>
+<h3 id="_put_connpid_path_headers_body_8594_put_connpid_path_headers_body">put(ConnPid, Path, Headers, Body) &#8594; put(ConnPid, Path, Headers, Body, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:put/5</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_put_connpid_path_headers_body_reqopts_8594_streamref">put(ConnPid, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -1111,6 +1222,14 @@ Body = iodata()
 <dd>
 <p>
 Body of the request.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1185,7 +1304,11 @@ highly recommended to set both when possible.</p></div>
 <div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_request_connpid_method_path_headers_body_8594_streamref">request(ConnPid, Method, Path, Headers, Body) &#8594; StreamRef</h3>
+<h3 id="_request_connpid_method_path_headers_body_8594_request_connpid_method_path_headers_body">request(ConnPid, Method, Path, Headers, Body) &#8594; request(ConnPid, Method, Path, Headers, Body, #{})</h3>
+<div class="paragraph"><p>Alias of <code>gun:request/6</code>.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_request_connpid_method_path_headers_body_reqopts_8594_streamref">request(ConnPid, Method, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 ConnPid = pid()
@@ -1225,6 +1348,14 @@ Body = iodata()
 <dd>
 <p>
 Body of the request.
+</p>
+</dd>
+<dt class="hdlist1">
+ReqOpts = req_opts()
+</dt>
+<dd>
+<p>
+Request options.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1727,7 +1858,6 @@ Frames = @todo
 
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="/js/bootstrap-carousel.js"></script>
     <script src="/js/bootstrap-dropdown.js"></script>
     <script src="/js/custom.js"></script>
   </body>

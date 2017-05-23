@@ -91,16 +91,21 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
-    <span style="color: #FF6600">env</span>                     <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>(),
-    <span style="color: #FF6600">max_empty_lines</span>         <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
-    <span style="color: #FF6600">max_header_name_length</span>  <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
-    <span style="color: #FF6600">max_header_value_length</span> <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
-    <span style="color: #FF6600">max_headers</span>             <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
-    <span style="color: #FF6600">max_keepalive</span>           <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
-    <span style="color: #FF6600">max_method_length</span>       <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
-    <span style="color: #FF6600">max_request_line_length</span> <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
-    <span style="color: #FF6600">middlewares</span>             <span style="color: #990000">:=</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()],
-    <span style="color: #FF6600">request_timeout</span>         <span style="color: #990000">:=</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()
+    <span style="color: #0000FF">connection_type</span>         <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">worker</span> | <span style="color: #FF6600">supervisor</span>,
+    <span style="color: #0000FF">env</span>                     <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>(),
+    <span style="color: #0000FF">idle_timeout</span>            <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">inactivity_timeout</span>      <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">max_empty_lines</span>         <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">max_header_name_length</span>  <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">max_header_value_length</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">max_headers</span>             <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">max_keepalive</span>           <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">max_method_length</span>       <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">max_request_line_length</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">middlewares</span>             <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()],
+    <span style="color: #0000FF">request_timeout</span>         <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #000080">shutdown</span><span style="color: #009900">_timeout</span>        <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">stream_handlers</span>         <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()]
 }</tt></pre></div></div>
 <div class="paragraph"><p>Configuration for the HTTP/1.1 protocol.</p></div>
 <div class="paragraph"><p>This configuration is passed to Cowboy when starting listeners
@@ -111,11 +116,35 @@ Ranch functions <code>ranch:get_protocol_options/1</code> and
 <div class="paragraph"><p>The default value is given next to the option name:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
+connection_type (supervisor)
+</dt>
+<dd>
+<p>
+    Whether the connection process also acts as a supervisor.
+</p>
+</dd>
+<dt class="hdlist1">
 env (#{})
 </dt>
 <dd>
 <p>
     Middleware environment.
+</p>
+</dd>
+<dt class="hdlist1">
+idle_timeout (60000)
+</dt>
+<dd>
+<p>
+    Time in ms with no data received before Cowboy closes the connection.
+</p>
+</dd>
+<dt class="hdlist1">
+inactivity_timeout (300000)
+</dt>
+<dd>
+<p>
+    Time in ms with nothing received at all before Cowboy closes the connection.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -159,19 +188,19 @@ max_keepalive (100)
 </p>
 </dd>
 <dt class="hdlist1">
-max_request_line_length (8000)
-</dt>
-<dd>
-<p>
-    Maximum length of the request line.
-</p>
-</dd>
-<dt class="hdlist1">
 max_method_length (32)
 </dt>
 <dd>
 <p>
     Maximum length of the method.
+</p>
+</dd>
+<dt class="hdlist1">
+max_request_line_length (8000)
+</dt>
+<dd>
+<p>
+    Maximum length of the request line.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -190,6 +219,22 @@ request_timeout (5000)
     Time in ms with no requests before Cowboy closes the connection.
 </p>
 </dd>
+<dt class="hdlist1">
+shutdown_timeout (5000)
+</dt>
+<dd>
+<p>
+    Time in ms Cowboy will wait for child processes to shut down before killing them.
+</p>
+</dd>
+<dt class="hdlist1">
+stream_handlers ([cowboy_stream_h])
+</dt>
+<dd>
+<p>
+    Ordered list of stream handlers that will handle all stream events.
+</p>
+</dd>
 </dl></div>
 </div>
 </div>
@@ -199,12 +244,17 @@ request_timeout (5000)
 <div class="ulist"><ul>
 <li>
 <p>
-<strong>2.0</strong>: The <code>max_method_length</code> option was added.
+<strong>2.0</strong>: The <code>timeout</code> option was renamed <code>request_timeout</code>.
 </p>
 </li>
 <li>
 <p>
-<strong>2.0</strong>: The <code>env</code> option is now a map instead of a proplist.
+<strong>2.0</strong>: The <code>idle_timeout</code>, <code>inactivity_timeout</code> and <code>shutdown_timeout</code> options were added.
+</p>
+</li>
+<li>
+<p>
+<strong>2.0</strong>: The <code>max_method_length</code> option was added.
 </p>
 </li>
 <li>
@@ -214,7 +264,22 @@ request_timeout (5000)
 </li>
 <li>
 <p>
-<strong>2.0</strong>: The <code>compress</code> option was temporarily removed.
+<strong>2.0</strong>: The <code>connection_type</code> option was added.
+</p>
+</li>
+<li>
+<p>
+<strong>2.0</strong>: The <code>env</code> option is now a map instead of a proplist.
+</p>
+</li>
+<li>
+<p>
+<strong>2.0</strong>: The <code>stream_handlers</code> option was added.
+</p>
+</li>
+<li>
+<p>
+<strong>2.0</strong>: The <code>compress</code> option was removed in favor of the <code>cowboy_compress_h</code> stream handler.
 </p>
 </li>
 <li>
@@ -304,7 +369,6 @@ request_timeout (5000)
 
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="/js/bootstrap-carousel.js"></script>
     <script src="/js/bootstrap-dropdown.js"></script>
     <script src="/js/custom.js"></script>
   </body>

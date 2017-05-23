@@ -117,10 +117,31 @@ rm -rf <span style="color: #990000">.</span>erlang<span style="color: #990000">.
 <div class="sect1">
 <h2 id="_customizing_the_build">Customizing the build</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk allows you to customize which plugins are to be included
-in the <em>erlang.mk</em> file. You can do so by maintaining your own
-<em>build.config</em> file in your repository. Erlang.mk will automatically
-use it the next time you run <code>make erlang-mk</code>.</p></div>
+<div class="paragraph"><p>Erlang.mk allows you to customize which components are to be included
+in the <em>erlang.mk</em> file. The <code>WITHOUT</code> variable allows you to
+remove components from the default Erlang.mk build. The <em>build.config</em>
+file lets you define exactly what goes in (including your own code!),
+and in what order.</p></div>
+<div class="paragraph"><p>The <code>WITHOUT</code> file contains the list of components to exclude from
+the build. For example, to exclude the package index and the EDoc
+plugin when bootstrapping your application:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make -f erlang<span style="color: #990000">.</span>mk bootstrap <span style="color: #009900">WITHOUT</span><span style="color: #990000">=</span><span style="color: #FF0000">"index plugins/edoc"</span></tt></pre></div></div>
+<div class="paragraph"><p>The generated Erlang.mk will never include those components when
+you update it, until you change your mind and use the <code>WITHOUT</code>
+variable again when you upgrade:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make erlang-mk <span style="color: #009900">WITHOUT</span><span style="color: #990000">=</span>index</tt></pre></div></div>
+<div class="paragraph"><p>The <em>build.config</em> file is automatically used when you bootstrap
+Erlang.mk or when you update it with <code>make erlang-mk</code>.</p></div>
 <div class="paragraph"><p>The <em>build.config</em> file contains the list of all files that will
 be built into the resulting <em>erlang.mk</em> file. You can start from
 the <a href="https://github.com/ninenines/erlang.mk/blob/master/build.config">most recent version</a>
@@ -210,7 +231,6 @@ the <code>ERLANG_MK_BUILD_DIR</code> variable.</p></div>
 
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="/js/bootstrap-carousel.js"></script>
     <script src="/js/bootstrap-dropdown.js"></script>
     <script src="/js/custom.js"></script>
   </body>
