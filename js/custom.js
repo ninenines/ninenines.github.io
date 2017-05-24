@@ -3,6 +3,10 @@ var projects_nav = function() {
 	var panels = document.querySelectorAll('.carousel-inner>div');
 
 	Array.prototype.forEach.call(nav, function(el) {
+		if (el.dataset.panel === undefined) {
+			return;
+		}
+
 		el.addEventListener('click', function(ev) {
 			ev.preventDefault();
 
