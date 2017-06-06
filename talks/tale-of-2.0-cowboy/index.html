@@ -1,0 +1,433 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>A tale of 2.0 Cowboy</title>
+
+		<meta name="description" content"Cowboy 2 EUC 2017 talk">
+		<meta name="author" content="Loïc Hoguin">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<section>
+	<h1>A tale of 2.0 Cowboy</h1>
+	<p>I'm a poor lonesome Cowboy,<br/>and a long way from home...</p>
+	<p><small>Loïc Hoguin (<a href="https://twitter.com/lhoguin">@lhoguin</a>), <a href="https://ninenines.eu">Nine Nines</a></small></p>
+</section>
+
+<section>
+	<h1>Confessions</h1>
+</section>
+
+<section>
+	<section>
+		<h2>Slow and steady</h2>
+		<img src="img/turtle-racing.jpg"/>
+	</section>
+
+	<section>
+		<h2>Life happened</h2>
+		<p>Literally</p>
+	</section>
+
+	<section>
+		<ul>
+			<li>Modifying an existing project is hard</li>
+			<li>Starting from scratch is easy (at first)</li>
+		</ul>
+	</section>
+
+	<section>
+		<h2>Many changes</h2>
+		<ul>
+			<li>Project core changed the most</li>
+			<li>Interface received numerous tweaks</li>
+			<li>New testing methodology</li>
+			<li>More detailed documentation</li>
+		</ul>
+	</section>
+
+	<section>
+		<h2>HTTP is complicated</h2>
+		<p>HTTP/2 even more so</p>
+	</section>
+</section>
+
+<section>
+	<h1>Lessons learned</h1>
+</section>
+
+<section>
+	<section>
+		<h2>Active supervisors</h2>
+		<img src="img/river-delta.jpg"/>
+	</section>
+
+	<section>
+		<ul>
+			<li>One process... <ul>
+				<li>Tells another process... <ul>
+					<li>To start a third process</li>
+				</ul></li>
+			</ul></li>
+		</ul>
+	</section>
+
+	<section>
+		<h3>Solutions</h3>
+		<ul>
+			<li>Let the supervisor act</li>
+			<li>Make worker processes supervise</li>
+		</ul>
+	</section>
+
+	<section>
+		<h3>Example: acceptor supervisor</h3>
+		<ul>
+			<li>Basically a supervisor with an <code>info/3</code> callback <ul>
+				<li>Accept connection</li>
+				<li>Spawn a process for that connection</li>
+				<li>Supervise the process</li>
+			</ul></li>
+			<li>Coming in Ranch 2.0</li>
+		</ul>
+	</section>
+
+	<section>
+		<h3>Example: connection workers</h3>
+		<ul>
+			<li>Process manages connection and related workers</li>
+			<li>Connection and request processes in Cowboy 2.0</li>
+			<li>Many implications</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>List of commands</h2>
+		<img src="img/to-do-list.png"/>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+		{[
+			{headers, fin, 100, Headers},
+			{flow, 64000},
+			{spawn, Pid, 5000}
+		], State}.
+		</code></pre>
+	</section>
+
+	<section>
+		<h3>Examples</h3>
+		<ul>
+			<li><code>gen_statem</code></li>
+			<li>Cowboy 2.0 stream handlers</li>
+			<li>Cowboy 2.1+ Websocket handlers</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Callback chains</h2>
+		<img src="img/chain.jpg"/>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+#{
+	middlewares =&gt;
+		[cowboy_router, cowboy_handler],
+	stream_handlers =&gt;
+		[cowboy_compress_h, cowboy_stream_h]
+}
+		</code></pre>
+	</section>
+
+	<section>
+		<h3>Middleware</h3>
+		<pre><code data-trim data-noescape>
+	execute(Req0, Env0) -&gt;
+		case do_something(Req0, Env0) of
+			{ok, Req, Env} -&gt;
+				{ok, Req, Env};
+			error -&gt;
+				{stop, Req0}
+		end.
+		</code></pre>
+	</section>
+
+	<section>
+		<h3>Stream handler 1/2</h3>
+		<pre><code data-trim data-noescape>
+data(StreamID, IsFin, Data, State=#state{next=Next0}) -&gt;
+	{Commands0, Next} = cowboy_stream:data(
+		StreamID, IsFin, Data, Next0),
+	fold(Commands0, State#state{next=Next}).
+		</code></pre>
+	</section>
+
+	<section>
+		<h3>Stream handler 2/2</h3>
+		<pre><code data-trim data-noescape>
+data(StreamID, IsFin, Data0, State=#state{next=Next0}) -&gt;
+	Data = do_something(Data0),
+	{Commands0, Next} = cowboy_stream:data(
+		StreamID, IsFin, Data, Next0),
+	{Commands0, State#state{next=Next}}.
+		</code></pre>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Receive loop</h2>
+		<img src="img/mailboxes.jpg"/>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+	loop() -&gt;
+		receive
+			Msg -&gt;
+				do_something(Msg),
+				loop()
+		end.
+		</code></pre>
+	</section>
+
+	<section>
+		<h3>Loop handlers</h3>
+		<ul>
+			<li>Native support for server-sent events</li>
+			<li>Switch to loop handlers from <code>cowboy_rest</code></li>
+			<li>After Cowboy 2.0</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Error 3-tuples</h2>
+		<img src="img/error-message.jpg"/>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+{error, Reason}
+
+Reason =
+	{connection_error,
+		protocol_error,
+		'The preface sequence must be followed
+			by a SETTINGS frame. (RFC7540 3.5)'}
+		</code></pre>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Options map</h2>
+		<img src="img/treasure-map.jpg"/>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+uri(Req :: cowboy_req:req())       -&gt; uri(Req, #{})
+uri(Req :: cowboy_req:req(), Opts) -&gt; URI :: iodata()
+
+Opts :: #{
+    scheme   =&gt; iodata()           | undefined,
+    host     =&gt; iodata()           | undefined,
+    port     =&gt; inet:port_number() | undefined,
+    path     =&gt; iodata()           | undefined,
+    qs       =&gt; iodata()           | undefined,
+    fragment =&gt; iodata()           | undefined
+}
+		</code></pre>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+	read_body(Req :: cowboy_req:req())
+		-&gt; read_body(Req, #{})
+
+	read_body(Req :: cowboy_req:req(), Opts)
+		-&gt; {ok,   Data :: binary(), Req}
+		 | {more, Data :: binary(), Req}
+
+	Opts :: #{
+		length  =&gt; non_neg_integer(),
+		period  =&gt; non_neg_integer(),
+		timeout =&gt; timeout()
+	}
+		</code></pre>
+	</section>
+
+	<section>
+		<h3>Required values</h3>
+		<p>Use <code>:=</code> instead of <code>=&gt;</code></p>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Better tests</h2>
+		<img src="img/bridge-collapsing.jpg"/>
+	</section>
+
+	<section>
+		<h3>Standards compliance</h3>
+		<p>For RFCs, at least one test per relevant MUST/SHOULD.</p>
+		<p>Document in the test suite what couldn't be tested.</p>
+	</section>
+
+	<section>
+		<h3>Features</h3>
+		<p>Every function, argument, option must have a test.</p>
+	</section>
+
+	<section>
+		<h3>Some tips</h3>
+		<ul>
+			<li>Unit tests are not interesting</li>
+			<li>Always run test cases in parallel</li>
+			<li>Short, successful tests must not output errors</li>
+			<li>Test cases must be documented</li>
+		</ul>
+	</section>
+
+	<section>
+		<img src="img/documented-tests.png"/>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Better docs</h2>
+		<img src="img/huge-library.jpg"/>
+	</section>
+
+	<section>
+		<p>Taking lessons from PHP</p>
+		<p><a href="https://ninenines.eu/docs/en/cowboy/2.0/manual/cowboy_req.read_body/">Example</a></p>
+	</section>
+
+	<section>
+		<h3>Highlights</h3>
+		<ul>
+			<li>One (man) page per module</li>
+			<li>One (man) page per function</li>
+			<li>Description, arguments, return value, changelog, examples...</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<h1>Cowboy 2.0+</h1>
+</section>
+
+<section>
+	<section>
+		<h2>When?</h2>
+		<ul>
+			<li>Cowboy 2.0-rc.1: Summer 2017 <ul>
+				<li>After OTP 20 is released</li>
+			</ul></li>
+			<li>Cowboy 2.0: 2017</li>
+			<li>Requires Erlang/OTP 19+ (sorry!)</li>
+		</ul>
+	</section>
+
+	<section>
+		<h3>What's left?</h3>
+		<ul>
+			<li>Hide <code>NumAcceptors</code> (Ranch 1.4)</li>
+			<li>Return multipart headers as a map</li>
+			<li>Constraints 2.0</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>New users</h2>
+		<ul>
+			<li>RabbitMQ (1.1, for now)</li>
+			<li>Zotonic</li>
+			<li>Barrel</li>
+			<li>Phoenix (2.0 with user patches; else 1.0)</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Related projects</h2>
+		<ul>
+			<li>Ranch 1.4: (Almost?) Out now!</li>
+			<li>Gun 1.0: 2017</li>
+			<li>Cowlib 2.0+: Adding documentation</li>
+			<li>Erlang.mk: Rolling release, keep on rollin'</li>
+			<li>New project! Looking Glass</li>
+		</ul>
+	</section>
+
+	<section>
+		<h2>Looking Glass</h2>
+		<ul>
+			<li>Next-gen profiler for RabbitMQ</li>
+			<li><code>erl_tracer</code> NIF</li>
+			<li>LZ4 compression of trace files</li>
+			<li>Cachegrind output</li>
+			<li>Really, really fast</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<section>
+		<h2>Cowboy 2.1+</h2>
+		<ul>
+			<li>Features cut from 2.0 added back</li>
+			<li>More features (related to standards)</li>
+			<li>Improve interface with backward compatibility</li>
+			<li>Fix bugs, add tests, become a legend</li>
+		</ul>
+	</section>
+
+	<section>
+		<p>And eventually release Cowboy 3.0</p>
+	</section>
+</section>
+
+<section>
+	<h2>After Cowboy 2.0</h2>
+	<p>Finally build that REST framework</p>
+	<p>Make (the true) REST easily accessible</p>
+</section>
+
+<section>
+	<h2>Thank you in advance</h2>
+	<p><a href="https://ninenines.eu">ninenines.eu</a></p>
+</section>
+
+			</div>
+		</div>
+		<script src="js/reveal.js"></script>
+		<script>
+Reveal.initialize({
+//	controls: false,
+	progress: false,
+	history: true
+});
+		</script>
+	</body>
+</html>
