@@ -1557,7 +1557,6 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite --&gt;
 &lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;start_clear&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt;          &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;ranch:ref&lt;/span&gt;&lt;/span&gt;(),
-            &lt;span style=&#34;color: #009900&#34;&gt;NumAcceptors&lt;/span&gt;  &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;non_neg_integer&lt;/span&gt;&lt;/span&gt;(),
             &lt;span style=&#34;color: #009900&#34;&gt;TransportOpts&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;ranch_tcp:opts&lt;/span&gt;&lt;/span&gt;(),
             &lt;span style=&#34;color: #009900&#34;&gt;ProtocolOpts&lt;/span&gt;  &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;opts&lt;/span&gt;&lt;/span&gt;())
     &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; {&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ListenerPid&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000080&#34;&gt;pid&lt;/span&gt;&lt;/span&gt;()}
@@ -1584,24 +1583,6 @@ updating the routes defined.
 &lt;/p&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It can be any Erlang term. An atom is generally good enough,
 for example &lt;code&gt;api&lt;/code&gt;, &lt;code&gt;my_app_clear&lt;/code&gt; or &lt;code&gt;my_app_tls&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
-&lt;/dd&gt;
-&lt;dt class=&#34;hdlist1&#34;&gt;
-NumAcceptors
-&lt;/dt&gt;
-&lt;dd&gt;
-&lt;p&gt;
-The number of acceptors is the number of processes that
-will accept connections. Tweak this value to improve the
-accept rate for incoming connections.
-&lt;/p&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The ideal value is between 10 and 100 on most systems.
-Larger values may have the opposite effect and reduce the
-accept rate. It&amp;#8217;s generally safe to start with a value of
-100 (or 10 on low memory systems). Then, when accept rates
-become a concern, measure the performance and update the
-value accordingly.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This value is unrelated to the maximum number of concurrent
-connections.&lt;/p&gt;&lt;/div&gt;
 &lt;/dd&gt;
 &lt;dt class=&#34;hdlist1&#34;&gt;
 TransportOpts
@@ -1679,7 +1660,7 @@ http://www.gnu.org/software/src-highlite --&gt;
     ]}
 ]),
 
-{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_clear&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;example&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;100&lt;/span&gt;, [{&lt;span style=&#34;color: #FF6600&#34;&gt;port&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;8080&lt;/span&gt;}], #{
+{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_clear&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;example&lt;/span&gt;, [{&lt;span style=&#34;color: #FF6600&#34;&gt;port&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;8080&lt;/span&gt;}], #{
     &lt;span style=&#34;color: #0000FF&#34;&gt;env&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&amp;gt;&lt;/span&gt; #{&lt;span style=&#34;color: #0000FF&#34;&gt;dispatch&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #009900&#34;&gt;Dispatch&lt;/span&gt;}
 })&lt;span style=&#34;color: #990000&#34;&gt;.&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class=&#34;listingblock&#34;&gt;
@@ -1690,7 +1671,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite --&gt;
 &lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;example&lt;/span&gt;,
 
-{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_clear&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;100&lt;/span&gt;, [], #{
+{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_clear&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt;, [], #{
     &lt;span style=&#34;color: #0000FF&#34;&gt;env&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&amp;gt;&lt;/span&gt; #{&lt;span style=&#34;color: #0000FF&#34;&gt;dispatch&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #009900&#34;&gt;Dispatch&lt;/span&gt;}
 }),
 
@@ -1730,7 +1711,6 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite --&gt;
 &lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;start_tls&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt;          &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;ranch:ref&lt;/span&gt;&lt;/span&gt;(),
-          &lt;span style=&#34;color: #009900&#34;&gt;NumAcceptors&lt;/span&gt;  &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;non_neg_integer&lt;/span&gt;&lt;/span&gt;(),
           &lt;span style=&#34;color: #009900&#34;&gt;TransportOpts&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;ranch_ssl:opts&lt;/span&gt;&lt;/span&gt;(),
           &lt;span style=&#34;color: #009900&#34;&gt;ProtocolOpts&lt;/span&gt;  &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;opts&lt;/span&gt;&lt;/span&gt;())
     &lt;span style=&#34;color: #990000&#34;&gt;-&amp;gt;&lt;/span&gt; {&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #009900&#34;&gt;ListenerPid&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;::&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000080&#34;&gt;pid&lt;/span&gt;&lt;/span&gt;()}
@@ -1756,24 +1736,6 @@ updating the routes defined.
 &lt;/p&gt;
 &lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;It can be any Erlang term. An atom is generally good enough,
 for example &lt;code&gt;api&lt;/code&gt;, &lt;code&gt;my_app_clear&lt;/code&gt; or &lt;code&gt;my_app_tls&lt;/code&gt;.&lt;/p&gt;&lt;/div&gt;
-&lt;/dd&gt;
-&lt;dt class=&#34;hdlist1&#34;&gt;
-NumAcceptors
-&lt;/dt&gt;
-&lt;dd&gt;
-&lt;p&gt;
-The number of acceptors is the number of processes that
-will accept connections. Tweak this value to improve the
-accept rate for incoming connections.
-&lt;/p&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;The ideal value is between 10 and 100 on most systems.
-Larger values may have the opposite effect and reduce the
-accept rate. It&amp;#8217;s generally safe to start with a value of
-100 (or 10 on low memory systems). Then, when accept rates
-become a concern, measure the performance and update the
-value accordingly.&lt;/p&gt;&lt;/div&gt;
-&lt;div class=&#34;paragraph&#34;&gt;&lt;p&gt;This value is unrelated to the maximum number of concurrent
-connections.&lt;/p&gt;&lt;/div&gt;
 &lt;/dd&gt;
 &lt;dt class=&#34;hdlist1&#34;&gt;
 TransportOpts
@@ -1852,7 +1814,7 @@ http://www.gnu.org/software/src-highlite --&gt;
     ]}
 ]),
 
-{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_tls&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;example&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;100&lt;/span&gt;, [
+{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_tls&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;example&lt;/span&gt;, [
     {&lt;span style=&#34;color: #FF6600&#34;&gt;port&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;8443&lt;/span&gt;},
     {&lt;span style=&#34;color: #FF6600&#34;&gt;cert&lt;/span&gt;, &lt;span style=&#34;color: #FF0000&#34;&gt;&#34;path/to/cert.pem&#34;&lt;/span&gt;}
 ], #{
@@ -1866,7 +1828,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite --&gt;
 &lt;pre&gt;&lt;tt&gt;&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;example&lt;/span&gt;,
 
-{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_tls&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt;, &lt;span style=&#34;color: #993399&#34;&gt;100&lt;/span&gt;, [
+{&lt;span style=&#34;color: #FF6600&#34;&gt;ok&lt;/span&gt;, &lt;span style=&#34;color: #990000&#34;&gt;_&lt;/span&gt;} &lt;span style=&#34;color: #990000&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;font-weight: bold&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;cowboy:start_tls&lt;/span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #009900&#34;&gt;Name&lt;/span&gt;, [
     {&lt;span style=&#34;color: #FF6600&#34;&gt;cert&lt;/span&gt;, &lt;span style=&#34;color: #FF0000&#34;&gt;&#34;path/to/cert.pem&#34;&lt;/span&gt;}
 ], #{
     &lt;span style=&#34;color: #0000FF&#34;&gt;env&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&amp;gt;&lt;/span&gt; #{&lt;span style=&#34;color: #0000FF&#34;&gt;dispatch&lt;/span&gt; &lt;span style=&#34;color: #990000&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #009900&#34;&gt;Dispatch&lt;/span&gt;}

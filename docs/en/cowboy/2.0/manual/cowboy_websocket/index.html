@@ -255,7 +255,8 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
     <span style="color: #0000FF">compress</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>(),
-    <span style="color: #0000FF">idle_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()
+    <span style="color: #0000FF">idle_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">req_filter</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>((<span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">map</span></span>())
 }</tt></pre></div></div>
 <div class="paragraph"><p>Websocket handler options.</p></div>
 <div class="paragraph"><p>This configuration is passed to Cowboy from the <code>init/2</code>
@@ -288,6 +289,18 @@ idle_timeout (60000)
     Time in milliseconds that Cowboy will keep the
     connection open without receiving anything from
     the client.
+</p>
+</dd>
+<dt class="hdlist1">
+req_filter
+</dt>
+<dd>
+<p>
+    A function applied to the Req to compact it and
+    only keep required information. The Req is only
+    given back in the <code>terminate/3</code> callback. By default
+    it keeps the method, version, URI components and peer
+    information.
 </p>
 </dd>
 </dl></div>

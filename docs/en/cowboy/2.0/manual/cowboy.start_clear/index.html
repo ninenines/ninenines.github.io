@@ -82,7 +82,6 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">start_clear</span></span>(<span style="color: #009900">Name</span>          <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">ranch:ref</span></span>(),
-            <span style="color: #009900">NumAcceptors</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
             <span style="color: #009900">TransportOpts</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">ranch_tcp:opts</span></span>(),
             <span style="color: #009900">ProtocolOpts</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">opts</span></span>())
     <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">ListenerPid</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">pid</span></span>()}
@@ -109,24 +108,6 @@ updating the routes defined.
 </p>
 <div class="paragraph"><p>It can be any Erlang term. An atom is generally good enough,
 for example <code>api</code>, <code>my_app_clear</code> or <code>my_app_tls</code>.</p></div>
-</dd>
-<dt class="hdlist1">
-NumAcceptors
-</dt>
-<dd>
-<p>
-The number of acceptors is the number of processes that
-will accept connections. Tweak this value to improve the
-accept rate for incoming connections.
-</p>
-<div class="paragraph"><p>The ideal value is between 10 and 100 on most systems.
-Larger values may have the opposite effect and reduce the
-accept rate. It&#8217;s generally safe to start with a value of
-100 (or 10 on low memory systems). Then, when accept rates
-become a concern, measure the performance and update the
-value accordingly.</p></div>
-<div class="paragraph"><p>This value is unrelated to the maximum number of concurrent
-connections.</p></div>
 </dd>
 <dt class="hdlist1">
 TransportOpts
@@ -204,7 +185,7 @@ http://www.gnu.org/software/src-highlite -->
     ]}
 ]),
 
-{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #FF6600">example</span>, <span style="color: #993399">100</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}], #{
+{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #FF6600">example</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}], #{
     <span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}
 })<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="listingblock">
@@ -215,7 +196,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">Name</span> <span style="color: #990000">=</span> <span style="color: #FF6600">example</span>,
 
-{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #009900">Name</span>, <span style="color: #993399">100</span>, [], #{
+{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #009900">Name</span>, [], #{
     <span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}
 }),
 
