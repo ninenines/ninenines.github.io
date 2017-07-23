@@ -37,7 +37,7 @@ docs-$1-$2: tmp/$1
 		printf "%s\n" "project = \"$1\"" "version = \"$3\"" "doctype = \"guide\"" \
 			>> content/docs/en/$1/$3/guide.asciidoc; \
 		echo "+++" >> content/docs/en/$1/$3/guide.asciidoc; \
-		sed -E 's/include::([a-z_]*)\.asciidoc(.*)/* link:\1\/\2/' tmp/$1/doc/src/guide/book.asciidoc \
+		sed -E 's/include::([a-z0-9_.]*)\.asciidoc(.*)/* link:\1\/\2/' tmp/$1/doc/src/guide/book.asciidoc \
 			| sed -n '/^= /,$$$$p' \
 			| sed -n '/^$$$$/,$$$$p' \
 			| sed 's/^= /== /' >> content/docs/en/$1/$3/guide.asciidoc; \
