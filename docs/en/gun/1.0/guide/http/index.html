@@ -68,7 +68,7 @@
 <h1 class="lined-header"><span>HTTP</span></h1>
 
 <div class="paragraph"><p>This chapter describes how to use the Gun client for
-communicating with an HTTP/1.1 or SPDY server.</p></div>
+communicating with an HTTP/1.1 or HTTP/2 server.</p></div>
 <div class="sect1">
 <h2 id="_streams">Streams</h2>
 <div class="sectionbody">
@@ -194,7 +194,7 @@ the request has no body.</p></div>
 <div class="paragraph"><p>It is recommended to send the content-length header if you
 know it in advance, although this is not required. If it
 is not set, HTTP/1.1 will use the chunked transfer-encoding,
-and SPDY will continue normally as it is chunked by design.</p></div>
+and HTTP/2 will continue normally as it is chunked by design.</p></div>
 <div class="listingblock">
 <div class="title">POST "/organizations/ninenines" with delayed body</div>
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
@@ -310,7 +310,7 @@ a <code>gun_error</code> message is sent instead.</p></div>
 data messages following. If it contains <code>fin</code> there will be
 no data messages. If it contains <code>nofin</code> then one or more data
 messages will follow.</p></div>
-<div class="paragraph"><p>When using SPDY this value is sent with the frame and simply
+<div class="paragraph"><p>When using HTTP/2 this value is sent with the frame and simply
 passed on in the message. When using HTTP/1.1 however Gun must
 guess whether data will follow by looking at the response headers.</p></div>
 <div class="paragraph"><p>You can receive messages directly, or you can use the <em>await</em>
@@ -383,7 +383,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="sect1">
 <h2 id="_handling_streams_pushed_by_the_server">Handling streams pushed by the server</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The SPDY protocol allows the server to push more than one
+<div class="paragraph"><p>The HTTP/2 protocol allows the server to push more than one
 resource for every request. It will start sending those
 extra resources before it starts sending the response itself,
 so Gun will send you <code>gun_push</code> messages before <code>gun_response</code>

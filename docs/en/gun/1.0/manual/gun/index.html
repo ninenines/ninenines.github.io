@@ -77,8 +77,8 @@
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>The <code>gun</code> module provides an asynchronous interface for
-connecting and communicating with Web servers over SPDY,
-HTTP or Websocket.</p></div>
+connecting and communicating with Web servers over HTTP,
+HTTP/2 or Websocket.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -106,16 +106,24 @@ http_opts &#8658; http_opts()
 </p>
 </dd>
 <dt class="hdlist1">
-protocols &#8658; [http | spdy]
+http2_opts &#8658; http2_opts()
+</dt>
+<dd>
+<p>
+        Options specific to the HTTP/2 protocol. See below.
+</p>
+</dd>
+<dt class="hdlist1">
+protocols &#8658; [http | http2]
 </dt>
 <dd>
 <p>
         Ordered list of preferred protocols. When the transport is tcp,
         this list must contain exactly one protocol. When the transport
         is ssl, this list must contain at least one protocol and will be
-        used using the NPN protocol negotiation method. When the server
-        does not support NPN then http will always be used. Defaults to
-        [http] when the transport is tcp, and [spdy, http] when the
+        used using the ALPN protocol negotiation method. When the server
+        does not support ALPN then http will always be used. Defaults to
+        [http] when the transport is tcp, and [http2, http] when the
         transport is ssl.
 </p>
 </dd>
@@ -134,14 +142,6 @@ retry_timeout &#8658; pos_integer()
 <dd>
 <p>
         Time between retries in milliseconds. Defaults to 5000.
-</p>
-</dd>
-<dt class="hdlist1">
-spdy_opts &#8658; spdy_opts()
-</dt>
-<dd>
-<p>
-        Options specific to the SPDY protocol. See below.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -187,7 +187,7 @@ ws_opts &#8658; ws_opts()
 <div class="paragraph"><p>The following keys are defined:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-keepalive &#8658; pos_integer()
+keepalive &#8658; timeout()
 </dt>
 <dd>
 <p>
@@ -195,7 +195,7 @@ keepalive &#8658; pos_integer()
         no standardized way to ping the server, Gun will simply send an
         empty line when the connection is idle. Gun only makes a best
         effort here as servers usually have configurable limits to drop
-        idle connections. Defaults to 5000.
+        idle connections. Use <code>infinity</code> to disable. Defaults to 5000.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -221,6 +221,21 @@ version &#8658; <em>HTTP/1.1</em> | <em>HTTP/1.0</em>
 </dl></div>
 </div>
 <div class="sect2">
+<h3 id="_http2_opts_map">http2_opts() = map()</h3>
+<div class="paragraph"><p>Configuration for the HTTP/2 protocol.</p></div>
+<div class="paragraph"><p>The following keys are defined:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+keepalive &#8658; pos_integer()
+</dt>
+<dd>
+<p>
+        Time between pings in milliseconds. Defaults to 5000.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
 <h3 id="_req_opts_map">req_opts() = map()</h3>
 <div class="paragraph"><p>Configuration for a particular request.</p></div>
 <div class="paragraph"><p>The following keys are defined:</p></div>
@@ -231,21 +246,6 @@ reply_to &#8658; pid()
 <dd>
 <p>
         The pid of a process that is responsible for the response handling.
-</p>
-</dd>
-</dl></div>
-</div>
-<div class="sect2">
-<h3 id="_spdy_opts_map">spdy_opts() = map()</h3>
-<div class="paragraph"><p>Configuration for the SPDY protocol.</p></div>
-<div class="paragraph"><p>The following keys are defined:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-keepalive &#8658; pos_integer()
-</dt>
-<dd>
-<p>
-        Time between pings in milliseconds. Defaults to 5000.
 </p>
 </dd>
 </dl></div>
@@ -286,7 +286,7 @@ The pid of the Gun connection process.
 </p>
 </dd>
 <dt class="hdlist1">
-Protocol = http | spdy
+Protocol = http | http2
 </dt>
 <dd>
 <p>
@@ -318,7 +318,7 @@ The pid of the Gun connection process.
 </p>
 </dd>
 <dt class="hdlist1">
-Protocol = http | spdy | ws
+Protocol = http | http2 | ws
 </dt>
 <dd>
 <p>
@@ -413,7 +413,7 @@ Headers @todo
 </dd>
 </dl></div>
 <div class="paragraph"><p>A resource pushed alongside an HTTP response.</p></div>
-<div class="paragraph"><p>This message can only be sent when the protocol is SPDY.</p></div>
+<div class="paragraph"><p>This message can only be sent when the protocol is HTTP/2.</p></div>
 <div class="paragraph"><p>@todo I fear we also need the scheme; resource is identified by URI
 @todo Perhaps we really should send the URI entirely, because cache
 @todo relies on URI to work and this feature is for caching&#8230;
@@ -1716,7 +1716,7 @@ the stream and stop relaying messages.</p></div>
 <div class="paragraph"><p>@todo Depending on the length
 @todo of a response Gun may also attempt to reconnect rather than
 @todo receive the entire response body.</p></div>
-<div class="paragraph"><p>SPDY streams can however be cancelled at any time.</p></div>
+<div class="paragraph"><p>HTTP/2 streams can however be cancelled at any time.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_ws_upgrade_connpid_path_8594_ws_upgrade_connpid_path">ws_upgrade(ConnPid, Path) &#8594; ws_upgrade(ConnPid, Path, [], #{})</h3>
