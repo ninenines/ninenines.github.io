@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.26" />
+
+    <title>Nine Nines: OTP version management</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>OTP version management</span></h1>
+
+<div class="paragraph"><p>Erlang.mk comes with integrated support for
+<a href="https://github.com/kerl/kerl">Kerl</a>, a shell script that
+automates the downloading, building and installing of
+Erlang/OTP. It can be used to easily build a specific
+Erlang/OTP version (with or without custom build options)
+or maintain different versions side by side.</p></div>
+<div class="sect1">
+<h2 id="_erlang_versions">Erlang versions</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk uses the Git tags from Erlang/OTP to identify
+OTP versions. The most recent tag at the time of writing
+is <code>OTP-20.0.4</code>, which is a patch release of <code>OTP-20.0</code>.
+A patch release is a non-official release containing a
+few fixes on top of the official release.</p></div>
+<div class="paragraph"><p>Older versions used a slightly different versioning scheme
+and tag format, for example: <code>OTP_R16B03</code>. Beware though,
+there also was an <code>OTP_R16B03-1</code> release that fixed a
+critical issue in the initial release.</p></div>
+<div class="paragraph"><p>The README file for all official Erlang/OTP releases can
+be found on <a href="http://www.erlang.org/downloads">erlang.org</a>.
+To obtain information about patch releases when they are
+released you need to be subscribed to the
+<a href="http://erlang.org/mailman/listinfo/erlang-questions">erlang-questions mailing list</a>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="otp_version_pinning">OTP version pinning</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk can use a specific version of Erlang/OTP when
+interacting with your project. This can be very useful
+when you are working with a team because you can define
+the version you need in the Makefile and Erlang.mk will
+ensure this version is used by everyone in your team.</p></div>
+<div class="paragraph"><p>To pin the version all you need to do is to set the
+<code>ERLANG_OTP</code> variable in your Makefile before including
+Erlang.mk. For example, to use <code>OTP-20.0.4</code>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">ERLANG_OTP =</span> OTP-20.0.4
+
+include erlang.mk</tt></pre></div></div>
+<div class="paragraph"><p>The next time you run <code>make</code> Erlang.mk will build and
+use the version you configured.</p></div>
+<div class="paragraph"><p>Note that there has been reports that this functionality
+is not compatible with the <code>.ONESHELL</code> feature from
+GNU Make.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_continuous_integration">Continuous integration</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Erlang.mk can automatically test your project against
+many different Erlang/OTP versions. This functionality
+is documented in the <a href="../ci">Continuous integration</a> chapter.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_kerl">Configuring Kerl</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>All of the Kerl variables can be configured directly in the
+Makefile. All you need to do is to export them. For example,
+to change the installation directory for the Erlang/OTP
+versions managed by Kerl, you could add the following to
+your Makefile:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">export</span></span> KERL_INSTALL_DIR <span style="color: #990000">=</span> <span style="color: #009900">$(CURDIR)</span>/erlang</tt></pre></div></div>
+<div class="paragraph"><p>When configuring paths like this, always make sure to provide
+an absolute path in the value. Erlang.mk will NOT expand them
+automatically for you.</p></div>
+</div>
+</div>
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/erlang.mk/1/guide/escripts/">
+					Escripts
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/erlang.mk/1/guide/compat/">
+					Compatibility with other build tools
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Erlang.mk
+	1
+	
+	User Guide
+</h3>
+
+<ul>
+	
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/erlang.mk/1/guide">1</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

@@ -12,8 +12,11 @@
 
 {{ if .Weight }}
 	{{ if eq .Params.doctype "guide" }}
-		{{ $.Scratch.Set "prev" ((where (where (where $.Site.Pages ".Params.project" .Params.project) ".Params.doctype" .Params.doctype) ".Params.version" .Params.version).Prev .) }}
-		{{ $.Scratch.Set "next"  ((where (where (where $.Site.Pages ".Params.project" .Params.project) ".Params.doctype" .Params.doctype) ".Params.version" .Params.version).Next .) }}
+		{{ $pages := where $.Site.Pages ".Params.project" .Params.project }}
+		{{ $pages := $pages | intersect (where $.Site.Pages ".Params.doctype" .Params.doctype) }}
+		{{ $pages := $pages | intersect (where $.Site.Pages ".Params.version" .Params.version) }}
+		{{ $.Scratch.Set "prev" ($pages.Prev .Page) }}
+		{{ $.Scratch.Set "next" ($pages.Next .Page) }}
 
 		<nav style="margin:1em 0">
 			{{ if ($.Scratch.Get "prev").Weight }}

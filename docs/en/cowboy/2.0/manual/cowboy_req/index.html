@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.17" />
+    <meta name="generator" content="Hugo 0.26" />
 
     <title>Nine Nines: cowboy_req(3)</title>
 
@@ -418,7 +418,7 @@ http://www.gnu.org/software/src-highlite -->
     | {<span style="color: #FF6600">sendfile</span>, <span style="color: #009900">Offset</span>, <span style="color: #009900">Length</span>, <span style="color: #009900">Filename</span>}
 
 <span style="color: #009900">Offset</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()
-<span style="color: #009900">Length</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">pos_integer</span></span>()
+<span style="color: #009900">Length</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()
 <span style="color: #009900">Filename</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">file:name_all</span></span>()</tt></pre></div></div>
 <div class="paragraph"><p>Response body.</p></div>
 <div class="paragraph"><p>It can take two forms: the actual data to be sent or a
@@ -438,9 +438,9 @@ http://www.gnu.org/software/src-highlite -->
 [<span style="color: #FF0000">"Hello "</span>,[<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"world"</span><span style="color: #990000">&gt;&gt;</span>,<span style="color: #993399">33</span>]]
 <span style="color: #993399">2</span><span style="color: #990000">&gt;</span> <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"~s~n"</span>, [<span style="color: #009900">RespBody</span>])<span style="color: #990000">.</span>
 <span style="color: #009900">Hello</span> <span style="color: #FF6600">world</span><span style="color: #990000">!</span></tt></pre></div></div>
-<div class="paragraph"><p>When using the sendfile tuple, the <code>Length</code> value is mandatory
-and must be higher than 0. It is sent with the response in the
-content-length header.</p></div>
+<div class="paragraph"><p>Note that the length must be greater than zero for any data
+to be sent. Cowboy will send an empty body when the length
+is zero.</p></div>
 </div>
 </div>
 </div>

@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.17" />
+    <meta name="generator" content="Hugo 0.26" />
 
     <title>Nine Nines: Build Erlang releases with Erlang.mk and Relx</title>
 
@@ -96,7 +96,13 @@ it will be a pretty small one.</p></div>
 Makefile. There is only one thing required: defining the project
 name.</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PROJECT =</span> my_project
+
+include erlang.mk</tt></pre></div></div>
 <div class="paragraph"><p>Simply doing this allows you to build your application by typing
 <code>make</code>, running tests using <code>make tests</code>, and
 more. It will even compile your <em>.dtl</em> files found in the
@@ -104,7 +110,25 @@ more. It will even compile your <em>.dtl</em> files found in the
 <div class="paragraph"><p>Let&#8217;s now take a look at a simplified version of the Makefile for
 this website. I only removed a few targets that were off-topic.</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PROJECT =</span> ninenines
+
+<span style="color: #009900">DEPS =</span> cowboy erlydtl
+<span style="color: #009900">dep_cowboy_commit =</span> 0.8.5
+<span style="color: #009900">dep_erlydtl_commit =</span> 4d0dc8fb
+
+<span style="font-weight: bold"><span style="color: #000080">.PHONY:</span></span> release clean-release
+
+<span style="color: #990000">release:</span> clean-release all projects
+        relx -o rel<span style="color: #990000">/</span><span style="color: #009900">$(PROJECT)</span>
+
+<span style="color: #990000">clean-release:</span> clean-projects
+        rm -rf rel<span style="color: #990000">/</span><span style="color: #009900">$(PROJECT)</span>
+
+include erlang.mk</tt></pre></div></div>
 <div class="paragraph"><p>You can see here how to define dependencies. First you list all
 the dependency names, then you have one line per dependency, giving
 the repository URL and the commit number, tag or branch you want.</p></div>
@@ -170,55 +194,107 @@ containing all the flags to pass to the Erlang VM, for example
 <h3>More articles</h3>
 <ul id="articles-nav" class="extra_margin">
 	
-		<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+		
 	
-		<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+		
+			<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+		
+	
+		
 	
 </ul>
 

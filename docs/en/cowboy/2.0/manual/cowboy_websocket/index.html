@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.17" />
+    <meta name="generator" content="Hugo 0.26" />
 
     <title>Nine Nines: cowboy_websocket(3)</title>
 
@@ -99,13 +99,14 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">InFrame</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #009900">CallResult</span>
 <span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">Info</span>, <span style="color: #009900">State</span>)      <span style="color: #990000">-&gt;</span> <span style="color: #009900">CallResult</span>
 
-<span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">Reason</span>, <span style="color: #000080">undefined</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>       <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
+<span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">Reason</span>, <span style="color: #009900">PartialReq</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>      <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
 
 <span style="color: #009900">Req</span>        <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
+<span style="color: #009900">PartialReq</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">map</span></span>()
 <span style="color: #009900">State</span>      <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
 <span style="color: #009900">Opts</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_websocket:opts</span></span>()
 <span style="color: #009900">InFrame</span>    <span style="color: #990000">::</span> {<span style="color: #FF6600">text</span> | <span style="font-weight: bold"><span style="color: #000080">binary</span></span> | <span style="color: #FF6600">ping</span> | <span style="color: #FF6600">pong</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
-<span style="color: #009900">OutFrame</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()
+<span style="color: #009900">OutFrame</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()                    <span style="font-style: italic"><span style="color: #9A1900">%% see types below</span></span>
 <span style="color: #009900">Info</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
 
 <span style="color: #009900">CallResult</span> <span style="color: #990000">::</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}
@@ -140,9 +141,8 @@ the connection (by sending a <code>close</code> frame or returning a <code>stop<
 tuple).</p></div>
 <div class="paragraph"><p>The optional <code>terminate/3</code> callback will ultimately be called
 with the reason for the termination of the connection. This
-callback is common to all handlers. Note that Websocket has
-no concept of requests so it sets the second argument to
-undefined.</p></div>
+callback is common to all handlers. Note that Websocket will
+not provide the full Req object by default, to save memory.</p></div>
 <div class="paragraph"><p>Cowboy will terminate the process right after closing the
 Websocket connection. This means that there is no need to
 perform any cleanup in the <code>terminate/3</code> callback.</p></div>
@@ -246,6 +246,24 @@ timeout
 <div class="sect1">
 <h2 id="_types">Types</h2>
 <div class="sectionbody">
+<div class="sect3">
+<h4 id="_cow_ws_frame">cow_ws:frame()</h4>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">frame</span></span>() <span style="color: #990000">::</span> {<span style="color: #FF6600">text</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | {<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | <span style="color: #FF6600">ping</span> | {<span style="color: #FF6600">ping</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | <span style="color: #FF6600">pong</span> | {<span style="color: #FF6600">pong</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | <span style="color: #FF6600">close</span> | {<span style="color: #FF6600">close</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()} | {<span style="color: #FF6600">close</span>, <span style="font-weight: bold"><span style="color: #000000">close_code</span></span>(), <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+
+<span style="font-weight: bold"><span style="color: #000000">close_code</span></span>() <span style="color: #990000">::</span> <span style="color: #993399">1000</span><span style="color: #990000">..</span><span style="color: #993399">1003</span> | <span style="color: #993399">1006</span><span style="color: #990000">..</span><span style="color: #993399">1011</span> | <span style="color: #993399">3000</span><span style="color: #990000">..</span><span style="color: #993399">4999</span></tt></pre></div></div>
+<div class="paragraph"><p>Websocket frames that can be sent as a response.</p></div>
+<div class="paragraph"><p>Note that there is no need to send pong frames back as
+Cowboy does it automatically for you.</p></div>
+</div>
 <div class="sect2">
 <h3 id="_opts">opts()</h3>
 <div class="listingblock">

@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.17" />
+    <meta name="generator" content="Hugo 0.26" />
 
     <title>Nine Nines: External plugins</title>
 
@@ -88,7 +88,12 @@ of dependencies.</p></div>
 <div class="paragraph"><p>For example, if you have <code>cowboy</code> in <code>DEPS</code>, add <code>cowboy</code> in
 <code>DEP_PLUGINS</code> also:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy
+<span style="color: #009900">DEP_PLUGINS =</span> cowboy</tt></pre></div></div>
 <div class="paragraph"><p>This will load the file <em>plugins.mk</em> in the root folder of
 the Cowboy repository.</p></div>
 </div>
@@ -106,7 +111,12 @@ writing <code>DEP_PLUGINS = cowboy/plugins.mk</code>.</p></div>
 from Cowboy and no other, we would write the following in
 our Makefile:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEPS =</span> cowboy
+<span style="color: #009900">DEP_PLUGINS =</span> cowboy/mk/dist.mk</tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -123,7 +133,13 @@ individual plugins in <em>plugins.mk</em>.</p></div>
 <em>mk/templates.mk</em>, you could write the following <em>plugins.mk</em>
 file:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #990000">THIS :=</span> <span style="color: #009900">$(</span>dir <span style="color: #009900">$(</span>realpath <span style="color: #009900">$(</span>lastword <span style="color: #009900">$(MAKEFILE_LIST))))</span>
+include <span style="color: #009900">$(THIS)</span>/mk/dist.mk
+include <span style="color: #009900">$(THIS)</span>/mk/templates.mk</tt></pre></div></div>
 <div class="paragraph"><p>The <code>THIS</code> variable is required to relatively include files.</p></div>
 <div class="paragraph"><p>This allows users to not only be able to select individual
 plugins, but also select all plugins from the dependency
@@ -145,9 +161,22 @@ the same.</p></div>
 <em>early-plugins.mk</em>. You can specify a filename exactly like you would
 have done it with regular plugins.</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># In your application's Makefile</span></span>
+<span style="color: #009900">BUILD_DEPS =</span> common_deps
+<span style="color: #009900">DEP_EARLY_PLUGINS =</span> common_deps</tt></pre></div></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># In the plugin's early-plugins.mk</span></span>
+DEPS <span style="color: #990000">+=</span> cowboy
+<span style="color: #009900">TEST_DEPS =</span> ct_helper
+<span style="color: #009900">dep_ct_helper =</span> git https<span style="color: #990000">:</span>//github.com/ninenines/ct_helper master</tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -160,21 +189,39 @@ library.</p></div>
 <div class="paragraph"><p>For example, the following Makefile loads a plugin in the <em>mk</em>
 subdirectory:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEP_PLUGINS =</span> <span style="color: #009900">$(PROJECT)</span>/mk/dist.mk</tt></pre></div></div>
 <div class="paragraph"><p>This also works with early-stage plugins:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">DEP_EARLY_PLUGINS =</span> <span style="color: #009900">$(PROJECT)</span>/mk/variables.mk</tt></pre></div></div>
 <div class="paragraph"><p>Like external plugins, if you do not specify the path to the plugin, it
 defaults to <em>plugins.mk</em> or <em>early-plugins.mk</em>, located at the root of
 your application:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># Loads ./early-plugins.mk</span></span>
+<span style="color: #009900">DEP_EARLY_PLUGINS =</span> <span style="color: #009900">$(PROJECT)</span>
+<span style="font-style: italic"><span style="color: #9A1900"># Loads ./plugins.mk</span></span>
+<span style="color: #009900">DEP_PLUGINS =</span> <span style="color: #009900">$(PROJECT)</span></tt></pre></div></div>
 </div>
 </div>
 
 
 
 	
+		
+		
+		
 		
 		
 
