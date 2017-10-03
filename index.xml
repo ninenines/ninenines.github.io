@@ -60,6 +60,18 @@
     </item>
     
     <item>
+      <title>Introduction</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/introduction/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/introduction/</guid>
+      <description>Ranch is a socket acceptor pool for TCP protocols.
+ Ranch aims to provide everything you need to accept TCP connections with a small code base and low latency while being easy to use directly as an application or to embed into your own.
+ Prerequisites It is assumed the developer already knows Erlang and has some experience with socket programming and TCP protocols.
+   Supported platforms Ranch is tested and supported on Linux, FreeBSD, OSX and Windows.</description>
+    </item>
+    
+    <item>
       <title>The modern Web</title>
       <link>https://ninenines.eu/docs/en/cowboy/2.0/guide/modern_web/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -107,6 +119,16 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/guide/listeners/</guid>
+      <description>A listener is a set of processes whose role is to listen on a port for new connections. It manages a pool of acceptor processes, each of them indefinitely accepting connections. When it does, it starts a new process executing the protocol handler code. All the socket programming is abstracted through the use of transport handlers.
+ The listener takes care of supervising all the acceptor and connection processes, allowing developers to focus on building their application.</description>
+    </item>
+    
+    <item>
+      <title>Listeners</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/listeners/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/listeners/</guid>
       <description>A listener is a set of processes whose role is to listen on a port for new connections. It manages a pool of acceptor processes, each of them indefinitely accepting connections. When it does, it starts a new process executing the protocol handler code. All the socket programming is abstracted through the use of transport handlers.
  The listener takes care of supervising all the acceptor and connection processes, allowing developers to focus on building their application.</description>
     </item>
@@ -172,6 +194,19 @@
     </item>
     
     <item>
+      <title>Transports</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/transports/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/transports/</guid>
+      <description>A transport defines the interface to interact with a socket.
+ Transports can be used for connecting, listening and accepting connections, but also for receiving and sending data. Both passive and active mode are supported, although all sockets are initialized as passive.
+ TCP transport The TCP transport is a thin wrapper around gen_tcp.
+   SSL transport The SSL transport is a thin wrapper around ssl.
+ Ranch depends on ssl by default so any necessary dependencies will start when Ranch is started.</description>
+    </item>
+    
+    <item>
       <title>Overview</title>
       <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/overview/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -209,6 +244,16 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/guide/protocols/</guid>
+      <description>A protocol handler starts a connection process and defines the protocol logic executed in this process.
+ Writing a protocol handler All protocol handlers must implement the ranch_protocol behavior which defines a single callback, start_link/4. This callback is responsible for spawning a new process for handling the connection. It receives four arguments: the name of the listener, the socket, the transport handler being used and the protocol options defined in the call to ranch:start_listener/6.</description>
+    </item>
+    
+    <item>
+      <title>Protocols</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/protocols/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/protocols/</guid>
       <description>A protocol handler starts a connection process and defines the protocol logic executed in this process.
  Writing a protocol handler All protocol handlers must implement the ranch_protocol behavior which defines a single callback, start_link/4. This callback is responsible for spawning a new process for handling the connection. It receives four arguments: the name of the listener, the socket, the transport handler being used and the protocol options defined in the call to ranch:start_listener/5.</description>
     </item>
@@ -262,6 +307,16 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/guide/embedded/</guid>
+      <description>Embedded mode allows you to insert Ranch listeners directly in your supervision tree. This allows for greater fault tolerance control by permitting the shutdown of a listener due to the failure of another part of the application and vice versa.
+ Embedding To embed Ranch in your application you can simply add the child specs to your supervision tree. This can all be done in the init/1 function of one of your application supervisors.</description>
+    </item>
+    
+    <item>
+      <title>Embedded mode</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/embedded/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/embedded/</guid>
       <description>Embedded mode allows you to insert Ranch listeners directly in your supervision tree. This allows for greater fault tolerance control by permitting the shutdown of a listener due to the failure of another part of the application and vice versa.
  Embedding To embed Ranch in your application you can simply add the child specs to your supervision tree. This can all be done in the init/1 function of one of your application supervisors.</description>
     </item>
@@ -323,6 +378,17 @@
     </item>
     
     <item>
+      <title>Writing parsers</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/parsers/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/parsers/</guid>
+      <description>There are three kinds of protocols:
+    Text protocols    Schema-less binary protocols    Schema-based binary protocols   This chapter introduces the first two kinds. It will not cover more advanced topics such as continuations or parser generators.
+ This chapter isn&amp;#8217;t specifically about Ranch, we assume here that you know how to read data from the socket. The data you read and the data that hasn&amp;#8217;t been parsed is saved in a buffer.</description>
+    </item>
+    
+    <item>
       <title>Building</title>
       <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/app/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -361,6 +427,16 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/guide/ssl_auth/</guid>
+      <description>Purpose SSL client authentication is a mechanism allowing applications to identify certificates. This allows your application to make sure that the client is an authorized certificate, but makes no claim about whether the user can be trusted. This can be combined with a password based authentication to attain greater security.
+ The server only needs to retain the certificate serial number and the certificate issuer to authenticate the certificate. Together, they can be used to uniquely identify a certicate.</description>
+    </item>
+    
+    <item>
+      <title>SSL client authentication</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/ssl_auth/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/ssl_auth/</guid>
       <description>Purpose SSL client authentication is a mechanism allowing applications to identify certificates. This allows your application to make sure that the client is an authorized certificate, but makes no claim about whether the user can be trusted. This can be combined with a password based authentication to attain greater security.
  The server only needs to retain the certificate serial number and the certificate issuer to authenticate the certificate. Together, they can be used to uniquely identify a certicate.</description>
     </item>
@@ -415,6 +491,16 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/guide/internals/</guid>
+      <description>This chapter may not apply to embedded Ranch as embedding allows you to use an architecture specific to your application, which may or may not be compatible with the description of the Ranch application.
+ Note that for everything related to efficiency and performance, you should perform the benchmarks yourself to get the numbers that matter to you. Generic benchmarks found on the web may or may not be of use to you, you can never know until you benchmark your own system.</description>
+    </item>
+    
+    <item>
+      <title>Internals</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/internals/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/internals/</guid>
       <description>This chapter may not apply to embedded Ranch as embedding allows you to use an architecture specific to your application, which may or may not be compatible with the description of the Ranch application.
  Note that for everything related to efficiency and performance, you should perform the benchmarks yourself to get the numbers that matter to you. Generic benchmarks found on the web may or may not be of use to you, you can never know until you benchmark your own system.</description>
     </item>
@@ -1248,6 +1334,15 @@ Crowdfund my salary or buy The Erlanger Playbook
     </item>
     
     <item>
+      <title>Ranch Function Reference</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/manual/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/manual/</guid>
+      <description>   ranch(7)    ranch(3)    ranch_protocol(3)    ranch_ssl(3)    ranch_tcp(3)    ranch_transport(3)   </description>
+    </item>
+    
+    <item>
       <title>Ranch User Guide</title>
       <link>https://ninenines.eu/docs/en/ranch/1.2/guide/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -1262,6 +1357,15 @@ Crowdfund my salary or buy The Erlanger Playbook
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/guide/</guid>
+      <description>   Introduction    Listeners    Transports    Protocols    Embedded mode    Writing parsers    SSL client authentication    Internals   </description>
+    </item>
+    
+    <item>
+      <title>Ranch User Guide</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/guide/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/guide/</guid>
       <description>   Introduction    Listeners    Transports    Protocols    Embedded mode    Writing parsers    SSL client authentication    Internals   </description>
     </item>
     
@@ -2052,6 +2156,18 @@ Crowdfund my salary or buy The Erlanger Playbook
     </item>
     
     <item>
+      <title>ranch(3)</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch/</guid>
+      <description>Name ranch - socket acceptor pool
+   Description The ranch module provides functions for starting and manipulating Ranch listeners.
+   Types max_conns() = non_neg_integer() | infinity Maximum number of connections allowed on this listener.
+ This is a soft limit. The actual number of connections might be slightly above the limit due to concurrency when accepting new connections. Some connections may also be removed from this count explicitly by the user code.</description>
+    </item>
+    
+    <item>
       <title>ranch(7)</title>
       <link>https://ninenines.eu/docs/en/ranch/1.2/manual/ranch_app/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -2070,6 +2186,18 @@ Crowdfund my salary or buy The Erlanger Playbook
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/manual/ranch_app/</guid>
+      <description>Name ranch - Socket acceptor pool for TCP protocols.
+   Dependencies The ranch application depends on the ssl application to start. It is used for handling secure connections, when the transport is ranch_ssl. It can be disabled if SSL is not used.
+   Environment The ranch application defines one application environment configuration parameter.
+  profile (false)    When enabled, Ranch will start eprof profiling automatically.</description>
+    </item>
+    
+    <item>
+      <title>ranch(7)</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_app/</guid>
       <description>Name ranch - Socket acceptor pool for TCP protocols.
    Dependencies The ranch application depends on the ssl application to start. It is used for handling secure connections, when the transport is ranch_ssl. It can be disabled if SSL is not used.
    Environment The ranch application defines one application environment configuration parameter.
@@ -2101,6 +2229,18 @@ Crowdfund my salary or buy The Erlanger Playbook
     </item>
     
     <item>
+      <title>ranch_protocol(3)</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_protocol/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_protocol/</guid>
+      <description>Name ranch_protocol - behaviour for protocol modules
+   Description The ranch_protocol behaviour defines the interface used by Ranch protocols.
+   Types None.
+   Callbacks start_link(Ref, Socket, Transport, ProtoOpts) &amp;#8594; {ok, pid()} | {ok, pid(), pid()}  Ref = ranch:ref()    Listener name.  Socket = any()    Socket for this connection.  Transport = module()    Transport module for this socket.</description>
+    </item>
+    
+    <item>
       <title>ranch_ssl(3)</title>
       <link>https://ninenines.eu/docs/en/ranch/1.2/manual/ranch_ssl/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -2117,6 +2257,17 @@ Crowdfund my salary or buy The Erlanger Playbook
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/manual/ranch_ssl/</guid>
+      <description>Name ranch_ssl - SSL transport module
+   Description The ranch_ssl module implements an SSL Ranch transport.
+   Types ssl_opt() ssl_opt() = {alpn_preferred_protocols, [binary()]} | {beast_mitigation, one_n_minus_one | zero_n | disabled} | {cacertfile, string()} | {cacerts, [public_key:der_encoded()]} | {cert, public_key:der_encoded()} | {certfile, string()} | {ciphers, [ssl:erl_cipher_suite()] | string()} | {client_renegotiation, boolean()} | {crl_cache, {module(), {internal | any(), list()}}} | {crl_check, boolean() | peer | best_effort} | {depth, 0.</description>
+    </item>
+    
+    <item>
+      <title>ranch_ssl(3)</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_ssl/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_ssl/</guid>
       <description>Name ranch_ssl - SSL transport module
    Description The ranch_ssl module implements an SSL Ranch transport.
    Types ssl_opt() ssl_opt() = {alpn_preferred_protocols, [binary()]} | {beast_mitigation, one_n_minus_one | zero_n | disabled} | {cacertfile, string()} | {cacerts, [public_key:der_encoded()]} | {cert, public_key:der_encoded()} | {certfile, string()} | {ciphers, [ssl:erl_cipher_suite()] | string()} | {client_renegotiation, boolean()} | {crl_cache, {module(), {internal | any(), list()}}} | {crl_check, boolean() | peer | best_effort} | {depth, 0.</description>
@@ -2147,6 +2298,18 @@ Crowdfund my salary or buy The Erlanger Playbook
     </item>
     
     <item>
+      <title>ranch_tcp(3)</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_tcp/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_tcp/</guid>
+      <description>Name ranch_tcp - TCP transport module
+   Description The ranch_tcp module implements a TCP Ranch transport.
+ Note that due to bugs in OTP up to at least R16B02, it is recommended to disable async threads when using the sendfile function of this transport, as it can make the threads stuck indefinitely.
+   Types opt() opt() = {backlog, non_neg_integer()} | {buffer, non_neg_integer()} | {delay_send, boolean()} | {dontroute, boolean()} | {exit_on_close, boolean()} | {fd, non_neg_integer()} | {high_msgq_watermark, non_neg_integer()} | {high_watermark, non_neg_integer()} | inet | inet6 | {ip, inet:ip_address()} | {ipv6_v6only, boolean()} | {keepalive, boolean()} | {linger, {boolean(), non_neg_integer()}} | {low_msgq_watermark, non_neg_integer()} | {low_watermark, non_neg_integer()} | {nodelay, boolean()} | {port, inet:port_number()} | {priority, integer()} | {raw, non_neg_integer(), non_neg_integer(), binary()} | {recbuf, non_neg_integer()} | {send_timeout, timeout()} | {send_timeout_close, boolean()} | {sndbuf, non_neg_integer()} | {tos, integer()} Listen options.</description>
+    </item>
+    
+    <item>
       <title>ranch_transport(3)</title>
       <link>https://ninenines.eu/docs/en/ranch/1.2/manual/ranch_transport/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -2165,6 +2328,19 @@ Crowdfund my salary or buy The Erlanger Playbook
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/ranch/1.3/manual/ranch_transport/</guid>
+      <description>Name ranch_transport - behaviour for transport modules
+   Description The ranch_transport behaviour defines the interface used by Ranch transports.
+   Types sendfile_opts() = [{chunk_size, non_neg_integer()}] Options used by the sendfile function and callbacks.
+ Allows configuring the chunk size, in bytes. Defaults to 8191 bytes.
+    Callbacks accept(LSocket, Timeout) &amp;#8594; {ok, CSocket} | {error, closed | timeout | atom()}  LSocket = CSocket = any()    Listening socket.</description>
+    </item>
+    
+    <item>
+      <title>ranch_transport(3)</title>
+      <link>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_transport/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/ranch/1.4/manual/ranch_transport/</guid>
       <description>Name ranch_transport - behaviour for transport modules
    Description The ranch_transport behaviour defines the interface used by Ranch transports.
    Types sendfile_opts() = [{chunk_size, non_neg_integer()}] Options used by the sendfile function and callbacks.

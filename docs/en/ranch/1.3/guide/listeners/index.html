@@ -105,7 +105,7 @@ A protocol handler and its associated options.
 </ul></div>
 <div class="paragraph"><p>Ranch includes both TCP and SSL transport handlers, respectively
 <code>ranch_tcp</code> and <code>ranch_ssl</code>.</p></div>
-<div class="paragraph"><p>A listener can be started by calling the <code>ranch:start_listener/5</code>
+<div class="paragraph"><p>A listener can be started by calling the <code>ranch:start_listener/6</code>
 function. Before doing so however, you must ensure that the <code>ranch</code>
 application is started.</p></div>
 <div class="listingblock">
@@ -124,7 +124,7 @@ to the <code>echo_protocol</code> handler.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #993399">100</span>,
         <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}],
         <span style="color: #FF6600">echo_protocol</span>, []
 )<span style="color: #990000">.</span></tt></pre></div></div>
@@ -196,14 +196,14 @@ can be overriden at listener startup.</p></div>
 the port number 0, or if you omit the port number entirely, Ranch will
 start listening on a random port.</p></div>
 <div class="paragraph"><p>You can retrieve this port number by calling <code>ranch:get_port/1</code>. The
-argument is the name of the listener you gave in <code>ranch:start_listener/5</code>.</p></div>
+argument is the name of the listener you gave in <code>ranch:start_listener/6</code>.</p></div>
 <div class="listingblock">
 <div class="title">Starting a listener for TCP connections on a random port</div>
 <div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #993399">100</span>,
         <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">0</span>}],
         <span style="color: #FF6600">echo_protocol</span>, []
 )<span style="color: #990000">.</span>
@@ -254,7 +254,7 @@ connections are handled optimally.</p></div>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #993399">100</span>,
         <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}, {<span style="color: #FF6600">max_connections</span>, <span style="color: #993399">100</span>}],
         <span style="color: #FF6600">echo_protocol</span>, []
 )<span style="color: #990000">.</span></tt></pre></div></div>
@@ -265,7 +265,7 @@ http://www.gnu.org/software/src-highlite -->
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #993399">100</span>,
         <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}, {<span style="color: #FF6600">max_connections</span>, <span style="color: #FF6600">infinity</span>}],
         <span style="color: #FF6600">echo_protocol</span>, []
 )<span style="color: #990000">.</span></tt></pre></div></div>
@@ -305,27 +305,6 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:set_max_connections</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #009900">MaxConns</span>)<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>The change will occur immediately.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_customizing_the_number_of_acceptor_processes">Customizing the number of acceptor processes</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>By default Ranch will use 10 acceptor processes. Their role is
-to accept connections and spawn a connection process for every
-new connection.</p></div>
-<div class="paragraph"><p>This number can be tweaked to improve performance. A good
-number is typically between 10 or 100 acceptors. You must
-measure to find the best value for your application.</p></div>
-<div class="listingblock">
-<div class="title">Specifying a custom number of acceptor processes</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
-        <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}, {<span style="color: #FF6600">num_acceptors</span>, <span style="color: #993399">42</span>}],
-        <span style="color: #FF6600">echo_protocol</span>, []
-)<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -397,7 +376,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 </div>
 <div class="sect1">
-<h2 id="_obtaining_information_about_listeners">Obtaining information about listeners</h2>
+<h2 id="_obtain_information_about_listeners">Obtain information about listeners</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Ranch provides two functions for retrieving information about the
 listeners, for reporting and diagnostic purposes.</p></div>
@@ -483,6 +462,8 @@ http://www.gnu.org/software/src-highlite -->
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/ranch/1.4/guide">1.4</a></li>
 	
 		<li><a href="/docs/en/ranch/1.3/guide">1.3</a></li>
 	

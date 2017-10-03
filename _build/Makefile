@@ -8,7 +8,7 @@ all: docs
 server:
 	hugo server --theme=ninenines
 
-clean: DOC_FILES = $(filter-out static/docs/en/cowboy/1.0,$(wildcard static/docs/en/*/*))
+clean: DOC_FILES = $(filter-out static/docs/en/cowboy/1.0/guide,$(wildcard static/docs/en/*/*/guide))
 clean: OUTPUT_FILES = $(filter-out ../_build,$(wildcard ../*))
 clean:
 	rm -rf content/docs tmp
@@ -70,7 +70,7 @@ docs-$1-$2: tmp/$1
 			> content/docs/en/$1/$3/manual.asciidoc; \
 		if [ "$1" = "cowboy" ]; then \
 			sed '1,/^$$$$/d' tmp/$1/doc/src/manual/$1_app.asciidoc | sed 's/xref:/link:..\//' \
-				| sed 's/link:man:[a-z0-9_]*(7)/link:\/docs/' \
+				| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/' \
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
 				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/' \
 				>> content/docs/en/$1/$3/manual.asciidoc; \
