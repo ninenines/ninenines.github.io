@@ -186,6 +186,34 @@ set the content-length header in the response if you know it
 in advance. This will ensure that the best response method
 is selected and help clients understand when the response
 is fully received.</p></div>
+<div class="paragraph"><p>Cowboy also provides a function to send response trailers.
+Response trailers are semantically equivalent to the headers
+you send in the response, only they are sent at the end.
+This is especially useful to attach information to the
+response that could not be generated until the response
+body was fully generated.</p></div>
+<div class="paragraph"><p>Trailer fields must be listed in the trailer header. Any
+field not listed might be dropped by the client or an intermediary.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_reply</span></span>(<span style="color: #993399">200</span>, #{
+    <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/html"</span><span style="color: #990000">&gt;&gt;</span>,
+    <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"trailer"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"expires, content-md5"</span><span style="color: #990000">&gt;&gt;</span>
+}, <span style="color: #009900">Req0</span>),
+
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #FF0000">"&lt;html&gt;&lt;head&gt;Hello world!&lt;/head&gt;"</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Req</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #FF0000">"&lt;body&gt;&lt;p&gt;Hats off!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Req</span>),
+
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_trailers</span></span>(#{
+    <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"expires"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Sun, 10 Dec 2017 19:13:47 GMT"</span><span style="color: #990000">&gt;&gt;</span>,
+    <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-md5"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"c6081d20ff41a42ce17048ed1c0345e2"</span><span style="color: #990000">&gt;&gt;</span>
+}, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The stream ends with trailers. It is no longer possible to
+send data after sending trailers. You cannot send trailers
+after setting the <code>fin</code> flag when streaming the body.</p></div>
 </div>
 </div>
 <div class="sect1">
