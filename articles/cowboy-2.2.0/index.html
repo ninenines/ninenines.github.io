@@ -9,7 +9,7 @@
 
     <meta name="generator" content="Hugo 0.30.2" />
 
-    <title>Nine Nines: Xerl: expression separator</title>
+    <title>Nine Nines: Cowboy 2.2</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=1" rel="stylesheet">
@@ -67,65 +67,56 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Xerl: expression separator</span></h1>
+	<h1 class="lined-header"><span>Cowboy 2.2</span></h1>
 	<p class="date">
-		<span class="day">01</span>
-		<span class="month">Mar</span>
+		<span class="day">13</span>
+		<span class="month">Dec</span>
 	</p>
 </header>
 
-<div class="paragraph"><p>As promised we are adding an expression separator this time.
-This will be short and easy.</p></div>
-<div class="paragraph"><p>In the tokenizer we only need to add a line recognizing the
-comma as a valid token.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>, <span style="color: #990000">:</span> {<span style="color: #FF6600">token</span>, {<span style="color: #FF6600">','</span>, <span style="color: #009900">TokenLine</span>}}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Then we need to change the following lines in the parser:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span>
-<span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">exprs</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span> | <span style="color: #FF6600">'$2'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>And add a comma between the expressions on the second line:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span>
-<span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">','</span> <span style="color: #FF6600">exprs</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span> | <span style="color: #FF6600">'$3'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>That takes care of everything except the optional trailing
-comma at the end of our lists of expressions. We just need an
-additional rule to take care of this.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">','</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>That&#8217;s it.</p></div>
-<div class="paragraph"><p>Wondering why we don&#8217;t have this optional trailing comma in
-Erlang considering how easy it was and the number of people
-complaining about it? Yeah, me too. But that&#8217;s for someone else
-to answer.</p></div>
-<div class="paragraph"><p>Another change I want to talk about is a simple modification
-of the compiler code to use an <code>#env{}</code> record for
-tracking state instead of passing around individual variables.
-This will be required later on when we make modules into proper
-expressions so I thought it was a good idea to anticipate.</p></div>
+<div class="paragraph"><p>Cowboy <code>2.2.0</code> has been released!</p></div>
+<div class="paragraph"><p>This release focused on adding features required for writing
+gRPC servers and on completing test suites for the core
+HTTP RFCs.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-<a href="https://github.com/extend/xerl/blob/0.4/">View the source</a>
+The <code>cowboy_req:stream_trailers/2</code> function has been
+  added. It terminates the streamed response by adding
+  some trailer field values. This feature is required
+  for gRPC.
+</p>
+</li>
+<li>
+<p>
+The <code>max_skip_body_length</code> option was added. It controls
+  how much of the request body we are willing to skip
+  to get to the next request for HTTP/1.1 keep-alive
+  connections.
+</p>
+</li>
+<li>
+<p>
+The CONNECT and TRACE methods have been disabled
+  entirely. They are currently not implemented and
+  their behavior is very specific (unlike most other
+  methods) so it is safer to prevent their use.
 </p>
 </li>
 </ul></div>
+<div class="paragraph"><p>Many bugs have also been fixed. A more complete
+list of changes can be found in the migration guide:
+<a href="https://ninenines.eu/docs/en/cowboy/2.1/guide/migrating_from_2.0/">Migrating from Cowboy 2.0 to 2.1</a>.</p></div>
+<div class="paragraph"><p>The next two releases will tentatively focus on improving
+the support for cookies and CORS, but I&#8217;m open to suggestions.
+If there is a pain point in Cowboy 2.2 I would love to hear
+about it.</p></div>
+<div class="paragraph"><p>You can donate to this project via
+<a href="https://salt.bountysource.com/teams/ninenines">BountySource</a>
+because I need to eat snacks when I write code.
+Thanks in advance!</p></div>
+<div class="paragraph"><p>As usual, any feedback is appreciated, and any issues
+should be reported by opening a ticket. Thanks!</p></div>
 
 </article>
 </div>
