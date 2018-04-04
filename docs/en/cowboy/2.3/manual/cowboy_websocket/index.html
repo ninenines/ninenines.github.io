@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: cowboy_websocket(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_websocket(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>cowboy_websocket - Websocket</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The module <code>cowboy_websocket</code> implements Websocket
+as a Ranch protocol. It also defines a callback interface
+for handling Websocket connections.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callbacks">Callbacks</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Websocket handlers must implement the following callback
+interface:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
+    <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+     | {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #009900">Opts</span>}
+
+<span style="font-weight: bold"><span style="color: #000000">websocket_init</span></span>(<span style="color: #009900">State</span>)            <span style="color: #990000">-&gt;</span> <span style="color: #009900">CallResult</span>  <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
+<span style="font-weight: bold"><span style="color: #000000">websocket_handle</span></span>(<span style="color: #009900">InFrame</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #009900">CallResult</span>
+<span style="font-weight: bold"><span style="color: #000000">websocket_info</span></span>(<span style="color: #009900">Info</span>, <span style="color: #009900">State</span>)      <span style="color: #990000">-&gt;</span> <span style="color: #009900">CallResult</span>
+
+<span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">Reason</span>, <span style="color: #009900">PartialReq</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>      <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
+
+<span style="color: #009900">Req</span>        <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
+<span style="color: #009900">PartialReq</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">map</span></span>()
+<span style="color: #009900">State</span>      <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+<span style="color: #009900">Opts</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_websocket:opts</span></span>()
+<span style="color: #009900">InFrame</span>    <span style="color: #990000">::</span> {<span style="color: #FF6600">text</span> | <span style="font-weight: bold"><span style="color: #000080">binary</span></span> | <span style="color: #FF6600">ping</span> | <span style="color: #FF6600">pong</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
+<span style="color: #009900">OutFrame</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cow_ws:frame</span></span>()                    <span style="font-style: italic"><span style="color: #9A1900">%% see types below</span></span>
+<span style="color: #009900">Info</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
+
+<span style="color: #009900">CallResult</span> <span style="color: #990000">::</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>}
+            | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+            | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">State</span>}
+            | {<span style="color: #FF6600">reply</span>, <span style="color: #009900">OutFrame</span> | [<span style="color: #009900">OutFrame</span>], <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+            | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">State</span>}
+
+<span style="color: #009900">Reason</span>     <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">normal</span></span> | <span style="color: #FF6600">stop</span> | <span style="color: #FF6600">timeout</span>
+            | <span style="color: #FF6600">remote</span> | {<span style="color: #FF6600">remote</span>, <span style="font-weight: bold"><span style="color: #000000">cow_ws:close_code</span></span>(), <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
+            | {<span style="color: #FF6600">error</span>, <span style="color: #FF6600">badencoding</span> | <span style="color: #FF6600">badframe</span> | <span style="color: #FF6600">closed</span> | <span style="font-weight: bold"><span style="color: #000080">atom</span></span>()}
+            | {<span style="color: #FF6600">crash</span>, <span style="color: #FF6600">error</span> | <span style="font-weight: bold"><span style="color: #000080">exit</span></span> | <span style="font-weight: bold"><span style="color: #000080">throw</span></span>, <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}</tt></pre></div></div>
+<div class="paragraph"><p>The <code>init/2</code> callback is common to all handlers. To upgrade
+the connection to Websocket, it must return <code>cowboy_websocket</code>
+as the first element of the tuple.</p></div>
+<div class="paragraph"><p>Any operation requiring the HTTP request must be done in the
+<code>init/2</code> function, as the Req object will not be available
+after it returns. Websocket sub-protocol selection should
+therefore be done in this function.</p></div>
+<div class="paragraph"><p>The optional <code>websocket_init/1</code> callback will be called once
+the connection has been upgraded to Websocket. It can be used
+to perform any required initialization of the handler.</p></div>
+<div class="paragraph"><p>Note that the <code>init/2</code> function does not run in the same
+process as the Websocket callbacks. Any Websocket-specific
+initialization must be done in <code>websocket_init/1</code>.</p></div>
+<div class="paragraph"><p>The <code>websocket_handle/2</code> callback will be called for every
+frame received. The <code>websocket_info/2</code> callback will be
+called for every Erlang message received.</p></div>
+<div class="paragraph"><p>All three Websocket callbacks may send one or more frames
+back to the client (by returning a <code>reply</code> tuple) or terminate
+the connection (by sending a <code>close</code> frame or returning a <code>stop</code>
+tuple).</p></div>
+<div class="paragraph"><p>The optional <code>terminate/3</code> callback will ultimately be called
+with the reason for the termination of the connection. This
+callback is common to all handlers. Note that Websocket will
+not provide the full Req object by default, to save memory.</p></div>
+<div class="paragraph"><p>Cowboy will terminate the process right after closing the
+Websocket connection. This means that there is no need to
+perform any cleanup in the <code>terminate/3</code> callback.</p></div>
+<div class="paragraph"><p>The following terminate reasons are defined for Websocket
+connections:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+normal
+</dt>
+<dd>
+<p>
+    The connection was closed normally before establishing a Websocket
+    connection. This typically happens if an <code>ok</code> tuple is returned
+    from the <code>init/2</code> callback.
+</p>
+</dd>
+<dt class="hdlist1">
+remote
+</dt>
+<dd>
+<p>
+    The remote endpoint closed the connection without giving any
+    further details.
+</p>
+</dd>
+<dt class="hdlist1">
+{remote, Code, Payload}
+</dt>
+<dd>
+<p>
+    The remote endpoint closed the connection with the given
+    <code>Code</code> and <code>Payload</code> as the reason.
+</p>
+</dd>
+<dt class="hdlist1">
+stop
+</dt>
+<dd>
+<p>
+    The handler requested to close the connection, either by returning
+    a <code>stop</code> tuple or by sending a <code>close</code> frame.
+</p>
+</dd>
+<dt class="hdlist1">
+timeout
+</dt>
+<dd>
+<p>
+    The connection has been closed due to inactivity. The timeout
+    value can be configured from <code>init/2</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+{crash, Class, Reason}
+</dt>
+<dd>
+<p>
+    A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be
+    used to obtain more information about the crash. The function
+    <code>erlang:get_stacktrace/0</code> can also be called to obtain the
+    stacktrace of the process when the crash occurred.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, badencoding}
+</dt>
+<dd>
+<p>
+    A text frame was sent by the client with invalid encoding. All
+    text frames must be valid UTF-8.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, badframe}
+</dt>
+<dd>
+<p>
+    A protocol error has been detected.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, closed}
+</dt>
+<dd>
+<p>
+    The socket has been closed brutally without a close frame being
+    received first.
+</p>
+</dd>
+<dt class="hdlist1">
+{error, Reason}
+</dt>
+<dd>
+<p>
+    A socket error ocurred.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_types">Types</h2>
+<div class="sectionbody">
+<div class="sect3">
+<h4 id="_cow_ws_frame">cow_ws:frame()</h4>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">frame</span></span>() <span style="color: #990000">::</span> {<span style="color: #FF6600">text</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | {<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | <span style="color: #FF6600">ping</span> | {<span style="color: #FF6600">ping</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | <span style="color: #FF6600">pong</span> | {<span style="color: #FF6600">pong</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+    | <span style="color: #FF6600">close</span> | {<span style="color: #FF6600">close</span>, <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()} | {<span style="color: #FF6600">close</span>, <span style="font-weight: bold"><span style="color: #000000">close_code</span></span>(), <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()}
+
+<span style="font-weight: bold"><span style="color: #000000">close_code</span></span>() <span style="color: #990000">::</span> <span style="color: #993399">1000</span><span style="color: #990000">..</span><span style="color: #993399">1003</span> | <span style="color: #993399">1006</span><span style="color: #990000">..</span><span style="color: #993399">1011</span> | <span style="color: #993399">3000</span><span style="color: #990000">..</span><span style="color: #993399">4999</span></tt></pre></div></div>
+<div class="paragraph"><p>Websocket frames that can be sent as a response.</p></div>
+<div class="paragraph"><p>Note that there is no need to send pong frames back as
+Cowboy does it automatically for you.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_opts">opts()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">compress</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>(),
+    <span style="color: #0000FF">idle_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">max_frame_size</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>() | <span style="color: #FF6600">infinity</span>,
+    <span style="color: #0000FF">req_filter</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>((<span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">map</span></span>())
+}</tt></pre></div></div>
+<div class="paragraph"><p>Websocket handler options.</p></div>
+<div class="paragraph"><p>This configuration is passed to Cowboy from the <code>init/2</code>
+function:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Opts</span> <span style="color: #990000">=</span> #{<span style="color: #0000FF">compress</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">true</span>},
+    {<span style="color: #FF6600">cowboy_websocket</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #009900">Opts</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The default value is given next to the option name:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+compress (false)
+</dt>
+<dd>
+<p>
+    Whether to enable the Websocket frame compression
+    extension. Frames will only be compressed for the
+    clients that support this extension.
+</p>
+</dd>
+<dt class="hdlist1">
+idle_timeout (60000)
+</dt>
+<dd>
+<p>
+    Time in milliseconds that Cowboy will keep the
+    connection open without receiving anything from
+    the client.
+</p>
+</dd>
+<dt class="hdlist1">
+max_frame_size (infinity)
+</dt>
+<dd>
+<p>
+    Maximum frame size allowed by this Websocket
+    handler. Cowboy will close the connection when
+    a client attempts to send a frame that goes over
+    this limit. For fragmented frames this applies
+    to the size of the reconstituted frame.
+</p>
+</dd>
+<dt class="hdlist1">
+req_filter
+</dt>
+<dd>
+<p>
+    A function applied to the Req to compact it and
+    only keep required information. The Req is only
+    given back in the <code>terminate/3</code> callback. By default
+    it keeps the method, version, URI components and peer
+    information.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changelog">Changelog</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>2.0</strong>: The Req object is no longer passed to Websocket callbacks.
+</p>
+</li>
+<li>
+<p>
+<strong>2.0</strong>: The callback <code>websocket_terminate/3</code> was removed in favor of <code>terminate/3</code>.
+</p>
+</li>
+<li>
+<p>
+<strong>1.0</strong>: Protocol introduced.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See also</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="..">cowboy(7)</a>,
+<a href="../cowboy_handler">cowboy_handler(3)</a>,
+<a href="../cowboy_http">cowboy_http(3)</a>,
+<a href="../cowboy_http2">cowboy_http2(3)</a></p></div>
+</div>
+</div>
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.3
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

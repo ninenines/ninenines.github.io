@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: The Req object</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>The Req object</span></h1>
+
+<div class="paragraph"><p>The Req object is a variable used for obtaining information
+about a request, read its body or send a response.</p></div>
+<div class="paragraph"><p>It is not really an object in the object-oriented sense.
+It is a simple map that can be directly accessed or
+used when calling functions from the <code>cowboy_req</code> module.</p></div>
+<div class="paragraph"><p>The Req object is the subject of a few different chapters.
+In this chapter we will learn about the Req object and
+look at how to retrieve information about the request.</p></div>
+<div class="sect1">
+<h2 id="_direct_access">Direct access</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The Req map contains a number of fields which are documented
+and can be accessed directly. They are the fields that have
+a direct mapping to HTTP: the request <code>method</code>; the HTTP
+<code>version</code> used; the effective URI components <code>scheme</code>,
+<code>host</code>, <code>port</code>, <code>path</code> and <code>qs</code>; the request <code>headers</code>;
+and the connection <code>peer</code> address and port.</p></div>
+<div class="paragraph"><p>Note that the <code>version</code> field can be used to determine
+whether a connection is using HTTP/2.</p></div>
+<div class="paragraph"><p>To access a field, you can simply match in the function
+head. The following example sends a simple "Hello world!"
+response when the <code>method</code> is GET, and a 405 error
+otherwise.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req0</span><span style="color: #990000">=</span>#{<span style="color: #FF6600">method</span> <span style="color: #990000">:=</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"GET"</span><span style="color: #990000">&gt;&gt;</span>}, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, #{
+        <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>
+    }, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello world!"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req0</span>),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
+<span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req0</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">405</span>, #{
+        <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"allow"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"GET"</span><span style="color: #990000">&gt;&gt;</span>
+    }, <span style="color: #009900">Req0</span>),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Any other field is internal and should not be accessed.
+They may change in future releases, including maintenance
+releases, without notice.</p></div>
+<div class="paragraph"><p>Modifying the Req object, while allowed, is not recommended
+unless strictly necessary. If adding new fields, make sure
+to namespace the field names so that no conflict can occur
+with future Cowboy updates or third party projects.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction_to_the_cowboy_req_interface">Introduction to the cowboy_req interface</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Functions in the <code>cowboy_req</code> module provide access to
+the request information but also various operations that
+are common when dealing with HTTP requests.</p></div>
+<div class="paragraph"><p>All the functions that begin with a verb indicate an action.
+Other functions simply return the corresponding value
+(sometimes that value does need to be built, but the
+cost of the operation is equivalent to retrieving a value).</p></div>
+<div class="paragraph"><p>Some of the <code>cowboy_req</code> functions return an updated Req
+object. They are the read, reply, set and delete functions.
+While ignoring the returned Req will not cause incorrect
+behavior for some of them, it is highly recommended to
+always keep and use the last returned Req object. The
+manual for <code>cowboy_req</code> details these functions and what
+modifications are done to the Req object.</p></div>
+<div class="paragraph"><p>Some of the calls to <code>cowboy_req</code> have side effects. This
+is the case of the read and reply functions. Cowboy reads
+the request body or replies immediately when the function
+is called.</p></div>
+<div class="paragraph"><p>All functions will crash if something goes wrong. There
+is usually no need to catch these errors, Cowboy will
+send the appropriate 4xx or 5xx response depending on
+where the crash occurred.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_request_method">Request method</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The request method can be retrieved directly:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<span style="color: #FF6600">method</span> <span style="color: #990000">:=</span> <span style="color: #009900">Method</span>} <span style="color: #990000">=</span> <span style="color: #009900">Req</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Or using a function:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Method</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:method</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The method is a case sensitive binary string. Standard
+methods include GET, HEAD, OPTIONS, PATCH, POST, PUT
+or DELETE.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_http_version">HTTP version</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The HTTP version is informational. It does not indicate that
+the client implements the protocol well or fully.</p></div>
+<div class="paragraph"><p>There is typically no need to change behavior based on the
+HTTP version: Cowboy already does it for you.</p></div>
+<div class="paragraph"><p>It can be useful in some cases, though. For example, one may
+want to redirect HTTP/1.1 clients to use Websocket, while HTTP/2
+clients keep using HTTP/2.</p></div>
+<div class="paragraph"><p>The HTTP version can be retrieved directly:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<span style="color: #FF6600">version</span> <span style="color: #990000">:=</span> <span style="color: #009900">Version</span>} <span style="color: #990000">=</span> <span style="color: #009900">Req</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Or using a function:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Version</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:version</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Cowboy defines the <code>'HTTP/1.0'</code>, <code>'HTTP/1.1'</code> and <code>'HTTP/2'</code>
+versions. Custom protocols can define their own values as
+atoms.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_effective_request_uri">Effective request URI</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The scheme, host, port, path and query string components
+of the effective request URI can all be retrieved directly:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{
+    <span style="color: #FF6600">scheme</span> <span style="color: #990000">:=</span> <span style="color: #009900">Scheme</span>,
+    <span style="color: #FF6600">host</span> <span style="color: #990000">:=</span> <span style="color: #009900">Host</span>,
+    <span style="color: #FF6600">port</span> <span style="color: #990000">:=</span> <span style="color: #009900">Port</span>,
+    <span style="color: #FF6600">path</span> <span style="color: #990000">:=</span> <span style="color: #009900">Path</span>,
+    <span style="color: #FF6600">qs</span> <span style="color: #990000">:=</span> <span style="color: #009900">Qs</span>
+} <span style="color: #990000">=</span> <span style="color: #009900">Req</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Or using the related functions:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Scheme</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:scheme</span></span>(<span style="color: #009900">Req</span>),
+<span style="color: #009900">Host</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:host</span></span>(<span style="color: #009900">Req</span>),
+<span style="color: #009900">Port</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:port</span></span>(<span style="color: #009900">Req</span>),
+<span style="color: #009900">Path</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:path</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span>
+<span style="color: #009900">Qs</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:qs</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The scheme and host are lowercased case insensitive binary
+strings. The port is an integer representing the port number.
+The path and query string are case sensitive binary strings.</p></div>
+<div class="paragraph"><p>Cowboy defines only the <code>&lt;&lt;"http"&gt;&gt;</code> and <code>&lt;&lt;"https"&gt;&gt;</code> schemes.
+They are chosen so that the scheme will only be <code>&lt;&lt;"https"&gt;&gt;</code>
+for requests on secure HTTP/1.1 or HTTP/2 connections.</p></div>
+<div class="paragraph"><p>The effective request URI itself can be reconstructed with
+the <code>cowboy_req:uri/1,2</code> function. By default, an absolute
+URI is returned:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% </span></span><span style="text-decoration: underline"><span style="color: #0000FF">scheme://host</span></span><span style="font-style: italic"><span style="color: #9A1900">[:port]/path[?qs]</span></span>
+<span style="color: #009900">URI</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Options are available to either disable or replace some
+or all of the components. Various URIs or URI formats can
+be generated this way, including the origin form:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% /path[?qs]</span></span>
+<span style="color: #009900">URI</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">host</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">undefined</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The protocol relative form:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% //host[:port]/path[?qs]</span></span>
+<span style="color: #009900">URI</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">scheme</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">undefined</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The absolute URI without a query string:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">URI</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">qs</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">undefined</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>A different host:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">URI</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">host</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"example.org"</span><span style="color: #990000">&gt;&gt;</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>And any other combination.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bindings">Bindings</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Bindings are the host and path components that you chose
+to extract when defining the routes of your application.
+They are only available after the routing.</p></div>
+<div class="paragraph"><p>Cowboy provides functions to retrieve one or all bindings.</p></div>
+<div class="paragraph"><p>To retrieve a single value:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Value</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:binding</span></span>(<span style="color: #FF6600">userid</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>When attempting to retrieve a value that was not bound,
+<code>undefined</code> will be returned. A different default value
+can be provided:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Value</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:binding</span></span>(<span style="color: #FF6600">userid</span>, <span style="color: #009900">Req</span>, <span style="color: #993399">42</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>To retrieve everything that was bound:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Bindings</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:bindings</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>They are returned as a map, with keys being atoms.</p></div>
+<div class="paragraph"><p>The Cowboy router also allows you to capture many host
+or path segments at once using the <code>...</code> qualifier.</p></div>
+<div class="paragraph"><p>To retrieve the segments captured from the host name:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">HostInfo</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:host_info</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>And the path segments:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PathInfo</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:path_info</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Cowboy will return <code>undefined</code> if <code>...</code> was not used
+in the route.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_query_parameters">Query parameters</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy provides two functions to access query parameters.
+You can use the first to get the entire list of parameters.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">QsVals</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_qs</span></span>(<span style="color: #009900">Req</span>),
+{<span style="color: #990000">_</span>, <span style="color: #009900">Lang</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">lists:keyfind</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"lang"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #993399">1</span>, <span style="color: #009900">QsVals</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Cowboy will only parse the query string, and not do any
+transformation. This function may therefore return duplicates,
+or parameter names without an associated value. The order of
+the list returned is undefined.</p></div>
+<div class="paragraph"><p>When a query string is <code>key=1&amp;key=2</code>, the list returned will
+contain two parameters of name <code>key</code>.</p></div>
+<div class="paragraph"><p>The same is true when trying to use the PHP-style suffix <code>[]</code>.
+When a query string is <code>key[]=1&amp;key[]=2</code>, the list returned will
+contain two parameters of name <code>key[]</code>.</p></div>
+<div class="paragraph"><p>When a query string is simply <code>key</code>, Cowboy will return the
+list <code>[{&lt;&lt;"key"&gt;&gt;, true}]</code>, using <code>true</code> to indicate that the
+parameter <code>key</code> was defined, but with no value.</p></div>
+<div class="paragraph"><p>The second function Cowboy provides allows you to match out
+only the parameters you are interested in, and at the same
+time do any post processing you require using <a href="../constraints">constraints</a>.
+This function returns a map.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<span style="color: #FF6600">id</span> <span style="color: #990000">:=</span> <span style="color: #009900">ID</span>, <span style="color: #FF6600">lang</span> <span style="color: #990000">:=</span> <span style="color: #009900">Lang</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:match_qs</span></span>([<span style="color: #FF6600">id</span>, <span style="color: #FF6600">lang</span>], <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Constraints can be applied automatically. The following
+snippet will crash when the <code>id</code> parameter is not an integer,
+or when the <code>lang</code> parameter is empty. At the same time, the
+value for <code>id</code> will be converted to an integer term:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">QsMap</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:match_qs</span></span>([{<span style="color: #FF6600">id</span>, <span style="color: #FF6600">int</span>}, {<span style="color: #FF6600">lang</span>, <span style="color: #FF6600">nonempty</span>}], <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>A default value may also be provided. The default will be used
+if the <code>lang</code> key is not found. It will not be used if
+the key is found but has an empty value.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<span style="color: #FF6600">lang</span> <span style="color: #990000">:=</span> <span style="color: #009900">Lang</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:match_qs</span></span>([{<span style="color: #FF6600">lang</span>, [], <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"en-US"</span><span style="color: #990000">&gt;&gt;</span>}], <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>If no default is provided and the value is missing, the
+query string is deemed invalid and the process will crash.</p></div>
+<div class="paragraph"><p>When the query string is <code>key=1&amp;key=2</code>, the value for <code>key</code>
+will be the list <code>[1, 2]</code>. Parameter names do not need to
+include the PHP-style suffix. Constraints may be used to
+ensure that only one value was passed through.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_headers">Headers</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Header values can be retrieved either as a binary string
+or parsed into a more meaningful representation.</p></div>
+<div class="paragraph"><p>The get the raw value:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">HeaderVal</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Cowboy expects all header names to be provided as lowercase
+binary strings. This is true for both requests and responses,
+regardless of the underlying protocol.</p></div>
+<div class="paragraph"><p>When the header is missing from the request, <code>undefined</code>
+will be returned. A different default can be provided:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">HeaderVal</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>All headers can be retrieved at once, either directly:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<span style="color: #FF6600">headers</span> <span style="color: #990000">:=</span> <span style="color: #009900">AllHeaders</span>} <span style="color: #990000">=</span> <span style="color: #009900">Req</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Or using a function:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">AllHeaders</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:headers</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Cowboy provides equivalent functions to parse individual
+headers. There is no function to parse all headers at once.</p></div>
+<div class="paragraph"><p>To parse a specific header:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">ParsedVal</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>An exception will be thrown if it doesn&#8217;t know how to parse the
+given header, or if the value is invalid. The list of known headers
+and default values can be found in the manual.</p></div>
+<div class="paragraph"><p>When the header is missing, <code>undefined</code> is returned. You can
+change the default value. Note that it should be the parsed value
+directly:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">ParsedVal</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_header</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req</span>,
+    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"plain"</span><span style="color: #990000">&gt;&gt;</span>, []})<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_peer">Peer</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The peer address and port number for the connection can be
+retrieved either directly or using a function.</p></div>
+<div class="paragraph"><p>To retrieve the peer directly:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<span style="color: #FF6600">peer</span> <span style="color: #990000">:=</span> {<span style="color: #009900">IP</span>, <span style="color: #009900">Port</span>}} <span style="color: #990000">=</span> <span style="color: #009900">Req</span><span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>And using a function:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<span style="color: #009900">IP</span>, <span style="color: #009900">Port</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:peer</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Note that the peer corresponds to the remote end of the
+connection to the server, which may or may not be the
+client itself. It may also be a proxy or a gateway.</p></div>
+</div>
+</div>
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/static_files/">
+					Static files
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/req_body/">
+					Reading the request body
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.3
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

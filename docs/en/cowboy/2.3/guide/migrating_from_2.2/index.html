@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: Migrating from Cowboy 2.2 to 2.3</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.2 to 2.3</span></h1>
+
+<div class="paragraph"><p>Cowboy 2.3 focused on making the Cowboy processes behave
+properly according to OTP principles. This version is a
+very good milestone toward that goal and most of everything
+should now work. Release upgrades and a few details will
+be improved in future versions.</p></div>
+<div class="sect1">
+<h2 id="_features_added">Features added</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+Add support for all functions from the module <code>sys</code>. Note
+  that Cowboy currently does not implement the <code>sys</code> debugging
+  mechanisms as tracing is recommended instead.
+</p>
+</li>
+<li>
+<p>
+Add a <code>max_frame_size</code> option for Websocket handlers
+  to close the connection when the client attempts to
+  send a frame that&#8217;s too large. It currently defaults
+  to <code>infinity</code> to avoid breaking existing code but will
+  be changed in a future version.
+</p>
+</li>
+<li>
+<p>
+Update Cowlib to 2.2.1.
+</p>
+</li>
+<li>
+<p>
+Add support for the 308 status code and a test suite
+  for RFC7538 where it is defined.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+Ensure timeout options accept the value <code>infinity</code> as
+  documented.
+</p>
+</li>
+<li>
+<p>
+Properly reject HTTP/2 requests with an invalid content-length
+  header instead of simply crashing.
+</p>
+</li>
+<li>
+<p>
+When switching from HTTP/1.1 to Websocket or user protocols
+  all the messages in the mailbox were flushed. Only messages
+  specific to <code>cowboy_http</code> should now be flushed.
+</p>
+</li>
+<li>
+<p>
+Parsing of the x-forwarded-for header has been corrected.
+  It now supports IPv6 addresses both with and without port.
+</p>
+</li>
+<li>
+<p>
+Websocket subprotocol tokens are now parsed in a case
+  insensitive manner, according to the spec.
+</p>
+</li>
+<li>
+<p>
+Cookies without values are now allowed. For example <code>Cookie: foo</code>.
+</p>
+</li>
+<li>
+<p>
+Colons are now allowed within path segments in routes provided
+  to <code>cowboy_router:compile/1</code> as long as they are not the first
+  character of the path segment.
+</p>
+</li>
+<li>
+<p>
+The <code>cowboy_req:delete_resp_header/2</code> function will no longer
+  crash when no response header was set before calling it.
+</p>
+</li>
+<li>
+<p>
+A miscount of the output HTTP/2 flow control window has been
+  fixed. It prevented sending the response body fully to some
+  clients. The issue only affected response bodies sent as iolists.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/middlewares/">
+					Middlewares
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/migrating_from_2.1/">
+					Migrating from Cowboy 2.1 to 2.2
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.3
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

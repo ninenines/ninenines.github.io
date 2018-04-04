@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: cowboy_req:uri(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req:uri(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>cowboy_req:uri - Reconstructed URI</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">uri</span></span>(<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>())       <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">uri</span></span>(<span style="color: #009900">Req</span>, #{})
+<span style="font-weight: bold"><span style="color: #000000">uri</span></span>(<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>(), <span style="color: #009900">Opts</span>) <span style="color: #990000">-&gt;</span> <span style="color: #009900">URI</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()
+
+<span style="color: #009900">Opts</span> <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">scheme</span>   <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()           | <span style="color: #000080">undefined</span>,
+    <span style="color: #0000FF">host</span>     <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()           | <span style="color: #000080">undefined</span>,
+    <span style="color: #0000FF">port</span>     <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">inet:port_number</span></span>() | <span style="color: #000080">undefined</span>,
+    <span style="color: #0000FF">path</span>     <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()           | <span style="color: #000080">undefined</span>,
+    <span style="color: #0000FF">qs</span>       <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()           | <span style="color: #000080">undefined</span>,
+    <span style="color: #0000FF">fragment</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()           | <span style="color: #000080">undefined</span>
+}</tt></pre></div></div>
+<div class="paragraph"><p>Reconstruct the effective request URI, optionally modifying components.</p></div>
+<div class="paragraph"><p>By default Cowboy will build a URI using the components found
+in the request. Options allow disabling or replacing individual
+components.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_arguments">Arguments</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Req
+</dt>
+<dd>
+<p>
+The Req object.
+</p>
+</dd>
+<dt class="hdlist1">
+Opts
+</dt>
+<dd>
+<p>
+Map for overriding individual components.
+</p>
+<div class="paragraph"><p>To replace a component, provide its new value as a binary
+string or an iolist. To disable a component, set its value
+to <code>undefined</code>.</p></div>
+<div class="paragraph"><p>As this function always returns a valid URI, there are some
+things to note:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Disabling the host also disables the scheme and port.
+</p>
+</li>
+<li>
+<p>
+There is no fragment component by default as these are
+      not sent with the request.
+</p>
+</li>
+<li>
+<p>
+The port number may not appear in the resulting URI if
+      it is the default port for the given scheme (http: 80; https: 443).
+</p>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_return_value">Return value</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The reconstructed URI is returned as an iolist or a binary string.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changelog">Changelog</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>2.0</strong>: Individual components can be replaced or disabled.
+</p>
+</li>
+<li>
+<p>
+<strong>2.0</strong>: Only the URI is returned, it is no longer wrapped in a tuple.
+</p>
+</li>
+<li>
+<p>
+<strong>2.0</strong>: Function introduced. Replaces <code>host_url/1</code> and <code>url/1</code>.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">Examples</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>With an effective request URI <a href="http://example.org/path/to/res?edit=1">http://example.org/path/to/res?edit=1</a>
+we can have:</p></div>
+<div class="listingblock">
+<div class="title">Protocol relative form</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% //example.org/path/to/res?edit=1</span></span>
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">scheme</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">undefined</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="listingblock">
+<div class="title">Serialized origin for use in the origin header</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% </span></span><span style="text-decoration: underline"><span style="color: #0000FF">http://example.org</span></span>
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">path</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">undefined</span>, <span style="color: #0000FF">qs</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">undefined</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="listingblock">
+<div class="title">HTTP/1.1 origin form (path and query string only)</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% /path/to/res?edit=1</span></span>
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">host</span> <span style="color: #990000">=&gt;</span> <span style="color: #000080">undefined</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="listingblock">
+<div class="title">Add a fragment to the URI</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% </span></span><span style="text-decoration: underline"><span style="color: #0000FF">http://example.org/path/to/res</span></span><span style="font-style: italic"><span style="color: #9A1900">?edit=1#errors</span></span>
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">fragment</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"errors"</span><span style="color: #990000">&gt;&gt;</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="listingblock">
+<div class="title">Ensure the scheme is HTTPS</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900">%% </span></span><span style="text-decoration: underline"><span style="color: #0000FF">https://example.org/path/to/res</span></span><span style="font-style: italic"><span style="color: #9A1900">?edit=1</span></span>
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>, #{<span style="color: #0000FF">scheme</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"https"</span><span style="color: #990000">&gt;&gt;</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="listingblock">
+<div class="title">Convert the URI to a binary string</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">iolist_to_binary</span></span>(<span style="font-weight: bold"><span style="color: #000000">cowboy_req:uri</span></span>(<span style="color: #009900">Req</span>))<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See also</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
+<a href="../cowboy_req.scheme">cowboy_req:scheme(3)</a>,
+<a href="../cowboy_req.host">cowboy_req:host(3)</a>,
+<a href="../cowboy_req.port">cowboy_req:port(3)</a>,
+<a href="../cowboy_req.path">cowboy_req:path(3)</a>,
+<a href="../cowboy_req.qs">cowboy_req:qs(3)</a></p></div>
+</div>
+</div>
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.3
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

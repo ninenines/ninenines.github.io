@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: Listeners</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Listeners</span></h1>
+
+<div class="paragraph"><p>A listener is a set of processes that listens on a port for
+new connections. Incoming connections get handled by Cowboy.
+Depending on the connection handshake, one or another protocol
+may be used.</p></div>
+<div class="paragraph"><p>This chapter is specific to Cowboy. Please refer to the
+<a href="https://ninenines.eu/docs/en/ranch/1.3/guide/listeners/">Ranch User Guide</a>
+for more information about listeners.</p></div>
+<div class="paragraph"><p>Cowboy provides two types of listeners: one listening for
+clear TCP connections, and one listening for secure TLS
+connections. Both of them support the HTTP/1.1 and HTTP/2
+protocols.</p></div>
+<div class="sect1">
+<h2 id="_clear_tcp_listener">Clear TCP listener</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The clear TCP listener will accept connections on the
+given port. A typical HTTP server would listen on port 80.
+Port 80 requires special permissions on most platforms
+however so a common alternative is port 8080.</p></div>
+<div class="paragraph"><p>The following snippet starts listening for connections
+on port 8080:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">start</span></span>(<span style="color: #009900">_Type</span>, <span style="color: #009900">_Args</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
+        {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">hello_handler</span>, []}]}
+    ]),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_clear</span></span>(<span style="color: #FF6600">my_http_listener</span>,
+        [{<span style="color: #FF6600">port</span>, <span style="color: #993399">8080</span>}],
+        #{<span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}}
+    ),
+    <span style="font-weight: bold"><span style="color: #000000">hello_erlang_sup:start_link</span></span>()<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>The <a href="../getting_started">Getting Started</a> chapter uses a
+clear TCP listener.</p></div>
+<div class="paragraph"><p>Clients connecting to Cowboy on the clear listener port are
+expected to use either HTTP/1.1 or HTTP/2.</p></div>
+<div class="paragraph"><p>Cowboy supports both methods of initiating a clear
+HTTP/2 connection: through the Upgrade mechanism
+(<a href="https://tools.ietf.org/html/rfc7540#section-3.2">RFC 7540 3.2</a>)
+or by sending the preface directly
+(<a href="https://tools.ietf.org/html/rfc7540#section-3.4">RFC 7540 3.4</a>).</p></div>
+<div class="paragraph"><p>Compatibility with HTTP/1.0 is provided by Cowboy&#8217;s HTTP/1.1
+implementation.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_secure_tls_listener">Secure TLS listener</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The secure TLS listener will accept connections on the
+given port. A typical HTTPS server would listen on port 443.
+Port 443 requires special permissions on most platforms
+however so a common alternative is port 8443.</p></div>
+<div class="paragraph"><p>The function provided by Cowboy will ensure that the TLS
+options given are following the HTTP/2 RFC with regards
+to security. For example some TLS extensions or ciphers
+may be disabled. This also applies to HTTP/1.1 connections
+on this listener. If this is not desirable, Ranch can be
+used directly to setup a custom listener.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">start</span></span>(<span style="color: #009900">_Type</span>, <span style="color: #009900">_Args</span>) <span style="color: #990000">-&gt;</span>
+    <span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
+        {<span style="color: #FF6600">'_'</span>, [{<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">hello_handler</span>, []}]}
+    ]),
+    {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_tls</span></span>(<span style="color: #FF6600">my_http_listener</span>,
+        [
+            {<span style="color: #FF6600">port</span>, <span style="color: #993399">8443</span>},
+            {<span style="color: #FF6600">certfile</span>, <span style="color: #FF0000">"/path/to/certfile"</span>},
+            {<span style="color: #FF6600">keyfile</span>, <span style="color: #FF0000">"/path/to/keyfile"</span>}
+        ],
+        #{<span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}}
+    ),
+    <span style="font-weight: bold"><span style="color: #000000">hello_erlang_sup:start_link</span></span>()<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Clients connecting to Cowboy on the secure listener are
+expected to use the ALPN TLS extension to indicate what
+protocols they understand. Cowboy always prefers HTTP/2
+over HTTP/1.1 when both are supported. When neither are
+supported by the client, or when the ALPN extension was
+missing, Cowboy expects HTTP/1.1 to be used.</p></div>
+<div class="paragraph"><p>Cowboy also advertises HTTP/2 support through the older
+NPN TLS extension for compatibility. Note however that
+this support will likely not be enabled by default when
+Cowboy 2.0 gets released.</p></div>
+<div class="paragraph"><p>Compatibility with HTTP/1.0 is provided by Cowboy&#8217;s HTTP/1.1
+implementation.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_protocol_configuration">Protocol configuration</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The HTTP/1.1 and HTTP/2 protocols share the same semantics;
+only their framing differs. The first is a text protocol and
+the second a binary protocol.</p></div>
+<div class="paragraph"><p>Cowboy doesn&#8217;t separate the configuration for HTTP/1.1 and
+HTTP/2. Everything goes into the same map. Many options are
+shared.</p></div>
+</div>
+</div>
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/flow_diagram/">
+					Flow diagram
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/routing/">
+					Routing
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.3
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

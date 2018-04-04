@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: REST handlers</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Keep in touch!" href="http://twitter.com/lhoguin"><img src="/img/ico_microblog.png" data-hover="/img/ico_microblog_alt.png"></a>
+					</li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>REST handlers</span></h1>
+
+<div class="paragraph"><p>REST is implemented in Cowboy as a sub protocol. The request
+is handled as a state machine with many optional callbacks
+describing the resource and modifying the machine&#8217;s behavior.</p></div>
+<div class="paragraph"><p>The REST handler is the recommended way to handle HTTP requests.</p></div>
+<div class="sect1">
+<h2 id="_initialization">Initialization</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>First, the <code>init/2</code> callback is called. This callback is common
+to all handlers. To use REST for the current request, this function
+must return a <code>cowboy_rest</code> tuple.</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
+    {<span style="color: #FF6600">cowboy_rest</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
+<div class="paragraph"><p>Cowboy will then switch to the REST protocol and start executing
+the state machine.</p></div>
+<div class="paragraph"><p>After reaching the end of the flowchart, the <code>terminate/3</code> callback
+will be called if it is defined.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_methods">Methods</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The REST component has code for handling the following HTTP methods:
+HEAD, GET, POST, PATCH, PUT, DELETE and OPTIONS.</p></div>
+<div class="paragraph"><p>Other methods can be accepted, however they have no specific callback
+defined for them at this time.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_callbacks">Callbacks</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>All callbacks are optional. Some may become mandatory depending
+on what other defined callbacks return. The various flowcharts
+in the next chapter should be a useful to determine which callbacks
+you need.</p></div>
+<div class="paragraph"><p>All callbacks take two arguments, the Req object and the State,
+and return a three-element tuple of the form <code>{Value, Req, State}</code>.</p></div>
+<div class="paragraph"><p>Nearly all callbacks can also return <code>{stop, Req, State}</code> to
+stop execution of the request, and
+<code>{{switch_handler, Module}, Req, State}</code> or
+<code>{{switch_handler, Module, Opts}, Req, State}</code> to switch to
+a different handler type. The exceptions are <code>expires</code>
+<code>generate_etag</code>, <code>last_modified</code> and <code>variances</code>.</p></div>
+<div class="paragraph"><p>The following table summarizes the callbacks and their default values.
+If the callback isn&#8217;t defined, then the default value will be used.
+Please look at the flowcharts to find out the result of each return
+value.</p></div>
+<div class="paragraph"><p>In the following table, "skip" means the callback is entirely skipped
+if it is undefined, moving directly to the next step. Similarly,
+"none" means there is no default value for this callback.</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="50%" />
+<col width="50%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Callback name          </th>
+<th align="center" valign="top"> Default value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">allowed_methods</p></td>
+<td align="center" valign="top"><p class="table"><code>[&lt;&lt;"GET"&gt;&gt;, &lt;&lt;"HEAD"&gt;&gt;, &lt;&lt;"OPTIONS"&gt;&gt;]</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">allow_missing_post</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">charsets_provided</p></td>
+<td align="center" valign="top"><p class="table">skip</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">content_types_accepted</p></td>
+<td align="center" valign="top"><p class="table">none</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">content_types_provided</p></td>
+<td align="center" valign="top"><p class="table"><code>[{{ &lt;&lt;"text"&gt;&gt;, &lt;&lt;"html"&gt;&gt;, '*'}, to_html}]</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">delete_completed</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">delete_resource</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">expires</p></td>
+<td align="center" valign="top"><p class="table"><code>undefined</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">forbidden</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">generate_etag</p></td>
+<td align="center" valign="top"><p class="table"><code>undefined</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">is_authorized</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">is_conflict</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">known_methods</p></td>
+<td align="center" valign="top"><p class="table"><code>[&lt;&lt;"GET"&gt;&gt;, &lt;&lt;"HEAD"&gt;&gt;, &lt;&lt;"POST"&gt;&gt;, &lt;&lt;"PUT"&gt;&gt;, &lt;&lt;"PATCH"&gt;&gt;, &lt;&lt;"DELETE"&gt;&gt;, &lt;&lt;"OPTIONS"&gt;&gt;]</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">languages_provided</p></td>
+<td align="center" valign="top"><p class="table">skip</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">last_modified</p></td>
+<td align="center" valign="top"><p class="table"><code>undefined</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">malformed_request</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">moved_permanently</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">moved_temporarily</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">multiple_choices</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">options</p></td>
+<td align="center" valign="top"><p class="table"><code>ok</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">previously_existed</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">resource_exists</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">service_available</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">uri_too_long</p></td>
+<td align="center" valign="top"><p class="table"><code>false</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">valid_content_headers</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">valid_entity_length</p></td>
+<td align="center" valign="top"><p class="table"><code>true</code></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">variances</p></td>
+<td align="center" valign="top"><p class="table"><code>[]</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph"><p>As you can see, Cowboy tries to move on with the request whenever
+possible by using well thought out default values.</p></div>
+<div class="paragraph"><p>In addition to these, there can be any number of user-defined
+callbacks that are specified through <code>content_types_accepted/2</code>
+and <code>content_types_provided/2</code>. They can take any name, however
+it is recommended to use a separate prefix for the callbacks of
+each function. For example, <code>from_html</code> and <code>to_html</code> indicate
+in the first case that we&#8217;re accepting a resource given as HTML,
+and in the second case that we send one as HTML.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_meta_data">Meta data</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy will set informative values to the Req object at various
+points of the execution. You can retrieve them by matching the
+Req object directly. The values are defined in the following table:</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="50%" />
+<col width="50%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Key        </th>
+<th align="left" valign="top"> Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">media_type</p></td>
+<td align="left" valign="top"><p class="table">The content-type negotiated for the response entity.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">language</p></td>
+<td align="left" valign="top"><p class="table">The language negotiated for the response entity.</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">charset</p></td>
+<td align="left" valign="top"><p class="table">The charset negotiated for the response entity.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph"><p>They can be used to send a proper body with the response to a
+request that used a method other than HEAD or GET.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_response_headers">Response headers</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cowboy will set response headers automatically over the execution
+of the REST code. They are listed in the following table.</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<col width="50%" />
+<col width="50%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Header name      </th>
+<th align="left" valign="top"> Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">content-language</p></td>
+<td align="left" valign="top"><p class="table">Language used in the response body</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">content-type</p></td>
+<td align="left" valign="top"><p class="table">Media type and charset of the response body</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">etag</p></td>
+<td align="left" valign="top"><p class="table">Etag of the resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">expires</p></td>
+<td align="left" valign="top"><p class="table">Expiration date of the resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">last-modified</p></td>
+<td align="left" valign="top"><p class="table">Last modification date for the resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">location</p></td>
+<td align="left" valign="top"><p class="table">Relative or absolute URI to the requested resource</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">vary</p></td>
+<td align="left" valign="top"><p class="table">List of headers that may change the representation of the resource</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/rest_principles/">
+					REST principles
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.3/guide/rest_flowcharts/">
+					REST flowcharts
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.3
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
