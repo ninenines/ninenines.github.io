@@ -89,13 +89,14 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
-    <span style="color: #0000FF">connection_type</span>    <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">worker</span> | <span style="color: #FF6600">supervisor</span>,
-    <span style="color: #0000FF">env</span>                <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>(),
-    <span style="color: #0000FF">inactivity_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
-    <span style="color: #0000FF">middlewares</span>        <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()],
-    <span style="color: #0000FF">preface_timeout</span>    <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
-    <span style="color: #000080">shutdown</span><span style="color: #009900">_timeout</span>   <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
-    <span style="color: #0000FF">stream_handlers</span>    <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()]
+    <span style="color: #0000FF">connection_type</span>         <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">worker</span> | <span style="color: #FF6600">supervisor</span>,
+    <span style="color: #0000FF">enable_connect_protocol</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>(),
+    <span style="color: #0000FF">env</span>                     <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>(),
+    <span style="color: #0000FF">inactivity_timeout</span>      <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">middlewares</span>             <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()],
+    <span style="color: #0000FF">preface_timeout</span>         <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #000080">shutdown</span><span style="color: #009900">_timeout</span>        <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">stream_handlers</span>         <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()]
 }</tt></pre></div></div>
 <div class="paragraph"><p>Configuration for the HTTP/2 protocol.</p></div>
 <div class="paragraph"><p>This configuration is passed to Cowboy when starting listeners
@@ -111,6 +112,15 @@ connection_type (supervisor)
 <dd>
 <p>
     Whether the connection process also acts as a supervisor.
+</p>
+</dd>
+<dt class="hdlist1">
+enable_connect_protocol (false)
+</dt>
+<dd>
+<p>
+    Whether to enable the extended CONNECT method to allow
+    protocols like Websocket to be used over an HTTP/2 stream.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -248,7 +258,7 @@ stream_handlers ([cowboy_stream_h])
             </div>
             <div class="span6 credits">
                <p><img src="/img/footer_logo.png"></p>
-               <p>Copyright &copy; Loïc Hoguin 2012-2016</p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
             </div>
           </div>
         </div>
