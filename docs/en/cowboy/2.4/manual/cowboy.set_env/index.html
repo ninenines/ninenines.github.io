@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: cowboy:set_env(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy:set_env(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>cowboy:set_env - Update a listener&#8217;s environment value</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">set_env</span></span>(<span style="color: #009900">Name</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">ranch:ref</span></span>(),
+        <span style="color: #009900">Key</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">atom</span></span>(),
+        <span style="color: #009900">Value</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>())
+    <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span></tt></pre></div></div>
+<div class="paragraph"><p>Set or update an environment value for a previously started
+listener.</p></div>
+<div class="paragraph"><p>This is most useful for updating the routes dynamically,
+without having to restart the listener.</p></div>
+<div class="paragraph"><p>The new value will only be available to new connections.
+Pre-existing connections will still use the old value.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_arguments">Arguments</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Name
+</dt>
+<dd>
+<p>
+The name of the listener to update.
+</p>
+<div class="paragraph"><p>The name of the listener is the first argument given to the
+<a href="../cowboy.start_clear">cowboy:start_clear(3)</a>,
+<a href="../cowboy.start_tls">cowboy:start_tls(3)</a> or
+<a href="../ranch.start_listener">ranch:start_listener(3)</a> function.</p></div>
+</dd>
+<dt class="hdlist1">
+Key
+</dt>
+<dd>
+<p>
+The key in the environment map. Common keys include <code>dispatch</code>
+and <code>middlewares</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+Value
+</dt>
+<dd>
+<p>
+The new value.
+</p>
+<div class="paragraph"><p>The type of the value differs depending on the key.</p></div>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_return_value">Return value</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The atom <code>ok</code> is returned on success.</p></div>
+<div class="paragraph"><p>An <code>exit:badarg</code> exception is thrown when the listener does
+not exist.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changelog">Changelog</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>1.0</strong>: Function introduced.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">Examples</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Update a listener&#8217;s routes</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
+    {<span style="color: #FF6600">'_'</span>, [
+        {<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">toppage_h</span>, []},
+        {<span style="color: #FF0000">"/ws"</span>, <span style="color: #FF6600">websocket_h</span>, []}
+    ]}
+]),
+
+<span style="font-weight: bold"><span style="color: #000000">cowboy:set_env</span></span>(<span style="color: #FF6600">example</span>, <span style="color: #FF6600">dispatch</span>, <span style="color: #009900">Dispatch</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See also</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="../cowboy">cowboy(3)</a>,
+<a href="../cowboy.start_clear">cowboy:start_clear(3)</a>,
+<a href="../cowboy.start_tls">cowboy:start_tls(3)</a>,
+<a href="../ranch.set_protocol_options">ranch:set_protocol_options(3)</a></p></div>
+</div>
+</div>
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.4
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <meta name="generator" content="Hugo 0.37.1" />
+
+    <title>Nine Nines: cowboy_req:stream_body(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=1" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req:stream_body(3)</span></h1>
+
+<div class="sect1">
+<h2 id="_name">Name</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>cowboy_req:stream_body - Stream the response body</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">stream_body</span></span>(<span style="color: #009900">Data</span>, <span style="color: #009900">IsFin</span>, <span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>
+
+<span style="color: #009900">Data</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()
+<span style="color: #009900">IsFin</span> <span style="color: #990000">::</span> <span style="color: #FF6600">fin</span> | <span style="color: #FF6600">nofin</span></tt></pre></div></div>
+<div class="paragraph"><p>Stream the response body.</p></div>
+<div class="paragraph"><p>This function may be called as many times as needed after
+initiating a response using the
+<a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a>
+function.</p></div>
+<div class="paragraph"><p>The second argument indicates if this call is the final
+call. Use the <code>nofin</code> value until you know no more data
+will be sent. The final call should use <code>fin</code> (possibly
+with an empty data value) or be a call to the
+<a href="../cowboy_req.stream_trailers">cowboy_req:stream_trailers(3)</a>
+function.</p></div>
+<div class="paragraph"><p>Note that not using <code>fin</code> for the final call is not an
+error; Cowboy will take care of it when the request
+handler terminates if needed. Depending on the resource
+it may however be more efficient to do it as early as
+possible.</p></div>
+<div class="paragraph"><p>You do not need to handle HEAD requests specifically as
+Cowboy will ensure no data is sent when you call this function.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_arguments">Arguments</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Data
+</dt>
+<dd>
+<p>
+The data to be sent.
+</p>
+</dd>
+<dt class="hdlist1">
+IsFin
+</dt>
+<dd>
+<p>
+A flag indicating whether this is the final piece of data
+to be sent.
+</p>
+</dd>
+<dt class="hdlist1">
+Req
+</dt>
+<dd>
+<p>
+The Req object.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_return_value">Return value</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The atom <code>ok</code> is always returned. It can be safely ignored.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changelog">Changelog</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>2.0</strong>: Function introduced. Replaces <code>chunk/2</code>.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">Examples</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Stream the response body</div>
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_reply</span></span>(<span style="color: #993399">200</span>, #{
+    <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>
+}, <span style="color: #009900">Req0</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello\n"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Req</span>),
+<span style="font-weight: bold"><span style="color: #000000">timer:sleep</span></span>(<span style="color: #993399">1000</span>),
+<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"World!\n"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF6600">fin</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">See also</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
+<a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a>,
+<a href="../cowboy_req.stream_trailers">cowboy_req:stream_trailers(3)</a></p></div>
+</div>
+</div>
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.4
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
