@@ -27,11 +27,12 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/gun/1.0/guide/introduction/</guid>
-      <description>Gun is an Erlang HTTP client with support for HTTP/1.1, HTTP/2 and Websocket.
+      <description>Gun is an HTTP client for Erlang/OTP.
+ Gun supports the HTTP/2, HTTP/1.1 and Websocket protocols.
  Prerequisites Knowledge of Erlang, but also of the HTTP/1.1, HTTP/2 and Websocket protocols is required in order to read this guide.
-   Supported platforms Gun is tested and supported on Linux.
- Gun is developed for Erlang 19+.
- Gun may be compiled on earlier Erlang versions with small source code modifications but there is no guarantee that it will work as intended.</description>
+   Supported platforms Gun is tested and supported on Linux, FreeBSD, Windows and OSX.
+ Gun is developed for Erlang/OTP 19.0 and newer.
+   License Gun uses the ISC License.</description>
     </item>
     
     <item>
@@ -223,8 +224,9 @@
       
       <guid>https://ninenines.eu/docs/en/gun/1.0/guide/start/</guid>
       <description>This chapter describes how to start and stop the Gun application.
- Setting up Before Gun can be used it needs to be in Erlang&amp;#8217;s ERL_LIBS path variable. If you use erlang.mk or a similar build tool, you only need to specify Gun as a dependency to your application and the tool will take care of downloading Gun and setting up paths.
- With erlang.mk this is done by adding gun to the DEPS variable in your Makefile.</description>
+ Setting up Specify Gun as a dependency to your application in your favorite build tool.
+ With Erlang.mk this is done by adding gun to the DEPS variable in your Makefile.
+ Adding Gun as an Erlang.mk dependency DEPS = gun   Starting Gun is an OTP application. It needs to be started before you can use it.</description>
     </item>
     
     <item>
@@ -235,8 +237,8 @@
       <guid>https://ninenines.eu/docs/en/gun/1.0/guide/protocols/</guid>
       <description>This chapter describes the protocols supported and the operations available to them.
  HTTP/1.1 HTTP/1.1 is a text request-response protocol. The client sends a request, the server sends back a response.
- Gun provides convenience functions for performing GET, HEAD, OPTIONS, POST, PATCH, PUT, and DELETE requests. All these functions are aliases of gun:request/{4,5,6} for each respective methods. Gun also provides a gun:data/4 function for streaming the request body.
- Gun will send a gun_response message for every response received, followed by zero or more gun_data messages for the response body.</description>
+ Gun provides convenience functions for performing GET, HEAD, OPTIONS, POST, PATCH, PUT, and DELETE requests. All these functions are aliases of gun:request/4,5,6 for the respective methods. Gun also provides a gun:data/4 function for streaming the request body.
+ Gun will send a gun_inform message for every intermediate informational responses received.</description>
     </item>
     
     <item>
@@ -457,7 +459,7 @@
       
       <guid>https://ninenines.eu/docs/en/gun/1.0/guide/http/</guid>
       <description>This chapter describes how to use the Gun client for communicating with an HTTP/1.1 or HTTP/2 server.
- Streams Every time a request is initiated, Gun creates a stream. A stream reference uniquely identifies a set of request and response(s) and must be used to perform additional operations with a stream or to identify its messages.
+ Streams Every time a request is initiated, Gun creates a stream. A stream reference uniquely identifies a set of request and response and must be used to perform additional operations with a stream or to identify its messages.
  Stream references use the Erlang reference data type and are therefore unique.
  Streams can be canceled at any time.</description>
     </item>
@@ -566,8 +568,8 @@
       
       <guid>https://ninenines.eu/docs/en/gun/1.0/guide/websocket/</guid>
       <description>This chapter describes how to use the Gun client for communicating with a Websocket server.
- @todo recovering from connection failure reconnecting to Websocket etc.
- HTTP upgrade Websocket is a protocol built on top of HTTP. To use Websocket, you must first request for the connection to be upgraded. Only HTTP/1.1 connections can be upgraded to Websocket, so you might need to restrict the protocol to HTTP/1.1 if you are planning to use Websocket over TLS.</description>
+ HTTP upgrade Websocket is a protocol built on top of HTTP. To use Websocket, you must first request for the connection to be upgraded. Only HTTP/1.1 connections can be upgraded to Websocket, so you might need to restrict the protocol to HTTP/1.1 if you are planning to use Websocket over TLS.
+ You must use the gun:ws_upgrade/2,3,4 function to upgrade to Websocket.</description>
     </item>
     
     <item>
@@ -1495,13 +1497,18 @@
     </item>
     
     <item>
-      <title>Code coverage</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</link>
+      <title>Triq</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/triq/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</guid>
-      <description>Placeholder chapter.
- </description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/triq/</guid>
+      <description>Triq is a QuickCheck-like library for property-based testing. Erlang.mk automates discovery and checking of Triq properties.
+ To run all tests (including Triq):
+ $ make tests To run all tests and static checks (including Triq):
+ $ make check You can also run Triq separately:
+ $ make triq To check properties from a single module:
+ $ make triq t=foo_tests To check a single property:
+ $ make triq t=foo_tests:bar </description>
     </item>
     
     <item>
@@ -1560,6 +1567,16 @@
     </item>
     
     <item>
+      <title>Code coverage</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</guid>
+      <description>Placeholder chapter.
+ </description>
+    </item>
+    
+    <item>
       <title>Continuous integration</title>
       <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -1567,17 +1584,6 @@
       <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</guid>
       <description>Erlang.mk comes with some support for continuous integration, aimed at open source projects that need to support more than one specific Erlang/OTP release. (If you target one specific release, check the OTP version pinning section of the OTP version management chapter.)
  Configuring Erlang/OTP versions to test To use the CI plugin you must first configure which versions of Erlang/OTP will be used. Erlang.mk provides three separate configuration variables depending on whether you need a normal OTP release, a HiPE-enabled release or an ErLLVM-enabled release.</description>
-    </item>
-    
-    <item>
-      <title>Dialyzer</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</guid>
-      <description>Dialyzer is a tool that will detect discrepancies in your program. It does so using a technique known as success typing analysis which has the advantage of providing no false positives. Dialyzer is able to detect type errors, dead code and more.
- Erlang.mk provides a wrapper around Dialyzer.
- How it works Dialyzer requires a PLT file to work. The PLT file contains the analysis information from all applications which are not expected to change, or rarely do.</description>
     </item>
     
     <item>
@@ -1636,13 +1642,14 @@
     </item>
     
     <item>
-      <title>Xref</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</link>
+      <title>Dialyzer</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</guid>
-      <description>Placeholder chapter.
- </description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</guid>
+      <description>Dialyzer is a tool that will detect discrepancies in your program. It does so using a technique known as success typing analysis which has the advantage of providing no false positives. Dialyzer is able to detect type errors, dead code and more.
+ Erlang.mk provides a wrapper around Dialyzer.
+ How it works Dialyzer requires a PLT file to work. The PLT file contains the analysis information from all applications which are not expected to change, or rarely do.</description>
     </item>
     
     <item>
@@ -1693,6 +1700,16 @@
       <guid>https://ninenines.eu/docs/en/cowboy/2.4/guide/resource_design/</guid>
       <description>This chapter aims to provide you with a list of questions you must answer in order to write a good resource handler. It is meant to be usable as a step by step guide.
  The service Can the service become unavailable, and when it does, can we detect it? For example, database connectivity problems may be detected early. We may also have planned outages of all or parts of the system.</description>
+    </item>
+    
+    <item>
+      <title>Xref</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</guid>
+      <description>Placeholder chapter.
+ </description>
     </item>
     
     <item>
@@ -1825,18 +1842,6 @@
     </item>
     
     <item>
-      <title>Why Erlang.mk</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</guid>
-      <description>Why would you choose Erlang.mk, if not for its many features? This chapter will attempt to answer that.
- Erlang.mk is fast Erlang.mk is as fast as it gets.
- Erlang.mk will group the compilation of files so as to avoid running the BEAM more than necessary. This saves many seconds compared to traditional Makefiles, even on small projects.
- Erlang.mk will not try to be too smart. It provides a simple solution that works for most people, and gives additional options for projects that run into edge cases, often in the form of extra variables or rules to be defined.</description>
-    </item>
-    
-    <item>
       <title>Streams</title>
       <link>https://ninenines.eu/docs/en/cowboy/2.0/guide/streams/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -1892,14 +1897,15 @@
     </item>
     
     <item>
-      <title>Short history</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</link>
+      <title>Why Erlang.mk</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</guid>
-      <description>This chapter aims to be a brief record of the life of the Erlang.mk project.
- Before Erlang.mk Erlang.mk originates from the Cowboy project. Cowboy started as a Rebar project and I, Loïc Hoguin, was very happy with it for a couple years. Over time however I started getting annoyed and frustrated by a number of things, including bad defaults, changing defaults and overall slowness.
- In particular, at the time I gave up on Rebar, the Cowboy test suite was taking about five minutes to run.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</guid>
+      <description>Why would you choose Erlang.mk, if not for its many features? This chapter will attempt to answer that.
+ Erlang.mk is fast Erlang.mk is as fast as it gets.
+ Erlang.mk will group the compilation of files so as to avoid running the BEAM more than necessary. This saves many seconds compared to traditional Makefiles, even on small projects.
+ Erlang.mk will not try to be too smart. It provides a simple solution that works for most people, and gives additional options for projects that run into edge cases, often in the form of extra variables or rules to be defined.</description>
     </item>
     
     <item>
@@ -1955,6 +1961,17 @@
       <description>Cowboy delegates the request processing to middleware components. By default, two middlewares are defined, for the routing and handling of the request, as is detailed in most of this guide.
  Middlewares give you complete control over how requests are to be processed. You can add your own middlewares to the mix or completely change the chain of middlewares as needed.
  Cowboy will execute all middlewares in the given order, unless one of them decides to stop processing.</description>
+    </item>
+    
+    <item>
+      <title>Short history</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</guid>
+      <description>This chapter aims to be a brief record of the life of the Erlang.mk project.
+ Before Erlang.mk Erlang.mk originates from the Cowboy project. Cowboy started as a Rebar project and I, Loïc Hoguin, was very happy with it for a couple years. Over time however I started getting annoyed and frustrated by a number of things, including bad defaults, changing defaults and overall slowness.
+ In particular, at the time I gave up on Rebar, the Cowboy test suite was taking about five minutes to run.</description>
     </item>
     
     <item>
@@ -2300,7 +2317,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/</guid>
-      <description>Installation    Getting started    Overview    Updating Erlang.mk    Limitations   Code    Building    Packages and dependencies    NIFs and port drivers    Releases    Self-extracting releases    Escripts    OTP version management    Compatibility with other build tools     Documentation    Asciidoc documentation    EDoc comments    Sphinx documentation     Tests    Erlang shell    EUnit    Common Test    Code coverage    Continuous integration    Dialyzer    Xref     Third-party plugins    External plugins    List of plugins     About Erlang.</description>
+      <description>Installation    Getting started    Overview    Updating Erlang.mk    Limitations   Code    Building    Packages and dependencies    NIFs and port drivers    Releases    Self-extracting releases    Escripts    OTP version management    Compatibility with other build tools     Documentation    Asciidoc documentation    EDoc comments    Sphinx documentation     Tests    Erlang shell    EUnit    Common Test    Triq    Code coverage    Continuous integration    Dialyzer    Xref     Third-party plugins    External plugins    List of plugins     About Erlang.</description>
     </item>
     
     <item>
@@ -2309,7 +2326,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/gun/1.0/manual/</guid>
-      <description>   gun(7)    gun(3)   </description>
+      <description>   gun(7)    gun(3)    gun:await(3)    gun:await_body(3)    gun:await_up(3)    gun:cancel(3)    gun:close(3)    gun_data(3)    gun:data(3)    gun:delete(3)    gun_down(3)    gun_error(3)    gun:flush(3)    gun:get(3)    gun:head(3)    gun:info(3)    gun_inform(3)    gun:open(3)    gun:open_unix(3)    gun:options(3)    gun:patch(3)    gun:post(3)    gun_push(3)    gun:put(3)    gun:request(3)    gun_response(3)    gun_trailers(3)    gun_up(3)    gun_upgrade(3)    gun_ws(3)    gun:ws_send(3)    gun:ws_upgrade(3)   </description>
     </item>
     
     <item>
@@ -6296,11 +6313,10 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun/</guid>
-      <description>Name gun - asynchronous HTTP client
+      <description>Name gun - Asynchronous HTTP client
    Description The gun module provides an asynchronous interface for connecting and communicating with Web servers over HTTP, HTTP/2 or Websocket.
-   Types opts() = map() Configuration for the connection.
- The following keys are defined:
-  connect_timeout &amp;#8658; timeout()    Connection timeout. Defaults to infinity.  http_opts &amp;#8658; http_opts()    Options specific to the HTTP protocol.</description>
+   Exports Connection:
+    gun:open(3) - Open a connection to the given host and port    gun:open_unix(3) - Open a connection to the given Unix domain socket    gun:close(3) - Brutally close the connection    gun:info(3) - Obtain information about the connection   Requests:</description>
     </item>
     
     <item>
@@ -6309,9 +6325,358 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_app/</guid>
-      <description>Name gun - Erlang HTTP client with support for HTTP/1.1, HTTP/2 and Websocket.
-   Dependencies The gun application uses the Erlang applications ranch for abstracting TCP and TLS over a common interface, and the ssl application for TLS support, required for HTTPS and secure HTTP/2 support. In addition, Gun requires the crypto application (a dependency of ssl) for Websocket.
- These dependencies must be started for the gun application to work.</description>
+      <description>Name gun - HTTP/1.1, HTTP/2 and Websocket client for Erlang/OTP
+   Description Gun is an HTTP client for Erlang/OTP with support for the HTTP/1.1, HTTP/2 and Websocket protocols.
+ Gun aims to provide an easy to use, asynchronous and always-connected client. It maintains a permanent connection to the server and reconnects automatically when necessary.
+   Modules    gun(3) - Asynchronous HTTP client     Dependencies    cowlib(7) - Support library for manipulating Web protocols    ssl - Secure communication over sockets   All these applications must be started before the gun application.</description>
+    </item>
+    
+    <item>
+      <title>gun:await(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.await/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.await/</guid>
+      <description>Name gun:await - Wait for a response
+   Description await(ConnPid, StreamRef) -&amp;gt; await(ConnPid, StreamRef, 5000, MonitorRef) await(ConnPid, StreamRef, MonitorRef) -&amp;gt; await(ConnPid, StreamRef, 5000, MonitorRef) await(ConnPid, StreamRef, Timeout) -&amp;gt; await(ConnPid, StreamRef, Timeout, MonitorRef) await(ConnPid, StreamRef, Timeout, MonitorRef) -&amp;gt; Result ConnPid :: pid() StreamRef :: reference() MonitorRef :: reference() Timeout :: timeout() Result :: tuple() - see below Wait for a response.
+ This function waits for a message from the given stream and returns it as a tuple.</description>
+    </item>
+    
+    <item>
+      <title>gun:await_body(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.await_body/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.await_body/</guid>
+      <description>Name gun:await_body - Wait for the complete response body
+   Description await_body(ConnPid, StreamRef) -&amp;gt; await_body(ConnPid, StreamRef, 5000, MonitorRef) await_body(ConnPid, StreamRef, MonitorRef) -&amp;gt; await_body(ConnPid, StreamRef, 5000, MonitorRef) await_body(ConnPid, StreamRef, Timeout) -&amp;gt; await_body(ConnPid, StreamRef, Timeout, MonitorRef) await_body(ConnPid, StreamRef, Timeout, MonitorRef) -&amp;gt; {ok, Body} | {ok, Body, Trailers} | {error, Reason} ConnPid :: pid() StreamRef :: reference() MonitorRef :: reference() Timeout :: timeout() Body :: binary() Trailers :: [{binary(), binary()}] Reason :: timeout | any() Wait for the complete response body.</description>
+    </item>
+    
+    <item>
+      <title>gun:await_up(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.await_up/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.await_up/</guid>
+      <description>Name gun:await_up - Wait for the connection to be up
+   Description await_up(ConnPid) -&amp;gt; await_up(ConnPid, 5000, MonitorRef) await_up(ConnPid, MonitorRef) -&amp;gt; await_up(ConnPid, 5000, MonitorRef) await_up(ConnPid, Timeout) -&amp;gt; await_up(ConnPid, Timeout, MonitorRef) await_up(ConnPid, Timeout, MonitorRef) -&amp;gt; {ok, Protocol} | {error, Reason} ConnPid :: pid() MonitorRef :: reference() Timeout :: timeout() Protocol :: http | http2 Reason :: timeout | any() Wait for the connection to be up.
+   Arguments  ConnPid    The pid of the Gun connection process.</description>
+    </item>
+    
+    <item>
+      <title>gun:cancel(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.cancel/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.cancel/</guid>
+      <description>Name gun:cancel - Cancel the given stream
+   Description cancel(ConnPid, StreamRef) -&amp;gt; ok ConnPid :: pid() StreamRef :: reference() Cancel the given stream.
+ The behavior of this function depends on the protocol selected.
+ HTTP/1.1 does not support this feature. Gun will simply silence the stream and stop relaying messages. Gun may also decide to close the connection if the response body is too large, to avoid wasting time and bandwidth.</description>
+    </item>
+    
+    <item>
+      <title>gun:close(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.close/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.close/</guid>
+      <description>Name gun:close - Brutally close the connection
+   Description close(ConnPid) -&amp;gt; ok ConnPid :: pid() Brutally close the connection.
+   Arguments  ConnPid    The pid of the Gun connection process.     Return value The atom ok is returned.
+   Changelog    1.0: Function introduced.     Examples Close the connection ok = gun:close(ConnPid).   See also gun(3), gun:open(3), gun:open_unix(3)</description>
+    </item>
+    
+    <item>
+      <title>gun:data(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.data/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.data/</guid>
+      <description>Name gun:data - Stream the body of a request
+   Description data(ConnPid, StreamRef, IsFin, Data) -&amp;gt; ok ConnPid :: pid() StreamRef :: reference() IsFin :: fin | nofin Data :: iodata() Stream the body of a request.
+ This function can only be used if the original request had headers indicating that a body would be streamed.
+ All calls to this function must use the nofin flag except for the last which must use fin to indicate the end of the request body.</description>
+    </item>
+    
+    <item>
+      <title>gun:delete(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.delete/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.delete/</guid>
+      <description>Name gun:delete - Delete a resource
+   Description delete(ConnPid, Path) -&amp;gt; delete(ConnPid, Path, [], #{}). delete(ConnPid, Path, Headers) -&amp;gt; delete(ConnPid, Path, Headers, #{}) delete(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] ReqOpts :: gun:req_opts() StreamRef :: reference() Delete a resource.
+   Arguments  ConnPid    The pid of the Gun connection process.  Path    Path to the resource.</description>
+    </item>
+    
+    <item>
+      <title>gun:flush(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.flush/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.flush/</guid>
+      <description>Name gun:flush - Flush all messages related to a connection or a stream
+   Description flush(ConnPid) -&amp;gt; ok flush(StreamRef) -&amp;gt; ok ConnPid :: pid() StreamRef :: reference() Flush all messages related to a connection or a stream.
+   Arguments Either of these arguments may be provided:
+  ConnPid    The pid of the Gun connection process.  StreamRef    Identifier of the stream for the original request.</description>
+    </item>
+    
+    <item>
+      <title>gun:get(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.get/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.get/</guid>
+      <description>Name gun:get - Get a resource representation
+   Description get(ConnPid, Path) -&amp;gt; get(ConnPid, Path, [], #{}). get(ConnPid, Path, Headers) -&amp;gt; get(ConnPid, Path, Headers, #{}) get(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] ReqOpts :: gun:req_opts() StreamRef :: reference() Get a resource representation.
+   Arguments  ConnPid    The pid of the Gun connection process.  Path    Path to the resource.</description>
+    </item>
+    
+    <item>
+      <title>gun:head(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.head/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.head/</guid>
+      <description>Name gun:head - Get headers of a resource representation
+   Description head(ConnPid, Path) -&amp;gt; head(ConnPid, Path, [], #{}). head(ConnPid, Path, Headers) -&amp;gt; head(ConnPid, Path, Headers, #{}) head(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] ReqOpts :: gun:req_opts() StreamRef :: reference() Get headers of a resource representation.
+ This function performs the same operation as gun:get(3), except the server will not send the resource representation, only the response&amp;#8217;s status code and headers.</description>
+    </item>
+    
+    <item>
+      <title>gun:info(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.info/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.info/</guid>
+      <description>Name gun:info - Obtain information about the connection
+   Description info(ConnPid) -&amp;gt; Info ConnPid :: pid() Info :: #{ sock_ip =&amp;gt; inet:ip_address(), sock_port =&amp;gt; inet:port_number() } Obtain information about the connection.
+   Arguments  ConnPid    The pid of the Gun connection process.     Return value A map is returned containing various informations about the connection.
+   Changelog    1.</description>
+    </item>
+    
+    <item>
+      <title>gun:open(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.open/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.open/</guid>
+      <description>Name gun:open - Open a connection to the given host and port
+   Description open(Host, Port) -&amp;gt; open(Host, Port, #{}) open(Host, Port, Opts) -&amp;gt; {ok, pid()} | {error, any()} Host :: inet:hostname() | inet:ip_address() Port :: inet:port_number() Opts :: gun:opts() Open a connection to the given host and port.
+   Arguments  Host    Host or IP address to connect to.  Port    Port to connect to.</description>
+    </item>
+    
+    <item>
+      <title>gun:open_unix(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.open_unix/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.open_unix/</guid>
+      <description>Name gun:open_unix - Open a connection to the given Unix domain socket
+   Description open_unix(SocketPath, Opts) -&amp;gt; {ok, pid()} | {error, any()} SocketPath :: string() Opts :: gun:opts() Open a connection to the given Unix domain socket.
+   Arguments  SocketPath    Path to the Unix domain socket to connect to.  Opts    Options for this connection.     Return value The pid of the newly created Gun process is returned.</description>
+    </item>
+    
+    <item>
+      <title>gun:options(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.options/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.options/</guid>
+      <description>Name gun:options - Query the capabilities of the server or a resource
+   Description options(ConnPid, Path) -&amp;gt; options(ConnPid, Path, [], #{}). options(ConnPid, Path, Headers) -&amp;gt; options(ConnPid, Path, Headers, #{}) options(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] ReqOpts :: gun:req_opts() StreamRef :: reference() Query the capabilities of the server or a resource.
+ The special path &#34;*&#34; can be used to obtain information about the server as a whole.</description>
+    </item>
+    
+    <item>
+      <title>gun:patch(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.patch/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.patch/</guid>
+      <description>Name gun:patch - Apply a set of changes to a resource
+   Description patch(ConnPid, Path, Headers) -&amp;gt; StreamRef patch(ConnPid, Path, Headers, Body) -&amp;gt; patch(ConnPid, Path, Headers, Body, #{}) patch(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference() Apply a set of changes to a resource.
+ The behavior of this function varies depending on whether a body is provided.</description>
+    </item>
+    
+    <item>
+      <title>gun:post(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.post/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.post/</guid>
+      <description>Name gun:post - Process the enclosed representation according to a resource&amp;#8217;s own semantics
+   Description post(ConnPid, Path, Headers) -&amp;gt; StreamRef post(ConnPid, Path, Headers, Body) -&amp;gt; post(ConnPid, Path, Headers, Body, #{}) post(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference() Process the enclosed representation according to a resource&amp;#8217;s own semantics.
+ The behavior of this function varies depending on whether a body is provided.</description>
+    </item>
+    
+    <item>
+      <title>gun:put(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.put/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.put/</guid>
+      <description>Name gun:put - Create or replace a resource
+   Description put(ConnPid, Path, Headers) -&amp;gt; StreamRef put(ConnPid, Path, Headers, Body) -&amp;gt; put(ConnPid, Path, Headers, Body, #{}) put(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference() Create or replace a resource.
+ The behavior of this function varies depending on whether a body is provided.</description>
+    </item>
+    
+    <item>
+      <title>gun:request(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.request/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.request/</guid>
+      <description>Name gun:request - Perform the given request
+   Description request(ConnPid, Method, Path, Headers) -&amp;gt; StreamRef request(ConnPid, Method, Path, Headers, Body) -&amp;gt; request(ConnPid, Method, Path, Headers, Body, #{}) request(ConnPid, Method, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Method :: binary() Path :: iodata() Headers :: [{binary(), iodata()}] Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference() Perform the given request.
+ This is a general purpose function that should only be used when other method-specific functions do not apply.</description>
+    </item>
+    
+    <item>
+      <title>gun:ws_send(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.ws_send/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.ws_send/</guid>
+      <description>Name gun:ws_send - Send Websocket frames
+   Description ws_send(ConnPid, Frames) -&amp;gt; ok ConnPid :: pid() Frames :: Frame | [Frame] Frame :: close | ping | pong | {text | binary | close | ping | pong, iodata()} | {close, non_neg_integer(), iodata()} Send Websocket frames.
+ The connection must first be upgraded to Websocket using the function gun:ws_upgrade(3).
+   Arguments  ConnPid    The pid of the Gun connection process.</description>
+    </item>
+    
+    <item>
+      <title>gun:ws_upgrade(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun.ws_upgrade/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun.ws_upgrade/</guid>
+      <description>Name gun:ws_upgrade - Upgrade to Websocket
+   Description ws_upgrade(ConnPid, Path) -&amp;gt; ws_upgrade(ConnPid, Path, []) ws_upgrade(ConnPid, Path, Headers) -&amp;gt; StreamRef ws_upgrade(ConnPid, Path, Headers, WsOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: [{binary(), iodata()}] WsOpts :: gun:ws_opts StreamRef :: reference() Upgrade to Websocket.
+ The behavior of this function depends on the protocol selected.
+ HTTP/1.1 cannot handle Websocket and HTTP requests concurrently. The upgrade, if successful, will result in the complete takeover of the connection.</description>
+    </item>
+    
+    <item>
+      <title>gun_data(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_data/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_data/</guid>
+      <description>Name gun_data - Response body
+   Description {gun_data, ConnPid, StreamRef, IsFin, Data} ConnPid :: pid() StreamRef :: reference() IsFin :: fin | nofin Data :: binary() Response body.
+ This message informs the relevant process that the server sent a all or part of the body for the response to the original request.
+ A data message is always preceded by a response message.
+ The response body may be terminated either by a data message with the flag fin set or by a gun_trailers(3) message.</description>
+    </item>
+    
+    <item>
+      <title>gun_down(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_down/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_down/</guid>
+      <description>Name gun_down - The connection is down
+   Description {gun_down, ConnPid, Protocol, Reason, KilledStreams, UnprocessedStreams} ConnPid :: pid() Protocol :: http | http2 | ws Reason :: any() KilledStreams :: [reference()] UnprocessedStreams :: [reference()] The connection is down.
+ This message informs the owner process that the connection was lost. Depending on the retry and retry_timeout options Gun may automatically attempt to reconnect.
+ When the connection goes back up, Gun will not attempt to retry requests.</description>
+    </item>
+    
+    <item>
+      <title>gun_error(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_error/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_error/</guid>
+      <description>Name gun_error - Stream or connection-wide error
+   Description {gun_error, ConnPid, StreamRef, Reason} {gun_error, ConnPid, Reason} ConnPid :: pid() StreamRef :: reference() Reason :: any() Stream or connection-wide error.
+ These messages inform the relevant process that an error occurred. A reference is given when the error pertains to a specific stream. Connection-wide errors do not imply that the connection is no longer usable, they are used for all errors that are not specific to a stream.</description>
+    </item>
+    
+    <item>
+      <title>gun_inform(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_inform/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_inform/</guid>
+      <description>Name gun_inform - Informational response
+   Description {gun_inform, ConnPid, StreamRef, Status, Headers} ConnPid :: pid() StreamRef :: reference() Status :: 100..199 Headers :: [{binary(), binary()}] Informational response.
+ This message informs the relevant process that the server sent an informational response to the original request.
+ Informational responses are only intermediate responses and provide no guarantees as to what the final response will be. An informational response always precedes the response to the original request.</description>
+    </item>
+    
+    <item>
+      <title>gun_push(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_push/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_push/</guid>
+      <description>Name gun_push - Server-initiated push
+   Description {gun_push, ConnPid, StreamRef, NewStreamRef, Method, URI, Headers} ConnPid :: pid() StreamRef :: reference() NewStreamRef :: reference() Method :: binary() URI :: binary() Headers :: [{binary(), binary()}] Server-initiated push.
+ This message informs the relevant process that the server is pushing a resource related to the effective target URI of the original request.
+ A server-initiated push message always precedes the response to the original request.</description>
+    </item>
+    
+    <item>
+      <title>gun_response(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_response/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_response/</guid>
+      <description>Name gun_response - Response
+   Description {gun_response, ConnPid, StreamRef, IsFin, Status, Headers} ConnPid :: pid() StreamRef :: reference() IsFin :: fin | nofin Status :: non_neg_integer() Headers :: [{binary(), binary()}] Response.
+ This message informs the relevant process that the server sent a response to the original request.
+   Elements  ConnPid    The pid of the Gun connection process.  StreamRef    Identifier of the stream for the original request.</description>
+    </item>
+    
+    <item>
+      <title>gun_trailers(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_trailers/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_trailers/</guid>
+      <description>Name gun_trailers - Response trailers
+   Description {gun_trailers, ConnPid, StreamRef, Headers} ConnPid :: pid() StreamRef :: reference() Headers :: [{binary(), binary()}] Response trailers.
+ This message informs the relevant process that the server sent response trailers for the response to the original request.
+ A trailers message terminates the response.
+   Elements  ConnPid    The pid of the Gun connection process.  StreamRef    Identifier of the stream for the original request.</description>
+    </item>
+    
+    <item>
+      <title>gun_up(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_up/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_up/</guid>
+      <description>Name gun_up - The connection is up
+   Description {gun_up, ConnPid, Protocol} ConnPid :: pid() Protocol :: http | http2 The connection is up.
+ This message informs the owner process that the connection or reconnection completed.
+ Gun will now start processing the messages it received while waiting for the connection to be up. If this is a reconnection, then this may not be desirable for all requests.</description>
+    </item>
+    
+    <item>
+      <title>gun_upgrade(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_upgrade/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_upgrade/</guid>
+      <description>Name gun_upgrade - Successful protocol upgrade
+   Description {gun_upgrade, ConnPid, StreamRef, Protocols, Headers} ConnPid :: pid() StreamRef :: reference() Protocols :: [&amp;lt;&amp;lt;&#34;websocket&#34;&amp;gt;&amp;gt;] Headers :: [{binary(), binary()}] Successful protocol upgrade.
+ This message informs the relevant process that the server accepted to upgrade to one or more protocols given in the original request.
+ The exact semantics of this message depend on the original protocol. HTTP/1.1 upgrades apply to the entire connection.</description>
+    </item>
+    
+    <item>
+      <title>gun_ws(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/1.0/manual/gun_ws/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/1.0/manual/gun_ws/</guid>
+      <description>Name gun_ws - Websocket frame
+   Description {gun_ws, ConnPid, StreamRef, Frame} ConnPid :: pid() StreamRef :: reference() Frame :: close | {text | binary | close, binary()} | {close, non_neg_integer(), binary()} Websocket frame.
+ This message informs the relevant process that the server sent the enclosed frame.
+ This message can only be sent on streams that were upgraded to the Websocket protocol.
+   Elements  ConnPid    The pid of the Gun connection process.</description>
     </item>
     
     <item>

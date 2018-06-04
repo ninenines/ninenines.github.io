@@ -7,8 +7,6 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.37.1" />
-
     <title>Nine Nines: Connection</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
@@ -89,7 +87,7 @@ to reconnect automatically.</p></div>
 <div class="sect1">
 <h2 id="_opening_a_new_connection">Opening a new connection</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The <code>gun:open/{2,3}</code> function must be used to open a connection.</p></div>
+<div class="paragraph"><p>The <code>gun:open/2,3</code> function must be used to open a connection.</p></div>
 <div class="listingblock">
 <div class="title">Opening a connection to example.org on port 443</div>
 <div class="content"><!-- Generator: GNU source-highlight
@@ -98,22 +96,22 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">ConnPid</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:open</span></span>(<span style="color: #FF0000">"example.org"</span>, <span style="color: #993399">443</span>)<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>If the port given is 443, Gun will attempt to connect using
-SSL. The protocol will be selected automatically using the
+TLS. The protocol will be selected automatically using the
 ALPN extension for TLS. By default Gun supports HTTP/2
-and HTTP/1.1 when connecting using SSL.</p></div>
-<div class="paragraph"><p>For any other port, Gun will attempt to connect using TCP
-and will use the HTTP/1.1 protocol.</p></div>
-<div class="paragraph"><p>The transport and protocol used can be overriden using
+and HTTP/1.1 when connecting using TLS.</p></div>
+<div class="paragraph"><p>For any other port, Gun will attempt to connect using
+plain TCP and will use the HTTP/1.1 protocol.</p></div>
+<div class="paragraph"><p>The transport and protocol used can be overriden via
 options. The manual documents all available options.</p></div>
 <div class="paragraph"><p>Options can be provided as a third argument, and take the
 form of a map.</p></div>
 <div class="listingblock">
-<div class="title">Opening an SSL connection to example.org on port 8443</div>
+<div class="title">Opening a TLS connection to example.org on port 8443</div>
 <div class="content"><!-- Generator: GNU source-highlight
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">ConnPid</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:open</span></span>(<span style="color: #FF0000">"example.org"</span>, <span style="color: #993399">8443</span>, #{<span style="color: #0000FF">transport</span><span style="color: #990000">=&gt;</span><span style="color: #FF6600">ssl</span>})<span style="color: #990000">.</span></tt></pre></div></div>
+<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">ConnPid</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:open</span></span>(<span style="color: #FF0000">"example.org"</span>, <span style="color: #993399">8443</span>, #{<span style="color: #0000FF">transport</span> <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">tls</span>})<span style="color: #990000">.</span></tt></pre></div></div>
 </div>
 </div>
 <div class="sect1">
@@ -122,7 +120,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>When Gun successfully connects to the server, it sends a
 <code>gun_up</code> message with the protocol that has been selected
 for the connection.</p></div>
-<div class="paragraph"><p>Gun provides the functions <code>gun:await_up/{1,2,3}</code> that wait
+<div class="paragraph"><p>Gun provides the functions <code>gun:await_up/1,2,3</code> that wait
 for the <code>gun_up</code> message. They can optionally take a monitor
 reference and/or timeout value. If no monitor is provided,
 one will be created for the duration of the function call.</p></div>
@@ -141,7 +139,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="sectionbody">
 <div class="paragraph"><p>When the connection is lost, Gun will send a <code>gun_down</code>
 message indicating the current protocol, the reason the
-connection was lost and two list of stream references.</p></div>
+connection was lost and two lists of stream references.</p></div>
 <div class="paragraph"><p>The first list indicates open streams that <em>may</em> have been
 processed by the server. The second list indicates open
 streams that the server did not process.</p></div>
@@ -150,18 +148,17 @@ streams that the server did not process.</p></div>
 <div class="sect1">
 <h2 id="_monitoring_the_connection_process">Monitoring the connection process</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>@todo Gun should detect the owner process being killed</p></div>
 <div class="paragraph"><p>Because software errors are unavoidable, it is important to
 detect when the Gun process crashes. It is also important
 to detect when it exits normally. Erlang provides two ways
 to do that: links and monitors.</p></div>
 <div class="paragraph"><p>Gun leaves you the choice as to which one will be used.
-However, if you use the <code>gun:await/{2,3}</code> or <code>gun:await_body/{2,3}</code>
+However, if you use the <code>gun:await/2,3</code> or <code>gun:await_body/2,3</code>
 functions, a monitor may be used for you to avoid getting
 stuck waiting for a message that will never come.</p></div>
 <div class="paragraph"><p>If you choose to monitor yourself you can do it on a permanent
 basis rather than on every message you will receive, saving
-resources. Indeed, the <code>gun:await/{3,4}</code> and <code>gun:await_body/{3,4}</code>
+resources. Indeed, the <code>gun:await/3,4</code> and <code>gun:await_body/3,4</code>
 functions both accept a monitor argument if you have one already.</p></div>
 <div class="listingblock">
 <div class="title">Monitoring the connection process</div>
@@ -180,10 +177,10 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">receive</span></span>
-        <span style="font-style: italic"><span style="color: #9A1900">%% Receive Gun messages here...</span></span>
-        {<span style="color: #FF6600">'DOWN'</span>, <span style="color: #009900">Mref</span>, <span style="font-weight: bold"><span style="color: #000080">process</span></span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">Reason</span>} <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">error_logger:error_msg</span></span>(<span style="color: #FF0000">"Oops!"</span>),
-                <span style="font-weight: bold"><span style="color: #000080">exit</span></span>(<span style="color: #009900">Reason</span>);
+    <span style="font-style: italic"><span style="color: #9A1900">%% Receive Gun messages here...</span></span>
+    {<span style="color: #FF6600">'DOWN'</span>, <span style="color: #009900">Mref</span>, <span style="font-weight: bold"><span style="color: #000080">process</span></span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">Reason</span>} <span style="color: #990000">-&gt;</span>
+        <span style="font-weight: bold"><span style="color: #000000">error_logger:error_msg</span></span>(<span style="color: #FF0000">"Oops!"</span>),
+        <span style="font-weight: bold"><span style="color: #000080">exit</span></span>(<span style="color: #009900">Reason</span>)
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>What to do when you receive a <code>DOWN</code> message is entirely up to you.</p></div>
 </div>
@@ -202,28 +199,6 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">gun:close</span></span>(<span style="color: #009900">ConnPid</span>)<span style="color: #990000">.</span></tt></pre></div></div>
 <div class="paragraph"><p>The process is stopped immediately without having a chance to
 perform the protocol&#8217;s closing handshake, if any.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_closing_the_connection_gracefully">Closing the connection gracefully</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The connection can also be stopped gracefully by calling the
-<code>gun:shutdown/1</code> function.</p></div>
-<div class="listingblock">
-<div class="title">Graceful shutdown of the connection</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">gun:shutdown</span></span>(<span style="color: #009900">ConnPid</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Gun will refuse any new requests or messages after you call
-this function. It will however continue to send you messages
-for existing streams until they are all completed.</p></div>
-<div class="paragraph"><p>For example if you performed a GET request just before calling
-<code>gun:shutdown/1</code>, you will still receive the response before
-Gun closes the connection.</p></div>
-<div class="paragraph"><p>If you set a monitor beforehand, you will receive a message
-when the connection has been closed.</p></div>
 </div>
 </div>
 

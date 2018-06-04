@@ -7,8 +7,6 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.37.1" />
-
     <title>Nine Nines: Building</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
@@ -282,6 +280,43 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Any space before and after the value is dropped.</p></div>
 <div class="paragraph"><p><a href="../deps">Dependencies</a> are covered in details in
 the next chapter.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_application_environment">Application environment</h4>
+<div class="paragraph"><p>The <code>PROJECT_ENV</code> variable is used to set the application
+environment:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>define PROJECT_ENV
+<span style="color: #990000">[</span>
+  {chips<span style="color: #990000">,</span> <span style="color: #990000">[</span>currysauce<span style="color: #990000">,</span>{mushypeas<span style="color: #990000">,</span><span style="font-weight: bold"><span style="color: #0000FF">false</span></span>}<span style="color: #990000">]</span>}<span style="color: #990000">,</span>
+  {pizza<span style="color: #990000">,</span> <span style="color: #990000">[</span>{size<span style="color: #990000">,</span>large}<span style="color: #990000">,</span>{toppings<span style="color: #990000">,[</span>anchovies<span style="color: #990000">]</span>}<span style="color: #990000">]</span>}
+<span style="color: #990000">]</span>
+endef</tt></pre></div></div>
+<div class="paragraph"><p>If you have a large set of environment variables, you may find it
+easier to use a separate file. Do this by including the following
+in your Makefile:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">PROJECT_ENV_FILE =</span> src/env.src
+<span style="color: #009900">PROJECT_ENV =</span> <span style="color: #009900">$(</span>subst <span style="color: #990000">\</span>n<span style="color: #990000">,</span><span style="color: #009900">$(newline)</span><span style="color: #990000">,</span><span style="color: #009900">$(</span>shell cat <span style="color: #009900">$(PROJECT_ENV_FILE)</span> <span style="color: #990000">|</span> sed -e <span style="color: #FF0000">'s/$$/</span><span style="color: #CC33CC">\\</span><span style="color: #FF0000">n/;'</span><span style="color: #990000">))</span>
+ebin<span style="color: #990000">/</span><span style="color: #009900">$(PROJECT)</span>.app<span style="color: #990000">::</span> <span style="color: #009900">$(PROJECT_ENV_FILE)</span></tt></pre></div></div>
+<div class="paragraph"><p>The file has the same contents as the <code>PROJECT_ENV</code> variable:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>[
+  {<span style="color: #FF6600">chips</span>, [<span style="color: #FF6600">currysauce</span>,{<span style="color: #FF6600">mushypeas</span>,<span style="color: #000080">false</span>}]},
+  {<span style="color: #FF6600">pizza</span>, [{<span style="font-weight: bold"><span style="color: #000080">size</span></span>,<span style="color: #FF6600">large</span>},{<span style="color: #FF6600">toppings</span>,[<span style="color: #FF6600">anchovies</span>]}]}
+]</tt></pre></div></div>
 </div>
 <div class="sect3">
 <h4 id="_legacy_method">Legacy method</h4>

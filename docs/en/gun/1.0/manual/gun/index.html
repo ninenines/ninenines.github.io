@@ -7,8 +7,6 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <meta name="generator" content="Hugo 0.37.1" />
-
     <title>Nine Nines: gun(3)</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
@@ -67,7 +65,7 @@
 <div class="sect1">
 <h2 id="_name">Name</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>gun - asynchronous HTTP client</p></div>
+<div class="paragraph"><p>gun - Asynchronous HTTP client</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -79,187 +77,427 @@ HTTP/2 or Websocket.</p></div>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_exports">Exports</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Connection:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun.open">gun:open(3)</a> - Open a connection to the given host and port
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.open_unix">gun:open_unix(3)</a> - Open a connection to the given Unix domain socket
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.close">gun:close(3)</a> - Brutally close the connection
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.info">gun:info(3)</a> - Obtain information about the connection
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Requests:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun.get">gun:get(3)</a> - Get a resource representation
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.head">gun:head(3)</a> - Get headers of a resource representation
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.options">gun:options(3)</a> - Query the capabilities of the server or a resource
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.patch">gun:patch(3)</a> - Apply a set of changes to a resource
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.post">gun:post(3)</a> - Process the enclosed representation according to a resource&#8217;s own semantics
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.put">gun:put(3)</a> - Create or replace a resource
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.delete">gun:delete(3)</a> - Delete a resource
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.request">gun:request(3)</a> - Perform the given request
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.data">gun:data(3)</a> - Stream the body of a request
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Messages:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun.await">gun:await(3)</a> - Wait for a response
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.await_body">gun:await_body(3)</a> - Wait for the complete response body
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.await_up">gun:await(3)</a> - Wait for the connection to be up
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.flush">gun:flush(3)</a> - Flush all messages related to a connection or a stream
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Streams:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun.cancel">gun:cancel(3)</a> - Cancel the given stream
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Websocket:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun.ws_upgrade">gun:ws_upgrade(3)</a> - Upgrade to Websocket
+</p>
+</li>
+<li>
+<p>
+<a href="../gun.ws_send">gun:ws_send(3)</a> - Send Websocket frames
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_messages">Messages</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Gun will inform the calling process of events asynchronously
+by sending any of the following messages:</p></div>
+<div class="paragraph"><p>Connection:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun_up">gun_up(3)</a> - The connection is up
+</p>
+</li>
+<li>
+<p>
+<a href="../gun_down">gun_down(3)</a> - The connection is down
+</p>
+</li>
+<li>
+<p>
+<a href="../gun_upgrade">gun_upgrade(3)</a> - Successful protocol upgrade
+</p>
+</li>
+<li>
+<p>
+<a href="../gun_error">gun_error(3)</a> - Stream or connection-wide error
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Responses:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun_push">gun_push(3)</a> - Server-initiated push
+</p>
+</li>
+<li>
+<p>
+<a href="../gun_inform">gun_inform(3)</a> - Informational response
+</p>
+</li>
+<li>
+<p>
+<a href="../gun_response">gun_response(3)</a> - Response
+</p>
+</li>
+<li>
+<p>
+<a href="../gun_data">gun_data(3)</a> - Response body
+</p>
+</li>
+<li>
+<p>
+<a href="../gun_trailers">gun_trailers(3)</a> - Response trailers
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Websocket:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="../gun_ws">gun_ws(3)</a> - Websocket frame
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The response messages will be sent to the process that opened
+the connection by default. The <code>reply_to</code> request option can
+be used to redirect request-specific messages to a different
+process.</p></div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_types">Types</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_opts_map">opts() = map()</h3>
-<div class="paragraph"><p>Configuration for the connection.</p></div>
-<div class="paragraph"><p>The following keys are defined:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-connect_timeout &#8658; timeout()
-</dt>
-<dd>
-<p>
-        Connection timeout. Defaults to <code>infinity</code>.
-</p>
-</dd>
-<dt class="hdlist1">
-http_opts &#8658; http_opts()
-</dt>
-<dd>
-<p>
-        Options specific to the HTTP protocol. See below.
-</p>
-</dd>
-<dt class="hdlist1">
-http2_opts &#8658; http2_opts()
-</dt>
-<dd>
-<p>
-        Options specific to the HTTP/2 protocol. See below.
-</p>
-</dd>
-<dt class="hdlist1">
-protocols &#8658; [http | http2]
-</dt>
-<dd>
-<p>
-        Ordered list of preferred protocols. When the transport is tcp,
-        this list must contain exactly one protocol. When the transport
-        is ssl, this list must contain at least one protocol and will be
-        used using the ALPN protocol negotiation method. When the server
-        does not support ALPN then http will always be used. Defaults to
-        [http] when the transport is tcp, and [http2, http] when the
-        transport is ssl.
-</p>
-</dd>
-<dt class="hdlist1">
-retry &#8658; non_neg_integer()
-</dt>
-<dd>
-<p>
-        Number of times Gun will try to reconnect on failure before giving up.
-        Defaults to 5.
-</p>
-</dd>
-<dt class="hdlist1">
-retry_timeout &#8658; pos_integer()
-</dt>
-<dd>
-<p>
-        Time between retries in milliseconds. Defaults to 5000.
-</p>
-</dd>
-<dt class="hdlist1">
-trace &#8658; boolean()
-</dt>
-<dd>
-<p>
-        Whether to enable <code>dbg</code> tracing of the connection process. Should
-        only be used during debugging. Defaults to false.
-</p>
-</dd>
-<dt class="hdlist1">
-transport &#8658; tcp | ssl
-</dt>
-<dd>
-<p>
-        Whether to use SSL or plain TCP. The default varies depending on the
-        port used. Port 443 defaults to ssl. All other ports default to tcp.
-</p>
-</dd>
-<dt class="hdlist1">
-transport_opts &#8658; proplists:proplist()
-</dt>
-<dd>
-<p>
-        Transport options. They are TCP options or SSL options depending on
-        the selected transport.
-</p>
-</dd>
-<dt class="hdlist1">
-ws_opts &#8658; ws_opts()
-</dt>
-<dd>
-<p>
-        Options specific to the Websocket protocol. See below.
-</p>
-</dd>
-</dl></div>
-</div>
-<div class="sect2">
-<h3 id="_http_opts_map">http_opts() = map()</h3>
+<h3 id="_http_opts">http_opts()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">http_opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">keepalive</span>             <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">transform_header_name</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span>((<span style="font-weight: bold"><span style="color: #000080">binary</span></span>()) <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()),
+    <span style="color: #0000FF">version</span>               <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">'HTTP/1.1'</span> | <span style="color: #FF6600">'HTTP/1.0'</span>
+}</tt></pre></div></div>
 <div class="paragraph"><p>Configuration for the HTTP protocol.</p></div>
-<div class="paragraph"><p>The following keys are defined:</p></div>
+<div class="paragraph"><p>The default value is given next to the option name:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-keepalive &#8658; timeout()
+keepalive (5000)
 </dt>
 <dd>
 <p>
-        Time between pings in milliseconds. Since the HTTP protocol has
-        no standardized way to ping the server, Gun will simply send an
-        empty line when the connection is idle. Gun only makes a best
-        effort here as servers usually have configurable limits to drop
-        idle connections. Use <code>infinity</code> to disable. Defaults to 5000.
+Time between pings in milliseconds. Since the HTTP protocol has
+no standardized way to ping the server, Gun will simply send an
+empty line when the connection is idle. Gun only makes a best
+effort here as servers usually have configurable limits to drop
+idle connections. Use <code>infinity</code> to disable.
 </p>
 </dd>
 <dt class="hdlist1">
-transform_header_name &#8658; funLowercaseName :: binary( &#8594; TransformedName :: binary()) | undefined
+transform_header_name - see below
 </dt>
 <dd>
 <p>
-        A function that will be applied to all header names before they
-        are sent to the server. Gun assumes that all header names are in
-        lower case. This function is useful if you, for example, need to
-        re-case header names in the event that the server incorrectly
-        considers header name case to be significant.
+A function that will be applied to all header names before they
+are sent to the server. Gun assumes that all header names are in
+lower case. This function is useful if you, for example, need to
+re-case header names in the event that the server incorrectly
+considers the case of header names to be significant.
 </p>
 </dd>
 <dt class="hdlist1">
-version &#8658; <em>HTTP/1.1</em> | <em>HTTP/1.0</em>
+version (<code>'HTTP/1.1'</code>)
 </dt>
 <dd>
 <p>
-        HTTP version to use. Defaults to <em>HTTP/1.1</em>.
+HTTP version to use.
 </p>
 </dd>
 </dl></div>
 </div>
 <div class="sect2">
-<h3 id="_http2_opts_map">http2_opts() = map()</h3>
+<h3 id="_http2_opts">http2_opts()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">http2_opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">keepalive</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>()
+}</tt></pre></div></div>
 <div class="paragraph"><p>Configuration for the HTTP/2 protocol.</p></div>
-<div class="paragraph"><p>The following keys are defined:</p></div>
+<div class="paragraph"><p>The default value is given next to the option name:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-keepalive &#8658; pos_integer()
+keepalive (5000)
 </dt>
 <dd>
 <p>
-        Time between pings in milliseconds. Defaults to 5000.
+Time between pings in milliseconds.
 </p>
 </dd>
 </dl></div>
 </div>
 <div class="sect2">
-<h3 id="_req_opts_map">req_opts() = map()</h3>
+<h3 id="_opts">opts()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">connect_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
+    <span style="color: #0000FF">http_opts</span>       <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">http_opts</span></span>(),
+    <span style="color: #0000FF">http2_opts</span>      <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">http2_opts</span></span>(),
+    <span style="color: #0000FF">protocols</span>       <span style="color: #990000">=&gt;</span> [<span style="color: #FF6600">http</span> | <span style="color: #FF6600">http2</span>],
+    <span style="color: #0000FF">retry</span>           <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>(),
+    <span style="color: #0000FF">retry_timeout</span>   <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">pos_integer</span></span>(),
+    <span style="color: #0000FF">trace</span>           <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>(),
+    <span style="color: #0000FF">transport</span>       <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">tcp</span> | <span style="color: #FF6600">tls</span>,
+    <span style="color: #0000FF">transport_opts</span>  <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">gen_tcp:connect_option</span></span>()] | [<span style="font-weight: bold"><span style="color: #000000">ssl:connect_option</span></span>()],
+    <span style="color: #0000FF">ws_opts</span>         <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">ws_opts</span></span>()
+}</tt></pre></div></div>
+<div class="paragraph"><p>Configuration for the connection.</p></div>
+<div class="paragraph"><p>The default value is given next to the option name:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+connect_timeout (infinity)
+</dt>
+<dd>
+<p>
+Connection timeout.
+</p>
+</dd>
+<dt class="hdlist1">
+http_opts (#{})
+</dt>
+<dd>
+<p>
+Options specific to the HTTP protocol.
+</p>
+</dd>
+<dt class="hdlist1">
+http2_opts (#{})
+</dt>
+<dd>
+<p>
+Options specific to the HTTP/2 protocol.
+</p>
+</dd>
+<dt class="hdlist1">
+protocols - see below
+</dt>
+<dd>
+<p>
+Ordered list of preferred protocols. When the transport is <code>tcp</code>,
+this list must contain exactly one protocol. When the transport
+is <code>tls</code>, this list must contain at least one protocol and will be
+used to negotiate a protocol via ALPN. When the server does not
+support ALPN then <code>http</code> will always be used. Defaults to
+<code>[http]</code> when the transport is <code>tcp</code>, and <code>[http2, http]</code> when the
+transport is <code>tls</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+retry (5)
+</dt>
+<dd>
+<p>
+Number of times Gun will try to reconnect on failure before giving up.
+</p>
+</dd>
+<dt class="hdlist1">
+retry_timeout (5000)
+</dt>
+<dd>
+<p>
+Time between retries in milliseconds.
+</p>
+</dd>
+<dt class="hdlist1">
+trace (false)
+</dt>
+<dd>
+<p>
+Whether to enable <code>dbg</code> tracing of the connection process. Should
+only be used during debugging.
+</p>
+</dd>
+<dt class="hdlist1">
+transport - see below
+</dt>
+<dd>
+<p>
+Whether to use TLS or plain TCP. The default varies depending on the
+port used. Port 443 defaults to <code>tls</code>. All other ports default to <code>tcp</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+transport_opts ([])
+</dt>
+<dd>
+<p>
+Transport options. They are TCP options or TLS options depending on
+the selected transport.
+</p>
+</dd>
+<dt class="hdlist1">
+ws_opts (#{})
+</dt>
+<dd>
+<p>
+Options specific to the Websocket protocol.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_req_opts">req_opts()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">req_opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">reply_to</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000080">pid</span></span>()
+}</tt></pre></div></div>
 <div class="paragraph"><p>Configuration for a particular request.</p></div>
-<div class="paragraph"><p>The following keys are defined:</p></div>
+<div class="paragraph"><p>The default value is given next to the option name:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-reply_to &#8658; pid()
+reply_to (<code>self()</code>)
 </dt>
 <dd>
 <p>
-        The pid of a process that is responsible for the response handling.
+The pid of the process that will receive the response messages.
 </p>
 </dd>
 </dl></div>
 </div>
 <div class="sect2">
-<h3 id="_ws_opts_map">ws_opts() = map()</h3>
+<h3 id="_ws_opts">ws_opts()</h3>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">ws_opts</span></span>() <span style="color: #990000">::</span> #{
+    <span style="color: #0000FF">compress</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">boolean</span></span>()
+}</tt></pre></div></div>
 <div class="paragraph"><p>Configuration for the Websocket protocol.</p></div>
-<div class="paragraph"><p>The following keys are defined:</p></div>
+<div class="paragraph"><p>The default value is given next to the option name:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 compress &#8658; boolean()
 </dt>
 <dd>
 <p>
-        Whether to enable permessage-deflate compression. This does
-        not guarantee that compression will be used as it is the
-        server that ultimately decides. Defaults to false.
+Whether to enable permessage-deflate compression. This does
+not guarantee that compression will be used as it is the
+server that ultimately decides. Defaults to false.
 </p>
 </dd>
 </dl></div>
@@ -267,1526 +505,9 @@ compress &#8658; boolean()
 </div>
 </div>
 <div class="sect1">
-<h2 id="_messages">Messages</h2>
+<h2 id="_see_also">See also</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Calling functions from this module may result in the following
-messages being sent.</p></div>
-<div class="sect2">
-<h3 id="_gun_up_connpid_protocol">{gun_up, ConnPid, Protocol}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Protocol = http | http2
-</dt>
-<dd>
-<p>
-The protocol selected for this connection.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>The connection is up.</p></div>
-<div class="paragraph"><p>This message informs the owner process that the connection or
-reconnection completed.</p></div>
-<div class="paragraph"><p>The protocol selected during the connection is sent in this
-message. It can be used to determine the capabilities of the
-server.</p></div>
-<div class="paragraph"><p>Gun will now start processing the messages it received while
-waiting for the connection to be up. If this is a reconnection,
-then this may not be desirable for all requests. Those requests
-should be cancelled when the connection goes down, and any
-subsequent messages ignored.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_down_connpid_protocol_reason_killedstreams_unprocessedstreams">{gun_down, ConnPid, Protocol, Reason, KilledStreams, UnprocessedStreams}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Protocol = http | http2 | ws
-</dt>
-<dd>
-<p>
-The protocol in use when the connection was lost.
-</p>
-</dd>
-<dt class="hdlist1">
-Reason = normal | closed | {error, atom()}
-</dt>
-<dd>
-<p>
-The reason for the loss of the connection.
-</p>
-</dd>
-<dt class="hdlist1">
-KilledStreams = [reference()]
-</dt>
-<dd>
-<p>
-List of streams that have been brutally terminated.
-</p>
-</dd>
-<dt class="hdlist1">
-UnprocessedStreams = [reference()]
-</dt>
-<dd>
-<p>
-List of streams that have not been processed by the server.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>The connection is down.</p></div>
-<div class="paragraph"><p>This message informs the owner process that the connection is
-currently down. Gun will automatically attempt to reconnect
-depending on the <code>retry</code> and <code>retry_timeout</code> options.</p></div>
-<div class="paragraph"><p>The reason of the termination is there for debugging purposes
-only. You should not rely on this value to know what streams
-were processed or completed.</p></div>
-<div class="paragraph"><p>The <em>killed streams</em> are the active streams that did not complete
-before the closing of the connection. Whether they can be retried
-safely depends on the protocol used and the idempotence property
-of the requests.</p></div>
-<div class="paragraph"><p>The <em>unprocessed streams</em> are streams that the server did not
-start processing yet. They may be retried safely depending on
-what streams were killed before.</p></div>
-<div class="paragraph"><p>When the connection goes back up, Gun will not attempt to retry
-requests. It will also not upgrade to Websocket automatically
-if that was the protocol in use when the connection was lost.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_push_connpid_streamref_newstreamref_uri_headers">{gun_push, ConnPid, StreamRef, NewStreamRef, URI, Headers}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream initiated by the owner process.
-</p>
-</dd>
-<dt class="hdlist1">
-NewStreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream being pushed.
-</p>
-</dd>
-<dt class="hdlist1">
-URI = binary()
-</dt>
-<dd>
-<p>
-URI of the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), binary()}]
-</dt>
-<dd>
-<p>
-Headers @todo
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>A resource pushed alongside an HTTP response.</p></div>
-<div class="paragraph"><p>This message can only be sent when the protocol is HTTP/2.</p></div>
-<div class="paragraph"><p>@todo I fear we also need the scheme; resource is identified by URI
-@todo Perhaps we really should send the URI entirely, because cache
-@todo relies on URI to work and this feature is for caching&#8230;
-@todo Not sure why Method is there, spec says it is only for GET</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_response_connpid_streamref_isfin_status_headers">{gun_response, ConnPid, StreamRef, IsFin, Status, Headers}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream initiated by the owner process.
-</p>
-</dd>
-<dt class="hdlist1">
-IsFin = fin | nofin
-</dt>
-<dd>
-<p>
-Whether this message terminates the response.
-</p>
-</dd>
-<dt class="hdlist1">
-Status = binary()
-</dt>
-<dd>
-<p>
-Status line for the response.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), binary()}]
-</dt>
-<dd>
-<p>
-Headers sent with the response.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>A response to an HTTP request.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_data_connpid_streamref_isfin_data">{gun_data, ConnPid, StreamRef, IsFin, Data}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream this data belongs to.
-</p>
-</dd>
-<dt class="hdlist1">
-IsFin = fin | nofin
-</dt>
-<dd>
-<p>
-Whether this message terminates the response.
-</p>
-</dd>
-<dt class="hdlist1">
-Data = binary()
-</dt>
-<dd>
-<p>
-Data from the stream.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Data associated with a stream.</p></div>
-<div class="paragraph"><p>The stream in question can be either one initiated by the owner
-process or a stream initiated by the server through the push
-mechanism. In any case a <code>gun_response</code> or a <code>gun_push</code> message
-will be sent before any <code>gun_data</code> message.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_error_connpid_streamref_reason">{gun_error, ConnPid, StreamRef, Reason}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream this error relates to.
-</p>
-</dd>
-<dt class="hdlist1">
-Reason = any()
-</dt>
-<dd>
-<p>
-Error reason.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Stream-specific error.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_error_connpid_reason">{gun_error, ConnPid, Reason}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Reason = any()
-</dt>
-<dd>
-<p>
-Error reason.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>General error.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_ws_upgrade_connpid_ok_headers">{gun_ws_upgrade, ConnPid, ok, Headers}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), binary()}]
-</dt>
-<dd>
-<p>
-Headers sent with the response.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Successful upgrade to the Websocket protocol.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_gun_ws_connpid_frame">{gun_ws, ConnPid, Frame}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Frame = @todo
-</dt>
-<dd>
-<p>
-Frame.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Websocket frame.</p></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_exports">Exports</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_open_host_port_8594_open_host_port">open(Host, Port) &#8594; open(Host, Port, [])</h3>
-<div class="paragraph"><p>Alias of <code>gun:open/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_open_host_port_opts_8594_ok_connpid_error_reason">open(Host, Port, Opts) &#8594; {ok, ConnPid} | {error, Reason}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Host = inet:hostname()
-</dt>
-<dd>
-<p>
-Host to connect to.
-</p>
-</dd>
-<dt class="hdlist1">
-Port = inet:port_number()
-</dt>
-<dd>
-<p>
-Port to connect to.
-</p>
-</dd>
-<dt class="hdlist1">
-Opts = opts()
-</dt>
-<dd>
-<p>
-Options for this connection.
-</p>
-</dd>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Reason = any()
-</dt>
-<dd>
-<p>
-Error reason. @todo really any?
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Open a connection to the given host and port.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_close_connpid_8594_ok">close(ConnPid) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Brutally close the connection.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_shutdown_connpid_8594_ok">shutdown(ConnPid) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Gracefully close the connection.</p></div>
-<div class="paragraph"><p>A monitor can be used to be notified when the connection is
-effectively closed.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_delete_connpid_path_8594_delete_connpid_path">delete(ConnPid, Path) &#8594; delete(ConnPid, Path, [], #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:delete/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_delete_connpid_path_headers_8594_delete_connpid_path_headers">delete(ConnPid, Path, Headers) &#8594; delete(ConnPid, Path, Headers, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:delete/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_delete_connpid_path_headers_reqopts_8594_streamref">delete(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Delete a resource.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_get_connpid_path_8594_get_connpid_path">get(ConnPid, Path) &#8594; get(ConnPid, Path, [], #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:get/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_get_connpid_path_headers_8594_get_connpid_path_headers">get(ConnPid, Path, Headers) &#8594; get(ConnPid, Path, Headers, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:get/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_get_connpid_path_headers_reqopts_8594_streamref">get(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Get a resource.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_head_connpid_path_8594_head_connpid_path">head(ConnPid, Path) &#8594; head(ConnPid, Path, [], #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:head/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_head_connpid_path_headers_8594_head_connpid_path_headers">head(ConnPid, Path, Headers) &#8594; head(ConnPid, Path, Headers, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:head/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_head_connpid_path_headers_reqopts_8594_streamref">head(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Get headers of a resource.</p></div>
-<div class="paragraph"><p>This function performs the same operation as <code>get/{2,3}</code> except
-the server will not send the resource representation, only the
-response&#8217;s status line and headers.</p></div>
-<div class="paragraph"><p>While servers should send the same headers they would if the
-request was a GET, like <code>content-length</code>, it is not always
-the case and differences may exist.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_options_connpid_path_8594_options_connpid_path">options(ConnPid, Path) &#8594; options(ConnPid, Path, [], #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:options/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_options_connpid_path_headers_8594_options_connpid_path_headers">options(ConnPid, Path, Headers) &#8594; options(ConnPid, Path, Headers, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:options/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_options_connpid_path_headers_reqopts_8594_streamref">options(ConnPid, Path, Headers, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Obtain information about the capabilities of the server or of a resource.</p></div>
-<div class="paragraph"><p>The special path <code>"*"</code> can be used to obtain information about
-the server as a whole. Any other path will return information
-about the resource only.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_patch_connpid_path_headers_8594_streamref">patch(ConnPid, Path, Headers) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Request that a set of changes be applied to the resource.</p></div>
-<div class="paragraph"><p>This function expects either <code>content-length</code> or <code>content-type</code>
-to be set to know a body is going to be sent afterwards.
-Gun will assume the request has no body otherwise. It is
-highly recommended to set both when possible.</p></div>
-<div class="paragraph"><p>The body sent in this request should be a patch document
-with instructions on how to update the resource.</p></div>
-<div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_patch_connpid_path_headers_body_8594_patch_connpid_path_headers_body">patch(ConnPid, Path, Headers, Body) &#8594; patch(ConnPid, Path, Headers, Body, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:patch/5</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_patch_connpid_path_headers_body_reqopts_8594_streamref">patch(ConnPid, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-Body = iodata()
-</dt>
-<dd>
-<p>
-Body of the request.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Request that a set of changes be applied to the resource.</p></div>
-<div class="paragraph"><p>It is highly recommended to set the <code>content-type</code> header
-to inform the server what media type the body contains.
-Gun will automatically set the <code>content-length</code> header.</p></div>
-<div class="paragraph"><p>The body sent in this request should be a patch document
-with instructions on how to update the resource.</p></div>
-<div class="paragraph"><p>The complete request is sent when calling this function.
-It is not possible to stream more of the body after
-calling it.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_post_connpid_path_headers_8594_streamref">post(ConnPid, Path, Headers) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Process the enclosed representation according to the resource&#8217;s own semantics.</p></div>
-<div class="paragraph"><p>This function expects either <code>content-length</code> or <code>content-type</code>
-to be set to know a body is going to be sent afterwards.
-Gun will assume the request has no body otherwise. It is
-highly recommended to set both when possible.</p></div>
-<div class="paragraph"><p>The body sent in this request will be processed
-according to the resource&#8217;s own semantics. A new
-resource may be created as a result, and may be
-located at a different URI.</p></div>
-<div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_post_connpid_path_headers_body_8594_post_connpid_path_headers_body">post(ConnPid, Path, Headers, Body) &#8594; post(ConnPid, Path, Headers, Body, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:post/5</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_post_connpid_path_headers_body_reqopts_8594_streamref">post(ConnPid, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-Body = iodata()
-</dt>
-<dd>
-<p>
-Body of the request.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Process the enclosed representation according to the resource&#8217;s own semantics.</p></div>
-<div class="paragraph"><p>It is highly recommended to set the <code>content-type</code> header
-to inform the server what media type the body contains.
-Gun will automatically set the <code>content-length</code> header.</p></div>
-<div class="paragraph"><p>The body sent in this request will be processed
-according to the resource&#8217;s own semantics. A new
-resource may be created as a result, and may be
-located at a different URI.</p></div>
-<div class="paragraph"><p>The complete request is sent when calling this function.
-It is not possible to stream more of the body after
-calling it.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_put_connpid_path_headers_8594_streamref">put(ConnPid, Path, Headers) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Create or replace a resource.</p></div>
-<div class="paragraph"><p>The body of the request is the entire representation of the resource.</p></div>
-<div class="paragraph"><p>This function expects either <code>content-length</code> or <code>content-type</code>
-to be set to know a body is going to be sent afterwards.
-Gun will assume the request has no body otherwise. It is
-highly recommended to set both when possible.</p></div>
-<div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_put_connpid_path_headers_body_8594_put_connpid_path_headers_body">put(ConnPid, Path, Headers, Body) &#8594; put(ConnPid, Path, Headers, Body, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:put/5</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_put_connpid_path_headers_body_reqopts_8594_streamref">put(ConnPid, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-Body = iodata()
-</dt>
-<dd>
-<p>
-Body of the request.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Create or replace a resource.</p></div>
-<div class="paragraph"><p>The body of the request is the entire representation of the resource.</p></div>
-<div class="paragraph"><p>It is highly recommended to set the <code>content-type</code> header
-to inform the server what media type the body contains.
-Gun will automatically set the <code>content-length</code> header.</p></div>
-<div class="paragraph"><p>The complete request is sent when calling this function.
-It is not possible to stream more of the body after
-calling it.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_request_connpid_method_path_headers_8594_streamref">request(ConnPid, Method, Path, Headers) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Method = iodata()
-</dt>
-<dd>
-<p>
-Request method.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path of the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Perform the given request.</p></div>
-<div class="paragraph"><p>This is a general purpose function that should only be used
-when existing method-specific functions don&#8217;t apply.</p></div>
-<div class="paragraph"><p>This function expects either <code>content-length</code> or <code>content-type</code>
-to be set to know a body is going to be sent afterwards.
-Gun will assume the request has no body otherwise. It is
-highly recommended to set both when possible.</p></div>
-<div class="paragraph"><p>You can use the <code>gun:data/4</code> function to send the body, if any.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_request_connpid_method_path_headers_body_8594_request_connpid_method_path_headers_body">request(ConnPid, Method, Path, Headers, Body) &#8594; request(ConnPid, Method, Path, Headers, Body, #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:request/6</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_request_connpid_method_path_headers_body_reqopts_8594_streamref">request(ConnPid, Method, Path, Headers, Body, ReqOpts) &#8594; StreamRef</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Method = iodata()
-</dt>
-<dd>
-<p>
-Request method.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path of the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-Body = iodata()
-</dt>
-<dd>
-<p>
-Body of the request.
-</p>
-</dd>
-<dt class="hdlist1">
-ReqOpts = req_opts()
-</dt>
-<dd>
-<p>
-Request options.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream for this request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Perform the given request.</p></div>
-<div class="paragraph"><p>This is a general purpose function that should only be used
-when existing method-specific functions don&#8217;t apply.</p></div>
-<div class="paragraph"><p>It is highly recommended to set the <code>content-type</code> header
-to inform the server what media type the body contains.
-Gun will automatically set the <code>content-length</code> header.</p></div>
-<div class="paragraph"><p>The complete request is sent when calling this function.
-It is not possible to stream more of the body after
-calling it.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_data_connpid_streamref_isfin_data_8594_ok">data(ConnPid, StreamRef, IsFin, Data) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream this data belongs to.
-</p>
-</dd>
-<dt class="hdlist1">
-IsFin = fin | nofin
-</dt>
-<dd>
-<p>
-Whether this message terminates the request.
-</p>
-</dd>
-<dt class="hdlist1">
-Data = iodata()
-</dt>
-<dd>
-<p>
-Data to be sent with the request.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Stream the body of a request.</p></div>
-<div class="paragraph"><p>@todo empty chunks</p></div>
-<div class="paragraph"><p>This function can only be used if the request identified by
-<code>StreamRef</code> came with headers indicating the presence of a
-body and that body not being given when creating the request.</p></div>
-<div class="paragraph"><p>All calls to this function must use <code>nofin</code> except for the
-last which must use <code>fin</code> to indicate the end of the request
-body.</p></div>
-<div class="paragraph"><p>Empty data is allowed regardless of the value of <code>IsFin</code>.
-Gun will not send empty data chunks unless required to
-indicate the request body is finished, however.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_await_connpid_streamref_8594_await_connpid_streamref_5000_monitorref">await(ConnPid, StreamRef) &#8594; await(ConnPid, StreamRef, 5000, MonitorRef)</h3>
-<div class="paragraph"><p>Alias of <code>gun:await/4</code>.</p></div>
-<div class="paragraph"><p>A monitor <code>MonitorRef</code> is automatically created for the duration of
-this call and an error will be returned if the Gun connection process
-terminates.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_await_connpid_streamref_monitorref_8594_await_connpid_streamref_5000_monitorref">await(ConnPid, StreamRef, MonitorRef) &#8594; await(ConnPid, StreamRef, 5000, MonitorRef)</h3>
-<div class="paragraph"><p>Alias of <code>gun:await/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_await_connpid_streamref_timeout_8594_await_connpid_streamref_timeout_monitorref">await(ConnPid, StreamRef, Timeout) &#8594; await(ConnPid, StreamRef, Timeout, MonitorRef)</h3>
-<div class="paragraph"><p>Alias of <code>gun:await/4</code>.</p></div>
-<div class="paragraph"><p>A monitor <code>MonitorRef</code> is automatically created for the duration of
-this call and an error will be returned if the Gun connection process
-terminates.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_await_connpid_streamref_timeout_monitorref_8594_tuple_8201_8212_8201_see_below">await(ConnPid, StreamRef, Timeout, MonitorRef) &#8594; tuple()&#8201;&#8212;&#8201;see below</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream to await messages from.
-</p>
-</dd>
-<dt class="hdlist1">
-Timeout = timeout()
-</dt>
-<dd>
-<p>
-How long this function will wait for messages.
-</p>
-</dd>
-<dt class="hdlist1">
-MonitorRef = reference()
-</dt>
-<dd>
-<p>
-Monitor reference for the Gun connection process.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Wait for a response message.</p></div>
-<div class="paragraph"><p>This function can be used when a synchronous handling of
-responses is desired. It will only return when a message
-for the given stream is received, on error or on timeout.</p></div>
-<div class="paragraph"><p>The return values are described in the next few subsections.</p></div>
-<div class="sect3">
-<h4 id="_response_isfin_status_headers">{response, IsFin, Status, Headers}</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-IsFin = fin | nofin
-</dt>
-<dd>
-<p>
-Whether this message terminates the response.
-</p>
-</dd>
-<dt class="hdlist1">
-Status = binary()
-</dt>
-<dd>
-<p>
-Status line for the response.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), binary()}]
-</dt>
-<dd>
-<p>
-Headers sent with the response.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Equivalent of a <code>gun_response</code> message.</p></div>
-</div>
-<div class="sect3">
-<h4 id="_data_isfin_data">{data, IsFin, Data}</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-IsFin = fin | nofin
-</dt>
-<dd>
-<p>
-Whether this message terminates the response.
-</p>
-</dd>
-<dt class="hdlist1">
-Data = binary()
-</dt>
-<dd>
-<p>
-Data from the stream.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Equivalent of a <code>gun_data</code> message.</p></div>
-</div>
-<div class="sect3">
-<h4 id="_push_newstreamref_uri_headers">{push, NewStreamRef, URI, Headers}</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-NewStreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream being pushed.
-</p>
-</dd>
-<dt class="hdlist1">
-URI = binary()
-</dt>
-<dd>
-<p>
-URI of the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), binary()}]
-</dt>
-<dd>
-<p>
-Headers @todo
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Equivalent of a <code>gun_push</code> message.</p></div>
-<div class="paragraph"><p>@todo Same changes as gun_push</p></div>
-</div>
-<div class="sect3">
-<h4 id="_error_reason">{error, Reason}</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Reason = any()
-</dt>
-<dd>
-<p>
-Error reason. @todo any?
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Equivalent of a <code>gun_error</code> message.</p></div>
-<div class="paragraph"><p>@todo I think we want to distinguish a stream error, a general error,
-@todo a DOWN and a timeout error</p></div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_await_body_connpid_streamref_8594_await_body_connpid_streamref_5000_monitorref">await_body(ConnPid, StreamRef) &#8594; await_body(ConnPid, StreamRef, 5000, MonitorRef)</h3>
-<div class="paragraph"><p>Alias of <code>gun:await_body/4</code>.</p></div>
-<div class="paragraph"><p>A monitor <code>MonitorRef</code> is automatically created for the duration of
-this call and an error will be returned if the Gun connection process
-terminates.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_await_body_connpid_streamref_monitorref_8594_await_body_connpid_streamref_5000_monitorref">await_body(ConnPid, StreamRef, MonitorRef) &#8594; await_body(ConnPid, StreamRef, 5000, MonitorRef)</h3>
-<div class="paragraph"><p>Alias of <code>gun:await_body/4</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_await_body_connpid_streamref_timeout_8594_await_body_connpid_streamref_timeout_monitorref">await_body(ConnPid, StreamRef, Timeout) &#8594; await_body(ConnPid, StreamRef, Timeout, MonitorRef)</h3>
-<div class="paragraph"><p>Alias of <code>gun:await_body/4</code>.</p></div>
-<div class="paragraph"><p>A monitor <code>MonitorRef</code> is automatically created for the duration of
-this call and an error will be returned if the Gun connection process
-terminates.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_await_body_connpid_streamref_timeout_monitorref_8594_ok_body_error_reason">await_body(ConnPid, StreamRef, Timeout, MonitorRef) &#8594; {ok, Body} | {error, Reason}</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream to await messages from.
-</p>
-</dd>
-<dt class="hdlist1">
-Timeout = timeout()
-</dt>
-<dd>
-<p>
-How long this function will wait for each message.
-</p>
-</dd>
-<dt class="hdlist1">
-MonitorRef = reference()
-</dt>
-<dd>
-<p>
-Monitor reference for the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Body = binary()
-</dt>
-<dd>
-<p>
-Body for the given stream.
-</p>
-</dd>
-<dt class="hdlist1">
-Reason = any()
-</dt>
-<dd>
-<p>
-Error reason. @todo any?
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Wait for a response body.</p></div>
-<div class="paragraph"><p>This function can be used when a synchronous handling of
-responses is desired. It will only return when it has
-finished fetching the entire response body.</p></div>
-<div class="paragraph"><p>The timeout value is <strong>per message</strong>. The actual function call
-can last much longer for large bodies.</p></div>
-<div class="paragraph"><p>@todo I think we want to distinguish a stream error, a general error,
-@todo a DOWN and a timeout error</p></div>
-<div class="paragraph"><p>@todo guide might be a little incorrect about await/await_body</p></div>
-</div>
-<div class="sect2">
-<h3 id="_flush_connpid_8594_ok">flush(ConnPid) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Flush all messages from the Gun connection process from the mailbox.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_flush_streamref_8594_ok">flush(StreamRef) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Stream identifier.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Flush all messages related to the given stream.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_cancel_connpid_streamref_8594_ok">cancel(ConnPid, StreamRef) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-StreamRef = reference()
-</dt>
-<dd>
-<p>
-Identifier of the stream to cancel.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Cancel the given stream.</p></div>
-<div class="paragraph"><p>HTTP/1.1 streams can&#8217;t be cancelled. Gun will simply silence
-the stream and stop relaying messages.</p></div>
-<div class="paragraph"><p>@todo Depending on the length
-@todo of a response Gun may also attempt to reconnect rather than
-@todo receive the entire response body.</p></div>
-<div class="paragraph"><p>HTTP/2 streams can however be cancelled at any time.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_ws_upgrade_connpid_path_8594_ws_upgrade_connpid_path">ws_upgrade(ConnPid, Path) &#8594; ws_upgrade(ConnPid, Path, [], #{})</h3>
-<div class="paragraph"><p>Alias of <code>gun:ws_upgrade/3</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_ws_upgrade_connpid_path_headers_8594_ok">ws_upgrade(ConnPid, Path, Headers) &#8594; ok</h3>
-<div class="paragraph"><p>Similar to <code>gun:ws_upgrade/4</code>, except <code>WsOpts</code> is taken from
-the options given in the <code>gun:open/{2,3}</code> call when opening
-the connection.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_ws_upgrade_connpid_path_headers_wsopts_8594_ok">ws_upgrade(ConnPid, Path, Headers, WsOpts) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Path = iodata()
-</dt>
-<dd>
-<p>
-Path to the resource.
-</p>
-</dd>
-<dt class="hdlist1">
-Headers = [{binary(), iodata()}]
-</dt>
-<dd>
-<p>
-Additional request headers.
-</p>
-</dd>
-<dt class="hdlist1">
-WsOpts = map()
-</dt>
-<dd>
-<p>
-Options for the Websocket connection.
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Request the connection to be upgraded to the Websocket protocol.</p></div>
-<div class="paragraph"><p>This function can only be used when the current protocol is <code>http</code>.</p></div>
-</div>
-<div class="sect2">
-<h3 id="_ws_send_connpid_frames_8594_ok">ws_send(ConnPid, Frames) &#8594; ok</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid = pid()
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
-</dd>
-<dt class="hdlist1">
-Frames = @todo
-</dt>
-<dd>
-<p>
-@todo
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>Send one or more Websocket frames.</p></div>
-<div class="paragraph"><p>This function can only be used following a successful <code>ws_upgrade</code> call.</p></div>
-</div>
+<div class="paragraph"><p><a href="../gun_app">gun(7)</a></p></div>
 </div>
 </div>
 
