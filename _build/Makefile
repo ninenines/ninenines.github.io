@@ -68,7 +68,7 @@ docs-$1-$2: tmp/$1
 		printf "%s\n" "+++" "title = \"`sed 's/\(.\)/\U\1/' <<< $1` Function Reference\"" \
 			"project = \"$1\"" "version = \"$3\"" "doctype = \"manual\"" "+++" "" \
 			> content/docs/en/$1/$3/manual.asciidoc; \
-		if [ "$1" = "cowboy" ]; then \
+		if [ "$1" = "cowboy" -o "$1" = "gun" ]; then \
 			sed '1,/^$$$$/d' tmp/$1/doc/src/manual/$1_app.asciidoc | sed 's/xref:/link:..\//' \
 				| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/' \
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
@@ -89,7 +89,7 @@ docs-$1-$2: tmp/$1
 			echo "\"" >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			echo "+++" >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			echo >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
-			if [ "$1" = "cowboy" ]; then \
+			if [ "$1" = "cowboy" -o "$1" = "gun" ]; then \
 				sed '1,/^$$$$/d' $$$$f | sed 's/xref:/link:..\//' \
 					| sed 's/link:man:$1(7)/link:../' \
 					| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
