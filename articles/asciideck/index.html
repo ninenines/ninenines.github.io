@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <title>Nine Nines: Cowboy 2.0 release candidate 2</title>
+    <title>Nine Nines: Asciideck: Asciidoc for Erlang</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=1" rel="stylesheet">
@@ -62,25 +62,42 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Cowboy 2.0 release candidate 2</span></h1>
+	<h1 class="lined-header"><span>Asciideck: Asciidoc for Erlang</span></h1>
 	<p class="date">
-		<span class="day">23</span>
-		<span class="month">Aug</span>
+		<span class="day">13</span>
+		<span class="month">Jun</span>
 	</p>
 </header>
 
-<p>Cowboy <code>2.0.0-rc.2</code> has been released!</p>
-<p>This is the new recommended version of Cowboy. Its API should not change before release. While you probably should not use it in production yet, many do successfully. Use at your own risk.</p>
-<p>This new version contains fixes for the following issues:</p>
-<ul><li>HTTP/2 server push was using the wrong header compression context.
+<p>Asciideck is a new project I have been working on in my spare time that implements an Asciidoc parser and translation of Asciidoc documents into various output formats.</p>
+<p>The Asciideck parser returns an AST for the document. That AST can be further manipulated should it be necessary: for example you may need to rewrite some relative links if you are not keeping the same file directory structure as the original Asciidoc documents. You could also enforce a certain document structure and validate it using the AST.</p>
+<p>This AST can then be passed on to the translator modules. Asciideck currently comes with two: HTML and man page. The article you are currently reading was generated using the HTML translator module.</p>
+<p>Asciideck has been tested against around 600 Asciidoc documents that I wrote. This website is now generated using Asciideck (Hugo will use the <a href="https://github.com/ninenines/asciideck/blob/master/scripts/asciidoc">asciidoc</a> script to generate HTML). But a lot of elements are not parsed properly, or are ignored by translator modules. It will take many more documents to get close to the original Asciidoc implementation in terms of features.</p>
+<p>I wrote this project twice: first as an ugly prototype that generated man pages, and then I rewrote that using a different technique for parsing. I looked at a few different Asciidoc and Markdown implementations and found the Markdown code in Pandoc to be surprisingly readable despite being written in Haskell. I could not fully understand how it worked, but I could follow it based on my knowledge of the syntax.</p>
+<p>I decided to write small functions that only contain the &quot;happy path&quot; for each possible blocks in an Asciidoc document. Take this function for example:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">comment_line</font></b>(<font color="#009900">St</font>) →
+    «<font color="#FF0000">"//"</font>, <font color="#009900">Comment0</font><font color="#990000">/</font><font color="#FF6600">bits</font>» <font color="#990000">=</font> <b><font color="#000000">read_line</font></b>(<font color="#009900">St</font>),
+    <font color="#009900">Comment</font> <font color="#990000">=</font> <b><font color="#000000">trim</font></b>(<font color="#009900">Comment0</font>),
+    {<font color="#FF6600">comment_line</font>, #{«<font color="#FF0000">"subs"</font>» ⇒ «<font color="#FF0000">"verbatim"</font>»}, <font color="#009900">Comment</font>, <b><font color="#000000">ann</font></b>(<font color="#009900">St</font>)}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>When the line begins with <code>//</code> this matches: we have a comment line and we return the block we just parsed. When the line doesn&apos;t begin with <code>//</code> the function will crash and Asciideck will try the next parse function in the list.</p>
+<p>This makes the code easy to read and improve. I am very happy with how it turned out.</p>
+<p>If you decide to use this parser and/or find issues with documents you have, please get in touch. I will be happy to fix issues on a short notice until the project gets close to a complete implementation.</p>
+<p>You can find the code at the usual locations:</p>
+<ul><li><a href="https://github.com/ninenines/asciideck">https://github.com/ninenines/asciideck</a>
 </li>
-<li>HTTP/2 flow control could end up queueing data in the wrong order when resuming the sending of data.
+<li><a href="https://git.ninenines.eu/asciideck.git/">https://git.ninenines.eu/asciideck.git/</a>
 </li>
-<li>The <code>shutdown</code> timeout was not implemented and request processes could be killed too quickly.
+<li><a href="https://gitlab.com/ninenines/asciideck">https://gitlab.com/ninenines/asciideck</a>
+</li>
+<li><a href="https://bitbucket.org/ninenines/asciideck">https://bitbucket.org/ninenines/asciideck</a>
 </li>
 </ul>
-<p>What else is new in Cowboy 2.0? Check the <a href="/articles/cowboy-2.0.0-rc.1">rc.1 announcement</a>.</p>
-<p>Please test this new release candidate and provide feedback! The best place to provide feedback is via tickets. Do not hesitate to open a ticket or bring an existing ticket to my attention to get it resolved before 2.0.</p>
+<p>You can also donate to this project via <a href="https://salt.bountysource.com/teams/ninenines">BountySource</a>. Thanks in advance!</p>
 
 
 </article>

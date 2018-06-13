@@ -1,0 +1,79 @@
++++
+date = "2018-06-13T07:00:00+01:00"
+title = "Asciideck: Asciidoc for Erlang"
+
++++
+
+Asciideck is a new project I have been working on
+in my spare time that implements an Asciidoc parser
+and translation of Asciidoc documents into various
+output formats.
+
+The Asciideck parser returns an AST for the document.
+That AST can be further manipulated should it be
+necessary: for example you may need to rewrite some
+relative links if you are not keeping the same file
+directory structure as the original Asciidoc documents.
+You could also enforce a certain document structure
+and validate it using the AST.
+
+This AST can then be passed on to the translator
+modules. Asciideck currently comes with two: HTML
+and man page. The article you are currently reading
+was generated using the HTML translator module.
+
+Asciideck has been tested against around 600
+Asciidoc documents that I wrote. This website is
+now generated using Asciideck (Hugo will use the
+https://github.com/ninenines/asciideck/blob/master/scripts/asciidoc[asciidoc]
+script to generate HTML). But a lot of elements
+are not parsed properly, or are ignored by translator
+modules. It will take many more documents to get
+close to the original Asciidoc implementation in
+terms of features.
+
+I wrote this project twice: first as an ugly prototype
+that generated man pages, and then I rewrote that
+using a different technique for parsing. I looked
+at a few different Asciidoc and Markdown implementations
+and found the Markdown code in Pandoc to be surprisingly
+readable despite being written in Haskell. I could
+not fully understand how it worked, but I could follow
+it based on my knowledge of the syntax.
+
+I decided to write small functions that only contain
+the "happy path" for each possible blocks in an
+Asciidoc document. Take this function for example:
+
+[source,erlang]
+----
+comment_line(St) →
+    «"//", Comment0/bits» = read_line(St),
+    Comment = trim(Comment0),
+    {comment_line, #{«"subs"» ⇒ «"verbatim"»}, Comment, ann(St)}.
+----
+
+When the line begins with `//` this matches: we have
+a comment line and we return the block we just parsed.
+When the line doesn't begin with `//` the function will
+crash and Asciideck will try the next parse function in
+the list.
+
+This makes the code easy to read and improve. I am
+very happy with how it turned out.
+
+If you decide to use this parser and/or find issues
+with documents you have, please get in touch. I will
+be happy to fix issues on a short notice until the
+project gets close to a complete implementation.
+
+You can find the code at the usual locations:
+
+* https://github.com/ninenines/asciideck
+* https://git.ninenines.eu/asciideck.git/
+* https://gitlab.com/ninenines/asciideck
+* https://bitbucket.org/ninenines/asciideck
+
+You can also donate to this project via
+https://salt.bountysource.com/teams/ninenines[BountySource].
+Thanks in advance!
