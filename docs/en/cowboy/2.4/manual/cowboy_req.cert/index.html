@@ -62,104 +62,60 @@
 
 <h1 class="lined-header"><span>cowboy_req:cert(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:cert - Client TLS certificate</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_req:cert - Client TLS certificate</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">cert</span></span>(<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #000080">undefined</span></tt></pre></div></div>
-<div class="paragraph"><p>Return the peer&#8217;s TLS certificate.</p></div>
-<div class="paragraph"><p>Using the default configuration this function will always return
-<code>undefined</code>. You need to explicitly configure Cowboy to request
-the client certificate. To do this you need to set the <code>verify</code>
-transport option to <code>verify_peer</code>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">cert</font></b>(<font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>()) <font color="#990000">-&gt;</font> <b><font color="#000080">binary</font></b>() | <font color="#000080">undefined</font></tt></pre>
+</div></div>
+<p>Return the peer&apos;s TLS certificate.</p>
+<p>Using the default configuration this function will always return <code>undefined</code>. You need to explicitly configure Cowboy to request the client certificate. To do this you need to set the <code>verify</code> transport option to <code>verify_peer</code>:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_tls</span></span>(<span style="color: #FF6600">example</span>, [
-    {<span style="color: #FF6600">port</span>, <span style="color: #993399">8443</span>},
-    {<span style="color: #FF6600">cert</span>, <span style="color: #FF0000">"path/to/cert.pem"</span>},
-    {<span style="color: #FF6600">verify</span>, <span style="color: #FF6600">verify_peer</span>}
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy:start_tls</font></b>(<font color="#FF6600">example</font>, [
+    {<font color="#FF6600">port</font>, <font color="#993399">8443</font>},
+    {<font color="#FF6600">cert</font>, <font color="#FF0000">"path/to/cert.pem"</font>},
+    {<font color="#FF6600">verify</font>, <font color="#FF6600">verify_peer</font>}
 ], #{
-    <span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}
-})<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>You may also want to customize the <code>verify_fun</code> function. Please
-consult the <code>ssl</code> application&#8217;s manual for more details.</p></div>
-<div class="paragraph"><p>TCP connections do not allow a certificate and this function
-will therefore always return <code>undefined</code>.</p></div>
-<div class="paragraph"><p>The certificate can also be obtained using pattern matching:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+    <font color="#0000FF">env</font> <font color="#990000">=&gt;</font> #{<font color="#0000FF">dispatch</font> <font color="#990000">=&gt;</font> <font color="#009900">Dispatch</font>}
+})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You may also want to customize the <code>verify_fun</code> function. Please consult the <code>ssl</code> application&apos;s manual for more details.</p>
+<p>TCP connections do not allow a certificate and this function will therefore always return <code>undefined</code>.</p>
+<p>The certificate can also be obtained using pattern matching:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>#{<span style="color: #FF6600">cert</span> <span style="color: #990000">:=</span> <span style="color: #009900">Cert</span>} <span style="color: #990000">=</span> <span style="color: #009900">Req</span><span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>#{<font color="#FF6600">cert</font> <font color="#990000">:=</font> <font color="#009900">Cert</font>} <font color="#990000">=</font> <font color="#009900">Req</font><font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_arguments">Arguments</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Req
-</dt>
-<dd>
-<p>
-The Req object.
-</p>
+<dl><dt>Req</dt>
+<dd><p>The Req object.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_return_value">Return value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The client TLS certificate.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>The client TLS certificate.</p>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.1</strong>: Function introduced.
-</p>
+<ul><li><strong>2.1</strong>: Function introduced.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Get the client TLS certificate.</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Get the client TLS certificate.</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Cert</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:cert</span></span>(<span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">Cert</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:cert</font></b>(<font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.peer">cowboy_req:peer(3)</a>,
-<a href="../cowboy_req.sock">cowboy_req:sock(3)</a></p></div>
-</div>
-</div>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.peer">cowboy_req:peer(3)</a>, <a href="../cowboy_req.sock">cowboy_req:sock(3)</a></p>
+
 
 
 

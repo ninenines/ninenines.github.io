@@ -62,395 +62,279 @@
 
 <h1 class="lined-header"><span>HTTP</span></h1>
 
-<div class="paragraph"><p>This chapter describes how to use the Gun client for
-communicating with an HTTP/1.1 or HTTP/2 server.</p></div>
-<div class="sect1">
+<p>This chapter describes how to use the Gun client for communicating with an HTTP/1.1 or HTTP/2 server.</p>
 <h2 id="_streams">Streams</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Every time a request is initiated,  Gun creates a <em>stream</em>.
-A <em>stream reference</em> uniquely identifies a set of request and
-response and must be used to perform additional operations
-with a stream or to identify its messages.</p></div>
-<div class="paragraph"><p>Stream references use the Erlang <em>reference</em> data type and
-are therefore unique.</p></div>
-<div class="paragraph"><p>Streams can be canceled at any time. This will stop any further
-messages from being sent to the owner process. Depending on
-its capabilities, the server will also be instructed to cancel
-the request.</p></div>
-<div class="paragraph"><p>Canceling a stream may result in Gun dropping the connection
-temporarily, to avoid uploading or downloading data that will
-not be used.</p></div>
-<div class="listingblock">
-<div class="title">Cancelling a stream</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Every time a request is initiated,  Gun creates a <em>stream</em>. A <em>stream reference</em> uniquely identifies a set of request and response and must be used to perform additional operations with a stream or to identify its messages.</p>
+<p>Stream references use the Erlang <em>reference</em> data type and are therefore unique.</p>
+<p>Streams can be canceled at any time. This will stop any further messages from being sent to the owner process. Depending on its capabilities, the server will also be instructed to cancel the request.</p>
+<p>Canceling a stream may result in Gun dropping the connection temporarily, to avoid uploading or downloading data that will not be used.</p>
+<div class="listingblock"><div class="title">Cancelling a stream</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">gun:cancel</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">gun:cancel</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_sending_requests">Sending requests</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Gun provides many convenient functions for performing common
-operations, like GET, POST or DELETE. It also provides a
-general purpose function in case you need other methods.</p></div>
-<div class="paragraph"><p>The availability of these methods on the server can vary
-depending on the software used but also on a per-resource
-basis.</p></div>
-<div class="paragraph"><p>Gun will automatically set a few headers depending on the
-method used. For all methods however it will set the host
-header if it has not been provided in the request arguments.</p></div>
-<div class="paragraph"><p>This section focuses on the act of sending a request. The
-handling of responses will be explained further on.</p></div>
-<div class="sect3">
+<p>Gun provides many convenient functions for performing common operations, like GET, POST or DELETE. It also provides a general purpose function in case you need other methods.</p>
+<p>The availability of these methods on the server can vary depending on the software used but also on a per-resource basis.</p>
+<p>Gun will automatically set a few headers depending on the method used. For all methods however it will set the host header if it has not been provided in the request arguments.</p>
+<p>This section focuses on the act of sending a request. The handling of responses will be explained further on.</p>
 <h4 id="_get_and_head">GET and HEAD</h4>
-<div class="paragraph"><p>Use <code>gun:get/2,3,4</code> to request a resource.</p></div>
-<div class="listingblock">
-<div class="title">GET "/organizations/ninenines"</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Use <code>gun:get/2,3,4</code> to request a resource.</p>
+<div class="listingblock"><div class="title">GET &quot;/organizations/ninenines&quot;</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:get</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">GET "/organizations/ninenines" with custom headers</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:get</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">GET &quot;/organizations/ninenines&quot; with custom headers</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:get</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>, [
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"accept"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"application/json"</span>},
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"user-agent"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"revolver/1.0"</span>}
-])<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Note that the list of headers has the field name as a binary.
-The field value is iodata, which is either a binary or an
-iolist.</p></div>
-<div class="paragraph"><p>Use <code>gun:head/2,3,4</code> if you don&#8217;t need the response body.</p></div>
-<div class="listingblock">
-<div class="title">HEAD "/organizations/ninenines"</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:get</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"accept"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"application/json"</font>},
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"user-agent"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"revolver/1.0"</font>}
+])<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Note that the list of headers has the field name as a binary. The field value is iodata, which is either a binary or an iolist.</p>
+<p>Use <code>gun:head/2,3,4</code> if you don&apos;t need the response body.</p>
+<div class="listingblock"><div class="title">HEAD &quot;/organizations/ninenines&quot;</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:head</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">HEAD "/organizations/ninenines" with custom headers</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:head</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">HEAD &quot;/organizations/ninenines&quot; with custom headers</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:head</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>, [
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"accept"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"application/json"</span>},
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"user-agent"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"revolver/1.0"</span>}
-])<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>It is not possible to send a request body with a GET or HEAD
-request.</p></div>
-</div>
-<div class="sect3">
-<h4 id="_post_put_and_patch">POST, PUT and PATCH</h4>
-<div class="paragraph"><p>HTTP defines three methods to create or update a resource.</p></div>
-<div class="paragraph"><p>POST is generally used when the resource identifier (URI) isn&#8217;t known
-in advance when creating a resource. POST can also be used to
-replace an existing resource, although PUT is more appropriate
-in that situation.</p></div>
-<div class="paragraph"><p>PUT creates or replaces a resource identified by the URI.</p></div>
-<div class="paragraph"><p>PATCH provides instructions on how to modify the resource.</p></div>
-<div class="paragraph"><p>Both POST and PUT send the entire resource representation in their
-request body. The PATCH method can be used when this is not
-desirable. The request body of a PATCH method may be a partial
-representation or a list of instructions on how to update the
-resource.</p></div>
-<div class="paragraph"><p>The <code>gun:post/4,5</code>, <code>gun:put/4,5</code> and <code>gun:patch/4,5</code> functions
-take a body as their fourth argument. These functions do
-not require any body-specific header to be set, although
-it is always recommended to set the content-type header.
-Gun will set the other headers automatically.</p></div>
-<div class="paragraph"><p>In this and the following examples in this section, <code>gun:post</code>
-can be replaced by <code>gun:put</code> or <code>gun:patch</code> for performing
-a PUT or PATCH request, respectively.</p></div>
-<div class="listingblock">
-<div class="title">POST "/organizations/ninenines"</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:head</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"accept"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"application/json"</font>},
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"user-agent"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"revolver/1.0"</font>}
+])<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>It is not possible to send a request body with a GET or HEAD request.</p>
+<h4 id="_post__put_and_patch">POST, PUT and PATCH</h4>
+<p>HTTP defines three methods to create or update a resource.</p>
+<p>POST is generally used when the resource identifier (URI) isn&apos;t known in advance when creating a resource. POST can also be used to replace an existing resource, although PUT is more appropriate in that situation.</p>
+<p>PUT creates or replaces a resource identified by the URI.</p>
+<p>PATCH provides instructions on how to modify the resource.</p>
+<p>Both POST and PUT send the entire resource representation in their request body. The PATCH method can be used when this is not desirable. The request body of a PATCH method may be a partial representation or a list of instructions on how to update the resource.</p>
+<p>The <code>gun:post/4,5</code>, <code>gun:put/4,5</code> and <code>gun:patch/4,5</code> functions take a body as their fourth argument. These functions do not require any body-specific header to be set, although it is always recommended to set the content-type header. Gun will set the other headers automatically.</p>
+<p>In this and the following examples in this section, <code>gun:post</code> can be replaced by <code>gun:put</code> or <code>gun:patch</code> for performing a PUT or PATCH request, respectively.</p>
+<div class="listingblock"><div class="title">POST &quot;/organizations/ninenines&quot;</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Body</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"{\"msg\": \"Hello world!\"}"</span>,
-<span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:post</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>, [
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"application/json"</span>}
-], <span style="color: #009900">Body</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The <code>gun:post/3</code>, <code>gun:put/3</code> and <code>gun:patch/3</code> functions
-do not take a body in their arguments. If a body is to be
-provided later on, using the <code>gun:data/4</code> function, then
-the request headers must indicate this. This can be done
-by setting the content-length or content-type request
-headers. If these headers are not set then Gun will assume
-the request has no body.</p></div>
-<div class="paragraph"><p>It is recommended to send the content-length header if you
-know it in advance, although this is not required. If it
-is not set, HTTP/1.1 will use the chunked transfer-encoding,
-and HTTP/2 will continue normally as it is chunked by design.</p></div>
-<div class="listingblock">
-<div class="title">POST "/organizations/ninenines" with delayed body</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">Body</font> <font color="#990000">=</font> <font color="#FF0000">"{\"msg\": \"Hello world!\"}"</font>,
+<font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:post</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-type"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"application/json"</font>}
+], <font color="#009900">Body</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The <code>gun:post/3</code>, <code>gun:put/3</code> and <code>gun:patch/3</code> functions do not take a body in their arguments. If a body is to be provided later on, using the <code>gun:data/4</code> function, then the request headers must indicate this. This can be done by setting the content-length or content-type request headers. If these headers are not set then Gun will assume the request has no body.</p>
+<p>It is recommended to send the content-length header if you know it in advance, although this is not required. If it is not set, HTTP/1.1 will use the chunked transfer-encoding, and HTTP/2 will continue normally as it is chunked by design.</p>
+<div class="listingblock"><div class="title">POST &quot;/organizations/ninenines&quot; with delayed body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Body</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"{\"msg\": \"Hello world!\"}"</span>,
-<span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:post</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>, [
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-length"</span><span style="color: #990000">&gt;&gt;</span>, <span style="font-weight: bold"><span style="color: #000000">integer_to_binary</span></span>(<span style="font-weight: bold"><span style="color: #000080">length</span></span>(<span style="color: #009900">Body</span>))},
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"application/json"</span>}
+<pre><tt><font color="#009900">Body</font> <font color="#990000">=</font> <font color="#FF0000">"{\"msg\": \"Hello world!\"}"</font>,
+<font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:post</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-length"</font><font color="#990000">&gt;&gt;</font>, <b><font color="#000000">integer_to_binary</font></b>(<b><font color="#000080">length</font></b>(<font color="#009900">Body</font>))},
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-type"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"application/json"</font>}
 ]),
-<span style="font-weight: bold"><span style="color: #000000">gun:data</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #FF6600">fin</span>, <span style="color: #009900">Body</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The atom <code>fin</code> indicates this is the last chunk of data to
-be sent. You can call the <code>gun:data/4</code> function as many
-times as needed until you have sent the entire body. The
-last call must use <code>fin</code> and all the previous calls must
-use <code>nofin</code>. The last chunk may be empty.</p></div>
-<div class="listingblock">
-<div class="title">Streaming the request body</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000000">gun:data</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#FF6600">fin</font>, <font color="#009900">Body</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The atom <code>fin</code> indicates this is the last chunk of data to be sent. You can call the <code>gun:data/4</code> function as many times as needed until you have sent the entire body. The last call must use <code>fin</code> and all the previous calls must use <code>nofin</code>. The last chunk may be empty.</p>
+<div class="listingblock"><div class="title">Streaming the request body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">sendfile</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #009900">Filepath</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">IoDevice</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">file:open</span></span>(<span style="color: #009900">Filepath</span>, [<span style="color: #FF6600">read</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #FF6600">raw</span>]),
-    <span style="font-weight: bold"><span style="color: #000000">do_sendfile</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #009900">IoDevice</span>)<span style="color: #990000">.</span>
+<pre><tt><b><font color="#000000">sendfile</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">Filepath</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">ok</font>, <font color="#009900">IoDevice</font>} <font color="#990000">=</font> <b><font color="#000000">file:open</font></b>(<font color="#009900">Filepath</font>, [<font color="#FF6600">read</font>, <b><font color="#000080">binary</font></b>, <font color="#FF6600">raw</font>]),
+    <b><font color="#000000">do_sendfile</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">IoDevice</font>)<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">do_sendfile</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #009900">IoDevice</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">file:read</span></span>(<span style="color: #009900">IoDevice</span>, <span style="color: #993399">8000</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        <span style="color: #FF6600">eof</span> <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">gun:data</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #FF6600">fin</span>, <span style="color: #990000">&lt;&lt;&gt;&gt;</span>),
-            <span style="font-weight: bold"><span style="color: #000000">file:close</span></span>(<span style="color: #009900">IoDevice</span>);
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Bin</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">gun:data</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Bin</span>),
-            <span style="font-weight: bold"><span style="color: #000000">do_sendfile</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #009900">IoDevice</span>)
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-<div class="sect3">
+<b><font color="#000000">do_sendfile</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">IoDevice</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <b><font color="#000000">file:read</font></b>(<font color="#009900">IoDevice</font>, <font color="#993399">8000</font>) <b><font color="#0000FF">of</font></b>
+        <font color="#FF6600">eof</font> <font color="#990000">-&gt;</font>
+            <b><font color="#000000">gun:data</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#FF6600">fin</font>, <font color="#990000">&lt;&lt;&gt;&gt;</font>),
+            <b><font color="#000000">file:close</font></b>(<font color="#009900">IoDevice</font>);
+        {<font color="#FF6600">ok</font>, <font color="#009900">Bin</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">gun:data</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#FF6600">nofin</font>, <font color="#009900">Bin</font>),
+            <b><font color="#000000">do_sendfile</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">IoDevice</font>)
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
 <h4 id="_delete">DELETE</h4>
-<div class="paragraph"><p>Use <code>gun:delete/2,3,4</code> to delete a resource.</p></div>
-<div class="listingblock">
-<div class="title">DELETE "/organizations/ninenines"</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Use <code>gun:delete/2,3,4</code> to delete a resource.</p>
+<div class="listingblock"><div class="title">DELETE &quot;/organizations/ninenines&quot;</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:delete</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">DELETE "/organizations/ninenines" with custom headers</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:delete</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">DELETE &quot;/organizations/ninenines&quot; with custom headers</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:delete</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>, [
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"user-agent"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"revolver/1.0"</span>}
-])<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-<div class="sect3">
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:delete</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"user-agent"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"revolver/1.0"</font>}
+])<font color="#990000">.</font></tt></pre>
+</div></div>
 <h4 id="_options">OPTIONS</h4>
-<div class="paragraph"><p>Use <code>gun:options/2,3</code> to request information about a resource.</p></div>
-<div class="listingblock">
-<div class="title">OPTIONS "/organizations/ninenines"</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Use <code>gun:options/2,3</code> to request information about a resource.</p>
+<div class="listingblock"><div class="title">OPTIONS &quot;/organizations/ninenines&quot;</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:options</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">OPTIONS "/organizations/ninenines" with custom headers</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:options</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">OPTIONS &quot;/organizations/ninenines&quot; with custom headers</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:options</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>, [
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"user-agent"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"revolver/1.0"</span>}
-])<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>You can also use this function to request information about
-the server itself.</p></div>
-<div class="listingblock">
-<div class="title">OPTIONS "*"</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:options</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"user-agent"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"revolver/1.0"</font>}
+])<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can also use this function to request information about the server itself.</p>
+<div class="listingblock"><div class="title">OPTIONS &quot;*&quot;</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:options</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"*"</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-<div class="sect3">
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:options</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"*"</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h4 id="_requests_with_an_arbitrary_method">Requests with an arbitrary method</h4>
-<div class="paragraph"><p>The <code>gun:request/4,5,6</code> function can be used to send requests
-with a configurable method name. It is mostly useful when you
-need a method that Gun does not understand natively.</p></div>
-<div class="listingblock">
-<div class="title">Example of a TRACE request</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The <code>gun:request/4,5,6</code> function can be used to send requests with a configurable method name. It is mostly useful when you need a method that Gun does not understand natively.</p>
+<div class="listingblock"><div class="title">Example of a TRACE request</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">gun:request</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"TRACE"</span>, <span style="color: #FF0000">"/"</span>, [
-    {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"max-forwards"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF0000">"30"</span>}
-])<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">gun:request</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"TRACE"</font>, <font color="#FF0000">"/"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"max-forwards"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"30"</font>}
+])<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_processing_responses">Processing responses</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>All data received from the server is sent to the owner
-process as a message. First a <code>gun_response</code> message is sent,
-followed by zero or more <code>gun_data</code> messages. If something goes wrong,
-a <code>gun_error</code> message is sent instead.</p></div>
-<div class="paragraph"><p>The response message will inform you whether there will be
-data messages following. If it contains <code>fin</code> there will be
-no data messages. If it contains <code>nofin</code> then one or more data
-messages will follow.</p></div>
-<div class="paragraph"><p>When using HTTP/2 this value is sent with the frame and simply
-passed on in the message. When using HTTP/1.1 however Gun must
-guess whether data will follow by looking at the response headers.</p></div>
-<div class="paragraph"><p>You can receive messages directly, or you can use the <em>await</em>
-functions to let Gun receive them for you.</p></div>
-<div class="listingblock">
-<div class="title">Receiving a response using receive</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>All data received from the server is sent to the owner process as a message. First a <code>gun_response</code> message is sent, followed by zero or more <code>gun_data</code> messages. If something goes wrong, a <code>gun_error</code> message is sent instead.</p>
+<p>The response message will inform you whether there will be data messages following. If it contains <code>fin</code> there will be no data messages. If it contains <code>nofin</code> then one or more data messages will follow.</p>
+<p>When using HTTP/2 this value is sent with the frame and simply passed on in the message. When using HTTP/1.1 however Gun must guess whether data will follow by looking at the response headers.</p>
+<p>You can receive messages directly, or you can use the <em>await</em> functions to let Gun receive them for you.</p>
+<div class="listingblock"><div class="title">Receiving a response using receive</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">print_body</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">MRef</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:get</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/"</span>),
-    <span style="font-weight: bold"><span style="color: #0000FF">receive</span></span>
-        {<span style="color: #FF6600">gun_response</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #FF6600">fin</span>, <span style="color: #009900">Status</span>, <span style="color: #009900">Headers</span>} <span style="color: #990000">-&gt;</span>
-            <span style="color: #FF6600">no_data</span>;
-        {<span style="color: #FF6600">gun_response</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Status</span>, <span style="color: #009900">Headers</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">receive_data</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">MRef</span>, <span style="color: #009900">StreamRef</span>);
-        {<span style="color: #FF6600">'DOWN'</span>, <span style="color: #009900">MRef</span>, <span style="font-weight: bold"><span style="color: #000080">process</span></span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">Reason</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">error_logger:error_msg</span></span>(<span style="color: #FF0000">"Oops!"</span>),
-            <span style="font-weight: bold"><span style="color: #000080">exit</span></span>(<span style="color: #009900">Reason</span>)
-    <span style="font-weight: bold"><span style="color: #0000FF">after</span></span> <span style="color: #993399">1000</span> <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000080">exit</span></span>(<span style="color: #FF6600">timeout</span>)
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span>
+<pre><tt><b><font color="#000000">print_body</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">MRef</font>) <font color="#990000">-&gt;</font>
+    <font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:get</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/"</font>),
+    <b><font color="#0000FF">receive</font></b>
+        {<font color="#FF6600">gun_response</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#FF6600">fin</font>, <font color="#009900">Status</font>, <font color="#009900">Headers</font>} <font color="#990000">-&gt;</font>
+            <font color="#FF6600">no_data</font>;
+        {<font color="#FF6600">gun_response</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#FF6600">nofin</font>, <font color="#009900">Status</font>, <font color="#009900">Headers</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">receive_data</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">MRef</font>, <font color="#009900">StreamRef</font>);
+        {<font color="#FF6600">'DOWN'</font>, <font color="#009900">MRef</font>, <b><font color="#000080">process</font></b>, <font color="#009900">ConnPid</font>, <font color="#009900">Reason</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">error_logger:error_msg</font></b>(<font color="#FF0000">"Oops!"</font>),
+            <b><font color="#000080">exit</font></b>(<font color="#009900">Reason</font>)
+    <b><font color="#0000FF">after</font></b> <font color="#993399">1000</font> <font color="#990000">-&gt;</font>
+        <b><font color="#000080">exit</font></b>(<font color="#FF6600">timeout</font>)
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">receive_data</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">MRef</span>, <span style="color: #009900">StreamRef</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">receive</span></span>
-        {<span style="color: #FF6600">gun_data</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"~s~n"</span>, [<span style="color: #009900">Data</span>]),
-            <span style="font-weight: bold"><span style="color: #000000">receive_data</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">MRef</span>, <span style="color: #009900">StreamRef</span>);
-        {<span style="color: #FF6600">gun_data</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #FF6600">fin</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"~s~n"</span>, [<span style="color: #009900">Data</span>]);
-        {<span style="color: #FF6600">'DOWN'</span>, <span style="color: #009900">MRef</span>, <span style="font-weight: bold"><span style="color: #000080">process</span></span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">Reason</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">error_logger:error_msg</span></span>(<span style="color: #FF0000">"Oops!"</span>),
-            <span style="font-weight: bold"><span style="color: #000080">exit</span></span>(<span style="color: #009900">Reason</span>)
-    <span style="font-weight: bold"><span style="color: #0000FF">after</span></span> <span style="color: #993399">1000</span> <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000080">exit</span></span>(<span style="color: #FF6600">timeout</span>)
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>While it may seem verbose, using messages like this has the
-advantage of never locking your process, allowing you to
-easily debug your code. It also allows you to start more than
-one connection and concurrently perform queries on all of them
-at the same time.</p></div>
-<div class="paragraph"><p>You can also use Gun in a synchronous manner by using the <em>await</em>
-functions.</p></div>
-<div class="paragraph"><p>The <code>gun:await/2,3,4</code> function will wait until it receives
-a response to, a pushed resource related to, or data from
-the given stream.</p></div>
-<div class="paragraph"><p>When calling <code>gun:await/2,3</code> and not passing a monitor
-reference, one is automatically created for you for the
-duration of the call.</p></div>
-<div class="paragraph"><p>The <code>gun:await_body/2,3,4</code> works similarly, but returns the
-body received. Both functions can be combined to receive the
-response and its body sequentially.</p></div>
-<div class="listingblock">
-<div class="title">Receiving a response using await</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000000">receive_data</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">MRef</font>, <font color="#009900">StreamRef</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">receive</font></b>
+        {<font color="#FF6600">gun_data</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#FF6600">nofin</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"~s~n"</font>, [<font color="#009900">Data</font>]),
+            <b><font color="#000000">receive_data</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">MRef</font>, <font color="#009900">StreamRef</font>);
+        {<font color="#FF6600">gun_data</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#FF6600">fin</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"~s~n"</font>, [<font color="#009900">Data</font>]);
+        {<font color="#FF6600">'DOWN'</font>, <font color="#009900">MRef</font>, <b><font color="#000080">process</font></b>, <font color="#009900">ConnPid</font>, <font color="#009900">Reason</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">error_logger:error_msg</font></b>(<font color="#FF0000">"Oops!"</font>),
+            <b><font color="#000080">exit</font></b>(<font color="#009900">Reason</font>)
+    <b><font color="#0000FF">after</font></b> <font color="#993399">1000</font> <font color="#990000">-&gt;</font>
+        <b><font color="#000080">exit</font></b>(<font color="#FF6600">timeout</font>)
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>While it may seem verbose, using messages like this has the advantage of never locking your process, allowing you to easily debug your code. It also allows you to start more than one connection and concurrently perform queries on all of them at the same time.</p>
+<p>You can also use Gun in a synchronous manner by using the <em>await</em> functions.</p>
+<p>The <code>gun:await/2,3,4</code> function will wait until it receives a response to, a pushed resource related to, or data from the given stream.</p>
+<p>When calling <code>gun:await/2,3</code> and not passing a monitor reference, one is automatically created for you for the duration of the call.</p>
+<p>The <code>gun:await_body/2,3,4</code> works similarly, but returns the body received. Both functions can be combined to receive the response and its body sequentially.</p>
+<div class="listingblock"><div class="title">Receiving a response using await</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:get</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/"</span>),
-<span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">gun:await</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-    {<span style="color: #FF6600">response</span>, <span style="color: #FF6600">fin</span>, <span style="color: #009900">Status</span>, <span style="color: #009900">Headers</span>} <span style="color: #990000">-&gt;</span>
-        <span style="color: #FF6600">no_data</span>;
-    {<span style="color: #FF6600">response</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Status</span>, <span style="color: #009900">Headers</span>} <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Body</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:await_body</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>),
-        <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"~s~n"</span>, [<span style="color: #009900">Body</span>])
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:get</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/"</font>),
+<b><font color="#0000FF">case</font></b> <b><font color="#000000">gun:await</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>) <b><font color="#0000FF">of</font></b>
+    {<font color="#FF6600">response</font>, <font color="#FF6600">fin</font>, <font color="#009900">Status</font>, <font color="#009900">Headers</font>} <font color="#990000">-&gt;</font>
+        <font color="#FF6600">no_data</font>;
+    {<font color="#FF6600">response</font>, <font color="#FF6600">nofin</font>, <font color="#009900">Status</font>, <font color="#009900">Headers</font>} <font color="#990000">-&gt;</font>
+        {<font color="#FF6600">ok</font>, <font color="#009900">Body</font>} <font color="#990000">=</font> <b><font color="#000000">gun:await_body</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>),
+        <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"~s~n"</font>, [<font color="#009900">Body</font>])
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_handling_streams_pushed_by_the_server">Handling streams pushed by the server</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The HTTP/2 protocol allows the server to push more than one
-resource for every request. It will start sending those
-extra resources before it starts sending the response itself,
-so Gun will send you <code>gun_push</code> messages before <code>gun_response</code>
-when that happens.</p></div>
-<div class="paragraph"><p>You can safely choose to ignore <code>gun_push</code> messages, or
-you can handle them. If you do, you can either receive the
-messages directly or use <em>await</em> functions.</p></div>
-<div class="paragraph"><p>The <code>gun_push</code> message contains both the new stream reference
-and the stream reference of the original request.</p></div>
-<div class="listingblock">
-<div class="title">Receiving a pushed response using receive</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The HTTP/2 protocol allows the server to push more than one resource for every request. It will start sending those extra resources before it starts sending the response itself, so Gun will send you <code>gun_push</code> messages before <code>gun_response</code> when that happens.</p>
+<p>You can safely choose to ignore <code>gun_push</code> messages, or you can handle them. If you do, you can either receive the messages directly or use <em>await</em> functions.</p>
+<p>The <code>gun_push</code> message contains both the new stream reference and the stream reference of the original request.</p>
+<div class="listingblock"><div class="title">Receiving a pushed response using receive</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">receive</span></span>
-    {<span style="color: #FF6600">gun_push</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">OriginalStreamRef</span>, <span style="color: #009900">PushedStreamRef</span>,
-            <span style="color: #009900">Method</span>, <span style="color: #009900">Host</span>, <span style="color: #009900">Path</span>, <span style="color: #009900">Headers</span>} <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000000">enjoy</span></span>()
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>If you use the <code>gun:await/2,3,4</code> function, however, Gun
-will use the original reference to identify the message but
-will return a tuple that doesn&#8217;t contain it.</p></div>
-<div class="listingblock">
-<div class="title">Receiving a pushed response using await</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#0000FF">receive</font></b>
+    {<font color="#FF6600">gun_push</font>, <font color="#009900">ConnPid</font>, <font color="#009900">OriginalStreamRef</font>, <font color="#009900">PushedStreamRef</font>,
+            <font color="#009900">Method</font>, <font color="#009900">Host</font>, <font color="#009900">Path</font>, <font color="#009900">Headers</font>} <font color="#990000">-&gt;</font>
+        <b><font color="#000000">enjoy</font></b>()
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>If you use the <code>gun:await/2,3,4</code> function, however, Gun will use the original reference to identify the message but will return a tuple that doesn&apos;t contain it.</p>
+<div class="listingblock"><div class="title">Receiving a pushed response using await</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">push</span>, <span style="color: #009900">PushedStreamRef</span>, <span style="color: #009900">Method</span>, <span style="color: #009900">URI</span>, <span style="color: #009900">Headers</span>}
-    <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:await</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #009900">OriginalStreamRef</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The <code>PushedStreamRef</code> variable can then be used with <code>gun:await/2,3,4</code>
-and <code>gun:await_body/2,3,4</code>.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>{<font color="#FF6600">push</font>, <font color="#009900">PushedStreamRef</font>, <font color="#009900">Method</font>, <font color="#009900">URI</font>, <font color="#009900">Headers</font>}
+    <font color="#990000">=</font> <b><font color="#000000">gun:await</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">OriginalStreamRef</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The <code>PushedStreamRef</code> variable can then be used with <code>gun:await/2,3,4</code> and <code>gun:await_body/2,3,4</code>.</p>
 <h2 id="_flushing_unwanted_messages">Flushing unwanted messages</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Gun provides the function <code>gun:flush/1</code> to quickly get rid
-of unwanted messages sitting in the process mailbox. You
-can use it to get rid of all messages related to a connection,
-or just the messages related to a stream.</p></div>
-<div class="listingblock">
-<div class="title">Flush all messages from a Gun connection</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Gun provides the function <code>gun:flush/1</code> to quickly get rid of unwanted messages sitting in the process mailbox. You can use it to get rid of all messages related to a connection, or just the messages related to a stream.</p>
+<div class="listingblock"><div class="title">Flush all messages from a Gun connection</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">gun:flush</span></span>(<span style="color: #009900">ConnPid</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Flush all messages from a specific stream</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">gun:flush</font></b>(<font color="#009900">ConnPid</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Flush all messages from a specific stream</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">gun:flush</span></span>(<span style="color: #009900">StreamRef</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">gun:flush</font></b>(<font color="#009900">StreamRef</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_redirecting_responses_to_a_different_process">Redirecting responses to a different process</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Gun allows you to specify which process will handle responses
-to a request via the <code>reply_to</code> request option.</p></div>
-<div class="listingblock">
-<div class="title">GET "/organizations/ninenines" to a different process</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Gun allows you to specify which process will handle responses to a request via the <code>reply_to</code> request option.</p>
+<div class="listingblock"><div class="title">GET &quot;/organizations/ninenines&quot; to a different process</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">StreamRef</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">gun:get</span></span>(<span style="color: #009900">ConnPid</span>, <span style="color: #FF0000">"/organizations/ninenines"</span>, [],
-    #{<span style="color: #0000FF">reply_to</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Pid</span>})<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:get</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/organizations/ninenines"</font>, [],
+    #{<font color="#0000FF">reply_to</font> <font color="#990000">=&gt;</font> <font color="#009900">Pid</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+
 
 
 

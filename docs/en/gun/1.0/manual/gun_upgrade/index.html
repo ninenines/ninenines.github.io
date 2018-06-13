@@ -62,114 +62,57 @@
 
 <h1 class="lined-header"><span>gun_upgrade(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>gun_upgrade - Successful protocol upgrade</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>gun_upgrade - Successful protocol upgrade</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">gun_upgrade</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #009900">Protocols</span>, <span style="color: #009900">Headers</span>}
+<pre><tt>{<font color="#FF6600">gun_upgrade</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">Protocols</font>, <font color="#009900">Headers</font>}
 
-<span style="color: #009900">ConnPid</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">pid</span></span>()
-<span style="color: #009900">StreamRef</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">reference</span></span>()
-<span style="color: #009900">Protocols</span> <span style="color: #990000">::</span> [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"websocket"</span><span style="color: #990000">&gt;&gt;</span>]
-<span style="color: #009900">Headers</span>   <span style="color: #990000">::</span> [{<span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}]</tt></pre></div></div>
-<div class="paragraph"><p>Successful protocol upgrade.</p></div>
-<div class="paragraph"><p>This message informs the relevant process that the server
-accepted to upgrade to one or more protocols given in the
-original request.</p></div>
-<div class="paragraph"><p>The exact semantics of this message depend on the original
-protocol. HTTP/1.1 upgrades apply to the entire connection.
-HTTP/2 uses a different mechanism which allows switching
-specific streams to a different protocol.</p></div>
-<div class="paragraph"><p>Gun currently only supports upgrading HTTP/1.1 connections
-to the Websocket protocol.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">ConnPid</font>   <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()
+<font color="#009900">StreamRef</font> <font color="#990000">::</font> <b><font color="#000080">reference</font></b>()
+<font color="#009900">Protocols</font> <font color="#990000">::</font> [<font color="#990000">&lt;&lt;</font><font color="#FF0000">"websocket"</font><font color="#990000">&gt;&gt;</font>]
+<font color="#009900">Headers</font>   <font color="#990000">::</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000080">binary</font></b>()}]</tt></pre>
+</div></div>
+<p>Successful protocol upgrade.</p>
+<p>This message informs the relevant process that the server accepted to upgrade to one or more protocols given in the original request.</p>
+<p>The exact semantics of this message depend on the original protocol. HTTP/1.1 upgrades apply to the entire connection. HTTP/2 uses a different mechanism which allows switching specific streams to a different protocol.</p>
+<p>Gun currently only supports upgrading HTTP/1.1 connections to the Websocket protocol.</p>
 <h2 id="_elements">Elements</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
+<dl><dt>ConnPid</dt>
+<dd><p>The pid of the Gun connection process.</p>
 </dd>
-<dt class="hdlist1">
-StreamRef
-</dt>
-<dd>
-<p>
-Identifier of the stream that resulted in an upgrade.
-</p>
+<dt>StreamRef</dt>
+<dd><p>Identifier of the stream that resulted in an upgrade.</p>
 </dd>
-<dt class="hdlist1">
-Protocols
-</dt>
-<dd>
-<p>
-List of protocols this stream was upgraded to.
-</p>
+<dt>Protocols</dt>
+<dd><p>List of protocols this stream was upgraded to.</p>
 </dd>
-<dt class="hdlist1">
-Headers
-</dt>
-<dd>
-<p>
-Headers sent with the upgrade response.
-</p>
+<dt>Headers</dt>
+<dd><p>Headers sent with the upgrade response.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>1.0</strong>: Message introduced.
-</p>
+<ul><li><strong>1.0</strong>: Message introduced.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Receive a gun_upgrade message in a gen_server</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Receive a gun_upgrade message in a gen_server</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">handle_info</span></span>({<span style="color: #FF6600">gun_upgrade</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">_StreamRef</span>,
-             <span style="color: #009900">_Protocols</span>, <span style="color: #009900">_Headers</span>},
-            <span style="color: #009900">State</span><span style="color: #990000">=</span><span style="color: #008080">#state</span>{<span style="color: #0000FF">conn_pid</span><span style="color: #990000">=</span><span style="color: #009900">ConnPid</span>}) <span style="color: #990000">-&gt;</span>
-    <span style="font-style: italic"><span style="color: #9A1900">%% Do something.</span></span>
-    {<span style="color: #FF6600">noreply</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">handle_info</font></b>({<font color="#FF6600">gun_upgrade</font>, <font color="#009900">ConnPid</font>, <font color="#009900">_StreamRef</font>,
+             <font color="#009900">_Protocols</font>, <font color="#009900">_Headers</font>},
+            <font color="#009900">State</font><font color="#990000">=</font><font color="#008080">#state</font>{<font color="#0000FF">conn_pid</font><font color="#990000">=</font><font color="#009900">ConnPid</font>}) <font color="#990000">-&gt;</font>
+    <i><font color="#9A1900">%% Do something.</font></i>
+    {<font color="#FF6600">noreply</font>, <font color="#009900">State</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../gun">gun(3)</a>,
-<a href="../gun.ws_upgrade">gun:ws_upgrade(3)</a>,
-<a href="../gun.ws_send">gun:ws_send(3)</a>,
-<a href="../gun_ws">gun_ws(3)</a></p></div>
-</div>
-</div>
+<p><a href="../gun">gun(3)</a>, <a href="../gun.ws_upgrade">gun:ws_upgrade(3)</a>, <a href="../gun.ws_send">gun:ws_send(3)</a>, <a href="../gun_ws">gun_ws(3)</a></p>
+
 
 
 

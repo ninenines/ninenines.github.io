@@ -62,93 +62,34 @@
 
 <h1 class="lined-header"><span>Internals</span></h1>
 
-<div class="paragraph"><p>This chapter may not apply to embedded Ranch as embedding allows you
-to use an architecture specific to your application, which may or may
-not be compatible with the description of the Ranch application.</p></div>
-<div class="paragraph"><p>Note that for everything related to efficiency and performance,
-you should perform the benchmarks yourself to get the numbers that
-matter to you. Generic benchmarks found on the web may or may not
-be of use to you, you can never know until you benchmark your own
-system.</p></div>
-<div class="sect1">
+<p>This chapter may not apply to embedded Ranch as embedding allows you to use an architecture specific to your application, which may or may not be compatible with the description of the Ranch application.</p>
+<p>Note that for everything related to efficiency and performance, you should perform the benchmarks yourself to get the numbers that matter to you. Generic benchmarks found on the web may or may not be of use to you, you can never know until you benchmark your own system.</p>
 <h2 id="_architecture">Architecture</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Ranch is an OTP application.</p></div>
-<div class="paragraph"><p>Like all OTP applications, Ranch has a top supervisor. It is responsible
-for supervising the <code>ranch_server</code> process and all the listeners that
-will be started.</p></div>
-<div class="paragraph"><p>The <code>ranch_server</code> gen_server is a central process keeping track of the
-listeners and their acceptors. It does so through the use of a public ets
-table called <code>ranch_server</code>. The table is owned by the top supervisor
-to improve fault tolerance. This way if the <code>ranch_server</code> gen_server
-fails, it doesn&#8217;t lose any information and the restarted process can
-continue as if nothing happened.</p></div>
-<div class="paragraph"><p>Ranch uses a custom supervisor for managing connections. This supervisor
-keeps track of the number of connections and handles connection limits
-directly. While it is heavily optimized to perform the task of creating
-connection processes for accepted connections, it is still following the
-OTP principles and the usual <code>sys</code> and <code>supervisor</code> calls will work on
-it as expected.</p></div>
-<div class="paragraph"><p>Listeners are grouped into the <code>ranch_listener_sup</code> supervisor and
-consist of three kinds of processes: the listener gen_server, the
-acceptor processes and the connection processes, both grouped under
-their own supervisor. All of these processes are registered to the
-<code>ranch_server</code> gen_server with varying amount of information.</p></div>
-<div class="paragraph"><p>All socket operations, including listening for connections, go through
-transport handlers. Accepted connections are given to the protocol handler.
-Transport handlers are simple callback modules for performing operations on
-sockets. Protocol handlers start a new process, which receives socket
-ownership, with no requirements on how the code should be written inside
-that new process.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>Ranch is an OTP application.</p>
+<p>Like all OTP applications, Ranch has a top supervisor. It is responsible for supervising the <code>ranch_server</code> process and all the listeners that will be started.</p>
+<p>The <code>ranch_server</code> gen_server is a central process keeping track of the listeners and their acceptors. It does so through the use of a public ets table called <code>ranch_server</code>. The table is owned by the top supervisor to improve fault tolerance. This way if the <code>ranch_server</code> gen_server fails, it doesn&apos;t lose any information and the restarted process can continue as if nothing happened.</p>
+<p>Ranch uses a custom supervisor for managing connections. This supervisor keeps track of the number of connections and handles connection limits directly. While it is heavily optimized to perform the task of creating connection processes for accepted connections, it is still following the OTP principles and the usual <code>sys</code> and <code>supervisor</code> calls will work on it as expected.</p>
+<p>Listeners are grouped into the <code>ranch_listener_sup</code> supervisor and consist of three kinds of processes: the listener gen_server, the acceptor processes and the connection processes, both grouped under their own supervisor. All of these processes are registered to the <code>ranch_server</code> gen_server with varying amount of information.</p>
+<p>All socket operations, including listening for connections, go through transport handlers. Accepted connections are given to the protocol handler. Transport handlers are simple callback modules for performing operations on sockets. Protocol handlers start a new process, which receives socket ownership, with no requirements on how the code should be written inside that new process.</p>
 <h2 id="_number_of_acceptors">Number of acceptors</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The second argument to <code>ranch:start_listener/6</code> is the number of
-processes that will be accepting connections. Care should be taken
-when choosing this number.</p></div>
-<div class="paragraph"><p>First of all, it should not be confused with the maximum number
-of connections. Acceptor processes are only used for accepting and
-have nothing else in common with connection processes. Therefore
-there is nothing to be gained from setting this number too high,
-in fact it can slow everything else down.</p></div>
-<div class="paragraph"><p>Second, this number should be high enough to allow Ranch to accept
-connections concurrently. But the number of cores available doesn&#8217;t
-seem to be the only factor for choosing this number, as we can
-observe faster accepts if we have more acceptors than cores. It
-might be entirely dependent on the protocol, however.</p></div>
-<div class="paragraph"><p>Our observations suggest that using 100 acceptors on modern hardware
-is a good solution, as it&#8217;s big enough to always have acceptors ready
-and it&#8217;s low enough that it doesn&#8217;t have a negative impact on the
-system&#8217;s performances.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>The second argument to <code>ranch:start_listener/6</code> is the number of processes that will be accepting connections. Care should be taken when choosing this number.</p>
+<p>First of all, it should not be confused with the maximum number of connections. Acceptor processes are only used for accepting and have nothing else in common with connection processes. Therefore there is nothing to be gained from setting this number too high, in fact it can slow everything else down.</p>
+<p>Second, this number should be high enough to allow Ranch to accept connections concurrently. But the number of cores available doesn&apos;t seem to be the only factor for choosing this number, as we can observe faster accepts if we have more acceptors than cores. It might be entirely dependent on the protocol, however.</p>
+<p>Our observations suggest that using 100 acceptors on modern hardware is a good solution, as it&apos;s big enough to always have acceptors ready and it&apos;s low enough that it doesn&apos;t have a negative impact on the system&apos;s performances.</p>
 <h2 id="_platform_specific_tcp_features">Platform-specific TCP features</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Some socket options are platform-specific and not supported by <code>inet</code>.
-They can be of interest because they generally are related to
-optimizations provided by the underlying OS. They can still be enabled
-thanks to the <code>raw</code> option, for which we will see an example.</p></div>
-<div class="paragraph"><p>One of these features is <code>TCP_DEFER_ACCEPT</code> on Linux. It is a simplified
-accept mechanism which will wait for application data to come in before
-handing out the connection to the Erlang process.</p></div>
-<div class="paragraph"><p>This is especially useful if you expect many connections to be mostly
-idle, perhaps part of a connection pool. They can be handled by the
-kernel directly until they send any real data, instead of allocating
-resources to idle connections.</p></div>
-<div class="paragraph"><p>To enable this mechanism, the following option can be used.</p></div>
-<div class="listingblock">
-<div class="title">Using raw transport options</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Some socket options are platform-specific and not supported by <code>inet</code>. They can be of interest because they generally are related to optimizations provided by the underlying OS. They can still be enabled thanks to the <code>raw</code> option, for which we will see an example.</p>
+<p>One of these features is <code>TCP_DEFER_ACCEPT</code> on Linux. It is a simplified accept mechanism which will wait for application data to come in before handing out the connection to the Erlang process.</p>
+<p>This is especially useful if you expect many connections to be mostly idle, perhaps part of a connection pool. They can be handled by the kernel directly until they send any real data, instead of allocating resources to idle connections.</p>
+<p>To enable this mechanism, the following option can be used.</p>
+<div class="listingblock"><div class="title">Using raw transport options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">raw</span>, <span style="color: #993399">6</span>, <span style="color: #993399">9</span>, <span style="color: #990000">&lt;&lt;</span> <span style="font-weight: bold"><span style="color: #000000">30:32</span></span><span style="color: #990000">/</span><span style="color: #FF6600">native</span> <span style="color: #990000">&gt;&gt;</span>}</tt></pre></div></div>
-<div class="paragraph"><p>It means go on layer 6, turn on option 9 with the given integer parameter.</p></div>
-</div>
-</div>
+<pre><tt>{<font color="#FF6600">raw</font>, <font color="#993399">6</font>, <font color="#993399">9</font>, <font color="#990000">&lt;&lt;</font> <b><font color="#000000">30:32</font></b><font color="#990000">/</font><font color="#FF6600">native</font> <font color="#990000">&gt;&gt;</font>}</tt></pre>
+</div></div>
+<p>It means go on layer 6, turn on option 9 with the given integer parameter.</p>
+
 
 
 
@@ -200,6 +141,8 @@ http://www.gnu.org/software/src-highlite -->
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/ranch/1.5/guide">1.5</a></li>
 	
 		<li><a href="/docs/en/ranch/1.4/guide">1.4</a></li>
 	

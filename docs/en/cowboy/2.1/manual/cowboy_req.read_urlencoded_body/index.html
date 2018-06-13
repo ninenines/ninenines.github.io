@@ -62,126 +62,64 @@
 
 <h1 class="lined-header"><span>cowboy_req:read_urlencoded_body(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:read_urlencoded_body - Read and parse a urlencoded request body</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_req:read_urlencoded_body - Read and parse a urlencoded request body</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">read_urlencoded_body</span></span>(<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>())
-    <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">read_urlencoded_body</span></span>(<span style="color: #009900">Req</span>, #{})
+<pre><tt><b><font color="#000000">read_urlencoded_body</font></b>(<font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>())
+    <font color="#990000">-&gt;</font> <b><font color="#000000">read_urlencoded_body</font></b>(<font color="#009900">Req</font>, #{})
 
-<span style="font-weight: bold"><span style="color: #000000">read_urlencoded_body</span></span>(<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>(), <span style="color: #009900">Opts</span>)
-    <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>}
+<b><font color="#000000">read_urlencoded_body</font></b>(<font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>(), <font color="#009900">Opts</font>)
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Body</font>, <font color="#009900">Req</font>}
 
-<span style="color: #009900">Opts</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:read_body_opts</span></span>()
-<span style="color: #009900">Body</span> <span style="color: #990000">::</span> [{<span style="color: #009900">Key</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Value</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #000080">true</span>}]</tt></pre></div></div>
-<div class="paragraph"><p>Read and parse a urlencoded request body.</p></div>
-<div class="paragraph"><p>This function reads the request body and parses it as
-<code>application/x-www-form-urlencoded</code>. It returns a list
-of key/values.</p></div>
-<div class="paragraph"><p>The urlencoded media type is used by Web browsers when
-submitting HTML forms using the POST method.</p></div>
-<div class="paragraph"><p>Cowboy needs to read the full body before parsing. By default
-it will read bodies of size up to 64KB. It is possible to
-provide options to read larger bodies if required.</p></div>
-<div class="paragraph"><p>Cowboy will automatically handle protocol details including
-the expect header, chunked transfer-encoding and others.</p></div>
-<div class="paragraph"><p>Once the body has been read, Cowboy sets the content-length
-header if it was not previously provided.</p></div>
-<div class="paragraph"><p>This function can only be called once. Calling it again will
-result in undefined behavior.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">Opts</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:read_body_opts</font></b>()
+<font color="#009900">Body</font> <font color="#990000">::</font> [{<font color="#009900">Key</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>() | <font color="#000080">true</font>}]</tt></pre>
+</div></div>
+<p>Read and parse a urlencoded request body.</p>
+<p>This function reads the request body and parses it as <code>application/x-www-form-urlencoded</code>. It returns a list of key/values.</p>
+<p>The urlencoded media type is used by Web browsers when submitting HTML forms using the POST method.</p>
+<p>Cowboy needs to read the full body before parsing. By default it will read bodies of size up to 64KB. It is possible to provide options to read larger bodies if required.</p>
+<p>Cowboy will automatically handle protocol details including the expect header, chunked transfer-encoding and others.</p>
+<p>Once the body has been read, Cowboy sets the content-length header if it was not previously provided.</p>
+<p>This function can only be called once. Calling it again will result in undefined behavior.</p>
 <h2 id="_arguments">Arguments</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Req
-</dt>
-<dd>
-<p>
-The Req object.
-</p>
+<dl><dt>Req</dt>
+<dd><p>The Req object.</p>
 </dd>
-<dt class="hdlist1">
-Opts
-</dt>
-<dd>
-<p>
-A map of body reading options. Please refer to
-<a href="../cowboy_req.read_body">cowboy_req:read_body(3)</a>
-for details about each option.
-</p>
-<div class="paragraph"><p>This function defaults the <code>length</code> to 64KB and the <code>period</code>
-to 5 seconds.</p></div>
+<dt>Opts</dt>
+<dd><p>A map of body reading options. Please refer to <a href="../cowboy_req.read_body">cowboy_req:read_body(3)</a> for details about each option.</p>
+<p>This function defaults the <code>length</code> to 64KB and the <code>period</code> to 5 seconds.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_return_value">Return value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>An <code>ok</code> tuple is returned containing a list of key/values found
-in the body.</p></div>
-<div class="paragraph"><p>The Req object returned in the tuple must be used for that point
-onward. It contains a more up to date representation of the request.
-For example it may have an added content-length header once the
-body has been read.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>An <code>ok</code> tuple is returned containing a list of key/values found in the body.</p>
+<p>The Req object returned in the tuple must be used for that point onward. It contains a more up to date representation of the request. For example it may have an added content-length header once the body has been read.</p>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: Function introduced. Replaces <code>body_qs/1,2</code>.
-</p>
+<ul><li><strong>2.0</strong>: Function introduced. Replaces <code>body_qs/1,2</code>.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Read a urlencoded body</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Read a urlencoded body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:read_urlencoded_body</span></span>(<span style="color: #009900">Req0</span>),
-{<span style="color: #990000">_</span>, <span style="color: #009900">Lang</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">lists:keyfind</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"lang"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #993399">1</span>, <span style="color: #009900">Body</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Allow large urlencoded bodies</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">Body</font>, <font color="#009900">Req</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:read_urlencoded_body</font></b>(<font color="#009900">Req0</font>),
+{<font color="#990000">_</font>, <font color="#009900">Lang</font>} <font color="#990000">=</font> <b><font color="#000000">lists:keyfind</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"lang"</font><font color="#990000">&gt;&gt;</font>, <font color="#993399">1</font>, <font color="#009900">Body</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Allow large urlencoded bodies</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:read_urlencoded_body</span></span>(<span style="color: #009900">Req0</span>, #{<span style="font-weight: bold"><span style="color: #000080">length</span></span> <span style="color: #990000">=&gt;</span> <span style="color: #993399">1000000</span>})<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">Body</font>, <font color="#009900">Req</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:read_urlencoded_body</font></b>(<font color="#009900">Req0</font>, #{<b><font color="#000080">length</font></b> <font color="#990000">=&gt;</font> <font color="#993399">1000000</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.has_body">cowboy_req:has_body(3)</a>,
-<a href="../cowboy_req.body_length">cowboy_req:body_length(3)</a>,
-<a href="../cowboy_req.read_body">cowboy_req:read_body(3)</a>,
-<a href="../cowboy_req.read_part">cowboy_req:read_part(3)</a>,
-<a href="../cowboy_req.read_part_body">cowboy_req:read_part_body(3)</a></p></div>
-</div>
-</div>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.has_body">cowboy_req:has_body(3)</a>, <a href="../cowboy_req.body_length">cowboy_req:body_length(3)</a>, <a href="../cowboy_req.read_body">cowboy_req:read_body(3)</a>, <a href="../cowboy_req.read_part">cowboy_req:read_part(3)</a>, <a href="../cowboy_req.read_part_body">cowboy_req:read_part_body(3)</a></p>
+
 
 
 

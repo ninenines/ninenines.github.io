@@ -62,123 +62,60 @@
 
 <h1 class="lined-header"><span>cowboy_http2(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_http2 - HTTP/2</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_http2 - HTTP/2</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The module <code>cowboy_http2</code> implements HTTP/2
-as a Ranch protocol.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>The module <code>cowboy_http2</code> implements HTTP/2 as a Ranch protocol.</p>
 <h2 id="_options">Options</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<!-- @todo Might be worth moving cowboy_clear/tls/stream_h options-->
+<!-- to their respective manual, when they are added.-->
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> #{
-    <span style="color: #0000FF">connection_type</span>    <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">worker</span> | <span style="color: #FF6600">supervisor</span>,
-    <span style="color: #0000FF">env</span>                <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_middleware:env</span></span>(),
-    <span style="color: #0000FF">inactivity_timeout</span> <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
-    <span style="color: #0000FF">middlewares</span>        <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()],
-    <span style="color: #0000FF">preface_timeout</span>    <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
-    <span style="color: #000080">shutdown</span><span style="color: #009900">_timeout</span>   <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #000000">timeout</span></span>(),
-    <span style="color: #0000FF">stream_handlers</span>    <span style="color: #990000">=&gt;</span> [<span style="font-weight: bold"><span style="color: #000000">module</span></span>()]
-}</tt></pre></div></div>
-<div class="paragraph"><p>Configuration for the HTTP/2 protocol.</p></div>
-<div class="paragraph"><p>This configuration is passed to Cowboy when starting listeners
-using <code>cowboy:start_clear/3</code> or <code>cowboy:start_tls/3</code> functions.</p></div>
-<div class="paragraph"><p>It can be updated without restarting listeners using the
-Ranch functions <code>ranch:get_protocol_options/1</code> and
-<code>ranch:set_protocol_options/2</code>.</p></div>
-<div class="paragraph"><p>The default value is given next to the option name:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-connection_type (supervisor)
-</dt>
-<dd>
-<p>
-    Whether the connection process also acts as a supervisor.
-</p>
+<pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">connection_type</font>    <font color="#990000">=&gt;</font> <font color="#FF6600">worker</font> | <font color="#FF6600">supervisor</font>,
+    <font color="#0000FF">env</font>                <font color="#990000">=&gt;</font> <b><font color="#000000">cowboy_middleware:env</font></b>(),
+    <font color="#0000FF">inactivity_timeout</font> <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">middlewares</font>        <font color="#990000">=&gt;</font> [<b><font color="#000000">module</font></b>()],
+    <font color="#0000FF">preface_timeout</font>    <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#000080">shutdown</font><font color="#009900">_timeout</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">stream_handlers</font>    <font color="#990000">=&gt;</font> [<b><font color="#000000">module</font></b>()]
+}</tt></pre>
+</div></div>
+<p>Configuration for the HTTP/2 protocol.</p>
+<p>This configuration is passed to Cowboy when starting listeners using <code>cowboy:start_clear/3</code> or <code>cowboy:start_tls/3</code> functions.</p>
+<p>It can be updated without restarting listeners using the Ranch functions <code>ranch:get_protocol_options/1</code> and <code>ranch:set_protocol_options/2</code>.</p>
+<p>The default value is given next to the option name:</p>
+<dl><dt>connection_type (supervisor)</dt>
+<dd><p>Whether the connection process also acts as a supervisor.</p>
 </dd>
-<dt class="hdlist1">
-env (#{})
-</dt>
-<dd>
-<p>
-    Middleware environment.
-</p>
+<dt>env (#{})</dt>
+<dd><p>Middleware environment.</p>
 </dd>
-<dt class="hdlist1">
-inactivity_timeout (300000)
-</dt>
-<dd>
-<p>
-    Time in ms with nothing received at all before Cowboy closes the connection.
-</p>
+<dt>inactivity_timeout (300000)</dt>
+<dd><p>Time in ms with nothing received at all before Cowboy closes the connection.</p>
 </dd>
-<dt class="hdlist1">
-middlewares ([cowboy_router, cowboy_handler])
-</dt>
-<dd>
-<p>
-    Middlewares to run for every request.
-</p>
+<dt>middlewares ([cowboy_router, cowboy_handler])</dt>
+<dd><p>Middlewares to run for every request.</p>
 </dd>
-<dt class="hdlist1">
-preface_timeout (5000)
-</dt>
-<dd>
-<p>
-    Time in ms Cowboy is willing to wait for the connection preface.
-</p>
+<dt>preface_timeout (5000)</dt>
+<dd><p>Time in ms Cowboy is willing to wait for the connection preface.</p>
 </dd>
-<dt class="hdlist1">
-shutdown_timeout (5000)
-</dt>
-<dd>
-<p>
-    Time in ms Cowboy will wait for child processes to shut down before killing them.
-</p>
+<dt>shutdown_timeout (5000)</dt>
+<dd><p>Time in ms Cowboy will wait for child processes to shut down before killing them.</p>
 </dd>
-<dt class="hdlist1">
-stream_handlers ([cowboy_stream_h])
-</dt>
-<dd>
-<p>
-    Ordered list of stream handlers that will handle all stream events.
-</p>
+<dt>stream_handlers ([cowboy_stream_h])</dt>
+<dd><p>Ordered list of stream handlers that will handle all stream events.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: Protocol introduced.
-</p>
+<ul><li><strong>2.0</strong>: Protocol introduced.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="..">cowboy(7)</a>,
-<a href="../cowboy_http">cowboy_http(3)</a>,
-<a href="../cowboy_websocket">cowboy_websocket(3)</a></p></div>
-</div>
-</div>
+<p><a href="..">cowboy(7)</a>, <a href="../cowboy_http">cowboy_http(3)</a>, <a href="../cowboy_websocket">cowboy_websocket(3)</a></p>
+
 
 
 

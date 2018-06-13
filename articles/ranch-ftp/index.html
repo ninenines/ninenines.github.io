@@ -69,216 +69,155 @@
 	</p>
 </header>
 
-<div class="paragraph"><p>Last week I was speaking at the
-<a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">London Erlang Factory Lite</a>
-where I presented a live demonstration of building an FTP server using
-<a href="http://ninenines.eu/docs/en/ranch/HEAD/README">Ranch</a>.
-As there was no slide, you should use this article as a reference instead.</p></div>
-<div class="paragraph"><p>The goal of this article is to showcase how to use Ranch for writing
-a network protocol implementation, how Ranch gets out of the way to let
-you write the code that matters, and the common techniques used when
-writing servers.</p></div>
-<div class="paragraph"><p>Let&#8217;s start by creating an empty project. Create a new directory and
-then open a terminal into that directory. The first step is to add Ranch
-as a dependency. Create the <code>rebar.config</code> file and add the
-following 3 lines.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Last week I was speaking at the <a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">London Erlang Factory Lite</a> where I presented a live demonstration of building an FTP server using <a href="http://ninenines.eu/docs/en/ranch/HEAD/README">Ranch</a>. As there was no slide, you should use this article as a reference instead.</p>
+<p>The goal of this article is to showcase how to use Ranch for writing a network protocol implementation, how Ranch gets out of the way to let you write the code that matters, and the common techniques used when writing servers.</p>
+<p>Let&apos;s start by creating an empty project. Create a new directory and then open a terminal into that directory. The first step is to add Ranch as a dependency. Create the <code>rebar.config</code> file and add the following 3 lines.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">deps</span>, [
-    {<span style="color: #FF6600">ranch</span>, <span style="color: #FF0000">".*"</span>, {<span style="color: #FF6600">git</span>, <span style="color: #FF0000">"git://github.com/extend/ranch.git"</span>, <span style="color: #FF0000">"master"</span>}}
-]}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>This makes your application depend on the last Ranch version available
-on the <em>master</em> branch. This is fine for development, however when
-you start pushing your application to production you will want to revisit
-this file to hardcode the exact version you are using, to make sure you
-run the same version of dependencies in production.</p></div>
-<div class="paragraph"><p>You can now fetch the dependencies.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>{<font color="#FF6600">deps</font>, [
+    {<font color="#FF6600">ranch</font>, <font color="#FF0000">".*"</font>, {<font color="#FF6600">git</font>, <font color="#FF0000">"git://github.com/extend/ranch.git"</font>, <font color="#FF0000">"master"</font>}}
+]}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>This makes your application depend on the last Ranch version available on the <em>master</em> branch. This is fine for development, however when you start pushing your application to production you will want to revisit this file to hardcode the exact version you are using, to make sure you run the same version of dependencies in production.</p>
+<p>You can now fetch the dependencies.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ rebar get-deps
-<span style="color: #990000">==&gt;</span> ranch_ftp <span style="color: #990000">(</span>get-deps<span style="color: #990000">)</span>
-Pulling ranch from {git<span style="color: #990000">,</span><span style="color: #FF0000">"git://github.com/extend/ranch.git"</span><span style="color: #990000">,</span><span style="color: #FF0000">"master"</span>}
-Cloning into <span style="color: #FF0000">'ranch'</span><span style="color: #990000">...</span>
-<span style="color: #990000">==&gt;</span> ranch <span style="color: #990000">(</span>get-deps<span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>This will create a <em>deps/</em> folder containing Ranch.</p></div>
-<div class="paragraph"><p>We don&#8217;t actually need anything else to write the protocol code.
-We could make an application for it, but this isn&#8217;t the purpose of this
-article so let&#8217;s just move on to writing the protocol itself. Create
-the file <em>ranch_ftp_protocol.erl</em> and open it in your favorite
-editor.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<font color="#990000">==&gt;</font> ranch_ftp <font color="#990000">(</font>get-deps<font color="#990000">)</font>
+Pulling ranch from {git<font color="#990000">,</font><font color="#FF0000">"git://github.com/extend/ranch.git"</font><font color="#990000">,</font><font color="#FF0000">"master"</font>}
+Cloning into <font color="#FF0000">'ranch'</font><font color="#990000">...</font>
+<font color="#990000">==&gt;</font> ranch <font color="#990000">(</font>get-deps<font color="#990000">)</font></tt></pre>
+</div></div>
+<p>This will create a <em>deps/</em> folder containing Ranch.</p>
+<p>We don&apos;t actually need anything else to write the protocol code. We could make an application for it, but this isn&apos;t the purpose of this article so let&apos;s just move on to writing the protocol itself. Create the file <em>ranch_ftp_protocol.erl</em> and open it in your favorite editor.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ vim ranch_ftp_protocol<span style="color: #990000">.</span>erl</tt></pre></div></div>
-<div class="paragraph"><p>Let&#8217;s start with a blank protocol module.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ vim ranch_ftp_protocol<font color="#990000">.</font>erl</tt></pre>
+</div></div>
+<p>Let&apos;s start with a blank protocol module.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000080">-module</span></span>(<span style="color: #FF6600">ranch_ftp_protocol</span>)<span style="color: #990000">.</span>
-<span style="font-weight: bold"><span style="color: #000080">-export</span></span>([<span style="font-weight: bold"><span style="color: #000000">start_link</span></span><span style="color: #990000">/</span><span style="color: #993399">4</span>, <span style="font-weight: bold"><span style="color: #000000">init</span></span><span style="color: #990000">/</span><span style="color: #993399">3</span>])<span style="color: #990000">.</span>
+<pre><tt><b><font color="#000080">-module</font></b>(<font color="#FF6600">ranch_ftp_protocol</font>)<font color="#990000">.</font>
+<b><font color="#000080">-export</font></b>([<b><font color="#000000">start_link</font></b><font color="#990000">/</font><font color="#993399">4</font>, <b><font color="#000000">init</font></b><font color="#990000">/</font><font color="#993399">3</font>])<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">start_link</span></span>(<span style="color: #009900">ListenerPid</span>, <span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #009900">Opts</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #009900">Pid</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000080">spawn_link</span></span>(<span style="font-weight: bold"><span style="color: #000080">?MODULE</span></span>, <span style="color: #FF6600">init</span>, [<span style="color: #009900">ListenerPid</span>, <span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>]),
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Pid</span>}<span style="color: #990000">.</span>
+<b><font color="#000000">start_link</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Opts</font>) <font color="#990000">-&gt;</font>
+    <font color="#009900">Pid</font> <font color="#990000">=</font> <b><font color="#000080">spawn_link</font></b>(<b><font color="#000080">?MODULE</font></b>, <font color="#FF6600">init</font>, [<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>]),
+    {<font color="#FF6600">ok</font>, <font color="#009900">Pid</font>}<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">ListenerPid</span>, <span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"Got a connection!~n"</span>),
-    <span style="color: #FF6600">ok</span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>When Ranch receives a connection, it will call the &lt;code&gt;start_link/4&lt;/code&gt;
-function with the listener&#8217;s pid, socket, transport module to be used,
-and the options we define when starting the listener. We don&#8217;t need options
-for the purpose of this article, so we don&#8217;t pass them to the process we are
-creating.</p></div>
-<div class="paragraph"><p>Let&#8217;s open a shell and start a Ranch listener to begin accepting
-connections. We only need to call one function. You should probably open
-it in another terminal and keep it open for convenience. If you quit
-the shell you will have to repeat the commands to proceed.</p></div>
-<div class="paragraph"><p>Also note that you need to type <code>c(ranch_ftp_protocol).</code>
-to recompile and reload the code for the protocol. You do not need to
-restart any process however.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"Got a connection!~n"</font>),
+    <font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>When Ranch receives a connection, it will call the <code>start_link/4</code> function with the listener&apos;s pid, socket, transport module to be used, and the options we define when starting the listener. We don&apos;t need options for the purpose of this article, so we don&apos;t pass them to the process we are creating.</p>
+<p>Let&apos;s open a shell and start a Ranch listener to begin accepting connections. We only need to call one function. You should probably open it in another terminal and keep it open for convenience. If you quit the shell you will have to repeat the commands to proceed.</p>
+<p>Also note that you need to type <code>c(ranch_ftp_protocol).</code> to recompile and reload the code for the protocol. You do not need to restart any process however.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ erl -pa ebin deps<span style="color: #990000">/*</span>/ebin
-Erlang R15B02 <span style="color: #990000">(</span>erts-<span style="color: #993399">5.9</span><span style="color: #990000">.</span><span style="color: #993399">2</span><span style="color: #990000">)</span> <span style="color: #990000">[</span><span style="font-weight: bold"><span style="color: #0000FF">source</span></span><span style="color: #990000">]</span> <span style="color: #990000">[</span><span style="color: #993399">64</span>-bit<span style="color: #990000">]</span> <span style="color: #990000">[</span>smp<span style="color: #990000">:</span><span style="color: #993399">4</span><span style="color: #990000">:</span><span style="color: #993399">4</span><span style="color: #990000">]</span> <span style="color: #990000">[</span>async-threads<span style="color: #990000">:</span><span style="color: #993399">0</span><span style="color: #990000">]</span> <span style="color: #990000">[</span>hipe<span style="color: #990000">]</span> <span style="color: #990000">[</span>kernel-poll<span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #0000FF">false</span></span><span style="color: #990000">]</span>
+<pre><tt>$ erl -pa ebin deps<font color="#990000">/*</font>/ebin
+Erlang R15B02 <font color="#990000">(</font>erts-<font color="#993399">5.9</font><font color="#990000">.</font><font color="#993399">2</font><font color="#990000">)</font> <font color="#990000">[</font><b><font color="#0000FF">source</font></b><font color="#990000">]</font> <font color="#990000">[</font><font color="#993399">64</font>-bit<font color="#990000">]</font> <font color="#990000">[</font>smp<font color="#990000">:</font><font color="#993399">4</font><font color="#990000">:</font><font color="#993399">4</font><font color="#990000">]</font> <font color="#990000">[</font>async-threads<font color="#990000">:</font><font color="#993399">0</font><font color="#990000">]</font> <font color="#990000">[</font>hipe<font color="#990000">]</font> <font color="#990000">[</font>kernel-poll<font color="#990000">:</font><b><font color="#0000FF">false</font></b><font color="#990000">]</font>
 
-Eshell V5<span style="color: #990000">.</span><span style="color: #993399">9.2</span>  <span style="color: #990000">(</span>abort with <span style="color: #990000">^</span>G<span style="color: #990000">)</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+Eshell V5<font color="#990000">.</font><font color="#993399">9.2</font>  <font color="#990000">(</font>abort with <font color="#990000">^</font>G<font color="#990000">)</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #993399">1</span><span style="color: #990000">&gt;</span> <span style="font-weight: bold"><span style="color: #000000">application:start</span></span>(<span style="color: #FF6600">ranch</span>)<span style="color: #990000">.</span>
-<span style="color: #FF6600">ok</span>
-<span style="color: #993399">2</span><span style="color: #990000">&gt;</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">my_ftp</span>, <span style="color: #993399">10</span>,
-       <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">2121</span>}],
-       <span style="color: #FF6600">ranch_ftp_protocol</span>, [])<span style="color: #990000">.</span>
-{<span style="color: #FF6600">ok</span>,<span style="color: #990000">&lt;</span><span style="color: #993399">0.40</span><span style="color: #990000">.</span><span style="color: #993399">0</span><span style="color: #990000">&gt;</span>}</tt></pre></div></div>
-<div class="paragraph"><p>This starts a listener named <code>my_ftp</code> that runs your very own
-<code>ranch_ftp_protocol</code> over TCP, listening on port <code>2121</code>.
-The last argument is the options given to the protocol that we ignored
-earlier.</p></div>
-<div class="paragraph"><p>To try your code, you can use the following command. It should be able
-to connect, the server will print a message in the console, and then
-the client will print an error.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#993399">1</font><font color="#990000">&gt;</font> <b><font color="#000000">application:start</font></b>(<font color="#FF6600">ranch</font>)<font color="#990000">.</font>
+<font color="#FF6600">ok</font>
+<font color="#993399">2</font><font color="#990000">&gt;</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">my_ftp</font>, <font color="#993399">10</font>,
+       <font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">2121</font>}],
+       <font color="#FF6600">ranch_ftp_protocol</font>, [])<font color="#990000">.</font>
+{<font color="#FF6600">ok</font>,<font color="#990000">&lt;</font><font color="#993399">0.40</font><font color="#990000">.</font><font color="#993399">0</font><font color="#990000">&gt;</font>}</tt></pre>
+</div></div>
+<p>This starts a listener named <code>my_ftp</code> that runs your very own <code>ranch_ftp_protocol</code> over TCP, listening on port <code>2121</code>. The last argument is the options given to the protocol that we ignored earlier.</p>
+<p>To try your code, you can use the following command. It should be able to connect, the server will print a message in the console, and then the client will print an error.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ ftp localhost <span style="color: #993399">2121</span></tt></pre></div></div>
-<div class="paragraph"><p>Let&#8217;s move on to actually writing the protocol.</p></div>
-<div class="paragraph"><p>Once you have created the new process and returned the pid, Ranch will
-give ownership of the socket to you. This requires a synchronization
-step though.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ ftp localhost <font color="#993399">2121</font></tt></pre>
+</div></div>
+<p>Let&apos;s move on to actually writing the protocol.</p>
+<p>Once you have created the new process and returned the pid, Ranch will give ownership of the socket to you. This requires a synchronization step though.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">ListenerPid</span>, <span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #0000FF">ok</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:accept_ack</span></span>(<span style="color: #009900">ListenerPid</span>),
-    <span style="color: #FF6600">ok</span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Now that you acknowledged the new connection, you can use it safely.</p></div>
-<div class="paragraph"><p>When an FTP server accepts a connection, it starts by sending a
-welcome message which can be one or more lines starting with the
-code <code>200</code>. Then the server will wait for the client
-to authenticate the user, and if the authentication went successfully,
-which it will always do for the purpose of this article, it will reply
-with a <code>230</code> code.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
+    <font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:accept_ack</font></b>(<font color="#009900">ListenerPid</font>),
+    <font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Now that you acknowledged the new connection, you can use it safely.</p>
+<p>When an FTP server accepts a connection, it starts by sending a welcome message which can be one or more lines starting with the code <code>200</code>. Then the server will wait for the client to authenticate the user, and if the authentication went successfully, which it will always do for the purpose of this article, it will reply with a <code>230</code> code.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">ListenerPid</span>, <span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #0000FF">ok</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:accept_ack</span></span>(<span style="color: #009900">ListenerPid</span>),
-    <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"200 My cool FTP server welcomes you!\r\n"</span><span style="color: #990000">&gt;&gt;</span>),
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">=</span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">recv</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #993399">0</span>, <span style="color: #993399">30000</span>),
-    <span style="font-weight: bold"><span style="color: #000000">auth</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #009900">Data</span>)<span style="color: #990000">.</span>
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
+    <font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:accept_ack</font></b>(<font color="#009900">ListenerPid</font>),
+    <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"200 My cool FTP server welcomes you!\r\n"</font><font color="#990000">&gt;&gt;</font>),
+    {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">=</font> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>),
+    <b><font color="#000000">auth</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Data</font>)<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">auth</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"USER "</span>, <span style="color: #009900">Rest</span><span style="color: #990000">/</span><span style="color: #FF6600">bits</span><span style="color: #990000">&gt;&gt;</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"User authenticated! ~p~n"</span>, [<span style="color: #009900">Rest</span>]),
-    <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"230 Auth OK\r\n"</span><span style="color: #990000">&gt;&gt;</span>),
-    <span style="color: #FF6600">ok</span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>As you can see we don&#8217;t need complex parsing code. We can simply
-match on the binary in the argument!</p></div>
-<div class="paragraph"><p>Next we need to loop receiving data commands and optionally
-execute them, if we want our server to become useful.</p></div>
-<div class="paragraph"><p>We will replace the &lt;code&gt;ok.&lt;/code&gt; line with the call to
-the following function. The new function is recursive, each call
-receiving data from the socket and sending a response. For now
-we will send an error response for all commands the client sends.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000000">auth</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"USER "</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font><font color="#990000">&gt;&gt;</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"User authenticated! ~p~n"</font>, [<font color="#009900">Rest</font>]),
+    <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"230 Auth OK\r\n"</font><font color="#990000">&gt;&gt;</font>),
+    <font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>As you can see we don&apos;t need complex parsing code. We can simply match on the binary in the argument!</p>
+<p>Next we need to loop receiving data commands and optionally execute them, if we want our server to become useful.</p>
+<p>We will replace the <code>ok.</code> line with the call to the following function. The new function is recursive, each call receiving data from the socket and sending a response. For now we will send an error response for all commands the client sends.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">loop</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">recv</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #993399">0</span>, <span style="color: #993399">30000</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">handle</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #009900">Data</span>),
-            <span style="font-weight: bold"><span style="color: #000000">loop</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>);
-        {<span style="color: #FF6600">error</span>, <span style="color: #990000">_</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"The client disconnected~n"</span>)
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span>
+<pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>) <b><font color="#0000FF">of</font></b>
+        {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">handle</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Data</font>),
+            <b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>);
+        {<font color="#FF6600">error</font>, <font color="#990000">_</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"The client disconnected~n"</font>)
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">handle</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #009900">Data</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"Command received ~p~n"</span>, [<span style="color: #009900">Data</span>]),
-    <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">send</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"500 Bad command\r\n"</span><span style="color: #990000">&gt;&gt;</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>With this we are almost ready to start implementing commands.
-But with code like this we might have errors if the client doesn&#8217;t
-send just one command per packet, or if the packets arrive too fast,
-or if a command is split over multiple packets.</p></div>
-<div class="paragraph"><p>To solve this, we need to use a buffer. Each time we receive data,
-we will append to the buffer, and then check if we have received a
-command fully before running it. The code could look similar to the
-following.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000000">handle</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Data</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"Command received ~p~n"</font>, [<font color="#009900">Data</font>]),
+    <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"500 Bad command\r\n"</font><font color="#990000">&gt;&gt;</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>With this we are almost ready to start implementing commands. But with code like this we might have errors if the client doesn&apos;t send just one command per packet, or if the packets arrive too fast, or if a command is split over multiple packets.</p>
+<p>To solve this, we need to use a buffer. Each time we receive data, we will append to the buffer, and then check if we have received a command fully before running it. The code could look similar to the following.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">loop</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #009900">Buffer</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="color: #009900">Transport</span><span style="color: #990000">:</span><span style="font-weight: bold"><span style="color: #000000">recv</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #993399">0</span>, <span style="color: #993399">30000</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">-&gt;</span>
-                        <span style="color: #009900">Buffer2</span> <span style="color: #990000">=</span> <span style="color: #990000">&lt;&lt;</span> <span style="color: #009900">Buffer</span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #009900">Data</span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000080">binary</span></span> <span style="color: #990000">&gt;&gt;</span>,
-                        {<span style="color: #009900">Commands</span>, <span style="color: #009900">Rest</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">split</span></span>(<span style="color: #009900">Buffer2</span>),
-                        [<span style="font-weight: bold"><span style="color: #000000">handle</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #009900">C</span>) || <span style="color: #009900">C</span> <span style="color: #990000">&lt;-</span> <span style="color: #009900">Commands</span>],
-            <span style="font-weight: bold"><span style="color: #000000">loop</span></span>(<span style="color: #009900">Socket</span>, <span style="color: #009900">Transport</span>, <span style="color: #009900">Rest</span>);
-        {<span style="color: #FF6600">error</span>, <span style="color: #990000">_</span>} <span style="color: #990000">-&gt;</span>
-            <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"The client disconnected~n"</span>)
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The implementation of <code>split/1</code> is left as an exercice
-to the reader. You will also probably want to handle the <code>QUIT</code>
-command, which must stop any processing and close the connection.</p></div>
-<div class="paragraph"><p>The attentive reader will also take note that in the case of text-
-based protocols where commands are separated by line breaks, you can
-set an option using <code>Transport:setopts/2</code> and have all the
-buffering done for you for free by Erlang itself.</p></div>
-<div class="paragraph"><p>As you can surely notice by now, Ranch allows us to build network
-applications by getting out of our way entirely past the initial setup.
-It lets you use the power of binary pattern matching to write text and
-binary protocol implementations in just a few lines of code.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">Watch the talk</a>
-</p>
+<pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Buffer</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>) <b><font color="#0000FF">of</font></b>
+        {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>
+			<font color="#009900">Buffer2</font> <font color="#990000">=</font> <font color="#990000">&lt;&lt;</font> <font color="#009900">Buffer</font><font color="#990000">/</font><b><font color="#000080">binary</font></b>, <font color="#009900">Data</font><font color="#990000">/</font><b><font color="#000080">binary</font></b> <font color="#990000">&gt;&gt;</font>,
+			{<font color="#009900">Commands</font>, <font color="#009900">Rest</font>} <font color="#990000">=</font> <b><font color="#000000">split</font></b>(<font color="#009900">Buffer2</font>),
+			[<b><font color="#000000">handle</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">C</font>) || <font color="#009900">C</font> <font color="#990000">&lt;-</font> <font color="#009900">Commands</font>],
+            <b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Rest</font>);
+        {<font color="#FF6600">error</font>, <font color="#990000">_</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"The client disconnected~n"</font>)
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The implementation of <code>split/1</code> is left as an exercice to the reader. You will also probably want to handle the <code>QUIT</code> command, which must stop any processing and close the connection.</p>
+<p>The attentive reader will also take note that in the case of text- based protocols where commands are separated by line breaks, you can set an option using <code>Transport:setopts/2</code> and have all the buffering done for you for free by Erlang itself.</p>
+<p>As you can surely notice by now, Ranch allows us to build network applications by getting out of our way entirely past the initial setup. It lets you use the power of binary pattern matching to write text and binary protocol implementations in just a few lines of code.</p>
+<ul><li><a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">Watch the talk</a>
 </li>
-</ul></div>
+</ul>
+
 
 </article>
 </div>

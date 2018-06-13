@@ -62,149 +62,110 @@
 
 <h1 class="lined-header"><span>EUnit</span></h1>
 
-<div class="paragraph"><p>EUnit is the tool of choice for unit testing. Erlang.mk
-automates a few things on top of EUnit, including the
-discovery and running of unit tests.</p></div>
-<div class="sect1">
+<p>EUnit is the tool of choice for unit testing. Erlang.mk automates a few things on top of EUnit, including the discovery and running of unit tests.</p>
 <h2 id="_writing_tests">Writing tests</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The <a href="http://www.erlang.org/doc/apps/eunit/chapter.html">EUnit user guide</a>
-is the best place to learn how to write tests. Of note is
-that all functions ending with <code>_test</code> or <code>_test_</code> will be
-picked up as EUnit test cases.</p></div>
-<div class="paragraph"><p>Erlang.mk will automatically pick up tests found in any of
-the Erlang modules of your application. It will also pick up
-tests located in the <em>$(TEST_DIR)</em> directory, which defaults
-to <em>test/</em>.</p></div>
-<div class="paragraph"><p>It is generally a good practice to hide test code from
-the code you ship to production. With Erlang.mk, you can
-do this thanks to the <code>TEST</code> macro. It is only defined
-when running tests:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The <a href="http://www.erlang.org/doc/apps/eunit/chapter.html">EUnit user guide</a> is the best place to learn how to write tests. Of note is that all functions ending with <code>_test</code> or <code>_test_</code> will be picked up as EUnit test cases.</p>
+<p>Erlang.mk will automatically pick up tests found in any of the Erlang modules of your application. It will also pick up tests located in the <em>$(TEST_DIR)</em> directory, which defaults to <em>test/</em>.</p>
+<p>It is generally a good practice to hide test code from the code you ship to production. With Erlang.mk, you can do this thanks to the <code>TEST</code> macro. It is only defined when running tests:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000080">-ifdef</span></span>(<span style="color: #009900">TEST</span>)<span style="color: #990000">.</span>
+<pre><tt><b><font color="#000080">-ifdef</font></b>(<font color="#009900">TEST</font>)<font color="#990000">.</font>
 
-<span style="font-style: italic"><span style="color: #9A1900">%% Insert tests here.</span></span>
+<i><font color="#9A1900">%% Insert tests here.</font></i>
 
-<span style="font-weight: bold"><span style="color: #000080">-endif</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Be careful, however, if you include the EUnit header file,
-as it also defines the <code>TEST</code> macro. Make sure to only include
-it inside an <code>ifdef</code> block, otherwise tests will always be
-compiled.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000080">-endif</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Be careful, however, if you include the EUnit header file, as it also defines the <code>TEST</code> macro. Make sure to only include it inside an <code>ifdef</code> block, otherwise tests will always be compiled.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000080">-ifdef</span></span>(<span style="color: #009900">TEST</span>)<span style="color: #990000">.</span>
+<pre><tt><b><font color="#000080">-ifdef</font></b>(<font color="#009900">TEST</font>)<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000080">-include_lib</span></span>(<span style="color: #990000">\</span><span style="color: #FF0000">"eunit/include/eunit.hrl\").</span>
+<b><font color="#000080">-include_lib</font></b>(<font color="#990000">\</font><font color="#FF0000">"eunit/include/eunit.hrl\").</font>
 
-<span style="color: #FF0000">%% Insert tests here.</span>
+<font color="#FF0000">%% Insert tests here.</font>
 
-<span style="color: #FF0000">-endif.</span></tt></pre></div></div>
-<div class="paragraph"><p>Erlang.mk will automatically recompile your code when you
-perform a normal build after running tests, and vice versa.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#FF0000">-endif.</font></tt></pre>
+</div></div>
+<p>Erlang.mk will automatically recompile your code when you perform a normal build after running tests, and vice versa.</p>
 <h2 id="_configuration">Configuration</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The <code>EUNIT_OPTS</code> variable allows you to specify additional
-EUnit options. Options are documented in the
-<a href="http://www.erlang.org/doc/man/eunit.html#test-2">EUnit manual</a>.
-At the time of writing, the only available option is <code>verbose</code>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The <code>EUNIT_OPTS</code> variable allows you to specify additional EUnit options. Options are documented in the <a href="http://www.erlang.org/doc/man/eunit.html#test-2">EUnit manual</a>. At the time of writing, the only available option is <code>verbose</code>:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">EUNIT_OPTS =</span> verbose</tt></pre></div></div>
-<div class="paragraph"><p>The <code>EUNIT_ERL_OPTS</code> variable allows you to specify options
-to be passed to <code>erl</code> when running EUnit tests. For example,
-you can load the <em>vm.args</em> and <em>sys.config</em> files:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">EUNIT_OPTS =</font> verbose</tt></pre>
+</div></div>
+<p>The <code>EUNIT_ERL_OPTS</code> variable allows you to specify options to be passed to <code>erl</code> when running EUnit tests. For example, you can load the <em>vm.args</em> and <em>sys.config</em> files:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">EUNIT_ERL_OPTS =</span> -args_file rel/vm.args -config rel/sys.config</tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">EUNIT_ERL_OPTS =</font> -args_file rel/vm.args -config rel/sys.config</tt></pre>
+</div></div>
 <h2 id="_usage">Usage</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>To run all tests (including EUnit):</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>To run all tests (including EUnit):</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make tests</tt></pre></div></div>
-<div class="paragraph"><p>To run all tests and static checks (including EUnit):</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make tests</tt></pre>
+</div></div>
+<p>To run all tests and static checks (including EUnit):</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make check</tt></pre></div></div>
-<div class="paragraph"><p>You can also run EUnit separately:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make check</tt></pre>
+</div></div>
+<p>You can also run EUnit separately:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make eunit</tt></pre></div></div>
-<div class="paragraph"><p>EUnit will be quiet by default, only outputting errors.
-You can easily make it verbose for a single invocation:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make eunit</tt></pre>
+</div></div>
+<p>EUnit will be quiet by default, only outputting errors. You can easily make it verbose for a single invocation:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make eunit <span style="color: #009900">EUNIT_OPTS</span><span style="color: #990000">=</span>verbose</tt></pre></div></div>
-<div class="paragraph"><p>Erlang.mk allows you to run all tests from a specific
-module, or a specific test case from that module, using
-the variable <code>t</code>.</p></div>
-<div class="paragraph"><p>For example, to run all tests from the <code>cow_http_hd</code>
-module (instead of all tests from the entire project),
-one could write:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make eunit <font color="#009900">EUNIT_OPTS</font><font color="#990000">=</font>verbose</tt></pre>
+</div></div>
+<p>Erlang.mk allows you to run all tests from a specific module, or a specific test case from that module, using the variable <code>t</code>.</p>
+<p>For example, to run all tests from the <code>cow_http_hd</code> module (instead of all tests from the entire project), one could write:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make eunit <span style="color: #009900">t</span><span style="color: #990000">=</span>cow_http_hd</tt></pre></div></div>
-<div class="paragraph"><p>Similarly, to run a specific test case:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make eunit <font color="#009900">t</font><font color="#990000">=</font>cow_http_hd</tt></pre>
+</div></div>
+<p>Similarly, to run a specific test case:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make eunit <span style="color: #009900">t</span><span style="color: #990000">=</span>cow_http_hd<span style="color: #990000">:</span>parse_accept_test_</tt></pre></div></div>
-<div class="paragraph"><p>To do the same against a multi-application repository,
-you can use the <code>-C</code> option:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make eunit <font color="#009900">t</font><font color="#990000">=</font>cow_http_hd<font color="#990000">:</font>parse_accept_test_</tt></pre>
+</div></div>
+<p>To do the same against a multi-application repository, you can use the <code>-C</code> option:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make -C apps/my_app eunit <span style="color: #009900">t</span><span style="color: #990000">=</span>my_module<span style="color: #990000">:</span>hello_test</tt></pre></div></div>
-<div class="paragraph"><p>Note that this also applies to dependencies. From Cowboy,
-you can run the following directly:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make -C apps/my_app eunit <font color="#009900">t</font><font color="#990000">=</font>my_module<font color="#990000">:</font>hello_test</tt></pre>
+</div></div>
+<p>Note that this also applies to dependencies. From Cowboy, you can run the following directly:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make -C deps/cowlib eunit <span style="color: #009900">t</span><span style="color: #990000">=</span>cow_http_hd</tt></pre></div></div>
-<div class="paragraph"><p>Finally, <a href="../coverage">code coverage</a> is available,
-but covered in its own chapter.</p></div>
-</div>
-</div>
+<pre><tt>$ make -C deps/cowlib eunit <font color="#009900">t</font><font color="#990000">=</font>cow_http_hd</tt></pre>
+</div></div>
+<p>Finally, <a href="../coverage">code coverage</a> is available, but covered in its own chapter.</p>
+
 
 
 

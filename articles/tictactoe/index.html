@@ -69,89 +69,60 @@
 	</p>
 </header>
 
-<div class="paragraph"><p>Everyone knows <a href="http://en.wikipedia.org/wiki/Tic-tac-toe">Tic Tac Toe</a>,
-right?</p></div>
-<div class="paragraph"><p>Players choose either to be the Xs or the Os, then place their symbol
-on a 3x3 board one after another, trying to create a line of 3 of them.</p></div>
-<div class="paragraph"><p>Writing an algorithm to check for victory sounds easy, right? It&#8217;s
-easily tested, considering there&#8217;s only 8 possible winning rows (3 horizontal,
-3 vertical and 2 diagonal).</p></div>
-<div class="paragraph"><p>In Erlang though, you probably wouldn&#8217;t want an algorithm. Erlang has
-this cool feature called pattern matching which will allow us to completely
-avoid writing the algorithm by instead letting us match directly on the
-solutions.</p></div>
-<div class="paragraph"><p>Let&#8217;s first create a board. A board is a list of 3 rows each containing
-3 columns. It can also be thought of as a tuple containing 9 elements.
-A tuple is easier to manipulate so this is what we are going to use.
-Each position can either contain an <code>x</code>, an <code>o</code>,
-or be <code>undefined</code>.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Everyone knows <a href="http://en.wikipedia.org/wiki/Tic-tac-toe">Tic Tac Toe</a>, right?</p>
+<p>Players choose either to be the Xs or the Os, then place their symbol on a 3x3 board one after another, trying to create a line of 3 of them.</p>
+<p>Writing an algorithm to check for victory sounds easy, right? It&apos;s easily tested, considering there&apos;s only 8 possible winning rows (3 horizontal, 3 vertical and 2 diagonal).</p>
+<p>In Erlang though, you probably wouldn&apos;t want an algorithm. Erlang has this cool feature called pattern matching which will allow us to completely avoid writing the algorithm by instead letting us match directly on the solutions.</p>
+<p>Let&apos;s first create a board. A board is a list of 3 rows each containing 3 columns. It can also be thought of as a tuple containing 9 elements. A tuple is easier to manipulate so this is what we are going to use. Each position can either contain an <code>x</code>, an <code>o</code>, or be <code>undefined</code>.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">new</span></span>() <span style="color: #990000">-&gt;</span>
-    {<span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>,
-     <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>,
-     <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>, <span style="color: #000080">undefined</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Now that we have a board, if we want to play, we need a function that
-will allow players to, you know, actually play their moves. Rows and
-columns are numbered 1 to 3 so we need a little math to correctly
-deduce the element&#8217;s position.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">new</font></b>() <font color="#990000">-&gt;</font>
+    {<font color="#000080">undefined</font>, <font color="#000080">undefined</font>, <font color="#000080">undefined</font>,
+     <font color="#000080">undefined</font>, <font color="#000080">undefined</font>, <font color="#000080">undefined</font>,
+     <font color="#000080">undefined</font>, <font color="#000080">undefined</font>, <font color="#000080">undefined</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Now that we have a board, if we want to play, we need a function that will allow players to, you know, actually play their moves. Rows and columns are numbered 1 to 3 so we need a little math to correctly deduce the element&apos;s position.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">play</span></span>(<span style="color: #009900">Who</span>, <span style="color: #009900">X</span>, <span style="color: #009900">Y</span>, <span style="color: #009900">Board</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000080">setelement</span></span>((<span style="color: #009900">Y</span> <span style="color: #990000">-</span> <span style="color: #993399">1</span>) <span style="color: #990000">*</span> <span style="color: #993399">3</span> <span style="color: #990000">+</span> <span style="color: #009900">X</span>, <span style="color: #009900">Board</span>, <span style="color: #009900">Who</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>This function returns the board with the element modified. Of course,
-as you probably noticed, we aren&#8217;t checking that the arguments are correct,
-or that the element was already set. This is left as an exercise to the
-reader.</p></div>
-<div class="paragraph"><p>After playing the move, we need to check whether someone won. That&#8217;s
-where you&#8217;d write an algorithm, and that&#8217;s where I wouldn&#8217;t. Let&#8217;s just
-pattern match all of them!</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">play</font></b>(<font color="#009900">Who</font>, <font color="#009900">X</font>, <font color="#009900">Y</font>, <font color="#009900">Board</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000080">setelement</font></b>((<font color="#009900">Y</font> <font color="#990000">-</font> <font color="#993399">1</font>) <font color="#990000">*</font> <font color="#993399">3</font> <font color="#990000">+</font> <font color="#009900">X</font>, <font color="#009900">Board</font>, <font color="#009900">Who</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>This function returns the board with the element modified. Of course, as you probably noticed, we aren&apos;t checking that the arguments are correct, or that the element was already set. This is left as an exercise to the reader.</p>
+<p>After playing the move, we need to check whether someone won. That&apos;s where you&apos;d write an algorithm, and that&apos;s where I wouldn&apos;t. Let&apos;s just pattern match all of them!</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">check</span></span>(<span style="color: #009900">Board</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="color: #009900">Board</span> <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        {<span style="color: #FF6600">x</span>, <span style="color: #FF6600">x</span>, <span style="color: #FF6600">x</span>,
-         <span style="color: #990000">_</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
-         <span style="color: #990000">_</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>} <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">victory</span>, <span style="color: #FF6600">x</span>};
+<pre><tt><b><font color="#000000">check</font></b>(<font color="#009900">Board</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <font color="#009900">Board</font> <b><font color="#0000FF">of</font></b>
+        {<font color="#FF6600">x</font>, <font color="#FF6600">x</font>, <font color="#FF6600">x</font>,
+         <font color="#990000">_</font>, <font color="#990000">_</font>, <font color="#990000">_</font>,
+         <font color="#990000">_</font>, <font color="#990000">_</font>, <font color="#990000">_</font>} <font color="#990000">-&gt;</font> {<font color="#FF6600">victory</font>, <font color="#FF6600">x</font>};
 
-        {<span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
-         <span style="color: #990000">_</span>, <span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>,
-         <span style="color: #990000">_</span>, <span style="color: #990000">_</span>, <span style="color: #FF6600">x</span>} <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">victory</span>, <span style="color: #FF6600">x</span>};
+        {<font color="#FF6600">x</font>, <font color="#990000">_</font>, <font color="#990000">_</font>,
+         <font color="#990000">_</font>, <font color="#FF6600">x</font>, <font color="#990000">_</font>,
+         <font color="#990000">_</font>, <font color="#990000">_</font>, <font color="#FF6600">x</font>} <font color="#990000">-&gt;</font> {<font color="#FF6600">victory</font>, <font color="#FF6600">x</font>};
 
-        {<span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
-         <span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>,
-         <span style="color: #FF6600">x</span>, <span style="color: #990000">_</span>, <span style="color: #990000">_</span>} <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">victory</span>, <span style="color: #FF6600">x</span>};
+        {<font color="#FF6600">x</font>, <font color="#990000">_</font>, <font color="#990000">_</font>,
+         <font color="#FF6600">x</font>, <font color="#990000">_</font>, <font color="#990000">_</font>,
+         <font color="#FF6600">x</font>, <font color="#990000">_</font>, <font color="#990000">_</font>} <font color="#990000">-&gt;</font> {<font color="#FF6600">victory</font>, <font color="#FF6600">x</font>};
 
-        <span style="font-style: italic"><span style="color: #9A1900">%% [snip]</span></span>
+        <i><font color="#9A1900">%% [snip]</font></i>
 
-        <span style="color: #990000">_</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Pattern matching allows us to simply <em>draw</em> the solutions
-directly inside our code, and if the board matches any of them, then we
-have a victory or a draw, otherwise the game can continue.</p></div>
-<div class="paragraph"><p>The <code>_</code> variable is special in that it always matches,
-allowing us to focus strictly on the winning row. And because it&#8217;s very
-graphical, if we were to have messed up somewhere, then we&#8217;d only need
-take a quick glance to be sure the winning solutions are the right ones.</p></div>
-<div class="paragraph"><p>Erlang allows us to transform algorithms into very graphical code thanks
-to its pattern matching feature, and let us focus on doing things instead
-of writing algorithms to do things.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<a href="/res/tictactoe.erl">tictactoe.erl</a>
-</p>
+        <font color="#990000">_</font> <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font>
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Pattern matching allows us to simply <em>draw</em> the solutions directly inside our code, and if the board matches any of them, then we have a victory or a draw, otherwise the game can continue.</p>
+<p>The <code>_</code> variable is special in that it always matches, allowing us to focus strictly on the winning row. And because it&apos;s very graphical, if we were to have messed up somewhere, then we&apos;d only need take a quick glance to be sure the winning solutions are the right ones.</p>
+<p>Erlang allows us to transform algorithms into very graphical code thanks to its pattern matching feature, and let us focus on doing things instead of writing algorithms to do things.</p>
+<ul><li><a href="/res/tictactoe.erl">tictactoe.erl</a>
 </li>
-</ul></div>
+</ul>
+
 
 </article>
 </div>

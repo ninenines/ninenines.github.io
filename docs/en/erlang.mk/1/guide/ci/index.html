@@ -62,80 +62,51 @@
 
 <h1 class="lined-header"><span>Continuous integration</span></h1>
 
-<div class="paragraph"><p>Erlang.mk comes with some support for continuous integration,
-aimed at open source projects that need to support more than
-one specific Erlang/OTP release. (If you target one specific
-release, check the <a href="../otp_version_pinning">OTP version pinning</a>
-section of the <a href="../kerl">OTP version management</a> chapter.)</p></div>
-<div class="sect1">
+<p>Erlang.mk comes with some support for continuous integration, aimed at open source projects that need to support more than one specific Erlang/OTP release. (If you target one specific release, check the <a href="../otp_version_pinning">OTP version pinning</a> section of the <a href="../kerl">OTP version management</a> chapter.)</p>
 <h2 id="_configuring_erlang_otp_versions_to_test">Configuring Erlang/OTP versions to test</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>To use the CI plugin you must first configure which versions
-of Erlang/OTP will be used. Erlang.mk provides three separate
-configuration variables depending on whether you need a normal
-OTP release, a HiPE-enabled release or an ErLLVM-enabled release.</p></div>
-<div class="paragraph"><p>At the time of writing, this is how you would test against all
-the most recent patch releases of Erlang/OTP 19 and above:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>To use the CI plugin you must first configure which versions of Erlang/OTP will be used. Erlang.mk provides three separate configuration variables depending on whether you need a normal OTP release, a HiPE-enabled release or an ErLLVM-enabled release.</p>
+<p>At the time of writing, this is how you would test against all the most recent patch releases of Erlang/OTP 19 and above:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">CI_OTP =</span> OTP-19.0.7 OTP-19.1.6 OTP-19.2.3 OTP-19.3.6.2 OTP-20.0.4</tt></pre></div></div>
-<div class="paragraph"><p>If you want to test against HiPE and ErLLVM but only with the
-latest version of Erlang/OTP, the following could work:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">CI_OTP =</font> OTP-19.0.7 OTP-19.1.6 OTP-19.2.3 OTP-19.3.6.2 OTP-20.0.4</tt></pre>
+</div></div>
+<p>If you want to test against HiPE and ErLLVM but only with the latest version of Erlang/OTP, the following could work:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">CI_HIPE =</span> <span style="color: #009900">$(</span>lastword <span style="color: #009900">$(CI_OTP))</span>
-<span style="color: #009900">CI_ERLLVM =</span> <span style="color: #009900">$(CI_HIPE)</span></tt></pre></div></div>
-<div class="paragraph"><p>Consult the <a href="../kerl">OTP version management</a> chapter for more
-information about Erlang/OTP versions and customization of the
-Erlang/OTP builds.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">CI_HIPE =</font> <font color="#009900">$(</font>lastword <font color="#009900">$(CI_OTP))</font>
+<font color="#009900">CI_ERLLVM =</font> <font color="#009900">$(CI_HIPE)</font></tt></pre>
+</div></div>
+<p>Consult the <a href="../kerl">OTP version management</a> chapter for more information about Erlang/OTP versions and customization of the Erlang/OTP builds.</p>
 <h2 id="_running_tests_across_all_configured_versions">Running tests across all configured versions</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The recommended way to run the <code>ci</code> target is with the option
-<code>-k</code>. It will ensure that tests are run for all configured
-Erlang/OTP versions, even if there are errors:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The recommended way to run the <code>ci</code> target is with the option <code>-k</code>. It will ensure that tests are run for all configured Erlang/OTP versions, even if there are errors:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make ci -k</tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>$ make ci -k</tt></pre>
+</div></div>
 <h2 id="_extending_the_ci_targets">Extending the CI targets</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The <code>ci</code> target can be extended. For example to run Dialyzer
-at the end of CI:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The <code>ci</code> target can be extended. For example to run Dialyzer at the end of CI:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #990000">ci::</span> dialyze</tt></pre></div></div>
-<div class="paragraph"><p>Additional setup can be done by extending the <code>ci-setup</code>
-target. This target is ran before testing each individual
-Erlang/OTP version.</p></div>
-<div class="paragraph"><p>For example, to ensure dependencies are re-fetched/built
-before testing individual Erlang/OTP releases:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#990000">ci::</font> dialyze</tt></pre>
+</div></div>
+<p>Additional setup can be done by extending the <code>ci-setup</code> target. This target is ran before testing each individual Erlang/OTP version.</p>
+<p>For example, to ensure dependencies are re-fetched/built before testing individual Erlang/OTP releases:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #990000">ci-setup::</span> distclean</tt></pre></div></div>
-<div class="paragraph"><p>Similarly, the <code>ci-extra</code> target can be extended to run
-extra commands after an Erlang/OTP version has been tested.</p></div>
-</div>
-</div>
+<pre><tt><font color="#990000">ci-setup::</font> distclean</tt></pre>
+</div></div>
+<p>Similarly, the <code>ci-extra</code> target can be extended to run extra commands after an Erlang/OTP version has been tested.</p>
+
 
 
 

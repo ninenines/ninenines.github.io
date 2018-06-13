@@ -62,121 +62,40 @@
 
 <h1 class="lined-header"><span>Migrating from Cowboy 2.3 to 2.4</span></h1>
 
-<div class="paragraph"><p>Cowboy 2.4 focused on improving the HTTP/2 implementation.
-All existing tests from RFC7540 and the h2spec test suite
-now all pass. Numerous options have been added to control
-SETTINGS and related behavior. In addition experimental
-support for Websocket over HTTP/2 was added.</p></div>
-<div class="sect1">
+<p>Cowboy 2.4 focused on improving the HTTP/2 implementation. All existing tests from RFC7540 and the h2spec test suite now all pass. Numerous options have been added to control SETTINGS and related behavior. In addition experimental support for Websocket over HTTP/2 was added.</p>
 <h2 id="_features_added">Features added</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-Add experimental support for Websocket over HTTP/2.
-  You can use the <code>enable_connect_protocol</code> option to
-  enable. It implements the following draft:
-  <a href="https://tools.ietf.org/html/draft-ietf-httpbis-h2-websockets-01">https://tools.ietf.org/html/draft-ietf-httpbis-h2-websockets-01</a>
-</p>
+<ul><li>Add experimental support for Websocket over HTTP/2. You can use the <code>enable_connect_protocol</code> option to enable. It implements the following draft: <a href="https://tools.ietf.org/html/draft-ietf-httpbis-h2-websockets-01">https://tools.ietf.org/html/draft-ietf-httpbis-h2-websockets-01</a>
 </li>
-<li>
-<p>
-Add options <code>max_decode_table_size</code> and
-  <code>max_encode_table_size</code> to restrict the size of the
-  HPACK compression dictionary.
-</p>
+<li>Add options <code>max_decode_table_size</code> and <code>max_encode_table_size</code> to restrict the size of the HPACK compression dictionary.
 </li>
-<li>
-<p>
-Add option <code>max_concurrent_streams</code> to restrict the
-  number of HTTP/2 streams that can be opened concurrently.
-</p>
+<li>Add option <code>max_concurrent_streams</code> to restrict the number of HTTP/2 streams that can be opened concurrently.
 </li>
-<li>
-<p>
-Add options <code>initial_connection_window_size</code> and
-  <code>initial_stream_window_size</code> to restrict the size of
-  the HTTP/2 request body buffers for the whole connection
-  and per stream, respectively.
-</p>
+<li>Add options <code>initial_connection_window_size</code> and <code>initial_stream_window_size</code> to restrict the size of the HTTP/2 request body buffers for the whole connection and per stream, respectively.
 </li>
-<li>
-<p>
-Add options <code>max_frame_size_received</code> and
-  <code>max_frame_size_sent</code> to restrict the size of
-  HTTP/2 frames.
-</p>
+<li>Add options <code>max_frame_size_received</code> and <code>max_frame_size_sent</code> to restrict the size of HTTP/2 frames.
 </li>
-<li>
-<p>
-Add option <code>settings_timeout</code> to reject clients that
-  did not send a SETTINGS ack. Note that this currently
-  may only occur at the beginning of the connection.
-</p>
+<li>Add option <code>settings_timeout</code> to reject clients that did not send a SETTINGS ack. Note that this currently may only occur at the beginning of the connection.
 </li>
-<li>
-<p>
-Update Ranch to 1.5.0
-</p>
+<li>Update Ranch to 1.5.0
 </li>
-<li>
-<p>
-Update Cowlib to 2.3.0
-</p>
+<li>Update Cowlib to 2.3.0
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_bugs_fixed">Bugs fixed</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-Fix the END_STREAM flag for informational responses
-  when using HTTP/2.
-</p>
+<ul><li>Fix the END_STREAM flag for informational responses when using HTTP/2.
 </li>
-<li>
-<p>
-Receive and ignore HTTP/2 request trailers if any
-  for HTTP/2 requests. Request trailer information will
-  be propagated to the user code in a future release.
-</p>
+<li>Receive and ignore HTTP/2 request trailers if any for HTTP/2 requests. Request trailer information will be propagated to the user code in a future release.
 </li>
-<li>
-<p>
-Reject WINDOW_UPDATE frames that are sent after the
-  client sent an RST_STREAM. Note that Cowboy will not
-  keep state information about terminated streams
-  forever and so the behavior might differ depending
-  on when the stream was reset.
-</p>
+<li>Reject WINDOW_UPDATE frames that are sent after the client sent an RST_STREAM. Note that Cowboy will not keep state information about terminated streams forever and so the behavior might differ depending on when the stream was reset.
 </li>
-<li>
-<p>
-Reject streams that depend on themselves. Note that
-  Cowboy currently does not implement HTTP/2&#8217;s priority
-  mechanisms so this issue was harmless.
-</p>
+<li>Reject streams that depend on themselves. Note that Cowboy currently does not implement HTTP/2&apos;s priority mechanisms so this issue was harmless.
 </li>
-<li>
-<p>
-Reject HTTP/2 requests where the body size is different
-  than the content-length value. Note that due to how Cowboy
-  works some requests might go through regardless, for
-  example when the user code does not read the request body.
-</p>
+<li>Reject HTTP/2 requests where the body size is different than the content-length value. Note that due to how Cowboy works some requests might go through regardless, for example when the user code does not read the request body.
 </li>
-<li>
-<p>
-Fix all existing test failures from RFC7540. This was
-  mostly incorrect test cases or intermittent failures.
-</p>
+<li>Fix all existing test failures from RFC7540. This was mostly incorrect test cases or intermittent failures.
 </li>
-</ul></div>
-</div>
-</div>
+</ul>
+
 
 
 

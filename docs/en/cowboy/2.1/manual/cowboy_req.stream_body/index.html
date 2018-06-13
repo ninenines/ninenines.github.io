@@ -62,116 +62,56 @@
 
 <h1 class="lined-header"><span>cowboy_req:stream_body(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:stream_body - Stream the response body</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_req:stream_body - Stream the response body</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">stream_body</span></span>(<span style="color: #009900">Data</span>, <span style="color: #009900">IsFin</span>, <span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>
+<pre><tt><b><font color="#000000">stream_body</font></b>(<font color="#009900">Data</font>, <font color="#009900">IsFin</font>, <font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>()) <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font>
 
-<span style="color: #009900">Data</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">iodata</span></span>()
-<span style="color: #009900">IsFin</span> <span style="color: #990000">::</span> <span style="color: #FF6600">fin</span> | <span style="color: #FF6600">nofin</span></tt></pre></div></div>
-<div class="paragraph"><p>Stream the response body.</p></div>
-<div class="paragraph"><p>This function may be called as many times as needed after
-initiating a response using the
-<a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a>
-function.</p></div>
-<div class="paragraph"><p>The second argument indicates if this call is the final
-call. Use the <code>nofin</code> value until you know no more data
-will be sent. The final call should use <code>fin</code> (possibly
-with an empty data value).</p></div>
-<div class="paragraph"><p>Note that not using <code>fin</code> for the final call is not an
-error; Cowboy will take care of it when the request
-handler terminates if needed. Depending on the resource
-it may however be more efficient to do it as early as
-possible.</p></div>
-<div class="paragraph"><p>You do not need to handle HEAD requests specifically as
-Cowboy will ensure no data is sent when you call this function.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">Data</font>  <font color="#990000">::</font> <b><font color="#000000">iodata</font></b>()
+<font color="#009900">IsFin</font> <font color="#990000">::</font> <font color="#FF6600">fin</font> | <font color="#FF6600">nofin</font></tt></pre>
+</div></div>
+<p>Stream the response body.</p>
+<p>This function may be called as many times as needed after initiating a response using the <a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a> function.</p>
+<p>The second argument indicates if this call is the final call. Use the <code>nofin</code> value until you know no more data will be sent. The final call should use <code>fin</code> (possibly with an empty data value).</p>
+<p>Note that not using <code>fin</code> for the final call is not an error; Cowboy will take care of it when the request handler terminates if needed. Depending on the resource it may however be more efficient to do it as early as possible.</p>
+<p>You do not need to handle HEAD requests specifically as Cowboy will ensure no data is sent when you call this function.</p>
 <h2 id="_arguments">Arguments</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Data
-</dt>
-<dd>
-<p>
-The data to be sent.
-</p>
+<dl><dt>Data</dt>
+<dd><p>The data to be sent.</p>
 </dd>
-<dt class="hdlist1">
-IsFin
-</dt>
-<dd>
-<p>
-A flag indicating whether this is the final piece of data
-to be sent.
-</p>
+<dt>IsFin</dt>
+<dd><p>A flag indicating whether this is the final piece of data to be sent.</p>
 </dd>
-<dt class="hdlist1">
-Req
-</dt>
-<dd>
-<p>
-The Req object.
-</p>
+<dt>Req</dt>
+<dd><p>The Req object.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_return_value">Return value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The atom <code>ok</code> is always returned. It can be safely ignored.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>The atom <code>ok</code> is always returned. It can be safely ignored.</p>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: Function introduced. Replaces <code>chunk/2</code>.
-</p>
+<ul><li><strong>2.0</strong>: Function introduced. Replaces <code>chunk/2</code>.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Stream the response body</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Stream the response body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_reply</span></span>(<span style="color: #993399">200</span>, #{
-    <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>
-}, <span style="color: #009900">Req0</span>),
-<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello\n"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Req</span>),
-<span style="font-weight: bold"><span style="color: #000000">timer:sleep</span></span>(<span style="color: #993399">1000</span>),
-<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"World!\n"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF6600">fin</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:stream_reply</font></b>(<font color="#993399">200</font>, #{
+    <font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-type"</font><font color="#990000">&gt;&gt;</font> <font color="#990000">=&gt;</font> <font color="#990000">&lt;&lt;</font><font color="#FF0000">"text/plain"</font><font color="#990000">&gt;&gt;</font>
+}, <font color="#009900">Req0</font>),
+<b><font color="#000000">cowboy_req:stream_body</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"Hello\n"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF6600">nofin</font>, <font color="#009900">Req</font>),
+<b><font color="#000000">timer:sleep</font></b>(<font color="#993399">1000</font>),
+<b><font color="#000000">cowboy_req:stream_body</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"World!\n"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF6600">fin</font>, <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a></p></div>
-</div>
-</div>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a></p>
+
 
 
 

@@ -69,140 +69,43 @@
 	</p>
 </header>
 
-<div class="paragraph"><p>I would like to share some experience and theories on
-Erlang scalability.</p></div>
-<div class="paragraph"><p>This will be in the form of a series of hints, which
-may or may not be accompanied with explanations as to why
-things are this way, or how they improve or reduce the scalability
-of a system. I will try to do my best to avoid giving falsehoods,
-even if that means a few things won&#8217;t be explained.</p></div>
-<div class="sect1">
+<p>I would like to share some experience and theories on Erlang scalability.</p>
+<p>This will be in the form of a series of hints, which may or may not be accompanied with explanations as to why things are this way, or how they improve or reduce the scalability of a system. I will try to do my best to avoid giving falsehoods, even if that means a few things won&apos;t be explained.</p>
 <h2 id="_nifs">NIFs</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>NIFs are considered harmful. I don&#8217;t know any single NIF-based
-library that I would recommend. That doesn&#8217;t mean they should
-all be avoided, just that if you&#8217;re going to want your system to
-scale, you probably shouldn&#8217;t use a NIF.</p></div>
-<div class="paragraph"><p>A common case for using NIFs is JSON processing. The problem
-is that JSON is a highly inefficient data structure (similar
-in inefficiency to XML, although perhaps not as bad). If you can
-avoid using JSON, you probably should. MessagePack can replace
-it in many situations.</p></div>
-<div class="paragraph"><p>Long-running NIFs will take over a scheduler and prevent Erlang
-from efficiently handling many processes.</p></div>
-<div class="paragraph"><p>Short-running NIFs will still confuse the scheduler if they
-take more than a few microseconds to run.</p></div>
-<div class="paragraph"><p>Threaded NIFs, or the use of the <code>enif_consume_timeslice</code>
-might help allievate this problem, but they&#8217;re not a silver bullet.</p></div>
-<div class="paragraph"><p>And as you already know, a crashing NIF will take down your VM,
-destroying any claims you may have at being scalable.</p></div>
-<div class="paragraph"><p>Never use a NIF because "C is fast". This is only true in
-single-threaded programs.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>NIFs are considered harmful. I don&apos;t know any single NIF-based library that I would recommend. That doesn&apos;t mean they should all be avoided, just that if you&apos;re going to want your system to scale, you probably shouldn&apos;t use a NIF.</p>
+<p>A common case for using NIFs is JSON processing. The problem is that JSON is a highly inefficient data structure (similar in inefficiency to XML, although perhaps not as bad). If you can avoid using JSON, you probably should. MessagePack can replace it in many situations.</p>
+<p>Long-running NIFs will take over a scheduler and prevent Erlang from efficiently handling many processes.</p>
+<p>Short-running NIFs will still confuse the scheduler if they take more than a few microseconds to run.</p>
+<p>Threaded NIFs, or the use of the <code>enif_consume_timeslice</code> might help allievate this problem, but they&apos;re not a silver bullet.</p>
+<p>And as you already know, a crashing NIF will take down your VM, destroying any claims you may have at being scalable.</p>
+<p>Never use a NIF because &quot;C is fast&quot;. This is only true in single-threaded programs.</p>
 <h2 id="_bifs">BIFs</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>BIFs can also be harmful. While they are generally better than
-NIFs, they are not perfect and some of them might have harmful
-effects on the scheduler.</p></div>
-<div class="paragraph"><p>A great example of this is the <code>erlang:decode_packet/3</code>
-BIF, when used for HTTP request or response decoding. Avoiding
-its use in <em>Cowboy</em> allowed us to see a big increase in
-the number of requests production systems were able to handle,
-up to two times the original amount. Incidentally this is something
-that is impossible to detect using synthetic benchmarks.</p></div>
-<div class="paragraph"><p>BIFs that return immediately are perfectly fine though.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>BIFs can also be harmful. While they are generally better than NIFs, they are not perfect and some of them might have harmful effects on the scheduler.</p>
+<p>A great example of this is the <code>erlang:decode_packet/3</code> BIF, when used for HTTP request or response decoding. Avoiding its use in <em>Cowboy</em> allowed us to see a big increase in the number of requests production systems were able to handle, up to two times the original amount. Incidentally this is something that is impossible to detect using synthetic benchmarks.</p>
+<p>BIFs that return immediately are perfectly fine though.</p>
 <h2 id="_binary_strings">Binary strings</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Binary strings use less memory, which means you spend less time
-allocating memory compared to list-based strings. They are also
-more natural for strings manipulation because they are optimized
-for appending (as opposed to prepending for lists).</p></div>
-<div class="paragraph"><p>If you can process a binary string using a single match context,
-then the code will run incredibly fast. The effects will be much
-increased if the code was compiled using HiPE, even if your Erlang
-system isn&#8217;t compiled natively.</p></div>
-<div class="paragraph"><p>Avoid using <code>binary:split</code> or <code>binary:replace</code>
-if you can avoid it. They have a certain overhead due to supporting
-many options that you probably don&#8217;t need for most operations.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>Binary strings use less memory, which means you spend less time allocating memory compared to list-based strings. They are also more natural for strings manipulation because they are optimized for appending (as opposed to prepending for lists).</p>
+<p>If you can process a binary string using a single match context, then the code will run incredibly fast. The effects will be much increased if the code was compiled using HiPE, even if your Erlang system isn&apos;t compiled natively.</p>
+<p>Avoid using <code>binary:split</code> or <code>binary:replace</code> if you can avoid it. They have a certain overhead due to supporting many options that you probably don&apos;t need for most operations.</p>
 <h2 id="_buffering_and_streaming">Buffering and streaming</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Use binaries. They are great for appending, and it&#8217;s a direct copy
-from what you receive from a stream (usually a socket or a file).</p></div>
-<div class="paragraph"><p>Be careful to not indefinitely receive data, as you might end up
-having a single binary taking up huge amounts of memory.</p></div>
-<div class="paragraph"><p>If you stream from a socket and know how much data you expect,
-then fetch that data in a single <code>recv</code> call.</p></div>
-<div class="paragraph"><p>Similarly, if you can use a single <code>send</code> call, then
-you should do so, to avoid going back and forth unnecessarily between
-your Erlang process and the Erlang port for your socket.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>Use binaries. They are great for appending, and it&apos;s a direct copy from what you receive from a stream (usually a socket or a file).</p>
+<p>Be careful to not indefinitely receive data, as you might end up having a single binary taking up huge amounts of memory.</p>
+<p>If you stream from a socket and know how much data you expect, then fetch that data in a single <code>recv</code> call.</p>
+<p>Similarly, if you can use a single <code>send</code> call, then you should do so, to avoid going back and forth unnecessarily between your Erlang process and the Erlang port for your socket.</p>
 <h2 id="_list_and_binary_comprehensions">List and binary comprehensions</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Prefer list comprehensions over <code>lists:map/2</code>. The
-compiler will be able to optimize your code greatly, for example
-not creating the result if you don&#8217;t need it. As time goes on,
-more optimizations will be added to the compiler and you will
-automatically benefit from them.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>Prefer list comprehensions over <code>lists:map/2</code>. The compiler will be able to optimize your code greatly, for example not creating the result if you don&apos;t need it. As time goes on, more optimizations will be added to the compiler and you will automatically benefit from them.</p>
 <h2 id="_gen_server_is_no_silver_bullet">gen_server is no silver bullet</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>It&#8217;s a bad idea to use <code>gen_server</code> for everything.
-For two reasons.</p></div>
-<div class="paragraph"><p>There is an overhead everytime the <code>gen_server</code> receives
-a call, a cast or a simple message. It can be a problem if your
-<code>gen_server</code> is in a critical code path where speed
-is all that matters. Do not hesitate to create other kinds of
-processes where it makes sense. And depending on the kind of process,
-you might want to consider making them special processes, which
-would essentially behave the same as a <code>gen_server</code>.</p></div>
-<div class="paragraph"><p>A common mistake is to have a unique <code>gen_server</code> to
-handle queries from many processes. This generally becomes the
-biggest bottleneck you&#8217;ll want to fix. You should try to avoid
-relying on a single process, using a pool if you can.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>It&apos;s a bad idea to use <code>gen_server</code> for everything. For two reasons.</p>
+<p>There is an overhead everytime the <code>gen_server</code> receives a call, a cast or a simple message. It can be a problem if your <code>gen_server</code> is in a critical code path where speed is all that matters. Do not hesitate to create other kinds of processes where it makes sense. And depending on the kind of process, you might want to consider making them special processes, which would essentially behave the same as a <code>gen_server</code>.</p>
+<p>A common mistake is to have a unique <code>gen_server</code> to handle queries from many processes. This generally becomes the biggest bottleneck you&apos;ll want to fix. You should try to avoid relying on a single process, using a pool if you can.</p>
 <h2 id="_supervisor_and_monitoring">Supervisor and monitoring</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>A <code>supervisor</code> is also a <code>gen_server</code>,
-so the previous points also apply to them.</p></div>
-<div class="paragraph"><p>Sometimes you&#8217;re in a situation where you have supervised
-processes but also want to monitor them in one or more other
-processes, effectively duplicating the work. The supervisor
-already knows when processes die, why not use this to our
-advantage?</p></div>
-<div class="paragraph"><p>You can create a custom supervisor process that will perform
-both the supervision and handle exit and other events, allowing
-to avoid the combination of supervising and monitoring which
-can prove harmful when many processes die at once, or when you
-have many short lived processes.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>A <code>supervisor</code> is also a <code>gen_server</code>, so the previous points also apply to them.</p>
+<p>Sometimes you&apos;re in a situation where you have supervised processes but also want to monitor them in one or more other processes, effectively duplicating the work. The supervisor already knows when processes die, why not use this to our advantage?</p>
+<p>You can create a custom supervisor process that will perform both the supervision and handle exit and other events, allowing to avoid the combination of supervising and monitoring which can prove harmful when many processes die at once, or when you have many short lived processes.</p>
 <h2 id="_ets_for_lolspeed_tm">ets for LOLSPEED(tm)</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>If you have data queried or modified by many processes, then
-<code>ets</code> public or protected tables will give you the
-performance boost you require. Do not forget to set the
-<code>read_concurrency</code> or <code>write_concurrency</code>
-options though.</p></div>
-<div class="paragraph"><p>You might also be thrilled to know that Erlang R16B will feature
-a big performance improvement for accessing <code>ets</code> tables
-concurrently.</p></div>
-</div>
-</div>
+<p>If you have data queried or modified by many processes, then <code>ets</code> public or protected tables will give you the performance boost you require. Do not forget to set the <code>read_concurrency</code> or <code>write_concurrency</code> options though.</p>
+<p>You might also be thrilled to know that Erlang R16B will feature a big performance improvement for accessing <code>ets</code> tables concurrently.</p>
+
 
 </article>
 </div>

@@ -62,117 +62,55 @@
 
 <h1 class="lined-header"><span>cowboy_req:parse_qs(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:parse_qs - Parse the query string</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_req:parse_qs - Parse the query string</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">parse_qs</span></span>(<span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>())
-    <span style="color: #990000">-&gt;</span> [{<span style="color: #009900">Key</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Value</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #000080">true</span>}]</tt></pre></div></div>
-<div class="paragraph"><p>Parse the query string as a list of key/value pairs.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">parse_qs</font></b>(<font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>())
+    <font color="#990000">-&gt;</font> [{<font color="#009900">Key</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>() | <font color="#000080">true</font>}]</tt></pre>
+</div></div>
+<p>Parse the query string as a list of key/value pairs.</p>
 <h2 id="_arguments">Arguments</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Req
-</dt>
-<dd>
-<p>
-The Req object.
-</p>
+<dl><dt>Req</dt>
+<dd><p>The Req object.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_return_value">Return value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The parsed query string is returned as a list of key/value pairs.
-The key is a binary string. The value is either a binary string,
-or the atom <code>true</code>. Both key and value are case sensitive.</p></div>
-<div class="paragraph"><p>The atom <code>true</code> is returned when a key is present in the query
-string without a value. For example, in the following URIs
-the key <code>&lt;&lt;"edit"&gt;&gt;</code> will always have the value <code>true</code>:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<code>/posts/42?edit</code>
-</p>
+<p>The parsed query string is returned as a list of key/value pairs. The key is a binary string. The value is either a binary string, or the atom <code>true</code>. Both key and value are case sensitive.</p>
+<p>The atom <code>true</code> is returned when a key is present in the query string without a value. For example, in the following URIs the key <code>&lt;&lt;&quot;edit&quot;&gt;&gt;</code> will always have the value <code>true</code>:</p>
+<ul><li><code>/posts/42?edit</code>
 </li>
-<li>
-<p>
-<code>/posts/42?edit&amp;exclusive=1</code>
-</p>
+<li><code>/posts/42?edit&amp;exclusive=1</code>
 </li>
-<li>
-<p>
-<code>/posts/42?exclusive=1&amp;edit</code>
-</p>
+<li><code>/posts/42?exclusive=1&amp;edit</code>
 </li>
-<li>
-<p>
-<code>/posts/42?exclusive=1&amp;edit&amp;from=web</code>
-</p>
+<li><code>/posts/42?exclusive=1&amp;edit&amp;from=web</code>
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: The parsed value is not longer cached in the Req object.
-</p>
+<ul><li><strong>2.0</strong>: The parsed value is not longer cached in the Req object.
 </li>
-<li>
-<p>
-<strong>2.0</strong>: Only the parsed query string is returned, it is no longer wrapped in a tuple.
-</p>
+<li><strong>2.0</strong>: Only the parsed query string is returned, it is no longer wrapped in a tuple.
 </li>
-<li>
-<p>
-<strong>2.0</strong>: Function introduced. Replaces <code>qs_val/1</code> and <code>qs_vals/1</code>.
-</p>
+<li><strong>2.0</strong>: Function introduced. Replaces <code>qs_val/1</code> and <code>qs_vals/1</code>.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Parse the query string and convert the keys to atoms</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Parse the query string and convert the keys to atoms</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">ParsedQs</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:parse_qs</span></span>(<span style="color: #009900">Req</span>),
-<span style="color: #009900">AtomsQs</span> <span style="color: #990000">=</span> [{<span style="font-weight: bold"><span style="color: #000000">binary_to_existing_atom</span></span>(<span style="color: #009900">K</span>, <span style="color: #FF6600">latin1</span>), <span style="color: #009900">V</span>}
-    || {<span style="color: #009900">K</span>, <span style="color: #009900">V</span>} <span style="color: #990000">&lt;-</span> <span style="color: #009900">ParsedQs</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">ParsedQs</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:parse_qs</font></b>(<font color="#009900">Req</font>),
+<font color="#009900">AtomsQs</font> <font color="#990000">=</font> [{<b><font color="#000000">binary_to_existing_atom</font></b>(<font color="#009900">K</font>, <font color="#FF6600">latin1</font>), <font color="#009900">V</font>}
+    || {<font color="#009900">K</font>, <font color="#009900">V</font>} <font color="#990000">&lt;-</font> <font color="#009900">ParsedQs</font>]<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.qs">cowboy_req:qs(3)</a>,
-<a href="../cowboy_req.match_qs">cowboy_req:match_qs(3)</a></p></div>
-</div>
-</div>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.qs">cowboy_req:qs(3)</a>, <a href="../cowboy_req.match_qs">cowboy_req:match_qs(3)</a></p>
+
 
 
 

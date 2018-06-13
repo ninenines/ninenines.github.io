@@ -62,123 +62,59 @@
 
 <h1 class="lined-header"><span>gun_response(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>gun_response - Response</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>gun_response - Response</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">gun_response</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">StreamRef</span>, <span style="color: #009900">IsFin</span>, <span style="color: #009900">Status</span>, <span style="color: #009900">Headers</span>}
+<pre><tt>{<font color="#FF6600">gun_response</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">IsFin</font>, <font color="#009900">Status</font>, <font color="#009900">Headers</font>}
 
-<span style="color: #009900">ConnPid</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">pid</span></span>()
-<span style="color: #009900">StreamRef</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">reference</span></span>()
-<span style="color: #009900">IsFin</span>     <span style="color: #990000">::</span> <span style="color: #FF6600">fin</span> | <span style="color: #FF6600">nofin</span>
-<span style="color: #009900">Status</span>    <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()
-<span style="color: #009900">Headers</span>   <span style="color: #990000">::</span> [{<span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}]</tt></pre></div></div>
-<div class="paragraph"><p>Response.</p></div>
-<div class="paragraph"><p>This message informs the relevant process that the server
-sent a response to the original request.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">ConnPid</font>   <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()
+<font color="#009900">StreamRef</font> <font color="#990000">::</font> <b><font color="#000080">reference</font></b>()
+<font color="#009900">IsFin</font>     <font color="#990000">::</font> <font color="#FF6600">fin</font> | <font color="#FF6600">nofin</font>
+<font color="#009900">Status</font>    <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()
+<font color="#009900">Headers</font>   <font color="#990000">::</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000080">binary</font></b>()}]</tt></pre>
+</div></div>
+<p>Response.</p>
+<p>This message informs the relevant process that the server sent a response to the original request.</p>
 <h2 id="_elements">Elements</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-ConnPid
-</dt>
-<dd>
-<p>
-The pid of the Gun connection process.
-</p>
+<dl><dt>ConnPid</dt>
+<dd><p>The pid of the Gun connection process.</p>
 </dd>
-<dt class="hdlist1">
-StreamRef
-</dt>
-<dd>
-<p>
-Identifier of the stream for the original request.
-</p>
+<dt>StreamRef</dt>
+<dd><p>Identifier of the stream for the original request.</p>
 </dd>
-<dt class="hdlist1">
-IsFin
-</dt>
-<dd>
-<p>
-Whether this message terminates the response.
-</p>
+<dt>IsFin</dt>
+<dd><p>Whether this message terminates the response.</p>
 </dd>
-<dt class="hdlist1">
-Status
-</dt>
-<dd>
-<p>
-Status code for the response.
-</p>
+<dt>Status</dt>
+<dd><p>Status code for the response.</p>
 </dd>
-<dt class="hdlist1">
-Headers
-</dt>
-<dd>
-<p>
-Headers sent with the response.
-</p>
+<dt>Headers</dt>
+<dd><p>Headers sent with the response.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>1.0</strong>: Message introduced.
-</p>
+<ul><li><strong>1.0</strong>: Message introduced.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Receive a gun_response message in a gen_server</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Receive a gun_response message in a gen_server</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">handle_info</span></span>({<span style="color: #FF6600">gun_response</span>, <span style="color: #009900">ConnPid</span>, <span style="color: #009900">_StreamRef</span>,
-             <span style="color: #009900">_IsFin</span>, <span style="color: #009900">_Status</span>, <span style="color: #009900">_Headers</span>},
-            <span style="color: #009900">State</span><span style="color: #990000">=</span><span style="color: #008080">#state</span>{<span style="color: #0000FF">conn_pid</span><span style="color: #990000">=</span><span style="color: #009900">ConnPid</span>}) <span style="color: #990000">-&gt;</span>
-    <span style="font-style: italic"><span style="color: #9A1900">%% Do something.</span></span>
-    {<span style="color: #FF6600">noreply</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">handle_info</font></b>({<font color="#FF6600">gun_response</font>, <font color="#009900">ConnPid</font>, <font color="#009900">_StreamRef</font>,
+             <font color="#009900">_IsFin</font>, <font color="#009900">_Status</font>, <font color="#009900">_Headers</font>},
+            <font color="#009900">State</font><font color="#990000">=</font><font color="#008080">#state</font>{<font color="#0000FF">conn_pid</font><font color="#990000">=</font><font color="#009900">ConnPid</font>}) <font color="#990000">-&gt;</font>
+    <i><font color="#9A1900">%% Do something.</font></i>
+    {<font color="#FF6600">noreply</font>, <font color="#009900">State</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../gun">gun(3)</a>,
-<a href="../gun.get">gun:get(3)</a>,
-<a href="../gun.head">gun:head(3)</a>,
-<a href="../gun.patch">gun:patch(3)</a>,
-<a href="../gun.post">gun:post(3)</a>,
-<a href="../gun.put">gun:put(3)</a>,
-<a href="../gun.delete">gun:delete(3)</a>,
-<a href="../gun.options">gun:options(3)</a>,
-<a href="../gun.request">gun:request(3)</a>,
-<a href="../gun_inform">gun_inform(3)</a>,
-<a href="../gun_push">gun_push(3)</a></p></div>
-</div>
-</div>
+<p><a href="../gun">gun(3)</a>, <a href="../gun.get">gun:get(3)</a>, <a href="../gun.head">gun:head(3)</a>, <a href="../gun.patch">gun:patch(3)</a>, <a href="../gun.post">gun:post(3)</a>, <a href="../gun.put">gun:put(3)</a>, <a href="../gun.delete">gun:delete(3)</a>, <a href="../gun.options">gun:options(3)</a>, <a href="../gun.request">gun:request(3)</a>, <a href="../gun_inform">gun_inform(3)</a>, <a href="../gun_push">gun_push(3)</a></p>
+
 
 
 

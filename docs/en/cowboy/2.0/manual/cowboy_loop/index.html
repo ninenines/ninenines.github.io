@@ -62,120 +62,60 @@
 
 <h1 class="lined-header"><span>cowboy_loop(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_loop - Loop handlers</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_loop - Loop handlers</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The module <code>cowboy_loop</code> defines a callback interface for
-long running HTTP connections.</p></div>
-<div class="paragraph"><p>You should switch to this behavior for long polling,
-server-sent events and similar long-running requests.</p></div>
-<div class="paragraph"><p>There are generally two usage patterns:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Loop until receiving a specific message, then send
-  a response and stop execution (for example long polling);
-</p>
+<p>The module <code>cowboy_loop</code> defines a callback interface for long running HTTP connections.</p>
+<p>You should switch to this behavior for long polling, server-sent events and similar long-running requests.</p>
+<p>There are generally two usage patterns:</p>
+<ul><li>Loop until receiving a specific message, then send a response and stop execution (for example long polling);
 </li>
-<li>
-<p>
-Or initiate a response in <code>init/2</code> and stream the
-  body in <code>info/3</code> as necessary (for example server-sent events).
-</p>
+<li>Or initiate a response in <code>init/2</code> and stream the body in <code>info/3</code> as necessary (for example server-sent events).
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_callbacks">Callbacks</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Loop handlers implement the following interface:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Loop handlers implement the following interface:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
-    <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-     | {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">Req</font>, <font color="#009900">State</font>)
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">cowboy_loop</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>}
+     | {<font color="#FF6600">cowboy_loop</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>, <font color="#FF6600">hibernate</font>}
 
-<span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #009900">Info</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>)
-    <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
-     | {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}
-     | {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}
+<b><font color="#000000">info</font></b>(<font color="#009900">Info</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>)
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>}
+     | {<font color="#FF6600">ok</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>, <font color="#FF6600">hibernate</font>}
+     | {<font color="#FF6600">stop</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>}
 
-<span style="font-weight: bold"><span style="color: #000000">terminate</span></span>(<span style="color: #009900">Reason</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">ok</span>  <span style="font-style: italic"><span style="color: #9A1900">%% optional</span></span>
+<b><font color="#000000">terminate</font></b>(<font color="#009900">Reason</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font>  <i><font color="#9A1900">%% optional</font></i>
 
-<span style="color: #009900">Req</span>    <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>()
-<span style="color: #009900">State</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
-<span style="color: #009900">Info</span>   <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">any</span></span>()
-<span style="color: #009900">Reason</span> <span style="color: #990000">::</span> <span style="color: #FF6600">stop</span>
-        | {<span style="color: #FF6600">crash</span>, <span style="color: #FF6600">error</span> | <span style="font-weight: bold"><span style="color: #000080">exit</span></span> | <span style="font-weight: bold"><span style="color: #000080">throw</span></span>, <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}</tt></pre></div></div>
-<div class="paragraph"><p>The <code>init/2</code> callback is common to all handlers. To switch
-to the loop behavior, it must return <code>cowboy_loop</code> as the
-first element of the tuple.</p></div>
-<div class="paragraph"><p>The <code>info/3</code> callback will be called for every Erlang message
-received. It may choose to continue the receive loop or stop
-it.</p></div>
-<div class="paragraph"><p>The optional <code>terminate/3</code> callback will ultimately be called
-with the reason for the termination of the handler.
-Cowboy will terminate the process right after this. There
-is no need to perform any cleanup in this callback.</p></div>
-<div class="paragraph"><p>The following terminate reasons are defined for loop handlers:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-stop
-</dt>
-<dd>
-<p>
-    The handler requested to close the connection by returning
-    a <code>stop</code> tuple.
-</p>
+<font color="#009900">Req</font>    <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>()
+<font color="#009900">State</font>  <font color="#990000">::</font> <b><font color="#000000">any</font></b>()
+<font color="#009900">Info</font>   <font color="#990000">::</font> <b><font color="#000000">any</font></b>()
+<font color="#009900">Reason</font> <font color="#990000">::</font> <font color="#FF6600">stop</font>
+        | {<font color="#FF6600">crash</font>, <font color="#FF6600">error</font> | <b><font color="#000080">exit</font></b> | <b><font color="#000080">throw</font></b>, <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>The <code>init/2</code> callback is common to all handlers. To switch to the loop behavior, it must return <code>cowboy_loop</code> as the first element of the tuple.</p>
+<p>The <code>info/3</code> callback will be called for every Erlang message received. It may choose to continue the receive loop or stop it.</p>
+<p>The optional <code>terminate/3</code> callback will ultimately be called with the reason for the termination of the handler. Cowboy will terminate the process right after this. There is no need to perform any cleanup in this callback.</p>
+<p>The following terminate reasons are defined for loop handlers:</p>
+<dl><dt>stop</dt>
+<dd><p>The handler requested to close the connection by returning a <code>stop</code> tuple.</p>
 </dd>
-<dt class="hdlist1">
-{crash, Class, Reason}
-</dt>
-<dd>
-<p>
-    A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be
-    used to obtain more information about the crash. The function
-    <code>erlang:get_stacktrace/0</code> can also be called to obtain the
-    stacktrace of the process when the crash occurred.
-</p>
+<dt>{crash, Class, Reason}</dt>
+<dd><p>A crash occurred in the handler. <code>Class</code> and <code>Reason</code> can be used to obtain more information about the crash. The function <code>erlang:get_stacktrace/0</code> can also be called to obtain the stacktrace of the process when the crash occurred.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: Loop handlers no longer need to handle overflow/timeouts.
-</p>
+<ul><li><strong>2.0</strong>: Loop handlers no longer need to handle overflow/timeouts.
 </li>
-<li>
-<p>
-<strong>1.0</strong>: Behavior introduced.
-</p>
+<li><strong>1.0</strong>: Behavior introduced.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="..">cowboy(7)</a>,
-<a href="../cowboy_handler">cowboy_handler(3)</a></p></div>
-</div>
-</div>
+<p><a href="..">cowboy(7)</a>, <a href="../cowboy_handler">cowboy_handler(3)</a></p>
+
 
 
 

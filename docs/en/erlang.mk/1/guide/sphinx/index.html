@@ -62,34 +62,16 @@
 
 <h1 class="lined-header"><span>Sphinx documentation</span></h1>
 
-<div class="paragraph"><p>Erlang.mk includes targets for running the
-<a href="http://www.sphinx-doc.org/">Sphinx documentation generator</a>, which can produce
-documentation in various formats, like HTML, man pages, Texinfo, LaTeX, and
-others.</p></div>
-<div class="sect1">
+<p>Erlang.mk includes targets for running the <a href="http://www.sphinx-doc.org/">Sphinx documentation generator</a>, which can produce documentation in various formats, like HTML, man pages, Texinfo, LaTeX, and others.</p>
 <h2 id="_writing_sphinx_documentation">Writing Sphinx documentation</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Sphinx generates documentation from a set of
-<a href="http://www.sphinx-doc.org/en/stable/rest.html">reST</a> documents. There is
-a <a href="http://www.sphinx-doc.org/en/stable/tutorial.html">quick start guide</a> on
-Sphinx' website. For Erlang.mk, we&#8217;ll set up a minimal environment instead.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>Sphinx generates documentation from a set of <a href="http://www.sphinx-doc.org/en/stable/rest.html">reST</a> documents. There is a <a href="http://www.sphinx-doc.org/en/stable/tutorial.html">quick start guide</a> on Sphinx&apos; website. For Erlang.mk, we&apos;ll set up a minimal environment instead.</p>
 <h2 id="_basic_setup">Basic setup</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>By default, Erlang.mk expects Sphinx documentation to be placed in the <em>doc</em>
-directory, with <em>doc/conf.py</em> config file in particular. The file contains
-information about the project, among the other things.</p></div>
-<div class="paragraph"><p>A minimal <em>doc/conf.py</em> will look similar to this:</p></div>
-<div class="listingblock">
-<div class="content"></div></div>
-<div class="paragraph"><p>It points to a <em>doc/index.rst</em> document. A simple skeleton includes a table of
-contents for all documentation, and links to generated index of terms and
-a search page:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>My Project
+<p>By default, Erlang.mk expects Sphinx documentation to be placed in the <em>doc</em> directory, with <em>doc/conf.py</em> config file in particular. The file contains information about the project, among the other things.</p>
+<p>A minimal <em>doc/conf.py</em> will look similar to this:</p>
+<div class="listingblock"><div class="content">source-highlight: could not find a language definition for python
+</div></div>
+<p>It points to a <em>doc/index.rst</em> document. A simple skeleton includes a table of contents for all documentation, and links to generated index of terms and a search page:</p>
+<div class="listingblock"><div class="content"><pre>My Project
 ==========
 
 Contents:
@@ -103,104 +85,51 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`search`</code></pre>
-</div></div>
-<div class="paragraph"><p>The skeleton above has a link to one other page, <em>doc/other_page.rst</em>. Simple
-header with some text will do for now:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>Other Page
+* :ref:`search`</pre></div></div>
+<p>The skeleton above has a link to one other page, <em>doc/other_page.rst</em>. Simple header with some text will do for now:</p>
+<div class="listingblock"><div class="content"><pre>Other Page
 ==========
 
-Lorem ipsum dolor sit amet...</code></pre>
+Lorem ipsum dolor sit amet...</pre></div></div>
+<p>The files above are enough to build HTML documentation to the <em>html</em> directory.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make docs     <i><font color="#9A1900"># all the docs, including EDoc and AsciiDoc if applicable</font></i>
+$ make sphinx   <i><font color="#9A1900"># Sphinx docs specifically</font></i></tt></pre>
 </div></div>
-<div class="paragraph"><p>The files above are enough to build HTML documentation to the <em>html</em> directory.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make docs     <span style="font-style: italic"><span style="color: #9A1900"># all the docs, including EDoc and AsciiDoc if applicable</span></span>
-$ make sphinx   <span style="font-style: italic"><span style="color: #9A1900"># Sphinx docs specifically</span></span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
 <h2 id="_erlang_mk_configuration">Erlang.mk configuration</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk defaults to the following configuration:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Erlang.mk defaults to the following configuration:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">SPHINX_FORMATS =</span> html
-<span style="color: #009900">SPHINX_SOURCE =</span> doc</tt></pre></div></div>
-<div class="paragraph"><p>To change the location of Sphinx sources, you need to set the <code>$(SPHINX_SOURCE)</code>
-variable. The <em>conf.py</em> file should also be placed in that directory, unless you
-specify <code>$(SPHINX_CONFDIR)</code>.</p></div>
-<div class="paragraph"><p>The variable <code>$(SPHINX_OPTS)</code> allows to provide options to <code>sphinx-build</code>, which
-is particularly useful for <code>-D name=value</code> options. You can even forego
-<em>doc/conf.py</em> file, using <code>-D name=value</code> in combination with the <code>-C</code> option,
-though in this case you will need to manually call <code>make sphinx</code> or add the
-<code>sphinx</code> target to dependencies of <code>docs</code>.</p></div>
-<div class="paragraph"><p>The <code>$(SPHINX_FORMATS)</code> variable lists formats to generate. By default only HTML
-is generated, but it can also build man pages or LaTeX documents which can later
-be converted to PDF. See the
-<a href="http://www.sphinx-doc.org/en/stable/invocation.html#cmdoption-sphinx-build-b">description of the <code>-b</code> option</a>
-for <code>sphinx-build</code> for a list of known formats.</p></div>
-<div class="paragraph"><p>Formats are by default generated to a directory called after the format
-(<em>html</em> for HTML, <em>man</em> for man pages, and so on). To change this behaviour
-for a specific format, you can set the <code>$(sphinx_$(format)_output)</code> variable, e.g.
-<code>$(sphinx_html_output)</code> for <em>html</em> or <code>$(sphinx_man_output)</code> for <em>man</em>.
-There are also <code>$(sphinx_$(format)_opts)</code> variables for setting <code>sphinx-build</code>
-options for a single format only.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">SPHINX_FORMATS =</font> html
+<font color="#009900">SPHINX_SOURCE =</font> doc</tt></pre>
+</div></div>
+<p>To change the location of Sphinx sources, you need to set the <code>$(SPHINX_SOURCE)</code> variable. The <em>conf.py</em> file should also be placed in that directory, unless you specify <code>$(SPHINX_CONFDIR)</code>.</p>
+<p>The variable <code>$(SPHINX_OPTS)</code> allows to provide options to <code>sphinx-build</code>, which is particularly useful for <code>-D name=value</code> options. You can even forego <em>doc/conf.py</em> file, using <code>-D name=value</code> in combination with the <code>-C</code> option, though in this case you will need to manually call <code>make sphinx</code> or add the <code>sphinx</code> target to dependencies of <code>docs</code>.</p>
+<p>The <code>$(SPHINX_FORMATS)</code> variable lists formats to generate. By default only HTML is generated, but it can also build man pages or LaTeX documents which can later be converted to PDF. See the <a href="http://www.sphinx-doc.org/en/stable/invocation.html#cmdoption-sphinx-build-b">description of the `-b` option</a> for <code>sphinx-build</code> for a list of known formats.</p>
+<p>Formats are by default generated to a directory called after the format (<em>html</em> for HTML, <em>man</em> for man pages, and so on). To change this behaviour for a specific format, you can set the <code>$(sphinx_$(format)_output)</code> variable, e.g. <code>$(sphinx_html_output)</code> for <em>html</em> or <code>$(sphinx_man_output)</code> for <em>man</em>. There are also <code>$(sphinx_$(format)_opts)</code> variables for setting <code>sphinx-build</code> options for a single format only.</p>
 <h2 id="_generating_man_pages">Generating man pages</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>To generate man pages, you need to include <code>man</code> in <code>$(SPHINX_FORMATS)</code> in
-your Makefile and define the <code>man_pages</code> option in <em>doc/conf.py</em>:</p></div>
-<div class="listingblock">
-<div class="content"></div></div>
-<div class="paragraph"><p>As the
-<a href="http://www.sphinx-doc.org/en/stable/config.html#options-for-manual-page-output">Sphinx documentation</a>
-indicates, the structure is:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<code>doc_name</code> is the path to the man page&#8217;s source (relative <code>$(SPHINX_SOURCE)</code>),
-  without the <em>.rst</em> suffix
-</p>
+<p>To generate man pages, you need to include <code>man</code> in <code>$(SPHINX_FORMATS)</code> in your Makefile and define the <code>man_pages</code> option in <em>doc/conf.py</em>:</p>
+<div class="listingblock"><div class="content">source-highlight: could not find a language definition for python
+</div></div>
+<p>As the <a href="http://www.sphinx-doc.org/en/stable/config.html#options-for-manual-page-output">Sphinx documentation</a> indicates, the structure is:</p>
+<ul><li><code>doc_name</code> is the path to the man page&apos;s source (relative <code>$(SPHINX_SOURCE)</code>), without the <em>.rst</em> suffix
 </li>
-<li>
-<p>
-<code>page_name</code> is the name of the resulting man page, which will be used as a base
-  for the output file name and will be included in the generated man page
-</p>
+<li><code>page_name</code> is the name of the resulting man page, which will be used as a base for the output file name and will be included in the generated man page
 </li>
-<li>
-<p>
-<code>Manpage Title</code> is a short, one-line description, which will be included in
-  the generated man page on a position that&#8217;s used by the <code>apropos</code> command
-</p>
+<li><code>Manpage Title</code> is a short, one-line description, which will be included in the generated man page on a position that&apos;s used by the <code>apropos</code> command
 </li>
-<li>
-<p>
-<code>Page Author</code> (or more of them) will be included in the autogenerated <code>AUTHOR</code>
-  section. Leaving this field empty disables generating the <code>AUTHOR</code> section
-</p>
+<li><code>Page Author</code> (or more of them) will be included in the autogenerated <code>AUTHOR</code> section. Leaving this field empty disables generating the <code>AUTHOR</code> section
 </li>
-<li>
-<p>
-<code>1</code> is the man page section number
-</p>
+<li><code>1</code> is the man page section number
 </li>
-</ul></div>
-<div class="paragraph"><p>With the above configuration (and Erlang.mk&#8217;s defaults), <em>doc/doc_name.rst</em> will
-be used to generate <em>man/page_name.1</em>.</p></div>
-</div>
-</div>
+</ul>
+<p>With the above configuration (and Erlang.mk&apos;s defaults), <em>doc/doc_name.rst</em> will be used to generate <em>man/page_name.1</em>.</p>
+
 
 
 

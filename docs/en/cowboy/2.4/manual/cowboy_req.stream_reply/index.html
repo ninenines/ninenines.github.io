@@ -62,152 +62,76 @@
 
 <h1 class="lined-header"><span>cowboy_req:stream_reply(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:stream_reply - Send the response headers</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_req:stream_reply - Send the response headers</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">stream_reply</span></span>(<span style="color: #009900">Status</span>, <span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>())
-    <span style="color: #990000">-&gt;</span> <span style="font-weight: bold"><span style="color: #000000">stream_reply</span></span>(<span style="color: #009900">StatusCode</span>, #{}, <span style="color: #009900">Req</span>)
+<pre><tt><b><font color="#000000">stream_reply</font></b>(<font color="#009900">Status</font>, <font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>())
+    <font color="#990000">-&gt;</font> <b><font color="#000000">stream_reply</font></b>(<font color="#009900">StatusCode</font>, #{}, <font color="#009900">Req</font>)
 
-<span style="font-weight: bold"><span style="color: #000000">stream_reply</span></span>(<span style="color: #009900">Status</span>, <span style="color: #009900">Headers</span>, <span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>())
-    <span style="color: #990000">-&gt;</span> <span style="color: #009900">Req</span>
+<b><font color="#000000">stream_reply</font></b>(<font color="#009900">Status</font>, <font color="#009900">Headers</font>, <font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>())
+    <font color="#990000">-&gt;</font> <font color="#009900">Req</font>
 
-<span style="color: #009900">Status</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:http_status</span></span>()
-<span style="color: #009900">Headers</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:http_headers</span></span>()</tt></pre></div></div>
-<div class="paragraph"><p>Send the response headers.</p></div>
-<div class="paragraph"><p>The header names must be given as lowercase binary strings.
-While header names are case insensitive, Cowboy requires them
-to be given as lowercase to function properly.</p></div>
-<div class="paragraph"><p>Cowboy does not allow duplicate header names. Headers set
-by this function may overwrite those set by <code>set_resp_header/3</code>.</p></div>
-<div class="paragraph"><p>Use <a href="../cowboy_req.set_resp_cookie">cowboy_req:set_resp_cookie(3)</a>
-instead of this function to set cookies.</p></div>
-<div class="paragraph"><p>If a response body was set before calling this function,
-it will not be sent.</p></div>
-<div class="paragraph"><p>Use <a href="../cowboy_req.stream_body">cowboy_req:stream_body(3)</a>
-to stream the response body and optionally
-<a href="../cowboy_req.stream_trailers">cowboy_req:stream_trailers(3)</a>
-to send response trailer field values.</p></div>
-<div class="paragraph"><p>You may want to set the content-length header when using
-this function, if it is known in advance. This will allow
-clients using HTTP/2 and HTTP/1.0 to process the response
-more efficiently.</p></div>
-<div class="paragraph"><p>The streaming method varies depending on the protocol being
-used. HTTP/2 will use the usual DATA frames. HTTP/1.1 will
-use chunked transfer-encoding. HTTP/1.0 will send the body
-unmodified and close the connection at the end if no
-content-length was set.</p></div>
-<div class="paragraph"><p>It is not possible to push resources after this function
-returns. Any attempt will result in an error.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">Status</font>  <font color="#990000">::</font> <b><font color="#000000">cowboy:http_status</font></b>()
+<font color="#009900">Headers</font> <font color="#990000">::</font> <b><font color="#000000">cowboy:http_headers</font></b>()</tt></pre>
+</div></div>
+<p>Send the response headers.</p>
+<p>The header names must be given as lowercase binary strings. While header names are case insensitive, Cowboy requires them to be given as lowercase to function properly.</p>
+<p>Cowboy does not allow duplicate header names. Headers set by this function may overwrite those set by <code>set_resp_header/3</code>.</p>
+<p>Use <a href="../cowboy_req.set_resp_cookie">cowboy_req:set_resp_cookie(3)</a> instead of this function to set cookies.</p>
+<p>If a response body was set before calling this function, it will not be sent.</p>
+<p>Use <a href="../cowboy_req.stream_body">cowboy_req:stream_body(3)</a> to stream the response body and optionally <a href="../cowboy_req.stream_trailers">cowboy_req:stream_trailers(3)</a> to send response trailer field values.</p>
+<p>You may want to set the content-length header when using this function, if it is known in advance. This will allow clients using HTTP/2 and HTTP/1.0 to process the response more efficiently.</p>
+<p>The streaming method varies depending on the protocol being used. HTTP/2 will use the usual DATA frames. HTTP/1.1 will use chunked transfer-encoding. HTTP/1.0 will send the body unmodified and close the connection at the end if no content-length was set.</p>
+<p>It is not possible to push resources after this function returns. Any attempt will result in an error.</p>
 <h2 id="_arguments">Arguments</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Status
-</dt>
-<dd>
-<p>
-The status code for the response.
-</p>
+<dl><dt>Status</dt>
+<dd><p>The status code for the response.</p>
 </dd>
-<dt class="hdlist1">
-Headers
-</dt>
-<dd>
-<p>
-The response headers.
-</p>
+<dt>Headers</dt>
+<dd><p>The response headers.</p>
 </dd>
-</dl></div>
-<div class="paragraph"><p>Header names must be given as lowercase binary strings.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Req
-</dt>
-<dd>
-<p>
-The Req object.
-</p>
+</dl>
+<p>Header names must be given as lowercase binary strings.</p>
+<dl><dt>Req</dt>
+<dd><p>The Req object.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_return_value">Return value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>A new Req object is returned.</p></div>
-<div class="paragraph"><p>The returned Req object must be used from that point onward
-in order to be able to stream the response body.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>A new Req object is returned.</p>
+<p>The returned Req object must be used from that point onward in order to be able to stream the response body.</p>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: Only the Req is returned, it is no longer wrapped in a tuple.
-</p>
+<ul><li><strong>2.0</strong>: Only the Req is returned, it is no longer wrapped in a tuple.
 </li>
-<li>
-<p>
-<strong>2.0</strong>: Function introduced. Replaces <code>chunked_reply/1,2</code>.
-</p>
+<li><strong>2.0</strong>: Function introduced. Replaces <code>chunked_reply/1,2</code>.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Initiate the response</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Initiate the response</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_reply</span></span>(<span style="color: #993399">200</span>, <span style="color: #009900">Req0</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Stream the response with custom headers</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:stream_reply</font></b>(<font color="#993399">200</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Stream the response with custom headers</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_reply</span></span>(<span style="color: #993399">200</span>, #{
-    <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"content-type"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=&gt;</span> <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text/plain"</span><span style="color: #990000">&gt;&gt;</span>
-}, <span style="color: #009900">Req0</span>),
-<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello\n"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Req</span>),
-<span style="font-weight: bold"><span style="color: #000000">timer:sleep</span></span>(<span style="color: #993399">1000</span>),
-<span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"World!\n"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #FF6600">fin</span>, <span style="color: #009900">Req</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:stream_reply</font></b>(<font color="#993399">200</font>, #{
+    <font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-type"</font><font color="#990000">&gt;&gt;</font> <font color="#990000">=&gt;</font> <font color="#990000">&lt;&lt;</font><font color="#FF0000">"text/plain"</font><font color="#990000">&gt;&gt;</font>
+}, <font color="#009900">Req0</font>),
+<b><font color="#000000">cowboy_req:stream_body</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"Hello\n"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF6600">nofin</font>, <font color="#009900">Req</font>),
+<b><font color="#000000">timer:sleep</font></b>(<font color="#993399">1000</font>),
+<b><font color="#000000">cowboy_req:stream_body</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"World!\n"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF6600">fin</font>, <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.set_resp_cookie">cowboy_req:set_resp_cookie(3)</a>,
-<a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>,
-<a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a>,
-<a href="../cowboy_req.inform">cowboy_req:inform(3)</a>,
-<a href="../cowboy_req.reply">cowboy_req:reply(3)</a>,
-<a href="../cowboy_req.stream_body">cowboy_req:stream_body(3)</a>,
-<a href="../cowboy_req.stream_trailers">cowboy_req:stream_trailers(3)</a>,
-<a href="../cowboy_req.push">cowboy_req:push(3)</a></p></div>
-</div>
-</div>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.set_resp_cookie">cowboy_req:set_resp_cookie(3)</a>, <a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>, <a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a>, <a href="../cowboy_req.inform">cowboy_req:inform(3)</a>, <a href="../cowboy_req.reply">cowboy_req:reply(3)</a>, <a href="../cowboy_req.stream_body">cowboy_req:stream_body(3)</a>, <a href="../cowboy_req.stream_trailers">cowboy_req:stream_trailers(3)</a>, <a href="../cowboy_req.push">cowboy_req:push(3)</a></p>
+
 
 
 

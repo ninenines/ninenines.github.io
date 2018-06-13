@@ -62,153 +62,82 @@
 
 <h1 class="lined-header"><span>cowboy:start_tls(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy:start_tls - Listen for connections using TLS</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy:start_tls - Listen for connections using TLS</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">start_tls</span></span>(<span style="color: #009900">Name</span>          <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">ranch:ref</span></span>(),
-          <span style="color: #009900">TransportOpts</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">ranch_ssl:opts</span></span>(),
-          <span style="color: #009900">ProtocolOpts</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">opts</span></span>())
-    <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">ok</span>, <span style="color: #009900">ListenerPid</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">pid</span></span>()}
-     | {<span style="color: #FF6600">error</span>, <span style="font-weight: bold"><span style="color: #000000">any</span></span>()}</tt></pre></div></div>
-<div class="paragraph"><p>Start listening for connections over a secure TLS channel.</p></div>
-<div class="paragraph"><p>Both HTTP/1.1 and HTTP/2 are supported on this listener.
-The ALPN TLS extension must be used to initiate an HTTP/2
-connection.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">start_tls</font></b>(<font color="#009900">Name</font>          <font color="#990000">::</font> <b><font color="#000000">ranch:ref</font></b>(),
+          <font color="#009900">TransportOpts</font> <font color="#990000">::</font> <b><font color="#000000">ranch_ssl:opts</font></b>(),
+          <font color="#009900">ProtocolOpts</font>  <font color="#990000">::</font> <b><font color="#000000">opts</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">ListenerPid</font> <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>Start listening for connections over a secure TLS channel.</p>
+<p>Both HTTP/1.1 and HTTP/2 are supported on this listener. The ALPN TLS extension must be used to initiate an HTTP/2 connection.</p>
 <h2 id="_arguments">Arguments</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Name
-</dt>
-<dd>
-<p>
-The listener name is used to refer to this listener in
-future calls, for example when stopping it or when
-updating the routes defined.
-</p>
-<div class="paragraph"><p>It can be any Erlang term. An atom is generally good enough,
-for example <code>api</code>, <code>my_app_clear</code> or <code>my_app_tls</code>.</p></div>
+<dl><dt>Name</dt>
+<dd><p>The listener name is used to refer to this listener in future calls, for example when stopping it or when updating the routes defined.</p>
+<p>It can be any Erlang term. An atom is generally good enough, for example <code>api</code>, <code>my_app_clear</code> or <code>my_app_tls</code>.</p>
 </dd>
-<dt class="hdlist1">
-TransportOpts
-</dt>
-<dd>
-<p>
-The transport options are where the TCP options, including
-the listener&#8217;s port number, are defined. They also contain
-the TLS options, like the server&#8217;s certificate. Transport options
-are provided as a list of keys and values, for example
-<code>[{port, 8443}, {certfile, "path/to/cert.pem"}]</code>.
-</p>
-<div class="paragraph"><p>The available options are documented in the
-<a href="../ranch_ssl">ranch_ssl(3)</a> manual.</p></div>
+<dt>TransportOpts</dt>
+<dd><p>The transport options are where the TCP options, including the listener&apos;s port number, are defined. They also contain the TLS options, like the server&apos;s certificate. Transport options are provided as a list of keys and values, for example <code>[{port, 8443}, {certfile, &quot;path/to/cert.pem&quot;}]</code>.</p>
+<p>The available options are documented in the <a href="../ranch_ssl">ranch_ssl(3)</a> manual.</p>
 </dd>
-<dt class="hdlist1">
-ProtocolOpts
-</dt>
-<dd>
-<p>
-The protocol options are in a map containing all the options for
-the different protocols that may be involved when connecting
-to the listener, including HTTP/1.1 and HTTP/2.
-</p>
-<div class="paragraph"><p>The HTTP/1.1 options are documented in the
-<a href="../cowboy_http">cowboy_http(3)</a> manual;
-and the HTTP/2 options in
-<a href="../cowboy_http2">cowboy_http2(3)</a>.</p></div>
+<dt>ProtocolOpts</dt>
+<dd><p>The protocol options are in a map containing all the options for the different protocols that may be involved when connecting to the listener, including HTTP/1.1 and HTTP/2.</p>
+<p>The HTTP/1.1 options are documented in the <a href="../cowboy_http">cowboy_http(3)</a> manual; and the HTTP/2 options in <a href="../cowboy_http2">cowboy_http2(3)</a>.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_return_value">Return value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>An ok tuple is returned on success. It contains the pid of
-the top-level supervisor for the listener.</p></div>
-<div class="paragraph"><p>An error tuple is returned on error. The error reason may
-be any Erlang term.</p></div>
-<div class="paragraph"><p>A common error is <code>eaddrinuse</code>. It indicates that the port
-configured for Cowboy is already in use.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>An ok tuple is returned on success. It contains the pid of the top-level supervisor for the listener.</p>
+<p>An error tuple is returned on error. The error reason may be any Erlang term.</p>
+<p>A common error is <code>eaddrinuse</code>. It indicates that the port configured for Cowboy is already in use.</p>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: HTTP/2 support added.
-</p>
+<ul><li><strong>2.0</strong>: HTTP/2 support added.
 </li>
-<li>
-<p>
-<strong>2.0</strong>: Function introduced. Replaces <code>cowboy:start_https/4</code>.
-</p>
+<li><strong>2.0</strong>: Function introduced. Replaces <code>cowboy:start_https/4</code>.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Start a listener</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Start a listener</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Dispatch</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_router:compile</span></span>([
-    {<span style="color: #FF6600">'_'</span>, [
-        {<span style="color: #FF0000">"/"</span>, <span style="color: #FF6600">toppage_h</span>, []}
+<pre><tt><font color="#009900">Dispatch</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_router:compile</font></b>([
+    {<font color="#FF6600">'_'</font>, [
+        {<font color="#FF0000">"/"</font>, <font color="#FF6600">toppage_h</font>, []}
     ]}
 ]),
 
-{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_tls</span></span>(<span style="color: #FF6600">example</span>, [
-    {<span style="color: #FF6600">port</span>, <span style="color: #993399">8443</span>},
-    {<span style="color: #FF6600">cert</span>, <span style="color: #FF0000">"path/to/cert.pem"</span>}
+{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy:start_tls</font></b>(<font color="#FF6600">example</font>, [
+    {<font color="#FF6600">port</font>, <font color="#993399">8443</font>},
+    {<font color="#FF6600">cert</font>, <font color="#FF0000">"path/to/cert.pem"</font>}
 ], #{
-    <span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}
-})<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Start a listener on a random port</div>
-<div class="content"><!-- Generator: GNU source-highlight
+    <font color="#0000FF">env</font> <font color="#990000">=&gt;</font> #{<font color="#0000FF">dispatch</font> <font color="#990000">=&gt;</font> <font color="#009900">Dispatch</font>}
+})<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Start a listener on a random port</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Name</span> <span style="color: #990000">=</span> <span style="color: #FF6600">example</span>,
+<pre><tt><font color="#009900">Name</font> <font color="#990000">=</font> <font color="#FF6600">example</font>,
 
-{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy:start_tls</span></span>(<span style="color: #009900">Name</span>, [
-    {<span style="color: #FF6600">cert</span>, <span style="color: #FF0000">"path/to/cert.pem"</span>}
+{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy:start_tls</font></b>(<font color="#009900">Name</font>, [
+    {<font color="#FF6600">cert</font>, <font color="#FF0000">"path/to/cert.pem"</font>}
 ], #{
-    <span style="color: #0000FF">env</span> <span style="color: #990000">=&gt;</span> #{<span style="color: #0000FF">dispatch</span> <span style="color: #990000">=&gt;</span> <span style="color: #009900">Dispatch</span>}
+    <font color="#0000FF">env</font> <font color="#990000">=&gt;</font> #{<font color="#0000FF">dispatch</font> <font color="#990000">=&gt;</font> <font color="#009900">Dispatch</font>}
 }),
 
-<span style="color: #009900">Port</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:get_port</span></span>(<span style="color: #009900">Name</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">Port</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_port</font></b>(<font color="#009900">Name</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy">cowboy(3)</a>,
-<a href="../cowboy.start_clear">cowboy:start_clear(3)</a>,
-<a href="../cowboy.stop_listener">cowboy:stop_listener(3)</a>,
-<a href="../ranch">ranch(3)</a></p></div>
-</div>
-</div>
+<p><a href="../cowboy">cowboy(3)</a>, <a href="../cowboy.start_clear">cowboy:start_clear(3)</a>, <a href="../cowboy.stop_listener">cowboy:stop_listener(3)</a>, <a href="../ranch">ranch(3)</a></p>
+
 
 
 

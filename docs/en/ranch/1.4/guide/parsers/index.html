@@ -62,109 +62,69 @@
 
 <h1 class="lined-header"><span>Writing parsers</span></h1>
 
-<div class="paragraph"><p>There are three kinds of protocols:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Text protocols
-</p>
+<p>There are three kinds of protocols:</p>
+<ul><li>Text protocols
 </li>
-<li>
-<p>
-Schema-less binary protocols
-</p>
+<li>Schema-less binary protocols
 </li>
-<li>
-<p>
-Schema-based binary protocols
-</p>
+<li>Schema-based binary protocols
 </li>
-</ul></div>
-<div class="paragraph"><p>This chapter introduces the first two kinds. It will not cover
-more advanced topics such as continuations or parser generators.</p></div>
-<div class="paragraph"><p>This chapter isn&#8217;t specifically about Ranch, we assume here that
-you know how to read data from the socket. The data you read and
-the data that hasn&#8217;t been parsed is saved in a buffer. Every
-time you read from the socket, the data read is appended to the
-buffer. What happens next depends on the kind of protocol. We
-will only cover the first two.</p></div>
-<div class="sect1">
+</ul>
+<p>This chapter introduces the first two kinds. It will not cover more advanced topics such as continuations or parser generators.</p>
+<p>This chapter isn&apos;t specifically about Ranch, we assume here that you know how to read data from the socket. The data you read and the data that hasn&apos;t been parsed is saved in a buffer. Every time you read from the socket, the data read is appended to the buffer. What happens next depends on the kind of protocol. We will only cover the first two.</p>
 <h2 id="_parsing_text">Parsing text</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Text protocols are generally line based. This means that we can&#8217;t
-do anything with them until we receive the full line.</p></div>
-<div class="paragraph"><p>A simple way to get a full line is to use <code>binary:split/{2,3}</code>.</p></div>
-<div class="listingblock">
-<div class="title">Using binary:split/2 to get a line of input</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Text protocols are generally line based. This means that we can&apos;t do anything with them until we receive the full line.</p>
+<p>A simple way to get a full line is to use <code>binary:split/{2,3}</code>.</p>
+<div class="listingblock"><div class="title">Using binary:split/2 to get a line of input</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">binary:split</span></span>(<span style="color: #009900">Buffer</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"\n"</span><span style="color: #990000">&gt;&gt;</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        [<span style="color: #990000">_</span>] <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">get_more_data</span></span>(<span style="color: #009900">Buffer</span>);
-        [<span style="color: #009900">Line</span>, <span style="color: #009900">Rest</span>] <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">handle_line</span></span>(<span style="color: #009900">Line</span>, <span style="color: #009900">Rest</span>)
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>In the above example, we can have two results. Either there was
-a line break in the buffer and we get it split into two parts,
-the line and the rest of the buffer; or there was no line break
-in the buffer and we need to get more data from the socket.</p></div>
-<div class="paragraph"><p>Next, we need to parse the line. The simplest way is to again
-split, here on space. The difference is that we want to split
-on all spaces character, as we want to tokenize the whole string.</p></div>
-<div class="listingblock">
-<div class="title">Using binary:split/3 to split text</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#0000FF">case</font></b> <b><font color="#000000">binary:split</font></b>(<font color="#009900">Buffer</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"\n"</font><font color="#990000">&gt;&gt;</font>) <b><font color="#0000FF">of</font></b>
+	[<font color="#990000">_</font>] <font color="#990000">-&gt;</font>
+		<b><font color="#000000">get_more_data</font></b>(<font color="#009900">Buffer</font>);
+	[<font color="#009900">Line</font>, <font color="#009900">Rest</font>] <font color="#990000">-&gt;</font>
+		<b><font color="#000000">handle_line</font></b>(<font color="#009900">Line</font>, <font color="#009900">Rest</font>)
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>In the above example, we can have two results. Either there was a line break in the buffer and we get it split into two parts, the line and the rest of the buffer; or there was no line break in the buffer and we need to get more data from the socket.</p>
+<p>Next, we need to parse the line. The simplest way is to again split, here on space. The difference is that we want to split on all spaces character, as we want to tokenize the whole string.</p>
+<div class="listingblock"><div class="title">Using binary:split/3 to split text</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">binary:split</span></span>(<span style="color: #009900">Line</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">" "</span><span style="color: #990000">&gt;&gt;</span>, [<span style="color: #FF6600">global</span>]) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"HELLO"</span><span style="color: #990000">&gt;&gt;</span>] <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">be_polite</span></span>();
-        [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"AUTH"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">User</span>, <span style="color: #009900">Password</span>] <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">authenticate_user</span></span>(<span style="color: #009900">User</span>, <span style="color: #009900">Password</span>);
-        [<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"QUIT"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Reason</span>] <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">quit</span></span>(<span style="color: #009900">Reason</span>)
-        <span style="font-style: italic"><span style="color: #9A1900">%% ...</span></span>
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Pretty simple, right? Match on the command name, get the rest
-of the tokens in variables and call the respective functions.</p></div>
-<div class="paragraph"><p>After doing this, you will want to check if there is another
-line in the buffer, and handle it immediately if any.
-Otherwise wait for more data.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#0000FF">case</font></b> <b><font color="#000000">binary:split</font></b>(<font color="#009900">Line</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">" "</font><font color="#990000">&gt;&gt;</font>, [<font color="#FF6600">global</font>]) <b><font color="#0000FF">of</font></b>
+	[<font color="#990000">&lt;&lt;</font><font color="#FF0000">"HELLO"</font><font color="#990000">&gt;&gt;</font>] <font color="#990000">-&gt;</font>
+		<b><font color="#000000">be_polite</font></b>();
+	[<font color="#990000">&lt;&lt;</font><font color="#FF0000">"AUTH"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">User</font>, <font color="#009900">Password</font>] <font color="#990000">-&gt;</font>
+		<b><font color="#000000">authenticate_user</font></b>(<font color="#009900">User</font>, <font color="#009900">Password</font>);
+	[<font color="#990000">&lt;&lt;</font><font color="#FF0000">"QUIT"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Reason</font>] <font color="#990000">-&gt;</font>
+		<b><font color="#000000">quit</font></b>(<font color="#009900">Reason</font>)
+	<i><font color="#9A1900">%% ...</font></i>
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Pretty simple, right? Match on the command name, get the rest of the tokens in variables and call the respective functions.</p>
+<p>After doing this, you will want to check if there is another line in the buffer, and handle it immediately if any. Otherwise wait for more data.</p>
 <h2 id="_parsing_binary">Parsing binary</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Binary protocols can be more varied, although most of them are
-pretty similar. The first four bytes of a frame tend to be
-the size of the frame, which is followed by a certain number
-of bytes for the type of frame and then various parameters.</p></div>
-<div class="paragraph"><p>Sometimes the size of the frame includes the first four bytes,
-sometimes not. Other times this size is encoded over two bytes.
-And even other times little-endian is used instead of big-endian.</p></div>
-<div class="paragraph"><p>The general idea stays the same though.</p></div>
-<div class="listingblock">
-<div class="title">Using binary pattern matching to split frames</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Binary protocols can be more varied, although most of them are pretty similar. The first four bytes of a frame tend to be the size of the frame, which is followed by a certain number of bytes for the type of frame and then various parameters.</p>
+<p>Sometimes the size of the frame includes the first four bytes, sometimes not. Other times this size is encoded over two bytes. And even other times little-endian is used instead of big-endian.</p>
+<p>The general idea stays the same though.</p>
+<div class="listingblock"><div class="title">Using binary pattern matching to split frames</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #990000">&lt;&lt;</span> <span style="color: #009900">Size</span><span style="color: #990000">:</span><span style="color: #993399">32</span>, <span style="color: #990000">_/</span><span style="color: #FF6600">bits</span> <span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">=</span> <span style="color: #009900">Buffer</span>,
-<span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="color: #009900">Buffer</span> <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        <span style="color: #990000">&lt;&lt;</span> <span style="color: #009900">Frame</span><span style="color: #990000">:</span><span style="color: #009900">Size</span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #009900">Rest</span><span style="color: #990000">/</span><span style="color: #FF6600">bits</span> <span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">handle_frame</span></span>(<span style="color: #009900">Frame</span>, <span style="color: #009900">Rest</span>);
-        <span style="color: #990000">_</span> <span style="color: #990000">-&gt;</span>
-                <span style="font-weight: bold"><span style="color: #000000">get_more_data</span></span>(<span style="color: #009900">Buffer</span>)
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>You will then need to parse this frame using binary pattern
-matching, and handle it. Then you will want to check if there
-is another frame fully received in the buffer, and handle it
-immediately if any. Otherwise wait for more data.</p></div>
-</div>
-</div>
+<pre><tt><font color="#990000">&lt;&lt;</font> <font color="#009900">Size</font><font color="#990000">:</font><font color="#993399">32</font>, <font color="#990000">_/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font> <font color="#990000">=</font> <font color="#009900">Buffer</font>,
+<b><font color="#0000FF">case</font></b> <font color="#009900">Buffer</font> <b><font color="#0000FF">of</font></b>
+	<font color="#990000">&lt;&lt;</font> <font color="#009900">Frame</font><font color="#990000">:</font><font color="#009900">Size</font><font color="#990000">/</font><b><font color="#000080">binary</font></b>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font> <font color="#990000">-&gt;</font>
+		<b><font color="#000000">handle_frame</font></b>(<font color="#009900">Frame</font>, <font color="#009900">Rest</font>);
+	<font color="#990000">_</font> <font color="#990000">-&gt;</font>
+		<b><font color="#000000">get_more_data</font></b>(<font color="#009900">Buffer</font>)
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You will then need to parse this frame using binary pattern matching, and handle it. Then you will want to check if there is another frame fully received in the buffer, and handle it immediately if any. Otherwise wait for more data.</p>
+
 
 
 
@@ -220,6 +180,8 @@ immediately if any. Otherwise wait for more data.</p></div>
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/ranch/1.5/guide">1.5</a></li>
 	
 		<li><a href="/docs/en/ranch/1.4/guide">1.4</a></li>
 	

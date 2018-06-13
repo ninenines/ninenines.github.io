@@ -2,11 +2,16 @@
 
 PROJECTS = $(sort $(notdir $(basename $(wildcard data/projects/*.toml))))
 
-all: docs
-	hugo --theme=ninenines -d ..
+all: $(CURDIR)/deps/asciideck docs
+	PATH=$(CURDIR)/deps/asciideck/scripts:$(PATH) hugo --theme=ninenines -d ..
 
-server:
-	hugo server --theme=ninenines
+server: $(CURDIR)/deps/asciideck
+	PATH=$(CURDIR)/deps/asciideck/scripts:$(PATH) hugo server --theme=ninenines
+
+$(CURDIR)/deps/asciideck:
+	mkdir -p $(CURDIR)/deps
+	git clone git@github.com:ninenines/asciideck.git $(CURDIR)/deps/asciideck
+	$(MAKE) -C $(CURDIR)/deps/asciideck
 
 clean: DOC_FILES = $(filter-out static/docs/en/cowboy/1.0/guide,$(wildcard static/docs/en/*/*/guide))
 clean: OUTPUT_FILES = $(filter-out ../_build,$(wildcard ../*))

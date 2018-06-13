@@ -62,131 +62,72 @@
 
 <h1 class="lined-header"><span>Loop handlers</span></h1>
 
-<div class="paragraph"><p>Loop handlers are a special kind of HTTP handlers used when the
-response can not be sent right away. The handler enters instead
-a receive loop waiting for the right message before it can send
-a response.</p></div>
-<div class="paragraph"><p>Loop handlers are used for requests where a response might not
-be immediately available, but where you would like to keep the
-connection open for a while in case the response arrives. The
-most known example of such practice is known as long polling.</p></div>
-<div class="paragraph"><p>Loop handlers can also be used for requests where a response is
-partially available and you need to stream the response body
-while the connection is open. The most known example of such
-practice is server-sent events.</p></div>
-<div class="paragraph"><p>While the same can be accomplished using plain HTTP handlers,
-it is recommended to use loop handlers because they are well-tested
-and allow using built-in features like hibernation and timeouts.</p></div>
-<div class="paragraph"><p>Loop handlers essentially wait for one or more Erlang messages
-and feed these messages to the <code>info/3</code> callback. It also features
-the <code>init/2</code> and <code>terminate/3</code> callbacks which work the same as
-for plain HTTP handlers.</p></div>
-<div class="sect1">
+<p>Loop handlers are a special kind of HTTP handlers used when the response can not be sent right away. The handler enters instead a receive loop waiting for the right message before it can send a response.</p>
+<p>Loop handlers are used for requests where a response might not be immediately available, but where you would like to keep the connection open for a while in case the response arrives. The most known example of such practice is known as long polling.</p>
+<p>Loop handlers can also be used for requests where a response is partially available and you need to stream the response body while the connection is open. The most known example of such practice is server-sent events.</p>
+<p>While the same can be accomplished using plain HTTP handlers, it is recommended to use loop handlers because they are well-tested and allow using built-in features like hibernation and timeouts.</p>
+<p>Loop handlers essentially wait for one or more Erlang messages and feed these messages to the <code>info/3</code> callback. It also features the <code>init/2</code> and <code>terminate/3</code> callbacks which work the same as for plain HTTP handlers.</p>
 <h2 id="_initialization">Initialization</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The <code>init/2</code> function must return a <code>cowboy_loop</code> tuple to enable
-loop handler behavior. This tuple may optionally contain
-a timeout value and/or the atom <code>hibernate</code> to make the
-process enter hibernation until a message is received.</p></div>
-<div class="paragraph"><p>This snippet enables the loop handler:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The <code>init/2</code> function must return a <code>cowboy_loop</code> tuple to enable loop handler behavior. This tuple may optionally contain a timeout value and/or the atom <code>hibernate</code> to make the process enter hibernation until a message is received.</p>
+<p>This snippet enables the loop handler:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>This also makes the process hibernate:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">cowboy_loop</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>This also makes the process hibernate:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">cowboy_loop</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>, <font color="#FF6600">hibernate</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_receive_loop">Receive loop</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Once initialized, Cowboy will wait for messages to arrive
-in the process' mailbox. When a message arrives, Cowboy
-calls the <code>info/3</code> function with the message, the Req object
-and the handler&#8217;s state.</p></div>
-<div class="paragraph"><p>The following snippet sends a reply when it receives a
-<code>reply</code> message from another process, or waits for another
-message otherwise.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Once initialized, Cowboy will wait for messages to arrive in the process&apos; mailbox. When a message arrives, Cowboy calls the <code>info/3</code> function with the message, the Req object and the handler&apos;s state.</p>
+<p>The following snippet sends a reply when it receives a <code>reply</code> message from another process, or waits for another message otherwise.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">info</span></span>({<span style="color: #FF6600">reply</span>, <span style="color: #009900">Body</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">cowboy_req:reply</span></span>(<span style="color: #993399">200</span>, #{}, <span style="color: #009900">Body</span>, <span style="color: #009900">Req</span>),
-    {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-<span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #009900">_Msg</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>, <span style="color: #FF6600">hibernate</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Do note that the <code>reply</code> tuple here may be any message
-and is simply an example.</p></div>
-<div class="paragraph"><p>This callback may perform any necessary operation including
-sending all or parts of a reply, and will subsequently
-return a tuple indicating if more messages are to be expected.</p></div>
-<div class="paragraph"><p>The callback may also choose to do nothing at all and just
-skip the message received.</p></div>
-<div class="paragraph"><p>If a reply is sent, then the <code>stop</code> tuple should be returned.
-This will instruct Cowboy to end the request.</p></div>
-<div class="paragraph"><p>Otherwise an <code>ok</code> tuple should be returned.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">info</font></b>({<font color="#FF6600">reply</font>, <font color="#009900">Body</font>}, <font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">cowboy_req:reply</font></b>(<font color="#993399">200</font>, #{}, <font color="#009900">Body</font>, <font color="#009900">Req</font>),
+    {<font color="#FF6600">stop</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>};
+<b><font color="#000000">info</font></b>(<font color="#009900">_Msg</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">ok</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>, <font color="#FF6600">hibernate</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Do note that the <code>reply</code> tuple here may be any message and is simply an example.</p>
+<p>This callback may perform any necessary operation including sending all or parts of a reply, and will subsequently return a tuple indicating if more messages are to be expected.</p>
+<p>The callback may also choose to do nothing at all and just skip the message received.</p>
+<p>If a reply is sent, then the <code>stop</code> tuple should be returned. This will instruct Cowboy to end the request.</p>
+<p>Otherwise an <code>ok</code> tuple should be returned.</p>
 <h2 id="_streaming_loop">Streaming loop</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Another common case well suited for loop handlers is
-streaming data received in the form of Erlang messages.
-This can be done by initiating a chunked reply in the
-<code>init/2</code> callback and then using <code>cowboy_req:chunk/2</code>
-every time a message is received.</p></div>
-<div class="paragraph"><p>The following snippet does exactly that. As you can see
-a chunk is sent every time an <code>event</code> message is received,
-and the loop is stopped by sending an <code>eof</code> message.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Another common case well suited for loop handlers is streaming data received in the form of Erlang messages. This can be done by initiating a chunked reply in the <code>init/2</code> callback and then using <code>cowboy_req:chunk/2</code> every time a message is received.</p>
+<p>The following snippet does exactly that. As you can see a chunk is sent every time an <code>event</code> message is received, and the loop is stopped by sending an <code>eof</code> message.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>(<span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    <span style="color: #009900">Req2</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_reply</span></span>(<span style="color: #993399">200</span>, <span style="color: #009900">Req</span>),
-    {<span style="color: #FF6600">cowboy_loop</span>, <span style="color: #009900">Req2</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span>
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    <font color="#009900">Req2</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:stream_reply</font></b>(<font color="#993399">200</font>, <font color="#009900">Req</font>),
+    {<font color="#FF6600">cowboy_loop</font>, <font color="#009900">Req2</font>, <font color="#009900">State</font>}<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #FF6600">eof</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">stop</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-<span style="font-weight: bold"><span style="color: #000000">info</span></span>({<span style="color: #FF6600">event</span>, <span style="color: #009900">Data</span>}, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">cowboy_req:stream_body</span></span>(<span style="color: #009900">Data</span>, <span style="color: #FF6600">nofin</span>, <span style="color: #009900">Req</span>),
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>};
-<span style="font-weight: bold"><span style="color: #000000">info</span></span>(<span style="color: #009900">_Msg</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Req</span>, <span style="color: #009900">State</span>}<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<b><font color="#000000">info</font></b>(<font color="#FF6600">eof</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">stop</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>};
+<b><font color="#000000">info</font></b>({<font color="#FF6600">event</font>, <font color="#009900">Data</font>}, <font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">cowboy_req:stream_body</font></b>(<font color="#009900">Data</font>, <font color="#FF6600">nofin</font>, <font color="#009900">Req</font>),
+    {<font color="#FF6600">ok</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>};
+<b><font color="#000000">info</font></b>(<font color="#009900">_Msg</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">ok</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_cleaning_up">Cleaning up</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>It is recommended that you set the connection header to
-<code>close</code> when replying, as this process may be reused for
-a subsequent request.</p></div>
-<div class="paragraph"><p>Please refer to the <a href="../handlers">Handlers chapter</a>
-for general instructions about cleaning up.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>It is recommended that you set the connection header to <code>close</code> when replying, as this process may be reused for a subsequent request.</p>
+<p>Please refer to the <a href="../handlers">Handlers chapter</a> for general instructions about cleaning up.</p>
 <h2 id="_hibernate">Hibernate</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>To save memory, you may hibernate the process in between
-messages received. This is done by returning the atom
-<code>hibernate</code> as part of the <code>loop</code> tuple callbacks normally
-return. Just add the atom at the end and Cowboy will hibernate
-accordingly.</p></div>
-</div>
-</div>
+<p>To save memory, you may hibernate the process in between messages received. This is done by returning the atom <code>hibernate</code> as part of the <code>loop</code> tuple callbacks normally return. Just add the atom at the end and Cowboy will hibernate accordingly.</p>
+
 
 
 

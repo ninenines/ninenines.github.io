@@ -69,118 +69,69 @@
 	</p>
 </header>
 
-<div class="paragraph"><p>Building OTP releases has always been a difficult task. Tools like
-Reltool or Rebar have made this simpler, but
-it&#8217;s no panacea. This article will show you an alternative and
-hopefully much simpler solution.</p></div>
-<div class="paragraph"><p>There is two steps to building a release. First you need to build
-the various OTP applications you want to include in the release. Once
-done, you need to create the release itself, by including the Erlang
-runtime system alongside the applications, a boot script to start the
-node and all its applications, and some configuration files.</p></div>
-<div class="paragraph"><p><a href="https://github.com/extend/erlang.mk">Erlang.mk</a> solves
-the first step. It is an include file for GNU Make. Just
-including it in a Makefile is enough to allow building your project,
-fetching and building dependencies, building documentation, performing
-static analysis and more.</p></div>
-<div class="paragraph"><p><a href="https://github.com/erlware/relx">Relx</a> solves the second
-step. It is a release creation tool, wrapped into a single executable
-file. It doesn&#8217;t require a configuration file. And if you do need one,
-it will be a pretty small one.</p></div>
-<div class="paragraph"><p>Let&#8217;s take a look at the smallest Erlang.mk powered
-Makefile. There is only one thing required: defining the project
-name.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Building OTP releases has always been a difficult task. Tools like Reltool or Rebar have made this simpler, but it&apos;s no panacea. This article will show you an alternative and hopefully much simpler solution.</p>
+<p>There is two steps to building a release. First you need to build the various OTP applications you want to include in the release. Once done, you need to create the release itself, by including the Erlang runtime system alongside the applications, a boot script to start the node and all its applications, and some configuration files.</p>
+<p><a href="https://github.com/extend/erlang.mk">Erlang.mk</a> solves the first step. It is an include file for GNU Make. Just including it in a Makefile is enough to allow building your project, fetching and building dependencies, building documentation, performing static analysis and more.</p>
+<p><a href="https://github.com/erlware/relx">Relx</a> solves the second step. It is a release creation tool, wrapped into a single executable file. It doesn&apos;t require a configuration file. And if you do need one, it will be a pretty small one.</p>
+<p>Let&apos;s take a look at the smallest Erlang.mk powered Makefile. There is only one thing required: defining the project name.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">PROJECT =</span> my_project
+<pre><tt><font color="#009900">PROJECT =</font> my_project
 
-include erlang.mk</tt></pre></div></div>
-<div class="paragraph"><p>Simply doing this allows you to build your application by typing
-<code>make</code>, running tests using <code>make tests</code>, and
-more. It will even compile your <em>.dtl</em> files found in the
-<em>templates/</em> directory if you are using ErlyDTL!</p></div>
-<div class="paragraph"><p>Let&#8217;s now take a look at a simplified version of the Makefile for
-this website. I only removed a few targets that were off-topic.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">PROJECT =</span> ninenines
-
-<span style="color: #009900">DEPS =</span> cowboy erlydtl
-<span style="color: #009900">dep_cowboy_commit =</span> 0.8.5
-<span style="color: #009900">dep_erlydtl_commit =</span> 4d0dc8fb
-
-<span style="font-weight: bold"><span style="color: #000080">.PHONY:</span></span> release clean-release
-
-<span style="color: #990000">release:</span> clean-release all projects
-        relx -o rel<span style="color: #990000">/</span><span style="color: #009900">$(PROJECT)</span>
-
-<span style="color: #990000">clean-release:</span> clean-projects
-        rm -rf rel<span style="color: #990000">/</span><span style="color: #009900">$(PROJECT)</span>
-
-include erlang.mk</tt></pre></div></div>
-<div class="paragraph"><p>You can see here how to define dependencies. First you list all
-the dependency names, then you have one line per dependency, giving
-the repository URL and the commit number, tag or branch you want.</p></div>
-<div class="paragraph"><p>Then you can see two targets defined, with <code>release</code>
-becoming the default target, because it was defined first. You can
-override the default target <code>all</code>, which builds the
-application and its dependencies, this way.</p></div>
-<div class="paragraph"><p>And as you can see, the <code>release</code> target uses
-Relx to build a release into the <em>rel/ninenines/</em>
-directory. Let&#8217;s take a look at the configuration file for this release.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">release</span>, {<span style="color: #FF6600">ninenines</span>, <span style="color: #FF0000">"1"</span>}, [<span style="color: #FF6600">ninenines</span>]}<span style="color: #990000">.</span>
-
-{<span style="color: #FF6600">extended_start_script</span>, <span style="color: #000080">true</span>}<span style="color: #990000">.</span>
-{<span style="color: #FF6600">sys_config</span>, <span style="color: #FF0000">"rel/sys.config"</span>}<span style="color: #990000">.</span>
-
-{<span style="color: #FF6600">overlay</span>, [
-        {<span style="color: #FF6600">mkdir</span>, <span style="color: #FF0000">"log"</span>},
-        {<span style="color: #FF6600">copy</span>, <span style="color: #FF0000">"rel/vm.args"</span>,
-                <span style="color: #FF0000">"releases/\{\{release_name\}\}-\{\{release_version\}\}/vm.args"</span>}
-]}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The first line defines a release named <code>ninenines</code>, which
-has a version number <code>"1"</code> and includes one application, also
-named <code>ninenines</code>, although it doesn&#8217;t have to.</p></div>
-<div class="paragraph"><p>We then use the <code>extended_start_script</code> option to tell
-Relx that we would like to have a start script that allows
-us to not only start the release, but do so with the node in the
-background, or also to allow us to connect to a running node, and so on.
-This start script has the same features as the one tools like
-Rebar generates.</p></div>
-<div class="paragraph"><p>The rest of the file just makes sure our configuration files are
-where we expect them. Relx will automatically take care
-of your <em>sys.config</em> file as long as you tell it where to
-find it. The <em>vm.args</em> file used by the extended start script
-needs to be handled more explicitly by using an overlay however.</p></div>
-<div class="paragraph"><p>How does Relx find what applications to include?
-By looking at the application dependencies in the <em>.app</em>
-file of each OTP application. Make sure you put all dependencies in
-there, <em>including</em> library applications, and Relx
-will find everything for you.</p></div>
-<div class="paragraph"><p>For example, this release includes the following applications.
-Only what&#8217;s strictly required.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>compiler-4.9.1  crypto-2.3     kernel-2.16.1    ranch-0.8.3    syntax_tools-1.6.11
-cowboy-0.8.5    erlydtl-0.7.0  ninenines-0.2.0  stdlib-1.19.1</code></pre>
+include erlang.mk</tt></pre>
 </div></div>
-<div class="paragraph"><p>The <em>sys.config</em> file is standard and
-<a href="http://www.erlang.org/doc/man/config.html">well documented</a>.
-The <em>vm.args</em> file is just an optionally multiline file
-containing all the flags to pass to the Erlang VM, for example
-<code>-name ninenines@127.0.0.1 -heart</code>.</p></div>
-<div class="paragraph"><p>Building OTP releases has always been a difficult task. Until now.</p></div>
+<p>Simply doing this allows you to build your application by typing <code>make</code>, running tests using <code>make tests</code>, and more. It will even compile your <em>.dtl</em> files found in the <em>templates/</em> directory if you are using ErlyDTL!</p>
+<p>Let&apos;s now take a look at a simplified version of the Makefile for this website. I only removed a few targets that were off-topic.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">PROJECT =</font> ninenines
+
+<font color="#009900">DEPS =</font> cowboy erlydtl
+<font color="#009900">dep_cowboy_commit =</font> 0.8.5
+<font color="#009900">dep_erlydtl_commit =</font> 4d0dc8fb
+
+<b><font color="#000080">.PHONY:</font></b> release clean-release
+
+<font color="#990000">release:</font> clean-release all projects
+	relx -o rel<font color="#990000">/</font><font color="#009900">$(PROJECT)</font>
+
+<font color="#990000">clean-release:</font> clean-projects
+	rm -rf rel<font color="#990000">/</font><font color="#009900">$(PROJECT)</font>
+
+include erlang.mk</tt></pre>
+</div></div>
+<p>You can see here how to define dependencies. First you list all the dependency names, then you have one line per dependency, giving the repository URL and the commit number, tag or branch you want.</p>
+<p>Then you can see two targets defined, with <code>release</code> becoming the default target, because it was defined first. You can override the default target <code>all</code>, which builds the application and its dependencies, this way.</p>
+<p>And as you can see, the <code>release</code> target uses Relx to build a release into the <em>rel/ninenines/</em> directory. Let&apos;s take a look at the configuration file for this release.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">release</font>, {<font color="#FF6600">ninenines</font>, <font color="#FF0000">"1"</font>}, [<font color="#FF6600">ninenines</font>]}<font color="#990000">.</font>
+
+{<font color="#FF6600">extended_start_script</font>, <font color="#000080">true</font>}<font color="#990000">.</font>
+{<font color="#FF6600">sys_config</font>, <font color="#FF0000">"rel/sys.config"</font>}<font color="#990000">.</font>
+
+{<font color="#FF6600">overlay</font>, [
+	{<font color="#FF6600">mkdir</font>, <font color="#FF0000">"log"</font>},
+	{<font color="#FF6600">copy</font>, <font color="#FF0000">"rel/vm.args"</font>,
+		<font color="#FF0000">"releases/\{\{release_name\}\}-\{\{release_version\}\}/vm.args"</font>}
+]}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The first line defines a release named <code>ninenines</code>, which has a version number <code>&quot;1&quot;</code> and includes one application, also named <code>ninenines</code>, although it doesn&apos;t have to.</p>
+<p>We then use the <code>extended_start_script</code> option to tell Relx that we would like to have a start script that allows us to not only start the release, but do so with the node in the background, or also to allow us to connect to a running node, and so on. This start script has the same features as the one tools like Rebar generates.</p>
+<p>The rest of the file just makes sure our configuration files are where we expect them. Relx will automatically take care of your <em>sys.config</em> file as long as you tell it where to find it. The <em>vm.args</em> file used by the extended start script needs to be handled more explicitly by using an overlay however.</p>
+<p>How does Relx find what applications to include? By looking at the application dependencies in the <em>.app</em> file of each OTP application. Make sure you put all dependencies in there, <em>including</em> library applications, and Relx will find everything for you.</p>
+<p>For example, this release includes the following applications. Only what&apos;s strictly required.</p>
+<div class="listingblock"><div class="content"><pre>compiler-4.9.1	crypto-2.3     kernel-2.16.1	ranch-0.8.3    syntax_tools-1.6.11
+cowboy-0.8.5	erlydtl-0.7.0  ninenines-0.2.0	stdlib-1.19.1</pre></div></div>
+<p>The <em>sys.config</em> file is standard and <a href="http://www.erlang.org/doc/man/config.html">well documented</a>. The <em>vm.args</em> file is just an optionally multiline file containing all the flags to pass to the Erlang VM, for example <code>-name ninenines@127.0.0.1 -heart</code>.</p>
+<p>Building OTP releases has always been a difficult task. Until now.</p>
+
 
 </article>
 </div>

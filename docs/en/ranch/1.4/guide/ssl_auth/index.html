@@ -62,158 +62,82 @@
 
 <h1 class="lined-header"><span>SSL client authentication</span></h1>
 
-<div class="sect1">
 <h2 id="_purpose">Purpose</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>SSL client authentication is a mechanism allowing applications to
-identify certificates. This allows your application to make sure that
-the client is an authorized certificate, but makes no claim about
-whether the user can be trusted. This can be combined with a password
-based authentication to attain greater security.</p></div>
-<div class="paragraph"><p>The server only needs to retain the certificate serial number and
-the certificate issuer to authenticate the certificate. Together,
-they can be used to uniquely identify a certicate.</p></div>
-<div class="paragraph"><p>As Ranch allows the same protocol code to be used for both SSL and
-non-SSL transports, you need to make sure you are in an SSL context
-before attempting to perform an SSL client authentication. This
-can be done by checking the return value of <code>Transport:name/0</code>.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>SSL client authentication is a mechanism allowing applications to identify certificates. This allows your application to make sure that the client is an authorized certificate, but makes no claim about whether the user can be trusted. This can be combined with a password based authentication to attain greater security.</p>
+<p>The server only needs to retain the certificate serial number and the certificate issuer to authenticate the certificate. Together, they can be used to uniquely identify a certicate.</p>
+<p>As Ranch allows the same protocol code to be used for both SSL and non-SSL transports, you need to make sure you are in an SSL context before attempting to perform an SSL client authentication. This can be done by checking the return value of <code>Transport:name/0</code>.</p>
 <h2 id="_obtaining_client_certificates">Obtaining client certificates</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>You can obtain client certificates from various sources. You can
-generate them yourself, or you can use a service like CAcert.org
-which allows you to generate client and server certificates for
-free.</p></div>
-<div class="paragraph"><p>Following are the steps you need to take to create a CAcert.org
-account, generate a certificate and install it in your favorite
-browser.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Open <a href="http://cacert.org">http://cacert.org</a> in your favorite browser
-</p>
+<p>You can obtain client certificates from various sources. You can generate them yourself, or you can use a service like CAcert.org which allows you to generate client and server certificates for free.</p>
+<p>Following are the steps you need to take to create a CAcert.org account, generate a certificate and install it in your favorite browser.</p>
+<ul><li>Open <a href="http://cacert.org">http://cacert.org</a> in your favorite browser
 </li>
-<li>
-<p>
-Root Certificate link: install both certificates
-</p>
+<li>Root Certificate link: install both certificates
 </li>
-<li>
-<p>
-Join (Register an account)
-</p>
+<li>Join (Register an account)
 </li>
-<li>
-<p>
-Verify your account (check your email inbox!)
-</p>
+<li>Verify your account (check your email inbox!)
 </li>
-<li>
-<p>
-Log in
-</p>
+<li>Log in
 </li>
-<li>
-<p>
-Client Certificates: New
-</p>
+<li>Client Certificates: New
 </li>
-<li>
-<p>
-Follow instructions to create the certificate
-</p>
+<li>Follow instructions to create the certificate
 </li>
-<li>
-<p>
-Install the certificate in your browser
-</p>
+<li>Install the certificate in your browser
 </li>
-</ul></div>
-<div class="paragraph"><p>You can optionally save the certificate for later use, for example
-to extract the <code>IssuerID</code> information as will be detailed later on.</p></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
+<p>You can optionally save the certificate for later use, for example to extract the <code>IssuerID</code> information as will be detailed later on.</p>
 <h2 id="_transport_configuration">Transport configuration</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The SSL transport does not request a client certificate by default.
-You need to specify the <code>{verify, verify_peer}</code> option when starting
-the listener to enable this behavior.</p></div>
-<div class="listingblock">
-<div class="title">Configure a listener for SSL authentication</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The SSL transport does not request a client certificate by default. You need to specify the <code>{verify, verify_peer}</code> option when starting the listener to enable this behavior.</p>
+<div class="listingblock"><div class="title">Configure a listener for SSL authentication</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">my_ssl</span>,
-        <span style="color: #FF6600">ranch_ssl</span>, [
-                {<span style="color: #FF6600">port</span>, <span style="color: #009900">SSLPort</span>},
-                {<span style="color: #FF6600">certfile</span>, <span style="color: #009900">PathToCertfile</span>},
-                {<span style="color: #FF6600">cacertfile</span>, <span style="color: #009900">PathToCACertfile</span>},
-                {<span style="color: #FF6600">verify</span>, <span style="color: #FF6600">verify_peer</span>}
-        ],
-        <span style="color: #FF6600">my_protocol</span>, []
-)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>In this example we set the required <code>port</code> and <code>certfile</code>, but also
-the <code>cacertfile</code> containing the CACert.org root certificate, and
-the option to request the client certificate.</p></div>
-<div class="paragraph"><p>If you enable the <code>{verify, verify_peer}</code> option and the client does
-not have a client certificate configured for your domain, then no
-certificate will be sent. This allows you to use SSL for more than
-just authenticated clients.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">my_ssl</font>,
+	<font color="#FF6600">ranch_ssl</font>, [
+		{<font color="#FF6600">port</font>, <font color="#009900">SSLPort</font>},
+		{<font color="#FF6600">certfile</font>, <font color="#009900">PathToCertfile</font>},
+		{<font color="#FF6600">cacertfile</font>, <font color="#009900">PathToCACertfile</font>},
+		{<font color="#FF6600">verify</font>, <font color="#FF6600">verify_peer</font>}
+	],
+	<font color="#FF6600">my_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>In this example we set the required <code>port</code> and <code>certfile</code>, but also the <code>cacertfile</code> containing the CACert.org root certificate, and the option to request the client certificate.</p>
+<p>If you enable the <code>{verify, verify_peer}</code> option and the client does not have a client certificate configured for your domain, then no certificate will be sent. This allows you to use SSL for more than just authenticated clients.</p>
 <h2 id="_authentication">Authentication</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>To authenticate users, you must first save the certificate information
-required. If you have your users' certificate files, you can simply
-load the certificate and retrieve the information directly.</p></div>
-<div class="listingblock">
-<div class="title">Retrieve the issuer ID from a certificate</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>To authenticate users, you must first save the certificate information required. If you have your users&apos; certificate files, you can simply load the certificate and retrieve the information directly.</p>
+<div class="listingblock"><div class="title">Retrieve the issuer ID from a certificate</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">certfile_to_issuer_id</span></span>(<span style="color: #009900">Filename</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Data</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">file:read_file</span></span>(<span style="color: #009900">Filename</span>),
-        [{<span style="color: #FF6600">'Certificate'</span>, <span style="color: #009900">Cert</span>, <span style="color: #FF6600">not_encrypted</span>}] <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">public_key:pem_decode</span></span>(<span style="color: #009900">Data</span>),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">IssuerID</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">public_key:pkix_issuer_id</span></span>(<span style="color: #009900">Cert</span>, <span style="font-weight: bold"><span style="color: #000080">self</span></span>),
-        <span style="color: #009900">IssuerID</span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The <code>IssuerID</code> variable contains both the certificate serial number
-and the certificate issuer stored in a tuple, so this value alone can
-be used to uniquely identify the user certificate. You can save this
-value in a database, a configuration file or any other place where an
-Erlang term can be stored and retrieved.</p></div>
-<div class="paragraph"><p>To retrieve the <code>IssuerID</code> from a running connection, you need to first
-retrieve the client certificate and then extract this information from
-it. Ranch does not provide a function to retrieve the client certificate.
-Instead you can use the <code>ssl:peercert/1</code> function. Once you have the
-certificate, you can again use the <code>public_key:pkix_issuer_id/2</code> to
-extract the <code>IssuerID</code> value.</p></div>
-<div class="paragraph"><p>The following function returns the <code>IssuerID</code> or <code>false</code> if no client
-certificate was found. This snippet is intended to be used from your
-protocol code.</p></div>
-<div class="listingblock">
-<div class="title">Retrieve the issuer ID from the certificate for the current connection</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">certfile_to_issuer_id</font></b>(<font color="#009900">Filename</font>) <font color="#990000">-&gt;</font>
+	{<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">=</font> <b><font color="#000000">file:read_file</font></b>(<font color="#009900">Filename</font>),
+	[{<font color="#FF6600">'Certificate'</font>, <font color="#009900">Cert</font>, <font color="#FF6600">not_encrypted</font>}] <font color="#990000">=</font> <b><font color="#000000">public_key:pem_decode</font></b>(<font color="#009900">Data</font>),
+	{<font color="#FF6600">ok</font>, <font color="#009900">IssuerID</font>} <font color="#990000">=</font> <b><font color="#000000">public_key:pkix_issuer_id</font></b>(<font color="#009900">Cert</font>, <b><font color="#000080">self</font></b>),
+	<font color="#009900">IssuerID</font><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The <code>IssuerID</code> variable contains both the certificate serial number and the certificate issuer stored in a tuple, so this value alone can be used to uniquely identify the user certificate. You can save this value in a database, a configuration file or any other place where an Erlang term can be stored and retrieved.</p>
+<p>To retrieve the <code>IssuerID</code> from a running connection, you need to first retrieve the client certificate and then extract this information from it. Ranch does not provide a function to retrieve the client certificate. Instead you can use the <code>ssl:peercert/1</code> function. Once you have the certificate, you can again use the <code>public_key:pkix_issuer_id/2</code> to extract the <code>IssuerID</code> value.</p>
+<p>The following function returns the <code>IssuerID</code> or <code>false</code> if no client certificate was found. This snippet is intended to be used from your protocol code.</p>
+<div class="listingblock"><div class="title">Retrieve the issuer ID from the certificate for the current connection</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">socket_to_issuer_id</span></span>(<span style="color: #009900">Socket</span>) <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">ssl:peercert</span></span>(<span style="color: #009900">Socket</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-                {<span style="color: #FF6600">error</span>, <span style="color: #FF6600">no_peercert</span>} <span style="color: #990000">-&gt;</span>
-                        <span style="color: #000080">false</span>;
-                {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Cert</span>} <span style="color: #990000">-&gt;</span>
-                        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">IssuerID</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">public_key:pkix_issuer_id</span></span>(<span style="color: #009900">Cert</span>, <span style="font-weight: bold"><span style="color: #000080">self</span></span>),
-                        <span style="color: #009900">IssuerID</span>
-        <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>You then only need to match the <code>IssuerID</code> value to authenticate the
-user.</p></div>
-</div>
-</div>
+<pre><tt><b><font color="#000000">socket_to_issuer_id</font></b>(<font color="#009900">Socket</font>) <font color="#990000">-&gt;</font>
+	<b><font color="#0000FF">case</font></b> <b><font color="#000000">ssl:peercert</font></b>(<font color="#009900">Socket</font>) <b><font color="#0000FF">of</font></b>
+		{<font color="#FF6600">error</font>, <font color="#FF6600">no_peercert</font>} <font color="#990000">-&gt;</font>
+			<font color="#000080">false</font>;
+		{<font color="#FF6600">ok</font>, <font color="#009900">Cert</font>} <font color="#990000">-&gt;</font>
+			{<font color="#FF6600">ok</font>, <font color="#009900">IssuerID</font>} <font color="#990000">=</font> <b><font color="#000000">public_key:pkix_issuer_id</font></b>(<font color="#009900">Cert</font>, <b><font color="#000080">self</font></b>),
+			<font color="#009900">IssuerID</font>
+	<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You then only need to match the <code>IssuerID</code> value to authenticate the user.</p>
+
 
 
 
@@ -269,6 +193,8 @@ user.</p></div>
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/ranch/1.5/guide">1.5</a></li>
 	
 		<li><a href="/docs/en/ranch/1.4/guide">1.4</a></li>
 	

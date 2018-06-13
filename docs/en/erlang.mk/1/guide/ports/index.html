@@ -62,193 +62,97 @@
 
 <h1 class="lined-header"><span>NIFs and port drivers</span></h1>
 
-<div class="paragraph"><p>Erlang.mk can not only build Erlang projects, but also the C code
-that some projects come with, like NIFs and port drivers.</p></div>
-<div class="paragraph"><p>There are two ways to build the C code: using a custom Makefile,
-or making Erlang.mk do it directly. The C code will be built
-as needed when you run <code>make</code>.</p></div>
-<div class="sect1">
+<p>Erlang.mk can not only build Erlang projects, but also the C code that some projects come with, like NIFs and port drivers.</p>
+<p>There are two ways to build the C code: using a custom Makefile, or making Erlang.mk do it directly. The C code will be built as needed when you run <code>make</code>.</p>
+<!-- @todo something for easier bootstrapping-->
 <h2 id="_c_source_code_location_and_erlang_environment">C source code location and Erlang environment</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The C source code should be located in the <em>$(C_SRC_DIR)</em> directory.
-It defaults to <em>c_src/</em>. Should you need to modify it, all you
-need to do is to set the variable in your Makefile before including
-Erlang.mk:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>The C source code should be located in the <em>$(C_SRC_DIR)</em> directory. It defaults to <em>c_src/</em>. Should you need to modify it, all you need to do is to set the variable in your Makefile before including Erlang.mk:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">C_SRC_DIR =</span> <span style="color: #009900">$(CURDIR)</span>/my_nif_source</tt></pre></div></div>
-<div class="paragraph"><p>When this directory exists, Erlang.mk will automatically create a
-file named <em>$(C_SRC_ENV)</em>. This file defaults to <em>$(C_SRC_DIR)/env.mk</em>.
-This can also be changed:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">C_SRC_DIR =</font> <font color="#009900">$(CURDIR)</font>/my_nif_source</tt></pre>
+</div></div>
+<p>When this directory exists, Erlang.mk will automatically create a file named <em>$(C_SRC_ENV)</em>. This file defaults to <em>$(C_SRC_DIR)/env.mk</em>. This can also be changed:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">C_SRC_ENV =</span> <span style="color: #009900">$(C_SRC_DIR)</span>/erlang_env.mk</tt></pre></div></div>
-<div class="paragraph"><p>It contains a few variable definitions for the environment used for the build:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<code>ERTS_INCLUDE_DIR</code>
-</dt>
-<dd>
-<p>
-        Path to the ERTS include files (<em>erl_driver.h</em>, <em>erl_nif.h</em> and more).
-</p>
+<pre><tt><font color="#009900">C_SRC_ENV =</font> <font color="#009900">$(C_SRC_DIR)</font>/erlang_env.mk</tt></pre>
+</div></div>
+<p>It contains a few variable definitions for the environment used for the build:</p>
+<dl><dt><code>ERTS_INCLUDE_DIR</code></dt>
+<dd><p>Path to the ERTS include files (<em>erl_driver.h</em>, <em>erl_nif.h</em> and more).</p>
 </dd>
-<dt class="hdlist1">
-<code>ERL_INTERFACE_INCLUDE_DIR</code>
-</dt>
-<dd>
-<p>
-        Path to the Erl_Interface include files (<em>ei.h</em> and related).
-</p>
+<dt><code>ERL_INTERFACE_INCLUDE_DIR</code></dt>
+<dd><p>Path to the Erl_Interface include files (<em>ei.h</em> and related).</p>
 </dd>
-<dt class="hdlist1">
-<code>ERL_INTERFACE_LIB_DIR</code>
-</dt>
-<dd>
-<p>
-        Path to the Erl_Interface static libraries.
-</p>
+<dt><code>ERL_INTERFACE_LIB_DIR</code></dt>
+<dd><p>Path to the Erl_Interface static libraries.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_using_a_custom_makefile">Using a custom Makefile</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk will automatically run <code>make</code> if it detects a Makefile
-in <em>$(C_SRC_DIR)/Makefile</em>.</p></div>
-<div class="paragraph"><p>The Makefile should have at least two targets: a default target
-(which can be anything, for example <code>all</code>) which is invoked when
-building the C code, and a <code>clean</code> target invoked when cleaning
-it.</p></div>
-<div class="paragraph"><p>You can include the <em>env.mk</em> file to benefit from the Erlang
-environment detection:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Erlang.mk will automatically run <code>make</code> if it detects a Makefile in <em>$(C_SRC_DIR)/Makefile</em>.</p>
+<p>The Makefile should have at least two targets: a default target (which can be anything, for example <code>all</code>) which is invoked when building the C code, and a <code>clean</code> target invoked when cleaning it.</p>
+<p>You can include the <em>env.mk</em> file to benefit from the Erlang environment detection:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>include env.mk</tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>include env.mk</tt></pre>
+</div></div>
 <h2 id="_using_erlang_mk_directly">Using Erlang.mk directly</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>You don&#8217;t need to write a Makefile to build C source code, however.
-Erlang.mk comes with rules to build both shared libraries and
-executables, using the source files it finds in <em>$(C_SRC_DIR)</em>.</p></div>
-<div class="paragraph"><p>By default, Erlang.mk will create a shared library. To change
-this and create an executable instead, put this in your Makefile
-before including Erlang.mk:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>You don&apos;t need to write a Makefile to build C source code, however. Erlang.mk comes with rules to build both shared libraries and executables, using the source files it finds in <em>$(C_SRC_DIR)</em>.</p>
+<p>By default, Erlang.mk will create a shared library. To change this and create an executable instead, put this in your Makefile before including Erlang.mk:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">C_SRC_TYPE =</span> executable</tt></pre></div></div>
-<div class="paragraph"><p>The generated file name varies depending on the type of project
-you have (shared library or executable) and on the platform you
-build the project on.</p></div>
-<div class="paragraph"><p>For shared libraries, the generated file name will be
-<em>$(C_SRC_OUTPUT)$(C_SRC_SHARED_EXTENSION)</em>, with the default
-being <em>$(CURDIR)/priv/$(PROJECT)</em> followed by the extension:
-<code>.dll</code> on Windows, <code>.so</code> everywhere else.</p></div>
-<div class="paragraph"><p>For executables, the generated file name is
-<em>$(C_SRC_OUTPUT)$(C_SRC_EXECUTABLE_EXTENSION)</em>, with the same
-default except for the extension: <code>.exe</code> on Windows, and otherwise
-nothing.</p></div>
-<div class="paragraph"><p>Erlang.mk sets appropriate compile and linker flags by default.
-These flags vary depending on the platform, and can of course
-be overriden.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<code>CC</code>
-</dt>
-<dd>
-<p>
-        The compiler to be used.
-</p>
+<pre><tt><font color="#009900">C_SRC_TYPE =</font> executable</tt></pre>
+</div></div>
+<p>The generated file name varies depending on the type of project you have (shared library or executable) and on the platform you build the project on.</p>
+<p>For shared libraries, the generated file name will be <em>$(C_SRC_OUTPUT)$(C_SRC_SHARED_EXTENSION)</em>, with the default being <em>$(CURDIR)/priv/$(PROJECT)</em> followed by the extension: <code>.dll</code> on Windows, <code>.so</code> everywhere else.</p>
+<p>For executables, the generated file name is <em>$(C_SRC_OUTPUT)$(C_SRC_EXECUTABLE_EXTENSION)</em>, with the same default except for the extension: <code>.exe</code> on Windows, and otherwise nothing.</p>
+<p>Erlang.mk sets appropriate compile and linker flags by default. These flags vary depending on the platform, and can of course be overriden.</p>
+<dl><dt><code>CC</code></dt>
+<dd><p>The compiler to be used.</p>
 </dd>
-<dt class="hdlist1">
-<code>CFLAGS</code>
-</dt>
-<dd>
-<p>
-        C compiler flags.
-</p>
+<dt><code>CFLAGS</code></dt>
+<dd><p>C compiler flags.</p>
 </dd>
-<dt class="hdlist1">
-<code>CXXFLAGS</code>
-</dt>
-<dd>
-<p>
-        C++ compiler flags.
-</p>
+<dt><code>CXXFLAGS</code></dt>
+<dd><p>C++ compiler flags.</p>
 </dd>
-<dt class="hdlist1">
-<code>LDFLAGS</code>
-</dt>
-<dd>
-<p>
-        Linker flags.
-</p>
+<dt><code>LDFLAGS</code></dt>
+<dd><p>Linker flags.</p>
 </dd>
-<dt class="hdlist1">
-<code>LDLIBS</code>
-</dt>
-<dd>
-<p>
-        Libraries to link against.
-</p>
+<dt><code>LDLIBS</code></dt>
+<dd><p>Libraries to link against.</p>
 </dd>
-</dl></div>
-<div class="paragraph"><p>The source files are automatically gathered from the contents
-of <em>$(C_SRC_DIR)</em>. Erlang.mk looks for <em>.c</em>, <em>.C</em>, <em>.cc</em> and <em>.cpp</em>
-source files. You can define the variable <code>SOURCES</code> to manually
-list the files to compile.</p></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
+<p>The source files are automatically gathered from the contents of <em>$(C_SRC_DIR)</em>. Erlang.mk looks for <em>.c</em>, <em>.C</em>, <em>.cc</em> and <em>.cpp</em> source files. You can define the variable <code>SOURCES</code> to manually list the files to compile.</p>
 <h2 id="_propagating_compile_and_linker_flags_to_sub_makefiles">Propagating compile and linker flags to sub-Makefiles</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>In some cases it might be necessary to propagate the flags
-you just defined to the sub-Makefiles of your local project.
-You generally can&#8217;t just export those as this could impact
-the building of dependencies.</p></div>
-<div class="paragraph"><p>Makefiles allow you to export variables for specific targets.
-When doing this, the variables will be exported only when
-this target runs, and not for other targets. It is therefore
-possible to export them when building the C code without
-impacting other build steps.</p></div>
-<div class="paragraph"><p>By adding this to your Makefile all five variables will be
-made available to sub-Makefiles when building C code:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>In some cases it might be necessary to propagate the flags you just defined to the sub-Makefiles of your local project. You generally can&apos;t just export those as this could impact the building of dependencies.</p>
+<p>Makefiles allow you to export variables for specific targets. When doing this, the variables will be exported only when this target runs, and not for other targets. It is therefore possible to export them when building the C code without impacting other build steps.</p>
+<p>By adding this to your Makefile all five variables will be made available to sub-Makefiles when building C code:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #990000">app-c_src:</span> <span style="font-weight: bold"><span style="color: #0000FF">export</span></span> CC <span style="color: #990000">+=</span>
-<span style="color: #990000">app-c_src:</span> <span style="font-weight: bold"><span style="color: #0000FF">export</span></span> CFLAGS <span style="color: #990000">+=</span>
-<span style="color: #990000">app-c_src:</span> <span style="font-weight: bold"><span style="color: #0000FF">export</span></span> CPPFLAGS <span style="color: #990000">+=</span>
-<span style="color: #990000">app-c_src:</span> <span style="font-weight: bold"><span style="color: #0000FF">export</span></span> LDFLAGS <span style="color: #990000">+=</span>
-<span style="color: #990000">app-c_src:</span> <span style="font-weight: bold"><span style="color: #0000FF">export</span></span> LDLIBS <span style="color: #990000">+=</span></tt></pre></div></div>
-<div class="paragraph"><p>Appending an empty string to the existing value is necessary
-because Makefiles expect an assignment for target-specific
-exports. Alternatively you can set a new value:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#990000">app-c_src:</font> <b><font color="#0000FF">export</font></b> CC <font color="#990000">+=</font>
+<font color="#990000">app-c_src:</font> <b><font color="#0000FF">export</font></b> CFLAGS <font color="#990000">+=</font>
+<font color="#990000">app-c_src:</font> <b><font color="#0000FF">export</font></b> CPPFLAGS <font color="#990000">+=</font>
+<font color="#990000">app-c_src:</font> <b><font color="#0000FF">export</font></b> LDFLAGS <font color="#990000">+=</font>
+<font color="#990000">app-c_src:</font> <b><font color="#0000FF">export</font></b> LDLIBS <font color="#990000">+=</font></tt></pre>
+</div></div>
+<p>Appending an empty string to the existing value is necessary because Makefiles expect an assignment for target-specific exports. Alternatively you can set a new value:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #990000">app-c_src:</span> <span style="font-weight: bold"><span style="color: #0000FF">export</span></span> CFLAGS <span style="color: #990000">=</span> -O<span style="color: #993399">3</span></tt></pre></div></div>
-</div>
-</div>
+<pre><tt><font color="#990000">app-c_src:</font> <b><font color="#0000FF">export</font></b> CFLAGS <font color="#990000">=</font> -O<font color="#993399">3</font></tt></pre>
+</div></div>
+
 
 
 

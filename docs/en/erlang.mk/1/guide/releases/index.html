@@ -62,217 +62,159 @@
 
 <h1 class="lined-header"><span>Releases</span></h1>
 
-<div class="paragraph"><p>Erlang.mk relies on <em>Relx</em> for generating releases. This
-chapter covers the Erlang.mk-specific bits. Consult the
-<a href="https://erlware.github.io/relx/">Relx website</a> for more information.</p></div>
-<div class="sect1">
+<p>Erlang.mk relies on <em>Relx</em> for generating releases. This chapter covers the Erlang.mk-specific bits. Consult the <a href="https://erlware.github.io/relx/">Relx website</a> for more information.</p>
 <h2 id="_setup">Setup</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk will create a release if it detects a Relx configuration
-file in the <em>$(RELX_CONFIG)</em> location. This defaults to
-<em>$(CURDIR)/relx.config</em>. You can override it by defining
-the variable before including Erlang.mk:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Erlang.mk will create a release if it detects a Relx configuration file in the <em>$(RELX_CONFIG)</em> location. This defaults to <em>$(CURDIR)/relx.config</em>. You can override it by defining the variable before including Erlang.mk:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">RELX_CONFIG =</span> <span style="color: #009900">$(CURDIR)</span>/webchat.config</tt></pre></div></div>
-<div class="paragraph"><p>Relx does not need to be installed. Erlang.mk will download
-and build it automatically.</p></div>
-<div class="paragraph"><p>The Relx executable will be saved in the <em>$(RELX)</em> file. This
-location defaults to <em>$(CURDIR)/relx</em> and can be overriden.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">RELX_CONFIG =</font> <font color="#009900">$(CURDIR)</font>/webchat.config</tt></pre>
+</div></div>
+<p>Relx does not need to be installed. Erlang.mk will download and build it automatically.</p>
+<p>The Relx executable will be saved in the <em>$(RELX)</em> file. This location defaults to <em>$(CURDIR)/relx</em> and can be overriden.</p>
+<!-- @todo You can use a custom location by ???-->
 <h2 id="_configuration">Configuration</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>You can specify additional Relx options using the <code>RELX_OPTS</code>
-variable. For example, to enable <code>dev_mode</code>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>You can specify additional Relx options using the <code>RELX_OPTS</code> variable. For example, to enable <code>dev_mode</code>:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">RELX_OPTS =</span> -d <span style="font-weight: bold"><span style="color: #0000FF">true</span></span></tt></pre></div></div>
-<div class="paragraph"><p>While you can specify the output directory for the release
-in the Relx options directly, Erlang.mk provides a specific
-variable for it: <code>RELX_OUTPUT_DIR</code>. It defaults to the <em>_rel</em>
-directory. You can also override it:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">RELX_OPTS =</font> -d <b><font color="#0000FF">true</font></b></tt></pre>
+</div></div>
+<p>While you can specify the output directory for the release in the Relx options directly, Erlang.mk provides a specific variable for it: <code>RELX_OUTPUT_DIR</code>. It defaults to the <em>_rel</em> directory. You can also override it:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">RELX_OUTPUT_DIR =</span> /path/to/staging/directory</tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">RELX_OUTPUT_DIR =</font> /path/to/staging/directory</tt></pre>
+</div></div>
 <h2 id="_generating_the_release">Generating the release</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Now that you&#8217;re all set, all you need to do is generate the
-release. As mentioned before, Erlang.mk will automatically
-generate it when it detects the <em>$(RELX_CONFIG)</em> file. This
-means the following command will also build the release:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Now that you&apos;re all set, all you need to do is generate the release. As mentioned before, Erlang.mk will automatically generate it when it detects the <em>$(RELX_CONFIG)</em> file. This means the following command will also build the release:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make</tt></pre></div></div>
-<div class="paragraph"><p>If you need to generate the release, and only the release,
-the <code>rel</code> target can be used:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make</tt></pre>
+</div></div>
+<p>If you need to generate the release, and only the release, the <code>rel</code> target can be used:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make rel</tt></pre></div></div>
-<div class="paragraph"><p>Erlang.mk always generates a tarball alongside the release,
-which can be directly uploaded to a server. The tarball is
-located at <code>$(RELX_OUTPUT_DIR)/&lt;name&gt;/&lt;name&gt;-&lt;vsn&gt;.tar.gz</code>.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>$ make rel</tt></pre>
+</div></div>
+<p>Erlang.mk always generates a tarball alongside the release, which can be directly uploaded to a server. The tarball is located at <code>$(RELX_OUTPUT_DIR)/&lt;name&gt;/&lt;name&gt;-&lt;vsn&gt;.tar.gz</code>.</p>
 <h2 id="_running_the_release">Running the release</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk provides a convenience function for running the
-release with one simple command:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Erlang.mk provides a convenience function for running the release with one simple command:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make run</tt></pre></div></div>
-<div class="paragraph"><p>This command will also build the project and generate the
-release if they weren&#8217;t already. It starts the release in
-<em>console mode</em>, meaning you will also have a shell ready to
-use to check things as needed.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>$ make run</tt></pre>
+</div></div>
+<p>This command will also build the project and generate the release if they weren&apos;t already. It starts the release in <em>console mode</em>, meaning you will also have a shell ready to use to check things as needed.</p>
 <h2 id="_upgrading_a_release">Upgrading a release</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk provides a <code>relup</code> target for generating release
-upgrades. Release upgrades allow updating the code and the
-state of a running release without restarting it.</p></div>
-<div class="paragraph"><p>Once your changes are done, you need to update the version
-of the application(s) that will be updated. You also need
-to update the version of the release.</p></div>
-<div class="paragraph"><p>For each application that needs to be updated, an
-<a href="http://erlang.org/doc/man/appup.html">appup file</a>
-must be written. Refer to the Erlang/OTP documentation
-for more details.</p></div>
-<div class="paragraph"><p>For the purpose of this section, assume the initial release
-version was <code>1</code>, and the new version is <code>2</code>. The name of the
-release will be <code>example</code>.</p></div>
-<div class="paragraph"><p>Once all this is done, you can build the tarball for the
-release upgrade:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Erlang.mk provides a <code>relup</code> target for generating release upgrades. Release upgrades allow updating the code and the state of a running release without restarting it.</p>
+<p>Once your changes are done, you need to update the version of the application(s) that will be updated. You also need to update the version of the release.</p>
+<p>For each application that needs to be updated, an <a href="http://erlang.org/doc/man/appup.html">appup file</a> must be written. Refer to the Erlang/OTP documentation for more details.</p>
+<p>For the purpose of this section, assume the initial release version was <code>1</code>, and the new version is <code>2</code>. The name of the release will be <code>example</code>.</p>
+<p>Once all this is done, you can build the tarball for the release upgrade:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make relup</tt></pre></div></div>
-<div class="paragraph"><p>This will create an archive at the root directory of the
-release, <code>$RELX_OUTPUT_DIR/example/example-2.tar.gz</code>.</p></div>
-<div class="paragraph"><p>Move the archive to the correct location on the running
-node. From the release&#8217;s root directory:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make relup</tt></pre>
+</div></div>
+<p>This will create an archive at the root directory of the release, <code>$RELX_OUTPUT_DIR/example/example-2.tar.gz</code>.</p>
+<p>Move the archive to the correct location on the running node. From the release&apos;s root directory:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ mkdir releases<span style="color: #990000">/</span><span style="color: #993399">2</span><span style="color: #990000">/</span>
-$ mv path/to/example-<span style="color: #993399">2</span><span style="color: #990000">.</span>tar<span style="color: #990000">.</span>gz releases<span style="color: #990000">/</span><span style="color: #993399">2</span><span style="color: #990000">/</span></tt></pre></div></div>
-<div class="paragraph"><p>Finally, upgrade the release:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ mkdir releases<font color="#990000">/</font><font color="#993399">2</font><font color="#990000">/</font>
+$ mv path/to/example-<font color="#993399">2</font><font color="#990000">.</font>tar<font color="#990000">.</font>gz releases<font color="#990000">/</font><font color="#993399">2</font><font color="#990000">/</font></tt></pre>
+</div></div>
+<p>Finally, upgrade the release:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ bin/example_release upgrade <span style="color: #FF0000">"2/example_release"</span></tt></pre></div></div>
-<div class="paragraph"><p>Or on Windows:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ bin/example_release upgrade <font color="#FF0000">"2/example_release"</font></tt></pre>
+</div></div>
+<p>Or on Windows:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ bin/example_release<span style="color: #990000">.</span>cmd upgrade <span style="color: #FF0000">"2/example_release"</span></tt></pre></div></div>
-<div class="paragraph"><p>Your release was upgraded!</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>$ bin/example_release<font color="#990000">.</font>cmd upgrade <font color="#FF0000">"2/example_release"</font></tt></pre>
+</div></div>
+<p>Your release was upgraded!</p>
 <h2 id="_getting_relx_semver_value">Getting Relx semver value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>There is a <strong>workaround</strong> to get the semver value which is
-generated by Relx based on VCS history.</p></div>
-<div class="paragraph"><p>Create a file <em>rel/version</em> with only one line inside:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>There is a <strong>workaround</strong> to get the semver value which is generated by Relx based on VCS history.</p>
+<p>Create a file <em>rel/version</em> with only one line inside:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{{ <span style="color: #FF6600">release_version</span> }}</tt></pre></div></div>
-<div class="paragraph"><p>Add/Update the <code>overlay</code> section of your <code>relx.config</code>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>{{ <font color="#FF6600">release_version</font> }}</tt></pre>
+</div></div>
+<p>Add/Update the <code>overlay</code> section of your <code>relx.config</code>:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">overlay</span>, [
-    {<span style="color: #FF6600">template</span>, <span style="color: #FF0000">"rel/version"</span>, <span style="color: #FF0000">"version"</span>}
-]}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>When you run <code>make rel</code> it creates the file <em>$(RELX_OUTPUT_DIR)/example/version</em>
-which contains the version value generated by Relx.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>{<font color="#FF6600">overlay</font>, [
+    {<font color="#FF6600">template</font>, <font color="#FF0000">"rel/version"</font>, <font color="#FF0000">"version"</font>}
+]}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>When you run <code>make rel</code> it creates the file <em>$(RELX_OUTPUT_DIR)/example/version</em> which contains the version value generated by Relx.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ cat _rel/app/release
-<span style="color: #993399">1.0</span><span style="color: #990000">.</span><span style="color: #993399">0</span><span style="color: #990000">+</span>build<span style="color: #990000">.</span><span style="color: #993399">11</span><span style="color: #990000">.</span>ref5612aa0</tt></pre></div></div>
-<div class="paragraph"><p>In your <code>Makefile</code> you can use this simple snippet to get the version,
-but please keep in mind that this should depend on the <code>rel</code> target:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<font color="#993399">1.0</font><font color="#990000">.</font><font color="#993399">0</font><font color="#990000">+</font>build<font color="#990000">.</font><font color="#993399">11</font><font color="#990000">.</font>ref5612aa0</tt></pre>
+</div></div>
+<p>In your <code>Makefile</code> you can use this simple snippet to get the version, but please keep in mind that this should depend on the <code>rel</code> target:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">$(</span>shell cat <span style="color: #009900">$(RELX_OUTPUT_DIR)/$(RELX_REL_NAME)/version)</span></tt></pre></div></div>
-<div class="paragraph"><p>For example:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">$(</font>shell cat <font color="#009900">$(RELX_OUTPUT_DIR)/$(RELX_REL_NAME)/version)</font></tt></pre>
+</div></div>
+<p>For example:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>include erlang.mk
 
-<span style="color: #009900">APP_VERSION =</span> <span style="color: #009900">$(</span>shell cat <span style="color: #009900">$(RELX_OUTPUT_DIR)/$(RELX_REL_NAME)/version)</span>
-<span style="color: #990000">myrecipe:</span> all
-        echo APP_VERSION <span style="color: #990000">=</span> <span style="color: #009900">$(APP_VERSION)</span></tt></pre></div></div>
-<div class="paragraph"><p>Would output:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<font color="#009900">APP_VERSION =</font> <font color="#009900">$(</font>shell cat <font color="#009900">$(RELX_OUTPUT_DIR)/$(RELX_REL_NAME)/version)</font>
+<font color="#990000">myrecipe:</font> all
+        echo APP_VERSION <font color="#990000">=</font> <font color="#009900">$(APP_VERSION)</font></tt></pre>
+</div></div>
+<p>Would output:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ make myrecipe
-<span style="color: #990000">...</span>
-<span style="color: #990000">===&gt;</span> Starting relx build process <span style="color: #990000">...</span>
-<span style="color: #990000">===&gt;</span> Resolving OTP Applications from directories<span style="color: #990000">:</span>
+<font color="#990000">...</font>
+<font color="#990000">===&gt;</font> Starting relx build process <font color="#990000">...</font>
+<font color="#990000">===&gt;</font> Resolving OTP Applications from directories<font color="#990000">:</font>
           /home/username/example/apps
           /home/username/example/deps
           /usr/lib/erlang/lib
-          /home/username/example<span style="color: #990000">/</span>_rel
-<span style="color: #990000">===&gt;</span> Resolved example-<span style="color: #993399">0.3</span><span style="color: #990000">.</span><span style="color: #993399">10</span><span style="color: #990000">+</span>build<span style="color: #990000">.</span><span style="color: #993399">11</span><span style="color: #990000">.</span>ref5612aa0
-<span style="color: #990000">===&gt;</span> Including Erts from /usr/lib/erlang
-<span style="color: #990000">===&gt;</span> release successfully created<span style="color: #990000">!</span>
-<span style="color: #990000">===&gt;</span> tarball /home/username/example<span style="color: #990000">/</span>_rel/example/example-<span style="color: #993399">0.3</span><span style="color: #990000">.</span><span style="color: #993399">10</span><span style="color: #990000">+</span>build<span style="color: #990000">.</span><span style="color: #993399">11</span><span style="color: #990000">.</span>ref5612aa0<span style="color: #990000">.</span>tar<span style="color: #990000">.</span>gz successfully created<span style="color: #990000">!</span>
-echo APP_VERSION <span style="color: #990000">=</span> <span style="color: #993399">0.3</span><span style="color: #990000">.</span><span style="color: #993399">10</span><span style="color: #990000">+</span>build<span style="color: #990000">.</span><span style="color: #993399">11</span><span style="color: #990000">.</span>ref5612aa0
-APP_VERSION <span style="color: #990000">=</span> <span style="color: #993399">0.3</span><span style="color: #990000">.</span><span style="color: #993399">10</span><span style="color: #990000">+</span>build<span style="color: #990000">.</span><span style="color: #993399">11</span><span style="color: #990000">.</span>ref5612aa0</tt></pre></div></div>
-</div>
-</div>
+          /home/username/example<font color="#990000">/</font>_rel
+<font color="#990000">===&gt;</font> Resolved example-<font color="#993399">0.3</font><font color="#990000">.</font><font color="#993399">10</font><font color="#990000">+</font>build<font color="#990000">.</font><font color="#993399">11</font><font color="#990000">.</font>ref5612aa0
+<font color="#990000">===&gt;</font> Including Erts from /usr/lib/erlang
+<font color="#990000">===&gt;</font> release successfully created<font color="#990000">!</font>
+<font color="#990000">===&gt;</font> tarball /home/username/example<font color="#990000">/</font>_rel/example/example-<font color="#993399">0.3</font><font color="#990000">.</font><font color="#993399">10</font><font color="#990000">+</font>build<font color="#990000">.</font><font color="#993399">11</font><font color="#990000">.</font>ref5612aa0<font color="#990000">.</font>tar<font color="#990000">.</font>gz successfully created<font color="#990000">!</font>
+echo APP_VERSION <font color="#990000">=</font> <font color="#993399">0.3</font><font color="#990000">.</font><font color="#993399">10</font><font color="#990000">+</font>build<font color="#990000">.</font><font color="#993399">11</font><font color="#990000">.</font>ref5612aa0
+APP_VERSION <font color="#990000">=</font> <font color="#993399">0.3</font><font color="#990000">.</font><font color="#993399">10</font><font color="#990000">+</font>build<font color="#990000">.</font><font color="#993399">11</font><font color="#990000">.</font>ref5612aa0</tt></pre>
+</div></div>
+
 
 
 

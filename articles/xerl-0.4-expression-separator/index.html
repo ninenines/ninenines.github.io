@@ -69,58 +69,44 @@
 	</p>
 </header>
 
-<div class="paragraph"><p>As promised we are adding an expression separator this time.
-This will be short and easy.</p></div>
-<div class="paragraph"><p>In the tokenizer we only need to add a line recognizing the
-comma as a valid token.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>As promised we are adding an expression separator this time. This will be short and easy.</p>
+<p>In the tokenizer we only need to add a line recognizing the comma as a valid token.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>, <span style="color: #990000">:</span> {<span style="color: #FF6600">token</span>, {<span style="color: #FF6600">','</span>, <span style="color: #009900">TokenLine</span>}}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Then we need to change the following lines in the parser:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>, <font color="#990000">:</font> {<font color="#FF6600">token</font>, {<font color="#FF6600">','</font>, <font color="#009900">TokenLine</font>}}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Then we need to change the following lines in the parser:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span>
-<span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">exprs</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span> | <span style="color: #FF6600">'$2'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>And add a comma between the expressions on the second line:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#FF6600">exprs</font> <font color="#990000">-&gt;</font> <font color="#FF6600">expr</font> <font color="#990000">:</font> [<font color="#FF6600">'$1'</font>]<font color="#990000">.</font>
+<font color="#FF6600">exprs</font> <font color="#990000">-&gt;</font> <font color="#FF6600">expr</font> <font color="#FF6600">exprs</font> <font color="#990000">:</font> [<font color="#FF6600">'$1'</font> | <font color="#FF6600">'$2'</font>]<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>And add a comma between the expressions on the second line:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span>
-<span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">','</span> <span style="color: #FF6600">exprs</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span> | <span style="color: #FF6600">'$3'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>That takes care of everything except the optional trailing
-comma at the end of our lists of expressions. We just need an
-additional rule to take care of this.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#FF6600">exprs</font> <font color="#990000">-&gt;</font> <font color="#FF6600">expr</font> <font color="#990000">:</font> [<font color="#FF6600">'$1'</font>]<font color="#990000">.</font>
+<font color="#FF6600">exprs</font> <font color="#990000">-&gt;</font> <font color="#FF6600">expr</font> <font color="#FF6600">','</font> <font color="#FF6600">exprs</font> <font color="#990000">:</font> [<font color="#FF6600">'$1'</font> | <font color="#FF6600">'$3'</font>]<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>That takes care of everything except the optional trailing comma at the end of our lists of expressions. We just need an additional rule to take care of this.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">exprs</span> <span style="color: #990000">-&gt;</span> <span style="color: #FF6600">expr</span> <span style="color: #FF6600">','</span> <span style="color: #990000">:</span> [<span style="color: #FF6600">'$1'</span>]<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>That&#8217;s it.</p></div>
-<div class="paragraph"><p>Wondering why we don&#8217;t have this optional trailing comma in
-Erlang considering how easy it was and the number of people
-complaining about it? Yeah, me too. But that&#8217;s for someone else
-to answer.</p></div>
-<div class="paragraph"><p>Another change I want to talk about is a simple modification
-of the compiler code to use an <code>#env{}</code> record for
-tracking state instead of passing around individual variables.
-This will be required later on when we make modules into proper
-expressions so I thought it was a good idea to anticipate.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<a href="https://github.com/extend/xerl/blob/0.4/">View the source</a>
-</p>
+<pre><tt><font color="#FF6600">exprs</font> <font color="#990000">-&gt;</font> <font color="#FF6600">expr</font> <font color="#FF6600">','</font> <font color="#990000">:</font> [<font color="#FF6600">'$1'</font>]<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>That&apos;s it.</p>
+<p>Wondering why we don&apos;t have this optional trailing comma in Erlang considering how easy it was and the number of people complaining about it? Yeah, me too. But that&apos;s for someone else to answer.</p>
+<p>Another change I want to talk about is a simple modification of the compiler code to use an <code>#env{}</code> record for tracking state instead of passing around individual variables. This will be required later on when we make modules into proper expressions so I thought it was a good idea to anticipate.</p>
+<ul><li><a href="https://github.com/extend/xerl/blob/0.4/">View the source</a>
 </li>
-</ul></div>
+</ul>
+
 
 </article>
 </div>

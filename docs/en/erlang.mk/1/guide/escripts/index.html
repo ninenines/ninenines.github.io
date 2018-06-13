@@ -62,96 +62,53 @@
 
 <h1 class="lined-header"><span>Escripts</span></h1>
 
-<div class="paragraph"><p>Escripts are an alternative to release. They are meant to be
-used for small command line executables written in Erlang.</p></div>
-<div class="paragraph"><p>They are not self-contained, unlike <a href="../relx">releases</a>.
-Erlang must be installed for them to run. This however means
-that they are fairly small compared to releases.</p></div>
-<div class="paragraph"><p>For self-contained executables, check <a href="../sfx">self-extracting releases</a>.</p></div>
-<div class="sect1">
+<p>Escripts are an alternative to release. They are meant to be used for small command line executables written in Erlang.</p>
+<p>They are not self-contained, unlike <a href="../relx">releases</a>. Erlang must be installed for them to run. This however means that they are fairly small compared to releases.</p>
+<p>For self-contained executables, check <a href="../sfx">self-extracting releases</a>.</p>
 <h2 id="_requirements">Requirements</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk uses <code>p7zip</code> by default to generate the escript
-archive. Make sure it is installed. On most systems the
-package is named <code>p7zip</code>; on Ubuntu you need <code>p7zip-full</code>.</p></div>
-<div class="paragraph"><p>If <code>p7zip</code> is unavailable, <code>zip</code> may be used by setting
-the <code>ESCRIPT_ZIP</code> variable. For example:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Erlang.mk uses <code>p7zip</code> by default to generate the escript archive. Make sure it is installed. On most systems the package is named <code>p7zip</code>; on Ubuntu you need <code>p7zip-full</code>.</p>
+<p>If <code>p7zip</code> is unavailable, <code>zip</code> may be used by setting the <code>ESCRIPT_ZIP</code> variable. For example:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make escript <span style="color: #009900">ESCRIPT_ZIP</span><span style="color: #990000">=</span>zip</tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>$ make escript <font color="#009900">ESCRIPT_ZIP</font><font color="#990000">=</font>zip</tt></pre>
+</div></div>
 <h2 id="_generating_an_escript">Generating an escript</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Run the following command to generate an escript:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Run the following command to generate an escript:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make escript</tt></pre></div></div>
-<div class="paragraph"><p>This will by default create an escript with the same name as
-the project, in the project&#8217;s directory. If the project is
-called <code>relx</code> then the escript will be in <code>./relx</code>.</p></div>
-<div class="paragraph"><p>You can run the escript as you would any executable:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>$ make escript</tt></pre>
+</div></div>
+<p>This will by default create an escript with the same name as the project, in the project&apos;s directory. If the project is called <code>relx</code> then the escript will be in <code>./relx</code>.</p>
+<p>You can run the escript as you would any executable:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ <span style="color: #990000">.</span>/relx</tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt>$ <font color="#990000">.</font>/relx</tt></pre>
+</div></div>
 <h2 id="_configuration">Configuration</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>You can change the name of the escript by setting <code>ESCRIPT_NAME</code>.
-The name determines both the default output file name and the
-entry module containing the function <code>main/1</code>.</p></div>
-<div class="paragraph"><p><code>ESCRIPT_FILE</code> can be set if you need a different file name
-or location.</p></div>
-<div class="paragraph"><p>The escript header can be entirely customized. The first line
-is the shebang, set by <code>ESCRIPT_SHEBANG</code>. The second line is
-a comment, set by <code>ESCRIPT_COMMENT</code>. The third line is the
-arguments the VM will use when running the escript, set by
-<code>ESCRIPT_EMU_ARGS</code>.</p></div>
-<div class="paragraph"><p>Finally, <code>ESCRIPT_ZIP</code> can be set to customize the command used
-to create the zip file. Read on for more information.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>You can change the name of the escript by setting <code>ESCRIPT_NAME</code>. The name determines both the default output file name and the entry module containing the function <code>main/1</code>.</p>
+<p><code>ESCRIPT_FILE</code> can be set if you need a different file name or location.</p>
+<p>The escript header can be entirely customized. The first line is the shebang, set by <code>ESCRIPT_SHEBANG</code>. The second line is a comment, set by <code>ESCRIPT_COMMENT</code>. The third line is the arguments the VM will use when running the escript, set by <code>ESCRIPT_EMU_ARGS</code>.</p>
+<p>Finally, <code>ESCRIPT_ZIP</code> can be set to customize the command used to create the zip file. Read on for more information.</p>
 <h2 id="_extra_files">Extra files</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Generating an escript is a two-part process. First, a zip file
-is created with the contents of the escript. Then a header is
-added to this file to create the escript.</p></div>
-<div class="paragraph"><p>It is possible to add commands that will be executed between
-the two steps. You can for example add extra files to the zip
-archive:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Generating an escript is a two-part process. First, a zip file is created with the contents of the escript. Then a header is added to this file to create the escript.</p>
+<p>It is possible to add commands that will be executed between the two steps. You can for example add extra files to the zip archive:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #990000">escript-zip::</span>
-    <span style="color: #009900">$(verbose)</span> <span style="color: #009900">$(ESCRIPT_ZIP)</span> <span style="color: #009900">$(ESCRIPT_ZIP_FILE)</span> priv/templates<span style="color: #990000">/*</span></tt></pre></div></div>
-<div class="paragraph"><p>The <code>ESCRIPT_ZIP</code> variable contains the command to run to add
-files to the zip archive <code>ESCRIPT_ZIP_FILE</code>.</p></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#990000">escript-zip::</font>
+    <font color="#009900">$(verbose)</font> <font color="#009900">$(ESCRIPT_ZIP)</font> <font color="#009900">$(ESCRIPT_ZIP_FILE)</font> priv/templates<font color="#990000">/*</font></tt></pre>
+</div></div>
+<p>The <code>ESCRIPT_ZIP</code> variable contains the command to run to add files to the zip archive <code>ESCRIPT_ZIP_FILE</code>.</p>
 <h2 id="_optimizing_for_size">Optimizing for size</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Erlang.mk will by default compile BEAM files with debug
-information. You may want to disable this behavior to obtain
-smaller escript files. Simply set <code>ERLC_OPTS</code> to a value that
-does not include <code>+debug_info</code>.</p></div>
-</div>
-</div>
+<p>Erlang.mk will by default compile BEAM files with debug information. You may want to disable this behavior to obtain smaller escript files. Simply set <code>ERLC_OPTS</code> to a value that does not include <code>+debug_info</code>.</p>
+
 
 
 

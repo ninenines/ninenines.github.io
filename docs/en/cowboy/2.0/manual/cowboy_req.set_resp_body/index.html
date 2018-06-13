@@ -62,138 +62,79 @@
 
 <h1 class="lined-header"><span>cowboy_req:set_resp_body(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_req:set_resp_body - Set the response body</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_req:set_resp_body - Set the response body</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">set_resp_body</span></span>(<span style="color: #009900">Body</span>, <span style="color: #009900">Req</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:req</span></span>())
-        <span style="color: #990000">-&gt;</span> <span style="color: #009900">Req</span>
+<pre><tt><b><font color="#000000">set_resp_body</font></b>(<font color="#009900">Body</font>, <font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>())
+	<font color="#990000">-&gt;</font> <font color="#009900">Req</font>
 
-<span style="color: #009900">Body</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:resp_body</span></span>()</tt></pre></div></div>
-<div class="paragraph"><p>Set the response body.</p></div>
-<div class="paragraph"><p>The response body will be sent when a reply is initiated.
-Note that the functions <code>stream_reply/2,3</code> and <code>reply/4</code>
-will override the body set by this function.</p></div>
-<div class="paragraph"><p>This function can also be used to remove a response body
-that was set previously. To do so, simply call this function
-with an empty body.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">Body</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:resp_body</font></b>()</tt></pre>
+</div></div>
+<p>Set the response body.</p>
+<p>The response body will be sent when a reply is initiated. Note that the functions <code>stream_reply/2,3</code> and <code>reply/4</code> will override the body set by this function.</p>
+<p>This function can also be used to remove a response body that was set previously. To do so, simply call this function with an empty body.</p>
 <h2 id="_arguments">Arguments</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-Body
-</dt>
-<dd>
-<p>
-The body can be either a binary value, an iolist or a
-<code>sendfile</code> tuple telling Cowboy to send the contents of
-a file.
-</p>
+<dl><dt>Body</dt>
+<dd><p>The body can be either a binary value, an iolist or a <code>sendfile</code> tuple telling Cowboy to send the contents of a file.</p>
 </dd>
-<dt class="hdlist1">
-Req
-</dt>
-<dd>
-<p>
-The Req object.
-</p>
+<dt>Req</dt>
+<dd><p>The Req object.</p>
 </dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
+</dl>
 <h2 id="_return_value">Return value</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>A new Req object is returned.</p></div>
-<div class="paragraph"><p>The returned Req object must be used from that point onward,
-otherwise the body will not be sent in the response.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>A new Req object is returned.</p>
+<p>The returned Req object must be used from that point onward, otherwise the body will not be sent in the response.</p>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>2.0</strong>: The function now accepts a <code>sendfile</code> tuple.
-</p>
+<ul><li><strong>2.0</strong>: The function now accepts a <code>sendfile</code> tuple.
 </li>
-<li>
-<p>
-<strong>2.0</strong>: The <code>set_resp_body_fun/2,3</code> functions were removed.
-</p>
+<li><strong>2.0</strong>: The <code>set_resp_body_fun/2,3</code> functions were removed.
 </li>
-<li>
-<p>
-<strong>1.0</strong>: Function introduced.
-</p>
+<li><strong>1.0</strong>: Function introduced.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Set the response body</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Set the response body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body</span></span>(<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"Hello world!"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #009900">Req0</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Set the response body as an iolist</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"Hello world!"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Set the response body as an iolist</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body</span></span>([
-    <span style="color: #FF0000">"&lt;html&gt;&lt;head&gt;&lt;title&gt;"</span>,
-    <span style="font-weight: bold"><span style="color: #000000">page_title</span></span>(),
-    <span style="color: #FF0000">"&lt;/title&gt;&lt;/head&gt;&lt;body&gt;"</span>,
-    <span style="font-weight: bold"><span style="color: #000000">page_body</span></span>(),
-    <span style="color: #FF0000">"&lt;/body&gt;&lt;/html&gt;"</span>
-], <span style="color: #009900">Req0</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Tell Cowboy to send data from a file</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>([
+    <font color="#FF0000">"&lt;html&gt;&lt;head&gt;&lt;title&gt;"</font>,
+    <b><font color="#000000">page_title</font></b>(),
+    <font color="#FF0000">"&lt;/title&gt;&lt;/head&gt;&lt;body&gt;"</font>,
+    <b><font color="#000000">page_body</font></b>(),
+    <font color="#FF0000">"&lt;/body&gt;&lt;/html&gt;"</font>
+], <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Tell Cowboy to send data from a file</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #008080">#file_info</span>{<span style="font-weight: bold"><span style="color: #000080">size</span></span><span style="color: #990000">=</span><span style="color: #009900">Size</span>}} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">file:read_file_info</span></span>(<span style="color: #009900">Filename</span>),
-<span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body</span></span>({<span style="color: #FF6600">sendfile</span>, <span style="color: #993399">0</span>, <span style="color: #009900">Size</span>, <span style="color: #009900">Filename</span>}, <span style="color: #009900">Req0</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Clear any previously set response body</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#008080">#file_info</font>{<b><font color="#000080">size</font></b><font color="#990000">=</font><font color="#009900">Size</font>}} <font color="#990000">=</font> <b><font color="#000000">file:read_file_info</font></b>(<font color="#009900">Filename</font>),
+<font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>({<font color="#FF6600">sendfile</font>, <font color="#993399">0</font>, <font color="#009900">Size</font>, <font color="#009900">Filename</font>}, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Clear any previously set response body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Req</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">cowboy_req:set_resp_body</span></span>(<span style="color: #990000">&lt;&lt;&gt;&gt;</span>, <span style="color: #009900">Req0</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>(<font color="#990000">&lt;&lt;&gt;&gt;</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="../cowboy_req">cowboy_req(3)</a>,
-<a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>,
-<a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a>,
-<a href="../cowboy_req.reply">cowboy_req:reply(3)</a>,
-<a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a></p></div>
-</div>
-</div>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>, <a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a>, <a href="../cowboy_req.reply">cowboy_req:reply(3)</a>, <a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a></p>
+
 
 
 

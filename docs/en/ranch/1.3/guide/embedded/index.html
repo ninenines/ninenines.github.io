@@ -62,48 +62,30 @@
 
 <h1 class="lined-header"><span>Embedded mode</span></h1>
 
-<div class="paragraph"><p>Embedded mode allows you to insert Ranch listeners directly
-in your supervision tree. This allows for greater fault tolerance
-control by permitting the shutdown of a listener due to the
-failure of another part of the application and vice versa.</p></div>
-<div class="sect1">
+<p>Embedded mode allows you to insert Ranch listeners directly in your supervision tree. This allows for greater fault tolerance control by permitting the shutdown of a listener due to the failure of another part of the application and vice versa.</p>
 <h2 id="_embedding">Embedding</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>To embed Ranch in your application you can simply add the child specs
-to your supervision tree. This can all be done in the <code>init/1</code> function
-of one of your application supervisors.</p></div>
-<div class="paragraph"><p>Ranch requires at the minimum two kinds of child specs for embedding.
-First, you need to add <code>ranch_sup</code> to your supervision tree, only once,
-regardless of the number of listeners you will use. Then you need to
-add the child specs for each listener.</p></div>
-<div class="paragraph"><p>Ranch has a convenience function for getting the listeners child specs
-called <code>ranch:child_spec/6</code>, that works like <code>ranch:start_listener/6</code>,
-except that it doesn&#8217;t start anything, it only returns child specs.</p></div>
-<div class="paragraph"><p>As for <code>ranch_sup</code>, the child spec is simple enough to not require a
-convenience function.</p></div>
-<div class="paragraph"><p>The following example adds both <code>ranch_sup</code> and one listener to another
-application&#8217;s supervision tree.</p></div>
-<div class="listingblock">
-<div class="title">Embed Ranch directly in your supervision tree</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>To embed Ranch in your application you can simply add the child specs to your supervision tree. This can all be done in the <code>init/1</code> function of one of your application supervisors.</p>
+<p>Ranch requires at the minimum two kinds of child specs for embedding. First, you need to add <code>ranch_sup</code> to your supervision tree, only once, regardless of the number of listeners you will use. Then you need to add the child specs for each listener.</p>
+<p>Ranch has a convenience function for getting the listeners child specs called <code>ranch:child_spec/6</code>, that works like <code>ranch:start_listener/6</code>, except that it doesn&apos;t start anything, it only returns child specs.</p>
+<p>As for <code>ranch_sup</code>, the child spec is simple enough to not require a convenience function.</p>
+<p>The following example adds both <code>ranch_sup</code> and one listener to another application&apos;s supervision tree.</p>
+<div class="listingblock"><div class="title">Embed Ranch directly in your supervision tree</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">init</span></span>([]) <span style="color: #990000">-&gt;</span>
-        <span style="color: #009900">RanchSupSpec</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">ranch_sup</span>, {<span style="color: #FF6600">ranch_sup</span>, <span style="color: #FF6600">start_link</span>, []},
-                <span style="color: #FF6600">permanent</span>, <span style="color: #993399">5000</span>, <span style="color: #FF6600">supervisor</span>, [<span style="color: #FF6600">ranch_sup</span>]},
-        <span style="color: #009900">ListenerSpec</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:child_spec</span></span>(<span style="color: #FF6600">echo</span>, <span style="color: #993399">100</span>,
-                <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}],
-                <span style="color: #FF6600">echo_protocol</span>, []
-        ),
-        {<span style="color: #FF6600">ok</span>, {{<span style="color: #FF6600">one_for_one</span>, <span style="color: #993399">10</span>, <span style="color: #993399">10</span>}, [<span style="color: #009900">RanchSupSpec</span>, <span style="color: #009900">ListenerSpec</span>]}}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Remember, you can add as many listener child specs as needed, but only
-one <code>ranch_sup</code> spec!</p></div>
-<div class="paragraph"><p>It is recommended that your architecture makes sure that all listeners
-are restarted if <code>ranch_sup</code> fails. See the Ranch internals chapter for
-more details on how Ranch does it.</p></div>
-</div>
-</div>
+<pre><tt><b><font color="#000000">init</font></b>([]) <font color="#990000">-&gt;</font>
+	<font color="#009900">RanchSupSpec</font> <font color="#990000">=</font> {<font color="#FF6600">ranch_sup</font>, {<font color="#FF6600">ranch_sup</font>, <font color="#FF6600">start_link</font>, []},
+		<font color="#FF6600">permanent</font>, <font color="#993399">5000</font>, <font color="#FF6600">supervisor</font>, [<font color="#FF6600">ranch_sup</font>]},
+	<font color="#009900">ListenerSpec</font> <font color="#990000">=</font> <b><font color="#000000">ranch:child_spec</font></b>(<font color="#FF6600">echo</font>, <font color="#993399">100</font>,
+		<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}],
+		<font color="#FF6600">echo_protocol</font>, []
+	),
+	{<font color="#FF6600">ok</font>, {{<font color="#FF6600">one_for_one</font>, <font color="#993399">10</font>, <font color="#993399">10</font>}, [<font color="#009900">RanchSupSpec</font>, <font color="#009900">ListenerSpec</font>]}}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Remember, you can add as many listener child specs as needed, but only one <code>ranch_sup</code> spec!</p>
+<p>It is recommended that your architecture makes sure that all listeners are restarted if <code>ranch_sup</code> fails. See the Ranch internals chapter for more details on how Ranch does it.</p>
+
 
 
 
@@ -159,6 +141,8 @@ more details on how Ranch does it.</p></div>
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/ranch/1.5/guide">1.5</a></li>
 	
 		<li><a href="/docs/en/ranch/1.4/guide">1.4</a></li>
 	

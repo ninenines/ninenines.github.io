@@ -62,175 +62,110 @@
 
 <h1 class="lined-header"><span>cowboy_static(3)</span></h1>
 
-<div class="sect1">
 <h2 id="_name">Name</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>cowboy_static - Static file handler</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>cowboy_static - Static file handler</p>
 <h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The module <code>cowboy_static</code> implements file serving capabilities
-using the REST semantics provided by <code>cowboy_rest</code>.</p></div>
-<div class="paragraph"><p>The static file handler is a pre-written handler coming with
-Cowboy. To serve files, use it in your routes.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>The module <code>cowboy_static</code> implements file serving capabilities using the REST semantics provided by <code>cowboy_rest</code>.</p>
+<p>The static file handler is a pre-written handler coming with Cowboy. To serve files, use it in your routes.</p>
 <h2 id="_options">Options</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">opts</span></span>() <span style="color: #990000">::</span> {<span style="color: #FF6600">priv_file</span>, <span style="color: #009900">App</span>, <span style="color: #009900">Path</span>}
-        | {<span style="color: #FF6600">priv_file</span>, <span style="color: #009900">App</span>, <span style="color: #009900">Path</span>, <span style="color: #009900">Extra</span>}
-        | {<span style="color: #FF6600">file</span>, <span style="color: #009900">Path</span>}
-        | {<span style="color: #FF6600">file</span>, <span style="color: #009900">Path</span>, <span style="color: #009900">Extra</span>}
-        | {<span style="color: #FF6600">priv_dir</span>, <span style="color: #009900">App</span>, <span style="color: #009900">Path</span>}
-        | {<span style="color: #FF6600">priv_dir</span>, <span style="color: #009900">App</span>, <span style="color: #009900">Path</span>, <span style="color: #009900">Extra</span>}
-        | {<span style="color: #FF6600">dir</span>, <span style="color: #009900">Path</span>}
-        | {<span style="color: #FF6600">dir</span>, <span style="color: #009900">Path</span>, <span style="color: #009900">Extra</span>}
+<pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">::</font> {<font color="#FF6600">priv_file</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">priv_file</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
+        | {<font color="#FF6600">file</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">file</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
+        | {<font color="#FF6600">priv_dir</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">priv_dir</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
+        | {<font color="#FF6600">dir</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">dir</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
 
-<span style="color: #009900">App</span>        <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">atom</span></span>()
-<span style="color: #009900">Path</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="font-weight: bold"><span style="color: #000000">string</span></span>()
-<span style="color: #009900">Extra</span>      <span style="color: #990000">::</span> [<span style="color: #009900">Etag</span> | <span style="color: #009900">Mimetypes</span>]
+<font color="#009900">App</font>        <font color="#990000">::</font> <b><font color="#000080">atom</font></b>()
+<font color="#009900">Path</font>       <font color="#990000">::</font> <b><font color="#000080">binary</font></b>() | <b><font color="#000000">string</font></b>()
+<font color="#009900">Extra</font>      <font color="#990000">::</font> [<font color="#009900">Etag</font> | <font color="#009900">Mimetypes</font>]
 
-<span style="color: #009900">Etag</span>       <span style="color: #990000">::</span> {<span style="color: #FF6600">etag</span>, <span style="font-weight: bold"><span style="color: #000000">module</span></span>(), <span style="font-weight: bold"><span style="color: #000080">function</span></span>()}
-            | {<span style="color: #FF6600">etag</span>, <span style="color: #000080">false</span>}
+<font color="#009900">Etag</font>       <font color="#990000">::</font> {<font color="#FF6600">etag</font>, <b><font color="#000000">module</font></b>(), <b><font color="#000080">function</font></b>()}
+            | {<font color="#FF6600">etag</font>, <font color="#000080">false</font>}
 
-<span style="color: #009900">Mimetypes</span>  <span style="color: #990000">::</span> {<span style="color: #FF6600">mimetypes</span>, <span style="font-weight: bold"><span style="color: #000000">module</span></span>(), <span style="font-weight: bold"><span style="color: #000080">function</span></span>()}
-            | {<span style="color: #FF6600">mimetypes</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>() | <span style="color: #009900">ParsedMime</span>}
+<font color="#009900">Mimetypes</font>  <font color="#990000">::</font> {<font color="#FF6600">mimetypes</font>, <b><font color="#000000">module</font></b>(), <b><font color="#000080">function</font></b>()}
+            | {<font color="#FF6600">mimetypes</font>, <b><font color="#000080">binary</font></b>() | <font color="#009900">ParsedMime</font>}
 
-<span style="color: #009900">ParsedMime</span> <span style="color: #990000">::</span> {<span style="color: #009900">Type</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">SubType</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Params</span>}
-<span style="color: #009900">Params</span>     <span style="color: #990000">::</span> [{<span style="color: #009900">Key</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Value</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}]</tt></pre></div></div>
-<div class="paragraph"><p>Static handler configuration.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-priv_file
-</dt>
-<dd>
-<p>
-Send a file.
-</p>
-<div class="paragraph"><p>The path is relative to the given application&#8217;s private
-directory.</p></div>
+<font color="#009900">ParsedMime</font> <font color="#990000">::</font> {<font color="#009900">Type</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">SubType</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Params</font>}
+<font color="#009900">Params</font>     <font color="#990000">::</font> [{<font color="#009900">Key</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()}]</tt></pre>
+</div></div>
+<p>Static handler configuration.</p>
+<dl><dt>priv_file</dt>
+<dd><p>Send a file.</p>
+<p>The path is relative to the given application&apos;s private directory.</p>
 </dd>
-<dt class="hdlist1">
-file
-</dt>
-<dd>
-<p>
-Send a file.
-</p>
-<div class="paragraph"><p>The path is either absolute or relative to the Erlang node&#8217;s
-current directory.</p></div>
+<dt>file</dt>
+<dd><p>Send a file.</p>
+<p>The path is either absolute or relative to the Erlang node&apos;s current directory.</p>
 </dd>
-<dt class="hdlist1">
-priv_dir
-</dt>
-<dd>
-<p>
-Recursively serve files from a directory.
-</p>
-<div class="paragraph"><p>The path is relative to the given application&#8217;s private
-directory.</p></div>
+<dt>priv_dir</dt>
+<dd><p>Recursively serve files from a directory.</p>
+<p>The path is relative to the given application&apos;s private directory.</p>
 </dd>
-<dt class="hdlist1">
-dir
-</dt>
-<dd>
-<p>
-Recursively serve files from a directory.
-</p>
-<div class="paragraph"><p>The path is either absolute or relative to the Erlang node&#8217;s
-current directory.</p></div>
+<dt>dir</dt>
+<dd><p>Recursively serve files from a directory.</p>
+<p>The path is either absolute or relative to the Erlang node&apos;s current directory.</p>
 </dd>
-</dl></div>
-<div class="paragraph"><p>The extra options allow you to define how the etag should be
-calculated and how the MIME type of files should be detected.</p></div>
-<div class="paragraph"><p>By default the static handler will generate an etag based
-on the size and modification time of the file. You may disable
-the etag entirely with <code>{etag, false}</code> or provide a module
-and function that will be called when needed:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+</dl>
+<p>The extra options allow you to define how the etag should be calculated and how the MIME type of files should be detected.</p>
+<p>By default the static handler will generate an etag based on the size and modification time of the file. You may disable the etag entirely with <code>{etag, false}</code> or provide a module and function that will be called when needed:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">generate_etag</span></span>(<span style="color: #009900">Path</span>, <span style="color: #009900">Size</span>, <span style="color: #009900">Mtime</span>) <span style="color: #990000">-&gt;</span> {<span style="color: #FF6600">strong</span> | <span style="color: #FF6600">weak</span>, <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}
+<pre><tt><b><font color="#000000">generate_etag</font></b>(<font color="#009900">Path</font>, <font color="#009900">Size</font>, <font color="#009900">Mtime</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">strong</font> | <font color="#FF6600">weak</font>, <b><font color="#000080">binary</font></b>()}
 
-<span style="color: #009900">Path</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()
-<span style="color: #009900">Size</span>  <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">non_neg_integer</span></span>()
-<span style="color: #009900">Mtime</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000000">file:date_time</span></span>()</tt></pre></div></div>
-<div class="paragraph"><p>By default the static handler will detect Web-related MIME types
-by looking at the file extension. You can provide a specific
-MIME type that will always be used, or a module and function that
-will be called when needed:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<font color="#009900">Path</font>  <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()
+<font color="#009900">Size</font>  <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()
+<font color="#009900">Mtime</font> <font color="#990000">::</font> <b><font color="#000000">file:date_time</font></b>()</tt></pre>
+</div></div>
+<p>By default the static handler will detect Web-related MIME types by looking at the file extension. You can provide a specific MIME type that will always be used, or a module and function that will be called when needed:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">detect_mimetype</span></span>(<span style="color: #009900">Path</span>) <span style="color: #990000">-&gt;</span> <span style="color: #009900">ParsedMime</span>
+<pre><tt><b><font color="#000000">detect_mimetype</font></b>(<font color="#009900">Path</font>) <font color="#990000">-&gt;</font> <font color="#009900">ParsedMime</font>
 
-<span style="color: #009900">Path</span>       <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()
-<span style="color: #009900">ParsedMime</span> <span style="color: #990000">::</span> {<span style="color: #009900">Type</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">SubType</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Params</span>}
-<span style="color: #009900">Params</span>     <span style="color: #990000">::</span> [{<span style="color: #009900">Key</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>(), <span style="color: #009900">Value</span> <span style="color: #990000">::</span> <span style="font-weight: bold"><span style="color: #000080">binary</span></span>()}]</tt></pre></div></div>
-<div class="paragraph"><p>Cowboy comes with two such functions; the default function
-<code>cow_mimetypes:web/1</code>, and a second function generated from
-the Apache <em>mime.types</em> file, <code>cow_mimetypes:all/1</code>.</p></div>
-<div class="paragraph"><p>The MIME type function should return
-<code>{&lt;&lt;"application"&gt;&gt;, &lt;&lt;"octet-stream"&gt;&gt;, []}</code>
-when it fails to detect a file&#8217;s MIME type.</p></div>
-</div>
-</div>
-<div class="sect1">
+<font color="#009900">Path</font>       <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()
+<font color="#009900">ParsedMime</font> <font color="#990000">::</font> {<font color="#009900">Type</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">SubType</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Params</font>}
+<font color="#009900">Params</font>     <font color="#990000">::</font> [{<font color="#009900">Key</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()}]</tt></pre>
+</div></div>
+<!-- @todo Case sensitivity of parsed mime content?-->
+<p>Cowboy comes with two such functions; the default function <code>cow_mimetypes:web/1</code>, and a second function generated from the Apache <em>mime.types</em> file, <code>cow_mimetypes:all/1</code>.</p>
+<p>The MIME type function should return <code>{&lt;&lt;&quot;application&quot;&gt;&gt;, &lt;&lt;&quot;octet-stream&quot;&gt;&gt;, []}</code> when it fails to detect a file&apos;s MIME type.</p>
 <h2 id="_changelog">Changelog</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-<strong>1.0</strong>: Handler introduced.
-</p>
+<ul><li><strong>1.0</strong>: Handler introduced.
 </li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
+</ul>
 <h2 id="_examples">Examples</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="title">Custom etag function</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<div class="listingblock"><div class="title">Custom etag function</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">generate_etag</span></span>(<span style="color: #009900">Path</span>, <span style="color: #009900">Size</span>, <span style="color: #009900">Mtime</span>) <span style="color: #990000">-&gt;</span>
-    {<span style="color: #FF6600">strong</span>, <span style="font-weight: bold"><span style="color: #000000">integer_to_binary</span></span>(
-        <span style="font-weight: bold"><span style="color: #000000">erlang:phash2</span></span>({<span style="color: #009900">Path</span>, <span style="color: #009900">Size</span>, <span style="color: #009900">Mtime</span>}, <span style="color: #993399">16#ffffffff</span>))}<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Custom MIME type function</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">generate_etag</font></b>(<font color="#009900">Path</font>, <font color="#009900">Size</font>, <font color="#009900">Mtime</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">strong</font>, <b><font color="#000000">integer_to_binary</font></b>(
+        <b><font color="#000000">erlang:phash2</font></b>({<font color="#009900">Path</font>, <font color="#009900">Size</font>, <font color="#009900">Mtime</font>}, <font color="#993399">16#ffffffff</font>))}<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Custom MIME type function</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">always_octet_stream</span></span>(<span style="color: #009900">_Path</span>) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">case</span></span> <span style="font-weight: bold"><span style="color: #000000">filename:extension</span></span>(<span style="color: #009900">Path</span>) <span style="font-weight: bold"><span style="color: #0000FF">of</span></span>
-        <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">".erl"</span><span style="color: #990000">&gt;&gt;</span> <span style="color: #990000">-&gt;</span> {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"text"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"plain"</span><span style="color: #990000">&gt;&gt;</span>, []};
-        <span style="color: #990000">_</span> <span style="color: #990000">-&gt;</span> {<span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"application"</span><span style="color: #990000">&gt;&gt;</span>, <span style="color: #990000">&lt;&lt;</span><span style="color: #FF0000">"octet-stream"</span><span style="color: #990000">&gt;&gt;</span>, []}
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span><span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><b><font color="#000000">always_octet_stream</font></b>(<font color="#009900">_Path</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <b><font color="#000000">filename:extension</font></b>(<font color="#009900">Path</font>) <b><font color="#0000FF">of</font></b>
+        <font color="#990000">&lt;&lt;</font><font color="#FF0000">".erl"</font><font color="#990000">&gt;&gt;</font> <font color="#990000">-&gt;</font> {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"text"</font><font color="#990000">&gt;&gt;</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"plain"</font><font color="#990000">&gt;&gt;</font>, []};
+        <font color="#990000">_</font> <font color="#990000">-&gt;</font> {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"application"</font><font color="#990000">&gt;&gt;</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"octet-stream"</font><font color="#990000">&gt;&gt;</font>, []}
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a href="..">cowboy(7)</a>,
-<a href="../cowboy_router">cowboy_router(3)</a></p></div>
-</div>
-</div>
+<p><a href="..">cowboy(7)</a>, <a href="../cowboy_router">cowboy_router(3)</a></p>
+
 
 
 

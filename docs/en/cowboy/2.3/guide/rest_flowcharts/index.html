@@ -62,244 +62,64 @@
 
 <h1 class="lined-header"><span>REST flowcharts</span></h1>
 
-<div class="paragraph"><p>This chapter will explain the REST handler state machine through
-a number of different diagrams.</p></div>
-<div class="paragraph"><p>There are four main paths that requests may follow. One for the
-method OPTIONS; one for the methods GET and HEAD; one for the
-methods PUT, POST and PATCH; and one for the method DELETE.</p></div>
-<div class="paragraph"><p>All paths start with the "Start" diagram, and all paths excluding
-the OPTIONS path go through the "Content negotiation" diagram
-and optionally the "Conditional requests" diagram if the resource
-exists.</p></div>
-<div class="paragraph"><p>The red squares refer to another diagram. The light green squares
-indicate a response. Other squares may be either a callback or a
-question answered by Cowboy itself. Green arrows tend to indicate
-the default behavior if the callback is undefined.</p></div>
-<div class="sect1">
+<p>This chapter will explain the REST handler state machine through a number of different diagrams.</p>
+<p>There are four main paths that requests may follow. One for the method OPTIONS; one for the methods GET and HEAD; one for the methods PUT, POST and PATCH; and one for the method DELETE.</p>
+<p>All paths start with the &quot;Start&quot; diagram, and all paths excluding the OPTIONS path go through the &quot;Content negotiation&quot; diagram and optionally the &quot;Conditional requests&quot; diagram if the resource exists.</p>
+<p>The red squares refer to another diagram. The light green squares indicate a response. Other squares may be either a callback or a question answered by Cowboy itself. Green arrows tend to indicate the default behavior if the callback is undefined.</p>
 <h2 id="_start">Start</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>All requests start from here.</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="../rest_start.png" alt="REST starting flowchart" />
-</div>
-</div>
-<div class="paragraph"><p>A series of callbacks are called in succession to perform
-a general checkup of the service, the request line and
-request headers.</p></div>
-<div class="paragraph"><p>The request body, if any, is not expected to have been
-received for any of these steps. It is only processed
-at the end of the "PUT, POST and PATCH methods" diagram,
-when all conditions have been met.</p></div>
-<div class="paragraph"><p>The <code>known_methods</code> and <code>allowed_methods</code> callbacks
-return a list of methods. Cowboy then checks if the request
-method is in the list, and stops otherwise.</p></div>
-<div class="paragraph"><p>The <code>is_authorized</code> callback may be used to check that
-access to the resource is authorized. Authentication
-may also be performed as needed. When authorization is
-denied, the return value from the callback must include
-a challenge applicable to the requested resource, which
-will be sent back to the client in the www-authenticate
-header.</p></div>
-<div class="paragraph"><p>This diagram is immediately followed by either the
-"OPTIONS method" diagram when the request method is
-OPTIONS, or the "Content negotiation" diagram otherwise.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>All requests start from here.</p>
+<img src="../rest_start.png" alt="REST starting flowchart"/><p>A series of callbacks are called in succession to perform a general checkup of the service, the request line and request headers.</p>
+<p>The request body, if any, is not expected to have been received for any of these steps. It is only processed at the end of the &quot;PUT, POST and PATCH methods&quot; diagram, when all conditions have been met.</p>
+<p>The <code>known_methods</code> and <code>allowed_methods</code> callbacks return a list of methods. Cowboy then checks if the request method is in the list, and stops otherwise.</p>
+<p>The <code>is_authorized</code> callback may be used to check that access to the resource is authorized. Authentication may also be performed as needed. When authorization is denied, the return value from the callback must include a challenge applicable to the requested resource, which will be sent back to the client in the www-authenticate header.</p>
+<p>This diagram is immediately followed by either the &quot;OPTIONS method&quot; diagram when the request method is OPTIONS, or the &quot;Content negotiation&quot; diagram otherwise.</p>
 <h2 id="_options_method">OPTIONS method</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>This diagram only applies to OPTIONS requests.</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="../rest_options.png" alt="REST OPTIONS method flowchart" />
-</div>
-</div>
-<div class="paragraph"><p>The <code>options</code> callback may be used to add information
-about the resource, such as media types or languages
-provided; allowed methods; any extra information. A
-response body may also be set, although clients should
-not be expected to read it.</p></div>
-<div class="paragraph"><p>If the <code>options</code> callback is not defined, Cowboy will
-send a response containing the list of allowed methods
-by default.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>This diagram only applies to OPTIONS requests.</p>
+<img src="../rest_options.png" alt="REST OPTIONS method flowchart"/><p>The <code>options</code> callback may be used to add information about the resource, such as media types or languages provided; allowed methods; any extra information. A response body may also be set, although clients should not be expected to read it.</p>
+<p>If the <code>options</code> callback is not defined, Cowboy will send a response containing the list of allowed methods by default.</p>
 <h2 id="_content_negotiation">Content negotiation</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>This diagram applies to all request methods other than
-OPTIONS. It is executed right after the "Start" diagram
-is completed.</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="../rest_conneg.png" alt="REST content negotiation flowchart" />
-</div>
-</div>
-<div class="paragraph"><p>The purpose of these steps is to determine an appropriate
-representation to be sent back to the client.</p></div>
-<div class="paragraph"><p>The request may contain any of the accept header; the
-accept-language header; or the accept-charset header.
-When present, Cowboy will parse the headers and then
-call the corresponding callback to obtain the list
-of provided content-type, language or charset for this
-resource. It then automatically select the best match
-based on the request.</p></div>
-<div class="paragraph"><p>If a callback is not defined, Cowboy will select the
-content-type, language or charset that the client
-prefers.</p></div>
-<div class="paragraph"><p>The <code>content_types_provided</code> also returns the name of
-a callback for every content-type it accepts. This
-callback will only be called at the end of the
-"GET and HEAD methods" diagram, when all conditions
-have been met.</p></div>
-<div class="paragraph"><p>The selected content-type, language and charset are
-saved as meta values in the Req object. You <strong>should</strong>
-use the appropriate representation if you set a
-response body manually (alongside an error code,
-for example).</p></div>
-<div class="paragraph"><p>This diagram is immediately followed by
-the "GET and HEAD methods" diagram,
-the "PUT, POST and PATCH methods" diagram,
-or the "DELETE method" diagram, depending on the
-method.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>This diagram applies to all request methods other than OPTIONS. It is executed right after the &quot;Start&quot; diagram is completed.</p>
+<img src="../rest_conneg.png" alt="REST content negotiation flowchart"/><p>The purpose of these steps is to determine an appropriate representation to be sent back to the client.</p>
+<p>The request may contain any of the accept header; the accept-language header; or the accept-charset header. When present, Cowboy will parse the headers and then call the corresponding callback to obtain the list of provided content-type, language or charset for this resource. It then automatically select the best match based on the request.</p>
+<p>If a callback is not defined, Cowboy will select the content-type, language or charset that the client prefers.</p>
+<p>The <code>content_types_provided</code> also returns the name of a callback for every content-type it accepts. This callback will only be called at the end of the &quot;GET and HEAD methods&quot; diagram, when all conditions have been met.</p>
+<p>The selected content-type, language and charset are saved as meta values in the Req object. You <strong>should</strong> use the appropriate representation if you set a response body manually (alongside an error code, for example).</p>
+<p>This diagram is immediately followed by the &quot;GET and HEAD methods&quot; diagram, the &quot;PUT, POST and PATCH methods&quot; diagram, or the &quot;DELETE method&quot; diagram, depending on the method.</p>
 <h2 id="_get_and_head_methods">GET and HEAD methods</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>This diagram only applies to GET and HEAD requests.</p></div>
-<div class="paragraph"><p>For a description of the <code>cond</code> step, please see
-the "Conditional requests" diagram.</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="../rest_get_head.png" alt="REST GET/HEAD methods flowchart" />
-</div>
-</div>
-<div class="paragraph"><p>When the resource exists, and the conditional steps
-succeed, the resource can be retrieved.</p></div>
-<div class="paragraph"><p>Cowboy prepares the response by first retrieving
-metadata about the representation, then by calling
-the <code>ProvideResource</code> callback. This is the callback
-you defined for each content-types you returned from
-<code>content_types_provided</code>. This callback returns the body
-that will be sent back to the client, or a fun if the
-body must be streamed.</p></div>
-<div class="paragraph"><p>When the resource does not exist, Cowboy will figure out
-whether the resource existed previously, and if so whether
-it was moved elsewhere in order to redirect the client to
-the new URI.</p></div>
-<div class="paragraph"><p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks
-must return the new location of the resource if it was in
-fact moved.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_put_post_and_patch_methods">PUT, POST and PATCH methods</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>This diagram only applies to PUT, POST and PATCH requests.</p></div>
-<div class="paragraph"><p>For a description of the <code>cond</code> step, please see
-the "Conditional requests" diagram.</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="../rest_put_post_patch.png" alt="REST PUT/POST/PATCH methods flowchart" />
-</div>
-</div>
-<div class="paragraph"><p>When the resource exists, first the conditional steps
-are executed. When that succeeds, and the method is PUT,
-Cowboy will call the <code>is_conflict</code> callback. This function
-can be used to prevent potential race conditions, by locking
-the resource for example.</p></div>
-<div class="paragraph"><p>Then all three methods reach the <code>content_types_accepted</code>
-step that we will describe in a few paragraphs.</p></div>
-<div class="paragraph"><p>When the resource does not exist, and the method is PUT,
-Cowboy will check for conflicts and then move on to the
-<code>content_types_accepted</code> step. For other methods, Cowboy
-will figure out whether the resource existed previously,
-and if so whether it was moved elsewhere. If the resource
-is truly non-existent, the method is POST and the call
-for <code>allow_missing_post</code> returns <code>true</code>, then Cowboy will
-move on to the <code>content_types_accepted</code> step. Otherwise
-the request processing ends there.</p></div>
-<div class="paragraph"><p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks
-must return the new location of the resource if it was in
-fact moved.</p></div>
-<div class="paragraph"><p>The <code>content_types_accepted</code> returns a list of
-content-types it accepts, but also the name of a callback
-for each of them. Cowboy will select the appropriate
-callback for processing the request body and call it.</p></div>
-<div class="paragraph"><p>This callback may return one of three different return
-values.</p></div>
-<div class="paragraph"><p>If an error occurred while processing the request body,
-it must return <code>false</code> and Cowboy will send an
-appropriate error response.</p></div>
-<div class="paragraph"><p>If the method is POST, then you may return <code>true</code> with
-an URI of where the resource has been created. This is
-especially useful for writing handlers for collections.</p></div>
-<div class="paragraph"><p>Otherwise, return <code>true</code> to indicate success. Cowboy
-will select the appropriate response to be sent depending
-on whether a resource has been created, rather than
-modified, and on the availability of a location header
-or a body in the response.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>This diagram only applies to GET and HEAD requests.</p>
+<p>For a description of the <code>cond</code> step, please see the &quot;Conditional requests&quot; diagram.</p>
+<img src="../rest_get_head.png" alt="REST GET/HEAD methods flowchart"/><p>When the resource exists, and the conditional steps succeed, the resource can be retrieved.</p>
+<p>Cowboy prepares the response by first retrieving metadata about the representation, then by calling the <code>ProvideResource</code> callback. This is the callback you defined for each content-types you returned from <code>content_types_provided</code>. This callback returns the body that will be sent back to the client, or a fun if the body must be streamed.</p>
+<p>When the resource does not exist, Cowboy will figure out whether the resource existed previously, and if so whether it was moved elsewhere in order to redirect the client to the new URI.</p>
+<p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks must return the new location of the resource if it was in fact moved.</p>
+<h2 id="_put__post_and_patch_methods">PUT, POST and PATCH methods</h2>
+<p>This diagram only applies to PUT, POST and PATCH requests.</p>
+<p>For a description of the <code>cond</code> step, please see the &quot;Conditional requests&quot; diagram.</p>
+<img src="../rest_put_post_patch.png" alt="REST PUT/POST/PATCH methods flowchart"/><p>When the resource exists, first the conditional steps are executed. When that succeeds, and the method is PUT, Cowboy will call the <code>is_conflict</code> callback. This function can be used to prevent potential race conditions, by locking the resource for example.</p>
+<p>Then all three methods reach the <code>content_types_accepted</code> step that we will describe in a few paragraphs.</p>
+<p>When the resource does not exist, and the method is PUT, Cowboy will check for conflicts and then move on to the <code>content_types_accepted</code> step. For other methods, Cowboy will figure out whether the resource existed previously, and if so whether it was moved elsewhere. If the resource is truly non-existent, the method is POST and the call for <code>allow_missing_post</code> returns <code>true</code>, then Cowboy will move on to the <code>content_types_accepted</code> step. Otherwise the request processing ends there.</p>
+<p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks must return the new location of the resource if it was in fact moved.</p>
+<p>The <code>content_types_accepted</code> returns a list of content-types it accepts, but also the name of a callback for each of them. Cowboy will select the appropriate callback for processing the request body and call it.</p>
+<p>This callback may return one of three different return values.</p>
+<p>If an error occurred while processing the request body, it must return <code>false</code> and Cowboy will send an appropriate error response.</p>
+<p>If the method is POST, then you may return <code>true</code> with an URI of where the resource has been created. This is especially useful for writing handlers for collections.</p>
+<p>Otherwise, return <code>true</code> to indicate success. Cowboy will select the appropriate response to be sent depending on whether a resource has been created, rather than modified, and on the availability of a location header or a body in the response.</p>
 <h2 id="_delete_method">DELETE method</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>This diagram only applies to DELETE requests.</p></div>
-<div class="paragraph"><p>For a description of the <code>cond</code> step, please see
-the "Conditional requests" diagram.</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="../rest_delete.png" alt="REST DELETE method flowchart" />
-</div>
-</div>
-<div class="paragraph"><p>When the resource exists, and the conditional steps
-succeed, the resource can be deleted.</p></div>
-<div class="paragraph"><p>Deleting the resource is a two steps process. First
-the callback <code>delete_resource</code> is executed. Use this
-callback to delete the resource.</p></div>
-<div class="paragraph"><p>Because the resource may be cached, you must also
-delete all cached representations of this resource
-in the system. This operation may take a while though,
-so you may return before it finished.</p></div>
-<div class="paragraph"><p>Cowboy will then call the <code>delete_completed</code> callback.
-If you know that the resource has been completely
-deleted from your system, including from caches, then
-you can return <code>true</code>. If any doubts persist, return
-<code>false</code>. Cowboy will assume <code>true</code> by default.</p></div>
-<div class="paragraph"><p>To finish, Cowboy checks if you set a response body,
-and depending on that, sends the appropriate response.</p></div>
-<div class="paragraph"><p>When the resource does not exist, Cowboy will figure out
-whether the resource existed previously, and if so whether
-it was moved elsewhere in order to redirect the client to
-the new URI.</p></div>
-<div class="paragraph"><p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks
-must return the new location of the resource if it was in
-fact moved.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>This diagram only applies to DELETE requests.</p>
+<p>For a description of the <code>cond</code> step, please see the &quot;Conditional requests&quot; diagram.</p>
+<img src="../rest_delete.png" alt="REST DELETE method flowchart"/><p>When the resource exists, and the conditional steps succeed, the resource can be deleted.</p>
+<p>Deleting the resource is a two steps process. First the callback <code>delete_resource</code> is executed. Use this callback to delete the resource.</p>
+<p>Because the resource may be cached, you must also delete all cached representations of this resource in the system. This operation may take a while though, so you may return before it finished.</p>
+<p>Cowboy will then call the <code>delete_completed</code> callback. If you know that the resource has been completely deleted from your system, including from caches, then you can return <code>true</code>. If any doubts persist, return <code>false</code>. Cowboy will assume <code>true</code> by default.</p>
+<p>To finish, Cowboy checks if you set a response body, and depending on that, sends the appropriate response.</p>
+<p>When the resource does not exist, Cowboy will figure out whether the resource existed previously, and if so whether it was moved elsewhere in order to redirect the client to the new URI.</p>
+<p>The <code>moved_permanently</code> and <code>moved_temporarily</code> callbacks must return the new location of the resource if it was in fact moved.</p>
 <h2 id="_conditional_requests">Conditional requests</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>This diagram applies to all request methods other than
-OPTIONS. It is executed right after the <code>resource_exists</code>
-callback, when the resource exists.</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="../rest_cond.png" alt="REST conditional requests flowchart" />
-</div>
-</div>
-<div class="paragraph"><p>A request becomes conditional when it includes either of
-the if-match header; the if-unmodified-since header; the
-if-none-match header; or the if-modified-since header.</p></div>
-<div class="paragraph"><p>If the condition fails, the request ends immediately
-without any retrieval or modification of the resource.</p></div>
-<div class="paragraph"><p>The <code>generate_etag</code> and <code>last_modified</code> are called as
-needed. Cowboy will only call them once and then cache
-the results for subsequent use.</p></div>
-</div>
-</div>
+<p>This diagram applies to all request methods other than OPTIONS. It is executed right after the <code>resource_exists</code> callback, when the resource exists.</p>
+<img src="../rest_cond.png" alt="REST conditional requests flowchart"/><p>A request becomes conditional when it includes either of the if-match header; the if-unmodified-since header; the if-none-match header; or the if-modified-since header.</p>
+<p>If the condition fails, the request ends immediately without any retrieval or modification of the resource.</p>
+<p>The <code>generate_etag</code> and <code>last_modified</code> are called as needed. Cowboy will only call them once and then cache the results for subsequent use.</p>
+
 
 
 

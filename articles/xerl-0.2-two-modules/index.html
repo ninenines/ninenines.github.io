@@ -69,149 +69,123 @@
 	</p>
 </header>
 
-<div class="paragraph"><p>Everything is an expression.</p></div>
-<div class="paragraph"><p>This sentence carries profound meaning. We will invoke it many
-times over the course of these articles.</p></div>
-<div class="paragraph"><p>If everything is an expression, then the language shouldn&#8217;t have
-any problem with me defining two modules in the same source file.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Everything is an expression.</p>
+<p>This sentence carries profound meaning. We will invoke it many times over the course of these articles.</p>
+<p>If everything is an expression, then the language shouldn&apos;t have any problem with me defining two modules in the same source file.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">mod</span> <span style="color: #FF6600">first_module</span>
-<span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+<pre><tt><font color="#FF6600">mod</font> <font color="#FF6600">first_module</font>
+<b><font color="#0000FF">begin</font></b>
+<b><font color="#0000FF">end</font></b>
 
-<span style="color: #FF6600">mod</span> <span style="color: #FF6600">second_module</span>
-<span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Likewise, it shouldn&#8217;t have any problem with me defining a
-module inside another module.</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<font color="#FF6600">mod</font> <font color="#FF6600">second_module</font>
+<b><font color="#0000FF">begin</font></b>
+<b><font color="#0000FF">end</font></b></tt></pre>
+</div></div>
+<p>Likewise, it shouldn&apos;t have any problem with me defining a module inside another module.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">mod</span> <span style="color: #FF6600">out_module</span>
-<span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
-    <span style="color: #FF6600">mod</span> <span style="color: #FF6600">in_module</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">begin</span></span>
-    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Of course, in the context of the Erlang VM, these two snippets
-are equivalent; there is nothing preventing you from calling the
-<code>in_module</code> module from any other module. The <code>mod</code>
-instruction means a module should be created in the Erlang VM,
-with no concept of scope attached.</p></div>
-<div class="paragraph"><p>Still we need to handle both. To do this we will add a step
-between the parser and the code generator that will walk over the
-abstract syntax tree, from here onward shortened as <em>AST</em>,
-and transform the AST by executing it where applicable.</p></div>
-<div class="paragraph"><p>What happens when you execute a <code>mod</code> instruction?
-A module is created. Since we are compiling, that simply means
-the compiler will branch out and create a module.</p></div>
-<div class="paragraph"><p>If everything is an expression, does that mean this will allow
-me to create modules at runtime using the same syntax? Yes, but
-let&#8217;s not get ahead of ourselves yet.</p></div>
-<div class="paragraph"><p>For now we will just iterate over the AST, and will compile
-a module for each <code>mod</code> found. Modules cannot contain
-expressions yet, so there&#8217;s no need to recurse over it at this
-point. This should solve the compilation of our first snippet.</p></div>
-<div class="paragraph"><p>The <code>compile/1</code> function becomes:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#FF6600">mod</font> <font color="#FF6600">out_module</font>
+<b><font color="#0000FF">begin</font></b>
+    <font color="#FF6600">mod</font> <font color="#FF6600">in_module</font>
+    <b><font color="#0000FF">begin</font></b>
+    <b><font color="#0000FF">end</font></b>
+<b><font color="#0000FF">end</font></b></tt></pre>
+</div></div>
+<p>Of course, in the context of the Erlang VM, these two snippets are equivalent; there is nothing preventing you from calling the <code>in_module</code> module from any other module. The <code>mod</code> instruction means a module should be created in the Erlang VM, with no concept of scope attached.</p>
+<p>Still we need to handle both. To do this we will add a step between the parser and the code generator that will walk over the abstract syntax tree, from here onward shortened as <em>AST</em>, and transform the AST by executing it where applicable.</p>
+<p>What happens when you execute a <code>mod</code> instruction? A module is created. Since we are compiling, that simply means the compiler will branch out and create a module.</p>
+<p>If everything is an expression, does that mean this will allow me to create modules at runtime using the same syntax? Yes, but let&apos;s not get ahead of ourselves yet.</p>
+<p>For now we will just iterate over the AST, and will compile a module for each <code>mod</code> found. Modules cannot contain expressions yet, so there&apos;s no need to recurse over it at this point. This should solve the compilation of our first snippet.</p>
+<p>The <code>compile/1</code> function becomes:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">compile</span></span>(<span style="color: #009900">Filename</span>) <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"Compiling ~s...~n"</span>, [<span style="color: #009900">Filename</span>]),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Src</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">file:read_file</span></span>(<span style="color: #009900">Filename</span>),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Tokens</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">xerl_lexer:string</span></span>(<span style="font-weight: bold"><span style="color: #000080">binary_to_list</span></span>(<span style="color: #009900">Src</span>)),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #009900">Exprs</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">xerl_parser:parse</span></span>(<span style="color: #009900">Tokens</span>),
-        <span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #009900">Filename</span>, <span style="color: #009900">Exprs</span>, [])<span style="color: #990000">.</span>
+<pre><tt><b><font color="#000000">compile</font></b>(<font color="#009900">Filename</font>) <font color="#990000">-&gt;</font>
+	<b><font color="#000000">io:format</font></b>(<font color="#FF0000">"Compiling ~s...~n"</font>, [<font color="#009900">Filename</font>]),
+	{<font color="#FF6600">ok</font>, <font color="#009900">Src</font>} <font color="#990000">=</font> <b><font color="#000000">file:read_file</font></b>(<font color="#009900">Filename</font>),
+	{<font color="#FF6600">ok</font>, <font color="#009900">Tokens</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">xerl_lexer:string</font></b>(<b><font color="#000080">binary_to_list</font></b>(<font color="#009900">Src</font>)),
+	{<font color="#FF6600">ok</font>, <font color="#009900">Exprs</font>} <font color="#990000">=</font> <b><font color="#000000">xerl_parser:parse</font></b>(<font color="#009900">Tokens</font>),
+	<b><font color="#000000">execute</font></b>(<font color="#009900">Filename</font>, <font color="#009900">Exprs</font>, [])<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #990000">_</span>, [], <span style="color: #009900">Modules</span>) <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"Done...~n"</span>),
-        {<span style="color: #FF6600">ok</span>, <span style="font-weight: bold"><span style="color: #000000">lists:reverse</span></span>(<span style="color: #009900">Modules</span>)};
-<span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #009900">Filename</span>, [<span style="color: #009900">Expr</span> <span style="color: #990000">=</span> {<span style="color: #FF6600">mod</span>, <span style="color: #990000">_</span>, {<span style="font-weight: bold"><span style="color: #000080">atom</span></span>, <span style="color: #990000">_</span>, <span style="color: #009900">Name</span>}, []}|<span style="color: #009900">Tail</span>], <span style="color: #009900">Modules</span>) <span style="color: #990000">-&gt;</span>
-        {<span style="color: #FF6600">ok</span>, [<span style="color: #009900">Core</span>]} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">xerl_codegen:exprs</span></span>([<span style="color: #009900">Expr</span>]),
-        {<span style="color: #FF6600">ok</span>, [{<span style="color: #009900">Name</span>, []}]} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">core_lint:module</span></span>(<span style="color: #009900">Core</span>),
-        <span style="font-weight: bold"><span style="color: #000000">io:format</span></span>(<span style="color: #FF0000">"~s~n"</span>, [<span style="font-weight: bold"><span style="color: #000000">core_pp:format</span></span>(<span style="color: #009900">Core</span>)]),
-        {<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>, <span style="color: #009900">Beam</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">compile:forms</span></span>(<span style="color: #009900">Core</span>,
-                [<span style="font-weight: bold"><span style="color: #000080">binary</span></span>, <span style="color: #FF6600">from_core</span>, <span style="color: #FF6600">return_errors</span>, {<span style="color: #FF6600">source</span>, <span style="color: #009900">Filename</span>}]),
-        {<span style="color: #FF6600">module</span>, <span style="color: #009900">Name</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">code:load_binary</span></span>(<span style="color: #009900">Name</span>, <span style="color: #009900">Filename</span>, <span style="color: #009900">Beam</span>),
-        <span style="font-weight: bold"><span style="color: #000000">execute</span></span>(<span style="color: #009900">Filename</span>, <span style="color: #009900">Tail</span>, [<span style="color: #009900">Name</span>|<span style="color: #009900">Modules</span>])<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Running this compiler over the first snippet yields the following
-result:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000000">execute</font></b>(<font color="#990000">_</font>, [], <font color="#009900">Modules</font>) <font color="#990000">-&gt;</font>
+	<b><font color="#000000">io:format</font></b>(<font color="#FF0000">"Done...~n"</font>),
+	{<font color="#FF6600">ok</font>, <b><font color="#000000">lists:reverse</font></b>(<font color="#009900">Modules</font>)};
+<b><font color="#000000">execute</font></b>(<font color="#009900">Filename</font>, [<font color="#009900">Expr</font> <font color="#990000">=</font> {<font color="#FF6600">mod</font>, <font color="#990000">_</font>, {<b><font color="#000080">atom</font></b>, <font color="#990000">_</font>, <font color="#009900">Name</font>}, []}|<font color="#009900">Tail</font>], <font color="#009900">Modules</font>) <font color="#990000">-&gt;</font>
+	{<font color="#FF6600">ok</font>, [<font color="#009900">Core</font>]} <font color="#990000">=</font> <b><font color="#000000">xerl_codegen:exprs</font></b>([<font color="#009900">Expr</font>]),
+	{<font color="#FF6600">ok</font>, [{<font color="#009900">Name</font>, []}]} <font color="#990000">=</font> <b><font color="#000000">core_lint:module</font></b>(<font color="#009900">Core</font>),
+	<b><font color="#000000">io:format</font></b>(<font color="#FF0000">"~s~n"</font>, [<b><font color="#000000">core_pp:format</font></b>(<font color="#009900">Core</font>)]),
+	{<font color="#FF6600">ok</font>, <font color="#990000">_</font>, <font color="#009900">Beam</font>} <font color="#990000">=</font> <b><font color="#000000">compile:forms</font></b>(<font color="#009900">Core</font>,
+		[<b><font color="#000080">binary</font></b>, <font color="#FF6600">from_core</font>, <font color="#FF6600">return_errors</font>, {<font color="#FF6600">source</font>, <font color="#009900">Filename</font>}]),
+	{<font color="#FF6600">module</font>, <font color="#009900">Name</font>} <font color="#990000">=</font> <b><font color="#000000">code:load_binary</font></b>(<font color="#009900">Name</font>, <font color="#009900">Filename</font>, <font color="#009900">Beam</font>),
+	<b><font color="#000000">execute</font></b>(<font color="#009900">Filename</font>, <font color="#009900">Tail</font>, [<font color="#009900">Name</font>|<font color="#009900">Modules</font>])<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Running this compiler over the first snippet yields the following result:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Compiling</span> <span style="font-weight: bold"><span style="color: #000000">test</span></span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000000">mod_SUITE_data</span></span><span style="color: #990000">/</span><span style="color: #FF6600">two_modules</span><span style="color: #990000">.</span><span style="color: #FF6600">xerl</span><span style="color: #990000">...</span>
-<span style="color: #FF6600">module</span> <span style="color: #FF6600">'first_module'</span> [<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span>,
-                       <span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span>]
-    <span style="color: #FF6600">attributes</span> []
-<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span> <span style="color: #990000">=</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> () <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
-            (<span style="color: #FF6600">'first_module'</span>)
-<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span> <span style="color: #990000">=</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Key</span>) <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
-            (<span style="color: #FF6600">'first_module'</span>, <span style="color: #009900">Key</span>)
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
-<span style="color: #FF6600">module</span> <span style="color: #FF6600">'second_module'</span> [<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span>,
-                        <span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span>]
-    <span style="color: #FF6600">attributes</span> []
-<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">0</span> <span style="color: #990000">=</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> () <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
-            (<span style="color: #FF6600">'second_module'</span>)
-<span style="color: #FF6600">'module_info'</span><span style="color: #990000">/</span><span style="color: #993399">1</span> <span style="color: #990000">=</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> (<span style="color: #009900">Key</span>) <span style="color: #990000">-&gt;</span>
-        <span style="font-weight: bold"><span style="color: #000080">call</span></span> <span style="color: #FF6600">'erlang'</span><span style="color: #990000">:</span><span style="color: #FF6600">'get_module_info'</span>
-            (<span style="color: #FF6600">'second_module'</span>, <span style="color: #009900">Key</span>)
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
-<span style="color: #009900">Done</span><span style="color: #990000">...</span>
-{<span style="color: #FF6600">ok</span>,[<span style="color: #FF6600">first_module</span>,<span style="color: #FF6600">second_module</span>]}</tt></pre></div></div>
-<div class="paragraph"><p>Everything looks fine. And we can check that the two modules have
-been loaded into the VM:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><font color="#009900">Compiling</font> <b><font color="#000000">test</font></b><font color="#990000">/</font><b><font color="#000000">mod_SUITE_data</font></b><font color="#990000">/</font><font color="#FF6600">two_modules</font><font color="#990000">.</font><font color="#FF6600">xerl</font><font color="#990000">...</font>
+<font color="#FF6600">module</font> <font color="#FF6600">'first_module'</font> [<font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">0</font>,
+                       <font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">1</font>]
+    <font color="#FF6600">attributes</font> []
+<font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">0</font> <font color="#990000">=</font>
+    <b><font color="#0000FF">fun</font></b> () <font color="#990000">-&gt;</font>
+        <b><font color="#000080">call</font></b> <font color="#FF6600">'erlang'</font><font color="#990000">:</font><font color="#FF6600">'get_module_info'</font>
+            (<font color="#FF6600">'first_module'</font>)
+<font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">1</font> <font color="#990000">=</font>
+    <b><font color="#0000FF">fun</font></b> (<font color="#009900">Key</font>) <font color="#990000">-&gt;</font>
+        <b><font color="#000080">call</font></b> <font color="#FF6600">'erlang'</font><font color="#990000">:</font><font color="#FF6600">'get_module_info'</font>
+            (<font color="#FF6600">'first_module'</font>, <font color="#009900">Key</font>)
+<b><font color="#0000FF">end</font></b>
+<font color="#FF6600">module</font> <font color="#FF6600">'second_module'</font> [<font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">0</font>,
+                        <font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">1</font>]
+    <font color="#FF6600">attributes</font> []
+<font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">0</font> <font color="#990000">=</font>
+    <b><font color="#0000FF">fun</font></b> () <font color="#990000">-&gt;</font>
+        <b><font color="#000080">call</font></b> <font color="#FF6600">'erlang'</font><font color="#990000">:</font><font color="#FF6600">'get_module_info'</font>
+            (<font color="#FF6600">'second_module'</font>)
+<font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">1</font> <font color="#990000">=</font>
+    <b><font color="#0000FF">fun</font></b> (<font color="#009900">Key</font>) <font color="#990000">-&gt;</font>
+        <b><font color="#000080">call</font></b> <font color="#FF6600">'erlang'</font><font color="#990000">:</font><font color="#FF6600">'get_module_info'</font>
+            (<font color="#FF6600">'second_module'</font>, <font color="#009900">Key</font>)
+<b><font color="#0000FF">end</font></b>
+<font color="#009900">Done</font><font color="#990000">...</font>
+{<font color="#FF6600">ok</font>,[<font color="#FF6600">first_module</font>,<font color="#FF6600">second_module</font>]}</tt></pre>
+</div></div>
+<p>Everything looks fine. And we can check that the two modules have been loaded into the VM:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #993399">9</span><span style="color: #990000">&gt;</span> <span style="color: #FF6600">m</span>(<span style="color: #FF6600">first_module</span>)<span style="color: #990000">.</span>
-<span style="color: #009900">Module</span> <span style="color: #FF6600">first_module</span> <span style="color: #FF6600">compiled</span><span style="color: #990000">:</span> <span style="color: #009900">Date</span><span style="color: #990000">:</span> <span style="color: #009900">February</span> <span style="color: #993399">2</span> <span style="color: #993399">2013</span>, <span style="color: #009900">Time</span><span style="color: #990000">:</span> <span style="color: #993399">14.56</span>
-<span style="color: #009900">Compiler</span> <span style="color: #FF6600">options</span><span style="color: #990000">:</span>  [<span style="color: #FF6600">from_core</span>]
-<span style="color: #009900">Object</span> <span style="font-weight: bold"><span style="color: #000000">file: test</span></span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000000">mod_SUITE_data</span></span><span style="color: #990000">/</span><span style="color: #FF6600">two_modules</span><span style="color: #990000">.</span><span style="color: #FF6600">xerl</span>
-<span style="color: #009900">Exports</span><span style="color: #990000">:</span>
-         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">0</span>
-         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">1</span>
-<span style="color: #FF6600">ok</span>
-<span style="color: #993399">10</span><span style="color: #990000">&gt;</span> <span style="color: #FF6600">m</span>(<span style="color: #FF6600">second_module</span>)<span style="color: #990000">.</span>
-<span style="color: #009900">Module</span> <span style="color: #FF6600">second_module</span> <span style="color: #FF6600">compiled</span><span style="color: #990000">:</span> <span style="color: #009900">Date</span><span style="color: #990000">:</span> <span style="color: #009900">February</span> <span style="color: #993399">2</span> <span style="color: #993399">2013</span>, <span style="color: #009900">Time</span><span style="color: #990000">:</span> <span style="color: #993399">14.56</span>
-<span style="color: #009900">Compiler</span> <span style="color: #FF6600">options</span><span style="color: #990000">:</span>  [<span style="color: #FF6600">from_core</span>]
-<span style="color: #009900">Object</span> <span style="font-weight: bold"><span style="color: #000000">file: test</span></span><span style="color: #990000">/</span><span style="font-weight: bold"><span style="color: #000000">mod_SUITE_data</span></span><span style="color: #990000">/</span><span style="color: #FF6600">two_modules</span><span style="color: #990000">.</span><span style="color: #FF6600">xerl</span>
-<span style="color: #009900">Exports</span><span style="color: #990000">:</span>
-         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">0</span>
-         <span style="font-weight: bold"><span style="color: #000080">module_info</span></span><span style="color: #990000">/</span><span style="color: #993399">1</span>
-<span style="color: #FF6600">ok</span></tt></pre></div></div>
-<div class="paragraph"><p>So far so good!</p></div>
-<div class="paragraph"><p>What about the second snippet? It brings up many questions. What
-happens once a <code>mod</code> expression has been executed at
-compile time? If it&#8217;s an expression then it has to have a result,
-right? Right. We are still a bit lacking with expressions for now,
-though, so let&#8217;s get back to it after we add more.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<a href="https://github.com/extend/xerl/blob/0.2/">View the source</a>
-</p>
+<pre><tt><font color="#993399">9</font><font color="#990000">&gt;</font> <font color="#FF6600">m</font>(<font color="#FF6600">first_module</font>)<font color="#990000">.</font>
+<font color="#009900">Module</font> <font color="#FF6600">first_module</font> <font color="#FF6600">compiled</font><font color="#990000">:</font> <font color="#009900">Date</font><font color="#990000">:</font> <font color="#009900">February</font> <font color="#993399">2</font> <font color="#993399">2013</font>, <font color="#009900">Time</font><font color="#990000">:</font> <font color="#993399">14.56</font>
+<font color="#009900">Compiler</font> <font color="#FF6600">options</font><font color="#990000">:</font>  [<font color="#FF6600">from_core</font>]
+<font color="#009900">Object</font> <b><font color="#000000">file: test</font></b><font color="#990000">/</font><b><font color="#000000">mod_SUITE_data</font></b><font color="#990000">/</font><font color="#FF6600">two_modules</font><font color="#990000">.</font><font color="#FF6600">xerl</font>
+<font color="#009900">Exports</font><font color="#990000">:</font> 
+         <b><font color="#000080">module_info</font></b><font color="#990000">/</font><font color="#993399">0</font>
+         <b><font color="#000080">module_info</font></b><font color="#990000">/</font><font color="#993399">1</font>
+<font color="#FF6600">ok</font>
+<font color="#993399">10</font><font color="#990000">&gt;</font> <font color="#FF6600">m</font>(<font color="#FF6600">second_module</font>)<font color="#990000">.</font>
+<font color="#009900">Module</font> <font color="#FF6600">second_module</font> <font color="#FF6600">compiled</font><font color="#990000">:</font> <font color="#009900">Date</font><font color="#990000">:</font> <font color="#009900">February</font> <font color="#993399">2</font> <font color="#993399">2013</font>, <font color="#009900">Time</font><font color="#990000">:</font> <font color="#993399">14.56</font>
+<font color="#009900">Compiler</font> <font color="#FF6600">options</font><font color="#990000">:</font>  [<font color="#FF6600">from_core</font>]
+<font color="#009900">Object</font> <b><font color="#000000">file: test</font></b><font color="#990000">/</font><b><font color="#000000">mod_SUITE_data</font></b><font color="#990000">/</font><font color="#FF6600">two_modules</font><font color="#990000">.</font><font color="#FF6600">xerl</font>
+<font color="#009900">Exports</font><font color="#990000">:</font> 
+         <b><font color="#000080">module_info</font></b><font color="#990000">/</font><font color="#993399">0</font>
+         <b><font color="#000080">module_info</font></b><font color="#990000">/</font><font color="#993399">1</font>
+<font color="#FF6600">ok</font></tt></pre>
+</div></div>
+<p>So far so good!</p>
+<p>What about the second snippet? It brings up many questions. What happens once a <code>mod</code> expression has been executed at compile time? If it&apos;s an expression then it has to have a result, right? Right. We are still a bit lacking with expressions for now, though, so let&apos;s get back to it after we add more.</p>
+<ul><li><a href="https://github.com/extend/xerl/blob/0.2/">View the source</a>
 </li>
-</ul></div>
+</ul>
+
 
 </article>
 </div>

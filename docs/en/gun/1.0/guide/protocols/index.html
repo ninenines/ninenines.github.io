@@ -62,270 +62,158 @@
 
 <h1 class="lined-header"><span>Supported protocols</span></h1>
 
-<div class="paragraph"><p>This chapter describes the protocols supported and the
-operations available to them.</p></div>
-<div class="sect1">
+<p>This chapter describes the protocols supported and the operations available to them.</p>
 <h2 id="_http_1_1">HTTP/1.1</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>HTTP/1.1 is a text request-response protocol. The client
-sends a request, the server sends back a response.</p></div>
-<div class="paragraph"><p>Gun provides convenience functions for performing GET, HEAD,
-OPTIONS, POST, PATCH, PUT, and DELETE requests. All these
-functions are aliases of <code>gun:request/4,5,6</code> for the respective
-methods. Gun also provides a <code>gun:data/4</code> function for streaming
-the request body.</p></div>
-<div class="paragraph"><p>Gun will send a <code>gun_inform</code> message for every intermediate
-informational responses received. They will always be sent
-before the <code>gun_response</code> message.</p></div>
-<div class="paragraph"><p>Gun will send a <code>gun_response</code> message for every response
-received, followed by zero or more <code>gun_data</code> messages for
-the response body, which is optionally terminated by a
-<code>gun_trailers</code> message. If something goes wrong, a <code>gun_error</code>
-will be sent instead.</p></div>
-<div class="paragraph"><p>Gun provides convenience functions for dealing with messages.
-The <code>gun:await/2,3,4</code> function waits for a response to the given
-request, and the <code>gun:await_body/2,3,4</code> function for the
-response body. The <code>gun:flush/1</code> function can be used to clear all
-messages related to a request or a connection from the mailbox
-of the calling process.</p></div>
-<div class="paragraph"><p>The function <code>gun:cancel/2</code> can be used to silence the
-response to a request previously sent if it is no longer
-needed. When using HTTP/1.1 there is no multiplexing so
-Gun will have to receive the response fully before any
-other responses can be received.</p></div>
-<div class="paragraph"><p>Finally, Gun can upgrade an HTTP/1.1 connection to Websocket.
-It provides the <code>gun:ws_upgrade/2,3,4</code> function for that
-purpose. A <code>gun_upgrade</code> message will be sent on success;
-a <code>gun_response</code> message otherwise.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>HTTP/1.1 is a text request-response protocol. The client sends a request, the server sends back a response.</p>
+<p>Gun provides convenience functions for performing GET, HEAD, OPTIONS, POST, PATCH, PUT, and DELETE requests. All these functions are aliases of <code>gun:request/4,5,6</code> for the respective methods. Gun also provides a <code>gun:data/4</code> function for streaming the request body.</p>
+<p>Gun will send a <code>gun_inform</code> message for every intermediate informational responses received. They will always be sent before the <code>gun_response</code> message.</p>
+<p>Gun will send a <code>gun_response</code> message for every response received, followed by zero or more <code>gun_data</code> messages for the response body, which is optionally terminated by a <code>gun_trailers</code> message. If something goes wrong, a <code>gun_error</code> will be sent instead.</p>
+<p>Gun provides convenience functions for dealing with messages. The <code>gun:await/2,3,4</code> function waits for a response to the given request, and the <code>gun:await_body/2,3,4</code> function for the response body. The <code>gun:flush/1</code> function can be used to clear all messages related to a request or a connection from the mailbox of the calling process.</p>
+<p>The function <code>gun:cancel/2</code> can be used to silence the response to a request previously sent if it is no longer needed. When using HTTP/1.1 there is no multiplexing so Gun will have to receive the response fully before any other responses can be received.</p>
+<p>Finally, Gun can upgrade an HTTP/1.1 connection to Websocket. It provides the <code>gun:ws_upgrade/2,3,4</code> function for that purpose. A <code>gun_upgrade</code> message will be sent on success; a <code>gun_response</code> message otherwise.</p>
 <h2 id="_http_2">HTTP/2</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>HTTP/2 is a binary protocol based on HTTP, compatible with
-the HTTP semantics, that reduces the complexity of parsing
-requests and responses, compresses the HTTP headers and
-allows the server to push additional resources along with
-the normal response to the original request.</p></div>
-<div class="paragraph"><p>The HTTP/2 interface is very similar to HTTP/1.1, so this
-section instead focuses on the differences in the interface
-for the two protocols.</p></div>
-<div class="paragraph"><p>Gun will send <code>gun_push</code> messages for every push received.
-They will always be sent before the <code>gun_response</code> message.
-They can be ignored safely if they are not needed, or they
-can be canceled.</p></div>
-<div class="paragraph"><p>The <code>gun:cancel/2</code> function will use the HTTP/2 stream
-cancellation mechanism which allows Gun to inform the
-server to stop sending a response for this particular
-request, saving resources.</p></div>
-<div class="paragraph"><p>It is not currently possible to upgrade an HTTP/2 connection
-to Websocket. Support for this will be added in a future
-release.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>HTTP/2 is a binary protocol based on HTTP, compatible with the HTTP semantics, that reduces the complexity of parsing requests and responses, compresses the HTTP headers and allows the server to push additional resources along with the normal response to the original request.</p>
+<p>The HTTP/2 interface is very similar to HTTP/1.1, so this section instead focuses on the differences in the interface for the two protocols.</p>
+<p>Gun will send <code>gun_push</code> messages for every push received. They will always be sent before the <code>gun_response</code> message. They can be ignored safely if they are not needed, or they can be canceled.</p>
+<p>The <code>gun:cancel/2</code> function will use the HTTP/2 stream cancellation mechanism which allows Gun to inform the server to stop sending a response for this particular request, saving resources.</p>
+<p>It is not currently possible to upgrade an HTTP/2 connection to Websocket. Support for this will be added in a future release.</p>
 <h2 id="_websocket">Websocket</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Websocket is a binary protocol built on top of HTTP that
-allows asynchronous concurrent communication between the
-client and the server. A Websocket server can push data to
-the client at any time.</p></div>
-<div class="paragraph"><p>Websocket is only available as a connection upgrade over
-an HTTP/1.1 connection.</p></div>
-<div class="paragraph"><p>Once the Websocket connection is established, the only
-operation available on this connection is sending Websocket
-frames using <code>gun:ws_send/2</code>.</p></div>
-<div class="paragraph"><p>Gun will send a <code>gun_ws</code> message for every frame received.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>Websocket is a binary protocol built on top of HTTP that allows asynchronous concurrent communication between the client and the server. A Websocket server can push data to the client at any time.</p>
+<p>Websocket is only available as a connection upgrade over an HTTP/1.1 connection.</p>
+<p>Once the Websocket connection is established, the only operation available on this connection is sending Websocket frames using <code>gun:ws_send/2</code>.</p>
+<p>Gun will send a <code>gun_ws</code> message for every frame received.</p>
 <h2 id="_summary">Summary</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The two following tables summarize the supported operations
-and the messages Gun sends depending on the connection&#8217;s
-current protocol.</p></div>
-<div class="tableblock">
-<table rules="all"
-width="100%"
-frame="border"
-cellspacing="0" cellpadding="4">
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
-<thead>
-<tr>
-<th align="left" valign="top"> Operation  </th>
-<th align="center" valign="top"> HTTP/1.1 </th>
-<th align="center" valign="top"> HTTP/2 </th>
-<th align="center" valign="top"> Websocket</th>
+<p>The two following tables summarize the supported operations and the messages Gun sends depending on the connection&apos;s current protocol.</p>
+<table rules="all" width="100%" frame="border"
+			cellspacing="0" cellpadding="4">
+<caption>Supported operations per protocol</caption><thead><tr><th>Operation</th>
+<th>HTTP/1.1</th>
+<th>HTTP/2</th>
+<th>Websocket</th>
+</tr></thead><tbody><tr><td>delete</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-</thead>
-<tbody>
-<tr>
-<td align="left" valign="top"><p class="table">delete</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>get</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">get</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>head</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">head</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>options</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">options</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>patch</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">patch</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>post</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">post</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>put</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">put</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>request</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">request</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>data</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">data</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>await</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">await</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>await_body</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">await_body</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>flush</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">flush</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>cancel</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">cancel</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>ws_upgrade</td>
+<td>yes</td>
+<td>no</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">ws_upgrade</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>ws_send</td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">ws_send</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
+</tbody></table>
+<table rules="all" width="100%" frame="border"
+			cellspacing="0" cellpadding="4">
+<caption>Messages sent per protocol</caption><thead><tr><th>Message</th>
+<th>HTTP/1.1</th>
+<th>HTTP/2</th>
+<th>Websocket</th>
+</tr></thead><tbody><tr><td>gun_push</td>
+<td>no</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-</tbody>
-</table>
-</div>
-<div class="tableblock">
-<table rules="all"
-width="100%"
-frame="border"
-cellspacing="0" cellpadding="4">
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
-<thead>
-<tr>
-<th align="left" valign="top"> Message               </th>
-<th align="center" valign="top"> HTTP/1.1 </th>
-<th align="center" valign="top"> HTTP/2 </th>
-<th align="center" valign="top"> Websocket</th>
+<tr><td>gun_inform</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-</thead>
-<tbody>
-<tr>
-<td align="left" valign="top"><p class="table">gun_push</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>gun_response</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">gun_inform</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>gun_data</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">gun_response</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>gun_trailers</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">gun_data</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>gun_error</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">gun_trailers</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
+<tr><td>gun_upgrade</td>
+<td>yes</td>
+<td>no</td>
+<td>no</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">gun_error</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
+<tr><td>gun_ws</td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
 </tr>
-<tr>
-<td align="left" valign="top"><p class="table">gun_upgrade</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-</tr>
-<tr>
-<td align="left" valign="top"><p class="table">gun_ws</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-<td align="center" valign="top"><p class="table">no</p></td>
-<td align="center" valign="top"><p class="table">yes</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+</tbody></table>
+
 
 
 

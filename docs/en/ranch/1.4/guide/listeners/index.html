@@ -62,367 +62,213 @@
 
 <h1 class="lined-header"><span>Listeners</span></h1>
 
-<div class="paragraph"><p>A listener is a set of processes whose role is to listen on a port
-for new connections. It manages a pool of acceptor processes, each
-of them indefinitely accepting connections. When it does, it starts
-a new process executing the protocol handler code. All the socket
-programming is abstracted through the use of transport handlers.</p></div>
-<div class="paragraph"><p>The listener takes care of supervising all the acceptor and connection
-processes, allowing developers to focus on building their application.</p></div>
-<div class="sect1">
+<p>A listener is a set of processes whose role is to listen on a port for new connections. It manages a pool of acceptor processes, each of them indefinitely accepting connections. When it does, it starts a new process executing the protocol handler code. All the socket programming is abstracted through the use of transport handlers.</p>
+<p>The listener takes care of supervising all the acceptor and connection processes, allowing developers to focus on building their application.</p>
 <h2 id="_starting_a_listener">Starting a listener</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Ranch does nothing by default. It is up to the application developer
-to request that Ranch listens for connections.</p></div>
-<div class="paragraph"><p>A listener can be started and stopped at will.</p></div>
-<div class="paragraph"><p>When starting a listener, a number of different settings are required:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-A name to identify it locally and be able to interact with it.
-</p>
+<p>Ranch does nothing by default. It is up to the application developer to request that Ranch listens for connections.</p>
+<p>A listener can be started and stopped at will.</p>
+<p>When starting a listener, a number of different settings are required:</p>
+<ul><li>A name to identify it locally and be able to interact with it.
 </li>
-<li>
-<p>
-The number of acceptors in the pool.
-</p>
+<li>The number of acceptors in the pool.
 </li>
-<li>
-<p>
-A transport handler and its associated options.
-</p>
+<li>A transport handler and its associated options.
 </li>
-<li>
-<p>
-A protocol handler and its associated options.
-</p>
+<li>A protocol handler and its associated options.
 </li>
-</ul></div>
-<div class="paragraph"><p>Ranch includes both TCP and SSL transport handlers, respectively
-<code>ranch_tcp</code> and <code>ranch_ssl</code>.</p></div>
-<div class="paragraph"><p>A listener can be started by calling the <code>ranch:start_listener/5</code>
-function. Before doing so however, you must ensure that the <code>ranch</code>
-application is started.</p></div>
-<div class="listingblock">
-<div class="title">Starting the Ranch application</div>
-<div class="content"><!-- Generator: GNU source-highlight
+</ul>
+<p>Ranch includes both TCP and SSL transport handlers, respectively <code>ranch_tcp</code> and <code>ranch_ssl</code>.</p>
+<p>A listener can be started by calling the <code>ranch:start_listener/5</code> function. Before doing so however, you must ensure that the <code>ranch</code> application is started.</p>
+<div class="listingblock"><div class="title">Starting the Ranch application</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #0000FF">ok</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">application:start</span></span>(<span style="color: #FF6600">ranch</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>You are then ready to start a listener. Let&#8217;s call it <code>tcp_echo</code>. It will
-have a pool of 100 acceptors, use a TCP transport and forward connections
-to the <code>echo_protocol</code> handler.</p></div>
-<div class="listingblock">
-<div class="title">Starting a listener for TCP connections on port 5555</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
-        <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}],
-        <span style="color: #FF6600">echo_protocol</span>, []
-)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>You can try this out by compiling and running the <code>tcp_echo</code> example in the
-examples directory. To do so, open a shell in the <em>examples/tcp_echo/</em>
-directory and run the following command:</p></div>
-<div class="listingblock">
-<div class="title">Building and starting a Ranch example</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ make run</tt></pre></div></div>
-<div class="paragraph"><p>You can then connect to it using telnet and see the echo server reply
-everything you send to it. Then when you&#8217;re done testing, you can use
-the <code>Ctrl+]</code> key to escape to the telnet command line and type
-<code>quit</code> to exit.</p></div>
-<div class="listingblock">
-<div class="title">Connecting to the example listener with telnet</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ telnet localhost <span style="color: #993399">5555</span>
-Trying <span style="color: #993399">127.0</span><span style="color: #990000">.</span><span style="color: #993399">0.1</span><span style="color: #990000">...</span>
-Connected to localhost<span style="color: #990000">.</span>
-Escape character is <span style="color: #FF0000">'^]'</span><span style="color: #990000">.</span>
-Hello<span style="color: #990000">!</span>
-Hello<span style="color: #990000">!</span>
-It works<span style="color: #990000">!</span>
-It works<span style="color: #990000">!</span>
-<span style="color: #990000">^]</span>
-
-telnet<span style="color: #990000">&gt;</span> quit
-Connection closed<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_stopping_a_listener">Stopping a listener</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>All you need to stop a Ranch listener is to call the
-<code>ranch:stop_listener/1</code> function with the listener&#8217;s name
-as argument. In the previous section we started the listener
-named <code>tcp_echo</code>. We can now stop it.</p></div>
-<div class="listingblock">
-<div class="title">Stopping a listener</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:stop_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_default_transport_options">Default transport options</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>By default the socket will be set to return <code>binary</code> data, with the
-options <code>{active, false}</code>, <code>{packet, raw}</code>, <code>{reuseaddr, true}</code> set.
-These values can&#8217;t be overriden when starting the listener, but
-they can be overriden using <code>Transport:setopts/2</code> in the protocol.</p></div>
-<div class="paragraph"><p>It will also set <code>{backlog, 1024}</code> and <code>{nodelay, true}</code>, which
-can be overriden at listener startup.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_listening_on_a_random_port">Listening on a random port</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>You do not have to specify a specific port to listen on. If you give
-the port number 0, or if you omit the port number entirely, Ranch will
-start listening on a random port.</p></div>
-<div class="paragraph"><p>You can retrieve this port number by calling <code>ranch:get_port/1</code>. The
-argument is the name of the listener you gave in <code>ranch:start_listener/5</code>.</p></div>
-<div class="listingblock">
-<div class="title">Starting a listener for TCP connections on a random port</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
-        <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">0</span>}],
-        <span style="color: #FF6600">echo_protocol</span>, []
-)<span style="color: #990000">.</span>
-<span style="color: #009900">Port</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:get_port</span></span>(<span style="color: #FF6600">tcp_echo</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_listening_on_privileged_ports">Listening on privileged ports</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Some systems limit access to ports below 1024 for security reasons.
-This can easily be identified by an <code>{error, eacces}</code> error when trying
-to open a listening socket on such a port.</p></div>
-<div class="paragraph"><p>The methods for listening on privileged ports vary between systems,
-please refer to your system&#8217;s documentation for more information.</p></div>
-<div class="paragraph"><p>We recommend the use of port rewriting for systems with a single server,
-and load balancing for systems with multiple servers. Documenting these
-solutions is however out of the scope of this guide.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_accepting_connections_on_an_existing_socket">Accepting connections on an existing socket</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>If you want to accept connections on an existing socket, you can use the
-<code>socket</code> transport option, which should just be the relevant data returned
-from the connect function for the transport or the underlying socket library
-(<code>gen_tcp:connect</code>, <code>ssl:connect</code>). The accept function will then be
-called on the passed in socket. You should connect the socket in
-<code>{active, false}</code> mode, as well.</p></div>
-<div class="paragraph"><p>Note, however, that because of a bug in SSL, you cannot change ownership of an
-SSL listen socket prior to R16. Ranch will catch the error thrown, but the
-owner of the SSL socket will remain as whatever process created the socket.
-However, this will not affect accept behaviour unless the owner process dies,
-in which case the socket is closed. Therefore, to use this feature with SSL
-with an erlang release prior to R16, ensure that the SSL socket is opened in a
-persistant process.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_limiting_the_number_of_concurrent_connections">Limiting the number of concurrent connections</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The <code>max_connections</code> transport option allows you to limit the number
-of concurrent connections. It defaults to 1024. Its purpose is to
-prevent your system from being overloaded and ensuring all the
-connections are handled optimally.</p></div>
-<div class="listingblock">
-<div class="title">Customizing the maximum number of concurrent connections</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
-        <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}, {<span style="color: #FF6600">max_connections</span>, <span style="color: #993399">100</span>}],
-        <span style="color: #FF6600">echo_protocol</span>, []
-)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>You can disable this limit by setting its value to the atom <code>infinity</code>.</p></div>
-<div class="listingblock">
-<div class="title">Disabling the limit for the number of connections</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
-        <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}, {<span style="color: #FF6600">max_connections</span>, <span style="color: #FF6600">infinity</span>}],
-        <span style="color: #FF6600">echo_protocol</span>, []
-)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The maximum number of connections is a soft limit. In practice, it
-can reach <code>max_connections</code> + the number of acceptors.</p></div>
-<div class="paragraph"><p>When the maximum number of connections is reached, Ranch will stop
-accepting connections. This will not result in further connections
-being rejected, as the kernel option allows queueing incoming
-connections. The size of this queue is determined by the <code>backlog</code>
-option and defaults to 1024. Ranch does not know about the number
-of connections that are in the backlog.</p></div>
-<div class="paragraph"><p>You may not always want connections to be counted when checking for
-<code>max_connections</code>. For example you might have a protocol where both
-short-lived and long-lived connections are possible. If the long-lived
-connections are mostly waiting for messages, then they don&#8217;t consume
-much resources and can safely be removed from the count.</p></div>
-<div class="paragraph"><p>To remove the connection from the count, you must call the
-<code>ranch:remove_connection/1</code> from within the connection process,
-with the name of the listener as the only argument.</p></div>
-<div class="listingblock">
-<div class="title">Removing a connection from the count of connections</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:remove_connection</span></span>(<span style="color: #009900">Ref</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>As seen in the chapter covering protocols, this pid is received as the
-first argument of the protocol&#8217;s <code>start_link/4</code> callback.</p></div>
-<div class="paragraph"><p>You can modify the <code>max_connections</code> value on a running listener by
-using the <code>ranch:set_max_connections/2</code> function, with the name of the
-listener as first argument and the new value as the second.</p></div>
-<div class="listingblock">
-<div class="title">Upgrading the maximum number of connections</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:set_max_connections</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #009900">MaxConns</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The change will occur immediately.</p></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_customizing_the_number_of_acceptor_processes">Customizing the number of acceptor processes</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>By default Ranch will use 10 acceptor processes. Their role is
-to accept connections and spawn a connection process for every
-new connection.</p></div>
-<div class="paragraph"><p>This number can be tweaked to improve performance. A good
-number is typically between 10 or 100 acceptors. You must
-measure to find the best value for your application.</p></div>
-<div class="listingblock">
-<div class="title">Specifying a custom number of acceptor processes</div>
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<span style="color: #FF6600">ok</span>, <span style="color: #990000">_</span>} <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:start_listener</span></span>(<span style="color: #FF6600">tcp_echo</span>,
-        <span style="color: #FF6600">ranch_tcp</span>, [{<span style="color: #FF6600">port</span>, <span style="color: #993399">5555</span>}, {<span style="color: #FF6600">num_acceptors</span>, <span style="color: #993399">42</span>}],
-        <span style="color: #FF6600">echo_protocol</span>, []
-)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_when_running_out_of_file_descriptors">When running out of file descriptors</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Operating systems have limits on the number of sockets
-which can be opened by applications. When this maximum is
-reached the listener can no longer accept new connections. The
-accept rate of the listener will be automatically reduced, and a
-warning message will be logged.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>=ERROR REPORT==== 13-Jan-2016::12:24:38 ===
-Ranch acceptor reducing accept rate: out of file descriptors</code></pre>
+<pre><tt><font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">application:start</font></b>(<font color="#FF6600">ranch</font>)<font color="#990000">.</font></tt></pre>
 </div></div>
-<div class="paragraph"><p>If you notice messages like this you should increase the number
-of file-descriptors which can be opened by your application. How
-this should be done is operating-system dependent. Please consult
-the documentation of your operating system.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>You are then ready to start a listener. Let&apos;s call it <code>tcp_echo</code>. It will have a pool of 100 acceptors, use a TCP transport and forward connections to the <code>echo_protocol</code> handler.</p>
+<div class="listingblock"><div class="title">Starting a listener for TCP connections on port 5555</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can try this out by compiling and running the <code>tcp_echo</code> example in the examples directory. To do so, open a shell in the <em>examples/tcp_echo/</em> directory and run the following command:</p>
+<div class="listingblock"><div class="title">Building and starting a Ranch example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make run</tt></pre>
+</div></div>
+<p>You can then connect to it using telnet and see the echo server reply everything you send to it. Then when you&apos;re done testing, you can use the <code>Ctrl+]</code> key to escape to the telnet command line and type <code>quit</code> to exit.</p>
+<div class="listingblock"><div class="title">Connecting to the example listener with telnet</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ telnet localhost <font color="#993399">5555</font>
+Trying <font color="#993399">127.0</font><font color="#990000">.</font><font color="#993399">0.1</font><font color="#990000">...</font>
+Connected to localhost<font color="#990000">.</font>
+Escape character is <font color="#FF0000">'^]'</font><font color="#990000">.</font>
+Hello<font color="#990000">!</font>
+Hello<font color="#990000">!</font>
+It works<font color="#990000">!</font>
+It works<font color="#990000">!</font>
+<font color="#990000">^]</font>
+
+telnet<font color="#990000">&gt;</font> quit
+Connection closed<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_stopping_a_listener">Stopping a listener</h2>
+<p>All you need to stop a Ranch listener is to call the <code>ranch:stop_listener/1</code> function with the listener&apos;s name as argument. In the previous section we started the listener named <code>tcp_echo</code>. We can now stop it.</p>
+<div class="listingblock"><div class="title">Stopping a listener</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:stop_listener</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_default_transport_options">Default transport options</h2>
+<p>By default the socket will be set to return <code>binary</code> data, with the options <code>{active, false}</code>, <code>{packet, raw}</code>, <code>{reuseaddr, true}</code> set. These values can&apos;t be overriden when starting the listener, but they can be overriden using <code>Transport:setopts/2</code> in the protocol.</p>
+<p>It will also set <code>{backlog, 1024}</code> and <code>{nodelay, true}</code>, which can be overriden at listener startup.</p>
+<h2 id="_listening_on_a_random_port">Listening on a random port</h2>
+<p>You do not have to specify a specific port to listen on. If you give the port number 0, or if you omit the port number entirely, Ranch will start listening on a random port.</p>
+<p>You can retrieve this port number by calling <code>ranch:get_port/1</code>. The argument is the name of the listener you gave in <code>ranch:start_listener/5</code>.</p>
+<div class="listingblock"><div class="title">Starting a listener for TCP connections on a random port</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">0</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font>
+<font color="#009900">Port</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_port</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_listening_on_privileged_ports">Listening on privileged ports</h2>
+<p>Some systems limit access to ports below 1024 for security reasons. This can easily be identified by an <code>{error, eacces}</code> error when trying to open a listening socket on such a port.</p>
+<p>The methods for listening on privileged ports vary between systems, please refer to your system&apos;s documentation for more information.</p>
+<p>We recommend the use of port rewriting for systems with a single server, and load balancing for systems with multiple servers. Documenting these solutions is however out of the scope of this guide.</p>
+<h2 id="_accepting_connections_on_an_existing_socket">Accepting connections on an existing socket</h2>
+<p>If you want to accept connections on an existing socket, you can use the <code>socket</code> transport option, which should just be the relevant data returned from the connect function for the transport or the underlying socket library (<code>gen_tcp:connect</code>, <code>ssl:connect</code>). The accept function will then be called on the passed in socket. You should connect the socket in <code>{active, false}</code> mode, as well.</p>
+<p>Note, however, that because of a bug in SSL, you cannot change ownership of an SSL listen socket prior to R16. Ranch will catch the error thrown, but the owner of the SSL socket will remain as whatever process created the socket. However, this will not affect accept behaviour unless the owner process dies, in which case the socket is closed. Therefore, to use this feature with SSL with an erlang release prior to R16, ensure that the SSL socket is opened in a persistant process.</p>
+<h2 id="_limiting_the_number_of_concurrent_connections">Limiting the number of concurrent connections</h2>
+<p>The <code>max_connections</code> transport option allows you to limit the number of concurrent connections. It defaults to 1024. Its purpose is to prevent your system from being overloaded and ensuring all the connections are handled optimally.</p>
+<div class="listingblock"><div class="title">Customizing the maximum number of concurrent connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}, {<font color="#FF6600">max_connections</font>, <font color="#993399">100</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can disable this limit by setting its value to the atom <code>infinity</code>.</p>
+<div class="listingblock"><div class="title">Disabling the limit for the number of connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}, {<font color="#FF6600">max_connections</font>, <font color="#FF6600">infinity</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The maximum number of connections is a soft limit. In practice, it can reach <code>max_connections</code><br/> the number of acceptors.</p>
+<p>When the maximum number of connections is reached, Ranch will stop accepting connections. This will not result in further connections being rejected, as the kernel option allows queueing incoming connections. The size of this queue is determined by the <code>backlog</code> option and defaults to 1024. Ranch does not know about the number of connections that are in the backlog.</p>
+<p>You may not always want connections to be counted when checking for <code>max_connections</code>. For example you might have a protocol where both short-lived and long-lived connections are possible. If the long-lived connections are mostly waiting for messages, then they don&apos;t consume much resources and can safely be removed from the count.</p>
+<p>To remove the connection from the count, you must call the <code>ranch:remove_connection/1</code> from within the connection process, with the name of the listener as the only argument.</p>
+<div class="listingblock"><div class="title">Removing a connection from the count of connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:remove_connection</font></b>(<font color="#009900">Ref</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>As seen in the chapter covering protocols, this pid is received as the first argument of the protocol&apos;s <code>start_link/4</code> callback.</p>
+<p>You can modify the <code>max_connections</code> value on a running listener by using the <code>ranch:set_max_connections/2</code> function, with the name of the listener as first argument and the new value as the second.</p>
+<div class="listingblock"><div class="title">Upgrading the maximum number of connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:set_max_connections</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#009900">MaxConns</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The change will occur immediately.</p>
+<h2 id="_customizing_the_number_of_acceptor_processes">Customizing the number of acceptor processes</h2>
+<p>By default Ranch will use 10 acceptor processes. Their role is to accept connections and spawn a connection process for every new connection.</p>
+<p>This number can be tweaked to improve performance. A good number is typically between 10 or 100 acceptors. You must measure to find the best value for your application.</p>
+<div class="listingblock"><div class="title">Specifying a custom number of acceptor processes</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}, {<font color="#FF6600">num_acceptors</font>, <font color="#993399">42</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_when_running_out_of_file_descriptors">When running out of file descriptors</h2>
+<p>Operating systems have limits on the number of sockets which can be opened by applications. When this maximum is reached the listener can no longer accept new connections. The accept rate of the listener will be automatically reduced, and a warning message will be logged.</p>
+<div class="listingblock"><div class="content"><pre>=ERROR REPORT==== 13-Jan-2016::12:24:38 ===
+Ranch acceptor reducing accept rate: out of file descriptors</pre></div></div>
+<p>If you notice messages like this you should increase the number of file-descriptors which can be opened by your application. How this should be done is operating-system dependent. Please consult the documentation of your operating system.</p>
 <h2 id="_using_a_supervisor_for_connection_processes">Using a supervisor for connection processes</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Ranch allows you to define the type of process that will be used
-for the connection processes. By default it expects a <code>worker</code>.
-When the <code>connection_type</code> configuration value is set to <code>supervisor</code>,
-Ranch will consider that the connection process it manages is a
-supervisor and will reflect that in its supervision tree.</p></div>
-<div class="paragraph"><p>Connection processes of type <code>supervisor</code> can either handle the
-socket directly or through one of their children. In the latter
-case the start function for the connection process must return
-two pids: the pid of the supervisor you created (that will be
-supervised) and the pid of the protocol handling process (that
-will receive the socket).</p></div>
-<div class="paragraph"><p>Instead of returning <code>{ok, ConnPid}</code>, simply return
-<code>{ok, SupPid, ConnPid}</code>.</p></div>
-<div class="paragraph"><p>It is very important that the connection process be created
-under the supervisor process so that everything works as intended.
-If not, you will most likely experience issues when the supervised
-process is stopped.</p></div>
-</div>
-</div>
-<div class="sect1">
+<p>Ranch allows you to define the type of process that will be used for the connection processes. By default it expects a <code>worker</code>. When the <code>connection_type</code> configuration value is set to <code>supervisor</code>, Ranch will consider that the connection process it manages is a supervisor and will reflect that in its supervision tree.</p>
+<p>Connection processes of type <code>supervisor</code> can either handle the socket directly or through one of their children. In the latter case the start function for the connection process must return two pids: the pid of the supervisor you created (that will be supervised) and the pid of the protocol handling process (that will receive the socket).</p>
+<p>Instead of returning <code>{ok, ConnPid}</code>, simply return <code>{ok, SupPid, ConnPid}</code>.</p>
+<p>It is very important that the connection process be created under the supervisor process so that everything works as intended. If not, you will most likely experience issues when the supervised process is stopped.</p>
 <h2 id="_upgrading">Upgrading</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Ranch allows you to upgrade the protocol options. This takes effect
-immediately and for all subsequent connections.</p></div>
-<div class="paragraph"><p>To upgrade the protocol options, call <code>ranch:set_protocol_options/2</code>
-with the name of the listener as first argument and the new options
-as the second.</p></div>
-<div class="listingblock">
-<div class="title">Upgrading the protocol options</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Ranch allows you to upgrade the protocol options. This takes effect immediately and for all subsequent connections.</p>
+<p>To upgrade the protocol options, call <code>ranch:set_protocol_options/2</code> with the name of the listener as first argument and the new options as the second.</p>
+<div class="listingblock"><div class="title">Upgrading the protocol options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:set_protocol_options</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #009900">NewOpts</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>All future connections will use the new options.</p></div>
-<div class="paragraph"><p>You can also retrieve the current options similarly by
-calling <code>ranch:get_protocol_options/1</code>.</p></div>
-<div class="listingblock">
-<div class="title">Retrieving the current protocol options</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">ranch:set_protocol_options</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#009900">NewOpts</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>All future connections will use the new options.</p>
+<p>You can also retrieve the current options similarly by calling <code>ranch:get_protocol_options/1</code>.</p>
+<div class="listingblock"><div class="title">Retrieving the current protocol options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #009900">Opts</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">ranch:get_protocol_options</span></span>(<span style="color: #FF6600">tcp_echo</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
-<div class="sect1">
+<pre><tt><font color="#009900">Opts</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_protocol_options</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_obtaining_information_about_listeners">Obtaining information about listeners</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Ranch provides two functions for retrieving information about the
-listeners, for reporting and diagnostic purposes.</p></div>
-<div class="paragraph"><p>The <code>ranch:info/0</code> function will return detailed information
-about all listeners.</p></div>
-<div class="listingblock">
-<div class="title">Retrieving detailed information</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Ranch provides two functions for retrieving information about the listeners, for reporting and diagnostic purposes.</p>
+<p>The <code>ranch:info/0</code> function will return detailed information about all listeners.</p>
+<div class="listingblock"><div class="title">Retrieving detailed information</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:info</span></span>()<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>The <code>ranch:procs/2</code> function will return all acceptor or listener
-processes for a given listener.</p></div>
-<div class="listingblock">
-<div class="title">Get all acceptor processes</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">ranch:info</font></b>()<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The <code>ranch:procs/2</code> function will return all acceptor or listener processes for a given listener.</p>
+<div class="listingblock"><div class="title">Get all acceptor processes</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:procs</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #FF6600">acceptors</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="listingblock">
-<div class="title">Get all connection processes</div>
-<div class="content"><!-- Generator: GNU source-highlight
+<pre><tt><b><font color="#000000">ranch:procs</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#FF6600">acceptors</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Get all connection processes</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">ranch:procs</span></span>(<span style="color: #FF6600">tcp_echo</span>, <span style="color: #FF6600">connections</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-</div>
-</div>
+<pre><tt><b><font color="#000000">ranch:procs</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#FF6600">connections</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+
 
 
 
@@ -478,6 +324,8 @@ http://www.gnu.org/software/src-highlite -->
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/ranch/1.5/guide">1.5</a></li>
 	
 		<li><a href="/docs/en/ranch/1.4/guide">1.4</a></li>
 	

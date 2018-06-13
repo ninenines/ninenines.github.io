@@ -69,136 +69,88 @@
 	</p>
 </header>
 
-<div class="paragraph"><p>Today we will start the work on the intermediate module
-that will be used to run the code for the expressions found
-in our file&#8217;s body, replacing our interpreter.</p></div>
-<div class="paragraph"><p>This is what we want to have when all the work is done:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>xerl -&gt; tokens -&gt; AST -&gt; intermediate -&gt; cerl</code></pre>
+<p>Today we will start the work on the intermediate module that will be used to run the code for the expressions found in our file&apos;s body, replacing our interpreter.</p>
+<p>This is what we want to have when all the work is done:</p>
+<div class="listingblock"><div class="content"><pre>xerl -&gt; tokens -&gt; AST -&gt; intermediate -&gt; cerl</pre></div></div>
+<p>Today we will perform this work only on the atomic integer expression however, so we will not build any module at the end. We have a few more things to take care of before getting there. This does mean that we completely break compilation of modules though, so hopefully we can resolve that soon.</p>
+<p>This intermediate representation is in the form of a module which contains a single function: <code>run/0</code>. This function contains all the expressions from our Xerl source file.</p>
+<p>In the case of a Xerl source file only containing the integer <code>42</code>, we will obtain the following module ready to be executed:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000080">-module</font></b>(<font color="#FF6600">'$xerl_intermediate'</font>)<font color="#990000">.</font>
+<b><font color="#000080">-export</font></b>([<b><font color="#000000">run</font></b><font color="#990000">/</font><font color="#993399">0</font>])<font color="#990000">.</font>
+
+<b><font color="#000000">run</font></b>() <font color="#990000">-&gt;</font>
+    <font color="#993399">42</font><font color="#990000">.</font></tt></pre>
 </div></div>
-<div class="paragraph"><p>Today we will perform this work only on the atomic integer
-expression however, so we will not build any module at the end.
-We have a few more things to take care of before getting there.
-This does mean that we completely break compilation of modules
-though, so hopefully we can resolve that soon.</p></div>
-<div class="paragraph"><p>This intermediate representation is in the form of a module
-which contains a single function: <code>run/0</code>. This function
-contains all the expressions from our Xerl source file.</p></div>
-<div class="paragraph"><p>In the case of a Xerl source file only containing the integer
-<code>42</code>, we will obtain the following module ready to
-be executed:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<p>Running it will of course give us a result of <code>42</code>, the same we had when interpreting expressions.</p>
+<p>The resulting Core Erlang code looks like this:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000080">-module</span></span>(<span style="color: #FF6600">'$xerl_intermediate'</span>)<span style="color: #990000">.</span>
-<span style="font-weight: bold"><span style="color: #000080">-export</span></span>([<span style="font-weight: bold"><span style="color: #000000">run</span></span><span style="color: #990000">/</span><span style="color: #993399">0</span>])<span style="color: #990000">.</span>
+<pre><tt><font color="#FF6600">module</font> <font color="#FF6600">'$xerl_intermediate'</font> [<font color="#FF6600">'run'</font><font color="#990000">/</font><font color="#993399">0</font>]
+    <font color="#FF6600">attributes</font> []
+<font color="#FF6600">'run'</font><font color="#990000">/</font><font color="#993399">0</font> <font color="#990000">=</font>
+    <b><font color="#0000FF">fun</font></b> () <font color="#990000">-&gt;</font>
+        <font color="#993399">42</font>
+<b><font color="#0000FF">end</font></b></tt></pre>
+</div></div>
+<p>The nice thing about doing it like this is that other than the definition of the intermediate module and its <code>run/0</code> function, we can use the same code we are using for generating the final Beam file. It may also be faster than interpreting if you have complex modules.</p>
+<p>Of course this here only works for the simplest cases, as you cannot declare a module or a function inside another Erlang function. We will need to wrap these into function calls to the Xerl compiler that will take care of compiling them, making them available for any subsequent expression. We will also need to pass the environment to the <code>run</code> function to keep track of all this.</p>
+<p>This does mean that we will have different code for compiling <code>fun</code> and <code>mod</code> expressions when creating the intermediate module. But the many other expressions don&apos;t need any special care.</p>
+<p>Right now we&apos;ve used the <code>&apos;$xerl_intermediate&apos;</code> atom for the intermediate module name because we only have one, but we will need to have a more random name later on when we&apos;ll implement modules this way.</p>
+<p>The attentive mind will know by now that when compiling a Xerl file containing one module, we will need to compile two intermediate modules: one for the file body, and one for the module&apos;s body. Worry not though, if we only detect <code>mod</code> instructions in the file body, we can just skip this phase.</p>
+<p>While we&apos;re at it, we&apos;ll modify our code generator to handle lists of expressions, which didn&apos;t actually work with integer literals before.</p>
+<p>We&apos;re going to use Core Erlang sequences for running the many expressions. Sequences work like <code>let</code>, except no value is actually bound. Perfect for our case, since we don&apos;t support binding values at this time anyway.</p>
+<p>Sequences have an argument and a body, both being Core Erlang expressions. The simplest way to have many expressions is to use a simple expression for the argument and a sequence for the rest of the expressions. When we encounter the last expression in the list, we do not create a sequence.</p>
+<p>The result is this very simple function:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">comp_body</font></b>([<font color="#009900">Expr</font>]) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">expr</font></b>(<font color="#009900">Expr</font>);
+<b><font color="#000000">comp_body</font></b>([<font color="#009900">Expr</font>|<font color="#009900">Exprs</font>]) <font color="#990000">-&gt;</font>
+    <font color="#009900">Arg</font> <font color="#990000">=</font> <b><font color="#000000">expr</font></b>(<font color="#009900">Expr</font>),
+    <font color="#009900">Body</font> <font color="#990000">=</font> <b><font color="#000000">comp_body</font></b>(<font color="#009900">Exprs</font>),
+    <b><font color="#000000">cerl:c_seq</font></b>(<font color="#009900">Arg</font>, <font color="#009900">Body</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>In the case of our example above, a sequence will not be created, we only have one expression. If we were to have <code>42, 43, 44</code> in our Xerl source file, we would have a result equivalent to the following before optimization:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000080">-module</font></b>(<font color="#FF6600">'$xerl_intermediate'</font>)<font color="#990000">.</font>
+<b><font color="#000080">-export</font></b>([<b><font color="#000000">run</font></b><font color="#990000">/</font><font color="#993399">0</font>])<font color="#990000">.</font>
 
-<span style="font-weight: bold"><span style="color: #000000">run</span></span>() <span style="color: #990000">-&gt;</span>
-    <span style="color: #993399">42</span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>Running it will of course give us a result of <code>42</code>,
-the same we had when interpreting expressions.</p></div>
-<div class="paragraph"><p>The resulting Core Erlang code looks like this:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
+<b><font color="#000000">run</font></b>() <font color="#990000">-&gt;</font>
+    <font color="#993399">42</font>,
+    <font color="#993399">43</font>,
+    <font color="#993399">44</font><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>And the result is of course <code>44</code>.</p>
+<p>The resulting Core Erlang code looks like this:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">module</span> <span style="color: #FF6600">'$xerl_intermediate'</span> [<span style="color: #FF6600">'run'</span><span style="color: #990000">/</span><span style="color: #993399">0</span>]
-    <span style="color: #FF6600">attributes</span> []
-<span style="color: #FF6600">'run'</span><span style="color: #990000">/</span><span style="color: #993399">0</span> <span style="color: #990000">=</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> () <span style="color: #990000">-&gt;</span>
-        <span style="color: #993399">42</span>
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>The nice thing about doing it like this is that other than the
-definition of the intermediate module and its <code>run/0</code>
-function, we can use the same code we are using for generating
-the final Beam file. It may also be faster than interpreting
-if you have complex modules.</p></div>
-<div class="paragraph"><p>Of course this here only works for the simplest cases, as you
-cannot declare a module or a function inside another Erlang function.
-We will need to wrap these into function calls to the Xerl compiler
-that will take care of compiling them, making them available for
-any subsequent expression. We will also need to pass the environment
-to the <code>run</code> function to keep track of all this.</p></div>
-<div class="paragraph"><p>This does mean that we will have different code for compiling
-<code>fun</code> and <code>mod</code> expressions when creating
-the intermediate module. But the many other expressions don&#8217;t need
-any special care.</p></div>
-<div class="paragraph"><p>Right now we&#8217;ve used the <code>'$xerl_intermediate'</code> atom
-for the intermediate module name because we only have one, but we
-will need to have a more random name later on when we&#8217;ll implement
-modules this way.</p></div>
-<div class="paragraph"><p>The attentive mind will know by now that when compiling a Xerl
-file containing one module, we will need to compile two intermediate
-modules: one for the file body, and one for the module&#8217;s body. Worry
-not though, if we only detect <code>mod</code> instructions in the file
-body, we can just skip this phase.</p></div>
-<div class="paragraph"><p>While we&#8217;re at it, we&#8217;ll modify our code generator to handle lists
-of expressions, which didn&#8217;t actually work with integer literals
-before.</p></div>
-<div class="paragraph"><p>We&#8217;re going to use Core Erlang sequences for running the many
-expressions. Sequences work like <code>let</code>, except no value
-is actually bound. Perfect for our case, since we don&#8217;t support
-binding values at this time anyway.</p></div>
-<div class="paragraph"><p>Sequences have an argument and a body, both being Core Erlang
-expressions. The simplest way to have many expressions is to use
-a simple expression for the argument and a sequence for the rest
-of the expressions. When we encounter the last expression in the
-list, we do not create a sequence.</p></div>
-<div class="paragraph"><p>The result is this very simple function:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000000">comp_body</span></span>([<span style="color: #009900">Expr</span>]) <span style="color: #990000">-&gt;</span>
-    <span style="font-weight: bold"><span style="color: #000000">expr</span></span>(<span style="color: #009900">Expr</span>);
-<span style="font-weight: bold"><span style="color: #000000">comp_body</span></span>([<span style="color: #009900">Expr</span>|<span style="color: #009900">Exprs</span>]) <span style="color: #990000">-&gt;</span>
-    <span style="color: #009900">Arg</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">expr</span></span>(<span style="color: #009900">Expr</span>),
-    <span style="color: #009900">Body</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">comp_body</span></span>(<span style="color: #009900">Exprs</span>),
-    <span style="font-weight: bold"><span style="color: #000000">cerl:c_seq</span></span>(<span style="color: #009900">Arg</span>, <span style="color: #009900">Body</span>)<span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>In the case of our example above, a sequence will not be created,
-we only have one expression. If we were to have <code>42, 43, 44</code>
-in our Xerl source file, we would have a result equivalent to the
-following before optimization:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000080">-module</span></span>(<span style="color: #FF6600">'$xerl_intermediate'</span>)<span style="color: #990000">.</span>
-<span style="font-weight: bold"><span style="color: #000080">-export</span></span>([<span style="font-weight: bold"><span style="color: #000000">run</span></span><span style="color: #990000">/</span><span style="color: #993399">0</span>])<span style="color: #990000">.</span>
-
-<span style="font-weight: bold"><span style="color: #000000">run</span></span>() <span style="color: #990000">-&gt;</span>
-    <span style="color: #993399">42</span>,
-    <span style="color: #993399">43</span>,
-    <span style="color: #993399">44</span><span style="color: #990000">.</span></tt></pre></div></div>
-<div class="paragraph"><p>And the result is of course <code>44</code>.</p></div>
-<div class="paragraph"><p>The resulting Core Erlang code looks like this:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #FF6600">module</span> <span style="color: #FF6600">'$xerl_intermediate'</span> [<span style="color: #FF6600">'run'</span><span style="color: #990000">/</span><span style="color: #993399">0</span>]
-    <span style="color: #FF6600">attributes</span> []
-<span style="color: #FF6600">'run'</span><span style="color: #990000">/</span><span style="color: #993399">0</span> <span style="color: #990000">=</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">fun</span></span> () <span style="color: #990000">-&gt;</span>
-        <span style="color: #FF6600">do</span>  <span style="color: #993399">42</span>
-            <span style="color: #FF6600">do</span>  <span style="color: #993399">43</span>
-                <span style="color: #993399">44</span>
-<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Feels very lisp-y, right? Yep.</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-<a href="https://github.com/extend/xerl/blob/0.5/">View the source</a>
-</p>
+<pre><tt><font color="#FF6600">module</font> <font color="#FF6600">'$xerl_intermediate'</font> [<font color="#FF6600">'run'</font><font color="#990000">/</font><font color="#993399">0</font>]
+    <font color="#FF6600">attributes</font> []
+<font color="#FF6600">'run'</font><font color="#990000">/</font><font color="#993399">0</font> <font color="#990000">=</font>
+    <b><font color="#0000FF">fun</font></b> () <font color="#990000">-&gt;</font>
+        <font color="#FF6600">do</font>  <font color="#993399">42</font>
+            <font color="#FF6600">do</font>  <font color="#993399">43</font>
+                <font color="#993399">44</font>
+<b><font color="#0000FF">end</font></b></tt></pre>
+</div></div>
+<p>Feels very lisp-y, right? Yep.</p>
+<ul><li><a href="https://github.com/extend/xerl/blob/0.5/">View the source</a>
 </li>
-</ul></div>
+</ul>
+
 
 </article>
 </div>
