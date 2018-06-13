@@ -53,10 +53,10 @@ docs-$1-$2: tmp/$1
 			echo "+++" >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			echo >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			sed '1,/^$$$$/d' $$$$f | sed 's/^=== /== /' \
-				| sed 's/xref:/link:..\//' | sed 's/image::/image::..\//' \
-				| sed 's/link:man:$1[(]7[)]/link:..\/$1_app/' \
-				| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
-				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/' \
+				| sed 's/xref:/link:..\//g' | sed 's/image::/image::..\//g' \
+				| sed 's/link:man:$1[(]7[)]/link:..\/$1_app/g' \
+				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
 				>> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 		done; \
 		rm tmp/$1/doc/src/guide/book.asciidoc.bak; \
@@ -70,9 +70,9 @@ docs-$1-$2: tmp/$1
 			> content/docs/en/$1/$3/manual.asciidoc; \
 		if [ "$1" = "cowboy" -o "$1" = "gun" ]; then \
 			sed '1,/^$$$$/d' tmp/$1/doc/src/manual/$1_app.asciidoc | sed 's/xref:/link:..\//' \
-				| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/' \
-				| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
-				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/' \
+				| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/g' \
+				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
 				>> content/docs/en/$1/$3/manual.asciidoc; \
 		else \
 			for f in `ls tmp/$1/doc/src/manual/*.asciidoc | sort`; do \
@@ -90,16 +90,16 @@ docs-$1-$2: tmp/$1
 			echo "+++" >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			echo >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			if [ "$1" = "cowboy" -o "$1" = "gun" ]; then \
-				sed '1,/^$$$$/d' $$$$f | sed 's/xref:/link:..\//' \
-					| sed 's/link:man:$1(7)/link:../' \
-					| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
-					| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/' \
+				sed '1,/^$$$$/d' $$$$f | sed 's/xref:/link:..\//g' \
+					| sed 's/link:man:$1(7)/link:../g' \
+					| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+					| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
 					>> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			else \
-				sed '1,/^$$$$/d' $$$$f | sed 's/xref:/link:..\//' \
-					| sed 's/link:man:$1(7)/link:..\/$1_app/' \
-					| sed 's/\(link:man:[a-z0-9_]*\):/\1./' \
-					| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/' \
+				sed '1,/^$$$$/d' $$$$f | sed 's/xref:/link:..\//g' \
+					| sed 's/link:man:$1(7)/link:..\/$1_app/g' \
+					| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+					| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
 					>> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			fi \
 		done \
