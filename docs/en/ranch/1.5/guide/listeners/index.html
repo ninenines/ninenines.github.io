@@ -180,7 +180,7 @@ http://www.gnu.org/software/src-highlite -->
 	<font color="#FF6600">echo_protocol</font>, []
 )<font color="#990000">.</font></tt></pre>
 </div></div>
-<p>The maximum number of connections is a soft limit. In practice, it can reach <code>max_connections</code><br/> the number of acceptors.</p>
+<p>The maximum number of connections is a soft limit. In practice, it can reach <code>max_connections</code> + the number of acceptors.</p>
 <p>When the maximum number of connections is reached, Ranch will stop accepting connections. This will not result in further connections being rejected, as the kernel option allows queueing incoming connections. The size of this queue is determined by the <code>backlog</code> option and defaults to 1024. Ranch does not know about the number of connections that are in the backlog.</p>
 <p>You may not always want connections to be counted when checking for <code>max_connections</code>. For example you might have a protocol where both short-lived and long-lived connections are possible. If the long-lived connections are mostly waiting for messages, then they don&apos;t consume much resources and can safely be removed from the count.</p>
 <p>To remove the connection from the count, you must call the <code>ranch:remove_connection/1</code> from within the connection process, with the name of the listener as the only argument.</p>
