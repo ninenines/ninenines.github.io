@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Supported protocols</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Supported protocols</span></h1>
+
+<p>This chapter describes the protocols supported and the operations available to them.</p>
+<h2 id="_http_1_1">HTTP/1.1</h2>
+<p>HTTP/1.1 is a text request-response protocol. The client sends a request, the server sends back a response.</p>
+<p>Gun provides convenience functions for performing GET, HEAD, OPTIONS, POST, PATCH, PUT, and DELETE requests. All these functions are aliases of <code>gun:request/4,5,6</code> for the respective methods. Gun also provides a <code>gun:data/4</code> function for streaming the request body.</p>
+<p>Gun will send a <code>gun_inform</code> message for every intermediate informational responses received. They will always be sent before the <code>gun_response</code> message.</p>
+<p>Gun will send a <code>gun_response</code> message for every response received, followed by zero or more <code>gun_data</code> messages for the response body, which is optionally terminated by a <code>gun_trailers</code> message. If something goes wrong, a <code>gun_error</code> will be sent instead.</p>
+<p>Gun provides convenience functions for dealing with messages. The <code>gun:await/2,3,4</code> function waits for a response to the given request, and the <code>gun:await_body/2,3,4</code> function for the response body. The <code>gun:flush/1</code> function can be used to clear all messages related to a request or a connection from the mailbox of the calling process.</p>
+<p>The function <code>gun:cancel/2</code> can be used to silence the response to a request previously sent if it is no longer needed. When using HTTP/1.1 there is no multiplexing so Gun will have to receive the response fully before any other responses can be received.</p>
+<p>Finally, Gun can upgrade an HTTP/1.1 connection to Websocket. It provides the <code>gun:ws_upgrade/2,3,4</code> function for that purpose. A <code>gun_upgrade</code> message will be sent on success; a <code>gun_response</code> message otherwise.</p>
+<h2 id="_http_2">HTTP/2</h2>
+<p>HTTP/2 is a binary protocol based on HTTP, compatible with the HTTP semantics, that reduces the complexity of parsing requests and responses, compresses the HTTP headers and allows the server to push additional resources along with the normal response to the original request.</p>
+<p>The HTTP/2 interface is very similar to HTTP/1.1, so this section instead focuses on the differences in the interface for the two protocols.</p>
+<p>Gun will send <code>gun_push</code> messages for every push received. They will always be sent before the <code>gun_response</code> message. They can be ignored safely if they are not needed, or they can be canceled.</p>
+<p>The <code>gun:cancel/2</code> function will use the HTTP/2 stream cancellation mechanism which allows Gun to inform the server to stop sending a response for this particular request, saving resources.</p>
+<p>It is not currently possible to upgrade an HTTP/2 connection to Websocket. Support for this will be added in a future release.</p>
+<h2 id="_websocket">Websocket</h2>
+<p>Websocket is a binary protocol built on top of HTTP that allows asynchronous concurrent communication between the client and the server. A Websocket server can push data to the client at any time.</p>
+<p>Websocket is only available as a connection upgrade over an HTTP/1.1 connection.</p>
+<p>Once the Websocket connection is established, the only operation available on this connection is sending Websocket frames using <code>gun:ws_send/2</code>.</p>
+<p>Gun will send a <code>gun_ws</code> message for every frame received.</p>
+<h2 id="_summary">Summary</h2>
+<p>The two following tables summarize the supported operations and the messages Gun sends depending on the connection&apos;s current protocol.</p>
+<table rules="all" width="100%" frame="border"
+			cellspacing="0" cellpadding="4">
+<caption>Supported operations per protocol</caption><thead><tr><th>Operation</th>
+<th>HTTP/1.1</th>
+<th>HTTP/2</th>
+<th>Websocket</th>
+</tr></thead><tbody><tr><td>delete</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>get</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>head</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>options</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>patch</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>post</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>put</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>request</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>data</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>await</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>await_body</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>flush</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>cancel</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>ws_upgrade</td>
+<td>yes</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr><td>ws_send</td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+</tbody></table>
+<table rules="all" width="100%" frame="border"
+			cellspacing="0" cellpadding="4">
+<caption>Messages sent per protocol</caption><thead><tr><th>Message</th>
+<th>HTTP/1.1</th>
+<th>HTTP/2</th>
+<th>Websocket</th>
+</tr></thead><tbody><tr><td>gun_push</td>
+<td>no</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>gun_inform</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>gun_response</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>gun_data</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>gun_trailers</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr><td>gun_error</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr><td>gun_upgrade</td>
+<td>yes</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr><td>gun_ws</td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+</tbody></table>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/gun/1.1/guide/start/">
+					Starting and stopping
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/gun/1.1/guide/connect/">
+					Connection
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	1.1
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/1.1/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/1.1/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/1.1/guide">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
