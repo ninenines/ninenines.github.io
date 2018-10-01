@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: gun:request(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>gun:request(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>gun:request - Perform the given request</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">request</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">Method</font>, <font color="#009900">Path</font>, <font color="#009900">Headers</font>)
+    <font color="#990000">-&gt;</font> <font color="#009900">StreamRef</font>
+
+<b><font color="#000000">request</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">Method</font>, <font color="#009900">Path</font>, <font color="#009900">Headers</font>, <font color="#009900">Body</font>)
+    <font color="#990000">-&gt;</font> <b><font color="#000000">request</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">Method</font>, <font color="#009900">Path</font>, <font color="#009900">Headers</font>, <font color="#009900">Body</font>, #{})
+
+<b><font color="#000000">request</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">Method</font>, <font color="#009900">Path</font>, <font color="#009900">Headers</font>, <font color="#009900">Body</font>, <font color="#009900">ReqOpts</font>)
+    <font color="#990000">-&gt;</font> <font color="#009900">StreamRef</font>
+
+<font color="#009900">ConnPid</font>   <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()
+<font color="#009900">Method</font>    <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()
+<font color="#009900">Path</font>      <font color="#990000">::</font> <b><font color="#000000">iodata</font></b>()
+<font color="#009900">Headers</font>   <font color="#990000">::</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000000">iodata</font></b>()}]
+<font color="#009900">Body</font>      <font color="#990000">::</font> <b><font color="#000000">iodata</font></b>()
+<font color="#009900">ReqOpts</font>   <font color="#990000">::</font> <b><font color="#000000">gun:req_opts</font></b>()
+<font color="#009900">StreamRef</font> <font color="#990000">::</font> <b><font color="#000080">reference</font></b>()</tt></pre>
+</div></div>
+<p>Perform the given request.</p>
+<p>This is a general purpose function that should only be used when other method-specific functions do not apply.</p>
+<p>The behavior of this function varies depending on whether a body is provided.</p>
+<p>The function <code>request/4</code> expects either a content-length or content-type header to indicate that a body will be sent afterwards. Gun will assume the request has no body otherwise. The body can then be sent using <a href="../gun.data">gun:data(3)</a>.</p>
+<p>The function <code>request/5,6</code> sends the entire request, including the request body, immediately. It is therefore not possible to use <a href="../gun.data">gun:data(3)</a> after that. You should provide a content-type header. Gun will set the content-length header automatically.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>ConnPid</dt>
+<dd><p>The pid of the Gun connection process.</p>
+</dd>
+<dt>Method</dt>
+<dd><p>Method to be used for the request.</p>
+</dd>
+<dt>Path</dt>
+<dd><p>Path to the resource.</p>
+</dd>
+<dt>Headers</dt>
+<dd><p>Additional request headers.</p>
+</dd>
+<dt>Body</dt>
+<dd><p>Request body.</p>
+</dd>
+<dt>ReqOpts</dt>
+<dd><p>Request options.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>A reference that identifies the newly created stream is returned. It is this reference that must be passed in subsequent calls and will be received in messages related to this new stream.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>1.0</strong>: Function introduced.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Perform a request</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:request</font></b>(<font color="#009900">ConnPid</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"PUT"</font><font color="#990000">&gt;&gt;</font>,
+    <font color="#FF0000">"/lang/fr_FR/hello"</font>,
+    [{<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-type"</font><font color="#990000">&gt;&gt;</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"text/plain"</font><font color="#990000">&gt;&gt;</font>}],
+    <font color="#990000">&lt;&lt;</font><font color="#FF0000">"Bonjour !"</font><font color="#990000">&gt;&gt;</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../gun">gun(3)</a>, <a href="../gun.await">gun:await(3)</a>, <a href="../gun.await_body">gun:await_body(3)</a>, <a href="../gun_push">gun_push(3)</a>, <a href="../gun_inform">gun_inform(3)</a>, <a href="../gun_response">gun_response(3)</a>, <a href="../gun_data">gun_data(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	1.3
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/1.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/1.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/1.3/manual">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/manual">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/manual">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

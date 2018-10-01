@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Websocket</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Websocket</span></h1>
+
+<p>This chapter describes how to use the Gun client for communicating with a Websocket server.</p>
+<!-- @todo recovering from connection failure, reconnecting to Websocket etc.-->
+<h2 id="_http_upgrade">HTTP upgrade</h2>
+<p>Websocket is a protocol built on top of HTTP. To use Websocket, you must first request for the connection to be upgraded. Only HTTP/1.1 connections can be upgraded to Websocket, so you might need to restrict the protocol to HTTP/1.1 if you are planning to use Websocket over TLS.</p>
+<p>You must use the <code>gun:ws_upgrade/2,3,4</code> function to upgrade to Websocket. This function can be called anytime after connection, so you can send HTTP requests before upgrading to Websocket.</p>
+<div class="listingblock"><div class="title">Upgrade to Websocket</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">gun:ws_upgrade</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/websocket"</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Gun will set all the necessary headers for performing the Websocket upgrade, but you can specify additional headers if needed. For example you can authenticate.</p>
+<div class="listingblock"><div class="title">Upgrade to Websocket using HTTP authentication</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">gun:ws_upgrade</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/websocket"</font>, [
+    {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"authorization"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">"Basic dXNlcm5hbWU6cGFzc3dvcmQ="</font>}
+])<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can pass the Websocket options as part of the <code>gun:open/2,3</code> call when opening the connection, or using the <code>gun:ws_upgrade/4</code>. The fourth argument is those same options.</p>
+<p>Gun can negotiate the protocol to be used for the Websocket connection. The <code>protocols</code> option can be given with a list of protocols accepted and the corresponding handler module. Note that the interface for handler modules is currently undocumented and must be set to <code>gun_ws_h</code>.</p>
+<div class="listingblock"><div class="title">Upgrade to Websocket with protocol negotiation</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">gun:ws_upgrade</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/websocket"</font>, []
+    #{<font color="#0000FF">protocols</font> <font color="#990000">=&gt;</font> [{<font color="#990000">&lt;&lt;</font><font color="#FF0000">"xmpp"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF6600">gun_ws_h</font>}]})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The upgrade will fail if the server cannot satisfy the protocol negotiation.</p>
+<p>When the upgrade succeeds, a <code>gun_upgrade</code> message is sent. If the server does not understand Websocket or refused the upgrade, a <code>gun_response</code> message is sent. If Gun couldn&apos;t perform the upgrade due to an error (for example attempting to upgrade to Websocket on an HTTP/1.0 connection) then a <code>gun_error</code> message is sent.</p>
+<p>When the server does not understand Websocket, it may send a meaningful response which should be processed. In the following example we however ignore it:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">receive</font></b>
+    {<font color="#FF6600">gun_upgrade</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, [<font color="#990000">&lt;&lt;</font><font color="#FF0000">"websocket"</font><font color="#990000">&gt;&gt;</font>], <font color="#009900">Headers</font>} <font color="#990000">-&gt;</font>
+        <b><font color="#000000">upgrade_success</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>);
+    {<font color="#FF6600">gun_response</font>, <font color="#009900">ConnPid</font>, <font color="#990000">_</font>, <font color="#990000">_</font>, <font color="#009900">Status</font>, <font color="#009900">Headers</font>} <font color="#990000">-&gt;</font>
+        <b><font color="#000080">exit</font></b>({<font color="#FF6600">ws_upgrade_failed</font>, <font color="#009900">Status</font>, <font color="#009900">Headers</font>});
+    {<font color="#FF6600">gun_error</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">Reason</font>} <font color="#990000">-&gt;</font>
+        <b><font color="#000080">exit</font></b>({<font color="#FF6600">ws_upgrade_failed</font>, <font color="#009900">Reason</font>})
+    <i><font color="#9A1900">%% More clauses here as needed.</font></i>
+<b><font color="#0000FF">after</font></b> <font color="#993399">1000</font> <font color="#990000">-&gt;</font>
+    <b><font color="#000080">exit</font></b>(<font color="#FF6600">timeout</font>)
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_sending_data">Sending data</h2>
+<p>Once the Websocket upgrade has completed successfully, you no longer have access to functions for performing requests. You can only send and receive Websocket messages.</p>
+<p>Use <code>gun:ws_send/2</code> to send messages to the server.</p>
+<div class="listingblock"><div class="title">Send a text frame</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">gun:ws_send</font></b>(<font color="#009900">ConnPid</font>, {<font color="#FF6600">text</font>, <font color="#FF0000">"Hello!"</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<!-- @todo Implement sending of N frames-->
+<!-- -->
+<!-- .Send a text frame, a binary frame and then close the connection-->
+<!-- [source,erlang]-->
+<!-- ------>
+<!-- gun:ws_send(ConnPid, [-->
+<!-- {text, &quot;Hello!&quot;},-->
+<!-- {binary, BinaryValue},-->
+<!-- close-->
+<!-- ]).-->
+<!-- ------>
+<p>Note that if you send a close frame, Gun will close the connection cleanly but will attempt to reconnect afterwards.</p>
+<h2 id="_receiving_data">Receiving data</h2>
+<p>Gun sends an Erlang message to the owner process for every Websocket message it receives.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">receive</font></b>
+    {<font color="#FF6600">gun_ws</font>, <font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">Frame</font>} <font color="#990000">-&gt;</font>
+        <b><font color="#000000">handle_frame</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">Frame</font>)
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<!-- @todo auto ping has not been implemented yet-->
+<!-- -->
+<!-- Gun will automatically send ping messages to the server to keep-->
+<!-- the connection alive, however if the connection dies and Gun has-->
+<!-- to reconnect it will not upgrade to Websocket automatically, you-->
+<!-- need to perform the operation when you receive the `gun_error`-->
+<!-- message.-->
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/gun/1.3/guide/http/">
+					HTTP
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/gun/1.3/guide/migrating_from_1.2/">
+					Migrating from Gun 1.2 to 1.3
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	1.3
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/1.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/1.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/1.3/guide">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/guide">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/guide">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
