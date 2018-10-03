@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Getting started</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Getting started</span></h1>
+
+<p>Erlang is more than a language, it is also an operating system for your applications. Erlang developers rarely write standalone modules, they write libraries or applications, and then bundle those into what is called a release. A release contains the Erlang VM plus all applications required to run the node, so it can be pushed to production directly.</p>
+<p>This chapter walks you through all the steps of setting up Cowboy, writing your first application and generating your first release. At the end of this chapter you should know everything you need to push your first Cowboy application to production.</p>
+<h2 id="_prerequisites">Prerequisites</h2>
+<p>We are going to use the <a href="https://github.com/ninenines/erlang.mk">Erlang.mk</a> build system. If you are using Windows, please check the <a href="http://erlang.mk/guide/installation.html">Installation instructions</a> to get your environment setup before you continue.</p>
+<h2 id="_bootstrap">Bootstrap</h2>
+<p>First, let&apos;s create the directory for our application.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ mkdir hello_erlang
+$ cd hello_erlang</tt></pre>
+</div></div>
+<p>Then we need to download Erlang.mk. Either use the following command or download it manually.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ wget https<font color="#990000">:</font>//erlang<font color="#990000">.</font>mk/erlang<font color="#990000">.</font>mk</tt></pre>
+</div></div>
+<p>We can now bootstrap our application. Since we are going to generate a release, we will also bootstrap it at the same time.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make -f erlang<font color="#990000">.</font>mk bootstrap bootstrap-rel</tt></pre>
+</div></div>
+<p>This creates a Makefile, a base application, and the release files necessary for creating the release. We can already build and start this release.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make run
+<font color="#990000">...</font>
+<font color="#990000">(</font>hello_erlang@<font color="#993399">127.0</font><font color="#990000">.</font><font color="#993399">0.1</font><font color="#990000">)</font><font color="#993399">1</font><font color="#990000">&gt;</font></tt></pre>
+</div></div>
+<p>Entering the command <code>i().</code> will show the running processes, including one called <code>hello_erlang_sup</code>. This is the supervisor for our application.</p>
+<p>The release currently does nothing. In the rest of this chapter we will add Cowboy as a dependency and write a simple &quot;Hello world!&quot; handler.</p>
+<h2 id="_cowboy_setup">Cowboy setup</h2>
+<p>We will modify the <em>Makefile</em> to tell the build system it needs to fetch and compile Cowboy:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">PROJECT =</font> hello_erlang
+
+<font color="#009900">DEPS =</font> cowboy
+<font color="#009900">dep_cowboy_commit =</font> 2.5.0
+
+<font color="#009900">DEP_PLUGINS =</font> cowboy
+
+include erlang.mk</tt></pre>
+</div></div>
+<p>The <code>DEP_PLUGINS</code> line tells the build system to load the plugins Cowboy provides. These include predefined templates that we will use soon.</p>
+<p>If you do <code>make run</code> now, Cowboy will be included in the release and started automatically. This is not enough however, as Cowboy doesn&apos;t do anything by default. We still need to tell Cowboy to listen for connections.</p>
+<h2 id="_listening_for_connections">Listening for connections</h2>
+<p>First we define the routes that Cowboy will use to map requests to handler modules, and then we start the listener. This is best done at application startup.</p>
+<p>Open the <em>src/hello_erlang_app.erl</em> file and add the necessary code to the <code>start/2</code> function to make it look like this:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">start</font></b>(<font color="#009900">_Type</font>, <font color="#009900">_Args</font>) <font color="#990000">-&gt;</font>
+    <font color="#009900">Dispatch</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_router:compile</font></b>([
+        {<font color="#FF6600">'_'</font>, [{<font color="#FF0000">"/"</font>, <font color="#FF6600">hello_handler</font>, []}]}
+    ]),
+    {<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy:start_clear</font></b>(<font color="#FF6600">my_http_listener</font>,
+        [{<font color="#FF6600">port</font>, <font color="#993399">8080</font>}],
+        #{<font color="#0000FF">env</font> <font color="#990000">=&gt;</font> #{<font color="#0000FF">dispatch</font> <font color="#990000">=&gt;</font> <font color="#009900">Dispatch</font>}}
+    ),
+    <b><font color="#000000">hello_erlang_sup:start_link</font></b>()<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Routes are explained in details in the <a href="../routing">Routing</a> chapter. For this tutorial we map the path <code>/</code> to the handler module <code>hello_handler</code>. This module doesn&apos;t exist yet.</p>
+<p>Build and start the release, then open <a href="http://localhost:8080">http://localhost:8080</a> in your browser. You will get a 500 error because the module is missing. Any other URL, like <a href="http://localhost:8080/test">http://localhost:8080/test</a>, will result in a 404 error.</p>
+<h2 id="_handling_requests">Handling requests</h2>
+<p>Cowboy features different kinds of handlers, including REST and Websocket handlers. For this tutorial we will use a plain HTTP handler.</p>
+<p>Generate a handler from a template:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make new <font color="#009900">t</font><font color="#990000">=</font>cowboy<font color="#990000">.</font>http <font color="#009900">n</font><font color="#990000">=</font>hello_handler</tt></pre>
+</div></div>
+<p>Then, open the <em>src/hello_handler.erl</em> file and modify the <code>init/2</code> function like this to send a reply.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">Req0</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+    <font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:reply</font></b>(<font color="#993399">200</font>,
+        #{<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-type"</font><font color="#990000">&gt;&gt;</font> <font color="#990000">=&gt;</font> <font color="#990000">&lt;&lt;</font><font color="#FF0000">"text/plain"</font><font color="#990000">&gt;&gt;</font>},
+        <font color="#990000">&lt;&lt;</font><font color="#FF0000">"Hello Erlang!"</font><font color="#990000">&gt;&gt;</font>,
+        <font color="#009900">Req0</font>),
+    {<font color="#FF6600">ok</font>, <font color="#009900">Req</font>, <font color="#009900">State</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>What the above code does is send a 200 OK reply, with the Content-type header set to <code>text/plain</code> and the response body set to <code>Hello Erlang!</code>.</p>
+<p>If you run the release and open <a href="http://localhost:8080">http://localhost:8080</a> in your browser, you should get a nice <code>Hello Erlang!</code> displayed!</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.5/guide/introduction/">
+					Introduction
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.5/guide/flow_diagram/">
+					Flow diagram
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.5
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

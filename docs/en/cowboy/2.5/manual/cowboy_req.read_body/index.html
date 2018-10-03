@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_req:read_body(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req:read_body(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_req:read_body - Read the request body</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">read_body</font></b>(<font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>())
+    <font color="#990000">-&gt;</font> <b><font color="#000000">read_body</font></b>(<font color="#009900">Req</font>, #{})
+
+<b><font color="#000000">read_body</font></b>(<font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>(), <font color="#009900">Opts</font>)
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>,   <font color="#009900">Data</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Req</font>}
+     | {<font color="#FF6600">more</font>, <font color="#009900">Data</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Req</font>}
+
+<font color="#009900">Opts</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:read_body_opts</font></b>()</tt></pre>
+</div></div>
+<p>Read the request body.</p>
+<p>This function reads a chunk of the request body. A <code>more</code> tuple is returned when more data remains to be read. Call the function repeatedly until an <code>ok</code> tuple is returned to read the entire body.</p>
+<p>An <code>ok</code> tuple with empty data is returned when the request has no body, or when calling this function again after the body has already been read. It is therefore safe to call this function directly. Note that the body can only be read once.</p>
+<p>This function reads the request body from the connection process. The connection process is responsible for reading from the socket. The exact behavior varies depending on the protocol.</p>
+<p>The options therefore are only related to the communication between the request process and the connection process.</p>
+<p>Cowboy will automatically handle protocol details including the expect header, chunked transfer-encoding and others.</p>
+<p>Once the body has been read fully, Cowboy sets the content-length header if it was not previously provided.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Req</dt>
+<dd><p>The Req object.</p>
+</dd>
+<dt>Opts</dt>
+<dd><p>A map of body reading options.</p>
+<p>The <code>length</code> option can be used to request smaller or bigger chunks of data to be sent. It is a best effort approach, Cowboy may send more data than configured on occasions. It defaults to 8MB.</p>
+<p>The <code>period</code> indicates how long the connection process will wait before it provides us with the data it received. It defaults to 15 seconds.</p>
+<p>The connection process sends data to the request process when either the <code>length</code> of data or the <code>period</code> of time is reached.</p>
+<p>The <code>timeout</code> option is a safeguard in case the connection process becomes unresponsive. The function will crash if no message was received in that interval. The timeout should be larger than the period. It defaults to the period + 1 second.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>A <code>more</code> tuple is returned when there are more data to be read.</p>
+<p>An <code>ok</code> tuple is returned when there are no more data to be read, either because this is the last chunk of data, the body has already been read, or there was no body to begin with.</p>
+<p>The data is always returned as a binary.</p>
+<p>The Req object returned in the tuple must be used from that point onward. It contains a more up to date representation of the request. For example it may have an added content-length header once the body has been read.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: Function introduced. Replaces <code>body/1,2</code>.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Read the entire body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">read_body</font></b>(<font color="#009900">Req0</font>, <font color="#009900">Acc</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <b><font color="#000000">cowboy_req:read_body</font></b>(<font color="#009900">Req0</font>) <b><font color="#0000FF">of</font></b>
+        {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>, <font color="#009900">Req</font>} <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#990000">&lt;&lt;</font> <font color="#009900">Acc</font><font color="#990000">/</font><b><font color="#000080">binary</font></b>, <font color="#009900">Data</font><font color="#990000">/</font><b><font color="#000080">binary</font></b> <font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>};
+        {<font color="#FF6600">more</font>, <font color="#009900">Data</font>, <font color="#009900">Req</font>} <font color="#990000">-&gt;</font> <b><font color="#000000">read_body</font></b>(<font color="#009900">Req</font>, <font color="#990000">&lt;&lt;</font> <font color="#009900">Acc</font><font color="#990000">/</font><b><font color="#000080">binary</font></b>, <font color="#009900">Data</font><font color="#990000">/</font><b><font color="#000080">binary</font></b> <font color="#990000">&gt;&gt;</font>)
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Read the body in small chunks</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">cowboy_req:read_body</font></b>(<font color="#009900">Req</font>, #{<b><font color="#000080">length</font></b> <font color="#990000">=&gt;</font> <font color="#993399">64000</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.has_body">cowboy_req:has_body(3)</a>, <a href="../cowboy_req.body_length">cowboy_req:body_length(3)</a>, <a href="../cowboy_req.read_urlencoded_body">cowboy_req:read_urlencoded_body(3)</a>, <a href="../cowboy_req.read_and_match_urlencoded_body">cowboy_req:read_and_match_urlencoded_body(3)</a>, <a href="../cowboy_req.read_part">cowboy_req:read_part(3)</a>, <a href="../cowboy_req.read_part_body">cowboy_req:read_part_body(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.5
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

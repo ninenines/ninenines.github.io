@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_http(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_http(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_http - HTTP/1.1</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>cowboy_http</code> implements HTTP/1.1 and HTTP/1.0 as a Ranch protocol.</p>
+<h2 id="_options">Options</h2>
+<!-- @todo Might be worth moving cowboy_clear/tls/stream_h options-->
+<!-- to their respective manual, when they are added.-->
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">connection_type</font>         <font color="#990000">=&gt;</font> <font color="#FF6600">worker</font> | <font color="#FF6600">supervisor</font>,
+    <font color="#0000FF">env</font>                     <font color="#990000">=&gt;</font> <b><font color="#000000">cowboy_middleware:env</font></b>(),
+    <font color="#0000FF">idle_timeout</font>            <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">inactivity_timeout</font>      <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">linger_timeout</font>          <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">max_empty_lines</font>         <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_header_name_length</font>  <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_header_value_length</font> <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_headers</font>             <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_keepalive</font>           <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_method_length</font>       <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_request_line_length</font> <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_skip_body_length</font>    <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">middlewares</font>             <font color="#990000">=&gt;</font> [<b><font color="#000000">module</font></b>()],
+    <font color="#0000FF">request_timeout</font>         <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#000080">shutdown</font><font color="#009900">_timeout</font>        <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">stream_handlers</font>         <font color="#990000">=&gt;</font> [<b><font color="#000000">module</font></b>()]
+}</tt></pre>
+</div></div>
+<p>Configuration for the HTTP/1.1 protocol.</p>
+<p>This configuration is passed to Cowboy when starting listeners using <code>cowboy:start_clear/3</code> or <code>cowboy:start_tls/3</code> functions.</p>
+<p>It can be updated without restarting listeners using the Ranch functions <code>ranch:get_protocol_options/1</code> and <code>ranch:set_protocol_options/2</code>.</p>
+<p>The default value is given next to the option name:</p>
+<dl><dt>connection_type (supervisor)</dt>
+<dd><p>Whether the connection process also acts as a supervisor.</p>
+</dd>
+<dt>env (#{})</dt>
+<dd><p>Middleware environment.</p>
+</dd>
+<dt>idle_timeout (60000)</dt>
+<dd><p>Time in ms with no data received before Cowboy closes the connection.</p>
+</dd>
+<dt>inactivity_timeout (300000)</dt>
+<dd><p>Time in ms with nothing received at all before Cowboy closes the connection.</p>
+</dd>
+<dt>linger_timeout (1000)</dt>
+<dd><p>Time in ms that Cowboy will wait when closing the connection. This is necessary to avoid the TCP reset problem as described in the <a href="https://tools.ietf.org/html/rfc7230#section-6.6">section 6.6 of RFC7230</a>.</p>
+</dd>
+<dt>max_empty_lines (5)</dt>
+<dd><p>Maximum number of empty lines before a request.</p>
+</dd>
+<dt>max_header_name_length (64)</dt>
+<dd><p>Maximum length of header names.</p>
+</dd>
+<dt>max_header_value_length (4096)</dt>
+<dd><p>Maximum length of header values.</p>
+</dd>
+<dt>max_headers (100)</dt>
+<dd><p>Maximum number of headers allowed per request.</p>
+</dd>
+<dt>max_keepalive (100)</dt>
+<dd><p>Maximum number of requests allowed per connection.</p>
+</dd>
+<dt>max_method_length (32)</dt>
+<dd><p>Maximum length of the method.</p>
+</dd>
+<dt>max_request_line_length (8000)</dt>
+<dd><p>Maximum length of the request line.</p>
+</dd>
+<dt>max_skip_body_length (1000000)</dt>
+<dd><p>Maximum length Cowboy is willing to skip when the user code did not read the body fully. When the remaining length is too large or unknown Cowboy will close the connection.</p>
+</dd>
+<dt>middlewares ([cowboy_router, cowboy_handler])</dt>
+<dd><p>Middlewares to run for every request.</p>
+</dd>
+<dt>request_timeout (5000)</dt>
+<dd><p>Time in ms with no requests before Cowboy closes the connection.</p>
+</dd>
+<dt>shutdown_timeout (5000)</dt>
+<dd><p>Time in ms Cowboy will wait for child processes to shut down before killing them.</p>
+</dd>
+<dt>stream_handlers ([cowboy_stream_h])</dt>
+<dd><p>Ordered list of stream handlers that will handle all stream events.</p>
+</dd>
+</dl>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.5</strong>: The <code>linger_timeout</code> option was added.
+</li>
+<li><strong>2.2</strong>: The <code>max_skip_body_length</code> option was added.
+</li>
+<li><strong>2.0</strong>: The <code>timeout</code> option was renamed <code>request_timeout</code>.
+</li>
+<li><strong>2.0</strong>: The <code>idle_timeout</code>, <code>inactivity_timeout</code> and <code>shutdown_timeout</code> options were added.
+</li>
+<li><strong>2.0</strong>: The <code>max_method_length</code> option was added.
+</li>
+<li><strong>2.0</strong>: The <code>max_request_line_length</code> default was increased from 4096 to 8000.
+</li>
+<li><strong>2.0</strong>: The <code>connection_type</code> option was added.
+</li>
+<li><strong>2.0</strong>: The <code>env</code> option is now a map instead of a proplist.
+</li>
+<li><strong>2.0</strong>: The <code>stream_handlers</code> option was added.
+</li>
+<li><strong>2.0</strong>: The <code>compress</code> option was removed in favor of the <code>cowboy_compress_h</code> stream handler.
+</li>
+<li><strong>2.0</strong>: Options are now a map instead of a proplist.
+</li>
+<li><strong>2.0</strong>: Protocol introduced. Replaces <code>cowboy_protocol</code>.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">cowboy(7)</a>, <a href="../cowboy_http2">cowboy_http2(3)</a>, <a href="../cowboy_websocket">cowboy_websocket(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.5
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

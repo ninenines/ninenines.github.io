@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_req:set_resp_body(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req:set_resp_body(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_req:set_resp_body - Set the response body</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">set_resp_body</font></b>(<font color="#009900">Body</font>, <font color="#009900">Req</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>())
+	<font color="#990000">-&gt;</font> <font color="#009900">Req</font>
+
+<font color="#009900">Body</font> <font color="#990000">::</font> <b><font color="#000000">cowboy_req:resp_body</font></b>()</tt></pre>
+</div></div>
+<p>Set the response body.</p>
+<p>The response body will be sent when a reply is initiated. Note that the functions <code>stream_reply/2,3</code> and <code>reply/4</code> will override the body set by this function.</p>
+<p>This function can also be used to remove a response body that was set previously. To do so, simply call this function with an empty body.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Body</dt>
+<dd><p>The body can be either a binary value, an iolist or a <code>sendfile</code> tuple telling Cowboy to send the contents of a file.</p>
+</dd>
+<dt>Req</dt>
+<dd><p>The Req object.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>A new Req object is returned.</p>
+<p>The returned Req object must be used from that point onward, otherwise the body will not be sent in the response.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: The function now accepts a <code>sendfile</code> tuple.
+</li>
+<li><strong>2.0</strong>: The <code>set_resp_body_fun/2,3</code> functions were removed.
+</li>
+<li><strong>1.0</strong>: Function introduced.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Set the response body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"Hello world!"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Set the response body as an iolist</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>([
+    <font color="#FF0000">"&lt;html&gt;&lt;head&gt;&lt;title&gt;"</font>,
+    <b><font color="#000000">page_title</font></b>(),
+    <font color="#FF0000">"&lt;/title&gt;&lt;/head&gt;&lt;body&gt;"</font>,
+    <b><font color="#000000">page_body</font></b>(),
+    <font color="#FF0000">"&lt;/body&gt;&lt;/html&gt;"</font>
+], <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Tell Cowboy to send data from a file</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#008080">#file_info</font>{<b><font color="#000080">size</font></b><font color="#990000">=</font><font color="#009900">Size</font>}} <font color="#990000">=</font> <b><font color="#000000">file:read_file_info</font></b>(<font color="#009900">Filename</font>),
+<font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>({<font color="#FF6600">sendfile</font>, <font color="#993399">0</font>, <font color="#009900">Size</font>, <font color="#009900">Filename</font>}, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Clear any previously set response body</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_body</font></b>(<font color="#990000">&lt;&lt;&gt;&gt;</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a>, <a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a>, <a href="../cowboy_req.reply">cowboy_req:reply(3)</a>, <a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.5
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

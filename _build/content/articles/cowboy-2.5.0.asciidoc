@@ -1,0 +1,57 @@
++++
+date = "2018-10-03T07:00:00+01:00"
+title = "Cowboy 2.5"
+
++++
+
+Cowboy `2.5.0` has been released!
+
+Cowboy 2.5 focused on making the test suites pass.
+It is now possible to get all the Cowboy tests to
+pass successfully, at least on Linux and on the
+more recent Erlang/OTP versions.
+
+HTTP/1.1 has been improved with a fix for the TCP
+reset problem and the ability to stream a response
+body without using chunked transfer-encoding.
+
+Two functions have been added: `cowboy_req:stream_events/3`
+encodes and streams one or more text/event-stream events,
+and `cowboy_req:read_and_match_urlencoded_body/2,3` reads,
+parses and matches application/x-www-form-urlencoded
+request bodies. I'm not a fan of the long name, or the fact
+it does so many things at the same time, but its usefulness
+is undeniable.
+
+The more interesting new features are experimental.
+
+A new interface has been added to Websocket handlers
+that allows for greater extensibility. It changes the
+return values from a number of different tuples to
+a list of commands (similar to stream handlers or
+to `gen_statem`). A new command has been introduced
+that tells Cowboy to stop/resume reading from the
+socket.
+
+A `logger` option has been added to define which
+logger module shall be used. It defaults to
+`error_logger` but can be configured to Erlang/OTP 21's
+new `logger` module, the widely used `lager` or
+any module compatible with the `logger` module
+interface. In addition a `log` stream handler
+command has been added, allowing stream handlers
+to silence certain log messages if necessary.
+
+Many bugs have also been fixed.
+
+A complete
+list of changes can be found in the migration guide:
+https://ninenines.eu/docs/en/cowboy/2.5/guide/migrating_from_2.4/[Migrating from Cowboy 2.4 to 2.5].
+
+You can donate to this project via
+https://salt.bountysource.com/teams/ninenines[BountySource].
+These funds are used to pay for additional servers for
+testing.
+
+As usual, feedback is appreciated, and issues or
+questions should be sent via Github tickets. Thanks!

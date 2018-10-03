@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_req(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_req - HTTP request and response</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>cowboy_req</code> provides functions to access, manipulate and respond to requests.</p>
+<p>There are four types of functions in this module. They can be differentiated by their name and their return type:</p>
+<table rules="all" width="100%" frame="border"
+			cellspacing="0" cellpadding="4">
+<thead><tr><th>Type</th>
+<th>Name pattern</th>
+<th>Return type</th>
+</tr></thead><tbody><tr><td>access</td>
+<td>no verb, parse_*, match_*</td>
+<td><code>Value</code></td>
+</tr>
+<tr><td>question</td>
+<td>has_*</td>
+<td><code>boolean()</code></td>
+</tr>
+<tr><td>modification</td>
+<td>set_*</td>
+<td><code>Req</code></td>
+</tr>
+<tr><td>action</td>
+<td>any other verb</td>
+<td><code>ok | {Result, Value, Req}</code></td>
+</tr>
+</tbody></table>
+<p>Any <code>Req</code> returned must be used in place of the one passed as argument. Functions that perform an action in particular write state in the Req object to make sure you are using the function correctly. For example, it&apos;s only possible to send one response, and to read the body once.</p>
+<h2 id="_exports">Exports</h2>
+<p>Connection:</p>
+<ul><li><a href="../cowboy_req.peer">cowboy_req:peer(3)</a> - Peer address and port
+</li>
+<li><a href="../cowboy_req.sock">cowboy_req:sock(3)</a> - Socket address and port
+</li>
+<li><a href="../cowboy_req.cert">cowboy_req:cert(3)</a> - Client TLS certificate
+</li>
+</ul>
+<p>Raw request:</p>
+<ul><li><a href="../cowboy_req.method">cowboy_req:method(3)</a> - HTTP method
+</li>
+<li><a href="../cowboy_req.version">cowboy_req:version(3)</a> - HTTP version
+</li>
+<li><a href="../cowboy_req.scheme">cowboy_req:scheme(3)</a> - URI scheme
+</li>
+<li><a href="../cowboy_req.host">cowboy_req:host(3)</a> - URI host name
+</li>
+<li><a href="../cowboy_req.port">cowboy_req:port(3)</a> - URI port number
+</li>
+<li><a href="../cowboy_req.path">cowboy_req:path(3)</a> - URI path
+</li>
+<li><a href="../cowboy_req.qs">cowboy_req:qs(3)</a> - URI query string
+</li>
+<li><a href="../cowboy_req.uri">cowboy_req:uri(3)</a> - Reconstructed URI
+</li>
+<li><a href="../cowboy_req.header">cowboy_req:header(3)</a> - HTTP header
+</li>
+<li><a href="../cowboy_req.headers">cowboy_req:headers(3)</a> - HTTP headers
+</li>
+</ul>
+<p>Processed request:</p>
+<ul><li><a href="../cowboy_req.parse_qs">cowboy_req:parse_qs(3)</a> - Parse the query string
+</li>
+<li><a href="../cowboy_req.match_qs">cowboy_req:match_qs(3)</a> - Match the query string against constraints
+</li>
+<li><a href="../cowboy_req.parse_header">cowboy_req:parse_header(3)</a> - Parse the given HTTP header
+</li>
+<li><a href="../cowboy_req.parse_cookies">cowboy_req:parse_cookies(3)</a> - Parse cookie headers
+</li>
+<li><a href="../cowboy_req.match_cookies">cowboy_req:match_cookies(3)</a> - Match cookies against constraints
+</li>
+<li><a href="../cowboy_req.binding">cowboy_req:binding(3)</a> - Access a value bound from the route
+</li>
+<li><a href="../cowboy_req.bindings">cowboy_req:bindings(3)</a> - Access all values bound from the route
+</li>
+<li><a href="../cowboy_req.host_info">cowboy_req:host_info(3)</a> - Access the route&apos;s heading host segments
+</li>
+<li><a href="../cowboy_req.path_info">cowboy_req:path_info(3)</a> - Access the route&apos;s trailing path segments
+</li>
+</ul>
+<p>Request body:</p>
+<ul><li><a href="../cowboy_req.has_body">cowboy_req:has_body(3)</a> - Is there a request body?
+</li>
+<li><a href="../cowboy_req.body_length">cowboy_req:body_length(3)</a> - Body length
+</li>
+<li><a href="../cowboy_req.read_body">cowboy_req:read_body(3)</a> - Read the request body
+</li>
+<li><a href="../cowboy_req.read_urlencoded_body">cowboy_req:read_urlencoded_body(3)</a> - Read and parse a urlencoded request body
+</li>
+<li><a href="../cowboy_req.read_and_match_urlencoded_body">cowboy_req:read_and_match_urlencoded_body(3)</a> - Read, parse and match a urlencoded request body against constraints
+</li>
+<li><a href="../cowboy_req.read_part">cowboy_req:read_part(3)</a> - Read the next multipart headers
+</li>
+<li><a href="../cowboy_req.read_part_body">cowboy_req:read_part_body(3)</a> - Read the current part&apos;s body
+</li>
+</ul>
+<p>Response:</p>
+<ul><li><a href="../cowboy_req.set_resp_cookie">cowboy_req:set_resp_cookie(3)</a> - Set a cookie
+</li>
+<li><a href="../cowboy_req.set_resp_header">cowboy_req:set_resp_header(3)</a> - Set a response header
+</li>
+<li><a href="../cowboy_req.set_resp_headers">cowboy_req:set_resp_headers(3)</a> - Set several response headers
+</li>
+<li><a href="../cowboy_req.has_resp_header">cowboy_req:has_resp_header(3)</a> - Is the given response header set?
+</li>
+<li><a href="../cowboy_req.resp_header">cowboy_req:resp_header(3)</a> - Response header
+</li>
+<li><a href="../cowboy_req.resp_headers">cowboy_req:resp_headers(3)</a> - Response headers
+</li>
+<li><a href="../cowboy_req.delete_resp_header">cowboy_req:delete_resp_header(3)</a> - Delete a response header
+</li>
+<li><a href="../cowboy_req.set_resp_body">cowboy_req:set_resp_body(3)</a> - Set the response body
+</li>
+<li><a href="../cowboy_req.has_resp_body">cowboy_req:has_resp_body(3)</a> - Is there a response body?
+</li>
+<li><a href="../cowboy_req.inform">cowboy_req:inform(3)</a> - Send an informational response
+</li>
+<li><a href="../cowboy_req.reply">cowboy_req:reply(3)</a> - Send the response
+</li>
+<li><a href="../cowboy_req.stream_reply">cowboy_req:stream_reply(3)</a> - Send the response headers
+</li>
+<li><a href="../cowboy_req.stream_body">cowboy_req:stream_body(3)</a> - Stream the response body
+</li>
+<li><a href="../cowboy_req.stream_events">cowboy_req:stream_events(3)</a> - Stream events
+</li>
+<li><a href="../cowboy_req.stream_trailers">cowboy_req:stream_trailers(3)</a> - Send the response trailers
+</li>
+<li><a href="../cowboy_req.push">cowboy_req:push(3)</a> - Push a resource to the client
+</li>
+</ul>
+<h2 id="_types">Types</h2>
+<h3 id="_push_opts">push_opts()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">push_opts</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">method</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),            <i><font color="#9A1900">%% case sensitive</font></i>
+    <font color="#0000FF">scheme</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),            <i><font color="#9A1900">%% lowercase; case insensitive</font></i>
+    <font color="#0000FF">host</font>   <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),            <i><font color="#9A1900">%% lowercase; case insensitive</font></i>
+    <font color="#0000FF">port</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">inet:port_number</font></b>(),
+    <font color="#0000FF">qs</font>     <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>()             <i><font color="#9A1900">%% case sensitive</font></i>
+}</tt></pre>
+</div></div>
+<p>Push options.</p>
+<p>By default, Cowboy will use the GET method, an empty query string, and take the scheme, host and port directly from the current request&apos;s URI.</p>
+<h3 id="_read_body_opts">read_body_opts()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">read_body_opts</font></b>() <font color="#990000">::</font> #{
+    <b><font color="#000080">length</font></b>  <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">period</font>  <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">timeout</font> <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>()
+}</tt></pre>
+</div></div>
+<p>Body reading options.</p>
+<p>The defaults are function-specific.</p>
+<h3 id="_req">req()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">req</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">method</font>  <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),               <i><font color="#9A1900">%% case sensitive</font></i>
+    <font color="#FF6600">version</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy:http_version</font></b>() | <b><font color="#000080">atom</font></b>(),
+    <font color="#FF6600">scheme</font>  <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),               <i><font color="#9A1900">%% lowercase; case insensitive</font></i>
+    <font color="#FF6600">host</font>    <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),               <i><font color="#9A1900">%% lowercase; case insensitive</font></i>
+    <font color="#FF6600">port</font>    <font color="#990000">:=</font> <b><font color="#000000">inet:port_number</font></b>(),
+    <font color="#FF6600">path</font>    <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),               <i><font color="#9A1900">%% case sensitive</font></i>
+    <font color="#FF6600">qs</font>      <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),               <i><font color="#9A1900">%% case sensitive</font></i>
+    <font color="#FF6600">headers</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy:http_headers</font></b>(),
+    <font color="#FF6600">peer</font>    <font color="#990000">:=</font> {<b><font color="#000000">inet:ip_address</font></b>(), <b><font color="#000000">inet:port_number</font></b>()},
+    <font color="#FF6600">sock</font>    <font color="#990000">:=</font> {<b><font color="#000000">inet:ip_address</font></b>(), <b><font color="#000000">inet:port_number</font></b>()},
+    <font color="#FF6600">cert</font>    <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>() | <font color="#000080">undefined</font>
+}</tt></pre>
+</div></div>
+<p>The Req object.</p>
+<p>Contains information about the request and response. While some fields are publicly documented, others aren&apos;t and shouldn&apos;t be used.</p>
+<p>You may add custom fields if required. Make sure to namespace them by prepending an underscore and the name of your application:</p>
+<div class="listingblock"><div class="title">Setting a custom field</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Req</font>#{<font color="#009900">_myapp_auth_method</font> <font color="#990000">=&gt;</font> <font color="#FF6600">pubkey</font>}<font color="#990000">.</font></tt></pre>
+</div></div>
+<h3 id="_resp_body">resp_body()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">resp_body</font></b>() <font color="#990000">::</font> <b><font color="#000000">iodata</font></b>()
+    | {<font color="#FF6600">sendfile</font>, <font color="#009900">Offset</font>, <font color="#009900">Length</font>, <font color="#009900">Filename</font>}
+
+<font color="#009900">Offset</font>   <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()
+<font color="#009900">Length</font>   <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()
+<font color="#009900">Filename</font> <font color="#990000">::</font> <b><font color="#000000">file:name_all</font></b>()</tt></pre>
+</div></div>
+<p>Response body.</p>
+<p>It can take two forms: the actual data to be sent or a tuple indicating which file to send.</p>
+<p>When sending data directly, the type is either a binary or an iolist. Iolists are an efficient way to build output. Instead of concatenating strings or binaries, you can simply build a list containing the fragments you want to send in the order they should be sent:</p>
+<div class="listingblock"><div class="title">Example iolists usage</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#993399">1</font><font color="#990000">&gt;</font> <font color="#009900">RespBody</font> <font color="#990000">=</font> [<font color="#FF0000">"Hello "</font>, [<font color="#990000">&lt;&lt;</font><font color="#FF0000">"world"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF0000">$!</font>]]<font color="#990000">.</font>
+[<font color="#FF0000">"Hello "</font>,[<font color="#990000">&lt;&lt;</font><font color="#FF0000">"world"</font><font color="#990000">&gt;&gt;</font>,<font color="#993399">33</font>]]
+<font color="#993399">2</font><font color="#990000">&gt;</font> <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"~s~n"</font>, [<font color="#009900">RespBody</font>])<font color="#990000">.</font>
+<font color="#009900">Hello</font> <font color="#FF6600">world</font><font color="#990000">!</font></tt></pre>
+</div></div>
+<p>Note that the length must be greater than zero for any data to be sent. Cowboy will send an empty body when the length is zero.</p>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">cowboy(7)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.5
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/manual">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

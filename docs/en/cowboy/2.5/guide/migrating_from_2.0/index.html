@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Cowboy 2.0 to 2.1</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.0 to 2.1</span></h1>
+
+<p>Cowboy 2.1 focused on adding features that were temporarily removed in Cowboy 2.0. A number of bugs found in the 2.0 release were also fixed.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>It is now possible to obtain the client TLS certificate and the local IP/port for the connection from the Req object.
+</li>
+<li>Informational responses (1XX responses) can now be sent. They must be sent before initiating the final response.
+</li>
+<li>The <code>expect: 100-continue</code> header is now handled automatically. The 100 response will be sent on the first <code>cowboy_req:read_body/2,3,4</code> call. This only applies when using the default <code>cowboy_stream_h</code> stream handler.
+</li>
+</ul>
+<h2 id="_experimental_features_added">Experimental features added</h2>
+<p>Experimental features are previews of features that will be added in a future release. They are not documented and their interface may change at any time. You are welcome to try them and provide feedback.</p>
+<ul><li>The <code>cowboy_metrics_h</code> stream handler can be used to extract metrics out of Cowboy. It must be used first in the list of stream handlers, and will record all events related to requests, responses and spawned processes. When the stream terminates it will pass this information to a user-defined callback.
+</li>
+<li>The <code>cowboy_tracer_h</code> stream handler can be used to setup automatic tracing of specific requests. You can conditionally enable tracing based on a function, header, path or any other element from the request and the trace will apply to the entire connection and any processes created by it. This is meant to be used for debugging both in tests and production.
+</li>
+</ul>
+<h2 id="_changed_behaviors">Changed behaviors</h2>
+<ul><li>The <code>cowboy_rest</code> handler now implements a mechanism for switching to a different type of handler from any callback where <code>stop</code> is also allowed. Switch by returning <code>{switch_handler, Module}</code> or <code>{switch_handler, Module, Opts}</code>. This is especially useful for switching to <code>cowboy_loop</code> for streaming the request or response body.
+</li>
+<li>REST callbacks that do not allow <code>stop</code> as a return value are now explicitly listed in the documentation.
+</li>
+</ul>
+<h2 id="_new_functions">New functions</h2>
+<ul><li>The function <code>cowboy_req:sock/1</code> returns the IP/port of the local socket.
+</li>
+<li>The function <code>cowboy_req:cert/1</code> returns the client TLS certificate or <code>undefined</code> if it isn&apos;t available.
+</li>
+<li>The function <code>cowboy_req:inform/2,3</code> sends an informational response.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>Ensure HTTP/2 connections are not closed prematurely when the user code does not read the request body.
+</li>
+<li>Ensure HTTP/1.1 streams are not terminated too early. Their behavior is now consistent with the HTTP/2 code where the stream handler is only terminated when the <code>stop</code> command is returned.
+</li>
+<li>Sending zero-sized data from stream handlers or from <code>cowboy_req:stream_body/3</code> could lead to issues with HTTP/1.1. This has been fixed.
+</li>
+<li>The final chunk sent by Cowboy when it terminates a chunked body after the handler process exits was not passed through stream handlers, which could lead to issues when <code>cowboy_compress_h</code> was being used. This is now corrected.
+</li>
+<li>The stream handler state was discarded in some cases where Cowboy had to send a response or response data automatically when ending a stream. This has now been corrected.
+</li>
+<li>The stream handler callback <code>terminate/3</code> will now be called when switching to another protocol using the command <code>switch_protocol</code>. This doesn&apos;t apply when doing upgrades to HTTP/2 as those occur before the stream is initialized.
+</li>
+<li>Cowlib has been updated to 2.0.1 to fix an issue with Websocket compression when using Erlang/OTP 20.1. Note that at the time of writing all 20.1 versions (from 20.1 to 20.1.4) have issues when compression is enabled. It is expected to work properly from 20.1.5 onward. In the meantime it is recommended to run the plain 20.1 release and disable Websocket compression, or use a release before 20.1.
+</li>
+<li>Cowboy will no longer crash when the <code>cowboy_clock</code> process is not running. This can happen when Cowboy is being restarted during upgrades, for example.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.5/guide/migrating_from_2.1/">
+					Migrating from Cowboy 2.1 to 2.2
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.5/guide/migrating_from_1.0/">
+					Migrating from Cowboy 1.0 to 2.0
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.5
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

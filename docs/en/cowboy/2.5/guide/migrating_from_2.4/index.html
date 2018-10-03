@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Cowboy 2.4 to 2.5</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.4 to 2.5</span></h1>
+
+<p>Cowboy 2.5 focused on making the test suites pass. A variety of new features, fixes and improvements have also been worked on.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>Add option <code>linger_timeout</code> to control how long Cowboy will wait before closing the socket when shutting down the connection. This helps avoid the TCP reset problem HTTP/1.1 suffers from. The default is now 1000 ms.
+</li>
+<li>It is now possible to stream a response body without using chunked transfer-encoding when the protocol is HTTP/1.1. To enable this behavior, simply pass the content-length header with the expected size when initiating the streamed response.
+</li>
+<li>Update Ranch to 1.6.2
+</li>
+<li>Update Cowlib to 2.6.0
+</li>
+</ul>
+<h2 id="_experimental_features_added">Experimental features added</h2>
+<ul><li>Websocket handlers now feature a commands-based interface. The return value from the callbacks can now take the form <code>{Commands, State}</code> where <code>Commands</code> can be frames to be sent or commands yet to be introduced. New commands will be available only through this new interface.
+</li>
+<li>Add the <code>{active, boolean()}</code> Websocket handler command. It allows disabling reading from the socket when <code>false</code> is returned. <code>true</code> reenables reading from the socket.
+</li>
+<li>Add the protocol option <code>logger</code> that allows configuring which logger module will be used. The logger module must follow the interface of the new <code>logger</code> module in Erlang/OTP 21, or be set to <code>error_logger</code> to keep the old behavior. A similar transport option exists in Ranch 1.6; both options are necessary to override Cowboy&apos;s default behavior completely.
+</li>
+<li>Add the <code>{log, Level, Format, Args}</code> stream handler command. Making it a command rather than a direct call will simplify silencing particular log messages.
+</li>
+</ul>
+<h2 id="_new_functions">New functions</h2>
+<ul><li>The function <code>cowboy_req:stream_events/3</code> streams one or more text/event-stream events, encoding them automatically.
+</li>
+<li>The functions <code>cowboy_req:read_and_match_urlencoded_body/2,3</code> can be used to read, parse and match application/x-www-form-urlencoded request bodies, in a similar way to <code>cowboy_req:match_qs/2</code>.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>Fix Erlang/OTP 21 warnings.
+</li>
+<li>Ensure that the port number is always defined in the Req object. When it is not provided in the request, the default port number for the protocol being used will be set.
+</li>
+<li>Ensure stream handlers can run after <code>cowboy_stream_h</code>.
+</li>
+<li>Honor the SETTINGS_ENABLE_PUSH HTTP/2 setting: don&apos;t send PUSH frames to clients that disabled it.
+</li>
+<li>Fix HTTP/2 <code>settings_timeout</code> option when the value is set to <code>infinity</code>.
+</li>
+<li>HTTP/1.1 responses will no longer include a trailer header when the request had no te header.
+</li>
+<li>HTTP/1.1 204 responses no longer send the transfer-encoding header when <code>cowboy_req:stream_reply/2,3</code> is used to send a response.
+</li>
+<li>Improve HTTP/1.1 keepalive handling to avoid processing requests that follow the final request that will receive a response.
+</li>
+<li>Improve the validation of HTTP/1.1 absolute-form requests.
+</li>
+<li>When the <code>switch_protocol</code> is used after a response was sent, Cowboy will no longer attempt to send the 101 informational response for the protocol upgrade. This caused a crash of the connection previously.
+</li>
+<li>Errors that occur when a callback returned by <code>content_types_provided</code> does not exist have been improved.
+</li>
+<li>Prevent annoying error logs when using sendfile in Erlang/OTP 20 and lower.
+</li>
+<li>Add missing frame types to <code>websocket_handle</code>.
+</li>
+<li>A test suite has been added for RFC8297 to ensure that 103 informational responses can be sent.
+</li>
+<li>Numerous test cases have been fixed, improved or removed in order to make the test suites pass. Most of the failures were caused by broken tests.
+</li>
+<li>Some misguiding or incorrect statements in the documentation have been removed or clarified.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.5/guide/middlewares/">
+					Middlewares
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.5/guide/migrating_from_2.3/">
+					Migrating from Cowboy 2.3 to 2.4
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.5
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
