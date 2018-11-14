@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: ranch_transport:sendfile(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch_transport:sendfile(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>ranch_transport:sendfile - Send a file on the socket</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">sendfile</font></b>(<font color="#009900">Transport</font> <font color="#990000">::</font> <b><font color="#000000">module</font></b>(),
+         <font color="#009900">Socket</font>    <font color="#990000">::</font> <b><font color="#000000">ranch_transport:socket</font></b>(),
+         <font color="#009900">File</font>      <font color="#990000">::</font> <b><font color="#000000">file:name_all</font></b>() | <b><font color="#000000">file:fd</font></b>(),
+         <font color="#009900">Offset</font>    <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>(),
+         <font color="#009900">Bytes</font>     <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>(),
+         <font color="#009900">Opts</font>      <font color="#990000">::</font> <b><font color="#000000">ranch_transport:sendfile_opts</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">SentBytes</font> <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Send a file on the socket.</p>
+<p>The file may be sent full or in parts, and may be specified by its filename or by an already open file descriptor.</p>
+<p>This function emulates the function <code>file:sendfile/2,4,5</code> and may be used when transports are not manipulating TCP directly.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Transport</dt>
+<dd><p>The transport module.</p>
+</dd>
+<dt>Socket</dt>
+<dd><p>The socket.</p>
+</dd>
+<dt>File</dt>
+<dd><p>The filename or file descriptor for the file to be sent.</p>
+</dd>
+<dt>Offset</dt>
+<dd><p>Start position in the file, in bytes.</p>
+</dd>
+<dt>Bytes</dt>
+<dd><p>Length in bytes.</p>
+</dd>
+<dt>Opts</dt>
+<dd><p>Additional options.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>The number of bytes actually sent is returned on success inside an <code>ok</code> tuple.</p>
+<p>An <code>error</code> tuple is returned otherwise.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>1.6</strong>: The type of the <code>File</code> argument was extended.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Implement Transport:sendfile using the fallback</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Filename</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Filename</font>, <font color="#993399">0</font>, <font color="#993399">0</font>, [])<font color="#990000">.</font>
+
+<b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">File</font>, <font color="#009900">Offset</font>, <font color="#009900">Bytes</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">File</font>, <font color="#009900">Offset</font>, <font color="#009900">Bytes</font>, [])<font color="#990000">.</font>
+
+<b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">File</font>, <font color="#009900">Offset</font>, <font color="#009900">Bytes</font>, <font color="#009900">Opts</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#000000">ranch_transport:sendfile</font></b>(<b><font color="#000080">?MODULE</font></b>, <font color="#009900">Socket</font>,
+        <font color="#009900">File</font>, <font color="#009900">Offset</font>, <font color="#009900">Bytes</font>, <font color="#009900">Opts</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../ranch_transport">ranch_transport(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	1.7
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/1.7/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/1.7/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/1.7/manual">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/manual">1.6</a></li>
+	
+		<li><a href="/docs/en/ranch/1.5/manual">1.5</a></li>
+	
+		<li><a href="/docs/en/ranch/1.4/manual">1.4</a></li>
+	
+		<li><a href="/docs/en/ranch/1.3/manual">1.3</a></li>
+	
+		<li><a href="/docs/en/ranch/1.2/manual">1.2</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
