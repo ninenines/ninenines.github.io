@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Erlang and the Web</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Erlang and the Web</span></h1>
+
+<p>Erlang is the ideal platform for writing Web applications. Its features are a perfect match for the requirements of modern Web applications.</p>
+<h2 id="_the_web_is_concurrent">The Web is concurrent</h2>
+<p>When you access a website there is little concurrency involved. A few connections are opened and requests are sent through these connections. Then the web page is displayed on your screen. Your browser will only open up to 4 or 8 connections to the server, depending on your settings. This isn&apos;t much.</p>
+<p>But think about it. You are not the only one accessing the server at the same time. There can be hundreds, if not thousands, if not millions of connections to the same server at the same time.</p>
+<p>Even today a lot of systems used in production haven&apos;t solved the C10K problem (ten thousand concurrent connections). And the ones who did are trying hard to get to the next step, C100K, and are pretty far from it.</p>
+<p>Erlang meanwhile has no problem handling millions of connections. At the time of writing there are application servers written in Erlang that can handle more than two million connections on a single server in a real production application, with spare memory and CPU!</p>
+<p>The Web is concurrent, and Erlang is a language designed for concurrency, so it is a perfect match.</p>
+<p>Of course, various platforms need to scale beyond a few million connections. This is where Erlang&apos;s built-in distribution mechanisms come in. If one server isn&apos;t enough, add more! Erlang allows you to use the same code for talking to local processes or to processes in other parts of your cluster, which means you can scale very quickly if the need arises.</p>
+<p>The Web has large userbases, and the Erlang platform was designed to work in a distributed setting, so it is a perfect match.</p>
+<p>Or is it? Surely you can find solutions to handle that many concurrent connections with your favorite language... But all these solutions will break down in the next few years. Why? Firstly because servers don&apos;t get any more powerful, they instead get a lot more cores and memory. This is only useful if your application can use them properly, and Erlang is light-years away from anything else in that area. Secondly, today your computer and your phone are online, tomorrow your watch, goggles, bike, car, fridge and tons of other devices will also connect to various applications on the Internet.</p>
+<p>Only Erlang is prepared to deal with what&apos;s coming.</p>
+<h2 id="_the_web_is_soft_real_time">The Web is soft real time</h2>
+<p>What does soft real time mean, you ask? It means we want the operations done as quickly as possible, and in the case of web applications, it means we want the data propagated fast.</p>
+<p>In comparison, hard real time has a similar meaning, but also has a hard time constraint, for example an operation needs to be done in under N milliseconds otherwise the system fails entirely.</p>
+<p>Users aren&apos;t that needy yet, they just want to get access to their content in a reasonable delay, and they want the actions they make to register at most a few seconds after they submitted them, otherwise they&apos;ll start worrying about whether it successfully went through.</p>
+<p>The Web is soft real time because taking longer to perform an operation would be seen as bad quality of service.</p>
+<p>Erlang is a soft real time system. It will always run processes fairly, a little at a time, switching to another process after a while and preventing a single process to steal resources from all others. This means that Erlang can guarantee stable low latency of operations.</p>
+<p>Erlang provides the guarantees that the soft real time Web requires.</p>
+<h2 id="_the_web_is_asynchronous">The Web is asynchronous</h2>
+<p>Long ago, the Web was synchronous because HTTP was synchronous. You fired a request, and then waited for a response. Not anymore. It all began when XmlHttpRequest started being used. It allowed the client to perform asynchronous calls to the server.</p>
+<p>Then Websocket appeared and allowed both the server and the client to send data to the other endpoint completely asynchronously. The data is contained within frames and no response is necessary.</p>
+<p>Erlang processes work the same. They send each other data contained within messages and then continue running without needing a response. They tend to spend most of their time inactive, waiting for a new message, and the Erlang VM happily activate them when one is received.</p>
+<p>It is therefore quite easy to imagine Erlang being good at receiving Websocket frames, which may come in at unpredictable times, pass the data to the responsible processes which are always ready waiting for new messages, and perform the operations required by only activating the required parts of the system.</p>
+<p>The more recent Web technologies, like Websocket of course, but also HTTP/2.0, are all fully asynchronous protocols. The concept of requests and responses is retained of course, but anything could be sent in between, by both the client or the browser, and the responses could also be received in a completely different order.</p>
+<p>Erlang is by nature asynchronous and really good at it thanks to the great engineering that has been done in the VM over the years. It&apos;s only natural that it&apos;s so good at dealing with the asynchronous Web.</p>
+<h2 id="_the_web_is_omnipresent">The Web is omnipresent</h2>
+<p>The Web has taken a very important part of our lives. We&apos;re connected at all times, when we&apos;re on our phone, using our computer, passing time using a tablet while in the bathroom... And this isn&apos;t going to slow down, every single device at home or on us will be connected.</p>
+<p>All these devices are always connected. And with the number of alternatives to give you access to the content you seek, users tend to not stick around when problems arise. Users today want their applications to be always available and if it&apos;s having too many issues they just move on.</p>
+<p>Despite this, when developers choose a product to use for building web applications, their only concern seems to be &quot;Is it fast?&quot;, and they look around for synthetic benchmarks showing which one is the fastest at sending &quot;Hello world&quot; with only a handful concurrent connections. Web benchmarks haven&apos;t been representative of reality in a long time, and are drifting further away as time goes on.</p>
+<p>What developers should really ask themselves is &quot;Can I service all my users with no interruption?&quot; and they&apos;d find that they have two choices. They can either hope for the best, or they can use Erlang.</p>
+<p>Erlang is built for fault tolerance. When writing code in any other language, you have to check all the return values and act accordingly to avoid any unforeseen issues. If you&apos;re lucky, you won&apos;t miss anything important. When writing Erlang code, you can just check the success condition and ignore all errors. If an error happens, the Erlang process crashes and is then restarted by a special process called a supervisor.</p>
+<p>Erlang developers thus have no need to fear unhandled errors, and can focus on handling only the errors that should give some feedback to the user and let the system take care of the rest. This also has the advantage of allowing them to write a lot less code, and let them sleep at night.</p>
+<p>Erlang&apos;s fault tolerance oriented design is the first piece of what makes it the best choice for the omnipresent, always available Web.</p>
+<p>The second piece is Erlang&apos;s built-in distribution. Distribution is a key part of building a fault tolerant system, because it allows you to handle bigger failures, like a whole server going down, or even a data center entirely.</p>
+<p>Fault tolerance and distribution are important today, and will be vital in the future of the Web. Erlang is ready.</p>
+<h2 id="_learn_erlang">Learn Erlang</h2>
+<p>If you are new to Erlang, you may want to grab a book or two to get started. Those are my recommendations as the author of Cowboy.</p>
+<h4 id="_the_erlanger_playbook">The Erlanger Playbook</h4>
+<p>The Erlanger Playbook is an ebook I am currently writing, which covers a number of different topics from code to documentation to testing Erlang applications. It also has an Erlang section where it covers directly the building blocks and patterns, rather than details like the syntax.</p>
+<p>You can most likely read it as a complete beginner, but you will need a companion book to make the most of it. Buy it from the <a href="https://ninenines.eu">Nine Nines website</a>.</p>
+<h4 id="_programming_erlang">Programming Erlang</h4>
+<p>This book is from one of the creator of Erlang, Joe Armstrong. It provides a very good explanation of what Erlang is and why it is so. It serves as a very good introduction to the language and platform.</p>
+<p>The book is <a href="http://pragprog.com/book/jaerlang2/programming-erlang">Programming Erlang</a>, and it also features a chapter on Cowboy.</p>
+<h4 id="_learn_you_some_erlang_for_great_good">Learn You Some Erlang for Great Good!</h4>
+<p><a href="http://learnyousomeerlang.com">LYSE</a> is a much more complete book covering many aspects of Erlang, while also providing stories and humor. Be warned: it&apos;s pretty verbose. It comes with a free online version and a more refined paper and ebook version.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.6/guide/modern_web/">
+					The modern Web
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.6/guide/introduction/">
+					Introduction
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.6
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

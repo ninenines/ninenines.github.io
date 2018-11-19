@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Cowboy 2.5 to 2.6</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=2" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.5 to 2.6</span></h1>
+
+<p>Cowboy 2.6 greatly refactored the HTTP/2 code, a large part of which was moved to Cowlib and is now used by both the Cowboy server and the Gun client.</p>
+<p>A large number of tickets were also closed which resulted in many bugs fixed and many features and options added, although some of them are still experimental.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>Add support for the PROXY protocol header. It can be enabled via the <code>proxy_header</code> option. The proxy information can then be found under the <code>proxy_info</code> key in the Req object.
+</li>
+<li>Allow using sendfile tuples in <code>cowboy_req:stream_body/3</code> and in the data command in stream handlers. The only caveat is that when using <code>cowboy_compress_h</code> the sendfile tuples may have to be converted to in-memory data in order to compress them. This is the case for gzip compression.
+</li>
+<li>The stream handlers <code>cowboy_stream_h</code> and <code>cowboy_compress_h</code> are now documented.
+</li>
+<li>Add the <code>chunked</code> option to allow disabling chunked transfer-encoding for HTTP/1.1 connections.
+</li>
+<li>Add the <code>http10_keepalive</code> option to allow disabling keep-alive for HTTP/1.0 connections.
+</li>
+<li>Add the <code>idle_timeout</code> option for HTTP/2.
+</li>
+<li>Add the <code>sendfile</code> option to both HTTP/1.1 and HTTP/2. It allows disabling the sendfile syscall entirely for all connections. It is recommended to disable sendfile when using VirtualBox shared folders.
+</li>
+<li>Add the <code>rate_limited/2</code> callback to REST handlers.
+</li>
+<li>Add the <code>deflate_opts</code> option to Websocket handlers that allows configuring deflate options for the permessage-deflate extension.
+</li>
+<li>Add the <code>charset</code> option to <code>cowboy_static</code>.
+</li>
+<li>Add support for the SameSite cookie attribute.
+</li>
+<li>Update Ranch to 1.7.0
+</li>
+<li>Update Cowlib to 2.7.0
+</li>
+</ul>
+<h2 id="_experimental_features_added">Experimental features added</h2>
+<ul><li>Add support for range requests (RFC7233) in REST handlers. This adds two new callbacks: <code>ranges_accepted/2</code> and <code>range_satisfiable/2</code> along with the user-specified <code>ProvideRangeCallback/2</code>.
+</li>
+<li>Add automatic handling of range requests to REST handlers that return the callback <code>auto</code> from <code>ranges_accepted/2</code>. Cowboy will call the configured <code>ProvideCallback</code> and then split the ouput automatically for the ranged response.
+</li>
+<li>Enable range requests support in <code>cowboy_static</code>.
+</li>
+<li>Add the <code>{deflate, boolean()}</code> Websocket handler command to disable permessage-deflate compression temporarily.
+</li>
+<li>Add the <code>compress_threshold</code> option which allows configuring how much data must be present in a response body to compress it. This only applies to non-streamed bodies at this time.
+</li>
+<li>Add the <code>compress_buffering</code> option which allows controlling whether some buffering may be done when streaming a response body. Change the default behavior to not buffer to make sure it works by default in all scenarios.
+</li>
+<li>Add the <code>{set_options, map()}</code> command to stream handlers and Websocket handlers. This can be used to update options on a per-request basis. Allow overriding the <code>idle_timeout</code> option for both HTTP/1.1 and Websocket, the <code>cowboy_compress_h</code> options for HTTP/1.1 and HTTP/2 and the <code>chunked</code> option for HTTP/1.1.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>Do not send a content-length automatically with 304 responses. This status code allows a content-length that corresponds to what would have been sent for a 200 response, but is never followed by a body.
+</li>
+<li>HTTP/2 streams are now terminated once the body has been sent fully, instead of immediately once the stop command is returned (by default when the request process exits). Metrics will therefore more accurately represent when a stream ended.
+</li>
+<li>Terminate connection processes gracefully when the parent process exists or when sys:terminate/2,3 is called.
+</li>
+<li>Automatically ignore the boundary parameter of multipart media types when using REST handlers. This is a special parameter that may change with all requests and cannot be predicted.
+</li>
+<li>Fix parsing of the accept header when it contains charset parameters. They are case insensitive and will now be lowercased, like for accept-charset and content-type.
+</li>
+<li>Handle the charset parameter using <code>charsets_provided</code> when it is present in the accept header when using REST handlers.
+</li>
+<li>Don&apos;t select charsets when the q-value is 0 in REST handlers.
+</li>
+<li>Handle accept-charset headers that include a wildcard in REST handlers.
+</li>
+<li>Only send a charset header when the content-type negotiated is of type text in REST handlers.
+</li>
+<li>Remove the default charset iso-8859-1 from REST handlers when no other is provided. This has been removed from the HTTP specifications for a long time.
+</li>
+<li>Many cases where a content-type header was sent unnecessarily in the REST handlers response have been fixed.
+</li>
+<li>Handle error_response commands in <code>cowboy_metrics_h</code>.
+</li>
+<li>A number of types and function specifications were fixed or improved. Dialyzer is now run against both the code and tests to help uncover issues.
+</li>
+<li>An undefined <code>cowboy_router</code> behavior has been documented.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.6/guide/middlewares/">
+					Middlewares
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.6/guide/migrating_from_2.4/">
+					Migrating from Cowboy 2.4 to 2.5
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.6
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/cowboy/1.0/guide">1.0</a></li>
+	
+</ul>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
