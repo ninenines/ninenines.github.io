@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <title>Nine Nines: Migrating from Ranch 1.6 to 1.7</title>
+    <title>Nine Nines: Changes since Ranch 1.7</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=2" rel="stylesheet">
@@ -60,30 +60,12 @@
 <div class="row">
 <div id="docs" class="span9 maincol">
 
-<h1 class="lined-header"><span>Migrating from Ranch 1.6 to 1.7</span></h1>
+<h1 class="lined-header"><span>Changes since Ranch 1.7</span></h1>
 
-<p>Ranch 1.7 adds built-in support for the PROXY protocol.</p>
-<p>The PROXY protocol is a simple and efficient way for proxies to transmit information about the client.</p>
-<p>While a third-party library already existed, it was not entirely compatible with the Ranch interface, in particular when socket active mode was involved. This new implementation fixes that and supports the full protocol with as little overhead as possible compared to normal operations: just one extra function call.</p>
-<p>Ranch 1.7 is compatible with Erlang/OTP 19.0 onward. Support for Erlang/OTP 18 has been removed.</p>
-<h2 id="_features_added">Features added</h2>
-<ul><li>Full support for the PROXY protocol was added.
-</li>
-</ul>
-<h2 id="_new_functions">New functions</h2>
-<ul><li>Add the function <code>ranch:recv_proxy_header/2</code> to receive the PROXY protocol header and parse it. It must be called before <code>ranch:handshake/1,2</code>.
-</li>
-<li>Add the functions <code>ranch_proxy_header:parse/1</code> and <code>ranch_proxy_header:header/1,2</code> to parse and build a PROXY protocol header, respectively.
-</li>
-</ul>
-<h2 id="_bugs_fixed">Bugs fixed</h2>
-<ul><li>Fix a race condition when the listener is restarted after <code>ranch_listener_sup</code> crashes. This resulted in the original options being used even if the options were updated at runtime.
-</li>
-<li>Make the acceptors exit instead of crash when the listening socket has been closed to prevent unnecessary logs.
-</li>
-<li>Fix an issue where listener information would not get cleaned up when an embedded listener was stopped. This was fixed in Ranch 1.6.2.
-</li>
-</ul>
+<p>The following patch versions were released since Ranch 1.7:</p>
+<h2 id="_ranch_1_7_1">Ranch 1.7.1</h2>
+<p>This release fixes an issue with the PROXY protocol where the wrong CRC32 algorithm was used and would cause checksum verification to fail.</p>
+<p>Because the plain <code>crc32</code> checksum is not supported by the PROXY protocol, the configuration value when building PROXY headers has been changed to <code>crc32c</code>.</p>
 
 
 
@@ -97,14 +79,14 @@
 
 		<nav style="margin:1em 0">
 			
-				<a style="float:left" href="https://ninenines.eu/docs/en/ranch/1.7/guide/migrating_from_1.7/">
-					Changes since Ranch 1.7
+				<a style="float:left" href="https://ninenines.eu/docs/en/ranch/1.7/guide/upcoming_2.0_changes/">
+					Upcoming changes in Ranch 2.0
 				</a>
 			
 
 			
-				<a style="float:right" href="https://ninenines.eu/docs/en/ranch/1.7/guide/migrating_from_1.5/">
-					Migrating from Ranch 1.5 to 1.6
+				<a style="float:right" href="https://ninenines.eu/docs/en/ranch/1.7/guide/migrating_from_1.6/">
+					Migrating from Ranch 1.6 to 1.7
 				</a>
 			
 		</nav>

@@ -187,6 +187,10 @@ http://www.gnu.org/software/src-highlite -->
 <td>git repo commit</td>
 <td>Clone the Git repository and checkout the given version</td>
 </tr>
+<tr><td>git-subfolder</td>
+<td>git repo commit subfolder</td>
+<td>Clone the Git repository, checkout the given version and use one of its subfolders as a dependency</td>
+</tr>
 <tr><td>git-submodule</td>
 <td>git-submodule</td>
 <td>Initialize and update the Git submodule</td>
@@ -426,6 +430,19 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><font color="#009900">NO_AUTOPATCH =</font> cowboy ranch cowlib</tt></pre>
 </div></div>
+<h2 id="_dealing_with_duplicate_modules">Dealing with duplicate modules</h2>
+<p>When there are duplicate modules found in both applications and their dependencies, some tasks may fail. Erlang expects modules to be unique in general.</p>
+<p>When the duplicates are found in dependencies, you will need to remove one of the duplicates at fetch time. To do so, you can add a rule similar to this to your Makefile before including <em>erlang.mk</em>:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">DEPS_DIR =</font> <font color="#009900">$(CURDIR)</font>/deps
+
+<font color="#990000">deps::</font> <font color="#009900">$(DEPS_DIR)</font>/cowlib
+	<font color="#009900">$(verbose)</font> rm -f <font color="#009900">$(DEPS_DIR)</font>/cowlib/src/cow_ws.erl</tt></pre>
+</div></div>
+<p>This must be done from the application that has this dependency. Only define the <code>DEPS_DIR</code> variable if necessary.</p>
 <h2 id="_skipping_deps">Skipping deps</h2>
 <p>It is possible to temporarily skip all dependency operations. This is done by defining the <code>SKIP_DEPS</code> variable. Use cases include being somewhere with no connection to download them, or perhaps a peculiar setup.</p>
 <p>A typical usage would be:</p>
