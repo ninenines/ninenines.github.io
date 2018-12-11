@@ -10,7 +10,7 @@
     <title>Nine Nines: External plugins</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
-    <link href="/css/99s.css?r=2" rel="stylesheet">
+    <link href="/css/99s.css?r=3" rel="stylesheet">
 
     <link rel="shortcut icon" href="/img/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
@@ -101,6 +101,14 @@ include <font color="#009900">$(THIS)</font>/mk/templates.mk</tt></pre>
 </div></div>
 <p>The <code>THIS</code> variable is required to relatively include files.</p>
 <p>This allows users to not only be able to select individual plugins, but also select all plugins from the dependency in one go if they wish to do so.</p>
+<p>Plugins can include some help text by extending the target <code>help-plugins</code>:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#990000">help-plugins::</font>
+	<font color="#009900">$(verbose)</font> <b><font color="#0000FF">printf</font></b> <font color="#FF0000">"%s</font><font color="#CC33CC">\n</font><font color="#FF0000">"</font> <font color="#FF0000">""</font> <font color="#FF0000">"Run benchmark: $(MAKE) perfs"</font></tt></pre>
+</div></div>
 <h2 id="_early_stage_plugins">Early-stage plugins</h2>
 <p>Plugins declared in <code>DEP_PLUGINS</code> are loaded near the end of Erlang.mk. That&apos;s why you have access to all previously initialized variables. However, if you want your plugin to add common dependencies to your applications, a regular is loaded too late in the process. You need to use &quot;Early-stage plugins&quot;. They are declared using the <code>DEP_EARLY_PLUGINS</code> variable instead. Plugins listed in this variable are loaded near the beginning of Erlang.mk Otherwise, they work exactly the same.</p>
 <p>If you only give the name of a dependency, the default file loaded is <em>early-plugins.mk</em>. You can specify a filename exactly like you would have done it with regular plugins.</p>

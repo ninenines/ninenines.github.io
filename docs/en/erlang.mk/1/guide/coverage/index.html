@@ -10,7 +10,7 @@
     <title>Nine Nines: Code coverage</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
-    <link href="/css/99s.css?r=2" rel="stylesheet">
+    <link href="/css/99s.css?r=3" rel="stylesheet">
 
     <link rel="shortcut icon" href="/img/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
@@ -62,8 +62,50 @@
 
 <h1 class="lined-header"><span>Code coverage</span></h1>
 
-<!-- @todo Write it.-->
-<p>Placeholder chapter.</p>
+<p>Erlang.mk provides support for code coverage via the tool <code>cover</code> that comes with Erlang/OTP. Code coverage lets you see what parts of your code are covered by the tests.</p>
+<h2 id="_enabling_cover_when_running_tests">Enabling cover when running tests</h2>
+<p>To run tests with code coverage enabled, simply define <code>COVER=1</code> either on the command line or in your Makefile:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make tests <font color="#009900">COVER</font><font color="#990000">=</font><font color="#993399">1</font></tt></pre>
+</div></div>
+<p>When running the targets <code>tests</code> or <code>check</code> the code coverage report will be built automatically. This is not the case for test framework specific targets, however. In those cases you can generate the reports manually:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make eunit proper <font color="#009900">COVER</font><font color="#990000">=</font><font color="#993399">1</font>
+$ make cover-report</tt></pre>
+</div></div>
+<p>Note that Common Test has some support for <code>cover</code> built-in and that it will generate code coverage reports in the Common Test logs regardless. The report that Erlang.mk generates is however common to all test frameworks and might be more useful.</p>
+<h2 id="_adding_applications_to_the_cover_report">Adding applications to the cover report</h2>
+<p>By default Erlang.mk will include all the applications in the code coverage report, except external dependencies.</p>
+<p>To include some dependencies in the report, you can define the <code>COVER_DEPS</code> variable:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">COVER_DEPS =</font> cowlib</tt></pre>
+</div></div>
+<p>When using multi application repositories you can exclude some applications by defining the <code>COVER_APPS</code> variable:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">COVER_APPS =</font> presence backend</tt></pre>
+</div></div>
+<h2 id="_configuring_paths">Configuring paths</h2>
+<p>By default Erlang.mk will store <em>coverdata</em> files and code coverage reports under the <em>cover/</em> directory. The variables <code>COVER_DATA_DIR</code> and <code>COVER_REPORT_DIR</code> can be set to use a different location.</p>
+<h2 id="_merging_coverdata_files">Merging coverdata files</h2>
+<p>The target <code>all.coverdata</code> will take all existing <em>coverdata</em> files and merge them into one:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make all<font color="#990000">.</font>coverdata</tt></pre>
+</div></div>
 
 
 

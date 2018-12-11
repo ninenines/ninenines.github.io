@@ -115,6 +115,14 @@ SHELL_DEPS = tddreloader
 All these will be documented in more details in their respective
 chapters.
 
+Note that these additional types of dependencies will only
+be fetched after normal dependencies by default. You can
+force a dependency to be downloaded first by extending the
+target `deps::` before including 'erlang.mk', for example:
+
+[source,make]
+deps:: $(CURDIR)/deps/triq
+
 ==== Modifying the dependency source or version
 
 By default, Erlang.mk will look into its package index to
@@ -287,6 +295,24 @@ regardless of the order, and A, B and C depend on a
 different version of D, it will always be A's version
 that wins, because we fetch all dependencies of A before
 fetching those from B or C.
+
+Once a dependency is built, it will not be built again by
+default. Typically dependencies do not need to be recompiled
+and this speeds up building immensely. There are a few ways
+to force recompiling a dependency however:
+
+* The dependency directory is a symbolic link; the dependency
+  will always be recompiled.
+
+* The dependency is built directly, for example with a command
+  like `make -C deps/cowlib`, or `make` in the dependency's
+  directory.
+
+* The variable `FULL` is set, for example `make FULL=1`. This
+  will force building of all dependencies. This can be added
+  to your Makefile before including 'erlang.mk'.
+
+* The file `ebin/dep_built` in the dependency is removed.
 
 === Fetching and listing dependencies only
 
@@ -476,11 +502,10 @@ performed:
 * Run autopatch on the project
 
 Autopatch first checks if there is any project-specific patch
-enabled. There are currently two: `RABBITMQ_CLIENT_PATCH` for
-the `amqp_client` dependency, and `RABBITMQ_SERVER_PATCH` for
-the `rabbit` dependency. These are needed only for RabbitMQ
-versions before 3.6.0 (assuming you are using upstream RabbitMQ,
-and not a fork).
+enabled. There are currently three: `RABBITMQ_CLIENT_PATCH` for
+the `amqp_client` dependency (before 3.6.0), `RABBITMQ_SERVER_PATCH`
+for the `rabbit` dependency (before 3.6.0) and `ELIXIR_PATCH`
+for the `elixir` dependency.
 
 Otherwise, autopatch performs different operations depending
 on the kind of project it finds the dependency to be.
@@ -502,6 +527,30 @@ generated automatically.
 empty Makefile generated, for compatibility purposes.
 
 * Other projects with no Makefile are left untouched.
+
+You can add additional commands to be run immediately before
+or after autopatch is done by extending the target
+`autopatch-$(dep)::`, for example this would remove
+a module:
+
+[source,make]
+----
+autopatch-ranch::
+	rm -f $(DEPS_DIR)/ranch/src/ranch_proxy_header.erl
+----
+
+A common use case for this feature is to apply a PATCH
+file on the dependency immediately after fetching it.
+It can also be used to add compiler options, for example:
+
+[source,make]
+----
+autopatch-couchbeam::
+	printf "\nERLC_OPTS += -DWITH_JIFFY\n" >> $(DEPS_DIR)/couchbeam/Makefile
+----
+
+The commands will run before autopatch when the target is
+defined before including 'erlang.mk', and after otherwise.
 
 You can disable the replacing of the 'erlang.mk' file by
 defining the `NO_AUTOPATCH_ERLANG_MK` variable:

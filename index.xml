@@ -1602,7 +1602,7 @@ A field can take the form of an atom field, a tuple with constraints {field, Con
       <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/releases/</guid>
       <description>Erlang.mk relies on Relx for generating releases. This chapter covers the Erlang.mk-specific bits. Consult the Relx website for more information.
 Setup Erlang.mk will create a release if it detects a Relx configuration file in the $(RELX_CONFIG) location. This defaults to $(CURDIR)/relx.config. You can override it by defining the variable before including Erlang.mk:
-RELX_CONFIG = $(CURDIR)/webchat.config  Relx does not need to be installed. Erlang.mk will download and build it automatically.</description>
+RELX_CONFIG = $(CURDIR)/webchat.config  It is also possible to have multiple relx.config files. For example you might have one for development and one for production.</description>
     </item>
     
     <item>
@@ -1930,13 +1930,14 @@ The static handler can serve either one file or all files from a given directory
     </item>
     
     <item>
-      <title>Compatibility with other build tools</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/compat/</link>
+      <title>Cross compiling</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/cross_compiling/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/compat/</guid>
-      <description>Erlang.mk tries its best to be compatible with the other Erlang build tools. It can use dependencies written with other build tools in mind, and can also make your projects usable by those build tools as well. Erlang.mk is like the cool kid that gets along with everybody.
-In this chapter I will use the term Rebar project to refer to a project built using Rebar 2, Rebar 3 or Mad.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/cross_compiling/</guid>
+      <description>Erlang.mk supports cross-compiling. While the compiled Erlang code is portable as-is, the C code is not and releases need to use the correct runtime system for the target environment.
+There are therefore two steps that might require some intervention: compiling and building the release. If you do not have any C code you can just compile as you would normally, however.
+Compiling To cross-compile the C code you need a cross compiler.</description>
     </item>
     
     <item>
@@ -1959,17 +1960,6 @@ Features added Listeners can now be suspended/resumed without stopping existing 
       <description>Ranch 1.7 adds built-in support for the PROXY protocol.
 The PROXY protocol is a simple and efficient way for proxies to transmit information about the client.
 While a third-party library already existed, it was not entirely compatible with the Ranch interface, in particular when socket active mode was involved. This new implementation fixes that and supports the full protocol with as little overhead as possible compared to normal operations: just one extra function call.</description>
-    </item>
-    
-    <item>
-      <title>AsciiDoc documentation</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/asciidoc/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/asciidoc/</guid>
-      <description>Erlang.mk provides rules for generating documentation from AsciiDoc files. It can automatically build a user guide PDF, chunked HTML documentation and Unix manual pages.
-Requirements It is necessary to have AsciiDoc, xsltproc and dblatex installed on your system for Erlang.mk to generate documentation from AsciiDoc sources.
-Writing AsciiDoc documentation AsciiDoc is a text document format for writing notes, documentation, articles, books, ebooks, slideshows, web pages, man pages and blogs. AsciiDoc files can be translated to many formats including HTML, PDF, EPUB, man page.</description>
     </item>
     
     <item>
@@ -2047,6 +2037,16 @@ The Req object is the subject of a few different chapters. In this chapter we wi
       <description>The Req object is a variable used for obtaining information about a request, read its body or send a response.
 It is not really an object in the object-oriented sense. It is a simple map that can be directly accessed or used when calling functions from the cowboy_req module.
 The Req object is the subject of a few different chapters. In this chapter we will learn about the Req object and look at how to retrieve information about the request.</description>
+    </item>
+    
+    <item>
+      <title>Compatibility with other build tools</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/compat/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/compat/</guid>
+      <description>Erlang.mk tries its best to be compatible with the other Erlang build tools. It can use dependencies written with other build tools in mind, and can also make your projects usable by those build tools as well. Erlang.mk is like the cool kid that gets along with everybody.
+In this chapter I will use the term Rebar project to refer to a project built using Rebar 2, Rebar 3 or Mad.</description>
     </item>
     
     <item>
@@ -2155,26 +2155,14 @@ You are not required to read it, however. If a body is present and was not read,
     </item>
     
     <item>
-      <title>EDoc comments</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/edoc/</link>
+      <title>AsciiDoc documentation</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/asciidoc/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/edoc/</guid>
-      <description>Erlang.mk provides a thin wrapper on top of EDoc, an application that generates documentation based on comments found in modules.
-Writing EDoc comments The EDoc user guide explains everything you need to know about EDoc comments.
-Configuration The EDOC_OPTS variable allows you to specify additional EDoc options. Options are documented in the EDoc manual.
-A common use for this variable is to enable Markdown in doc comments, using the edown application:</description>
-    </item>
-    
-    <item>
-      <title>Sphinx documentation</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/sphinx/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/sphinx/</guid>
-      <description>Erlang.mk includes targets for running the Sphinx documentation generator, which can produce documentation in various formats, like HTML, man pages, Texinfo, LaTeX, and others.
-Writing Sphinx documentation Sphinx generates documentation from a set of reST documents. There is a quick start guide on Sphinx&amp;apos; website. For Erlang.mk, we&amp;apos;ll set up a minimal environment instead.
-Basic setup By default, Erlang.mk expects Sphinx documentation to be placed in the doc directory, with doc/conf.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/asciidoc/</guid>
+      <description>Erlang.mk provides rules for generating documentation from AsciiDoc files. It can automatically build a user guide PDF, chunked HTML documentation and Unix manual pages.
+Requirements It is necessary to have AsciiDoc, xsltproc and dblatex installed on your system for Erlang.mk to generate documentation from AsciiDoc sources.
+Writing AsciiDoc documentation AsciiDoc is a text document format for writing notes, documentation, articles, books, ebooks, slideshows, web pages, man pages and blogs. AsciiDoc files can be translated to many formats including HTML, PDF, EPUB, man page.</description>
     </item>
     
     <item>
@@ -2272,14 +2260,15 @@ While only one response is allowed for every request, HTTP/2 introduced a mechan
     </item>
     
     <item>
-      <title>Erlang shell</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/shell/</link>
+      <title>EDoc comments</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/edoc/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/shell/</guid>
-      <description>Erlang.mk provides a convenient target for starting a shell with all the paths set properly to experiment with your code.
-Configuration The SHELL_DEPS variable can be used to define dependencies that are only to be used when the make shell command is called. For example, if you want to use kjell as your shell:
-SHELL_DEPS = kjell  Dependencies are downloaded and compiled the first time you run the make shell command.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/edoc/</guid>
+      <description>Erlang.mk provides a thin wrapper on top of EDoc, an application that generates documentation based on comments found in modules.
+Writing EDoc comments The EDoc user guide explains everything you need to know about EDoc comments.
+Configuration The EDOC_OPTS variable allows you to specify additional EDoc options. Options are documented in the EDoc manual.
+A common use for this variable is to enable Markdown in doc comments, using the edown application:</description>
     </item>
     
     <item>
@@ -2353,14 +2342,14 @@ Cookies are a name/value store where the names and values are stored in plain te
     </item>
     
     <item>
-      <title>EUnit</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/eunit/</link>
+      <title>Sphinx documentation</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/sphinx/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/eunit/</guid>
-      <description>EUnit is the tool of choice for unit testing. Erlang.mk automates a few things on top of EUnit, including the discovery and running of unit tests.
-Writing tests The EUnit user guide is the best place to learn how to write tests. Of note is that all functions ending with _test or _test_ will be picked up as EUnit test cases.
-Erlang.mk will automatically pick up tests found in any of the Erlang modules of your application.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/sphinx/</guid>
+      <description>Erlang.mk includes targets for running the Sphinx documentation generator, which can produce documentation in various formats, like HTML, man pages, Texinfo, LaTeX, and others.
+Writing Sphinx documentation Sphinx generates documentation from a set of reST documents. There is a quick start guide on Sphinx&amp;apos; website. For Erlang.mk, we&amp;apos;ll set up a minimal environment instead.
+Basic setup By default, Erlang.mk expects Sphinx documentation to be placed in the doc directory, with doc/conf.</description>
     </item>
     
     <item>
@@ -2441,14 +2430,14 @@ In the context of HTTP, multipart is most often used with the multipart/form-dat
     </item>
     
     <item>
-      <title>Common Test</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/common_test/</link>
+      <title>Erlang shell</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/shell/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/common_test/</guid>
-      <description>Common Test is Erlang&amp;apos;s functional testing framework. Erlang.mk automates the discovery and running of Common Test suites.
-Writing tests The Common Test user guide is the best place to learn how to write tests. Erlang.mk requires that file names for test suites end with _SUITE.erl and that the files be located in the $(TEST_DIR) directory. This defaults to test/.
-Configuration The CT_OPTS variable allows you to set extra Common Test options.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/shell/</guid>
+      <description>Erlang.mk provides a convenient target for starting a shell with all the paths set properly to experiment with your code.
+Configuration The SHELL_DEPS variable can be used to define dependencies that are only to be used when the make shell command is called. For example, if you want to use kjell as your shell:
+SHELL_DEPS = kjell  Dependencies are downloaded and compiled the first time you run the make shell command.</description>
     </item>
     
     <item>
@@ -2529,18 +2518,25 @@ We will first attempt to define REST and will look at what it means in the conte
     </item>
     
     <item>
-      <title>Triq</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/triq/</link>
+      <title>EUnit</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/eunit/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/triq/</guid>
-      <description>Triq is a QuickCheck-like library for property-based testing. Erlang.mk automates discovery and checking of Triq properties.
-To run all tests (including Triq):
-$ make tests  To run all tests and static checks (including Triq):
-$ make check  You can also run Triq separately:
-$ make triq  To check properties from a single module:
-$ make triq t=foo_tests  To check a single property:
-$ make triq t=foo_tests:bar  </description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/eunit/</guid>
+      <description>EUnit is the tool of choice for unit testing. Erlang.mk automates a few things on top of EUnit, including the discovery and running of unit tests.
+Writing tests The EUnit user guide is the best place to learn how to write tests. Of note is that all functions ending with _test or _test_ will be picked up as EUnit test cases.
+Erlang.mk will automatically pick up tests found in any of the Erlang modules of your application.</description>
+    </item>
+    
+    <item>
+      <title>Common Test</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/common_test/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/common_test/</guid>
+      <description>Common Test is Erlang&amp;apos;s functional testing framework. Erlang.mk automates the discovery and running of Common Test suites.
+Writing tests The Common Test user guide is the best place to learn how to write tests. Erlang.mk requires that file names for test suites end with _SUITE.erl and that the files be located in the $(TEST_DIR) directory. This defaults to test/.
+Configuration The CT_OPTS variable allows you to set extra Common Test options.</description>
     </item>
     
     <item>
@@ -2628,22 +2624,18 @@ init(Req, State) -&amp;gt; {cowboy_rest, Req, State}.</description>
     </item>
     
     <item>
-      <title>Code coverage</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</link>
+      <title>PropEr</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/proper/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</guid>
-      <description>Placeholder chapter.</description>
-    </item>
-    
-    <item>
-      <title>Continuous integration</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</guid>
-      <description>Erlang.mk comes with some support for continuous integration, aimed at open source projects that need to support more than one specific Erlang/OTP release. (If you target one specific release, check the OTP version pinning section of the OTP version management chapter.)
-Configuring Erlang/OTP versions to test To use the CI plugin you must first configure which versions of Erlang/OTP will be used. Erlang.mk provides three separate configuration variables depending on whether you need a normal OTP release, a HiPE-enabled release or an ErLLVM-enabled release.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/proper/</guid>
+      <description>PropEr is a QuickCheck-like library for property-based testing. Erlang.mk automates discovery and checking of PropEr properties.
+To run all tests (including PropEr):
+$ make tests  To run all tests and static checks (including PropEr):
+$ make check  You can also run PropEr separately:
+$ make proper  To check properties from a single module:
+$ make proper t=foo_tests  To check a single property:
+$ make proper t=foo_tests:bar  </description>
     </item>
     
     <item>
@@ -2724,14 +2716,29 @@ All paths start with the &amp;quot;Start&amp;quot; diagram, and all paths exclud
     </item>
     
     <item>
-      <title>Dialyzer</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</link>
+      <title>Triq</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/triq/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</guid>
-      <description>Dialyzer is a tool that will detect discrepancies in your program. It does so using a technique known as success typing analysis which has the advantage of providing no false positives. Dialyzer is able to detect type errors, dead code and more.
-Erlang.mk provides a wrapper around Dialyzer.
-How it works Dialyzer requires a PLT file to work. The PLT file contains the analysis information from all applications which are not expected to change, or rarely do.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/triq/</guid>
+      <description>Triq is a QuickCheck-like library for property-based testing. Erlang.mk automates discovery and checking of Triq properties.
+To run all tests (including Triq):
+$ make tests  To run all tests and static checks (including Triq):
+$ make check  You can also run Triq separately:
+$ make triq  To check properties from a single module:
+$ make triq t=foo_tests  To check a single property:
+$ make triq t=foo_tests:bar  </description>
+    </item>
+    
+    <item>
+      <title>Code coverage</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/coverage/</guid>
+      <description>Erlang.mk provides support for code coverage via the tool cover that comes with Erlang/OTP. Code coverage lets you see what parts of your code are covered by the tests.
+Enabling cover when running tests To run tests with code coverage enabled, simply define COVER=1 either on the command line or in your Makefile:
+$ make tests COVER=1  When running the targets tests or check the code coverage report will be built automatically.</description>
     </item>
     
     <item>
@@ -2805,23 +2812,13 @@ The service Can the service become unavailable, and when it does, can we detect 
     </item>
     
     <item>
-      <title>Xref</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</link>
+      <title>Continuous integration</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</guid>
-      <description>Placeholder chapter.</description>
-    </item>
-    
-    <item>
-      <title>External plugins</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins/</guid>
-      <description>It is often convenient to be able to keep the build files used by all your projects in one place. Those files could be Makefiles, configuration files, templates and more.
-Erlang.mk allows you to automatically load plugins from dependencies. Plugins can do anything, including defining new variables, defining file templates, hooking themselves inside the normal Erlang.mk processing or even adding new rules.
-You can load plugins using one of two methods.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/ci/</guid>
+      <description>Erlang.mk comes with some support for continuous integration, aimed at open source projects that need to support more than one specific Erlang/OTP release. (If you target one specific release, check the OTP version pinning section of the OTP version management chapter.)
+Configuring Erlang/OTP versions to test To use the CI plugin you must first configure which versions of Erlang/OTP will be used. Erlang.mk provides three separate configuration variables depending on whether you need a normal OTP release, a HiPE-enabled release or an ErLLVM-enabled release.</description>
     </item>
     
     <item>
@@ -2902,17 +2899,23 @@ Websocket connections are fully asynchronous, unlike HTTP/1.1 (synchronous) and 
     </item>
     
     <item>
-      <title>List of plugins</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins_list/</link>
+      <title>Dialyzer</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins_list/</guid>
-      <description>This is a non-exhaustive list of Erlang.mk plugins, sorted alphabetically.
-efene.mk An Efene plugin for Erlang.mk. Efene is an alternative language for the BEAM.
-elixir.mk An Elixir plugin for Erlang.mk. Elixir is an alternative language for the BEAM.
-elvis.mk An Elvis plugin for Erlang.mk. Elvis is an Erlang style reviewer.
-geas Geas gives aggregated information on a project and its dependencies, and is available as an Erlang.mk plugin.
-hexer.mk An Hex plugin for Erlang.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/dialyzer/</guid>
+      <description>Dialyzer is a tool that will detect discrepancies in your program. It does so using a technique known as success typing analysis which has the advantage of providing no false positives. Dialyzer is able to detect type errors, dead code and more.
+Erlang.mk provides a wrapper around Dialyzer.
+How it works Dialyzer requires a PLT file to work. The PLT file contains the analysis information from all applications which are not expected to change, or rarely do.</description>
+    </item>
+    
+    <item>
+      <title>Xref</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/xref/</guid>
+      <description>Placeholder chapter.</description>
     </item>
     
     <item>
@@ -2983,6 +2986,17 @@ As Websocket connections are established through the HTTP/1.1 upgrade mechanism,
       <guid>https://ninenines.eu/docs/en/cowboy/2.6/guide/ws_handlers/</guid>
       <description>Websocket handlers provide an interface for upgrading HTTP/1.1 connections to Websocket and sending or receiving frames on the Websocket connection.
 As Websocket connections are established through the HTTP/1.1 upgrade mechanism, Websocket handlers need to be able to first receive the HTTP request for the upgrade, before switching to Websocket and taking over the connection. They can then receive or send Websocket frames, handle incoming Erlang messages or close the connection.</description>
+    </item>
+    
+    <item>
+      <title>External plugins</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins/</guid>
+      <description>It is often convenient to be able to keep the build files used by all your projects in one place. Those files could be Makefiles, configuration files, templates and more.
+Erlang.mk allows you to automatically load plugins from dependencies. Plugins can do anything, including defining new variables, defining file templates, hooking themselves inside the normal Erlang.mk processing or even adding new rules.
+You can load plugins using one of two methods.</description>
     </item>
     
     <item>
@@ -3063,15 +3077,16 @@ All versions of HTTP allow clients to initiate streams. HTTP/2 is the only one a
     </item>
     
     <item>
-      <title>Why Erlang.mk</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</link>
+      <title>List of plugins</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins_list/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</guid>
-      <description>Why would you choose Erlang.mk, if not for its many features? This chapter will attempt to answer that.
-Erlang.mk is fast Erlang.mk is as fast as it gets.
-Erlang.mk will group the compilation of files so as to avoid running the BEAM more than necessary. This saves many seconds compared to traditional Makefiles, even on small projects.
-Erlang.mk will not try to be too smart. It provides a simple solution that works for most people, and gives additional options for projects that run into edge cases, often in the form of extra variables or rules to be defined.</description>
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/external_plugins_list/</guid>
+      <description>This is a non-exhaustive list of Erlang.mk plugins, sorted alphabetically.
+ci.erlang.mk A plugin that keeps track of released OTP versions to always run CI builds on the most recent patch(es).
+efene.mk An Efene plugin for Erlang.mk. Efene is an alternative language for the BEAM.
+elixir.mk An Elixir plugin for Erlang.mk. Elixir is an alternative language for the BEAM.
+elvis.mk An Elvis plugin for Erlang.mk. Elvis is an Erlang style reviewer.</description>
     </item>
     
     <item>
@@ -3152,30 +3167,6 @@ Cowboy will execute all middlewares in the given order, unless one of them decid
     </item>
     
     <item>
-      <title>Short history</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</guid>
-      <description>This chapter aims to be a brief record of the life of the Erlang.mk project.
-Before Erlang.mk Erlang.mk originates from the Cowboy project. Cowboy started as a Rebar project and I, Loïc Hoguin, was very happy with it for a couple years. Over time however I started getting annoyed and frustrated by a number of things, including bad defaults, changing defaults and overall slowness.
-In particular, at the time I gave up on Rebar, the Cowboy test suite was taking about five minutes to run.</description>
-    </item>
-    
-    <item>
-      <title>Contributing</title>
-      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/contributing/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/contributing/</guid>
-      <description>You are welcome and encouraged to contribute.
-This is how.
-Priorities From the most important to the least important:
-Bugs  Package issues/additions  Refactoring  Features   Bugs If you have found a bug, you should open a ticket. Include everything relevant including the command you used, output, a link to the code that triggers the issue, why you think this is a bug, etc.
-If you think you have found a bug but you are not sure, you should open a ticket as previously explained.</description>
-    </item>
-    
-    <item>
       <title>Changes since Cowboy 2.2</title>
       <link>https://ninenines.eu/docs/en/cowboy/2.2/guide/migrating_from_2.2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -3248,6 +3239,29 @@ Features added Add option linger_timeout to control how long Cowboy will wait be
     </item>
     
     <item>
+      <title>Why Erlang.mk</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/why/</guid>
+      <description>Why would you choose Erlang.mk, if not for its many features? This chapter will attempt to answer that.
+Erlang.mk is fast Erlang.mk is as fast as it gets.
+Erlang.mk will group the compilation of files so as to avoid running the BEAM more than necessary. This saves many seconds compared to traditional Makefiles, even on small projects.
+Erlang.mk will not try to be too smart. It provides a simple solution that works for most people, and gives additional options for projects that run into edge cases, often in the form of extra variables or rules to be defined.</description>
+    </item>
+    
+    <item>
+      <title>Short history</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/history/</guid>
+      <description>This chapter aims to be a brief record of the life of the Erlang.mk project.
+Before Erlang.mk Erlang.mk originates from the Cowboy project. Cowboy started as a Rebar project and I, Loïc Hoguin, was very happy with it for a couple years. Over time however I started getting annoyed and frustrated by a number of things, including bad defaults, changing defaults and overall slowness.
+In particular, at the time I gave up on Rebar, the Cowboy test suite was taking about five minutes to run.</description>
+    </item>
+    
+    <item>
       <title>HTTP and other specifications</title>
       <link>https://ninenines.eu/docs/en/cowboy/2.0/guide/specs/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -3317,6 +3331,19 @@ Features added Add experimental support for Websocket over HTTP/2. You can use t
       <description>Cowboy 2.6 greatly refactored the HTTP/2 code, a large part of which was moved to Cowlib and is now used by both the Cowboy server and the Gun client.
 A large number of tickets were also closed which resulted in many bugs fixed and many features and options added, although some of them are still experimental.
 Features added Add support for the PROXY protocol header. It can be enabled via the proxy_header option.</description>
+    </item>
+    
+    <item>
+      <title>Contributing</title>
+      <link>https://ninenines.eu/docs/en/erlang.mk/1/guide/contributing/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/contributing/</guid>
+      <description>You are welcome and encouraged to contribute.
+This is how.
+Priorities From the most important to the least important:
+Bugs  Package issues/additions  Refactoring  Features   Bugs If you have found a bug, you should open a ticket. Include everything relevant including the command you used, output, a link to the code that triggers the issue, why you think this is a bug, etc.
+If you think you have found a bug but you are not sure, you should open a ticket as previously explained.</description>
     </item>
     
     <item>
@@ -4208,7 +4235,7 @@ cowboy(3) - Listener management  cowboy_req(3) - Request and response  cowboy_ro
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/erlang.mk/1/guide/</guid>
-      <description>Installation  Getting started  Overview  Updating Erlang.mk  Limitations   Code Building  Packages and dependencies  NIFs and port drivers  Releases  Self-extracting releases  Escripts  OTP version management  Compatibility with other build tools   Documentation Asciidoc documentation  EDoc comments  Sphinx documentation   Tests Erlang shell  EUnit  Common Test  Triq  Code coverage  Continuous integration  Dialyzer  Xref   Third-party plugins External plugins  List of plugins   About Erlang.</description>
+      <description>Installation  Getting started  Overview  Updating Erlang.mk  Limitations   Code Building  Packages and dependencies  NIFs and port drivers  Releases  Self-extracting releases  Escripts  OTP version management  Cross compiling  Compatibility with other build tools   Documentation Asciidoc documentation  EDoc comments  Sphinx documentation   Tests Erlang shell  EUnit  Common Test  PropEr  Triq  Code coverage  Continuous integration  Dialyzer  Xref   Third-party plugins External plugins  List of plugins   About Erlang.</description>
     </item>
     
     <item>
