@@ -3183,8 +3183,9 @@ Cowboy 2.2.2 While fixing the miscount in the previous patch release an issue wa
       
       <guid>https://ninenines.eu/docs/en/cowboy/2.6/guide/migrating_from_2.6/</guid>
       <description>The following patch versions were released since Cowboy 2.6:
-Cowboy 2.6.1 This release updates Ranch to 1.7.1.
-It fixes an issue with the PROXY protocol where the wrong CRC32 algorithm was used and would cause checksum verification to fail.</description>
+Cowboy 2.6.2 This release updates Cowlib to 2.7.2.
+A bug in the HTTP/2 code that resulted in the failure to fully send iolist response bodies has been fixed. Cowboy would just wait indefinitely in those cases.
+Cowboy will now use the host header when the HTTP/2 :authority pseudo header is missing. A common scenario where this occurs is when proxies translate incoming HTTP/1.</description>
     </item>
     
     <item>
@@ -9088,7 +9089,7 @@ Arguments Name Cookie name.
       
       <guid>https://ninenines.eu/docs/en/cowboy/2.6/manual/cowboy_req.set_resp_cookie/</guid>
       <description>Name cowboy_req:set_resp_cookie - Set a cookie
-Description set_resp_cookie(Name, Value, Req :: cowboy_req:req()) -&amp;gt; set_resp_cookie(Name, Value, [], Req) set_resp_cookie(Name, Value, Req :: cowboy_req:req(), Opts) -&amp;gt; Req Name :: binary() %% case sensitive Value :: iodata() %% case sensitive Opts :: cow_cookie:cookie_opts()  Set a cookie to be sent with the response.
+Description set_resp_cookie(Name, Value, Req :: cowboy_req:req()) -&amp;gt; set_resp_cookie(Name, Value, Req, #{}) set_resp_cookie(Name, Value, Req :: cowboy_req:req(), Opts) -&amp;gt; Req Name :: binary() %% case sensitive Value :: iodata() %% case sensitive Opts :: cow_cookie:cookie_opts()  Set a cookie to be sent with the response.
 Note that cookie names are case sensitive.
 Arguments Name Cookie name.
  Value Cookie value.
