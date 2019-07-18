@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Connection draining</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=5" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Connection draining</span></h1>
+
+<p>Stopping a Ranch listener via <code>ranch:stop_listener/1</code> will invariably kill all connection processes the listener hosts. However, you may want to stop a listener in a graceful fashion, ie by not accepting any new connections, but allowing the existing connection processes to exit by themselves instead of being killed.</p>
+<p>For this purpose, you should first suspend the listener you wish to stop gracefully, and then wait for its connection count to drop to zero.</p>
+<div class="listingblock"><div class="title">Draining a single listener</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:suspend_listener</font></b>(<font color="#009900">Ref</font>),
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:wait_for_connections</font></b>(<font color="#009900">Ref</font>, <font color="#FF6600">'=='</font>, <font color="#993399">0</font>),
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:stop_listener</font></b>(<font color="#009900">Ref</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>If you want to drain more than just one listener, it may be important to first suspend them all before beginning to wait for their connection counts to reach zero. Otherwise, the not yet suspended listeners will still be accepting connections while you wait for the suspended ones to be drained.</p>
+<div class="listingblock"><div class="title">Draining multiple listeners</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">lists:foreach</font></b>(
+	<b><font color="#0000FF">fun</font></b> (<font color="#009900">Ref</font>) <font color="#990000">-&gt;</font>
+		<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:suspend_listener</font></b>(<font color="#009900">Ref</font>)
+	<b><font color="#0000FF">end</font></b>,
+	<font color="#009900">Refs</font>
+),
+<b><font color="#000000">lists:foreach</font></b>(
+	<b><font color="#0000FF">fun</font></b> (<font color="#009900">Ref</font>) <font color="#990000">-&gt;</font>
+		<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:wait_for_connections</font></b>(<font color="#009900">Ref</font>, <font color="#FF6600">'=='</font>, <font color="#993399">0</font>),
+		<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:stop_listener</font></b>(<font color="#009900">Ref</font>)
+	<b><font color="#0000FF">end</font></b>,
+	<font color="#009900">Refs</font>
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>If you have long-running connection processes hosted by the listener you want to stop gracefully, draining may take a long time, possibly forever. If you just want to give the connection processes a chance to finish, but are not willing to wait for infinity, the waiting part could be handled in a separate process.</p>
+<div class="listingblock"><div class="title">Draining a listener with a timeout</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:suspend_listener</font></b>(<font color="#009900">Ref</font>),
+{<font color="#009900">DrainPid</font>, <font color="#009900">DrainRef</font>} <font color="#990000">=</font> <b><font color="#000000">spawn_monitor</font></b>(
+	<b><font color="#0000FF">fun</font></b> () <font color="#990000">-&gt;</font>
+		<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:wait_for_connections</font></b>(<font color="#009900">Ref</font>, <font color="#FF6600">'=='</font>, <font color="#993399">0</font>)
+	<b><font color="#0000FF">end</font></b>
+),
+<b><font color="#0000FF">receive</font></b>
+	{<font color="#FF6600">'DOWN'</font>, <font color="#009900">DrainRef</font>, <b><font color="#000080">process</font></b>, <font color="#009900">DrainPid</font>, <font color="#990000">_</font>} <font color="#990000">-&gt;</font>
+		<font color="#FF6600">ok</font>
+<b><font color="#0000FF">after</font></b> <font color="#009900">DrainTimeout</font> <font color="#990000">-&gt;</font>
+	<b><font color="#000080">exit</font></b>(<font color="#009900">DrainPid</font>, <b><font color="#000080">kill</font></b>),
+	<font color="#FF6600">ok</font>
+<b><font color="#0000FF">end</font></b>,
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:stop_listener</font></b>(<font color="#009900">Ref</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>To drain listeners automatically as part of your application shutdown routine, use the <code>prep_stop/1</code> function of your application module.</p>
+<div class="listingblock"><div class="title">Draining listeners automatically on application shutdown</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000080">-module</font></b>(<font color="#FF6600">my_app</font>)<font color="#990000">.</font>
+
+<b><font color="#000080">-behavior</font></b>(<font color="#FF6600">application</font>)<font color="#990000">.</font>
+
+<b><font color="#000080">-export</font></b>([<b><font color="#000000">start</font></b><font color="#990000">/</font><font color="#993399">2</font>])<font color="#990000">.</font>
+<b><font color="#000080">-export</font></b>([<b><font color="#000000">prep_stop</font></b><font color="#990000">/</font><font color="#993399">1</font>])<font color="#990000">.</font>
+<b><font color="#000080">-export</font></b>([<b><font color="#000000">stop</font></b><font color="#990000">/</font><font color="#993399">1</font>])<font color="#990000">.</font>
+
+<b><font color="#000000">start</font></b>(<font color="#009900">_StartType</font>, <font color="#009900">_StartArgs</font>) <font color="#990000">-&gt;</font>
+	{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">my_listener</font>, <font color="#FF6600">ranch_tcp</font>, #{}, <font color="#FF6600">my_protocol</font>, []),
+	<b><font color="#000000">my_app_sup:start_link</font></b>()<font color="#990000">.</font>
+
+<b><font color="#000000">prep_stop</font></b>(<font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+	<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:suspend_listener</font></b>(<font color="#FF6600">my_listener</font>),
+	<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:wait_for_connections</font></b>(<font color="#FF6600">my_listener</font>, <font color="#FF6600">'=='</font>, <font color="#993399">0</font>),
+	<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:stop_listener</font></b>(<font color="#FF6600">my_listener</font>),
+	<font color="#009900">State</font><font color="#990000">.</font>
+
+<b><font color="#000000">stop</font></b>(<font color="#009900">_State</font>) <font color="#990000">-&gt;</font>
+	<font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
+</div></div>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/ranch/2.0/guide/ssl_auth/">
+					SSL client authentication
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/ranch/2.0/guide/internals/">
+					Internals
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/ranch/1.7/guide">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/guide">1.6</a></li>
+	
+		<li><a href="/docs/en/ranch/1.5/guide">1.5</a></li>
+	
+		<li><a href="/docs/en/ranch/1.4/guide">1.4</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://salt.bountysource.com/teams/ninenines">BountySource</a>. These funds are used to cover the recurring expenses like dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

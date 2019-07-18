@@ -132,4 +132,4 @@ docs:: docs-$1
 
 endef
 
-$(eval $(foreach p,$(PROJECTS),$(call docs-target,$p)))
+$(eval $(foreach p,$(filter-out erlang.mk,$(PROJECTS)),$(call docs-target,$p)))

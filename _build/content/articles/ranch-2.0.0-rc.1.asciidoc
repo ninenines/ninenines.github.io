@@ -1,0 +1,82 @@
++++
+date = "2019-07-18T07:00:00+01:00"
+title = "Ranch 2.0 release candidate 1"
+
++++
+
+Ranch `2.0.0-rc.1` has been released!
+
+We are getting very close to releasing Ranch 2.0! As most of
+the tremendous programming work was done by contributor Jan Uhlig,
+I will yield the floor and let him describe what went into this
+great release.
+
+In Ranch 1.x, there is only one supervisor per Ranch listener
+to start and manage connection processes. Under high load
+(many clients rapidly connecting and/or disconnecting), the
+message queue of this one supervisor could becomes congested,
+leading to declining accept rates or a stalled listener.
+
+Ranch 2.0 introduces the `num_conns_sups` option (defaulting
+to the number of acceptors), which allows the message load to
+be divided between the specified number of connection supervisors.
+This improves accept concurrency at the same time.
+
+Another bottleneck is a possible congestion of the syn queue of
+a listening socket. The reason is located within the operating
+system's TCP/IP implementation, and on Linux the `SO_REUSEPORT`
+socket option was introduced to address it. What it boils down
+to is that you can have more than just one socket listening on
+the same port, causing the sockets to be load-balanced when
+accepting connections.
+
+Ranch 1.x always uses a single listening socket per listener,
+shared between the acceptors. With a trick, starting multiple Ranch
+listeners on the same port, it is already possible to make use
+of the `SO_REUSEPORT` feature. But that's not ideal.
+
+Ranch 2.0 introduces the `num_listen_sockets` option, which allows
+to specify the number of listening sockets a Ranch listener should
+employ, without having to use this trick. Whether you can use
+`SO_REUSEPORT` at all and how to enable it depends on your
+operating system, though.
+
+Other changes include proper support for local (Unix Domain) sockets,
+removing the restriction that a listener be suspended to change its
+transport options and much needed improvements to embedded listeners.
+
+In addition we have had patches merged to Erlang/OTP to add support
+for active N to the `ssl` application (requires Erlang/OTP 21.3 or
+above) and fix a number of smaller issues we encountered. We have
+also helped detect and fix a bug in the Windows implementation of
+active N that greatly reduced its performance in some cases.
+
+To ensure that everything works correctly, new tests have been
+written, and some existing tests were updated. A noteworthy addition
+in this area is pitting Ranch against https://github.com/ankhers/havoc[Havoc],
+a resilience testing tool that kills random processes and ports
+in the system.
+
+Cowboy users wishing to try Ranch 2.0.0-rc.1 will need to use Cowboy's
+master branch at this time or wait for the upcoming Cowboy 2.7.0.
+Cowboy has been made compatible with both Ranch 1 and 2.
+
+Last but not least, aside from the changes mentioned above, we
+are currently preparing a https://github.com/juhlig/prometheus_ranch[Prometheus collector]
+for Ranch as well as an accompanying Grafana dashboard.
+
+Ranch 2.0 requires Erlang/OTP 21 or above and is tested and supported
+on Linux, FreeBSD, macOS and Windows.
+
+A complete
+list of changes can be found in the migration guide:
+https://ninenines.eu/docs/en/ranch/2.0/guide/migrating_from_1.7/[Migrating from Ranch 1.7 to 2.0].
+
+You can donate to this project via
+https://salt.bountysource.com/teams/ninenines[BountySource].
+These funds are used to pay for additional servers for
+testing. We will soon add two Raspberry Pi 4 in order
+to have some ARM targets when testing.
+
+As usual, feedback is appreciated, and issues or
+questions should be sent via Github tickets. Thanks!
