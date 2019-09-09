@@ -117,11 +117,11 @@ Ref = gun:get(Pid, "/"),
 Ref = gun:get(Pid, "/", [], #{flow =&gt; 1}),
 {response, nofin, 200, _} = gun:await(Pid, Ref)
 {data, nofin, _} = gun:await(Pid, Ref),
-{error, timeout} = gun:await(Pid, Ref, 3000),
+{error, timeout} = gun:await(Pid, Ref),
 gun:update_flow(Pid, Ref, 2),
 {data, nofin, _} = gun:await(Pid, Ref),
 {data, nofin, _} = gun:await(Pid, Ref),
-{error, timeout} = gun:await(Pid, Ref, 1000).
+{error, timeout} = gun:await(Pid, Ref).
 	</code></pre>
 
 	<p>Configurable per stream or per protocol:</p>
@@ -137,7 +137,7 @@ gun:update_flow(Pid, Ref, 2),
 	<pre><code data-trim data-noescape>
 {ok, Pid} = gun:open("host.name", 443),
 {ok, _} = gun:await_up(Pid),
-Ref = gun:ws_upgrade(Pid, "/ws", []),
+Ref = gun:ws_upgrade(Pid, "/ws"),
 {upgrade, [&lt;&lt;"websocket"&gt;&gt;], _} = gun:await(Pid, Ref),
 gun:ws_send(Pid, Ref, [
 	{text, &lt;&lt;"Hello!"&gt;&gt;},
@@ -278,7 +278,7 @@ Ref3 = gun:get(Pid, "/"),
 </section>
 
 <section>
-	<h2>Cookie jar</h2>
+	<h2>Cookie jars</h2>
 	<ul>
 		<li>Automatic storing and retrieving of cookies</li>
 		<li>Jars exclusive to one connection</li>
@@ -355,7 +355,14 @@ Ref3 = gun:get(Pid, "/"),
 			<ul><li>Contains many improvements for elixir-grpc</li></ul>
 		</li>
 		<li>Cowboy 2.7 with many improvements for elixir-grpc</li>
-		<li>Ranch 2.0: num acceptors conns_sup listen_sockets</li>
+		<li>
+			Ranch 2.0:
+			<ul>
+				<li>num_acceptors</li>
+				<li>num_conns_sups</li>
+				<li>num_listen_sockets</li>
+			</ul>
+		</li>
 		<li>Serious work started on REST framework</li>
 	</ul>
 </section>
