@@ -1,0 +1,385 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Gun 2.0</title>
+
+		<meta name="description" content"Gun 2 Erlang Paris 2019.09 talk">
+		<meta name="author" content="Loïc Hoguin">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<section>
+	<h1>Gun 2.0</h1>
+	<p>The right of <em>Erlang nodes</em> to keep and<br/>bear arms shall not be infringed. #2A</p>
+	<p><small>Loïc Hoguin, <a href="https://ninenines.eu">Nine Nines</a></small></p>
+</section>
+
+<section>
+	<h1>What is Gun?</h1>
+</section>
+
+<section>
+	<h2>Erlang Web client</h2>
+	<ul>
+		<li>HTTP/1.1</li>
+		<li>HTTP/2</li>
+		<li>Websocket</li>
+		<li>SSE (server-sent events / eventsource)</li>
+		<li>CONNECT and Socks proxies</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Asynchronous</h2>
+	<ul>
+		<li>Functions to perform actions</li>
+		<li>Most functions return immediately</li>
+		<li>Messages sent on input</li>
+		<li>
+			Works very well with <code>gen_statem</code>:
+			<ul><li><a href="https://github.com/inaka/apns4erl/blob/master/src/apns_connection.erl"><code>apns_connection.erl</code></a> is a good example</li></ul>
+	</ul>
+</section>
+
+<section>
+	<h2>Close to specs</h2>
+	<p>If the specification allows it, Gun must allow it</p>
+	<p>Allow Gun to work through the<br/>most exotic network topologies</p>
+</section>
+
+<section>
+	<h1>Features</h1>
+</section>
+
+<section>
+	<h2>Connection management</h2>
+	<ul>
+		<li>One process per connection</li>
+		<li>Supervised under Gun by default, configurable</li>
+		<li>No connection pooling in Gun itself</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Always connected</h2>
+	<ul>
+		<li>Gun is built as an always-connected client</li>
+		<li>Retries connecting after losing the connection</li>
+		<li><code>retry</code> and <code>retry_timeout</code> by default</li>
+		<li><code>retry_fun</code> for more complex needs</li>
+	</ul>
+</section>
+
+<section>
+	<h2>One function per method</h2>
+	<ul>
+		<li>gun:get, gun:head</li>
+		<li>gun:patch, gun:post, gun:put</li>
+		<li>gun:delete</li>
+		<li>gun:options</li>
+		<li>gun:headers (and gun:data), gun:request</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Responses as messages</h2>
+	<ul>
+		<li>gun_up, gun_down</li>
+		<li>gun_upgrade</li>
+		<li>gun_error</li>
+		<li>gun_push</li>
+		<li>gun_inform, gun_response</li>
+		<li>gun_data, gun_trailers</li>
+		<li>gun_ws</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Semi-synchronous mode</h2>
+	<pre><code data-trim data-noescape>
+{ok, Pid} = gun:open("host.name", 443),
+{ok, http2} = gun:await(Pid),
+Ref = gun:get(Pid, "/"),
+{response, nofin, 200, RespHeaders} = gun:await(Pid, Ref),
+{ok, RespBody} = gun:await_body(Pid, Ref).
+	</code></pre>
+</section>
+
+<section>
+	<h2>Flow control</h2>
+	<pre><code data-trim data-noescape>
+Ref = gun:get(Pid, "/", [], #{flow =&gt; 1}),
+{response, nofin, 200, _} = gun:await(Pid, Ref)
+{data, nofin, _} = gun:await(Pid, Ref),
+{error, timeout} = gun:await(Pid, Ref, 3000),
+gun:update_flow(Pid, Ref, 2),
+{data, nofin, _} = gun:await(Pid, Ref),
+{data, nofin, _} = gun:await(Pid, Ref),
+{error, timeout} = gun:await(Pid, Ref, 1000).
+	</code></pre>
+
+	<p>Configurable per stream or per protocol:</p>
+	<pre><code data-trim data-noescape>
+{ok, Pid} = gun:open("host.name", 443, #{
+	http_opts =&gt; #{flow =&gt; 10}
+}).
+	</code></pre>
+</section>
+
+<section>
+	<h2>Websocket</h2>
+	<pre><code data-trim data-noescape>
+{ok, Pid} = gun:open("host.name", 443),
+{ok, _} = gun:await_up(Pid),
+Ref = gun:ws_upgrade(Pid, "/ws", []),
+{upgrade, [&lt;&lt;"websocket"&gt;&gt;], _} = gun:await(Pid, Ref),
+gun:ws_send(Pid, Ref, [
+	{text, &lt;&lt;"Hello!"&gt;&gt;},
+	{binary, &lt;&lt;1,2,3,4&gt;&gt;}
+]),
+{ws, Frame} = gun:await(Pid, Ref).
+	</code></pre>
+	<p>Websocket over HTTP/2 currently missing.</p>
+</section>
+
+<section>
+	<h2>SSE</h2>
+	<pre><code data-trim data-noescape>
+CommonOpts = #{content_handlers =&gt; [gun_sse_h, gun_data_h]},
+{ok, Pid} = gun:open("host.name", 443, #{
+	http_opts =&gt; CommonOpts,
+	http2_opts =&gt; CommonOpts 
+}).
+	</code></pre>
+	<pre><code data-trim data-noescape>
+Ref = gun:get(Pid, "/events", #{
+	&lt;&lt;"accept"&gt;&gt; =&gt; &lt;&lt;"text/event-stream"&gt;&gt;}),
+]),
+{response, nofin, 200, RespHeaders} = gun:await(Pid, Ref),
+{sse, Event} = gun:await(Pid, Ref),
+#{
+	last_event_id := LastEventID,
+	event_type := &lt;&lt;"message"&gt;&gt;,
+	data := Data
+} = Event.
+	</code></pre>
+</section>
+
+<section>
+	<h2>CONNECT support</h2>
+	<section>
+		<pre><code data-trim data-noescape>
+{ok, Pid} = gun:open("proxy1.name", 443),
+Ref1 = gun:connect(Pid, #{
+	host =&gt; "proxy2.name", port =&gt; 443
+}),
+{response, fin, 200, _} = gun:await(Pid, Ref1),
+Ref2 = gun:connect(Pid, #{
+	host =&gt; "origin.name", port =&gt; 443
+}),
+{response, fin, 200, _} = gun:await(Pid, Ref2),
+Ref3 = gun:get(Pid, "/"),
+{response, nofin, 200, RespHeaders} = gun:await(Pid, Ref3),
+{ok, Body} = gun:await_body(Pid, Ref3).
+		</code></pre>
+	</section>
+	<section>
+		<pre><code data-trim data-noescape>
+#{
+	transport := tls, protocol := http,
+	origin_scheme := &lt;&lt;"http"&gt;&gt;,
+	origin_host := "origin.name", origin_port := 443,
+	intermediaries := [
+	#{	type := connect,
+		host := "proxy1.name", port := 443,
+		transport := tls, protocol := http},
+	#{	type := connect,
+		host := "proxy2.name", port := 443,
+		transport := tls, protocol := http}]
+} = gun:info(Pid).
+		</code></pre>
+	</section>
+	<section>
+		<p>CONNECT over HTTP/2 currently missing.</p>
+	</section>
+</section>
+
+<section>
+	<h2>Socks support</h2>
+	<ul>
+		<li>Currently being worked on</li>
+		<li>Similar to CONNECT</li>
+		<li>Open connection to Socks server using <code>gun_socks</code></li>
+		<li>Options determine where to connect next</li>
+		<li>Exotic scenarios: Socks -&gt; CONNECT -&gt; Socks -&gt; ...</li>
+		<li>Support Socks4a, Socks5</li>
+		<li>Socks6 to be supported as well once available</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Events</h2>
+	<section>
+		<ul>
+			<li>init, terminate</li>
+			<li>domain_lookup_start, domain_lookup_end</li>
+			<li>connect_start, connect_end</li>
+			<li>tls_handshake_start, tls_handshake_end</li>
+			<li>disconnect</li>
+		</ul>
+	</section>
+
+	<section>
+		<ul>
+			<li>request_start, request_headers, request_end</li>
+			<li>push_promise_start, push_promise_end</li>
+			<li>response_start, response_inform, response_headers, response_trailers, response_end</li>
+		</ul>
+	</section>
+
+	<section>
+		<ul>
+			<li>ws_upgrade</li>
+			<li>ws_recv_frame_start, ws_recv_frame_header, ws_recv_frame_end</li>
+			<li>ws_send_frame_start, ws_send_frame_end</li>
+		</ul>
+	</section>
+
+	<section>
+		<ul>
+			<li>protocol_changed</li>
+			<li>transport_changed</li>
+			<li>origin_changed</li>
+			<li>cancel</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<h1>Wishlist</h1>
+	<p>Some features might make it into 2.0.<br/>Others in 2.x releases.</p>
+</section>
+
+<section>
+	<h2>Raw socket mode</h2>
+	<ul>
+		<li>Using HTTP/1.1 Upgrade to non-Web protocols</li>
+		<li>
+			Using CONNECT to access non-HTTP servers
+			<ul><li>Including over HTTP/2</li></ul>
+		</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Cookie jar</h2>
+	<ul>
+		<li>Automatic storing and retrieving of cookies</li>
+		<li>Jars exclusive to one connection</li>
+		<li>Jars shared between connections</li>
+		<li>Options for a per-request jar</li>
+		<li>Filters to allow/reject specific cookies</li>
+		<li>Configurable storage (memory, disk, DB)</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Client-side cache</h2>
+	<ul>
+		<li>RFC 7234 (or corresponding httptre RFC)</li>
+		<li>Cache responses per connection/shared</li>
+		<li>Skip requests for which we have a cached response</li>
+		<li>Option to skip the cache when doing a request</li>
+		<li>Configurable storage (memory, disk, DB)</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Internals</h1>
+</section>
+
+<section>
+	<h2>gen_statem</h2>
+	<section>
+		<ul>
+			<li><code>not_connected</code></li>
+			<li><code>domain_lookup</code></li>
+			<li><code>connecting</code></li>
+			<li><code>tls_handshake</code></li>
+			<li><code>connected</code></li>
+			<li><code>closing</code></li>
+		</ul>
+	</section>
+
+	<section>
+		<ul>
+			<li>One callback module per protocol</li>
+			<li>
+				Most callbacks return commands
+				<ul><li>For example to switch the protocol</li></ul>
+			</li>
+		</ul>
+	</section>
+</section>
+
+<section>
+	<h2>HTTP/2 machine</h2>
+	<ul>
+		<li>HTTP/2 code shared with Cowboy</li>
+		<li>Improvements benefit both projects</li>
+		<li>Same options available for both projects</li>
+	</ul>
+</section>
+
+<section>
+	<h2>TLS over TLS</h2>
+	<ul>
+		<li><a href="https://github.com/ninenines/gun/blob/master/src/gun_tls_proxy.erl"><code>gun_tls_proxy</code></a> and <a href="https://github.com/ninenines/gun/blob/master/src/gun_tls_proxy_cb.erl"><code>gun_tls_proxy_cb</code></a></li>
+		<li>Uses <code>ssl</code>'s callback module option</li>
+		<li>Routes the output to Gun, not a socket</li>
+		<li>Makes data go through multiple layers of encryption</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Upcoming</h1>
+	<ul>
+		<li>
+			Gun 2.0.0-pre.1 to be released in September 2019
+			<ul><li>Contains many improvements for elixir-grpc</li></ul>
+		</li>
+		<li>Cowboy 2.7 with many improvements for elixir-grpc</li>
+		<li>Ranch 2.0: num acceptors conns_sup listen_sockets</li>
+		<li>Serious work started on REST framework</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Thanks</h1>
+	<p>Sponsors:</p>
+	<ul>
+		<li>SameRoom.io / 8x8 (long term sponsorship)</li>
+		<li>Pleroma (Socks5 and more)</li>
+		<li>Kobil (elixir-grpc related improvements)</li>
+	</ul>
+	<p><a href="https://ninenines.eu">ninenines.eu</a></p>
+</section>
+
+			</div>
+		</div>
+		<script src="js/reveal.js"></script>
+		<script>
+Reveal.initialize({
+//	controls: false,
+	progress: false,
+	history: true
+});
+		</script>
+	</body>
+</html>
