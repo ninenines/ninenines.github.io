@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Connection</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=6" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Connection</span></h1>
+
+<p>This chapter describes how to open, monitor and close a connection using the Gun client.</p>
+<h2 id="_gun_connections">Gun connections</h2>
+<p>Gun is designed with the HTTP/2 and Websocket protocols in mind. They are built for long-running connections that allow concurrent exchange of data, either in the form of request/responses for HTTP/2 or in the form of messages for Websocket.</p>
+<p>A Gun connection is an Erlang process that manages a socket to a remote endpoint. This Gun connection is owned by a user process that is called the <em>owner</em> of the connection, and is managed by the supervision tree of the <code>gun</code> application.</p>
+<p>Any process can communicate with the Gun connection by calling functions from the module <code>gun</code>. All functions perform their respective operations asynchronously. The Gun connection will send Erlang messages to the calling process whenever needed.</p>
+<p>When the remote endpoint closes the connection, Gun attempts to reconnect automatically.</p>
+<h2 id="_opening_a_new_connection">Opening a new connection</h2>
+<p>The <code>gun:open/2,3</code> function must be used to open a connection.</p>
+<div class="listingblock"><div class="title">Opening a connection to example.org on port 443</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">ConnPid</font>} <font color="#990000">=</font> <b><font color="#000000">gun:open</font></b>(<font color="#FF0000">"example.org"</font>, <font color="#993399">443</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>If the port given is 443, Gun will attempt to connect using TLS. The protocol will be selected automatically using the ALPN extension for TLS. By default Gun supports HTTP/2 and HTTP/1.1 when connecting using TLS.</p>
+<p>For any other port, Gun will attempt to connect using plain TCP and will use the HTTP/1.1 protocol.</p>
+<p>The transport and protocol used can be overriden via options. The manual documents all available options.</p>
+<p>Options can be provided as a third argument, and take the form of a map.</p>
+<div class="listingblock"><div class="title">Opening a TLS connection to example.org on port 8443</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">ConnPid</font>} <font color="#990000">=</font> <b><font color="#000000">gun:open</font></b>(<font color="#FF0000">"example.org"</font>, <font color="#993399">8443</font>, #{<font color="#0000FF">transport</font> <font color="#990000">=&gt;</font> <font color="#FF6600">tls</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>When using TLS you may want to tweak the <a href="http://erlang.org/doc/man/ssl_app.html#configuration">configuration</a> for the <code>ssl</code> application, in particular the <code>session_lifetime</code> and <code>session_cache_client_max</code> to limit the amount of memory used for the TLS sessions cache.</p>
+<h2 id="_waiting_for_the_connection_to_be_established">Waiting for the connection to be established</h2>
+<p>When Gun successfully connects to the server, it sends a <code>gun_up</code> message with the protocol that has been selected for the connection.</p>
+<p>Gun provides the functions <code>gun:await_up/1,2,3</code> that wait for the <code>gun_up</code> message. They can optionally take a monitor reference and/or timeout value. If no monitor is provided, one will be created for the duration of the function call.</p>
+<div class="listingblock"><div class="title">Synchronous opening of a connection</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">ConnPid</font>} <font color="#990000">=</font> <b><font color="#000000">gun:open</font></b>(<font color="#FF0000">"example.org"</font>, <font color="#993399">443</font>),
+{<font color="#FF6600">ok</font>, <font color="#009900">Protocol</font>} <font color="#990000">=</font> <b><font color="#000000">gun:await_up</font></b>(<font color="#009900">ConnPid</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_handling_connection_loss">Handling connection loss</h2>
+<p>When the connection is lost, Gun will send a <code>gun_down</code> message indicating the current protocol, the reason the connection was lost and two lists of stream references.</p>
+<p>The first list indicates open streams that <em>may</em> have been processed by the server. The second list indicates open streams that the server did not process.</p>
+<h2 id="_monitoring_the_connection_process">Monitoring the connection process</h2>
+<p>Because software errors are unavoidable, it is important to detect when the Gun process crashes. It is also important to detect when it exits normally. Erlang provides two ways to do that: links and monitors.</p>
+<p>Gun leaves you the choice as to which one will be used. However, if you use the <code>gun:await/2,3</code> or <code>gun:await_body/2,3</code> functions, a monitor may be used for you to avoid getting stuck waiting for a message that will never come.</p>
+<p>If you choose to monitor yourself you can do it on a permanent basis rather than on every message you will receive, saving resources. Indeed, the <code>gun:await/3,4</code> and <code>gun:await_body/3,4</code> functions both accept a monitor argument if you have one already.</p>
+<div class="listingblock"><div class="title">Monitoring the connection process</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">ConnPid</font>} <font color="#990000">=</font> <b><font color="#000000">gun:open</font></b>(<font color="#FF0000">"example.org"</font>, <font color="#993399">443</font>)<font color="#990000">.</font>
+<font color="#009900">MRef</font> <font color="#990000">=</font> <b><font color="#000000">monitor</font></b>(<b><font color="#000080">process</font></b>, <font color="#009900">ConnPid</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>This monitor reference can be kept and used until the connection process exits.</p>
+<div class="listingblock"><div class="title">Handling `DOWN` messages</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">receive</font></b>
+    <i><font color="#9A1900">%% Receive Gun messages here...</font></i>
+    {<font color="#FF6600">'DOWN'</font>, <font color="#009900">Mref</font>, <b><font color="#000080">process</font></b>, <font color="#009900">ConnPid</font>, <font color="#009900">Reason</font>} <font color="#990000">-&gt;</font>
+        <b><font color="#000000">error_logger:error_msg</font></b>(<font color="#FF0000">"Oops!"</font>),
+        <b><font color="#000080">exit</font></b>(<font color="#009900">Reason</font>)
+<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>What to do when you receive a <code>DOWN</code> message is entirely up to you.</p>
+<h2 id="_closing_the_connection_abruptly">Closing the connection abruptly</h2>
+<p>The connection can be stopped abruptly at any time by calling the <code>gun:close/1</code> function.</p>
+<div class="listingblock"><div class="title">Immediate closing of the connection</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">gun:close</font></b>(<font color="#009900">ConnPid</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The process is stopped immediately without having a chance to perform the protocol&apos;s closing handshake, if any.</p>
+<!-- === Closing the connection gracefully-->
+<!-- -->
+<!-- The connection can also be stopped gracefully by calling the-->
+<!-- `gun:shutdown/1` function.-->
+<!-- -->
+<!-- .Graceful shutdown of the connection-->
+<!-- [source,erlang]-->
+<!-- ------>
+<!-- gun:shutdown(ConnPid).-->
+<!-- ------>
+<!-- -->
+<!-- Gun will refuse any new requests or messages after you call-->
+<!-- this function. It will however continue to send you messages-->
+<!-- for existing streams until they are all completed.-->
+<!-- -->
+<!-- For example if you performed a GET request just before calling-->
+<!-- `gun:shutdown/1`, you will still receive the response before-->
+<!-- Gun closes the connection.-->
+<!-- -->
+<!-- If you set a monitor beforehand, you will receive a message-->
+<!-- when the connection has been closed.-->
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/gun/2.0/guide/protocols/">
+					Supported protocols
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/gun/2.0/guide/http/">
+					HTTP
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/gun/1.3/guide">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/guide">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/guide">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/guide">1.0</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://salt.bountysource.com/teams/ninenines">BountySource</a>. These funds are used to cover the recurring expenses like dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
