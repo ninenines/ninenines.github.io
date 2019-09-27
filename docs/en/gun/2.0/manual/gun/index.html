@@ -244,7 +244,26 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><b><font color="#000000">http2_opts</font></b>() <font color="#990000">::</font> #{
     <font color="#0000FF">closing_timeout</font> <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
     <font color="#0000FF">flow</font>            <font color="#990000">=&gt;</font> <b><font color="#000000">pos_integer</font></b>(),
-    <font color="#0000FF">keepalive</font>       <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>()
+    <font color="#0000FF">keepalive</font>       <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+
+    <i><font color="#9A1900">%% HTTP/2 state machine configuration.</font></i>
+    <font color="#0000FF">connection_window_margin_size</font>  <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
+    <font color="#0000FF">connection_window_update_threshold</font> <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
+    <font color="#0000FF">enable_connect_protocol</font>        <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#0000FF">initial_connection_window_size</font> <font color="#990000">=&gt;</font> <font color="#993399">65535</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
+    <font color="#0000FF">initial_stream_window_size</font>     <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
+    <font color="#0000FF">max_concurrent_streams</font>         <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>() | <font color="#FF6600">infinity</font>,
+    <font color="#0000FF">max_connection_window_size</font>     <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
+    <font color="#0000FF">max_decode_table_size</font>          <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_encode_table_size</font>          <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_frame_size_received</font>        <font color="#990000">=&gt;</font> <font color="#993399">16384</font><font color="#990000">..</font><font color="#993399">16777215</font>,
+    <font color="#0000FF">max_frame_size_sent</font>            <font color="#990000">=&gt;</font> <font color="#993399">16384</font><font color="#990000">..</font><font color="#993399">16777215</font> | <font color="#FF6600">infinity</font>,
+    <font color="#0000FF">max_stream_buffer_size</font>         <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">max_stream_window_size</font>         <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
+    <font color="#0000FF">preface_timeout</font>                <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">settings_timeout</font>               <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">stream_window_margin_size</font>      <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
+    <font color="#0000FF">stream_window_update_threshold</font> <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>
 }</tt></pre>
 </div></div>
 <p>Configuration for the HTTP/2 protocol.</p>
@@ -260,7 +279,6 @@ http://www.gnu.org/software/src-highlite -->
 <dd><p>Time between pings in milliseconds.</p>
 </dd>
 </dl>
-<!-- @todo Allow and document max_frame_size_sent.-->
 <h3 id="_opts">opts()</h3>
 <div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
 by Lorenzo Bettini

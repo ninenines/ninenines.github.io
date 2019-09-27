@@ -1,0 +1,72 @@
++++
+date = "2019-09-27T07:00:00+01:00"
+title = "Gun 2.0 pre-release 1"
+
++++
+
+Gun `2.0.0-pre.1` has been released!
+
+The first pre-release version of Gun 2.0 has been released!
+Gun 2.0 adds a ton of features along with a small number of
+breaking changes.
+
+Before listing the features please note that this pre-release
+includes a fix for a potential security vulnerability! This
+only applies when Gun is used inside a proxy under specific
+circumstances. Please see the migration guide for details.
+Since the issue also exists in the previous version I have
+released Gun `1.3.1` as well that fixes this issue.
+
+Much of my focus for Gun 2.0 has been improving the support
+for connecting through proxies. Gun now supports both Socks5
+and CONNECT proxies, but most importantly Gun is now able
+to tunnel TLS connections through TLS proxies. Gun is also
+able to tunnel connections through any combination of proxies,
+for example Socks5 TCP to CONNECT TLS to Socks5 TLS to origin
+server using TLS.
+
+Gun does not support HTTP/2 CONNECT yet but this is a planned
+feature that will be the main focus for the next pre-release.
+Along with it support for Websocket over HTTP/2 will be added
+since it reuses the HTTP/2 CONNECT mechanism.
+
+Other features include the graceful shutdown of connections;
+flow control for data messages; or event handlers with many hook
+points for instrumentation and other purposes.
+
+While experimental at the time of the pre-release, Gun can
+now be used to send and receive non-HTTP/Websocket data.
+Gun can therefore be used as a Socks/CONNECT client for
+any protocol. Gun can also use the HTTP/1.1 Upgrade mechanism
+to switch to any protocol. This feature will be documented
+before the Gun 2.0 release.
+
+The HTTP/2 code has seen numerous fixes thanks to merging
+Gun's and Cowboy's code together. In addition Gun will now
+receive HTTP/2 response bodies much faster than before thanks
+to better defaults and optimizations.
+
+Gun 2.0 currently requires Erlang/OTP 20 or above and is tested
+and supported on Linux, FreeBSD, macOS and Windows.
+
+A complete
+list of changes can be found in the migration guide:
+https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/[Migrating from Gun 1.3 to 2.0].
+
+I will have more free time available for consulting or for
+paid open source development starting from next week. If you
+are interested, drop me an email at mailto:contact@ninenines.eu[contact@ninenines.eu].
+I have gathered that there's interest in a pure Erlang GRPC
+implementation, and there's also QUIC and HTTP/3 that will
+be ready soon, for example of projects I'd be interested in
+working on.
+
+You can donate to this project via
+https://salt.bountysource.com/teams/ninenines[BountySource].
+These funds are used to pay for additional servers for
+testing. We will soon add two Raspberry Pi 4 in order
+to have some ARM targets when testing. (The Pis are here!
+Just need to install now.)
+
+As usual, feedback is appreciated, and issues or
+questions should be sent via Github tickets. Thanks!

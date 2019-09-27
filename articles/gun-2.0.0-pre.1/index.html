@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <title>Nine Nines: Website update</title>
+    <title>Nine Nines: Gun 2.0 pre-release 1</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=6" rel="stylesheet">
@@ -62,23 +62,26 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Website update</span></h1>
+	<h1 class="lined-header"><span>Gun 2.0 pre-release 1</span></h1>
 	<p class="date">
-		<span class="year">2016</span>
-		<span class="day-month">02 Apr</span>
+		<span class="year">2019</span>
+		<span class="day-month">27 Sep</span>
 	</p>
 </header>
 
-<p>Last week-end I updated the Nine Nines website.</p>
-<p>I switched to <a href="http://gohugo.io/">Hugo</a>. The site is now built from <a href="http://asciidoc.org/">Asciidoc</a> documents. You probably saw me switch to Asciidoc for documentation this past year. This is the natural conclusion to that story. The great thing is that with a little bit of Makefile magic I can just copy the documentation files into Hugo and poof, they appear on the website.</p>
-<p>I am very happy with that new setup. I can now post my thoughts again. Woo! Expect regular posts from now on. I will try to replace my long series of tweets with posts.</p>
-<p>The sections have been rearranged. There used to be a separate training section; now  <a href="/services">all my services</a> are described in one page. I have also clarified my areas of expertise. There used to be confusion in the past, so now it should be clearer that I am not a distributed systems expert.</p>
-<p>On that note, if you are looking for my services right now, I&apos;m not available. I&apos;ll have to work 7 days a week for a while. Try again in a couple months. More on that in a future post.</p>
-<p>The <a href="/docs">documentation</a> becomes a first class citizen. Bullet and Cowlib don&apos;t have proper documentation... yet. I have started working on the Cowlib documentation, and Bullet shouldn&apos;t take too long. All these projects will be documented when Cowboy gets to 2.0, and will all be supported equally. Note that the Cowboy 1.0 documentation still has the old website templates and links. Don&apos;t worry about it.</p>
-<p>The mailing lists link has been removed. I did announce a few months back that mailing lists were going to go. They&apos;re still up right now, but not for long. I am planning to put the archives read-only, link to them from a future post and be done with it. If you have a question, open a ticket on Github. Then I can just decide to leave the ticket open if I want to do improvements based on your feedback.</p>
-<p>I have replaced most of the &quot;we&quot; by &quot;I&quot;. I am a one-man company right now. Have been for a while. Doesn&apos;t make sense to keep a facade. I want to be close to users, not put a barrier between us.</p>
-<p>The RSS changed. The old link doesn&apos;t work anymore. The new link is at <a href="/index.xml">/index.xml</a>,  or <a href="/articles/index.xml">/articles/index.xml</a> if you only care about my posts. I guess that&apos;s the one most people want.</p>
-<p>I still have some tweaks to do, but it will take a while. My long term plan is to remove Bootstrap, use vanilla CSS and as little JS as possible. The reason for that is that it&apos;s cheaper than upgrading libraries every few years. Life is too short to spend it upgrading JS libraries.</p>
+<p>Gun <code>2.0.0-pre.1</code> has been released!</p>
+<p>The first pre-release version of Gun 2.0 has been released! Gun 2.0 adds a ton of features along with a small number of breaking changes.</p>
+<p>Before listing the features please note that this pre-release includes a fix for a potential security vulnerability! This only applies when Gun is used inside a proxy under specific circumstances. Please see the migration guide for details. Since the issue also exists in the previous version I have released Gun <code>1.3.1</code> as well that fixes this issue.</p>
+<p>Much of my focus for Gun 2.0 has been improving the support for connecting through proxies. Gun now supports both Socks5 and CONNECT proxies, but most importantly Gun is now able to tunnel TLS connections through TLS proxies. Gun is also able to tunnel connections through any combination of proxies, for example Socks5 TCP to CONNECT TLS to Socks5 TLS to origin server using TLS.</p>
+<p>Gun does not support HTTP/2 CONNECT yet but this is a planned feature that will be the main focus for the next pre-release. Along with it support for Websocket over HTTP/2 will be added since it reuses the HTTP/2 CONNECT mechanism.</p>
+<p>Other features include the graceful shutdown of connections; flow control for data messages; or event handlers with many hook points for instrumentation and other purposes.</p>
+<p>While experimental at the time of the pre-release, Gun can now be used to send and receive non-HTTP/Websocket data. Gun can therefore be used as a Socks/CONNECT client for any protocol. Gun can also use the HTTP/1.1 Upgrade mechanism to switch to any protocol. This feature will be documented before the Gun 2.0 release.</p>
+<p>The HTTP/2 code has seen numerous fixes thanks to merging Gun&apos;s and Cowboy&apos;s code together. In addition Gun will now receive HTTP/2 response bodies much faster than before thanks to better defaults and optimizations.</p>
+<p>Gun 2.0 currently requires Erlang/OTP 20 or above and is tested and supported on Linux, FreeBSD, macOS and Windows.</p>
+<p>A complete list of changes can be found in the migration guide: <a href="https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/">Migrating from Gun 1.3 to 2.0</a>.</p>
+<p>I will have more free time available for consulting or for paid open source development starting from next week. If you are interested, drop me an email at <a href="mailto:contact@ninenines.eu">contact@ninenines.eu</a>. I have gathered that there&apos;s interest in a pure Erlang GRPC implementation, and there&apos;s also QUIC and HTTP/3 that will be ready soon, for example of projects I&apos;d be interested in working on.</p>
+<p>You can donate to this project via <a href="https://salt.bountysource.com/teams/ninenines">BountySource</a>. These funds are used to pay for additional servers for testing. We will soon add two Raspberry Pi 4 in order to have some ARM targets when testing. (The Pis are here! Just need to install now.)</p>
+<p>As usual, feedback is appreciated, and issues or questions should be sent via Github tickets. Thanks!</p>
 
 
 </article>
