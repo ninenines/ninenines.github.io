@@ -68,7 +68,7 @@ docs-$1-$2: tmp/$1
 		mkdir -p static/docs/en/$1/$3/guide/; \
 		cp tmp/$1/doc/src/guide/* static/docs/en/$1/$3/guide/; \
 	fi
-	if [ -f tmp/$1/doc/src/manual/$1.asciidoc ]; then \
+	if [ -f tmp/$1/doc/src/manual/$1_app.asciidoc ]; then \
 		mkdir -p content/docs/en/$1/$3/manual/; \
 		printf "%s\n" "+++" "title = \"`sed 's/\(.\)/\U\1/' <<< $1` Function Reference\"" \
 			"project = \"$1\"" "version = \"$3\"" "doctype = \"manual\"" "+++" "" \
