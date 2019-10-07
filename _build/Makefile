@@ -25,6 +25,8 @@ tmp: clean
 
 # For substitution.
 comma := ,
+quote := "
+# Necessary comment to fix syntax highlighting: "
 
 define docs-version-target
 
@@ -59,9 +61,9 @@ docs-$1-$2: tmp/$1
 			echo >> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 			sed '1,/^$$$$/d' $$$$f | sed 's/^=== /== /' \
 				| sed 's/xref:/link:..\//g' | sed 's/image::/image::..\//g' \
-				| sed 's/link:man:$1[(]7[)]/link:..\/$1_app/g' \
+				| sed 's/link:man:$1[(]7[)]/link:\/docs\/en\/$1\/$3\/manual\/$1_app/g' \
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
-				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
+				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\/docs\/en\/$1\/$3\/manual\/\1/g' \
 				>> content/docs/en/$1/$3/guide/`basename $$$$f`; \
 		done; \
 		rm tmp/$1/doc/src/guide/book.asciidoc.bak; \
@@ -115,7 +117,7 @@ endef
 define docs-target
 
 $(eval include data/projects/$1.toml)
-$(eval VERSIONS := $(subst $(comma),,$(subst ],,$(subst [,,$(versions)))))
+$(eval VERSIONS := $(subst $(quote),,$(subst $(comma),,$(subst ],,$(subst [,,$(versions))))))
 $(eval BRANCHES := $(subst $(comma),,$(subst ],,$(subst [,,$(branches)))))
 $(eval TARGETS := $(shell echo "1 2 3 4 5 6 7 8 9" | cut -d' ' -f 1-$(words $(VERSIONS))))
 
