@@ -69,7 +69,7 @@
 <h2 id="_callbacks">Callbacks</h2>
 <p>Ranch transports implement the following interface:</p>
 <h3 id="_accept">accept</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -79,7 +79,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Use the listening socket returned by <code>listen/1</code> to accept a new connection. The timeout is specified in milliseconds.</p>
 <h3 id="_close">close</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -87,7 +87,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Close the socket.</p>
 <h3 id="_controlling_process">controlling_process</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -96,7 +96,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Assign a new controlling process to the socket. The controlling process is the process that is linked to and receives messages from the socket.</p>
 <h3 id="_getopts">getopts</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -105,7 +105,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Get one or more options for the socket.</p>
 <h3 id="_getstat">getstat</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -113,7 +113,7 @@ http://www.gnu.org/software/src-highlite -->
     <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">SockStatValues</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
 </div></div>
 <p>Get all statistics for the socket.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -122,20 +122,55 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Get one or more statistic options for the socket.</p>
 <h3 id="_handshake">handshake</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><b><font color="#000000">handshake</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
-          <font color="#009900">SockOpts</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>(),
           <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
-    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font>}</tt></pre>
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">Info</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}
+
+<b><font color="#000000">handshake</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+          <font color="#009900">SockOpts</font> <font color="#990000">::</font> <b><font color="#000000">opts</font></b>(),
+          <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">Info</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}</tt></pre>
 </div></div>
 <p>Perform the transport-level handshake.</p>
 <p>This function will be called by connection processes before performing any socket operation. It allows transports that require extra initialization to perform their task and return a socket that is ready to use.</p>
+<p>If the handshake is completed by this call, the function will return <code>{ok, Socket}</code>. However, some transports (notably, <code>ranch_ssl</code> if <code>{handshake, hello}</code> is specified in the socket options) may pause the handshake at a certain point and return <code>{ok, Socket, Info}</code> instead, in order to allow for additional decisions to be made before resuming the handshake with <code>handshake_continue/3</code> or cancelling it with <code>handshake_cancel/1</code>.</p>
 <p>This function may also be used to upgrade a connection from a transport to another depending on the capabilities of the transports. For example a <code>ranch_tcp</code> socket may be upgraded to a <code>ranch_ssl</code> one using this function.</p>
+<h3 id="_handshake_continue">handshake_continue</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">handshake_continue</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+                   <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}
+
+<b><font color="#000000">handshake_continue</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+                   <font color="#009900">SockOpts</font> <font color="#990000">::</font> <b><font color="#000000">opts</font></b>(),
+                   <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>Resume the paused transport-level handshake and return a socket that is ready to use.</p>
+<p>This function will be called by connection processes to resume a paused handshake.</p>
+<h3 id="_handshake_cancel">handshake_cancel</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">handshake_cancel</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()) <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font></tt></pre>
+</div></div>
+<p>Cancel the paused transport-level handshake.</p>
 <h3 id="_listen">listen</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -145,7 +180,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Create a socket that listens on the port given in the socket options.</p>
 <p>The port may not be specified or may be set to 0, which means a random available port number will be chosen.</p>
 <h3 id="_messages">messages</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -157,7 +192,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Return the tuple keys for the messages sent by the socket.</p>
 <h3 id="_name">name</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -165,7 +200,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Return the name of the transport.</p>
 <h3 id="_peername">peername</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -176,7 +211,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Return the address and port number for the other end of the connection.</p>
 <p>For UNIX Domain sockets the return value will be <code>{local, PeerSocket}</code>, with <code>PeerSocket</code> typically an empty binary.</p>
 <h3 id="_recv">recv</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -191,7 +226,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>A length of 0 will return the data available on the socket as soon as possible, regardless of length.</p>
 <p>While it is possible to use the timeout value <code>infinity</code>, it is highly discouraged as it could cause your process to get stuck waiting for data that will never come. This may happen when a socket becomes half-open due to a crash of the remote endpoint. Wi-Fi going down is another common culprit.</p>
 <h3 id="_secure">secure</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -199,7 +234,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Return whether the transport can be used for secure connections.</p>
 <h3 id="_send">send</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -208,7 +243,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Send a packet on the socket.</p>
 <h3 id="_sendfile">sendfile</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -229,7 +264,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>The file may be sent full or in parts, and may be specified by its filename or by an already open file descriptor.</p>
 <p>Transports that manipulate TCP directly may use the <code>file:sendfile/2,4,5</code> function, which calls the <code>sendfile</code> syscall where applicable (on Linux, for example). Other transports can use the <code>sendfile/6</code> function exported from this module.</p>
 <h3 id="_setopts">setopts</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -238,7 +273,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Set one or more options for the socket.</p>
 <h3 id="_shutdown">shutdown</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -248,7 +283,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Close the socket for reading and/or writing.</p>
 <h3 id="_sockname">sockname</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -265,7 +300,7 @@ http://www.gnu.org/software/src-highlite -->
 </ul>
 <h2 id="_types">Types</h2>
 <h3 id="_sendfile_opts">sendfile_opts()</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -277,7 +312,7 @@ http://www.gnu.org/software/src-highlite -->
 </dd>
 </dl>
 <h3 id="_socket">socket()</h3>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->

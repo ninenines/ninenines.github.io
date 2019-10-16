@@ -66,7 +66,7 @@
 <p>As Websocket connections are established through the HTTP/1.1 upgrade mechanism, Websocket handlers need to be able to first receive the HTTP request for the upgrade, before switching to Websocket and taking over the connection. They can then receive or send Websocket frames, handle incoming Erlang messages or close the connection.</p>
 <h2 id="_upgrade">Upgrade</h2>
 <p>The <code>init/2</code> callback is called when the request is received. To establish a Websocket connection, you must switch to the <code>cowboy_websocket</code> module:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -82,7 +82,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>If the server only understands MQTT it can return:</p>
 <div class="listingblock"><div class="content"><pre>sec-websocket-protocol: mqtt</pre></div></div>
 <p>This selection must be done in <code>init/2</code>. An example usage could be:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -106,7 +106,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Cowboy has separate processes for handling the connection and requests. Because Websocket takes over the connection, the Websocket protocol handling occurs in a different process than the request handling.</p>
 <p>This is reflected in the different callbacks Websocket handlers have. The <code>init/2</code> callback is called from the temporary request process and the <code>websocket_</code> callbacks from the connection process.</p>
 <p>This means that some initialization cannot be done from <code>init/2</code>. Anything that would require the current pid, or be tied to the current pid, will not work as intended. The optional <code>websocket_init/1</code> can be used instead:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -115,7 +115,7 @@ http://www.gnu.org/software/src-highlite -->
     {<font color="#FF6600">ok</font>, <font color="#009900">State</font>}<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>All Websocket callbacks share the same return values. This means that we can send frames to the client right after the upgrade:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -126,7 +126,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Cowboy will call <code>websocket_handle/2</code> whenever a text, binary, ping or pong frame arrives from the client.</p>
 <p>The handler can handle or ignore the frames. It can also send frames back to the client or stop the connection.</p>
 <p>The following snippet echoes back any text frame received and ignores all others:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -140,7 +140,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Cowboy will call <code>websocket_info/2</code> whenever an Erlang message arrives.</p>
 <p>The handler can handle or ignore the messages. It can also send frames to the client or stop the connection.</p>
 <p>The following snippet forwards log messages to the client and ignores all others:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -155,7 +155,7 @@ http://www.gnu.org/software/src-highlite -->
 <!-- functionality easily.-->
 <p>All <code>websocket_</code> callbacks share return values. They may send zero, one or many frames to the client.</p>
 <p>To send nothing, just return an ok tuple:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -163,7 +163,7 @@ http://www.gnu.org/software/src-highlite -->
     {<font color="#FF6600">ok</font>, <font color="#009900">State</font>}<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>To send one frame, return a reply tuple with the frame to send:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -172,7 +172,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>You can send frames of any type: text, binary, ping, pong or close frames.</p>
 <p>To send many frames at once, return a reply tuple with the list of frames to send:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -189,7 +189,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Cowboy does not send ping frames itself. The handler can do it if required. A better solution in most cases is to let the client handle pings. Doing it from the handler would imply having an additional timer per connection and this can be a considerable cost for servers that need to handle large numbers of connections.</p>
 <p>Cowboy can be configured to close idle connections automatically. It is highly recommended to configure a timeout here, to avoid having processes linger longer than needed.</p>
 <p>The <code>init/2</code> callback can set the timeout to be used for the connection. For example, this would make Cowboy close connections idle for more than 30 seconds:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -201,7 +201,7 @@ http://www.gnu.org/software/src-highlite -->
 <h2 id="_saving_memory">Saving memory</h2>
 <p>The Websocket connection process can be set to hibernate after the callback returns.</p>
 <p>Simply add an <code>hibernate</code> field to the ok or reply tuples:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -218,7 +218,7 @@ http://www.gnu.org/software/src-highlite -->
 <h2 id="_closing_the_connection">Closing the connection</h2>
 <p>The connection can be closed at any time, either by telling Cowboy to stop it or by sending a close frame.</p>
 <p>To tell Cowboy to close the connection, use a stop tuple:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -282,6 +282,8 @@ http://www.gnu.org/software/src-highlite -->
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
 	
 		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
 	

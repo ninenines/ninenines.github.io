@@ -74,7 +74,7 @@
 <p>We are just starting, so let&apos;s no go ahead of ourselves here. We&apos;ll begin with writing the code allowing us to compile an empty module.</p>
 <p>We will compile to Core Erlang: this is one of the many intermediate step your Erlang code compiles to before it becomes BEAM machine code. Core Erlang is a very neat language for machine generated code, and we will learn many things about it.</p>
 <p>Today we will only focus on compiling the following code:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -86,7 +86,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>We will use <em>leex</em> for the lexer. This lexer uses .xrl files which are then compiled to .erl files that you can then compile to BEAM. The file is divided in three parts: definitions, rules and Erlang code. Definitions and Erlang code are obvious; rules are what concerns us.</p>
 <p>We only need two things: atoms and whitespaces. Atoms are a lowercase letter followed by any letter, number, _ or @. Whitespace is either a space, an horizontal tab, \r or \n. There exists other kinds of whitespaces but we simply do not allow them in the Xerl language.</p>
 <p>Rules consist of a regular expression followed by Erlang code. The latter must return a token representation or the atom <code>skip_token</code>.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -101,7 +101,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>The first rule matches an atom, which is converted to either a special representation for reserved words, or an atom tuple. The <code>TokenChars</code> variable represents the match as a string, and the <code>TokenLine</code> variable contains the line number. <a href="https://github.com/extend/xerl/blob/0.1/src/xerl_lexer.xrl">View the complete file</a>.</p>
 <p>We obtain the following result from the lexer:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -109,7 +109,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>The second step is to parse this list of tokens to add semantic meaning and generate what is called an <em>abstract syntax tree</em>. We will be using the <em>yecc</em> parser generator for this. This time it will take .yrl files but the process is the same as before. The file is a little more complex than for the lexer, we need to define at the very least terminals, nonterminals and root symbols, the grammar itself, and optionally some Erlang code.</p>
 <p>To compile our module, we need a few things. First, everything is an expression. We thus need list of expressions and individual expressions. We will support a single expression for now, the <code>mod</code> expression which defines a module. And that&apos;s it! We end up with the following grammar:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -123,7 +123,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p><a href="https://github.com/extend/xerl/blob/0.1/src/xerl_parser.yrl">View the complete file</a>.</p>
 <p>We obtain the following result from the parser:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -135,7 +135,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>There&apos;s one important thing to do when generating Core Erlang AST for a module: create the <code>module_info/{0,1}</code> functions. Indeed, these are added to Erlang before it becomes Core Erlang, and so we need to replicate this ourselves. Do not be concerned however, as this only takes a few lines of extra code.</p>
 <p>As you can see by <a href="https://github.com/extend/xerl/blob/0.1/src/xerl_codegen.erl">looking at the complete file</a>, the code generator echoes the grammar we defined in the parser, and simply applies the appropriate Core Erlang functions for each expressions.</p>
 <p>We obtain the following pretty-printed Core Erlang generated code:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -166,6 +166,10 @@ http://www.gnu.org/software/src-highlite -->
 <h3>More articles</h3>
 <ul id="articles-nav" class="extra_margin">
 	
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
 		
 	
 		

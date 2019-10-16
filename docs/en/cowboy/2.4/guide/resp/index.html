@@ -69,14 +69,14 @@
 <h2 id="_reply">Reply</h2>
 <p>Cowboy provides three functions for sending the entire reply, depending on whether you need to set headers and body. In all cases, Cowboy will add any headers required by the protocol (for example the date header will always be sent).</p>
 <p>When you need to set only the status code, use <code>cowboy_req:reply/2</code>:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:reply</font></b>(<font color="#993399">200</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>When you need to set response headers at the same time, use <code>cowboy_req:reply/3</code>:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -86,7 +86,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Note that the header name must always be a lowercase binary.</p>
 <p>When you also need to set the response body, use <code>cowboy_req:reply/4</code>:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -96,7 +96,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>You should always set the content-type header when the response has a body. There is however no need to set the content-length header; Cowboy does it automatically.</p>
 <p>The response body and the header values must be either a binary or an iolist. An iolist is a list containing binaries, characters, strings or other iolists. This allows you to build a response from different parts without having to do any concatenation:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -112,7 +112,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Cowboy provides two functions for initiating a response, and an additional function for streaming the response body. Cowboy will add any required headers to the response.</p>
 <!-- @todo For HTTP/1.1 Cowboy should probably not use chunked transfer-encoding if the content-length is set.-->
 <p>When you need to set only the status code, use <code>cowboy_req:stream_reply/2</code>:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -124,7 +124,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>The second argument to <code>cowboy_req:stream_body/3</code> indicates whether this data terminates the body. Use <code>fin</code> for the final flag, and <code>nofin</code> otherwise.</p>
 <p>This snippet does not set a content-type header. This is not recommended. All responses with a body should have a content-type. The header can be set beforehand, or using the <code>cowboy_req:stream_reply/3</code>:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -139,7 +139,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>While not required by any means, it is recommended that you set the content-length header in the response if you know it in advance. This will ensure that the best response method is selected and help clients understand when the response is fully received.</p>
 <p>Cowboy also provides a function to send response trailers. Response trailers are semantically equivalent to the headers you send in the response, only they are sent at the end. This is especially useful to attach information to the response that could not be generated until the response body was fully generated.</p>
 <p>Trailer fields must be listed in the trailer header. Any field not listed might be dropped by the client or an intermediary.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -160,7 +160,7 @@ http://www.gnu.org/software/src-highlite -->
 <h2 id="_preset_response_headers">Preset response headers</h2>
 <p>Cowboy provides functions to set response headers without immediately sending them. They are stored in the Req object and sent as part of the response when a reply function is called.</p>
 <p>To set response headers:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -169,7 +169,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Header names must be a lowercase binary.</p>
 <p>Do not use this function for setting cookies. Refer to the <a href="../cookies">Cookies</a> chapter for more information.</p>
 <p>To check if a response header has already been set:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -177,7 +177,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>It returns <code>true</code> if the header was set, <code>false</code> otherwise.</p>
 <p>To delete a response header that was set previously:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -202,7 +202,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Headers given to the reply function will always override preset headers and required headers. If a header is found in two or three of these, then the one in the reply function is picked and the others are dropped.</p>
 <p>Similarly, preset headers will always override required headers.</p>
 <p>To illustrate, look at the following snippet. Cowboy by default sends the server header with the value &quot;Cowboy&quot;. We can override it:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -213,7 +213,7 @@ http://www.gnu.org/software/src-highlite -->
 <h2 id="_preset_response_body">Preset response body</h2>
 <p>Cowboy provides functions to set the response body without immediately sending it. It is stored in the Req object and sent when the reply function is called.</p>
 <p>To set the response body:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -222,7 +222,7 @@ http://www.gnu.org/software/src-highlite -->
 <!-- @todo Yeah we probably should add that function that-->
 <!-- also sets the content-type at the same time...-->
 <p>To check if a response body has already been set:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -235,7 +235,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>The preset response body is only sent if the reply function used is <code>cowboy_req:reply/2</code> or <code>cowboy_req:reply/3</code>.</p>
 <h2 id="_sending_files">Sending files</h2>
 <p>Cowboy provides a shortcut for sending files. When using <code>cowboy_req:reply/4</code>, or when presetting the response header, you can give a <code>sendfile</code> tuple to Cowboy:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -244,7 +244,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Depending on the values for <code>Offset</code> or <code>Length</code>, the entire file may be sent, or just a part of it.</p>
 <p>The length is required even for sending the entire file. Cowboy sends it in the content-length header.</p>
 <p>To send a file while replying:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -265,7 +265,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>Cowboy allows you to send informational responses.</p>
 <p>Informational responses are responses that have a status code between 100 and 199. Any number can be sent before the proper response. Sending an informational response does not change the behavior of the proper response, and clients are expected to ignore any informational response they do not understand.</p>
 <p>The following snippet sends a 103 informational response with some headers that are expected to be in the final response.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -280,7 +280,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>To push a resource, you need to provide the same information as a client performing a request would. This includes the HTTP method, the URI and any necessary request headers.</p>
 <p>Cowboy by default only requires you to give the path to the resource and the request headers. The rest of the URI is taken from the current request (excluding the query string, set to empty) and the method is GET by default.</p>
 <p>The following snippet pushes a CSS file that is linked to in the response:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -294,7 +294,7 @@ http://www.gnu.org/software/src-highlite -->
     <font color="#FF0000">"&lt;body&gt;&lt;p&gt;Welcome to Erlang!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"</font>], <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>To override the method, scheme, host, port or query string, simply pass in a fourth argument. The following snippet uses a different host name:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -360,6 +360,8 @@ http://www.gnu.org/software/src-highlite -->
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
 	
 		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
 	

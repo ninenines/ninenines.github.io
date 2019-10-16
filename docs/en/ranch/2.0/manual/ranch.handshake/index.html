@@ -65,16 +65,17 @@
 <h2 id="_name">Name</h2>
 <p>ranch:handshake - Perform the transport handshake</p>
 <h2 id="_description">Description</h2>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">handshake</font></b>(<font color="#009900">Ref</font>)       <font color="#990000">-&gt;</font> <b><font color="#000000">handshake</font></b>(<font color="#009900">Ref</font>, [])
-<b><font color="#000000">handshake</font></b>(<font color="#009900">Ref</font>, <font color="#009900">Opts</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font>}
+<pre><tt><b><font color="#000000">handshake</font></b>(<font color="#009900">Ref</font>)       <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font>} | {<font color="#FF6600">continue</font>, <font color="#009900">Info</font>}
+<b><font color="#000000">handshake</font></b>(<font color="#009900">Ref</font>, <font color="#009900">Opts</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font>} | {<font color="#FF6600">continue</font>, <font color="#009900">Info</font>}
 
 <font color="#009900">Ref</font>    <font color="#990000">::</font> <b><font color="#000000">ranch:ref</font></b>()
 <font color="#009900">Opts</font>   <font color="#990000">::</font> <b><font color="#000000">any</font></b>()
-<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()
+<font color="#009900">Info</font>   <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
 </div></div>
 <p>Perform the transport handshake.</p>
 <p>This function must be called by the protocol process in order to retrieve the socket for the connection. Ranch performs the handshake necessary to give control of the socket to this process and also does the transport handshake, for example setting up the TLS connection.</p>
@@ -88,19 +89,22 @@ http://www.gnu.org/software/src-highlite -->
 </dd>
 </dl>
 <h2 id="_return_value">Return value</h2>
-<p>An <code>ok</code> tuple is returned containing the socket for the connection.</p>
+<p>An <code>ok</code> tuple is returned containing the socket for the connection by default.</p>
+<p>Depending on configuration, a <code>continue</code> tuple can otherwise be returned when the handshake operation is paused. It contains data provided by the transport that can be used to inform further decisions before resuming the handshake, for example to provide new transport options. The handshake can be resumed using <a href="../ranch.handshake_continue">ranch:handshake_continue(3)</a> or canceled using <a href="../ranch.handshake_cancel">ranch:handshake_cancel(3)</a>.</p>
 <p>This function will trigger an exception when an error occurs.</p>
 <h2 id="_changelog">Changelog</h2>
-<ul><li><strong>1.6</strong>: Function introduced. Replaces <code>ranch:accept_ack/1</code>.
+<ul><li><strong>2.0</strong>: The <code>continue</code> tuple can now be returned.
+</li>
+<li><strong>1.6</strong>: Function introduced. Replaces <code>ranch:accept_ack/1</code>.
 </li>
 </ul>
 <h2 id="_examples">Examples</h2>
 <div class="listingblock"><div class="title">Initialize the connection process</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">start_link</font></b>(<font color="#009900">Ref</font>, <font color="#990000">_</font>, <font color="#009900">Transport</font>, <font color="#009900">Opts</font>) <font color="#990000">-&gt;</font>
+<pre><tt><b><font color="#000000">start_link</font></b>(<font color="#009900">Ref</font>, <font color="#009900">Transport</font>, <font color="#009900">Opts</font>) <font color="#990000">-&gt;</font>
     <font color="#009900">Pid</font> <font color="#990000">=</font> <b><font color="#000000">proc_lib:spawn_link</font></b>(<b><font color="#000080">?MODULE</font></b>, <font color="#FF6600">init</font>,
         [<font color="#009900">Ref</font>, <font color="#009900">Transport</font>, <font color="#009900">Opts</font>]),
     {<font color="#FF6600">ok</font>, <font color="#009900">Pid</font>}<font color="#990000">.</font>
@@ -111,7 +115,7 @@ http://www.gnu.org/software/src-highlite -->
         <font color="#0000FF">transport</font><font color="#990000">=</font><font color="#009900">Transport</font>, <font color="#0000FF">opts</font><font color="#990000">=</font><font color="#009900">Opts</font>})<font color="#990000">.</font></tt></pre>
 </div></div>
 <h2 id="_see_also">See also</h2>
-<p><a href="../ranch.start_listener">ranch:start_listener(3)</a>, <a href="../ranch.recv_proxy_header">ranch:recv_proxy_header(3)</a>, <a href="../ranch.remove_connection">ranch:remove_connection(3)</a>, <a href="../ranch">ranch(3)</a></p>
+<p><a href="../ranch.start_listener">ranch:start_listener(3)</a>, <a href="../ranch.handshake_continue">ranch:handshake_continue(3)</a>, <a href="../ranch.handshake_cancel">ranch:handshake_cancel(3)</a>, <a href="../ranch.recv_proxy_header">ranch:recv_proxy_header(3)</a>, <a href="../ranch.remove_connection">ranch:remove_connection(3)</a>, <a href="../ranch">ranch(3)</a></p>
 
 
 

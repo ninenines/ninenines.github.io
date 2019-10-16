@@ -78,6 +78,8 @@
 </li>
 <li>Embedded listeners are now failing in a predictable manner when <code>ranch_server</code> goes down. It is no longer necessary to embed <code>ranch_sup</code> and the recommendation is now to just start Ranch normally when using embedded listeners.
 </li>
+<li>Two steps handshake is now supported. This allows obtaining TLS extensions and updating options before resuming the handshake. The handshake can also be canceled.
+</li>
 </ul>
 <h2 id="_experimental_features_added">Experimental features added</h2>
 <ul><li>The experimental <code>num_listen_sockets</code> option has been added. It allows opening more than one listening socket per listener. It can only be used alongside the Linux <code>SO_REUSEPORT</code> socket option or equivalent. It allows working around a bottleneck in the kernel and maximizes resource usage, leading to increased rates for accepting new connections.
@@ -95,6 +97,10 @@
 <li>The <code>Socket</code> argument was removed from <code>Protocol:start_link/3</code>. The socket must now be obtained by calling <code>ranch:handshake/1,2</code>.
 </li>
 </ul>
+<h2 id="_added_functions">Added functions</h2>
+<ul><li>The functions <code>ranch:handshake_continue/1,2</code> and <code>ranch:handshake_cancel/1</code> can be used to perform a two steps handshake. These functions may not be supported by all transports.
+</li>
+</ul>
 <h2 id="_changed_functions">Changed functions</h2>
 <ul><li>The <code>NumAcceptors</code> argument was removed from <code>ranch:start_listener/5</code> and <code>ranch:child_spec/5</code> and moved to the transport options.
 </li>
@@ -110,7 +116,9 @@
 </li>
 </ul>
 <h2 id="_bugs_fixed">Bugs fixed</h2>
-<ul><li>Repeatedly calling <code>ranch:remove_connection/1</code> from a connection process would crash the respective connection supervisor. This has now been fixed.
+<ul><li>Calling <code>ranch:remove_connection/1</code> will now resume a sleeping acceptor process when applicable.
+</li>
+<li>Repeatedly calling <code>ranch:remove_connection/1</code> from a connection process would crash the respective connection supervisor. This has now been fixed.
 </li>
 <li>When a connection process was failing to start, the socket was not closed and this lead to leaking sockets. This is now corrected.
 </li>

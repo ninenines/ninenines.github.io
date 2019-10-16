@@ -71,7 +71,7 @@
 <p>Cookies may be sent repeatedly. This is often useful to update the expiration time and avoid losing a cookie.</p>
 <h2 id="_setting_cookies">Setting cookies</h2>
 <p>By default cookies are defined for the duration of the session:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -79,7 +79,7 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_cookie</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"sessionid"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">SessionID</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>They can also be set for a duration in seconds:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -88,7 +88,7 @@ http://www.gnu.org/software/src-highlite -->
     #{<font color="#0000FF">max_age</font> <font color="#990000">=&gt;</font> <font color="#993399">3600</font>})<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>To delete cookies, set <code>max_age</code> to 0:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -97,7 +97,7 @@ http://www.gnu.org/software/src-highlite -->
     #{<font color="#0000FF">max_age</font> <font color="#990000">=&gt;</font> <font color="#993399">0</font>})<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>To restrict cookies to a specific domain and path, the options of the same name can be used:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -106,7 +106,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Cookies will be sent with requests to this domain and all its subdomains, and to resources on this path or deeper in the path hierarchy.</p>
 <p>To restrict cookies to secure channels (typically resources available over HTTPS):</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -115,7 +115,7 @@ http://www.gnu.org/software/src-highlite -->
     #{<font color="#0000FF">secure</font> <font color="#990000">=&gt;</font> <font color="#000080">true</font>})<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>To prevent client-side scripts from accessing a cookie:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -128,7 +128,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>The client only ever sends back the cookie name and value. All other options that can be set are never sent back.</p>
 <p>Cowboy provides two functions for reading cookies. Both involve parsing the cookie header(s) and so should not be called repeatedly.</p>
 <p>You can get all cookies as a key/value list:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -136,14 +136,14 @@ http://www.gnu.org/software/src-highlite -->
 {<font color="#990000">_</font>, <font color="#009900">Lang</font>} <font color="#990000">=</font> <b><font color="#000000">lists:keyfind</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"lang"</font><font color="#990000">&gt;&gt;</font>, <font color="#993399">1</font>, <font color="#009900">Cookies</font>)<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>Or you can perform a match against cookies and retrieve only the ones you need, while at the same time doing any required post processing using <a href="../constraints">constraints</a>. This function returns a map:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>#{<font color="#FF6600">id</font> <font color="#990000">:=</font> <font color="#009900">ID</font>, <font color="#FF6600">lang</font> <font color="#990000">:=</font> <font color="#009900">Lang</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:match_cookies</font></b>([<font color="#FF6600">id</font>, <font color="#FF6600">lang</font>], <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
 </div></div>
 <p>You can use constraints to validate the values while matching them. The following snippet will crash if the <code>id</code> cookie is not an integer number or if the <code>lang</code> cookie is empty. Additionally the <code>id</code> cookie value will be converted to an integer term:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -151,7 +151,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Note that if two cookies share the same name, then the map value will be a list of the two cookie values.</p>
 <p>A default value can be provided. The default will be used if the <code>lang</code> cookie is not found. It will not be used if the cookie is found but has an empty value:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -214,6 +214,8 @@ http://www.gnu.org/software/src-highlite -->
 <ul>
 	
 	
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
 	
 		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
 	

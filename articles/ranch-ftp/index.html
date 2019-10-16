@@ -72,7 +72,7 @@
 <p>Last week I was speaking at the <a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">London Erlang Factory Lite</a> where I presented a live demonstration of building an FTP server using <a href="http://ninenines.eu/docs/en/ranch/HEAD/README">Ranch</a>. As there was no slide, you should use this article as a reference instead.</p>
 <p>The goal of this article is to showcase how to use Ranch for writing a network protocol implementation, how Ranch gets out of the way to let you write the code that matters, and the common techniques used when writing servers.</p>
 <p>Let&apos;s start by creating an empty project. Create a new directory and then open a terminal into that directory. The first step is to add Ranch as a dependency. Create the <code>rebar.config</code> file and add the following 3 lines.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -82,7 +82,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>This makes your application depend on the last Ranch version available on the <em>master</em> branch. This is fine for development, however when you start pushing your application to production you will want to revisit this file to hardcode the exact version you are using, to make sure you run the same version of dependencies in production.</p>
 <p>You can now fetch the dependencies.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -94,14 +94,14 @@ Cloning into <font color="#FF0000">'ranch'</font><font color="#990000">...</font
 </div></div>
 <p>This will create a <em>deps/</em> folder containing Ranch.</p>
 <p>We don&apos;t actually need anything else to write the protocol code. We could make an application for it, but this isn&apos;t the purpose of this article so let&apos;s just move on to writing the protocol itself. Create the file <em>ranch_ftp_protocol.erl</em> and open it in your favorite editor.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ vim ranch_ftp_protocol<font color="#990000">.</font>erl</tt></pre>
 </div></div>
 <p>Let&apos;s start with a blank protocol module.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -119,7 +119,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>When Ranch receives a connection, it will call the <code>start_link/4</code> function with the listener&apos;s pid, socket, transport module to be used, and the options we define when starting the listener. We don&apos;t need options for the purpose of this article, so we don&apos;t pass them to the process we are creating.</p>
 <p>Let&apos;s open a shell and start a Ranch listener to begin accepting connections. We only need to call one function. You should probably open it in another terminal and keep it open for convenience. If you quit the shell you will have to repeat the commands to proceed.</p>
 <p>Also note that you need to type <code>c(ranch_ftp_protocol).</code> to recompile and reload the code for the protocol. You do not need to restart any process however.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -128,7 +128,7 @@ Erlang R15B02 <font color="#990000">(</font>erts-<font color="#993399">5.9</font
 
 Eshell V5<font color="#990000">.</font><font color="#993399">9.2</font>  <font color="#990000">(</font>abort with <font color="#990000">^</font>G<font color="#990000">)</font></tt></pre>
 </div></div>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -141,7 +141,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>This starts a listener named <code>my_ftp</code> that runs your very own <code>ranch_ftp_protocol</code> over TCP, listening on port <code>2121</code>. The last argument is the options given to the protocol that we ignored earlier.</p>
 <p>To try your code, you can use the following command. It should be able to connect, the server will print a message in the console, and then the client will print an error.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -149,7 +149,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Let&apos;s move on to actually writing the protocol.</p>
 <p>Once you have created the new process and returned the pid, Ranch will give ownership of the socket to you. This requires a synchronization step though.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -159,7 +159,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>Now that you acknowledged the new connection, you can use it safely.</p>
 <p>When an FTP server accepts a connection, it starts by sending a welcome message which can be one or more lines starting with the code <code>200</code>. Then the server will wait for the client to authenticate the user, and if the authentication went successfully, which it will always do for the purpose of this article, it will reply with a <code>230</code> code.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -177,7 +177,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>As you can see we don&apos;t need complex parsing code. We can simply match on the binary in the argument!</p>
 <p>Next we need to loop receiving data commands and optionally execute them, if we want our server to become useful.</p>
 <p>We will replace the <code>ok.</code> line with the call to the following function. The new function is recursive, each call receiving data from the socket and sending a response. For now we will send an error response for all commands the client sends.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -196,7 +196,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <p>With this we are almost ready to start implementing commands. But with code like this we might have errors if the client doesn&apos;t send just one command per packet, or if the packets arrive too fast, or if a command is split over multiple packets.</p>
 <p>To solve this, we need to use a buffer. Each time we receive data, we will append to the buffer, and then check if we have received a command fully before running it. The code could look similar to the following.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.8
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -226,6 +226,10 @@ http://www.gnu.org/software/src-highlite -->
 <h3>More articles</h3>
 <ul id="articles-nav" class="extra_margin">
 	
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
 		
 	
 		

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_req:parse_header(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=6" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req:parse_header(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_req:parse_header - Parse the given HTTP header</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>)          <font color="#990000">-&gt;</font> <font color="#009900">ParsedValue</font> | <font color="#009900">Default</font>
+<b><font color="#000000">parse_header</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>, <font color="#009900">Default</font>) <font color="#990000">-&gt;</font> <font color="#009900">ParsedValue</font> | <font color="#009900">Default</font>
+
+<font color="#009900">Name</font>        <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()
+<font color="#009900">Req</font>         <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>()
+<font color="#009900">ParsedValue</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()
+<font color="#009900">Default</font>     <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>Parse the given HTTP header.</p>
+<p>The header name must be given as a lowercase binary string. While header names are case insensitive, Cowboy requires them to be given as lowercase to function properly.</p>
+<p>The type of the parsed value varies depending on the header. Similarly, the default value when calling <code>cowboy_req:parse_header/2</code> differs depending on the header.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Name</dt>
+<dd><p>Desired HTTP header name as a lowercase binary string.</p>
+</dd>
+<dt>Req</dt>
+<dd><p>The Req object.</p>
+</dd>
+<dt>Default</dt>
+<dd><p>Default value returned when the header is missing.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>The parsed header value varies depending on the header. When the header is missing, the default argument is returned.</p>
+<h2 id="_headers">Headers</h2>
+<p>The following snippets detail the types returned by the different headers. Unless mentioned otherwise, the default value when the header is missing will be <code>undefined</code>:</p>
+<div class="listingblock"><div class="title">accept</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"accept"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>)
+    <font color="#990000">-&gt;</font> [{{<font color="#009900">Type</font>, <font color="#009900">SubType</font>, <font color="#009900">Params</font>}, <font color="#009900">Quality</font>, <font color="#009900">AcceptExt</font>}]
+
+<font color="#009900">Type</font>      <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case insensitive</font></i>
+<font color="#009900">SubType</font>   <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case insensitive</font></i>
+<font color="#009900">Params</font>    <font color="#990000">::</font> [{<font color="#009900">Key</font>, <font color="#009900">Value</font>}]
+<font color="#009900">Quality</font>   <font color="#990000">::</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">1000</font>
+<font color="#009900">AcceptExt</font> <font color="#990000">::</font> [<font color="#009900">Key</font> | {<font color="#009900">Key</font>, <font color="#009900">Value</font>}]
+<font color="#009900">Key</font>       <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case insensitive</font></i>
+<font color="#009900">Value</font>     <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case sensitive</font></i></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">accept-charset, accept-encoding and accept-language</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> [{<font color="#009900">Value</font>, <font color="#009900">Quality</font>}]
+
+<font color="#009900">Name</font>    <font color="#990000">::</font> <font color="#990000">&lt;&lt;</font><font color="#FF0000">"accept-charset"</font><font color="#990000">&gt;&gt;</font>
+         | <font color="#990000">&lt;&lt;</font><font color="#FF0000">"accept-encoding"</font><font color="#990000">&gt;&gt;</font>
+         | <font color="#990000">&lt;&lt;</font><font color="#FF0000">"accept-language"</font><font color="#990000">&gt;&gt;</font>
+<font color="#009900">Value</font>   <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()                 <i><font color="#9A1900">%% case insensitive</font></i>
+<font color="#009900">Quality</font> <font color="#990000">::</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">1000</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">authorization</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"authorization"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>)
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">basic</font>, <font color="#009900">Username</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Password</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()}
+     | {<font color="#FF6600">bearer</font>, <font color="#009900">Token</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()}
+     | {<font color="#FF6600">digest</font>, [{<font color="#009900">Key</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()}]}</tt></pre>
+</div></div>
+<!-- @todo Currently also parses connection. Do we want this? Should it be documented? Use case?-->
+<div class="listingblock"><div class="title">content-length</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-length"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">non_neg_integer</font></b>()</tt></pre>
+</div></div>
+<p>When the content-length header is missing, <code>0</code> is returned.</p>
+<div class="listingblock"><div class="title">content-type</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-type"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>)
+    <font color="#990000">-&gt;</font> {<font color="#009900">Type</font>, <font color="#009900">SubType</font>, <font color="#009900">Params</font>}
+
+<font color="#009900">Type</font>      <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case insensitive</font></i>
+<font color="#009900">SubType</font>   <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case insensitive</font></i>
+<font color="#009900">Params</font>    <font color="#990000">::</font> [{<font color="#009900">Key</font>, <font color="#009900">Value</font>}]
+<font color="#009900">Key</font>       <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case insensitive</font></i>
+<font color="#009900">Value</font>     <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case sensitive;</font></i></tt></pre>
+</div></div>
+<p>Note that the value for the charset parameter is case insensitive and returned as a lowercase binary string.</p>
+<div class="listingblock"><div class="title">cookie</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"cookie"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> [{<font color="#009900">Name</font>, <font color="#009900">Value</font>}]
+
+<font color="#009900">Name</font>  <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()                   <i><font color="#9A1900">%% case sensitive</font></i>
+<font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()                   <i><font color="#9A1900">%% case sensitive</font></i></tt></pre>
+</div></div>
+<p>When the cookie header is missing, <code>[]</code> is returned.</p>
+<p>While an empty cookie header is not valid, some clients do send it. Cowboy will in this case also return <code>[]</code>.</p>
+<div class="listingblock"><div class="title">expect</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"expect"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> <font color="#FF6600">continue</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">if-match and if-none-match</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>)
+    <font color="#990000">-&gt;</font> <font color="#FF6600">'*'</font> | [{<font color="#FF6600">weak</font> | <font color="#FF6600">strong</font>, <font color="#009900">OpaqueTag</font>}]
+
+<font color="#009900">Name</font>      <font color="#990000">::</font> <font color="#990000">&lt;&lt;</font><font color="#FF0000">"if-match"</font><font color="#990000">&gt;&gt;</font>
+           | <font color="#990000">&lt;&lt;</font><font color="#FF0000">"if-none-match"</font><font color="#990000">&gt;&gt;</font>
+<font color="#009900">OpaqueTag</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case sensitive</font></i></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">if-modified-since and if-unmodified-since</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">calendar:datetime</font></b>()</tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">range</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"range"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> {<font color="#009900">From</font>, <font color="#009900">To</font>} | <font color="#009900">Final</font>
+
+<font color="#009900">From</font>  <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()
+<font color="#009900">To</font>    <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>() | <font color="#FF6600">infinity</font>
+<font color="#009900">Final</font> <font color="#990000">::</font> <b><font color="#000000">neg_integer</font></b>()</tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">sec-websocket-extensions</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"sec-websocket-extensions"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>)
+    <font color="#990000">-&gt;</font> [{<font color="#009900">Extension</font>, <font color="#009900">Params</font>}]
+
+<font color="#009900">Extension</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case sensitive</font></i>
+<font color="#009900">Params</font>    <font color="#990000">::</font> [<font color="#009900">Key</font> | {<font color="#009900">Key</font>, <font color="#009900">Value</font>}]
+<font color="#009900">Key</font>       <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case sensitive</font></i>
+<font color="#009900">Value</font>     <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()               <i><font color="#9A1900">%% case sensitive</font></i></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">sec-websocket-protocol and upgrade</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> [<font color="#009900">Token</font>]
+
+<font color="#009900">Name</font>  <font color="#990000">::</font> <font color="#990000">&lt;&lt;</font><font color="#FF0000">"sec-websocket-protocol"</font><font color="#990000">&gt;&gt;</font>
+       | <font color="#990000">&lt;&lt;</font><font color="#FF0000">"upgrade"</font><font color="#990000">&gt;&gt;</font>
+<font color="#009900">Token</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()                   <i><font color="#9A1900">%% case insensitive</font></i></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">x-forwarded-for</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"x-forwarded-for"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> [<font color="#009900">Token</font>]
+
+<font color="#009900">Token</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()                   <i><font color="#9A1900">%% case sensitive</font></i></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Unknown headers</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">parse_header</font></b>(<font color="#990000">_</font>, <font color="#009900">Req</font>) <font color="#990000">-&gt;</font> {<font color="#000080">undefined</font>, <font color="#009900">RawValue</font>}</tt></pre>
+</div></div>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: Only the parsed header value is returned, it is no longer wrapped in a tuple.
+</li>
+<li><strong>1.0</strong>: Function introduced.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Parse the accept header with a custom default value</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><i><font color="#9A1900">%% Accept everything when header is missing.</font></i>
+<font color="#009900">Accept</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:parse_header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"accept"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>,
+    [{{ <font color="#990000">&lt;&lt;</font><font color="#FF0000">"*"</font><font color="#990000">&gt;&gt;</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"*"</font><font color="#990000">&gt;&gt;</font>, []}, <font color="#993399">1000</font>, []}])<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Parse the content-length header</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><i><font color="#9A1900">%% Default content-length is 0.</font></i>
+<font color="#009900">Length</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:header</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"content-length"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.header">cowboy_req:header(3)</a>, <a href="../cowboy_req.headers">cowboy_req:headers(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.7
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.7/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.7/manual">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/manual">2.4</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.3/manual">2.3</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.2/manual">2.2</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://salt.bountysource.com/teams/ninenines">BountySource</a>. These funds are used to cover the recurring expenses like dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
