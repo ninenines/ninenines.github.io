@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Farwest Demo</title>
+
+		<meta name="description" content"Farwest Demo BEAM FOSDEM 2020 talk">
+		<meta name="author" content="Loïc Hoguin">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<section>
+	<h1>Farwest Demo</h1>
+	<p>An overview and a demo of the Farwest project</p>
+	<p><small>Loïc Hoguin, <a href="https://ninenines.eu">Nine Nines</a></small></p>
+</section>
+
+<section>
+	<h1>What is Farwest?</h1>
+</section>
+
+<section>
+	<h2>Erlang/OTP REST framework</h2>
+	<p>HATEOAS</p>
+	<p>Standards based (whenever possible)</p>
+	<p>Built on top of <code>cowboy_rest</code></p>
+</section>
+
+<section>
+	<h2>Building blocks</h2>
+	<ul>
+		<li>Resource</li>
+		<li>URI and URI Templates</li>
+		<li>Media types</li>
+		<li>Operations (forms)</li>
+		<li>Metadata</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Client libraries</h2>
+	<p>One library per language/platform</p>
+	<p>Build on top of existing HTTP clients</p>
+	<p>Don't write a separate client per API</p>
+</section>
+
+<section>
+	<h1>Work done so far</h1>
+</section>
+
+<section>
+	<h2>Discovery</h2>
+	<ul>
+		<li>Link HTTP header</li>
+		<li>Links in response bodies</li>
+		<li>URI Templates router, reverse routing</li>
+		<li>Variants</li>
+		<li>Skeleton Erlang/OTP client library</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Generate response bodies</h2>
+	<ul>
+		<li>Automatic HTML generation</li>
+		<li>Skeleton forms</li>
+		<li>Automatic BED (binary Erlang data) generation</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Mod:describe()</h2>
+	<ul>
+		<li>URI or URI Template</li>
+		<li>Operations</li>
+		<li>Operation/media type pairs (input/output)</li>
+		<li>Links</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Configurable operations</h2>
+	<ul>
+		<li>HTTP method used</li>
+		<li>Semantics</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Demo</h1>
+	<section>
+		<ol>
+			<li><code>git clone https://github.com/ninenines/farwest_demo</code></li>
+			<li><code>cd farwest_demo</code></li>
+			<li><code>make run</code></li>
+			<li>Open <a href="http://localhost:8080">http://localhost:8080</a> in your browser</li>
+			<li>Use <code>curl -i http://localhost:8080</code></li>
+		</ol>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+describe() → #{
+    uri ⇒ "/",
+    media_types ⇒ #{
+        html ⇒ ["text/html"],
+        bed ⇒ ["application/x-bed"]
+    },
+    operations ⇒ #{
+        get ⇒ #{output ⇒ [html, bed]}
+    }
+}.
+		</code></pre>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+links(Req) →
+    {ok, [
+        {child, fwd_processes_r},
+        {child, fwd_tables_r}
+    ], Req}.
+		</code></pre>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+$ curl -I http://localhost:8080       
+HTTP/1.1 200 OK
+content-length: 2398
+content-type: text/html
+date: Mon, 27 Jan 2020 11:56:23 GMT
+link: &lt;/processes&gt;; rel="child";
+    variants-06="accept=(\"text/html\" \"application/x-bed\")",
+    &lt;/tables&gt;; rel="child"; variants-06="accept=(\"text/html\")"
+server: Cowboy
+variant-key-06: ("text/html")
+variants-06: accept=("text/html" "application/x-bed")
+vary: accept
+		</code></pre>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+get(Req) →
+    Info = observer_backend:sys_info(),
+    Data = #{
+        «"System Version"» ⇒ g(otp_release, Info),
+        ...
+    },
+    {ok, Data, Req}.
+
+to_representation(Req, html, Data) →
+    {ok, farwest_html:from_term(Req, Data), Req};
+to_representation(Req, bed, Data) →
+    {ok, farwest_bed:from_term(Req, Data), Req}.
+		</code></pre>
+	</section>
+
+	<section>
+		<img src="pics/fwd_system_r.png"/>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+$ curl -I http://localhost:8080/tables
+HTTP/1.1 200 OK
+content-length: 7052
+content-type: text/html
+date: Mon, 27 Jan 2020 11:56:10 GMT
+farwest-link-templates: &lt;/tables/{name}&gt;; rel="child";
+    variants-06="accept=(\"text/html\")"
+link: &lt;/&gt;; rel="parent"; variants-06="accept=
+    (\"text/html\" \"application/x-bed\")"
+server: Cowboy
+		</code></pre>
+	</section>
+
+	<section>
+		<img src="pics/fwd_tables_r.png"/>
+	</section>
+
+	<section>
+		<img src="pics/fwd_table_r.png"/>
+	</section>
+
+	<section>
+		<img src="pics/fwd_table_row_r.png"/>
+	</section>
+</section>
+
+<section>
+	<h1>Upcoming work</h1>
+</section>
+
+<section>
+	<h2>Improved discovery</h2>
+	<p>Automatic sitemap?</p>
+	<p>Better discovery of operations</p>
+	<p>Include operations/forms in non-HTML formats</p>
+</section>
+
+<section>
+	<h2>Generate response bodies</h2>
+	<p>Template-based HTML generation</p>
+	<p>Automatic JSON/JSON-LD/... generation</p>
+</section>
+
+<section>
+	<h2>Semantics</h2>
+	<p>Schemas (schema.org or other)</p>
+	<p>Better forms using schemas</p>
+	<p>Read data and expand URI Templates</p>
+</section>
+
+<section>
+	<h2>Improved client libraries</h2>
+	<p>More functions</p>
+	<p>Client-side cache for Gun</p>
+	<p>Non-Erlang client libraries</p>
+</section>
+
+<section>
+	<h1>Thanks</h1>
+	<p><a href="https://ninenines.eu">ninenines.eu</a></p>
+</section>
+
+			</div>
+		</div>
+		<script src="js/reveal.js"></script>
+		<script>
+Reveal.initialize({
+//	controls: false,
+	progress: false,
+	history: true
+});
+		</script>
+	</body>
+</html>
