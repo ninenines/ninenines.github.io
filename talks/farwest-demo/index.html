@@ -35,7 +35,7 @@
 	<h2>Building blocks</h2>
 	<ul>
 		<li>Resource</li>
-		<li>URI and URI Templates</li>
+		<li>URI and URI Templates (RFC 6570)</li>
 		<li>Media types</li>
 		<li>Operations (forms)</li>
 		<li>Metadata</li>
@@ -56,10 +56,10 @@
 <section>
 	<h2>Discovery</h2>
 	<ul>
-		<li>Link HTTP header</li>
+		<li>Link HTTP header (RFC 8288)</li>
 		<li>Links in response bodies</li>
 		<li>URI Templates router, reverse routing</li>
-		<li>Variants</li>
+		<li>Variants (draft)</li>
 		<li>Skeleton Erlang/OTP client library</li>
 	</ul>
 </section>
@@ -87,7 +87,7 @@
 	<h2>Configurable operations</h2>
 	<ul>
 		<li>HTTP method used</li>
-		<li>Semantics</li>
+		<li>Semantics (not yet enforced)</li>
 	</ul>
 </section>
 
@@ -186,11 +186,60 @@ server: Cowboy
 	</section>
 
 	<section>
+		<pre><code data-trim data-noescape>
+{'$fw_link', child,
+    farwest:link_to(fwd_table_r, #{«"name"» ⇒ TableName}),
+    TableName}
+		</code></pre>
+	</section>
+
+	<section>
 		<img src="pics/fwd_table_r.png"/>
 	</section>
 
 	<section>
+		<pre><code data-trim data-noescape>
+describe() → #{
+    uri ⇒ "/tables/{name}/{key}",
+    media_types ⇒ #{
+        html ⇒ ["text/html"],
+        term ⇒ ["text/plain"] %% text/x-erlang-term?
+    },
+    operations ⇒ #{
+        get ⇒ #{output ⇒ [html]},
+        put ⇒ #{input ⇒ [term]},
+        delete ⇒ #{}
+    }
+}.
+		</code></pre>
+	</section>
+
+	<section>
 		<img src="pics/fwd_table_row_r.png"/>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+put(Req0=#{bindings := #{name := Name0}}) →
+    Name = binary_to_atom(Name0, utf8),
+    {ok, Body, Req} = cowboy_req:read_body(Req0),
+    {ok, Tuple} = parse_string(
+        unicode:characters_to_list(Body) ++ "."),
+    ets:delete_object(Name, Tuple),
+    ets:insert(Name, Tuple),
+    {ok, Req}.
+		</code></pre>
+	</section>
+
+	<section>
+		<pre><code data-trim data-noescape>
+delete(Req=#{bindings := #{name := Name0, key := Key0}}) →
+    Name = binary_to_atom(Name0, utf8),
+    {ok, Key} = parse_string(
+        unicode:characters_to_list(Key0) ++ "."),
+    ets:delete(Name, Key),
+    {ok, Req}.
+		</code></pre>
 	</section>
 </section>
 
@@ -203,11 +252,13 @@ server: Cowboy
 	<p>Automatic sitemap?</p>
 	<p>Better discovery of operations</p>
 	<p>Include operations/forms in non-HTML formats</p>
+	<p>Cache metadata (etag, cache-control...)</p>
 </section>
 
 <section>
 	<h2>Generate response bodies</h2>
 	<p>Template-based HTML generation</p>
+	<p>Replace/insert your own templates</p>
 	<p>Automatic JSON/JSON-LD/... generation</p>
 </section>
 
@@ -227,7 +278,8 @@ server: Cowboy
 
 <section>
 	<h1>Thanks</h1>
-	<p><a href="https://ninenines.eu">ninenines.eu</a></p>
+	<p><a href="https://github.com/ninenines/farwest">github.com/ninenines/farwest</a></p>
+	<p><a href="https://github.com/ninenines/farwest_demo">github.com/ninenines/farwest_demo</a></p>
 </section>
 
 			</div>
