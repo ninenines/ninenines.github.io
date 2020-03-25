@@ -286,6 +286,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">::</font> #{
     <font color="#0000FF">connect_timeout</font>       <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">cookie_store</font>          <font color="#990000">=&gt;</font> <b><font color="#000000">gun_cookies:store</font></b>(),
     <font color="#0000FF">domain_lookup_timeout</font> <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
     <font color="#0000FF">http_opts</font>             <font color="#990000">=&gt;</font> <b><font color="#000000">http_opts</font></b>(),
     <font color="#0000FF">http2_opts</font>            <font color="#990000">=&gt;</font> <b><font color="#000000">http2_opts</font></b>(),
@@ -306,6 +307,10 @@ http://www.gnu.org/software/src-highlite -->
 <p>The default value is given next to the option name:</p>
 <dl><dt>connect_timeout (infinity)</dt>
 <dd><p>Connection timeout.</p>
+</dd>
+<dt>cookie_store - see below</dt>
+<dd><p>The cookie store that Gun will use for this connection. When configured, Gun will query the store for cookies and include them in the request headers; and add cookies found in response headers to the store.</p>
+<p>By default no cookie store will be used.</p>
 </dd>
 <dt>domain_lookup_timeout (infinity)</dt>
 <dd><p>Domain lookup timeout.</p>
@@ -484,7 +489,9 @@ http://www.gnu.org/software/src-highlite -->
 </dl>
 <!-- @todo Document default_protocol and user_opts.-->
 <h2 id="_changelog">Changelog</h2>
-<ul><li><strong>2.0</strong>: The types <code>protocols()</code> and <code>socks_opts()</code> have been added. Support for the Socks protocol has been added in every places where protocol selection is available. In addition it is now possible to specify separate HTTP options for the CONNECT proxy and the origin server.
+<ul><li><strong>2.0</strong>: The option <code>cookie_store</code> was added. It can be used to configure a cookie store that Gun will use automatically.
+</li>
+<li><strong>2.0</strong>: The types <code>protocols()</code> and <code>socks_opts()</code> have been added. Support for the Socks protocol has been added in every places where protocol selection is available. In addition it is now possible to specify separate HTTP options for the CONNECT proxy and the origin server.
 </li>
 <li><strong>2.0</strong>: The <code>connect_timeout</code> option has been split into three options: <code>domain_lookup_timeout</code>, <code>connect_timeout</code> and when applicable <code>tls_handshake_timeout</code>.
 </li>

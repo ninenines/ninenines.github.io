@@ -66,9 +66,11 @@
 <p>Gun 2.0 greatly improves the HTTP/2 performance when it comes to receiving large response bodies; and when receiving response bodies from many separate requests concurrently.</p>
 <p>Gun now shares much of its HTTP/2 code with Cowboy, including the HTTP/2 state machine. Numerous issues were fixed as a result because the Cowboy implementation was much more advanced.</p>
 <p>The Gun connection process is now implemented using <code>gen_statem</code>.</p>
-<p>Gun 2.0 requires Erlang/OTP 20.0 or greater.</p>
+<p>Gun 2.0 requires Erlang/OTP 22.0 or greater.</p>
 <h2 id="_features_added">Features added</h2>
-<ul><li>Graceful shutdown has been implemented. Graceful shutdown can be initiated on the client side by calling the new function <code>gun:shutdown/1</code> or when the owner process goes away; or on the peer side via the connection: close HTTP/1.1 header, the HTTP/2 GOAWAY frame or the Websocket close frame. Gun will try to complete existing streams when possible; other streams get canceled immediately. The <code>closing_timeout</code> option controls how long we are willing to wait at most before closing the connection.
+<ul><li>Cookie store support has been added. The <code>cookie_store</code> option allows configuring the cookie store backend. The <code>gun_cookies</code> module provides functions to help implementing such a backend. Gun comes with the backend <code>gun_cookies_list</code> which provides a per-connection, non-persistent cookie store. The cookie store engine implements the entire RFC6265bis draft algorithms except the parts about non-HTTP cookies as no such interface is provided; and the parts about SameSite as Gun has no concept of &quot;browsing context&quot;.
+</li>
+<li>Graceful shutdown has been implemented. Graceful shutdown can be initiated on the client side by calling the new function <code>gun:shutdown/1</code> or when the owner process goes away; or on the peer side via the connection: close HTTP/1.1 header, the HTTP/2 GOAWAY frame or the Websocket close frame. Gun will try to complete existing streams when possible; other streams get canceled immediately. The <code>closing_timeout</code> option controls how long we are willing to wait at most before closing the connection.
 </li>
 <li>Flow control has been added. It allows limiting the number of data/Websocket messages Gun sends to the calling process. Gun will stop reading from the socket or stop updating the protocol&apos;s flow control window when applicable as well, to apply some backpressure to the remote endpoint(s). It is disabled by default and can be applied on a per-request basis if necessary.
 </li>
@@ -84,7 +86,7 @@
 </li>
 <li>Gun can now be used to send and receive raw data, as if it was just a normal socket. This can be useful when needing to connect through a number of HTTP/Socks proxies, allowing the use of Gun&apos;s great proxying capabilities (including TLS over TLS) for any sort of protocols. This can also be useful when performing HTTP/1.1 Upgrade to custom protocols.
 </li>
-<li>Headers can now be provided as a map. Header names may now be provided as binary, string or atom.
+<li>Headers can now be provided as a map.
 </li>
 <li>Header names may now be provided as binary, string or atom.
 </li>
@@ -165,6 +167,16 @@
 <li>The default port number for the HTTP and HTTPS schemes is no longer sent in the host header.
 </li>
 <li>An invalid stream reference was sent on failed Websocket upgrade responses. This has been corrected.
+</li>
+<li>HTTP/2 connection preface errors are now properly detected and propagated in the <code>gun_down</code> message to the connection owner as well as the exit reason of the Gun process.
+</li>
+<li>HTTP/2 connection preface errors now provide a different human readable error when the data received looks like an HTTP/1.x response.
+</li>
+<li>HTTP/2 connection errors were missing the human readable reason in the <code>gun_error</code> message. This has been corrected.
+</li>
+<li>Fix the host and :authority (pseudo-)headers when connecting to an IPv6 address given as a tuple. They were lacking the surrounding brackets.
+</li>
+<li>Fix a crash in gun:info/1 when the socket was closed before we call Transport:sockname/1.
 </li>
 </ul>
 

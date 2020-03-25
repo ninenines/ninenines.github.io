@@ -1,0 +1,80 @@
++++
+date = "2020-12-07T07:00:00+01:00"
+title = "Cowboy 2 performance"
+
++++
+
+https://github.com/sponsors/essen[You can now reward my work via GitHub Sponsors].
+
+Recently an article was published by Stressgrid entitled
+https://stressgrid.com/blog/cowboy_performance/[Survey of Cowboy Webserver Performance]
+that compares Cowboy performance across the different versions
+as well as Erlang/OTP versions. The results are not very surprising
+to me personally (although the drop is bigger than I expected),
+but they might be to others.
+
+This prompted an experiment that I will now describe in two parts.
+The first part is about modifying Cowboy to use `active,N` instead
+of `active,once` to reduce the amount of time spent in the TCP
+driver. The second part is about writing a stream handler in order
+to squeeze the most performance out of Cowboy 2.
+
+In order to support both HTTP/1.1 and HTTP/2 with a common interface
+(as well as HTTP/3 in the future), Cowboy 2 switched from the model
+of "one process per connection" to "one process per connection +
+one process per request". This is required because from HTTP/2
+onward requests are processed concurrently rather than sequentially,
+not to mention the protocols include a number of control messages
+that must be handled at the same time.
+
+But this necessarily has some impact on the performance of HTTP/1.1
+connections, and this is what the Stressgrid benchmarks show. Note
+that while I will demonstrate in this article that it is indeed the
+use of multiple processes that causes this reduction in performance,
+I do not really know why this happens, though.
+
+After reading the blog post I started experimenting. I took Cowboy's
+`hello_world` example and added https://github.com/rabbitmq/looking_glass[Looking Glass]
+to the release. I then ran a quick benchmark against the example with
+Looking Glass enabled:
+
+``` erlang
+$ make run
+...
+(hello_world_example@host)1> lg:trace([
+    {app, ranch}, {app, cowlib}, {app, cowboy}, {app, stdlib}
+], lg_file_tracer, "traces.lz4", #{mode => profile, running => true}).
+ok
+... Run the benchmark here for a few seconds.
+(hello_world_example@host)2> lg:stop().
+ok
+(hello_world_example@host)3> lg_callgrind:profile_many("traces.lz4.*", "callgrind.out", #{running => true}).
+ok
+(hello_world_example@host)4> q().
+...
+$ qcachegrind _rel/hello_world_example/callgrind.out
+```
+
+The benchmark can be done with `wrk` for example:
+
+``` bash
+$ wrk -c100 -d10s http://localhost:8080
+```
+
+The benchmark results don't matter, what we want is to see what
+`qcachegrind` tells us about what happened in the system while
+the benchmark was running.
+
+// @todo Need to run the above again in order to extract a picture to put here.
+
+What we can see in the above picture is that around 8% of the
+active time (the time when processes are not waiting for messages)
+is spent in `ranch_tcp:setopts/2`. This is when Cowboy sets
+`active,once`. Turns out this is really expensive, at least
+with synthetic benchmarks, if not more.
+
+A few years ago Steve Vinoski added `active,N` to Erlang/OTP
+to reduce the amount of time spent in the TCP driver. Instead
+of having to call `setops/2` for every packet we want to get
+from the socket, we can tell the driver how many packets we
+want and reduce the number of `setopts/2` calls.
