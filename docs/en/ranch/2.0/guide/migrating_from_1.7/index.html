@@ -65,10 +65,12 @@
 <p>Ranch 2.0 adds support for multiple connection supervisors.</p>
 <p>Ranch 1.x had a bottleneck because it used only a single connection supervisor. This was more evident when many connections were dropped at once as the supervisor couldn&apos;t keep up and failed to accept new connections while cleaning up the old ones. Ranch 2.0 behaves much better in this scenario by default. Multiple connection supervisors also helps with concurrently accepting new connections.</p>
 <p>Ranch 2.0 also adds experimental support for opening more than one listening socket on a single port.</p>
-<p>Starting with Ranch 2.0 we are also providing a Prometheus collector as a separate project as well as a Grafana dashboard.</p>
+<p>Starting with Ranch 2.0 we are also providing a <a href="https://github.com/juhlig/prometheus_ranch">Prometheus collector</a> as a separate project as well as a <a href="https://github.com/juhlig/prometheus_ranch/blob/master/dashboards/ranch-dashboard.json">Grafana dashboard</a>.</p>
 <p>Ranch 2.0 is compatible with Erlang/OTP 21.0 onward. Support for Erlang/OTP 19 and 20 has been removed.</p>
 <h2 id="_features_added">Features added</h2>
-<ul><li>The <code>num_conns_sups</code> option has been added. It allows configuring the number of connection supervisors. It now defaults to <code>num_accceptors</code>. The old behavior can be obtained by setting this value to 1.
+<ul><li>Ranch now comes with a <code>ranch.appup</code> file necessary for performing release upgrades. A test suite has been added to confirm release upgrades work from one tag to the next. Numerous fixes were made that will also improve error recovery. Release upgrades will only be supported from Ranch 2.0 onward.
+</li>
+<li>The <code>num_conns_sups</code> option has been added. It allows configuring the number of connection supervisors. It now defaults to <code>num_accceptors</code>. The old behavior can be obtained by setting this value to 1.
 </li>
 <li>The <code>logger</code> option is no longer experimental. It now defaults to <code>logger</code> instead of <code>error_logger</code>.
 </li>
@@ -92,7 +94,7 @@
 <h2 id="_changed_behaviors">Changed behaviors</h2>
 <ul><li>The callback function <code>Transport:listen/1</code> and its implementations in <code>ranch_tcp</code> and <code>ranch_ssl</code> have changed to accept a map of transport options instead of only socket options.
 </li>
-<li>The callback function <code>Transport:messages/0</code> return value now include the tag used for passive messages.
+<li>The callback function <code>Transport:messages/0</code> return value now includes the tag used for passive messages.
 </li>
 <li>The <code>Socket</code> argument was removed from <code>Protocol:start_link/3</code>. The socket must now be obtained by calling <code>ranch:handshake/1,2</code>.
 </li>
@@ -126,7 +128,9 @@
 <h2 id="_other_changes">Other changes</h2>
 <ul><li>Connection draining has now been documented in the guide following user feedback and discussions.
 </li>
-<li>Ranch is now tested against <code>havoc</code>, a chaos monkey style testing tool. Currently includes three scenarios: normal TCP and TLS listeners and embedded TCP listener. This new test suite helped uncover a misplaced <code>monitor/2</code> call added during the development of Ranch 2.0.
+<li>Ranch is now tested against <a href="https://concuerror.com/">Concuerror</a>, a model checking tool for debugging, testing and verifying concurrent Erlang programs. Two tests have been added in this release and more will follow in the future.
+</li>
+<li>Ranch is now tested against <code>stampede</code>, a chaos monkey style testing tool. Currently includes three scenarios: normal TCP and TLS listeners and embedded TCP listener. This new test suite helped uncover a misplaced <code>monitor/2</code> call added during the development of Ranch 2.0 (we were using a similar tool, <code>havoc</code>, at the time of finding that issue).
 </li>
 <li>The supervisor for acceptors and the parent supervisor for connection supervisors now have an adaptive restart intensity limit set to <code>1 + ceil(math:log2(NumChildren))</code> to allow room for errors when they have many children.
 </li>

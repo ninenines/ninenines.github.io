@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <title>Nine Nines: Cowboy 2.3</title>
+    <title>Nine Nines: Ranch 2.0</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=7" rel="stylesheet">
@@ -62,18 +62,28 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Cowboy 2.3</span></h1>
+	<h1 class="lined-header"><span>Ranch 2.0</span></h1>
 	<p class="date">
-		<span class="year">2018</span>
-		<span class="day-month">04 Apr</span>
+		<span class="year">2020</span>
+		<span class="day-month">25 Jun</span>
 	</p>
 </header>
 
-<p>Cowboy <code>2.3.0</code> has been released!</p>
-<p>This release focused on adding support for the functions from the <code>sys</code> module for introspecting Cowboy processes.</p>
-<p>Many bugs have also been fixed. A more complete list of changes can be found in the migration guide: <a href="https://ninenines.eu/docs/en/cowboy/2.3/guide/migrating_from_2.2/">Migrating from Cowboy 2.2 to 2.3</a>.</p>
-<p>You can donate to this project via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a> because I need to eat snacks when I write code. Thanks in advance!</p>
-<p>As usual, feedback is appreciated, and issues should be reported by opening a ticket. Thanks!</p>
+<p>Ranch <code>2.0.0</code> has been released!</p>
+<p>In Ranch 1.x, there is only one supervisor per Ranch listener to start and manage connection processes. Under high load (many clients rapidly connecting and/or disconnecting), the message queue of this one supervisor could become congested, leading to declining accept rates or a stalled listener.</p>
+<p>Ranch 2.0 introduces the <code>num_conns_sups</code> option (defaulting to the number of acceptors), which allows the message load to be divided between the specified number of connection supervisors. This improves accept concurrency at the same time.</p>
+<p>Another bottleneck is a possible congestion of the syn queue of a listening socket. The reason is located within the operating system&apos;s TCP/IP implementation, and on Linux the <code>SO_REUSEPORT</code> socket option was introduced to address it. What it boils down to is that you can have more than one socket listening on the same port, causing the sockets to be &quot;load-balanced&quot; when accepting connections.</p>
+<p>Ranch 2.0 introduces the <code>num_listen_sockets</code> option, which allows to specify the number of listening sockets a Ranch listener should employ. Whether you can use <code>SO_REUSEPORT</code> at all and how to enable it depends on your operating system, though.</p>
+<p>Other changes include proper support for local (Unix Domain) sockets, removing the restriction that a listener be suspended to change its transport options and much needed improvements to embedded listeners.</p>
+<p>In addition we have had patches merged to Erlang/OTP to add support for active N to the <code>ssl</code> application (requires Erlang/OTP 21.3 or above) and fix a number of smaller issues we encountered. We have also helped detect and fix a bug in the Windows implementation of active N that greatly reduced its performance in some cases.</p>
+<p>To ensure that everything works correctly, new tests have been written, and some existing tests were updated. Ranch is now tested against <a href="https://github.com/juhlig/stampede">Stampede</a>, a resilience testing tool that kills random processes and ports in the system; and against <a href="https://concuerror.com/">Concuerror</a>, a model checking tool for debugging, testing and verifying concurrrent Erlang programs.</p>
+<p>Starting from Ranch 2.0 onward, a <code>.appup</code> file is provided and release upgrades are tested and supported. The current plan is to test upgrades from one version to the next.</p>
+<p>We are now providing a <a href="https://github.com/juhlig/prometheus_ranch">Prometheus collector</a> as a separate project as well as a <a href="https://github.com/juhlig/prometheus_ranch/blob/master/dashboards/ranch-dashboard.json">Grafana dashboard</a>.</p>
+<p>Huge thanks to Jan Uhlig for working on many of the changes and improvements that went into this release.</p>
+<p>Ranch 2.0 requires Erlang/OTP 21 or above and is tested and supported on Linux, FreeBSD, macOS and Windows.</p>
+<p>A complete list of changes can be found in the migration guide: <a href="https://ninenines.eu/docs/en/ranch/2.0/guide/migrating_from_1.7/">Migrating from Ranch 1.7 to 2.0</a>.</p>
+<p>You can donate to this project via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to pay for additional servers for testing. We will soon add two Raspberry Pi 4 in order to have some ARM targets when testing.</p>
+<p>As usual, feedback is appreciated, and issues or questions should be sent via Github tickets. Thanks!</p>
 
 
 </article>
