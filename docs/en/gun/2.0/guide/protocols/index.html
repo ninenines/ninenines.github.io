@@ -76,11 +76,9 @@
 <p>The HTTP/2 interface is very similar to HTTP/1.1, so this section instead focuses on the differences in the interface for the two protocols.</p>
 <p>Gun will send <code>gun_push</code> messages for every push received. They will always be sent before the <code>gun_response</code> message. They can be ignored safely if they are not needed, or they can be canceled.</p>
 <p>The <code>gun:cancel/2</code> function will use the HTTP/2 stream cancellation mechanism which allows Gun to inform the server to stop sending a response for this particular request, saving resources.</p>
-<p>It is not currently possible to upgrade an HTTP/2 connection to Websocket. Support for this will be added in a future release.</p>
 <h2 id="_websocket">Websocket</h2>
 <p>Websocket is a binary protocol built on top of HTTP that allows asynchronous concurrent communication between the client and the server. A Websocket server can push data to the client at any time.</p>
-<p>Websocket is only available as a connection upgrade over an HTTP/1.1 connection.</p>
-<p>Once the Websocket connection is established, the only operation available on this connection is sending Websocket frames using <code>gun:ws_send/2</code>.</p>
+<p>Once the Websocket connection is established over an HTTP/1.1 connection, the only operation available on this connection is sending Websocket frames using <code>gun:ws_send/3</code>.</p>
 <p>Gun will send a <code>gun_ws</code> message for every frame received.</p>
 <h2 id="_summary">Summary</h2>
 <p>The two following tables summarize the supported operations and the messages Gun sends depending on the connection&apos;s current protocol.</p>
@@ -157,7 +155,7 @@
 </tr>
 <tr><td>ws_upgrade</td>
 <td>yes</td>
-<td>no</td>
+<td>yes</td>
 <td>no</td>
 </tr>
 <tr><td>ws_send</td>
@@ -204,7 +202,7 @@
 </tr>
 <tr><td>gun_upgrade</td>
 <td>yes</td>
-<td>no</td>
+<td>yes</td>
 <td>no</td>
 </tr>
 <tr><td>gun_ws</td>

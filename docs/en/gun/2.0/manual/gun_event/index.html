@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: gun_event(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>gun_event(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>gun_event - Events</p>
+<h2 id="_description">Description</h2>
+<p>The <code>gun_event</code> module provides the callback interface and types for implementing event handlers.</p>
+<h2 id="_callbacks">Callbacks</h2>
+<p>Event handlers implement the following interface. Because types are tied to specific events, they are documented alongside them. All event types are exported and can be referred to as <code>gun_event:Type()</code>.</p>
+<p>The events are ordered by the order they are likely to be triggered, with the most frequent events listed first.</p>
+<h3 id="_init">init</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">init_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">owner</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">transport</font> <font color="#990000">:=</font> <font color="#FF6600">tcp</font> | <font color="#FF6600">tls</font>,
+    <font color="#FF6600">origin_scheme</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">origin_host</font> <font color="#990000">:=</font> <b><font color="#000000">inet:hostname</font></b>() | <b><font color="#000000">inet:ip_address</font></b>(),
+    <font color="#FF6600">origin_port</font> <font color="#990000">:=</font> <b><font color="#000000">inet:port_number</font></b>(),
+    <font color="#FF6600">opts</font> <font color="#990000">:=</font> <b><font color="#000000">gun:opts</font></b>()
+}
+
+<b><font color="#000000">init</font></b>(<b><font color="#000000">init_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun is initializing.</p>
+<h3 id="_domain_lookup_start">domain_lookup_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">domain_lookup_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">host</font> <font color="#990000">:=</font> <b><font color="#000000">inet:hostname</font></b>() | <b><font color="#000000">inet:ip_address</font></b>(),
+    <font color="#FF6600">port</font> <font color="#990000">:=</font> <b><font color="#000000">inet:port_number</font></b>(),
+    <font color="#FF6600">tcp_opts</font> <font color="#990000">:=</font> [<b><font color="#000000">gen_tcp:connect_option</font></b>()],
+    <font color="#FF6600">timeout</font> <font color="#990000">:=</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">lookup_info</font> <font color="#990000">=&gt;</font> <b><font color="#000000">gun_tcp:lookup_info</font></b>(),
+    <font color="#0000FF">error</font> <font color="#990000">=&gt;</font> <b><font color="#000000">any</font></b>()
+}
+
+<b><font color="#000000">domain_lookup_start</font></b>(<b><font color="#000000">domain_lookup_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun is starting to resolve the host address.</p>
+<p>The <code>lookup_info</code> and <code>error</code> keys are never set for this event.</p>
+<h3 id="_domain_lookup_end">domain_lookup_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">domain_lookup_end</font></b>(<b><font color="#000000">domain_lookup_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished resolving the host address.</p>
+<p>The <code>lookup_info</code> key is only set when the lookup is successful. The <code>error</code> key is set otherwise.</p>
+<h3 id="_connect_start">connect_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">connect_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">lookup_info</font> <font color="#990000">:=</font> <b><font color="#000000">gun_tcp:lookup_info</font></b>(),
+    <font color="#FF6600">timeout</font> <font color="#990000">:=</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">socket</font> <font color="#990000">=&gt;</font> <b><font color="#000000">inet:socket</font></b>(),
+    <font color="#0000FF">protocol</font> <font color="#990000">=&gt;</font> <font color="#FF6600">http</font> | <font color="#FF6600">http2</font> | <font color="#FF6600">socks</font> | <font color="#FF6600">raw</font>,
+    <font color="#0000FF">error</font> <font color="#990000">=&gt;</font> <b><font color="#000000">any</font></b>()
+}
+
+<b><font color="#000000">connect_start</font></b>(<b><font color="#000000">connect_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun is starting to connect to the host address and port.</p>
+<p>The <code>socket</code>, <code>protocol</code> and <code>error</code> keys are never set for this event.</p>
+<h3 id="_connect_end">connect_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">connect_end</font></b>(<b><font color="#000000">connect_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished connecting to the host address and port.</p>
+<p>The <code>socket</code> key is set on connect success. The <code>error</code> key is set otherwise.</p>
+<p>The <code>protocol</code> key is only set when the transport is <code>tcp</code> and the connection is successful. The protocol is only known in the <code>tls_handshake_end</code> event otherwise.</p>
+<h3 id="_tls_handshake_start">tls_handshake_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">tls_handshake_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">stream_ref</font> <font color="#990000">=&gt;</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#0000FF">reply_to</font> <font color="#990000">=&gt;</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">socket</font> <font color="#990000">:=</font> <b><font color="#000000">inet:socket</font></b>() | <b><font color="#000000">ssl:sslsocket</font></b>() | <b><font color="#000080">pid</font></b>(), <i><font color="#9A1900">%% The socket before/after will be different.</font></i>
+    <font color="#FF6600">tls_opts</font> <font color="#990000">:=</font> [<b><font color="#000000">ssl:tls_client_option</font></b>()],
+    <font color="#FF6600">timeout</font> <font color="#990000">:=</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">protocol</font> <font color="#990000">=&gt;</font> <font color="#FF6600">http</font> | <font color="#FF6600">http2</font> | <font color="#FF6600">socks</font> | <font color="#FF6600">raw</font>,
+    <font color="#0000FF">error</font> <font color="#990000">=&gt;</font> <b><font color="#000000">any</font></b>()
+}
+
+<b><font color="#000000">tls_handshake_start</font></b>(<b><font color="#000000">tls_handshake_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has started a TLS handshake.</p>
+<p>This and the <code>tls_handshake_end</code> event only occur when connecting to a TLS server or when upgrading the connection or a stream to use TLS, for example when using CONNECT or when connecting to a secure SOCKS server.</p>
+<p>The <code>stream_ref</code> and <code>reply_to</code> keys are only set when the TLS handshake occurs as a result of a CONNECT request or inside an existing CONNECT tunnel.</p>
+<p>The <code>protocol</code> and <code>error</code> keys are never set for this event.</p>
+<h3 id="_tls_handshake_end">tls_handshake_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">tls_handshake_end</font></b>(<b><font color="#000000">tls_handshake_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished a TLS handshake.</p>
+<p>The <code>protocol</code> key is set on TLS handshake success. The <code>error</code> key is set otherwise.</p>
+<h3 id="_request_start">request_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">request_start_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">function</font> <font color="#990000">:=</font> <font color="#FF6600">headers</font> | <font color="#FF6600">request</font> | <font color="#FF6600">ws_upgrade</font> | <font color="#FF6600">connect</font>,
+    <font color="#FF6600">method</font> <font color="#990000">:=</font> <b><font color="#000000">iodata</font></b>(),
+    <font color="#0000FF">scheme</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">authority</font> <font color="#990000">:=</font> <b><font color="#000000">iodata</font></b>(),
+    <font color="#0000FF">path</font> <font color="#990000">=&gt;</font> <b><font color="#000000">iodata</font></b>(),
+    <font color="#FF6600">headers</font> <font color="#990000">:=</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000000">iodata</font></b>()}]
+}
+
+<b><font color="#000000">request_start</font></b>(<b><font color="#000000">request_start_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun is starting to send a request.</p>
+<p>The <code>scheme</code> and <code>path</code> keys are never set when the <code>function</code> is set to <code>connect</code>.</p>
+<h3 id="_request_headers">request_headers</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">request_headers</font></b>(<b><font color="#000000">request_start_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished sending the request headers.</p>
+<h3 id="_request_end">request_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">request_end_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>()
+}
+
+<b><font color="#000000">request_end</font></b>(<b><font color="#000000">request_end_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished sending the request.</p>
+<h3 id="_push_promise_start">push_promise_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">push_promise_start_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>()
+}
+
+<b><font color="#000000">push_promise_start</font></b>(<b><font color="#000000">push_promise_start_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has begun receiving a promised request (server push).</p>
+<h3 id="_push_promise_end">push_promise_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">push_promise_end_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#0000FF">promised_stream_ref</font> <font color="#990000">=&gt;</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">method</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">uri</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">headers</font> <font color="#990000">:=</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000000">iodata</font></b>()}]
+}
+
+<b><font color="#000000">push_promise_end</font></b>(<b><font color="#000000">push_promise_end_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished receiving a promised request (server push). Promised requests never include a body.</p>
+<p>Promised requests received during the graceful shutdown of the connection get canceled immediately.</p>
+<!-- @todo The cancel event should probably trigger as well.-->
+<h3 id="_response_start">response_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">response_start_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>()
+}
+
+<b><font color="#000000">response_start</font></b>(<b><font color="#000000">response_start_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has begun receiving a response.</p>
+<h3 id="_response_inform">response_inform</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">response_headers_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">status</font> <font color="#990000">:=</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#FF6600">headers</font> <font color="#990000">:=</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000080">binary</font></b>()}]
+}
+
+<b><font color="#000000">response_inform</font></b>(<b><font color="#000000">response_headers_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has received an informational response (1xx status code).</p>
+<p>A <code>status</code> with value 101 indicates that the response has concluded as the stream will be upgraded to a new protocol.</p>
+<h3 id="_response_headers">response_headers</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">response_headers</font></b>(<b><font color="#000000">response_headers_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished receiving response headers.</p>
+<h3 id="_response_trailers">response_trailers</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">response_trailers_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">headers</font> <font color="#990000">:=</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000080">binary</font></b>()}]
+}
+
+<b><font color="#000000">response_trailers</font></b>(<b><font color="#000000">response_trailers_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has received response trailers.</p>
+<h3 id="_response_end">response_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">response_end_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>()
+}
+
+<b><font color="#000000">response_end</font></b>(<b><font color="#000000">response_end_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished receiving a response.</p>
+<h3 id="_ws_upgrade">ws_upgrade</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ws_upgrade_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">opts</font> <font color="#990000">:=</font> <b><font color="#000000">gun:ws_opts</font></b>()
+}
+
+<b><font color="#000000">ws_upgrade</font></b>(<b><font color="#000000">ws_upgrade_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>A Websocket upgrade was requested.</p>
+<p>Success is indicated by a response (101 informational if HTTP/1.1, 2xx if HTTP/2) followed by a <code>protocol_changed</code> event.</p>
+<h3 id="_ws_recv_frame_start">ws_recv_frame_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ws_recv_frame_start_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">frag_state</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:frag_state</font></b>(),
+    <font color="#FF6600">extensions</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:extensions</font></b>()
+}
+
+<b><font color="#000000">ws_recv_frame_start</font></b>(<b><font color="#000000">ws_recv_frame_start_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has begun receiving a Websocket frame.</p>
+<h3 id="_ws_recv_frame_header">ws_recv_frame_header</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ws_recv_frame_header_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">frag_state</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:frag_state</font></b>(),
+    <font color="#FF6600">extensions</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:extensions</font></b>(),
+    <font color="#FF6600">type</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:frame_type</font></b>(),
+    <font color="#FF6600">rsv</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:rsv</font></b>(),
+    <font color="#FF6600">len</font> <font color="#990000">:=</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#FF6600">mask_key</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:mask_key</font></b>()
+}
+
+<b><font color="#000000">ws_recv_frame_header</font></b>(<b><font color="#000000">ws_recv_frame_header_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has received the header part of a Websocket frame.</p>
+<p>It will be immediately be followed by the frame&apos;s payload.</p>
+<h3 id="_ws_recv_frame_end">ws_recv_frame_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ws_recv_frame_end_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">extensions</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:extensions</font></b>(),
+    <font color="#FF6600">close_code</font> <font color="#990000">:=</font> <font color="#000080">undefined</font> | <b><font color="#000000">cow_ws:close_code</font></b>(),
+    <font color="#FF6600">payload</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>()
+}
+
+<b><font color="#000000">ws_recv_frame_end</font></b>(<b><font color="#000000">ws_recv_frame_end_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished receiving a Websocket frame.</p>
+<h3 id="_ws_send_frame_start">ws_send_frame_start</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ws_send_frame_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">extensions</font> <font color="#990000">:=</font> <b><font color="#000000">cow_ws:extensions</font></b>(),
+    <font color="#FF6600">frame</font> <font color="#990000">:=</font> <b><font color="#000000">gun:ws_frame</font></b>()
+}
+
+<b><font color="#000000">ws_send_frame_start</font></b>(<b><font color="#000000">ws_send_frame_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has started sending a Websocket frame.</p>
+<h3 id="_ws_send_frame_end">ws_send_frame_end</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ws_send_frame_end</font></b>(<b><font color="#000000">ws_send_frame_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has finished sending a Websocket frame.</p>
+<h3 id="_protocol_changed">protocol_changed</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">protocol_changed_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">protocol</font> <font color="#990000">:=</font> <font color="#FF6600">http</font> | <font color="#FF6600">http2</font> | <font color="#FF6600">socks</font> | <font color="#FF6600">raw</font> | <font color="#FF6600">ws</font>
+}
+
+<b><font color="#000000">protocol_changed</font></b>(<b><font color="#000000">protocol_changed_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>The protocol has changed for either the entire Gun connection or for a specific stream.</p>
+<p>The <code>stream_ref</code> key is only set when the protocol has changed for a specific stream or inside a CONNECT tunnel.</p>
+<p>This event occurs during successful Websocket upgrades, as a result of successful CONNECT requests or after a SOCKS tunnel was successfully established.</p>
+<h3 id="_origin_changed">origin_changed</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">origin_changed_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">stream_ref</font> <font color="#990000">=&gt;</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">type</font> <font color="#990000">:=</font> <font color="#FF6600">connect</font> | <font color="#FF6600">socks5</font>,
+    <font color="#FF6600">origin_scheme</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">origin_host</font> <font color="#990000">:=</font> <b><font color="#000000">inet:hostname</font></b>() | <b><font color="#000000">inet:ip_address</font></b>(),
+    <font color="#FF6600">origin_port</font> <font color="#990000">:=</font> <b><font color="#000000">inet:port_number</font></b>()
+}
+
+<b><font color="#000000">origin_changed</font></b>(<b><font color="#000000">origin_changed_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>The origin server has changed for either the Gun connection or for a specific stream.</p>
+<p>The <code>stream_ref</code> key is only set when the origin has changed for a specific stream or inside a CONNECT tunnel.</p>
+<h3 id="_cancel">cancel</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">cancel_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">stream_ref</font> <font color="#990000">:=</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#FF6600">reply_to</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#FF6600">endpoint</font> <font color="#990000">:=</font> <font color="#FF6600">local</font> | <font color="#FF6600">remote</font>,
+    <font color="#FF6600">reason</font> <font color="#990000">:=</font> <b><font color="#000080">atom</font></b>()
+}
+
+<b><font color="#000000">cancel</font></b>(<b><font color="#000000">cancel_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>A stream has been canceled.</p>
+<p>HTTP/1.1 streams can&apos;t be canceled at the protocol level. In this case Gun will silence the stream for the user but events may still occur.</p>
+<p>HTTP/2 streams can be canceled both by the client and the server. Events may still occur for a short time after the stream has been canceled.</p>
+<h3 id="_disconnect">disconnect</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">disconnect_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">reason</font> <font color="#990000">:=</font> <b><font color="#000080">normal</font></b> | <font color="#FF6600">closed</font> | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}
+}
+
+<b><font color="#000000">disconnect</font></b>(<b><font color="#000000">disconnect_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun has been disconnected from the server.</p>
+<h3 id="_terminate">terminate</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">terminate_event</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">state</font> <font color="#990000">:=</font> <font color="#FF6600">not_connected</font>
+        | <font color="#FF6600">domain_lookup</font> | <font color="#FF6600">connecting</font> | <font color="#FF6600">initial_tls_handshake</font> | <font color="#FF6600">tls_handshake</font>
+        | <font color="#FF6600">connected</font> | <font color="#FF6600">connected_data_only</font> | <font color="#FF6600">connected_ws_only</font>,
+    <font color="#FF6600">reason</font> <font color="#990000">:=</font> <b><font color="#000080">normal</font></b> | <font color="#000080">shutdown</font> | {<font color="#000080">shutdown</font>, <b><font color="#000000">any</font></b>()} | <b><font color="#000000">any</font></b>()
+}
+
+<b><font color="#000000">terminate</font></b>(<b><font color="#000000">terminate_event</font></b>(), <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font></tt></pre>
+</div></div>
+<p>Gun is terminating.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: Module introduced.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">gun(7)</a>, <a href="../gun">gun(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	2.0
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/gun/1.3/manual">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/manual">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/manual">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/manual">1.0</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

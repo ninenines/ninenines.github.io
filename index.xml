@@ -83,7 +83,7 @@ Prerequisites Knowledge of Erlang, but also of the HTTP/1.1, HTTP/2 and Websocke
 Supported platforms Gun is tested and supported on Linux, FreeBSD, Windows and OSX.
 Gun is developed for Erlang/OTP 22.0 and newer.
 License Gun uses the ISC License.
-Copyright (c) 2013-2019, Loïc Hoguin &amp;lt;essen@ninenines.eu&amp;gt; Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.</description>
+Copyright (c) 2013-2020, Loïc Hoguin &amp;lt;essen@ninenines.eu&amp;gt; Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.</description>
     </item>
     
     <item>
@@ -1048,6 +1048,16 @@ POTENTIAL SECURITY VULNERABILITY: Fix transfer-encoding precedence over content-
     </item>
     
     <item>
+      <title>Internals: TLS over TLS</title>
+      <link>https://ninenines.eu/docs/en/gun/2.0/guide/internals_tls_over_tls/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/internals_tls_over_tls/</guid>
+      <description>The ssl application that comes with Erlang/OTP implements TLS using an interface equivalent to the gen_tcp interface: you get and manipulate a socket. The TLS encoding and decoding is applied transparently to the data sent and received.
+In order to have a TLS layer inside another TLS layer we need a way to encode the data of the inner layer before we pass it to the outer layer. We cannot do this with a socket interface.</description>
+    </item>
+    
+    <item>
       <title>Migrating from Gun 1.0 to 1.1</title>
       <link>https://ninenines.eu/docs/en/gun/1.1/guide/migrating_from_1.0/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -1065,17 +1075,6 @@ Features added Update Cowlib to 2.5.1   Bugs fixed A bug in the experimental gun
       <guid>https://ninenines.eu/docs/en/gun/1.2/guide/migrating_from_1.1/</guid>
       <description>Gun 1.2 adds support for the CONNECT request over HTTP/1.1 connections.
 Features added CONNECT requests can now be issued on HTTP/1.1 connections. The tunneled connection can use any of the protocols Gun supports: HTTP/1.1, HTTP/2 and Websocket over both TCP and TLS transports. Note that Gun currently does not support tunneling a TLS connection over a TLS connection due to limitations in Erlang/OTP.  Gun supports sending multiple CONNECT requests, allowing the tunnel to the origin server to go through multiple proxies.</description>
-    </item>
-    
-    <item>
-      <title>Migrating from Gun 1.3 to 2.0</title>
-      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/</guid>
-      <description>Gun 2.0 adds many features including graceful shutdown, flow control for data messages, event handlers, support for tunneling TLS connections through TLS proxies, Socks proxy support, and much more. It has only a limited number of breaking changes compared to the previous version.
-Gun 2.0 greatly improves the HTTP/2 performance when it comes to receiving large response bodies; and when receiving response bodies from many separate requests concurrently.
-Gun now shares much of its HTTP/2 code with Cowboy, including the HTTP/2 state machine.</description>
     </item>
     
     <item>
@@ -1337,13 +1336,13 @@ Features added The protocols CONNECT destination option has been added as a repl
     </item>
     
     <item>
-      <title>Migrating from Gun 1.2 to 1.3</title>
-      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.2/</link>
+      <title>Migrating from Gun 1.3 to 2.0</title>
+      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.2/</guid>
-      <description>Gun 1.3 improves the support for CONNECT requests introduced in the previous version and documents Websocket protocol negotiation.
-Features added The protocols CONNECT destination option has been added as a replacement for the now deprecated protocol option.  Add built-in support for Websocket protocol negotiation through the Websocket option protocols. The interface of the handler module currently remains undocumented and must be set to gun_ws_h.  Add the h2specd HTTP/2 test suite from the h2spec project.</description>
+      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/</guid>
+      <description>Gun 2.0 includes state of the art tunnel support. With Gun 2.0 it is possible to make request or data go through any number of proxy endpoints using any combination of TCP or TLS transports and HTTP/1.1, HTTP/2 or SOCKS5 protocols. All combinations of the scenario Proxy1 -&amp;gt; Proxy2 -&amp;gt; Origin are tested and known to work.
+Gun 2.0 adds many more features such as Websocket over HTTP/2, a built-in cookie store, graceful shutdown, flow control for data messages, event handlers and more.</description>
     </item>
     
     <item>
@@ -1459,16 +1458,6 @@ Features added CONNECT requests can now be issued on HTTP/1.1 connections. The t
     </item>
     
     <item>
-      <title>Migrating from Gun 1.1 to 1.2</title>
-      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.1/</guid>
-      <description>Gun 1.2 adds support for the CONNECT request over HTTP/1.1 connections.
-Features added CONNECT requests can now be issued on HTTP/1.1 connections. The tunneled connection can use any of the protocols Gun supports: HTTP/1.1, HTTP/2 and Websocket over both TCP and TLS transports. Note that Gun currently does not support tunneling a TLS connection over a TLS connection due to limitations in Erlang/OTP.  Gun supports sending multiple CONNECT requests, allowing the tunnel to the origin server to go through multiple proxies.</description>
-    </item>
-    
-    <item>
       <title>Handlers</title>
       <link>https://ninenines.eu/docs/en/cowboy/2.3/guide/handlers/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -1544,6 +1533,16 @@ Plain HTTP handlers The most basic handler in Cowboy implements the mandatory in
 This callback receives the Req object and the initial state defined in the router configuration.
 A handler that does nothing would look like this:
 init(Req, State) -&amp;gt; {ok, Req, State}.  Despite sending no reply, a 204 No Content response will be sent to the client, as Cowboy makes sure that a response is sent for every request.</description>
+    </item>
+    
+    <item>
+      <title>Migrating from Gun 1.2 to 1.3</title>
+      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.2/</guid>
+      <description>Gun 1.3 improves the support for CONNECT requests introduced in the previous version and documents Websocket protocol negotiation.
+Features added The protocols CONNECT destination option has been added as a replacement for the now deprecated protocol option.  Add built-in support for Websocket protocol negotiation through the Websocket option protocols. The interface of the handler module currently remains undocumented and must be set to gun_ws_h.  Add the h2specd HTTP/2 test suite from the h2spec project.</description>
     </item>
     
     <item>
@@ -1649,13 +1648,13 @@ Features added Update Cowlib to 2.5.1   Bugs fixed A bug in the experimental gun
     </item>
     
     <item>
-      <title>Migrating from Gun 1.0 to 1.1</title>
-      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.0/</link>
+      <title>Migrating from Gun 1.1 to 1.2</title>
+      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.1/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.0/</guid>
-      <description>Gun 1.1 updates the Cowlib dependency to 2.5.1 and fixes a few problems with experimental features.
-Features added Update Cowlib to 2.5.1   Bugs fixed A bug in the experimental gun_sse_h where lone id lines were not propagated has been fixed by updating the Cowlib dependency.  The status code was incorrectly given to the experimental content handlers as a binary. It has been fixed an an integer is now given as was intended.</description>
+      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.1/</guid>
+      <description>Gun 1.2 adds support for the CONNECT request over HTTP/1.1 connections.
+Features added CONNECT requests can now be issued on HTTP/1.1 connections. The tunneled connection can use any of the protocols Gun supports: HTTP/1.1, HTTP/2 and Websocket over both TCP and TLS transports. Note that Gun currently does not support tunneling a TLS connection over a TLS connection due to limitations in Erlang/OTP.  Gun supports sending multiple CONNECT requests, allowing the tunnel to the origin server to go through multiple proxies.</description>
     </item>
     
     <item>
@@ -1755,6 +1754,16 @@ Features added Listeners can now be suspended/resumed without stopping existing 
       <description>Ranch 1.7 adds built-in support for the PROXY protocol.
 The PROXY protocol is a simple and efficient way for proxies to transmit information about the client.
 While a third-party library already existed, it was not entirely compatible with the Ranch interface, in particular when socket active mode was involved. This new implementation fixes that and supports the full protocol with as little overhead as possible compared to normal operations: just one extra function call.</description>
+    </item>
+    
+    <item>
+      <title>Migrating from Gun 1.0 to 1.1</title>
+      <link>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.0/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.0/</guid>
+      <description>Gun 1.1 updates the Cowlib dependency to 2.5.1 and fixes a few problems with experimental features.
+Features added Update Cowlib to 2.5.1   Bugs fixed A bug in the experimental gun_sse_h where lone id lines were not propagated has been fixed by updating the Cowlib dependency.  The status code was incorrectly given to the experimental content handlers as a binary. It has been fixed an an integer is now given as was intended.</description>
     </item>
     
     <item>
@@ -3785,6 +3794,17 @@ In Erlang though, you probably wouldn&amp;apos;t want an algorithm.</description
     
     <item>
       <title>cow_cookie(3)</title>
+      <link>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie/</guid>
+      <description>Name cow_cookie - Cookies
+Description The module cow_cookie provides functions for parsing and manipulating cookie headers.
+Exports cow_cookie:parse_cookie(3) - Parse a cookie header  cow_cookie:parse_set_cookie(3) - Parse a set-cookie header  cow_cookie:cookie(3) - Generate a cookie header  cow_cookie:setcookie(3) - Generate a set-cookie header   Types cookie_attrs() cookie_attrs() :: #{ expires =&amp;gt; calendar:datetime(), max_age =&amp;gt; calendar:datetime(), domain =&amp;gt; binary(), path =&amp;gt; binary(), secure =&amp;gt; true, http_only =&amp;gt; true, same_site =&amp;gt; strict | lax | none }  Cookie attributes parsed from the set-cookie header.</description>
+    </item>
+    
+    <item>
+      <title>cow_cookie(3)</title>
       <link>https://ninenines.eu/docs/en/cowlib/2.8/manual/cow_cookie/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -3807,6 +3827,19 @@ Exports cow_cookie:parse_cookie(3) - Parse a cookie header  cow_cookie:parse_set
     
     <item>
       <title>cow_cookie:cookie(3)</title>
+      <link>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.cookie/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.cookie/</guid>
+      <description>Name cow_cookie:cookie - Generate a cookie header
+Description cookie(Cookies) -&amp;gt; iolist() Cookies :: [{Name :: iodata(), Value :: iodata()}]  Generate a cookie header.
+Arguments Cookies A list of pairs of cookie name and value.
+  Return value An iolist with the generated cookie header value.
+Changelog 2.9: Function introduced.   Examples Generate a cookie header Cookie = cow_cookie:cookie([{&amp;lt;&amp;lt;&#34;sessionid&#34;&amp;gt;&amp;gt;, ID}]).  See also cow_cookie(3), cow_cookie:parse_cookie(3), cow_cookie:parse_set_cookie(3), cow_cookie:setcookie(3)</description>
+    </item>
+    
+    <item>
+      <title>cow_cookie:cookie(3)</title>
       <link>https://ninenines.eu/docs/en/cowlib/2.9/manual/cow_cookie.cookie/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -3816,6 +3849,20 @@ Description cookie(Cookies) -&amp;gt; iolist() Cookies :: [{Name :: iodata(), Va
 Arguments Cookies A list of pairs of cookie name and value.
   Return value An iolist with the generated cookie header value.
 Changelog 2.9: Function introduced.   Examples Generate a cookie header Cookie = cow_cookie:cookie([{&amp;lt;&amp;lt;&#34;sessionid&#34;&amp;gt;&amp;gt;, ID}]).  See also cow_cookie(3), cow_cookie:parse_cookie(3), cow_cookie:parse_set_cookie(3), cow_cookie:setcookie(3)</description>
+    </item>
+    
+    <item>
+      <title>cow_cookie:parse_cookie(3)</title>
+      <link>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.parse_cookie/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.parse_cookie/</guid>
+      <description>Name cow_cookie:parse_cookie - Parse a cookie header
+Description parse_cookie(Cookie :: binary()) -&amp;gt; [{binary(), binary()}]  Parse a cookie header.
+Arguments Cookie The cookie header value.
+  Return value A list of cookie name/value pairs is returned on success.
+An exception is thrown in the event of a parse error.
+Changelog 2.9: Fixes to the parser may lead to potential incompatibilities. A cookie name starting with $ is no longer ignored.</description>
     </item>
     
     <item>
@@ -3848,6 +3895,19 @@ Changelog 2.9: Fixes to the parser may lead to potential incompatibilities. A co
     
     <item>
       <title>cow_cookie:parse_set_cookie(3)</title>
+      <link>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.parse_set_cookie/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.parse_set_cookie/</guid>
+      <description>Name cow_cookie:parse_set_cookie - Parse a set-cookie header
+Description parse_set_cookie(SetCookie :: binary()) -&amp;gt; {ok, Name, Value, Attrs} | ignore Name :: binary() Value :: binary() Attrs :: cow_cookie:cookie_attrs()  Parse a set-cookie header.
+Arguments SetCookie The set-cookie header value.
+  Return value An ok tuple with the cookie name, value and attributes is returned on success.
+An atom ignore is returned when the cookie has both an empty name and an empty value, and must be ignored.</description>
+    </item>
+    
+    <item>
+      <title>cow_cookie:parse_set_cookie(3)</title>
       <link>https://ninenines.eu/docs/en/cowlib/2.9/manual/cow_cookie.parse_set_cookie/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -3857,6 +3917,21 @@ Description parse_set_cookie(SetCookie :: binary()) -&amp;gt; {ok, Name, Value, 
 Arguments SetCookie The set-cookie header value.
   Return value An ok tuple with the cookie name, value and attributes is returned on success.
 An atom ignore is returned when the cookie has both an empty name and an empty value, and must be ignored.</description>
+    </item>
+    
+    <item>
+      <title>cow_cookie:setcookie(3)</title>
+      <link>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.setcookie/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/cowlib/2.10/manual/cow_cookie.setcookie/</guid>
+      <description>Name cow_cookie:setcookie - Generate a set-cookie header
+Description setcookie(Name :: iodata(), Value :: iodata(), Opts :: cow_cookie:cookie_opts()) -&amp;gt; iolist()  Generate a set-cookie header.
+Arguments Name Cookie name.
+ Value Cookie value.
+ Opts Options added to the set-cookie header as attributes.
+  Return value An iolist with the generated set-cookie header value.
+Changelog 1.0: Function introduced.   Examples Generate a set-cookie header SetCookie = cow_cookie:setcookie(&amp;lt;&amp;lt;&#34;sessionid&#34;&amp;gt;&amp;gt;, ID, #{ http_only =&amp;gt; true, secure =&amp;gt; true }).</description>
     </item>
     
     <item>
@@ -9228,6 +9303,18 @@ init(Req, State) -&amp;gt; {cowboy_websocket, Req, State} | {cowboy_websocket, R
     
     <item>
       <title>Cowlib Function Reference</title>
+      <link>https://ninenines.eu/docs/en/cowlib/2.10/manual/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/cowlib/2.10/manual/</guid>
+      <description>Name cowlib - Support library for manipulating Web protocols
+Description Cowlib provides libraries for parsing and building messages for various Web protocols, including HTTP/1.1, HTTP/2 and Websocket.
+It is optimized for completeness rather than speed. No value is ignored, they are all returned.
+Modules cow_cookie(3) - Cookies   Dependencies crypto - Crypto functions   All these applications must be started before the cowlib application. To start Cowlib and all dependencies at once:</description>
+    </item>
+    
+    <item>
+      <title>Cowlib Function Reference</title>
       <link>https://ninenines.eu/docs/en/cowlib/2.8/manual/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -9244,6 +9331,18 @@ Modules cow_cookie(3) - Cookies   Dependencies crypto - Crypto functions   All t
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/cowlib/2.9/manual/</guid>
+      <description>Name cowlib - Support library for manipulating Web protocols
+Description Cowlib provides libraries for parsing and building messages for various Web protocols, including HTTP/1.1, HTTP/2 and Websocket.
+It is optimized for completeness rather than speed. No value is ignored, they are all returned.
+Modules cow_cookie(3) - Cookies   Dependencies crypto - Crypto functions   All these applications must be started before the cowlib application. To start Cowlib and all dependencies at once:</description>
+    </item>
+    
+    <item>
+      <title>cowlib(7)</title>
+      <link>https://ninenines.eu/docs/en/cowlib/2.10/manual/cowlib_app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/cowlib/2.10/manual/cowlib_app/</guid>
       <description>Name cowlib - Support library for manipulating Web protocols
 Description Cowlib provides libraries for parsing and building messages for various Web protocols, including HTTP/1.1, HTTP/2 and Websocket.
 It is optimized for completeness rather than speed. No value is ignored, they are all returned.
@@ -9331,7 +9430,7 @@ Modules gun(3) - Asynchronous HTTP client   Dependencies cowlib(7) - Support lib
       <description>Name gun - HTTP/1.1, HTTP/2 and Websocket client for Erlang/OTP
 Description Gun is an HTTP client for Erlang/OTP with support for the HTTP/1.1, HTTP/2 and Websocket protocols.
 Gun aims to provide an easy to use, asynchronous and always-connected client. It maintains a permanent connection to the server and reconnects automatically when necessary.
-Modules gun(3) - Asynchronous HTTP client  gun_cookies(3) - Cookie store engine  gun_cookies_list(3) - Cookie store backend: in-memory, per connection   Dependencies cowlib(7) - Support library for manipulating Web protocols  ssl - Secure communication over sockets   All these applications must be started before the gun application.</description>
+Modules gun(3) - Asynchronous HTTP client  gun_cookies(3) - Cookie store engine  gun_cookies_list(3) - Cookie store backend: in-memory, per connection  gun_event(3) - Events   Dependencies cowlib(7) - Support library for manipulating Web protocols  ssl - Secure communication over sockets   All these applications must be started before the gun application.</description>
     </item>
     
     <item>
@@ -9376,7 +9475,7 @@ Modules gun(3) - Asynchronous HTTP client  gun_cookies(3) - Cookie store engine 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/guide/</guid>
-      <description>Interface Introduction  Starting and stopping  Supported protocols  Connection  Using HTTP  Using Websocket   Additional information Migrating from Gun 1.3 to 2.0  Migrating from Gun 1.2 to 1.3  Migrating from Gun 1.1 to 1.2  Migrating from Gun 1.0 to 1.1   </description>
+      <description>Interface Introduction  Starting and stopping  Supported protocols  Connection  Using HTTP  Using Websocket   Advanced Internals: TLS over TLS   Additional information Migrating from Gun 1.3 to 2.0  Migrating from Gun 1.2 to 1.3  Migrating from Gun 1.1 to 1.2  Migrating from Gun 1.0 to 1.1   </description>
     </item>
     
     <item>
@@ -9496,7 +9595,7 @@ Modules gun(3) - Asynchronous HTTP client   Dependencies cowlib(7) - Support lib
       <description>Name gun - HTTP/1.1, HTTP/2 and Websocket client for Erlang/OTP
 Description Gun is an HTTP client for Erlang/OTP with support for the HTTP/1.1, HTTP/2 and Websocket protocols.
 Gun aims to provide an easy to use, asynchronous and always-connected client. It maintains a permanent connection to the server and reconnects automatically when necessary.
-Modules gun(3) - Asynchronous HTTP client  gun_cookies(3) - Cookie store engine  gun_cookies_list(3) - Cookie store backend: in-memory, per connection   Dependencies cowlib(7) - Support library for manipulating Web protocols  ssl - Secure communication over sockets   All these applications must be started before the gun application.</description>
+Modules gun(3) - Asynchronous HTTP client  gun_cookies(3) - Cookie store engine  gun_cookies_list(3) - Cookie store backend: in-memory, per connection  gun_event(3) - Events   Dependencies cowlib(7) - Support library for manipulating Web protocols  ssl - Secure communication over sockets   All these applications must be started before the gun application.</description>
     </item>
     
     <item>
@@ -9550,7 +9649,7 @@ This function waits for a message from the given stream and returns it as a tupl
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.await/</guid>
       <description>Name gun:await - Wait for a response
-Description await(ConnPid, StreamRef) -&amp;gt; await(ConnPid, StreamRef, 5000, MonitorRef) await(ConnPid, StreamRef, MonitorRef) -&amp;gt; await(ConnPid, StreamRef, 5000, MonitorRef) await(ConnPid, StreamRef, Timeout) -&amp;gt; await(ConnPid, StreamRef, Timeout, MonitorRef) await(ConnPid, StreamRef, Timeout, MonitorRef) -&amp;gt; Result ConnPid :: pid() StreamRef :: reference() MonitorRef :: reference() Timeout :: timeout() Result :: tuple() - see below  Wait for a response.
+Description await(ConnPid, StreamRef) -&amp;gt; await(ConnPid, StreamRef, 5000, MonitorRef) await(ConnPid, StreamRef, MonitorRef) -&amp;gt; await(ConnPid, StreamRef, 5000, MonitorRef) await(ConnPid, StreamRef, Timeout) -&amp;gt; await(ConnPid, StreamRef, Timeout, MonitorRef) await(ConnPid, StreamRef, Timeout, MonitorRef) -&amp;gt; Result ConnPid :: pid() StreamRef :: gun:stream_ref() MonitorRef :: reference() Timeout :: timeout() Result :: tuple() - see below  Wait for a response.
 This function waits for a message from the given stream and returns it as a tuple.</description>
     </item>
     
@@ -9601,7 +9700,7 @@ Description await_body(ConnPid, StreamRef) -&amp;gt; await_body(ConnPid, StreamR
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.await_body/</guid>
       <description>Name gun:await_body - Wait for the complete response body
-Description await_body(ConnPid, StreamRef) -&amp;gt; await_body(ConnPid, StreamRef, 5000, MonitorRef) await_body(ConnPid, StreamRef, MonitorRef) -&amp;gt; await_body(ConnPid, StreamRef, 5000, MonitorRef) await_body(ConnPid, StreamRef, Timeout) -&amp;gt; await_body(ConnPid, StreamRef, Timeout, MonitorRef) await_body(ConnPid, StreamRef, Timeout, MonitorRef) -&amp;gt; {ok, Body} | {ok, Body, Trailers} | {error, Reason} ConnPid :: pid() StreamRef :: reference() MonitorRef :: reference() Timeout :: timeout() Body :: binary() Trailers :: [{binary(), binary()}] Reason :: {stream_error | connection_error | down, any()} | timeout  Wait for the complete response body.</description>
+Description await_body(ConnPid, StreamRef) -&amp;gt; await_body(ConnPid, StreamRef, 5000, MonitorRef) await_body(ConnPid, StreamRef, MonitorRef) -&amp;gt; await_body(ConnPid, StreamRef, 5000, MonitorRef) await_body(ConnPid, StreamRef, Timeout) -&amp;gt; await_body(ConnPid, StreamRef, Timeout, MonitorRef) await_body(ConnPid, StreamRef, Timeout, MonitorRef) -&amp;gt; {ok, Body} | {ok, Body, Trailers} | {error, Reason} ConnPid :: pid() StreamRef :: gun:stream_ref() MonitorRef :: reference() Timeout :: timeout() Body :: binary() Trailers :: [{binary(), binary()}] Reason :: {stream_error | connection_error | down, any()} | timeout  Wait for the complete response body.</description>
     </item>
     
     <item>
@@ -9714,7 +9813,7 @@ HTTP/1.1 does not support this feature. Gun will simply silence the stream and s
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.cancel/</guid>
       <description>Name gun:cancel - Cancel the given stream
-Description cancel(ConnPid, StreamRef) -&amp;gt; ok ConnPid :: pid() StreamRef :: reference()  Cancel the given stream.
+Description cancel(ConnPid, StreamRef) -&amp;gt; ok ConnPid :: pid() StreamRef :: gun:stream_ref()  Cancel the given stream.
 The behavior of this function depends on the protocol selected.
 HTTP/1.1 does not support this feature. Gun will simply silence the stream and stop relaying messages. Gun may also decide to close the connection if the response body is too large, to avoid wasting time and bandwidth.</description>
     </item>
@@ -9813,7 +9912,7 @@ This feature is currently only available for HTTP/1.1 connections. Upon successf
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.connect/</guid>
       <description>Name gun:connect - Establish a tunnel to the origin server
-Description connect(ConnPid, Destination) -&amp;gt; connect(ConnPid, Destination, [], #{}). connect(ConnPid, Destination, Headers) -&amp;gt; connect(ConnPid, Destination, Headers, #{}). connect(ConnPid, Destination, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Destination :: gun:connect_destination() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: reference()  Establish a tunnel to the origin server.
+Description connect(ConnPid, Destination) -&amp;gt; connect(ConnPid, Destination, [], #{}). connect(ConnPid, Destination, Headers) -&amp;gt; connect(ConnPid, Destination, Headers, #{}). connect(ConnPid, Destination, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Destination :: gun:connect_destination() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Establish a tunnel to the origin server.
 This feature is currently only available for HTTP/1.1 connections. Upon successful completion of the CONNECT request a tunnel is established and subsequent requests will go through the tunnel.</description>
     </item>
     
@@ -9872,7 +9971,7 @@ All calls to this function must use the nofin flag except for the last which mus
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.data/</guid>
       <description>Name gun:data - Stream the body of a request
-Description data(ConnPid, StreamRef, IsFin, Data) -&amp;gt; ok ConnPid :: pid() StreamRef :: reference() IsFin :: fin | nofin Data :: iodata()  Stream the body of a request.
+Description data(ConnPid, StreamRef, IsFin, Data) -&amp;gt; ok ConnPid :: pid() StreamRef :: gun:stream_ref() IsFin :: fin | nofin Data :: iodata()  Stream the body of a request.
 This function can only be used if the original request had headers indicating that a body would be streamed.
 All calls to this function must use the nofin flag except for the last which must use fin to indicate the end of the request body.</description>
     </item>
@@ -9940,7 +10039,7 @@ Arguments ConnPid The pid of the Gun connection process.
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.delete/</guid>
       <description>Name gun:delete - Delete a resource
-Description delete(ConnPid, Path) -&amp;gt; delete(ConnPid, Path, [], #{}). delete(ConnPid, Path, Headers) -&amp;gt; delete(ConnPid, Path, Headers, #{}) delete(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: reference()  Delete a resource.
+Description delete(ConnPid, Path) -&amp;gt; delete(ConnPid, Path, [], #{}). delete(ConnPid, Path, Headers) -&amp;gt; delete(ConnPid, Path, Headers, #{}) delete(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Delete a resource.
 Arguments ConnPid The pid of the Gun connection process.
  Path Path to the resource.
  Headers Additional request headers.
@@ -10010,7 +10109,7 @@ ConnPid The pid of the Gun connection process.
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.flush/</guid>
       <description>Name gun:flush - Flush all messages related to a connection or a stream
-Description flush(ConnPid) -&amp;gt; ok flush(StreamRef) -&amp;gt; ok ConnPid :: pid() StreamRef :: reference()  Flush all messages related to a connection or a stream.
+Description flush(ConnPid) -&amp;gt; ok flush(StreamRef) -&amp;gt; ok ConnPid :: pid() StreamRef :: gun:stream_ref()  Flush all messages related to a connection or a stream.
 Arguments Either of these arguments may be provided:
 ConnPid The pid of the Gun connection process.
  StreamRef Identifier of the stream for the original request.
@@ -10076,7 +10175,7 @@ Arguments ConnPid The pid of the Gun connection process.
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.get/</guid>
       <description>Name gun:get - Get a resource representation
-Description get(ConnPid, Path) -&amp;gt; get(ConnPid, Path, [], #{}). get(ConnPid, Path, Headers) -&amp;gt; get(ConnPid, Path, Headers, #{}) get(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: reference()  Get a resource representation.
+Description get(ConnPid, Path) -&amp;gt; get(ConnPid, Path, [], #{}). get(ConnPid, Path, Headers) -&amp;gt; get(ConnPid, Path, Headers, #{}) get(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Get a resource representation.
 Arguments ConnPid The pid of the Gun connection process.
  Path Path to the resource.
  Headers Additional request headers.
@@ -10134,7 +10233,7 @@ This function performs the same operation as gun:get(3), except the server will 
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.head/</guid>
       <description>Name gun:head - Get headers of a resource representation
-Description head(ConnPid, Path) -&amp;gt; head(ConnPid, Path, [], #{}). head(ConnPid, Path, Headers) -&amp;gt; head(ConnPid, Path, Headers, #{}) head(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: reference()  Get headers of a resource representation.
+Description head(ConnPid, Path) -&amp;gt; head(ConnPid, Path, [], #{}). head(ConnPid, Path, Headers) -&amp;gt; head(ConnPid, Path, Headers, #{}) head(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Get headers of a resource representation.
 This function performs the same operation as gun:get(3), except the server will not send the resource representation, only the response&amp;apos;s status code and headers.</description>
     </item>
     
@@ -10145,7 +10244,7 @@ This function performs the same operation as gun:get(3), except the server will 
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.headers/</guid>
       <description>Name gun:headers - Initiate the given request
-Description headers(ConnPid, Method, Path, Headers) -&amp;gt; headers(ConnPid, Method, Path, Headers, #{}) headers(ConnPid, Method, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Method :: binary() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: reference()  Initiate the given request.
+Description headers(ConnPid, Method, Path, Headers) -&amp;gt; headers(ConnPid, Method, Path, Headers, #{}) headers(ConnPid, Method, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Method :: binary() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Initiate the given request.
 This is a general purpose function that should only be used when other method-specific functions do not apply.
 The function headers/4,5 initiates a request but does not send the request body.</description>
     </item>
@@ -10206,7 +10305,7 @@ Description info(ConnPid) -&amp;gt; Info ConnPid :: pid() Info :: #{ socket =&am
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.info/</guid>
       <description>Name gun:info - Obtain information about the connection
-Description info(ConnPid) -&amp;gt; Info ConnPid :: pid() Info :: #{ owner =&amp;gt; pid(), socket =&amp;gt; inet:socket() | ssl:sslsocket(), transport =&amp;gt; tcp | tls, protocol =&amp;gt; http | http2 | socks | ws, sock_ip =&amp;gt; inet:ip_address(), sock_port =&amp;gt; inet:port_number(), origin_host =&amp;gt; inet:hostname() | inet:ip_address(), origin_port =&amp;gt; inet:port_number(), intermediaries =&amp;gt; [Intermediary], cookie_store =&amp;gt; gun_cookies:cookie_store() } Intermediary :: #{ type =&amp;gt; connect | socks5, host =&amp;gt; inet:hostname() | inet:ip_address(), port =&amp;gt; inet:port_number(), transport =&amp;gt; tcp | tls, protocol =&amp;gt; http | http2 | socks }  Obtain information about the connection.</description>
+Description info(ConnPid) -&amp;gt; Info ConnPid :: pid() Info :: #{ owner =&amp;gt; pid(), socket =&amp;gt; inet:socket() | ssl:sslsocket(), transport =&amp;gt; tcp | tls, protocol =&amp;gt; http | http2 | socks | ws, sock_ip =&amp;gt; inet:ip_address(), sock_port =&amp;gt; inet:port_number(), origin_scheme =&amp;gt; binary() | undefined, origin_host =&amp;gt; inet:hostname() | inet:ip_address(), origin_port =&amp;gt; inet:port_number(), intermediaries =&amp;gt; [Intermediary], cookie_store =&amp;gt; gun_cookies:cookie_store() } Intermediary :: #{ type =&amp;gt; connect | socks5, host =&amp;gt; inet:hostname() | inet:ip_address(), port =&amp;gt; inet:port_number(), transport =&amp;gt; tcp | tls, protocol =&amp;gt; http | http2 | socks | raw }  Obtain information about the connection.</description>
     </item>
     
     <item>
@@ -10387,7 +10486,7 @@ The special path &amp;quot;*&amp;quot; can be used to obtain information about t
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.options/</guid>
       <description>Name gun:options - Query the capabilities of the server or a resource
-Description options(ConnPid, Path) -&amp;gt; options(ConnPid, Path, [], #{}). options(ConnPid, Path, Headers) -&amp;gt; options(ConnPid, Path, Headers, #{}) options(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: reference()  Query the capabilities of the server or a resource.
+Description options(ConnPid, Path) -&amp;gt; options(ConnPid, Path, [], #{}). options(ConnPid, Path, Headers) -&amp;gt; options(ConnPid, Path, Headers, #{}) options(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Query the capabilities of the server or a resource.
 The special path &amp;quot;*&amp;quot; can be used to obtain information about the server as a whole.</description>
     </item>
     
@@ -10442,7 +10541,7 @@ The behavior of this function varies depending on whether a body is provided.</d
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.patch/</guid>
       <description>Name gun:patch - Apply a set of changes to a resource
-Description patch(ConnPid, Path, Headers) -&amp;gt; patch(ConnPid, Path, Headers, #{}) patch(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef patch(ConnPid, Path, Headers, Body) -&amp;gt; patch(ConnPid, Path, Headers, Body, #{}) patch(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference()  Apply a set of changes to a resource.</description>
+Description patch(ConnPid, Path, Headers) -&amp;gt; patch(ConnPid, Path, Headers, #{}) patch(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef patch(ConnPid, Path, Headers, Body) -&amp;gt; patch(ConnPid, Path, Headers, Body, #{}) patch(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Apply a set of changes to a resource.</description>
     </item>
     
     <item>
@@ -10496,7 +10595,7 @@ The behavior of this function varies depending on whether a body is provided.</d
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.post/</guid>
       <description>Name gun:post - Process the enclosed representation according to a resource&amp;apos;s own semantics
-Description post(ConnPid, Path, Headers) -&amp;gt; post(ConnPid, Path, Headers, #{}) post(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef post(ConnPid, Path, Headers, Body) -&amp;gt; post(ConnPid, Path, Headers, Body, #{}) post(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference()  Process the enclosed representation according to a resource&amp;apos;s own semantics.</description>
+Description post(ConnPid, Path, Headers) -&amp;gt; post(ConnPid, Path, Headers, #{}) post(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef post(ConnPid, Path, Headers, Body) -&amp;gt; post(ConnPid, Path, Headers, Body, #{}) post(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Process the enclosed representation according to a resource&amp;apos;s own semantics.</description>
     </item>
     
     <item>
@@ -10554,7 +10653,7 @@ The function put/3 expects either a content-length or content-type header to ind
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.put/</guid>
       <description>Name gun:put - Create or replace a resource
-Description put(ConnPid, Path, Headers) -&amp;gt; put(ConnPid, Path, Headers, #{}) put(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef put(ConnPid, Path, Headers, Body) -&amp;gt; put(ConnPid, Path, Headers, Body, #{}) put(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference()  Create or replace a resource.
+Description put(ConnPid, Path, Headers) -&amp;gt; put(ConnPid, Path, Headers, #{}) put(ConnPid, Path, Headers, ReqOpts) -&amp;gt; StreamRef put(ConnPid, Path, Headers, Body) -&amp;gt; put(ConnPid, Path, Headers, Body, #{}) put(ConnPid, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Create or replace a resource.
 The behavior of this function varies depending on whether a body is provided.</description>
     </item>
     
@@ -10609,7 +10708,7 @@ This is a general purpose function that should only be used when other method-sp
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.request/</guid>
       <description>Name gun:request - Perform the given request
-Description request(ConnPid, Method, Path, Headers, Body) -&amp;gt; request(ConnPid, Method, Path, Headers, Body, #{}) request(ConnPid, Method, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Method :: binary() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: reference()  Perform the given request.
+Description request(ConnPid, Method, Path, Headers, Body) -&amp;gt; request(ConnPid, Method, Path, Headers, Body, #{}) request(ConnPid, Method, Path, Headers, Body, ReqOpts) -&amp;gt; StreamRef ConnPid :: pid() Method :: binary() Path :: iodata() Headers :: gun:req_headers() Body :: iodata() ReqOpts :: gun:req_opts() StreamRef :: gun:stream_ref()  Perform the given request.
 This is a general purpose function that should only be used when other method-specific functions do not apply.</description>
     </item>
     
@@ -10646,10 +10745,7 @@ For HTTP/1.1 there is no such mechanism and Gun will close the connection once t
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.stream_info/</guid>
       <description>Name gun:stream_info - Obtain information about a stream
-Description stream_info(ConnPid, StreamRef) -&amp;gt; {ok, undefined | Info} | {error, not_connected} ConnPid :: pid() StreamRef :: reference() Info :: #{ ref =&amp;gt; reference(), reply_to =&amp;gt; pid(), state =&amp;gt; running | stopping }  Obtain information about a stream.
-Arguments ConnPid The pid of the Gun connection process.
- StreamRef Identifier of the stream for the original request.
-  Return value A map is returned containing various informations about the stream.</description>
+Description stream_info(ConnPid, StreamRef) -&amp;gt; {ok, undefined | Info} | {error, not_connected} ConnPid :: pid() StreamRef :: gun:stream_ref() Info :: #{ ref =&amp;gt; gun:stream_ref(), reply_to =&amp;gt; pid(), state =&amp;gt; running | stopping, intermediaries =&amp;gt; [Intermediary], tunnel =&amp;gt; Tunnel } Intermediary :: #{ type =&amp;gt; connect | socks5, host =&amp;gt; inet:hostname() | inet:ip_address(), port =&amp;gt; inet:port_number(), transport =&amp;gt; tcp | tls, protocol =&amp;gt; http | http2 | socks | raw } Tunnel :: #{ transport =&amp;gt; tcp | tls, protocol =&amp;gt; http | http2 | socks | raw, origin_scheme =&amp;gt; binary() | undefined, origin_host =&amp;gt; inet:hostname() | inet:ip_address(), origin_port =&amp;gt; inet:port_number() }  Obtain information about a stream.</description>
     </item>
     
     <item>
@@ -10659,7 +10755,7 @@ Arguments ConnPid The pid of the Gun connection process.
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.update_flow/</guid>
       <description>Name gun:update_flow - Update a stream&amp;apos;s flow control value
-Description update_flow(ConnPid, StreamRef, Flow) -&amp;gt; ok ConnPid :: pid() StreamRef :: reference() Flow :: pos_integer()  Update a stream&amp;apos;s flow control value.
+Description update_flow(ConnPid, StreamRef, Flow) -&amp;gt; ok ConnPid :: pid() StreamRef :: gun:stream_ref() Flow :: pos_integer()  Update a stream&amp;apos;s flow control value.
 The flow value can only ever be incremented.
 This function does nothing for streams that have flow control disabled (which is the default).
 Arguments ConnPid The pid of the Gun connection process.
@@ -10725,10 +10821,9 @@ Arguments ConnPid The pid of the Gun connection process.
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.ws_send/</guid>
       <description>Name gun:ws_send - Send Websocket frames
-Description ws_send(ConnPid, Frames) -&amp;gt; ok ConnPid :: pid() Frames :: Frame | [Frame] Frame :: close | ping | pong | {text | binary | close | ping | pong, iodata()} | {close, non_neg_integer(), iodata()}  Send Websocket frames.
+Description ws_send(ConnPid, StreamRef, Frames) -&amp;gt; ok ConnPid :: pid() StreamRef :: gun:stream_ref() Frames :: Frame | [Frame] Frame :: close | ping | pong | {text | binary | close | ping | pong, iodata()} | {close, non_neg_integer(), iodata()}  Send Websocket frames.
 The connection must first be upgraded to Websocket using the function gun:ws_upgrade(3).
-Arguments ConnPid The pid of the Gun connection process.
- Frames One or more Websocket frame(s).</description>
+Arguments ConnPid The pid of the Gun connection process.</description>
     </item>
     
     <item>
@@ -10786,7 +10881,7 @@ HTTP/1.1 cannot handle Websocket and HTTP requests concurrently. The upgrade, if
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun.ws_upgrade/</guid>
       <description>Name gun:ws_upgrade - Upgrade to Websocket
-Description ws_upgrade(ConnPid, Path) -&amp;gt; ws_upgrade(ConnPid, Path, []) ws_upgrade(ConnPid, Path, Headers) -&amp;gt; StreamRef ws_upgrade(ConnPid, Path, Headers, WsOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() WsOpts :: gun:ws_opts StreamRef :: reference()  Upgrade to Websocket.
+Description ws_upgrade(ConnPid, Path) -&amp;gt; ws_upgrade(ConnPid, Path, []) ws_upgrade(ConnPid, Path, Headers) -&amp;gt; StreamRef ws_upgrade(ConnPid, Path, Headers, WsOpts) -&amp;gt; StreamRef ConnPid :: pid() Path :: iodata() Headers :: gun:req_headers() WsOpts :: gun:ws_opts StreamRef :: gun:stream_ref()  Upgrade to Websocket.
 The behavior of this function depends on the protocol selected.
 HTTP/1.1 cannot handle Websocket and HTTP requests concurrently. The upgrade, if successful, will result in the complete takeover of the connection.</description>
     </item>
@@ -10905,7 +11000,7 @@ The response body may be terminated either by a data message with the flag fin s
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_data/</guid>
       <description>Name gun_data - Response body
-Description {gun_data, ConnPid, StreamRef, IsFin, Data} ConnPid :: pid() StreamRef :: reference() IsFin :: fin | nofin Data :: binary()  Response body.
+Description {gun_data, ConnPid, StreamRef, IsFin, Data} ConnPid :: pid() StreamRef :: gun:stream_ref() IsFin :: fin | nofin Data :: binary()  Response body.
 This message informs the relevant process that the server sent a all or part of the body for the response to the original request.
 A data message is always preceded by a response message.
 The response body may be terminated either by a data message with the flag fin set or by a gun_trailers(3) message.</description>
@@ -10966,7 +11061,7 @@ When the connection goes back up, Gun will not attempt to retry requests.</descr
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_down/</guid>
       <description>Name gun_down - The connection is down
-Description {gun_down, ConnPid, Protocol, Reason, KilledStreams} ConnPid :: pid() Protocol :: http | http2 | socks | ws Reason :: any() KilledStreams :: [reference()]  The connection is down.
+Description {gun_down, ConnPid, Protocol, Reason, KilledStreams} ConnPid :: pid() Protocol :: http | http2 | socks | ws Reason :: any() KilledStreams :: [gun:stream_ref()]  The connection is down.
 This message informs the owner process that the connection was lost. Depending on the retry and retry_timeout options Gun may automatically attempt to reconnect.
 When the connection goes back up, Gun will not attempt to retry requests.</description>
     </item>
@@ -11022,8 +11117,21 @@ These messages inform the relevant process that an error occurred. A reference i
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_error/</guid>
       <description>Name gun_error - Stream or connection-wide error
-Description {gun_error, ConnPid, StreamRef, Reason} {gun_error, ConnPid, Reason} ConnPid :: pid() StreamRef :: reference() Reason :: any()  Stream or connection-wide error.
+Description {gun_error, ConnPid, StreamRef, Reason} {gun_error, ConnPid, Reason} ConnPid :: pid() StreamRef :: gun:stream_ref() Reason :: any()  Stream or connection-wide error.
 These messages inform the relevant process that an error occurred. A reference is given when the error pertains to a specific stream. Connection-wide errors do not imply that the connection is no longer usable, they are used for all errors that are not specific to a stream.</description>
+    </item>
+    
+    <item>
+      <title>gun_event(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/2.0/manual/gun_event/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_event/</guid>
+      <description>Name gun_event - Events
+Description The gun_event module provides the callback interface and types for implementing event handlers.
+Callbacks Event handlers implement the following interface. Because types are tied to specific events, they are documented alongside them. All event types are exported and can be referred to as gun_event:Type().
+The events are ordered by the order they are likely to be triggered, with the most frequent events listed first.
+init init_event() :: #{ owner := pid(), transport := tcp | tls, origin_scheme := binary(), origin_host := inet:hostname() | inet:ip_address(), origin_port := inet:port_number(), opts := gun:opts() } init(init_event(), State) -&amp;gt; State  Gun is initializing.</description>
     </item>
     
     <item>
@@ -11081,7 +11189,7 @@ Informational responses are only intermediate responses and provide no guarantee
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_inform/</guid>
       <description>Name gun_inform - Informational response
-Description {gun_inform, ConnPid, StreamRef, Status, Headers} ConnPid :: pid() StreamRef :: reference() Status :: 100..199 Headers :: [{binary(), binary()}]  Informational response.
+Description {gun_inform, ConnPid, StreamRef, Status, Headers} ConnPid :: pid() StreamRef :: gun:stream_ref() Status :: 100..199 Headers :: [{binary(), binary()}]  Informational response.
 This message informs the relevant process that the server sent an informational response to the original request.
 Informational responses are only intermediate responses and provide no guarantees as to what the final response will be. An informational response always precedes the response to the original request.</description>
     </item>
@@ -11141,7 +11249,7 @@ A server-initiated push message always precedes the response to the original req
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_push/</guid>
       <description>Name gun_push - Server-initiated push
-Description {gun_push, ConnPid, StreamRef, NewStreamRef, Method, URI, Headers} ConnPid :: pid() StreamRef :: reference() NewStreamRef :: reference() Method :: binary() URI :: binary() Headers :: [{binary(), binary()}]  Server-initiated push.
+Description {gun_push, ConnPid, StreamRef, NewStreamRef, Method, URI, Headers} ConnPid :: pid() StreamRef :: gun:stream_ref() NewStreamRef :: gun:stream_ref() Method :: binary() URI :: binary() Headers :: [{binary(), binary()}]  Server-initiated push.
 This message informs the relevant process that the server is pushing a resource related to the effective target URI of the original request.
 A server-initiated push message always precedes the response to the original request.</description>
     </item>
@@ -11209,24 +11317,11 @@ Elements ConnPid The pid of the Gun connection process.
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_response/</guid>
       <description>Name gun_response - Response
-Description {gun_response, ConnPid, StreamRef, IsFin, Status, Headers} ConnPid :: pid() StreamRef :: reference() IsFin :: fin | nofin Status :: non_neg_integer() Headers :: [{binary(), binary()}]  Response.
+Description {gun_response, ConnPid, StreamRef, IsFin, Status, Headers} ConnPid :: pid() StreamRef :: gun:stream_ref() IsFin :: fin | nofin Status :: non_neg_integer() Headers :: [{binary(), binary()}]  Response.
 This message informs the relevant process that the server sent a response to the original request.
 Elements ConnPid The pid of the Gun connection process.
  StreamRef Identifier of the stream for the original request.
  IsFin Whether this message terminates the response.</description>
-    </item>
-    
-    <item>
-      <title>gun_socks_up(3)</title>
-      <link>https://ninenines.eu/docs/en/gun/2.0/manual/gun_socks_up/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_socks_up/</guid>
-      <description>Name gun_socks_up - The Socks connection is up
-Description {gun_socks_up, ConnPid, Protocol} ConnPid :: pid() Protocol :: http | http2 | socks  The Socks connection is up.
-This message informs the owner/calling process that the connection completed through the configured Socks proxy.
-If Gun is configured to connect to another Socks server, then the connection is not usable yet. One or more gun_socks_up(3) messages will follow.
-Otherwise, Gun will start processing the messages it received while waiting for the connection to be up.</description>
     </item>
     
     <item>
@@ -11296,12 +11391,24 @@ Elements ConnPid The pid of the Gun connection process.
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_trailers/</guid>
       <description>Name gun_trailers - Response trailers
-Description {gun_trailers, ConnPid, StreamRef, Headers} ConnPid :: pid() StreamRef :: reference() Headers :: [{binary(), binary()}]  Response trailers.
+Description {gun_trailers, ConnPid, StreamRef, Headers} ConnPid :: pid() StreamRef :: gun:stream_ref() Headers :: [{binary(), binary()}]  Response trailers.
 This message informs the relevant process that the server sent response trailers for the response to the original request.
 A trailers message terminates the response.
 Elements ConnPid The pid of the Gun connection process.
  StreamRef Identifier of the stream for the original request.
  Headers Trailing headers sent after the response body.</description>
+    </item>
+    
+    <item>
+      <title>gun_tunnel_up(3)</title>
+      <link>https://ninenines.eu/docs/en/gun/2.0/manual/gun_tunnel_up/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_tunnel_up/</guid>
+      <description>Name gun_tunnel_up - The tunnel is up
+Description {gun_tunnel_up, ConnPid, StreamRef, Protocol} ConnPid :: pid() StreamRef :: gun:stream_ref() | undefined Protocol :: http | http2 | socks  The tunnel is up.
+This message informs the owner/calling process that the connection completed through the SOCKS or CONNECT proxy.
+If Gun is configured to connect to another SOCKS server, then the connection is not usable yet. One or more gun_tunnel_up(3) messages will follow.</description>
     </item>
     
     <item>
@@ -11361,7 +11468,7 @@ Gun will now start processing the messages it received while waiting for the con
       <description>Name gun_up - The connection is up
 Description {gun_up, ConnPid, Protocol} ConnPid :: pid() Protocol :: http | http2 | socks  The connection is up.
 This message informs the owner process that the connection or reconnection completed.
-If Gun is configured to connect to a Socks server, then the connection is not usable yet. One or more gun_socks_up(3) messages will follow.
+If Gun is configured to connect to a Socks server, then the connection is not usable yet. One or more gun_tunnel_up(3) messages will follow.
 Otherwise, Gun will start processing the messages it received while waiting for the connection to be up.</description>
     </item>
     
@@ -11420,7 +11527,7 @@ The exact semantics of this message depend on the original protocol. HTTP/1.1 up
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_upgrade/</guid>
       <description>Name gun_upgrade - Successful protocol upgrade
-Description {gun_upgrade, ConnPid, StreamRef, Protocols, Headers} ConnPid :: pid() StreamRef :: reference() Protocols :: [&amp;lt;&amp;lt;&#34;websocket&#34;&amp;gt;&amp;gt;] Headers :: [{binary(), binary()}]  Successful protocol upgrade.
+Description {gun_upgrade, ConnPid, StreamRef, Protocols, Headers} ConnPid :: pid() StreamRef :: gun:stream_ref() Protocols :: [&amp;lt;&amp;lt;&#34;websocket&#34;&amp;gt;&amp;gt;] Headers :: [{binary(), binary()}]  Successful protocol upgrade.
 This message informs the relevant process that the server accepted to upgrade to one or more protocols given in the original request.
 The exact semantics of this message depend on the original protocol. HTTP/1.1 upgrades apply to the entire connection. HTTP/2 uses a different mechanism which allows switching specific streams to a different protocol.</description>
     </item>
@@ -11484,7 +11591,7 @@ Elements ConnPid The pid of the Gun connection process.</description>
       
       <guid>https://ninenines.eu/docs/en/gun/2.0/manual/gun_ws/</guid>
       <description>Name gun_ws - Websocket frame
-Description {gun_ws, ConnPid, StreamRef, Frame} ConnPid :: pid() StreamRef :: reference() Frame :: close | ping | pong | {text | binary | close, binary()} | {close, non_neg_integer(), binary()} | {ping | pong, binary()}  Websocket frame.
+Description {gun_ws, ConnPid, StreamRef, Frame} ConnPid :: pid() StreamRef :: gun:stream_ref() Frame :: close | ping | pong | {text | binary | close, binary()} | {close, non_neg_integer(), binary()} | {ping | pong, binary()}  Websocket frame.
 This message informs the relevant process that the server sent the enclosed frame.
 This message can only be sent on streams that were upgraded to the Websocket protocol.</description>
     </item>

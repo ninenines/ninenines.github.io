@@ -62,7 +62,8 @@
 
 <h1 class="lined-header"><span>Migrating from Gun 1.3 to 2.0</span></h1>
 
-<p>Gun 2.0 adds many features including graceful shutdown, flow control for data messages, event handlers, support for tunneling TLS connections through TLS proxies, Socks proxy support, and much more. It has only a limited number of breaking changes compared to the previous version.</p>
+<p>Gun 2.0 includes state of the art tunnel support. With Gun 2.0 it is possible to make request or data go through any number of proxy endpoints using any combination of TCP or TLS transports and HTTP/1.1, HTTP/2 or SOCKS5 protocols. All combinations of the scenario Proxy1 -&gt; Proxy2 -&gt; Origin are tested and known to work.</p>
+<p>Gun 2.0 adds many more features such as Websocket over HTTP/2, a built-in cookie store, graceful shutdown, flow control for data messages, event handlers and more.</p>
 <p>Gun 2.0 greatly improves the HTTP/2 performance when it comes to receiving large response bodies; and when receiving response bodies from many separate requests concurrently.</p>
 <p>Gun now shares much of its HTTP/2 code with Cowboy, including the HTTP/2 state machine. Numerous issues were fixed as a result because the Cowboy implementation was much more advanced.</p>
 <p>The Gun connection process is now implemented using <code>gen_statem</code>.</p>
@@ -78,11 +79,11 @@
 </li>
 <li>In order to get separate events when connecting, the domain lookup, connection and TLS handshakes are now performed separately by Gun. As a result, there exists three separate timeout options for each of the steps, and the transport options had to be split into <code>tcp_opts</code> and <code>tls_opts</code>.
 </li>
-<li>Gun can connect through any number of HTTP, HTTPS, Socks or secure Socks proxies, including when Socks proxies are located after the HTTP(S) proxies. The ultimate endpoint may be using any protocol, including plain TCP, TLS, HTTP/1.1 or HTTP/2.
+<li>Gun now supports connecting through SOCKS proxies, including secure SOCKS proxies. Both unauthenticated and username/password authentication are supported.
 </li>
-<li>Gun now supports connecting through Socks5 proxies, including secure Socks proxies. Both unauthenticated and username/password authentication are supported.
+<li>Gun can connect through any number of HTTP, HTTPS, SOCKS or secure SOCKS proxies, including SOCKS proxies located after HTTP(S) proxies. The ultimate endpoint may be using any protocol, including plain TCP, TLS, HTTP/1.1 or HTTP/2.
 </li>
-<li>When specifying which protocols to use, options can now be provided specific to those protocols. It is now possible to have separate HTTP options for an HTTP proxy and the origin HTTP server, for example. See the new <code>protocols()</code> type for details.
+<li>When specifying which protocols to use, options can now be provided specific to those protocols. It is now possible to have separate HTTP options for an HTTP proxy and the origin HTTP server, for example. See the new <code>gun:protocols()</code> type for details.
 </li>
 <li>Gun can now be used to send and receive raw data, as if it was just a normal socket. This can be useful when needing to connect through a number of HTTP/Socks proxies, allowing the use of Gun&apos;s great proxying capabilities (including TLS over TLS) for any sort of protocols. This can also be useful when performing HTTP/1.1 Upgrade to custom protocols.
 </li>
@@ -90,11 +91,13 @@
 </li>
 <li>Header names may now be provided as binary, string or atom.
 </li>
+<li>Gun now automatically lowercases provided header names.
+</li>
 <li>Many HTTP/2 options have been added, allowing great control over how Gun and the remote endpoint are using the HTTP/2 connection. They can be used to improve performance or lower the memory usage, for example.
 </li>
-<li>It is now possible to send many Websocket frames in a single <code>gun:ws_send/2</code> call.
+<li>It is now possible to send many Websocket frames in a single <code>gun:ws_send/3</code> call.
 </li>
-<li>Gun will now send Websocket ping frames automatically at intervals determined by the <code>keepalive</code> option. It defaults to 5 seconds.
+<li>Gun may now send Websocket ping frames automatically at intervals determined by the <code>keepalive</code> option. It is disabled by default.
 </li>
 <li>A new <code>silence_pings</code> option can be set to <code>false</code> to receive all ping and pong frames when using Websocket. They are typically not needed and therefore silent by default.
 </li>
@@ -106,9 +109,9 @@
 </li>
 <li>A new option <code>supervise</code> can be used to start a Gun connection without using Gun&apos;s supervisor. It defaults to <code>true</code>.
 </li>
-<li>Gun now automatically lowercases provided header names.
-</li>
 <li>Many improvements have been done to postpone or reject requests and other operations while in the wrong state (for example during state transitions when switching protocols or connecting to proxies).
+</li>
+<li>Update Cowlib to 2.10.0.
 </li>
 </ul>
 <h2 id="_features_removed">Features removed</h2>
@@ -116,7 +119,7 @@
 </li>
 <li>The <code>connect_destination()</code> option <code>protocol</code> has been removed. It was previously deprecated in favor of <code>protocols</code>.
 </li>
-<li>The <code>keepalive</code> timeout is now disabled by default for HTTP/1.1. To be perfectly clear, this is unrelated to the HTTP/1.1 keep-alive mechanism.
+<li>The <code>keepalive</code> timeout is now disabled by default for HTTP/1.1 and HTTP/2. To be perfectly clear, this is unrelated to the HTTP/1.1 keep-alive mechanism.
 </li>
 </ul>
 <h2 id="_functions_added">Functions added</h2>
@@ -128,13 +131,21 @@
 </li>
 </ul>
 <h2 id="_functions_modified">Functions modified</h2>
-<ul><li>The function <code>gun:info/1</code> now returns the owner of the connection.
+<ul><li>The function <code>gun:info/1</code> now returns the owner of the connection as well as the cookie store.
 </li>
 <li>The functions <code>gun:await/2,3,4</code>, <code>gun:await_body/2,3,4</code> and <code>gun:await_up/1,2,3</code> now distinguish the error types. They can be a timeout, a connection error, a stream error or a down error (when the Gun process exited while waiting).
 </li>
-<li>The functions <code>gun:await/2,3,4</code> will now receive upgrade and Websocket messages and return them.
+<li>The functions <code>gun:await/2,3,4</code> will now receive upgrades, tunnel up and Websocket messages and return them.
 </li>
-<li>The functions <code>gun:request/4,5,6</code> have been replaced with <code>gun:headers/4,5</code> and <code>gun:request/5,6</code>. This provides a cleaner separation between requests that are followed by a body separately from those that don&apos;t.
+<li>Requests may now include the <code>tunnel</code> option to send the request on a specific tunnel.
+</li>
+<li>The functions <code>gun:request/4,5,6</code> have been replaced with <code>gun:headers/4,5</code> and <code>gun:request/5,6</code>. This provides a cleaner separation between requests that are followed by a body and those that don&apos;t.
+</li>
+<li>The function <code>gun:ws_send/2</code> has been replaced with the function <code>gun:ws_send/3</code>. The stream reference for the corresponding Websocket upgrade request must now be given.
+</li>
+</ul>
+<h2 id="_messages_added">Messages added</h2>
+<ul><li>The <code>gun_tunnel_up</code> message has been added.
 </li>
 </ul>
 <h2 id="_messages_modified">Messages modified</h2>
@@ -144,11 +155,15 @@
 <h2 id="_bugs_fixed">Bugs fixed</h2>
 <ul><li><strong>POTENTIAL SECURITY VULNERABILITY</strong>: Fix transfer-encoding precedence over content-length in responses. This bug may contribute to a response smuggling security vulnerability when Gun is used inside a proxy.
 </li>
+<li>Gun will now better detect connection closes in some cases.
+</li>
 <li>Gun will no longer send duplicate connection-wide <code>gun_error</code> messages to the same process.
 </li>
 <li>Gun no longer crashes when trying to upgrade to Websocket over a connection restricted to HTTP/1.0.
 </li>
 <li>The default value for the preferred protocols when using CONNECT over TLS has been corrected. It was mistakenly not enabling HTTP/2.
+</li>
+<li>Protocol options provided for a tunnel destination were sometimes ignored. This should no longer be the case.
 </li>
 <li>Gun will no longer send an empty HTTP/2 DATA frame when there is no request body. It was not necessary.
 </li>
@@ -160,7 +175,7 @@
 </li>
 <li>Hostnames can now be provided as atom as stated by the documentation.
 </li>
-<li>Gun will no longer attempt to send empty data chunks. When using HTTP/1.1 chunked transfer-encoding this caused the request body to terminated, even when <code>nofin</code> was given.
+<li>Gun will no longer attempt to send empty data chunks. When using HTTP/1.1 chunked transfer-encoding this caused the request body to end, even when <code>nofin</code> was given.
 </li>
 <li>Gun now always retries connecting immediately when the connection goes down.
 </li>
@@ -192,8 +207,8 @@
 
 		<nav style="margin:1em 0">
 			
-				<a style="float:left" href="https://ninenines.eu/docs/en/gun/2.0/guide/websocket/">
-					Websocket
+				<a style="float:left" href="https://ninenines.eu/docs/en/gun/2.0/guide/internals_tls_over_tls/">
+					Internals: TLS over TLS
 				</a>
 			
 

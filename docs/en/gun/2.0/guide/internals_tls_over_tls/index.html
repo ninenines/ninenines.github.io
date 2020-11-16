@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Internals: TLS over TLS</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Internals: TLS over TLS</span></h1>
+
+<p>The <code>ssl</code> application that comes with Erlang/OTP implements TLS using an interface equivalent to the <code>gen_tcp</code> interface: you get and manipulate a socket. The TLS encoding and decoding is applied transparently to the data sent and received.</p>
+<p>In order to have a TLS layer inside another TLS layer we need a way to encode the data of the inner layer before we pass it to the outer layer. We cannot do this with a socket interface. Thankfully, the <code>ssl</code> application comes with options that allow to transform an <code>sslsocket()</code> into an encoder/decoder.</p>
+<p>The implementation is however a little convoluted as a result. This chapter aims to give an overview of how it all works under the hood.</p>
+<h2 id="_gun_tls_proxy">gun_tls_proxy</h2>
+<p>The module <code>gun_tls_proxy</code> implements an intermediary process that sits between the Gun process and the TLS process. It is responsible for routing data from the Gun process to the TLS process, and from the TLS process to the Gun process.</p>
+<p>In order to obtain the TLS encoded data the <code>cb_info</code> option is given to the <code>ssl:connect/3</code> function. This replaces the default TCP outer socket module with our own custom module. Gun uses the <code>gun_tls_proxy_cb</code> module instead. This module will forward all messages to the <code>gun_tls_proxy</code> process.</p>
+<p>The resulting operations looks like this:</p>
+<div class="listingblock"><div class="content"><pre>Gun process &lt;-&gt; gun_tls_proxy &lt;-&gt; sslsocket() &lt;-&gt; gun_tls_proxy &lt;-&gt; &quot;inner socket&quot;</pre></div></div>
+<p>The &quot;inner socket&quot; is the socket for the Gun connection. The <code>gun_tls_proxy</code> process decides where to send or receive the data based on where it&apos;s coming from. This is how it knows whether the data has been encoded/decoded or not.</p>
+<p>Because the <code>ssl:connect/3</code> function call is blocking, a temporary process is used while connecting. This is required because the <code>gun_tls_proxy</code> needs to forward data even while performing the TLS handshake, otherwise the <code>ssl:connect/3</code> call will not complete.</p>
+<p>The result of the <code>ssl:connect/3</code> call is forward to the Gun process, along with the negotiated protocols when the connection was successful.</p>
+<p>The <code>gun_tls_proxy_cb</code> module does not actually implement <code>{active,N}</code> as requested by the <code>ssl</code> application. Instead it uses <code>{active,true}</code>.</p>
+<p>The behavior of the <code>gun_tls_proxy</code> process will vary depending on whether the TLS over TLS is done connection-wide or only stream-wide.</p>
+<h2 id="_connection_wide_tls_over_tls">Connection-wide TLS over TLS</h2>
+<p>When used for the entire connection, the <code>gun_tls_proxy</code> process will act like a real socket once connected. The only difference is how the connection is performed. As mentioned earlier, the result of the <code>ssl:connect/3</code> call is sent back to the Gun process.</p>
+<p>When doing TLS over TLS the processes will end up looking like this:</p>
+<div class="listingblock"><div class="content"><pre>Gun process &lt;-&gt; gun_tls_proxy &lt;-&gt; &quot;inner socket&quot;</pre></div></div>
+<p>The details of the interactions between <code>gun_tls_proxy</code> and its associated <code>sslsocket()</code> have been removed in order to better illustrate the concept.</p>
+<p>When adding another layer this becomes:</p>
+<div class="listingblock"><div class="content"><pre>Gun process &lt;-&gt; gun_tls_proxy &lt;-&gt; gun_tls_proxy &lt;-&gt; sslsocket()</pre></div></div>
+<p>This is what is done when only HTTP/1.1 and SOCKS proxies are involved.</p>
+<h2 id="_stream_wide_tls_over_tls">Stream-wide TLS over TLS</h2>
+<p>The same cannot be done for HTTP/2 proxies. This is because the HTTP/2 CONNECT method does not apply to the entire connection, but only to a stream. The proxied data must be wrapped inside a DATA frame. It cannot be sent directly. This is what must be done:</p>
+<div class="listingblock"><div class="content"><pre>Gun process -&gt; gun_tls_proxy -&gt; Gun process -&gt; &quot;inner socket&quot;</pre></div></div>
+<p>The &quot;inner socket&quot; is the socket for the HTTP/2 connection.</p>
+<p>In order to tell Gun to continue processing the data, the <code>handle_continue</code> mechanism is introduced. When <code>gun_tls_proxy</code> has TLS encoded the data it sends it back to the Gun process, wrapped in a <code>handle_continue</code> tuple. This tuple contains enough information to figure out what stream the data belongs to and what should be done next. Gun will therefore route the data to the correct layer and continue sending it.</p>
+<p>This solution is also used for receiving data, except in the reverse order.</p>
+<h2 id="_routing_to_the_right_stream">Routing to the right stream</h2>
+<p>In order to know where to route the data, the <code>stream_ref</code> had to be modified to contain all the references to the individual streams. So if the tunnel is identified by <code>StreamA</code> and a request on this tunnel is identified by <code>StreamB</code>, then the stream is known as <code>[StreamA, StreamB]</code> to the user. Gun then routes first to <code>StreamA</code>, a tunnel, which continues routing to <code>StreamB</code>.</p>
+<p>A problem comes up if an intermediary is a SOCKS server, for example in the following scenario:</p>
+<div class="listingblock"><div class="content"><pre>HTTP/2 proxy &lt;-&gt; SOCKS proxy &lt;-&gt; HTTP/1.1 origin</pre></div></div>
+<p>The SOCKS protocol doesn&apos;t have a concept of stream, therefore when we refer to request to the origin server they are <code>[StreamA, StreamB]</code>, not <code>[StreamA, StreamB, StreamC]</code>. This is a problem for routing encoded/decoded TLS data to the SOCKS layer: we don&apos;t have a built-in way of referring to the SOCKS layer.</p>
+<p>The solution is to have a separate <code>handle_continue_stream_ref</code> value that assigns a reference to the SOCKS layers. Gun will then be able to forward <code>handle_continue</code> message, and only them, to the appropriate layer.</p>
+<p>Gun therefore has two different routing avenues, but the mechanism remains the same otherwise.</p>
+<h2 id="_gun_tunnel">gun_tunnel</h2>
+<p>In order to simplify the routing, the <code>gun_tunnel</code> module was introduced. For each intermediary (including the original CONNECT stream at the HTTP/2 layer) there is a <code>gun_tunnel</code> module.</p>
+<p>Going back to the example above:</p>
+<div class="listingblock"><div class="content"><pre>HTTP/2 proxy &lt;-&gt; SOCKS proxy &lt;-&gt; HTTP/1.1 origin</pre></div></div>
+<p>In this case the modules involved to handle the request will be as follow:</p>
+<div class="listingblock"><div class="content"><pre>gun_http2 &lt;-&gt; gun_tunnel &lt;-&gt; gun_tunnel &lt;-&gt; gun_http</pre></div></div>
+<p>The <code>gun_http2</code> module doesn&apos;t do any routing, it just passes everything to the <code>gun_tunnel</code> module. The <code>gun_tunnel</code> module will then do the routing, which involves removing <code>StreamA</code> from <code>[StreamA, StreamB]</code> where appropriate.</p>
+<p>The <code>gun_tunnel</code> module also receives the TLS encoded/decoded data and forwards it appropriately. When it comes to sending data, it will return a <code>send</code> command that allows the previous module to continue sending the data. The <code>gun_http2</code> module will ultimately wrap the data to be sent in a DATA frame and send it to the &quot;inner socket&quot;.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/gun/2.0/guide/websocket/">
+					Websocket
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/">
+					Migrating from Gun 1.3 to 2.0
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	2.0
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/2.0/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/2.0/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/gun/1.3/guide">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/guide">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/guide">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/guide">1.0</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

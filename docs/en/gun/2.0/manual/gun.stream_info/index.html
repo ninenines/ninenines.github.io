@@ -72,11 +72,27 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><b><font color="#000000">stream_info</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#000080">undefined</font> | <font color="#009900">Info</font>} | {<font color="#FF6600">error</font>, <font color="#FF6600">not_connected</font>}
 
 <font color="#009900">ConnPid</font> <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()
-<font color="#009900">StreamRef</font> <font color="#990000">::</font> <b><font color="#000080">reference</font></b>()
+<font color="#009900">StreamRef</font> <font color="#990000">::</font> <b><font color="#000000">gun:stream_ref</font></b>()
 <font color="#009900">Info</font> <font color="#990000">::</font> #{
-    <font color="#0000FF">ref</font> <font color="#990000">=&gt;</font> <b><font color="#000080">reference</font></b>(),
-    <font color="#0000FF">reply_to</font> <font color="#990000">=&gt;</font> <b><font color="#000080">pid</font></b>(),
-    <font color="#0000FF">state</font> <font color="#990000">=&gt;</font> <b><font color="#000080">running</font></b> | <font color="#FF6600">stopping</font>
+    <font color="#0000FF">ref</font>            <font color="#990000">=&gt;</font> <b><font color="#000000">gun:stream_ref</font></b>(),
+    <font color="#0000FF">reply_to</font>       <font color="#990000">=&gt;</font> <b><font color="#000080">pid</font></b>(),
+    <font color="#0000FF">state</font>          <font color="#990000">=&gt;</font> <b><font color="#000080">running</font></b> | <font color="#FF6600">stopping</font>,
+    <font color="#0000FF">intermediaries</font> <font color="#990000">=&gt;</font> [<font color="#009900">Intermediary</font>],
+    <font color="#0000FF">tunnel</font>         <font color="#990000">=&gt;</font> <font color="#009900">Tunnel</font>
+}
+<font color="#009900">Intermediary</font> <font color="#990000">::</font> #{
+    <font color="#0000FF">type</font>      <font color="#990000">=&gt;</font> <font color="#FF6600">connect</font> | <font color="#FF6600">socks5</font>,
+    <font color="#0000FF">host</font>      <font color="#990000">=&gt;</font> <b><font color="#000000">inet:hostname</font></b>() | <b><font color="#000000">inet:ip_address</font></b>(),
+    <font color="#0000FF">port</font>      <font color="#990000">=&gt;</font> <b><font color="#000000">inet:port_number</font></b>(),
+    <font color="#0000FF">transport</font> <font color="#990000">=&gt;</font> <font color="#FF6600">tcp</font> | <font color="#FF6600">tls</font>,
+    <font color="#0000FF">protocol</font>  <font color="#990000">=&gt;</font> <font color="#FF6600">http</font> | <font color="#FF6600">http2</font> | <font color="#FF6600">socks</font> | <font color="#FF6600">raw</font>
+}
+<font color="#009900">Tunnel</font> <font color="#990000">::</font> #{
+    <font color="#0000FF">transport</font>     <font color="#990000">=&gt;</font> <font color="#FF6600">tcp</font> | <font color="#FF6600">tls</font>,
+    <font color="#0000FF">protocol</font>      <font color="#990000">=&gt;</font> <font color="#FF6600">http</font> | <font color="#FF6600">http2</font> | <font color="#FF6600">socks</font> | <font color="#FF6600">raw</font>,
+    <font color="#0000FF">origin_scheme</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>() | <font color="#000080">undefined</font>,
+    <font color="#0000FF">origin_host</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">inet:hostname</font></b>() | <b><font color="#000000">inet:ip_address</font></b>(),
+    <font color="#0000FF">origin_port</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">inet:port_number</font></b>()
 }</tt></pre>
 </div></div>
 <p>Obtain information about a stream.</p>

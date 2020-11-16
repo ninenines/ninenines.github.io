@@ -69,19 +69,23 @@
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">ws_send</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">Frames</font>) <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font>
+<pre><tt><b><font color="#000000">ws_send</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, <font color="#009900">Frames</font>) <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font>
 
-<font color="#009900">ConnPid</font> <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()
-<font color="#009900">Frames</font>  <font color="#990000">::</font> <font color="#009900">Frame</font> | [<font color="#009900">Frame</font>]
-<font color="#009900">Frame</font>   <font color="#990000">::</font> <font color="#FF6600">close</font> | <font color="#FF6600">ping</font> | <font color="#FF6600">pong</font>
-         | {<font color="#FF6600">text</font> | <b><font color="#000080">binary</font></b> | <font color="#FF6600">close</font> | <font color="#FF6600">ping</font> | <font color="#FF6600">pong</font>, <b><font color="#000000">iodata</font></b>()}
-         | {<font color="#FF6600">close</font>, <b><font color="#000000">non_neg_integer</font></b>(), <b><font color="#000000">iodata</font></b>()}</tt></pre>
+<font color="#009900">ConnPid</font>   <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()
+<font color="#009900">StreamRef</font> <font color="#990000">::</font> <b><font color="#000000">gun:stream_ref</font></b>()
+<font color="#009900">Frames</font>    <font color="#990000">::</font> <font color="#009900">Frame</font> | [<font color="#009900">Frame</font>]
+<font color="#009900">Frame</font>     <font color="#990000">::</font> <font color="#FF6600">close</font> | <font color="#FF6600">ping</font> | <font color="#FF6600">pong</font>
+           | {<font color="#FF6600">text</font> | <b><font color="#000080">binary</font></b> | <font color="#FF6600">close</font> | <font color="#FF6600">ping</font> | <font color="#FF6600">pong</font>, <b><font color="#000000">iodata</font></b>()}
+           | {<font color="#FF6600">close</font>, <b><font color="#000000">non_neg_integer</font></b>(), <b><font color="#000000">iodata</font></b>()}</tt></pre>
 </div></div>
 <p>Send Websocket frames.</p>
 <p>The connection must first be upgraded to Websocket using the function <a href="../gun.ws_upgrade">gun:ws_upgrade(3)</a>.</p>
 <h2 id="_arguments">Arguments</h2>
 <dl><dt>ConnPid</dt>
 <dd><p>The pid of the Gun connection process.</p>
+</dd>
+<dt>StreamRef</dt>
+<dd><p>Identifier of the stream that was upgraded to Websocket.</p>
 </dd>
 <dt>Frames</dt>
 <dd><p>One or more Websocket frame(s).</p>
@@ -90,7 +94,11 @@ http://www.gnu.org/software/src-highlite -->
 <h2 id="_return_value">Return value</h2>
 <p>The atom <code>ok</code> is returned.</p>
 <h2 id="_changelog">Changelog</h2>
-<ul><li><strong>1.0</strong>: Function introduced.
+<ul><li><strong>2.0</strong>: The mandatory <code>StreamRef</code> argument was added.
+</li>
+<li><strong>2.0</strong>: It is now possible to send multiple frames at once.
+</li>
+<li><strong>1.0</strong>: Function introduced.
 </li>
 </ul>
 <h2 id="_examples">Examples</h2>
@@ -99,14 +107,14 @@ http://www.gnu.org/software/src-highlite -->
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">gun:ws_send</font></b>(<font color="#009900">ConnPid</font>, {<font color="#FF6600">text</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"Hello world!"</font><font color="#990000">&gt;&gt;</font>})<font color="#990000">.</font></tt></pre>
+<pre><tt><b><font color="#000000">gun:ws_send</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, {<font color="#FF6600">text</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"Hello world!"</font><font color="#990000">&gt;&gt;</font>})<font color="#990000">.</font></tt></pre>
 </div></div>
 <div class="listingblock"><div class="title">Send many frames including a close frame</div>
 <div class="content"><!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">gun:ws_send</font></b>(<font color="#009900">ConnPid</font>, [
+<pre><tt><b><font color="#000000">gun:ws_send</font></b>(<font color="#009900">ConnPid</font>, <font color="#009900">StreamRef</font>, [
     {<font color="#FF6600">text</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"See you later, world!"</font><font color="#990000">&gt;&gt;</font>},
     <font color="#FF6600">close</font>
 ])<font color="#990000">.</font></tt></pre>
