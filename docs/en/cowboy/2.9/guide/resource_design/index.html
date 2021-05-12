@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Designing a resource handler</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Designing a resource handler</span></h1>
+
+<p>This chapter aims to provide you with a list of questions you must answer in order to write a good resource handler. It is meant to be usable as a step by step guide.</p>
+<h2 id="_the_service">The service</h2>
+<p>Can the service become unavailable, and when it does, can we detect it? For example, database connectivity problems may be detected early. We may also have planned outages of all or parts of the system. Implement the <code>service_available</code> callback.</p>
+<p>What HTTP methods does the service implement? Do we need more than the standard OPTIONS, HEAD, GET, PUT, POST, PATCH and DELETE? Are we not using one of those at all? Implement the <code>known_methods</code> callback.</p>
+<h2 id="_type_of_resource_handler">Type of resource handler</h2>
+<p>Am I writing a handler for a collection of resources, or for a single resource?</p>
+<p>The semantics for each of these are quite different. You should not mix collection and single resource in the same handler.</p>
+<h2 id="_collection_handler">Collection handler</h2>
+<p>Skip this section if you are not doing a collection.</p>
+<p>Is the collection hardcoded or dynamic? For example, if you use the route <code>/users</code> for the collection of users then the collection is hardcoded; if you use <code>/forums/:category</code> for the collection of threads then it isn&apos;t. When the collection is hardcoded you can safely assume the resource always exists.</p>
+<p>What methods should I implement?</p>
+<p>OPTIONS is used to get some information about the collection. It is recommended to allow it even if you do not implement it, as Cowboy has a default implementation built-in.</p>
+<p>HEAD and GET are used to retrieve the collection. If you allow GET, also allow HEAD as there&apos;s no extra work required to make it work.</p>
+<p>POST is used to create a new resource inside the collection. Creating a resource by using POST on the collection is useful when resources may be created before knowing their URI, usually because parts of it are generated dynamically. A common case is some kind of auto incremented integer identifier.</p>
+<p>The next methods are more rarely allowed.</p>
+<p>PUT is used to create a new collection (when the collection isn&apos;t hardcoded), or replace the entire collection.</p>
+<p>DELETE is used to delete the entire collection.</p>
+<p>PATCH is used to modify the collection using instructions given in the request body. A PATCH operation is atomic. The PATCH operation may be used for such things as reordering; adding, modifying or deleting parts of the collection.</p>
+<h2 id="_single_resource_handler">Single resource handler</h2>
+<p>Skip this section if you are doing a collection.</p>
+<p>What methods should I implement?</p>
+<p>OPTIONS is used to get some information about the resource. It is recommended to allow it even if you do not implement it, as Cowboy has a default implementation built-in.</p>
+<p>HEAD and GET are used to retrieve the resource. If you allow GET, also allow HEAD as there&apos;s no extra work required to make it work.</p>
+<p>POST is used to update the resource.</p>
+<p>PUT is used to create a new resource (when it doesn&apos;t already exist) or replace the resource.</p>
+<p>DELETE is used to delete the resource.</p>
+<p>PATCH is used to modify the resource using instructions given in the request body. A PATCH operation is atomic. The PATCH operation may be used for adding, removing or modifying specific values in the resource.</p>
+<h2 id="_the_resource">The resource</h2>
+<p>Following the above discussion, implement the <code>allowed_methods</code> callback.</p>
+<p>Does the resource always exist? If it may not, implement the <code>resource_exists</code> callback.</p>
+<p>Do I need to authenticate the client before they can access the resource? What authentication mechanisms should I provide? This may include form-based, token-based (in the URL or a cookie), HTTP basic, HTTP digest, SSL certificate or any other form of authentication. Implement the <code>is_authorized</code> callback.</p>
+<p>Do I need fine-grained access control? How do I determine that they are authorized access? Handle that in your <code>is_authorized</code> callback.</p>
+<p>Can access to a resource be forbidden regardless of access being authorized? A simple example of that is censorship of a resource. Implement the <code>forbidden</code> callback.</p>
+<p>Can access be rate-limited for authenticated users? Use the <code>rate_limited</code> callback.</p>
+<p>Are there any constraints on the length of the resource URI? For example, the URI may be used as a key in storage and may have a limit in length. Implement <code>uri_too_long</code>.</p>
+<h2 id="_representations">Representations</h2>
+<p>What media types do I provide? If text based, what charsets are provided? What languages do I provide?</p>
+<p>Implement the mandatory <code>content_types_provided</code>. Prefix the callbacks with <code>to_</code> for clarity. For example, <code>to_html</code> or <code>to_text</code>. For resources that don&apos;t implement methods GET or HEAD, you must still accept at least one media type, but you can leave the callback as <code>undefined</code> since it will never be called.</p>
+<p>Implement the <code>languages_provided</code> or <code>charsets_provided</code> callbacks if applicable.</p>
+<p>Is there any other header that may make the representation of the resource vary? Implement the <code>variances</code> callback.</p>
+<p>Depending on your choices for caching content, you may want to implement one or more of the <code>generate_etag</code>, <code>last_modified</code> and <code>expires</code> callbacks.</p>
+<p>Do I want the user or user agent to actively choose a representation available? Send a list of available representations in the response body and implement the <code>multiple_choices</code> callback.</p>
+<h2 id="_redirections">Redirections</h2>
+<p>Do I need to keep track of what resources were deleted? For example, you may have a mechanism where moving a resource leaves a redirect link to its new location. Implement the <code>previously_existed</code> callback.</p>
+<p>Was the resource moved, and is the move temporary? If it is explicitly temporary, for example due to maintenance, implement the <code>moved_temporarily</code> callback. Otherwise, implement the <code>moved_permanently</code> callback.</p>
+<h2 id="_the_request">The request</h2>
+<p>Do you need to read the query string? Individual headers? Implement <code>malformed_request</code> and do all the parsing and validation in this function. Note that the body should not be read at this point.</p>
+<p>May there be a request body? Will I know its size? What&apos;s the maximum size of the request body I&apos;m willing to accept? Implement <code>valid_entity_length</code>.</p>
+<p>Finally, take a look at the sections corresponding to the methods you are implementing.</p>
+<h2 id="_options_method">OPTIONS method</h2>
+<p>Cowboy by default will send back a list of allowed methods. Do I need to add more information to the response? Implement the <code>options</code> method.</p>
+<h2 id="_get_and_head_methods">GET and HEAD methods</h2>
+<p>If you implement the methods GET and/or HEAD, you must implement one <code>ProvideResource</code> callback for each content-type returned by the <code>content_types_provided</code> callback.</p>
+<h2 id="_put__post_and_patch_methods">PUT, POST and PATCH methods</h2>
+<p>If you implement the methods PUT, POST and/or PATCH, you must implement the <code>content_types_accepted</code> callback, and one <code>AcceptCallback</code> callback for each content-type it returns. Prefix the <code>AcceptCallback</code> callback names with <code>from_</code> for clarity. For example, <code>from_html</code> or <code>from_json</code>.</p>
+<p>Do we want to allow the POST method to create individual resources directly through their URI (like PUT)? Implement the <code>allow_missing_post</code> callback. It is recommended to explicitly use PUT in these cases instead.</p>
+<p>May there be conflicts when using PUT to create or replace a resource? Do we want to make sure that two updates around the same time are not cancelling one another? Implement the <code>is_conflict</code> callback.</p>
+<h2 id="_delete_methods">DELETE methods</h2>
+<p>If you implement the method DELETE, you must implement the <code>delete_resource</code> callback.</p>
+<p>When <code>delete_resource</code> returns, is the resource completely removed from the server, including from any caching service? If not, and/or if the deletion is asynchronous and we have no way of knowing it has been completed yet, implement the <code>delete_completed</code> callback.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.9/guide/rest_flowcharts/">
+					REST flowcharts
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.9/guide/ws_protocol/">
+					The Websocket protocol
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.9
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

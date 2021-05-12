@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cow_cookie(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cow_cookie(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cow_cookie - Cookies</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>cow_cookie</code> provides functions for parsing and manipulating cookie headers.</p>
+<h2 id="_exports">Exports</h2>
+<ul><li><a href="../cow_cookie.parse_cookie">cow_cookie:parse_cookie(3)</a> - Parse a cookie header
+</li>
+<li><a href="../cow_cookie.parse_set_cookie">cow_cookie:parse_set_cookie(3)</a> - Parse a set-cookie header
+</li>
+<li><a href="../cow_cookie.cookie">cow_cookie:cookie(3)</a> - Generate a cookie header
+</li>
+<li><a href="../cow_cookie.setcookie">cow_cookie:setcookie(3)</a> - Generate a set-cookie header
+</li>
+</ul>
+<h2 id="_types">Types</h2>
+<h3 id="_cookie_attrs">cookie_attrs()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">cookie_attrs</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">expires</font> <font color="#990000">=&gt;</font> <b><font color="#000000">calendar:datetime</font></b>(),
+    <font color="#0000FF">max_age</font> <font color="#990000">=&gt;</font> <b><font color="#000000">calendar:datetime</font></b>(),
+    <font color="#0000FF">domain</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#0000FF">path</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#0000FF">secure</font> <font color="#990000">=&gt;</font> <font color="#000080">true</font>,
+    <font color="#0000FF">http_only</font> <font color="#990000">=&gt;</font> <font color="#000080">true</font>,
+    <font color="#0000FF">same_site</font> <font color="#990000">=&gt;</font> <font color="#FF6600">strict</font> | <font color="#FF6600">lax</font> | <font color="#FF6600">none</font>
+}</tt></pre>
+</div></div>
+<p>Cookie attributes parsed from the set-cookie header. The attributes must be passed as-is to a cookie store engine for processing, along with the cookie name and value. More information about the attributes can be found in <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>.</p>
+<h3 id="_cookie_opts">cookie_opts()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">cookie_opts</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">domain</font>    <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#0000FF">http_only</font> <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#0000FF">max_age</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">path</font>      <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#0000FF">same_site</font> <font color="#990000">=&gt;</font> <font color="#FF6600">strict</font> | <font color="#FF6600">lax</font> | <font color="#FF6600">none</font>,
+    <font color="#0000FF">secure</font>    <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>()
+}</tt></pre>
+</div></div>
+<p>Options for the set-cookie header. They are added to the header as attributes. More information about the options can be found in <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>.</p>
+<p>The following options are defined:</p>
+<dl><dt>domain</dt>
+<dd><p>Hosts to which the cookie will be sent. By default it will only be sent to the origin server.</p>
+</dd>
+<dt>http_only</dt>
+<dd><p>Whether the cookie should be restricted to HTTP requests, or it should also be exposed to other APIs, for example Javascript. By default there are no restrictions.</p>
+</dd>
+<dt>max_age</dt>
+<dd><p>Maximum lifetime of the cookie, in seconds. By default the cookie is kept for the duration of the session.</p>
+</dd>
+<dt>path</dt>
+<dd><p>Path to which the cookie will be sent. By default it will be sent to the current &quot;directory&quot; of the effective request URI.</p>
+</dd>
+<dt>same_site</dt>
+<dd><p>Whether the cookie should be sent along with cross-site requests. This attribute is currently non-standard but is in the process of being standardized. Please refer to the <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03#section-4.1.2.7">RFC 6265 (bis) draft</a> for details.</p>
+<p>The default value for this attribute may vary depending on user agent and configuration. Browsers are known to be more strict over TCP compared to TLS.</p>
+</dd>
+<dt>secure</dt>
+<dd><p>Whether the cookie should be sent only on secure channels (for example TLS). Note that this does not guarantee the integrity of the cookie, only its confidentiality during transfer. By default there are no restrictions.</p>
+</dd>
+</dl>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.10</strong>: The <code>same_site</code> attribute and option may now be set to <code>none</code>.
+</li>
+<li><strong>2.9</strong>: The <code>cookie_attrs</code> type was added.
+</li>
+<li><strong>1.0</strong>: Module introduced.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">cowlib(7)</a>, <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowlib
+	2.11
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+	
+		<li><a href="/docs/en/cowlib/2.11/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowlib/2.11/manual">2.11</a></li>
+	
+		<li><a href="/docs/en/cowlib/2.10/manual">2.10</a></li>
+	
+		<li><a href="/docs/en/cowlib/2.9/manual">2.9</a></li>
+	
+		<li><a href="/docs/en/cowlib/2.8/manual">2.8</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Reading the request body</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Reading the request body</span></h1>
+
+<p>The request body can be read using the Req object.</p>
+<p>Cowboy will not attempt to read the body until requested. You need to call the body reading functions in order to retrieve it.</p>
+<p>Cowboy will not cache the body, it is therefore only possible to read it once.</p>
+<p>You are not required to read it, however. If a body is present and was not read, Cowboy will either cancel or skip its download, depending on the protocol.</p>
+<p>Cowboy provides functions for reading the body raw, and read and parse form urlencoded or <a href="../multipart">multipart bodies</a>. The latter is covered in its own chapter.</p>
+<h2 id="_request_body_presence">Request body presence</h2>
+<p>Not all requests come with a body. You can check for the presence of a request body with this function:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">cowboy_req:has_body</font></b>(<font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>It returns <code>true</code> if there is a body; <code>false</code> otherwise.</p>
+<p>In practice, this function is rarely used. When the method is <code>POST</code>, <code>PUT</code> or <code>PATCH</code>, the request body is often required by the application, which should just attempt to read it directly.</p>
+<h2 id="_request_body_length">Request body length</h2>
+<p>You can obtain the length of the body:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Length</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:body_length</font></b>(<font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Note that the length may not be known in advance. In that case <code>undefined</code> will be returned. This can happen with HTTP/1.1&apos;s chunked transfer-encoding, or HTTP/2 when no content-length was provided.</p>
+<p>Cowboy will update the body length in the Req object once the body has been read completely. A length will always be returned when attempting to call this function after reading the body completely.</p>
+<h2 id="_reading_the_body">Reading the body</h2>
+<p>You can read the entire body with one function call:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">Data</font>, <font color="#009900">Req</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:read_body</font></b>(<font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Cowboy returns an <code>ok</code> tuple when the body has been read fully.</p>
+<p>By default, Cowboy will attempt to read up to 8MB of data, for up to 15 seconds. The call will return once Cowboy has read at least 8MB of data, or at the end of the 15 seconds period.</p>
+<p>These values can be customized. For example, to read only up to 1MB for up to 5 seconds:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">Data</font>, <font color="#009900">Req</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:read_body</font></b>(<font color="#009900">Req0</font>,
+    #{<b><font color="#000080">length</font></b> <font color="#990000">=&gt;</font> <font color="#993399">1000000</font>, <font color="#0000FF">period</font> <font color="#990000">=&gt;</font> <font color="#993399">5000</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You may also disable the length limit:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">Data</font>, <font color="#009900">Req</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:read_body</font></b>(<font color="#009900">Req0</font>, #{<b><font color="#000080">length</font></b> <font color="#990000">=&gt;</font> <font color="#FF6600">infinity</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>This makes the function wait 15 seconds and return with whatever arrived during that period. This is not recommended for public facing applications.</p>
+<p>These two options can effectively be used to control the rate of transmission of the request body.</p>
+<h2 id="_streaming_the_body">Streaming the body</h2>
+<p>When the body is too large, the first call will return a <code>more</code> tuple instead of <code>ok</code>. You can call the function again to read more of the body, reading it one chunk at a time.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">read_body_to_console</font></b>(<font color="#009900">Req0</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <b><font color="#000000">cowboy_req:read_body</font></b>(<font color="#009900">Req0</font>) <b><font color="#0000FF">of</font></b>
+        {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>, <font color="#009900">Req</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"~s"</font>, [<font color="#009900">Data</font>]),
+            <font color="#009900">Req</font>;
+        {<font color="#FF6600">more</font>, <font color="#009900">Data</font>, <font color="#009900">Req</font>} <font color="#990000">-&gt;</font>
+            <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"~s"</font>, [<font color="#009900">Data</font>]),
+            <b><font color="#000000">read_body_to_console</font></b>(<font color="#009900">Req</font>)
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The <code>length</code> and <code>period</code> options can also be used. They need to be passed for every call.</p>
+<h2 id="_reading_a_form_urlencoded_body">Reading a form urlencoded body</h2>
+<p>Cowboy provides a convenient function for reading and parsing bodies sent as application/x-www-form-urlencoded.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">KeyValues</font>, <font color="#009900">Req</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:read_urlencoded_body</font></b>(<font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>This function returns a list of key/values, exactly like the function <code>cowboy_req:parse_qs/1</code>.</p>
+<p>The defaults for this function are different. Cowboy will read for up to 64KB and up to 5 seconds. They can be modified:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#009900">KeyValues</font>, <font color="#009900">Req</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:read_urlencoded_body</font></b>(<font color="#009900">Req0</font>,
+    #{<b><font color="#000080">length</font></b> <font color="#990000">=&gt;</font> <font color="#993399">4096</font>, <font color="#0000FF">period</font> <font color="#990000">=&gt;</font> <font color="#993399">3000</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.9/guide/req/">
+					The Req object
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.9/guide/resp/">
+					Sending a response
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.9
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

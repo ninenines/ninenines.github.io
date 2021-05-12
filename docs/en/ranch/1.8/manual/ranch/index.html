@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: ranch(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>ranch - Socket acceptor pool</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>ranch</code> provides functions for starting and manipulating Ranch listeners.</p>
+<h2 id="_exports">Exports</h2>
+<p>Start/stop:</p>
+<ul><li><a href="../ranch.start_listener">ranch:start_listener(3)</a> - Start a listener
+</li>
+<li><a href="../ranch.stop_listener">ranch:stop_listener(3)</a> - Stop a listener
+</li>
+<li><a href="../ranch.child_spec">ranch:child_spec(3)</a> - Build child specifications for a new listener
+</li>
+</ul>
+<p>Suspend/resume:</p>
+<ul><li><a href="../ranch.suspend_listener">ranch:suspend_listener(3)</a> - Suspend a running listener
+</li>
+<li><a href="../ranch.resume_listener">ranch:resume_listener(3)</a> - Resume a suspended listener
+</li>
+<li><a href="../ranch.get_status">ranch:get_status(3)</a> - Get a listener&apos;s running state
+</li>
+</ul>
+<p>Connections:</p>
+<ul><li>ranch:accept_ack(3) - Deprecated in favor of <a href="../ranch.handshake">ranch:handshake(3)</a>
+</li>
+<li><a href="../ranch.handshake">ranch:handshake(3)</a> - Perform the transport handshake
+</li>
+<li><a href="../ranch.recv_proxy_header">ranch:recv_proxy_header(3)</a> - Receive the PROXY protocol header
+</li>
+<li><a href="../ranch.remove_connection">ranch:remove_connection(3)</a> - Remove connection from the count
+</li>
+</ul>
+<p>Options:</p>
+<ul><li><a href="../ranch.get_max_connections">ranch:get_max_connections(3)</a> - Get the max number of connections
+</li>
+<li><a href="../ranch.get_protocol_options">ranch:get_protocol_options(3)</a> - Get the current protocol options
+</li>
+<li><a href="../ranch.get_transport_options">ranch:get_transport_options(3)</a> - Get the current transport options
+</li>
+<li><a href="../ranch.set_max_connections">ranch:set_max_connections(3)</a> - Set the max number of connections
+</li>
+<li><a href="../ranch.set_protocol_options">ranch:set_protocol_options(3)</a> - Set the protocol options
+</li>
+<li><a href="../ranch.set_transport_options">ranch:set_transport_options(3)</a> - Set the transport options
+</li>
+</ul>
+<p>Introspection:</p>
+<ul><li><a href="../ranch.get_addr">ranch:get_addr(3)</a> - Get the listening port and IP
+</li>
+<li><a href="../ranch.get_port">ranch:get_port(3)</a> - Get the listening port
+</li>
+<li><a href="../ranch.info">ranch:info(3)</a> - Overview of Ranch listeners
+</li>
+<li><a href="../ranch.procs">ranch:procs(3)</a> - Retrieve pids from a listener
+</li>
+<li><a href="../ranch.wait_for_connections">ranch:wait_for_connections(3)</a> - Wait for a specific number of connections
+</li>
+</ul>
+<h2 id="_types">Types</h2>
+<h3 id="_max_conns">max_conns()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">max_conns</font></b>() <font color="#990000">=</font> <b><font color="#000000">non_neg_integer</font></b>() | <font color="#FF6600">infinity</font></tt></pre>
+</div></div>
+<p>Maximum number of connections allowed on this listener.</p>
+<p>This is a soft limit. The actual number of connections might be slightly above the limit due to concurrency when accepting new connections. Some connections may also be removed from this count explicitly by the user code.</p>
+<h3 id="_opt">opt()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">opt</font></b>() <font color="#990000">=</font> {<font color="#FF6600">ack_timeout</font>, <b><font color="#000000">timeout</font></b>()}
+      | {<font color="#FF6600">connection_type</font>, <font color="#FF6600">worker</font> | <font color="#FF6600">supervisor</font>}
+      | {<font color="#FF6600">max_connections</font>, <b><font color="#000000">max_conns</font></b>()}
+      | {<font color="#FF6600">num_acceptors</font>, <b><font color="#000000">pos_integer</font></b>()}
+      | {<font color="#000080">shutdown</font>, <b><font color="#000000">timeout</font></b>() | <font color="#FF6600">brutal_kill</font>}
+      | {<font color="#FF6600">socket</font>, <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>Deprecated form for Ranch-specific options.</p>
+<p>Please use the <code>opts()</code> type when you need to provide Ranch-specific transport options. Socket options will remain separate from the Ranch-specific options.</p>
+<h3 id="_opts">opts()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">=</font> <b><font color="#000000">any</font></b>() | #{
+    <font color="#0000FF">connection_type</font>   <font color="#990000">=&gt;</font> <font color="#FF6600">worker</font> | <font color="#FF6600">supervisor</font>,
+    <font color="#0000FF">handshake_timeout</font> <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">max_connections</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">max_conns</font></b>(),
+    <font color="#0000FF">logger</font>            <font color="#990000">=&gt;</font> <b><font color="#000000">module</font></b>(),
+    <font color="#0000FF">num_acceptors</font>     <font color="#990000">=&gt;</font> <b><font color="#000000">pos_integer</font></b>(),
+    <font color="#000080">shutdown</font>          <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>() | <font color="#FF6600">brutal_kill</font>,
+    <font color="#0000FF">socket</font>            <font color="#990000">=&gt;</font> <b><font color="#000000">any</font></b>(),
+    <font color="#0000FF">socket_opts</font>       <font color="#990000">=&gt;</font> <b><font color="#000000">any</font></b>()
+}</tt></pre>
+</div></div>
+<p>Transport options.</p>
+<p>The transport options are a combination of Ranch-specific options and socket options. Socket options may be given directly (assuming they are not a map and no Ranch-specific option needs to be given) or as part of <code>socket_opts</code>.</p>
+<p>None of the options are required.</p>
+<dl><dt>ack_timeout</dt>
+<dd><p>When <code>ack_timeout</code> is found in a transport options proplist, it is converted to the <code>handshake_timeout</code> option from the map. They are equivalent. The <code>ack_timeout</code> option will be removed in Ranch 2.0.</p>
+</dd>
+<dt>connection_type (worker)</dt>
+<dd><p>Type of process that will handle the connection.</p>
+</dd>
+<dt>handshake_timeout (5000)</dt>
+<dd><p>Maximum allowed time for the <code>ranch:handshake/1,2</code> call to finish.</p>
+</dd>
+<dt>max_connections (1024)</dt>
+<dd><p>Maximum number of active connections. Soft limit. Use <code>infinity</code> to disable the limit entirely.</p>
+</dd>
+<dt>num_acceptors (10)</dt>
+<dd><p>Number of processes that accept connections.</p>
+</dd>
+<dt>shutdown (5000)</dt>
+<dd><p>Maximum allowed time for children to stop on listener shutdown.</p>
+</dd>
+<dt>socket</dt>
+<dd><p>Listening socket opened externally to be used instead of calling <code>Transport:listen/1</code>. This option will be removed in Ranch 2.0. Use a custom transport module acting as a wrapper for <code>ranch_tcp</code> or <code>ranch_ssl</code> instead.</p>
+</dd>
+<dt>socket_opts</dt>
+<dd><p>Socket options given to <code>Transport:listen/1</code>. Please refer to the documentation of the transport module you are using for more details.</p>
+</dd>
+</dl>
+<h3 id="_ref">ref()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ref</font></b>() <font color="#990000">=</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>Unique name used to refer to a listener.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>1.6</strong>: The <code>logger</code> option was added.
+</li>
+<li><strong>1.6</strong>: The <code>opt()</code> type was deprecated in favor of the new <code>opts()</code> type.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="../ranch_app">ranch(7)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	1.8
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/1.8/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/1.8/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/ranch/1.8/manual">1.8</a></li>
+	
+		<li><a href="/docs/en/ranch/1.7/manual">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/manual">1.6</a></li>
+	
+		<li><a href="/docs/en/ranch/1.5/manual">1.5</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

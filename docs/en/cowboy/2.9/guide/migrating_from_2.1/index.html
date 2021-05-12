@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Cowboy 2.1 to 2.2</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.1 to 2.2</span></h1>
+
+<p>Cowboy 2.2 focused on adding features required for writing gRPC servers and on completing test suites for the core HTTP RFCs, fixing many bugs along the way.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>Add support for sending trailers at the end of response bodies. Trailers are additional header fields that may be sent after the body to add more information to the response. Their usage is required in gRPC servers. They are optional and may be discarded in other scenarios (for example if the request goes through an HTTP/1.0 proxy, as HTTP/1.0 does not support trailers).
+</li>
+<li>The <code>max_skip_body_length</code> option was added to <code>cowboy_http</code>. It controls how much of a request body Cowboy is willing to skip when the handler did not touch it. If the remaining body size is too large Cowboy instead closes the connection. It defaults to 1MB.
+</li>
+<li>The CONNECT and TRACE methods are now rejected as they are currently not implemented and must be handled differently than other methods. They will be implemented in a future release.
+</li>
+</ul>
+<h2 id="_new_functions">New functions</h2>
+<ul><li>The function <code>stream_trailers/2</code> has been added. It terminates a stream and adds trailer fields at the end of the response. A corresponding stream handler command <code>{trailers, Trailers}</code> has also been added.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>Test suites for the core HTTP RFCs RFC7230, RFC7231 and RFC7540 have been completed. Many of the bugs listed here were fixed as a result of this work.
+</li>
+<li>Many HTTP/2 edge cases when clients are misbehaving have been corrected. This includes many cases where the request is malformed (for example when a pseudo-header is present twice).
+</li>
+<li>When the HTTP/2 SETTINGS_INITIAL_WINDOW_SIZE value changes, Cowboy now properly updates the flow control windows.
+</li>
+<li>HTTP/2 could mistakenly log stray messages that actually were expected. This is no longer the case.
+</li>
+<li>We no longer send a GOAWAY frame when the HTTP/2 preface is invalid.
+</li>
+<li>Some values in the Req object of pushed requests were in the wrong type. They are now the expected binary instead of iolist.
+</li>
+<li>A response body was sometimes sent in response to HEAD requests when using HTTP/2. The body is now ignored.
+</li>
+<li>The <code>max_headers</code> option for <code>cowboy_http</code> was not always respected depending on the contents of the buffer. The limit is now strict.
+</li>
+<li>When an early error occurred on the HTTP/1.1 request line, the partial Req given to stream handlers was missing the <code>ref</code> and <code>peer</code> information. This has been corrected.
+</li>
+<li>Absolute URIs with a userinfo component, or without an authority component, are now properly rejected for HTTP/1.0 and HTTP/1.1.
+</li>
+<li>Whitespace is no longer allowed in header lines before the colon.
+</li>
+<li>408 responses to HTTP/1.1 requests now properly include a connection: close header indicating that we are going to close the connection. This header will also be sent for other early errors resulting in the closing of the connection.
+</li>
+<li>When both the transfer-encoding and content-length headers are sent in an HTTP/1.1 request, the transfer-encoding now takes precedence over the content-length header and the latter is removed from the Req object.
+</li>
+<li>A 400 response is now returned when the transfer-encoding header is invalid or contains any transfer-coding other than chunked.
+</li>
+<li>Invalid chunk sizes are now rejected immediately.
+</li>
+<li>Chunk extensions are now limited to 129 characters. They are not used in practice and are still ignored by Cowboy. The limit is not configurable.
+</li>
+<li>The final chunk was mistakenly sent in responses to HEAD requests. This is now corrected.
+</li>
+<li><code>OPTIONS *</code> requests were broken in Cowboy 2.0. They are now working again. Both the routing and <code>cowboy_req:uri/1,2</code> have been corrected.
+</li>
+<li>204 responses no longer include a content-length header.
+</li>
+<li>A packet could be lost when switching to Websocket or any other protocol via the <code>switch_protocol</code> command. This is now fixed.
+</li>
+<li>A 426 response will now be sent when a handler requires the client to upgrade to Websocket and the request did not include the required headers.
+</li>
+<li>Both experimental stream handlers <code>cowboy_metrics_h</code> and <code>cowboy_tracer_h</code> received a number of fixes and improvements.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.9/guide/migrating_from_2.2/">
+					Migrating from Cowboy 2.2 to 2.3
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.9/guide/migrating_from_2.0/">
+					Migrating from Cowboy 2.0 to 2.1
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.9
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.4/guide">2.4</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

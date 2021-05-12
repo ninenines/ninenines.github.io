@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Listeners</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Listeners</span></h1>
+
+<p>A listener is a set of processes whose role is to listen on a port for new connections. It manages a pool of acceptor processes, each of them indefinitely accepting connections. When it does, it starts a new process executing the protocol handler code. All the socket programming is abstracted through the use of transport handlers.</p>
+<p>The listener takes care of supervising all the acceptor and connection processes, allowing developers to focus on building their application.</p>
+<h2 id="_starting_a_listener">Starting a listener</h2>
+<p>Ranch does nothing by default. It is up to the application developer to request that Ranch listens for connections.</p>
+<p>A listener can be started and stopped at will.</p>
+<p>When starting a listener, a number of different settings are required:</p>
+<ul><li>A name to identify it locally and be able to interact with it.
+</li>
+<li>The number of acceptors in the pool.
+</li>
+<li>A transport handler and its associated options.
+</li>
+<li>A protocol handler and its associated options.
+</li>
+</ul>
+<p>Ranch includes both TCP and SSL transport handlers, respectively <code>ranch_tcp</code> and <code>ranch_ssl</code>.</p>
+<p>A listener can be started by calling the <code>ranch:start_listener/5</code> function. Before doing so however, you must ensure that the <code>ranch</code> application is started.</p>
+<div class="listingblock"><div class="title">Starting the Ranch application</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">application:start</font></b>(<font color="#FF6600">ranch</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You are then ready to start a listener. Let&apos;s call it <code>tcp_echo</code>. It will have a pool of 100 acceptors, use a TCP transport and forward connections to the <code>echo_protocol</code> handler.</p>
+<div class="listingblock"><div class="title">Starting a listener for TCP connections on port 5555</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can try this out by compiling and running the <code>tcp_echo</code> example in the examples directory. To do so, open a shell in the <em>examples/tcp_echo/</em> directory and run the following command:</p>
+<div class="listingblock"><div class="title">Building and starting a Ranch example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ make run</tt></pre>
+</div></div>
+<p>You can then connect to it using telnet and see the echo server reply everything you send to it. Then when you&apos;re done testing, you can use the <code>Ctrl+]</code> key to escape to the telnet command line and type <code>quit</code> to exit.</p>
+<div class="listingblock"><div class="title">Connecting to the example listener with telnet</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>$ telnet localhost <font color="#993399">5555</font>
+Trying <font color="#993399">127.0</font><font color="#990000">.</font><font color="#993399">0.1</font><font color="#990000">...</font>
+Connected to localhost<font color="#990000">.</font>
+Escape character is <font color="#FF0000">'^]'</font><font color="#990000">.</font>
+Hello<font color="#990000">!</font>
+Hello<font color="#990000">!</font>
+It works<font color="#990000">!</font>
+It works<font color="#990000">!</font>
+<font color="#990000">^]</font>
+
+telnet<font color="#990000">&gt;</font> quit
+Connection closed<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_stopping_a_listener">Stopping a listener</h2>
+<p>All you need to stop a Ranch listener is to call the <code>ranch:stop_listener/1</code> function with the listener&apos;s name as argument. In the previous section we started the listener named <code>tcp_echo</code>. We can now stop it.</p>
+<div class="listingblock"><div class="title">Stopping a listener</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:stop_listener</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_suspending_and_resuming_a_listener">Suspending and resuming a listener</h2>
+<p>Listeners can be suspended and resumed by calling <code>ranch:suspend_listener/1</code> and <code>ranch:resume_listener/1</code>, respectively, with the name of the listener as argument.</p>
+<p>Suspending a listener will cause it to stop listening and not accept new connections, but existing connection processes will not be stopped.</p>
+<div class="listingblock"><div class="title">Suspending a listener</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:suspend_listener</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Resuming a listener will cause it to start listening and accept new connections again. It is worth mentioning, however, that if the listener is configured to listen on a random port, it will listen on a different port than before it was suspended.</p>
+<div class="listingblock"><div class="title">Resuming a listener</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:resume_listener</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Whether a listener is currently running or suspended can be queried by calling <code>ranch:get_status/1</code> with the listener name as argument.</p>
+<h2 id="_default_transport_options">Default transport options</h2>
+<p>By default the socket will be set to return <code>binary</code> data, with the options <code>{active, false}</code>, <code>{packet, raw}</code>, <code>{reuseaddr, true}</code> set. These values can&apos;t be overriden when starting the listener, but they can be overriden using <code>Transport:setopts/2</code> in the protocol.</p>
+<p>It will also set <code>{backlog, 1024}</code> and <code>{nodelay, true}</code>, which can be overriden at listener startup.</p>
+<h2 id="_listening_on_a_random_port">Listening on a random port</h2>
+<p>You do not have to specify a specific port to listen on. If you give the port number 0, or if you omit the port number entirely, Ranch will start listening on a random port.</p>
+<p>You can retrieve this port number by calling <code>ranch:get_port/1</code>. The argument is the name of the listener you gave in <code>ranch:start_listener/5</code>.</p>
+<div class="listingblock"><div class="title">Starting a listener for TCP connections on a random port</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">0</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font>
+<font color="#009900">Port</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_port</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_listening_on_privileged_ports">Listening on privileged ports</h2>
+<p>Some systems limit access to ports below 1024 for security reasons. This can easily be identified by an <code>{error, eacces}</code> error when trying to open a listening socket on such a port.</p>
+<p>The methods for listening on privileged ports vary between systems, please refer to your system&apos;s documentation for more information.</p>
+<p>We recommend the use of port rewriting for systems with a single server, and load balancing for systems with multiple servers. Documenting these solutions is however out of the scope of this guide.</p>
+<h2 id="_accepting_connections_on_an_existing_socket">Accepting connections on an existing socket</h2>
+<p>If you want to accept connections on an existing socket, you can use the <code>socket</code> transport option, which should just be the relevant data returned from the connect function for the transport or the underlying socket library (<code>gen_tcp:connect</code>, <code>ssl:connect</code>). The accept function will then be called on the passed in socket. You should connect the socket in <code>{active, false}</code> mode, as well.</p>
+<h2 id="_limiting_the_number_of_concurrent_connections">Limiting the number of concurrent connections</h2>
+<p>The <code>max_connections</code> transport option allows you to limit the number of concurrent connections. It defaults to 1024. Its purpose is to prevent your system from being overloaded and ensuring all the connections are handled optimally.</p>
+<div class="listingblock"><div class="title">Customizing the maximum number of concurrent connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}, {<font color="#FF6600">max_connections</font>, <font color="#993399">100</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can disable this limit by setting its value to the atom <code>infinity</code>.</p>
+<div class="listingblock"><div class="title">Disabling the limit for the number of connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}, {<font color="#FF6600">max_connections</font>, <font color="#FF6600">infinity</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The maximum number of connections is a soft limit. In practice, it can reach <code>max_connections</code> + the number of acceptors.</p>
+<p>When the maximum number of connections is reached, Ranch will stop accepting connections. This will not result in further connections being rejected, as the kernel option allows queueing incoming connections. The size of this queue is determined by the <code>backlog</code> option and defaults to 1024. Ranch does not know about the number of connections that are in the backlog.</p>
+<p>You may not always want connections to be counted when checking for <code>max_connections</code>. For example you might have a protocol where both short-lived and long-lived connections are possible. If the long-lived connections are mostly waiting for messages, then they don&apos;t consume much resources and can safely be removed from the count.</p>
+<p>To remove the connection from the count, you must call the <code>ranch:remove_connection/1</code> from within the connection process, with the name of the listener as the only argument.</p>
+<div class="listingblock"><div class="title">Removing a connection from the count of connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:remove_connection</font></b>(<font color="#009900">Ref</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>As seen in the chapter covering protocols, this pid is received as the first argument of the protocol&apos;s <code>start_link/4</code> callback.</p>
+<p>You can modify the <code>max_connections</code> value on a running listener by using the <code>ranch:set_max_connections/2</code> function, with the name of the listener as first argument and the new value as the second.</p>
+<div class="listingblock"><div class="title">Upgrading the maximum number of connections</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:set_max_connections</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#009900">MaxConns</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The change will occur immediately.</p>
+<h2 id="_customizing_the_number_of_acceptor_processes">Customizing the number of acceptor processes</h2>
+<p>By default Ranch will use 10 acceptor processes. Their role is to accept connections and spawn a connection process for every new connection.</p>
+<p>This number can be tweaked to improve performance. A good number is typically between 10 or 100 acceptors. You must measure to find the best value for your application.</p>
+<div class="listingblock"><div class="title">Specifying a custom number of acceptor processes</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">tcp_echo</font>,
+	<font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">5555</font>}, {<font color="#FF6600">num_acceptors</font>, <font color="#993399">42</font>}],
+	<font color="#FF6600">echo_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_when_running_out_of_file_descriptors">When running out of file descriptors</h2>
+<p>Operating systems have limits on the number of sockets which can be opened by applications. When this maximum is reached the listener can no longer accept new connections. The accept rate of the listener will be automatically reduced, and a warning message will be logged.</p>
+<div class="listingblock"><div class="content"><pre>=ERROR REPORT==== 13-Jan-2016::12:24:38 ===
+Ranch acceptor reducing accept rate: out of file descriptors</pre></div></div>
+<p>If you notice messages like this you should increase the number of file-descriptors which can be opened by your application. How this should be done is operating-system dependent. Please consult the documentation of your operating system.</p>
+<h2 id="_using_a_supervisor_for_connection_processes">Using a supervisor for connection processes</h2>
+<p>Ranch allows you to define the type of process that will be used for the connection processes. By default it expects a <code>worker</code>. When the <code>connection_type</code> configuration value is set to <code>supervisor</code>, Ranch will consider that the connection process it manages is a supervisor and will reflect that in its supervision tree.</p>
+<p>Connection processes of type <code>supervisor</code> can either handle the socket directly or through one of their children. In the latter case the start function for the connection process must return two pids: the pid of the supervisor you created (that will be supervised) and the pid of the protocol handling process (that will receive the socket).</p>
+<p>Instead of returning <code>{ok, ConnPid}</code>, simply return <code>{ok, SupPid, ConnPid}</code>.</p>
+<p>It is very important that the connection process be created under the supervisor process so that everything works as intended. If not, you will most likely experience issues when the supervised process is stopped.</p>
+<h2 id="_upgrading">Upgrading</h2>
+<p>Ranch allows you to upgrade the protocol options. This takes effect immediately and for all subsequent connections.</p>
+<p>To upgrade the protocol options, call <code>ranch:set_protocol_options/2</code> with the name of the listener as first argument and the new options as the second.</p>
+<div class="listingblock"><div class="title">Upgrading the protocol options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:set_protocol_options</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#009900">NewOpts</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>All future connections will use the new options.</p>
+<p>You can also retrieve the current options similarly by calling <code>ranch:get_protocol_options/1</code>.</p>
+<div class="listingblock"><div class="title">Retrieving the current protocol options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Opts</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_protocol_options</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_changing_transport_options">Changing transport options</h2>
+<p>Ranch allows you to change the transport options of a listener, for example to make it listen on a different port.</p>
+<p>To change transport options, the listener has to be suspended first. Then you are allowed to change the transport options by calling <code>ranch:set_transport_options/2</code> with the listener name and the new transport options as arguments. After that, you can resume the listener.</p>
+<div class="listingblock"><div class="title">Changing the transport options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:set_transport_options</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#009900">NewOpts</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can retrieve the current transport options by calling <code>ranch:get_transport_options/1</code>.</p>
+<div class="listingblock"><div class="title">Retrieving the current transport options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Opts</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_transport_options</font></b>(<font color="#FF6600">tcp_echo</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_obtaining_information_about_listeners">Obtaining information about listeners</h2>
+<p>Ranch provides two functions for retrieving information about the listeners, for reporting and diagnostic purposes.</p>
+<p>The <code>ranch:info/0</code> function will return detailed information about all listeners.</p>
+<div class="listingblock"><div class="title">Retrieving detailed information</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:info</font></b>()<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The <code>ranch:procs/2</code> function will return all acceptor or listener processes for a given listener.</p>
+<div class="listingblock"><div class="title">Get all acceptor processes</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:procs</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#FF6600">acceptors</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Get all connection processes</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:procs</font></b>(<font color="#FF6600">tcp_echo</font>, <font color="#FF6600">connections</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/ranch/1.8/guide/introduction/">
+					Introduction
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/ranch/1.8/guide/transports/">
+					Transports
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	1.8
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/1.8/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/1.8/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/ranch/1.8/guide">1.8</a></li>
+	
+		<li><a href="/docs/en/ranch/1.7/guide">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/guide">1.6</a></li>
+	
+		<li><a href="/docs/en/ranch/1.5/guide">1.5</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
