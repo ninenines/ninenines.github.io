@@ -75,7 +75,7 @@ docs-$1-$2: tmp/$1
 		printf "%s\n" "+++" "title = \"`sed 's/\(.\)/\U\1/' <<< $1` Function Reference\"" \
 			"project = \"$1\"" "version = \"$3\"" "doctype = \"manual\"" "+++" "" \
 			> content/docs/en/$1/$3/manual.asciidoc; \
-		if [ "$1" = "cowboy" -o "$1" = "gun" -o "$1" = "cowlib" ] || [ "$1" = "ranch" -a "$3" = "1.6" ] || [ "$1" = "ranch" -a "$3" = "1.7" ] || [ "$1" = "ranch" -a "$3" = "1.8" ] || [ "$1" = "ranch" -a "$3" = "2.0" ]; then \
+		if [ "$1" = "cowboy" -o "$1" = "gun" -o "$1" = "cowlib" -o "$1" = "ranch" ]; then \
 			sed '1,/^$$$$/d' tmp/$1/doc/src/manual/$1_app.asciidoc \
 				| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/g' \
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
@@ -96,7 +96,7 @@ docs-$1-$2: tmp/$1
 			echo "\"" >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			echo "+++" >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
 			echo >> content/docs/en/$1/$3/manual/`basename $$$$f`; \
-			if [ "$1" = "cowboy" -o "$1" = "gun" -o "$1" = "cowlib" ] || [ "$1" = "ranch" -a "$3" = "1.6" ] || [ "$1" = "ranch" -a "$3" = "1.7" ] || [ "$1" = "ranch" -a "$3" = "2.0" ]; then \
+			if [ "$1" = "cowboy" -o "$1" = "gun" -o "$1" = "cowlib" -o "$1" = "ranch" ]; then \
 				sed '1,/^$$$$/d' $$$$f \
 					| sed 's/link:man:$1(7)/link:../g' \
 					| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \

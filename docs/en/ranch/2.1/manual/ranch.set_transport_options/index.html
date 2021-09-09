@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: ranch:set_transport_options(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+    
+</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch:set_transport_options(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>ranch:set_transport_options - Set the transport options</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">set_transport_options</font></b>(<font color="#009900">Ref</font>       <font color="#990000">::</font> <b><font color="#000000">ranch:ref</font></b>(),
+                      <font color="#009900">TransOpts</font> <font color="#990000">::</font> <b><font color="#000000">ranch:opts</font></b>())
+    <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font> | {<font color="#FF6600">error</font>, <font color="#009900">Reason</font> <font color="#990000">::</font> <b><font color="#000000">term</font></b>()}</tt></pre>
+</div></div>
+<p>Set the transport options.</p>
+<p>The complete set of transport options is replaced. To update a subset of the transport options, it is recommended to get the current transport options using <a href="../ranch.get_transport_options">ranch:get_transport_options(3)</a>, update them and then set them back using this function.</p>
+<p>Changes to the following options will take effect...</p>
+<ul><li>immediately:
+<ul><li><code>max_connections</code>
+</li>
+<li><code>handshake_timeout</code>
+</li>
+<li><code>shutdown</code>
+</li>
+</ul>
+</li>
+<li>only after the listener has been suspended and resumed:
+<ul><li><code>num_acceptors</code>
+</li>
+<li><code>num_listen_sockets</code>
+</li>
+<li><code>post_listen_callback</code>
+</li>
+<li><code>socket_opts</code>
+</li>
+</ul>
+</li>
+<li>only when the entire listener is restarted:
+<ul><li><code>connection_type</code>
+</li>
+<li><code>num_conns_sups</code>
+</li>
+<li><code>logger</code>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Ref</dt>
+<dd><p>The listener name.</p>
+</dd>
+<dt>TransOpts</dt>
+<dd><p>The new transport options.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>The atom <code>ok</code> is returned on success.</p>
+<p>An error tuple is returned on failure, for example if the given transport options contain invalid values.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: The restriction that the listener must be suspended has been removed.
+</li>
+<li><strong>2.0</strong>: The <code>TransOpts</code> argument must no longer contain Ranch-specific options if given as a list. Use a map.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Set the transport options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Ref</font> <font color="#990000">=</font> <font color="#FF6600">example</font>,
+
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:suspend_listener</font></b>(<font color="#009900">Ref</font>),
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:set_transport_options</font></b>(<font color="#009900">Ref</font>, <font color="#009900">TransOpts</font>),
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:resume_listener</font></b>(<font color="#009900">Ref</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Update the listener TCP port within the `socket_opts` transport option</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Ref</font> <font color="#990000">=</font> <font color="#FF6600">example</font>,
+
+<font color="#009900">TransOpts0</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_transport_options</font></b>(<font color="#009900">Ref</font>),
+#{<font color="#0000FF">socket_opts</font> <font color="#990000">=</font> <font color="#009900">SocketOpts0</font>} <font color="#990000">=</font> <font color="#009900">TransOpts0</font>,
+<font color="#009900">SocketOpts</font> <font color="#990000">=</font> [{<font color="#FF6600">port</font>, <font color="#993399">12345</font>}|<b><font color="#000000">proplists:delete</font></b>(<font color="#FF6600">port</font>, <font color="#009900">SocketOpts0</font>)],
+<font color="#009900">TransOpts</font> <font color="#990000">=</font> <font color="#009900">TransOpts0</font>#{<font color="#0000FF">socket_opts</font> <font color="#990000">=</font> <font color="#009900">SocketOpts</font>},
+
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:suspend_listener</font></b>(<font color="#009900">Ref</font>),
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:set_transport_options</font></b>(<font color="#009900">Ref</font>, <font color="#009900">TransOpts</font>),
+<font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:resume_listener</font></b>(<font color="#009900">Ref</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../ranch.suspend_listener">ranch:suspend_listener(3)</a>, <a href="../ranch.resume_listener">ranch:resume_listener(3)</a>, <a href="../ranch.get_transport_options">ranch:get_transport_options(3)</a>, <a href="../ranch.set_max_connections">ranch:set_max_connections(3)</a>, <a href="../ranch.set_protocol_options">ranch:set_protocol_options(3)</a>, <a href="../ranch">ranch(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	2.1
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/2.1/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/2.1/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/ranch/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/ranch/1.8/manual">1.8</a></li>
+	
+		<li><a href="/docs/en/ranch/1.7/manual">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/manual">1.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

@@ -64,6 +64,7 @@
 
 <p>Gun 2.0 includes state of the art tunnel support. With Gun 2.0 it is possible to make requests or data go through any number of proxy endpoints using any combination of TCP or TLS transports and HTTP/1.1, HTTP/2 or SOCKS5 protocols. All combinations of the scenario Proxy1 -&gt; Proxy2 -&gt; Origin are tested and known to work.</p>
 <p>Gun 2.0 adds many more features such as Websocket over HTTP/2, a built-in cookie store, graceful shutdown, flow control for data messages, event handlers and more.</p>
+<p>Gun 2.0 also introduces an experimental pool module that automatically maintains connections and routes requests to the right process, in a similar way as browsers do.</p>
 <p>Gun 2.0 greatly improves the HTTP/2 performance when it comes to receiving large response bodies; and when receiving response bodies from many separate requests concurrently.</p>
 <p>Gun now shares much of its HTTP/2 code with Cowboy, including the HTTP/2 state machine. Numerous issues were fixed as a result because the Cowboy implementation was much more advanced.</p>
 <p>The Gun connection process is now implemented using <code>gen_statem</code>.</p>
@@ -111,7 +112,11 @@
 </li>
 <li>Many improvements have been done to postpone or reject requests and other operations while in the wrong state (for example during state transitions when switching protocols or connecting to proxies).
 </li>
-<li>Update Cowlib to 2.10.1.
+<li>Update Cowlib to 2.11.0.
+</li>
+</ul>
+<h2 id="_experimental_features_added">Experimental features added</h2>
+<ul><li>The <code>gun_pool</code> module was introduced. Its interface is very similar to the <code>gun</code> module, but as it is an experimental feature, it has not been documented yet. The intent is to obtain feedback and document it in an upcoming minor release. Pools are created for each authority (host/port) and scope (user-defined value) pairs and are resolved accordingly using the information provided in the request and request options. Connections may concurrently handle multiple requests/responses from as many different processes as required.
 </li>
 </ul>
 <h2 id="_features_removed">Features removed</h2>
