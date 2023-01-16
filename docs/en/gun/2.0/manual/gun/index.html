@@ -17,8 +17,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
     <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
 
-    
-</head>
+	</head>
 
 
 <body class="">
@@ -250,6 +249,7 @@ http://www.gnu.org/software/src-highlite -->
     <font color="#0000FF">cookie_ignore_informational</font> <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
     <font color="#0000FF">flow</font>                        <font color="#990000">=&gt;</font> <b><font color="#000000">pos_integer</font></b>(),
     <font color="#0000FF">keepalive</font>                   <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">keepalive_tolerance</font>         <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
 
     <i><font color="#9A1900">%% HTTP/2 state machine configuration.</font></i>
     <font color="#0000FF">connection_window_margin_size</font>  <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">16#7fffffff</font>,
@@ -285,6 +285,9 @@ http://www.gnu.org/software/src-highlite -->
 </dd>
 <dt>keepalive (infinity)</dt>
 <dd><p>Time between pings in milliseconds.</p>
+</dd>
+<dt>keepalive_tolerance - see below</dt>
+<dd><p>The number of unacknowledged pings in flight that are tolerated before the connection is closed. By default this mechanism is disabled even if <code>keepalive</code> is enabled.</p>
 </dd>
 </dl>
 <h3 id="_opts">opts()</h3>
@@ -358,8 +361,8 @@ http://www.gnu.org/software/src-highlite -->
 <dt>supervise (true)</dt>
 <dd><p>Whether the Gun process should be started under the <code>gun_sup</code> supervisor. Set to <code>false</code> to use your own supervisor.</p>
 </dd>
-<dt>tcp_opts ([])</dt>
-<dd><p>TCP options used when establishing the connection.</p>
+<dt>tcp_opts (DefaultOpts)</dt>
+<dd><p>TCP options used when establishing the connection. By default Gun enables send timeouts with the options <code>[{send_timeout, 15000}, {send_timeout_close, true}]</code>.</p>
 </dd>
 <dt>tls_handshake_timeout (infinity)</dt>
 <dd><p>TLS handshake timeout.</p>
@@ -488,12 +491,14 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><b><font color="#000000">ws_opts</font></b>() <font color="#990000">::</font> #{
-    <font color="#0000FF">closing_timeout</font> <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
-    <font color="#0000FF">compress</font>        <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
-    <font color="#0000FF">flow</font>            <font color="#990000">=&gt;</font> <b><font color="#000000">pos_integer</font></b>(),
-    <font color="#0000FF">keepalive</font>       <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
-    <font color="#0000FF">protocols</font>       <font color="#990000">=&gt;</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000000">module</font></b>()}],
-    <font color="#0000FF">silence_pings</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>()
+    <font color="#0000FF">closing_timeout</font>  <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">compress</font>         <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#0000FF">default_protocol</font> <font color="#990000">=&gt;</font> <b><font color="#000000">module</font></b>(),
+    <font color="#0000FF">flow</font>             <font color="#990000">=&gt;</font> <b><font color="#000000">pos_integer</font></b>(),
+    <font color="#0000FF">keepalive</font>        <font color="#990000">=&gt;</font> <b><font color="#000000">timeout</font></b>(),
+    <font color="#0000FF">protocols</font>        <font color="#990000">=&gt;</font> [{<b><font color="#000080">binary</font></b>(), <b><font color="#000000">module</font></b>()}],
+    <font color="#0000FF">silence_pings</font>    <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#0000FF">user_opts</font>        <font color="#990000">=&gt;</font> <b><font color="#000000">any</font></b>()
 }</tt></pre>
 </div></div>
 <p>Configuration for the Websocket protocol.</p>
@@ -504,6 +509,9 @@ http://www.gnu.org/software/src-highlite -->
 <dt>compress (false)</dt>
 <dd><p>Whether to enable permessage-deflate compression. This does not guarantee that compression will be used as it is the server that ultimately decides. Defaults to false.</p>
 </dd>
+<dt>default_protocol (gun_ws_h)</dt>
+<dd><p>Default protocol module when no Websocket subprotocol is negotiated.</p>
+</dd>
 <dt>flow - see below</dt>
 <dd><p>The initial flow control value for the Websocket connection. By default flow control is disabled.</p>
 </dd>
@@ -511,15 +519,19 @@ http://www.gnu.org/software/src-highlite -->
 <dd><p>Time between pings in milliseconds.</p>
 </dd>
 <dt>protocols ([])</dt>
-<dd><p>A non-empty list enables Websocket protocol negotiation. The list of protocols will be sent in the sec-websocket-protocol request header. The handler module interface is currently undocumented and must be set to <code>gun_ws_h</code>.</p>
+<dd><p>A non-empty list enables Websocket protocol negotiation. The list of protocols will be sent in the sec-websocket-protocol request header. The given module must follow the <a href="../gun_ws_protocol">gun_ws_protocol(3)</a> interface. Gun comes with a default interface in <code>gun_ws_h</code> that may be reused for negotiated protocols.</p>
 </dd>
 <dt>silence_pings (true)</dt>
 <dd><p>Whether the ping and pong frames should be sent to the user. In all cases Gun will automatically send a pong frame back when receiving a ping.</p>
 </dd>
+<dt>user_opts - see below</dt>
+<dd><p>Additional options that are not in use by Gun unless a custom Websocket subprotocol is configured and negotiated. By default no user option is defined.</p>
+</dd>
 </dl>
-<!-- @todo Document default_protocol and user_opts.-->
 <h2 id="_changelog">Changelog</h2>
-<ul><li><strong>2.0</strong>: The <code>stream_ref()</code> type was added.
+<ul><li><strong>2.0</strong>: The <code>default_protocol</code> and <code>user_opts</code> Websocket options were added.
+</li>
+<li><strong>2.0</strong>: The <code>stream_ref()</code> type was added.
 </li>
 <li><strong>2.0</strong>: The option <code>cookie_store</code> was added. It can be used to configure a cookie store that Gun will use automatically. A related option, <code>cookie_ignore_informational</code>, was added to both <code>http_opts()</code> and <code>http2_opts()</code>.
 </li>

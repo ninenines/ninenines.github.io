@@ -17,8 +17,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
     <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
 
-    
-</head>
+	</head>
 
 
 <body class="">
@@ -81,7 +80,7 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#009900">ConnPid</font>   <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()
 <font color="#009900">Path</font>      <font color="#990000">::</font> <b><font color="#000000">iodata</font></b>()
 <font color="#009900">Headers</font>   <font color="#990000">::</font> <b><font color="#000000">gun:req_headers</font></b>()
-<font color="#009900">WsOpts</font>    <font color="#990000">::</font> <font color="#FF6600">gun</font><font color="#990000">:</font><font color="#FF6600">ws_opts</font>
+<font color="#009900">WsOpts</font>    <font color="#990000">::</font> <b><font color="#000000">gun:ws_opts</font></b>()
 <font color="#009900">StreamRef</font> <font color="#990000">::</font> <b><font color="#000000">gun:stream_ref</font></b>()</tt></pre>
 </div></div>
 <p>Upgrade to Websocket.</p>
@@ -89,6 +88,7 @@ http://www.gnu.org/software/src-highlite -->
 <p>HTTP/1.1 cannot handle Websocket and HTTP requests concurrently. The upgrade, if successful, will result in the complete takeover of the connection. Any subsequent HTTP requests will be rejected.</p>
 <p>Gun does not currently support Websocket over HTTP/2.</p>
 <p>By default Gun will take the Websocket options from the connection&apos;s <code>ws_opts</code>.</p>
+<p>Websocket subprotocol negotiation is enabled when the <code>protocols</code> option is given. It takes a subprotocol name and a module implementing the <a href="../gun_ws_protocol">gun_ws_protocol(3)</a> behavior.</p>
 <h2 id="_arguments">Arguments</h2>
 <dl><dt>ConnPid</dt>
 <dd><p>The pid of the Gun connection process.</p>
@@ -134,8 +134,20 @@ http://www.gnu.org/software/src-highlite -->
     <font color="#0000FF">compress</font> <font color="#990000">=&gt;</font> <font color="#000080">false</font>
 })<font color="#990000">.</font></tt></pre>
 </div></div>
+<div class="listingblock"><div class="title">Upgrade to Websocket with protocol negotiation</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">StreamRef</font> <font color="#990000">=</font> <b><font color="#000000">gun:ws_upgrade</font></b>(<font color="#009900">ConnPid</font>, <font color="#FF0000">"/ws"</font>, [], #{
+    <font color="#0000FF">protocols</font> <font color="#990000">=&gt;</font> [
+        {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"mqtt"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF6600">gun_ws_mqtt_h</font>},
+        {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"v12.stomp"</font><font color="#990000">&gt;&gt;</font>, <font color="#FF6600">gun_ws_stomp_h</font>}
+    ]
+})<font color="#990000">.</font></tt></pre>
+</div></div>
 <h2 id="_see_also">See also</h2>
-<p><a href="../gun">gun(3)</a>, <a href="../gun.ws_send">gun:ws_send(3)</a>, <a href="../gun_upgrade">gun_upgrade(3)</a>, <a href="../gun_ws">gun_ws(3)</a></p>
+<p><a href="../gun">gun(3)</a>, <a href="../gun.ws_send">gun:ws_send(3)</a>, <a href="../gun_upgrade">gun_upgrade(3)</a>, <a href="../gun_ws">gun_ws(3)</a>, <a href="../gun_ws_protocol">gun_ws_protocol(3)</a></p>
 
 
 
