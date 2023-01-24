@@ -73,6 +73,8 @@
 </li>
 <li>Graceful shutdown has been implemented. Graceful shutdown can be initiated on the client side by calling the new function <code>gun:shutdown/1</code> or when the owner process goes away; or on the peer side via the connection: close HTTP/1.1 header, the HTTP/2 GOAWAY frame or the Websocket close frame. Gun will try to complete existing streams when possible; other streams get canceled immediately. The <code>closing_timeout</code> option controls how long we are willing to wait at most before closing the connection.
 </li>
+<li>Gun will better detect connection failures by checking the return value from sending data to the socket. This applies to all supported protocols. In addition, Gun now enables <code>send_timeout_close</code> with a <code>send_timeout</code> value defaulting to 15s.
+</li>
 <li>Flow control has been added. It allows limiting the number of data/Websocket messages Gun sends to the calling process. Gun will stop reading from the socket or stop updating the protocol&apos;s flow control window when applicable as well, to apply some backpressure to the remote endpoint(s). It is disabled by default and can be applied on a per-request basis if necessary.
 </li>
 <li>An event handler interface has been added providing access to many internal Gun events. This can be used for a variety of purposes including logging, tracing or otherwise instrumenting a Gun connection.
@@ -95,6 +97,10 @@
 </li>
 <li>Many HTTP/2 options have been added, allowing great control over how Gun and the remote endpoint are using the HTTP/2 connection. They can be used to improve performance or lower the memory usage, for example.
 </li>
+<li>A new <code>keepalive_tolerance</code> option for HTTP/2 enables closing the connection automatically when ping acks are not received in a timely manner. It nicely complements the <code>keepalive</code> option that makes Gun send pings.
+</li>
+<li>Gun now supports Websocket subprotocol negotiation and the feature is fully documented and tested. This can be used to create handlers that will implement a protocol from within the Gun process itself. The negotiation is enabled by setting the <code>protocols</code> setting. The <code>default_protocol</code> and <code>user_opts</code> settings are also useful.
+</li>
 <li>It is now possible to send many Websocket frames in a single <code>gun:ws_send/3</code> call.
 </li>
 <li>Gun may now send Websocket ping frames automatically at intervals determined by the <code>keepalive</code> option. It is disabled by default.
@@ -111,7 +117,7 @@
 </li>
 <li>Many improvements have been done to postpone or reject requests and other operations while in the wrong state (for example during state transitions when switching protocols or connecting to proxies).
 </li>
-<li>Update Cowlib to 2.11.0.
+<li>Update Cowlib to 2.12.0.
 </li>
 </ul>
 <h2 id="_experimental_features_added">Experimental features added</h2>
@@ -196,6 +202,20 @@
 <li>Fix the host and :authority (pseudo-)headers when connecting to an IPv6 address given as a tuple. They were lacking the surrounding brackets.
 </li>
 <li>Fix a crash in gun:info/1 when the socket was closed before we call Transport:sockname/1.
+</li>
+<li>Fix flushing by stream reference. When the <code>gun_inform</code> message was flushed the function would switch to flushing all messages from the pid instead of only messages from the given stream.
+</li>
+<li>Allow setting a custom SNI value.
+</li>
+<li>Fix double sending of last chunk in HTTP/1.1 when Gun is asked to send empty data before closing the stream.
+</li>
+<li>Gun will now properly ignore parameters when the media type is text/event-stream.
+</li>
+<li>Avoid noisy crashes in the TLS over TLS code.
+</li>
+<li>Gun will now include the StreamRef of Websocket streams when sending <code>gun_down</code> messages.
+</li>
+<li>Gun will no longer reject HTTP proxies that use HTTP/1.0 for the version in their response.
 </li>
 </ul>
 

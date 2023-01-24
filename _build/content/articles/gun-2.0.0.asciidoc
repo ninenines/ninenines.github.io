@@ -1,0 +1,80 @@
++++
+date = "2023-01-24T07:00:00+01:00"
+title = "Gun 2.0"
+
++++
+
+Gun `2.0.0` has been released!
+
+Gun 2.0 adds a ton of features along with a small number
+of breaking changes.
+
+Gun 2.0 includes state of the art tunnel support. With
+Gun 2.0 it is possible to make requests or data go through
+any number of proxy endpoints using any combination of
+TCP or TLS transports and HTTP/1.1, HTTP/2 or SOCKS5
+protocols. All combinations of the scenario Proxy1 ->
+Proxy2 -> Origin are tested and known to work.
+
+You can watch a demo of the tunnel support below. This
+video is the first of its kind. If you like it, or you
+don't like it, please tell me! I intend to continue
+producing those on a semi-regular basis. Watch:
+
+++++
+<video src="/res/gun2_unlimited_proxy_demo.webm" controls
+    width="640" height="360">
+</video>
+++++
+
+Gun 2.0 can now be used to send and receive raw data,
+as if it was just a normal socket. This can be
+useful when needing to connect through a number
+of HTTP/SOCKS5 proxies, allowing the use of Gun's
+great proxying capabilities for non-Web protocols.
+This can also be useful when performing HTTP/1.1
+Upgrade to custom protocols.
+
+Gun 2.0 adds many more features such as Websocket over
+HTTP/2, Websocket protocol negotiation, a built-in
+cookie store, graceful shutdown, flow control for
+data messages, event handlers and more.
+
+Gun 2.0 greatly improves the HTTP/2 performance when it
+comes to receiving large response bodies; and when receiving
+response bodies from many separate requests concurrently.
+
+Gun 2.0 will be more responsive in the event of connection
+failures. It now checks return values from send calls and
+has send timeouts enabled by default. For HTTP/2 a new
+option allows Gun to drop the connection when pings do
+not get a response in a timely manner.
+
+Gun now shares much of its HTTP/2 code with Cowboy,
+including the HTTP/2 state machine. Numerous issues were
+fixed as a result because the Cowboy implementation was
+much more advanced.
+
+The Gun connection process is now implemented using `gen_statem`.
+
+The `gun_pool` module is a significant experimental feature
+that allows users to create pools of connections. Pools
+are split by authority and a user-provided token, allowing
+users to reuse connections in a similar way to what Web
+browsers are doing. Please check it out and provide feedback!
+
+Gun 2.0 requires Erlang/OTP 22.0 or greater and is tested
+and supported on Linux, macOS and Windows.
+
+A complete
+list of changes can be found in the migration guide:
+https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/[Migrating from Gun 1.3 to 2.0].
+
+I will now focus on implementing HTTP/3 and QUIC, first
+in Cowboy and then in Gun.
+
+You can donate to this project via
+https://github.com/sponsors/essen[GitHub Sponsors].
+
+As usual, feedback is appreciated, and issues or
+questions should be sent via Github tickets. Thanks!
