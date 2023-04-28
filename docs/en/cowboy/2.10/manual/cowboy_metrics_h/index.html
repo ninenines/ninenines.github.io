@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_metrics_h(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_metrics_h(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_metrics_h - Metrics stream handler</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>cowboy_metrics_h</code> gathers metrics and other information about a stream. It then calls the configured callback with this data.</p>
+<h2 id="_types">Types</h2>
+<h3 id="_metrics">metrics()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">metrics</font></b>() <font color="#990000">::</font> #{
+    <i><font color="#9A1900">%% The identifier for this listener.</font></i>
+    <font color="#FF6600">ref</font> <font color="#990000">:=</font> <b><font color="#000000">ranch:ref</font></b>(),
+
+    <i><font color="#9A1900">%% The pid for this connection.</font></i>
+    <font color="#FF6600">pid</font> <font color="#990000">:=</font> <b><font color="#000080">pid</font></b>(),
+
+    <i><font color="#9A1900">%% The streamid also indicates the total number of requests on</font></i>
+    <i><font color="#9A1900">%% this connection (StreamID div 2 + 1).</font></i>
+    <font color="#FF6600">streamid</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy_stream:streamid</font></b>(),
+
+    <i><font color="#9A1900">%% The terminate reason is always useful.</font></i>
+    <font color="#FF6600">reason</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy_stream:reason</font></b>(),
+
+    <i><font color="#9A1900">%% A filtered Req object or a partial Req object</font></i>
+    <i><font color="#9A1900">%% depending on how far the request got to.</font></i>
+    <font color="#0000FF">req</font> <font color="#990000">=&gt;</font> <b><font color="#000000">cowboy_req:req</font></b>(),
+    <font color="#0000FF">partial_req</font> <font color="#990000">=&gt;</font> <b><font color="#000000">cowboy_stream:partial_req</font></b>(),
+
+    <i><font color="#9A1900">%% Response status.</font></i>
+    <font color="#FF6600">resp_status</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy:http_status</font></b>(),
+
+    <i><font color="#9A1900">%% Filtered response headers.</font></i>
+    <font color="#FF6600">resp_headers</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy:http_headers</font></b>(),
+
+    <i><font color="#9A1900">%% Start/end of the processing of the request.</font></i>
+    <i><font color="#9A1900">%%</font></i>
+    <i><font color="#9A1900">%% This represents the time from this stream handler's init</font></i>
+    <i><font color="#9A1900">%% to terminate.</font></i>
+    <font color="#0000FF">req_start</font> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+    <font color="#0000FF">req_end</font> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+
+    <i><font color="#9A1900">%% Start/end of the receiving of the request body.</font></i>
+    <i><font color="#9A1900">%% Begins when the first packet has been received.</font></i>
+    <font color="#0000FF">req_body_start</font> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+    <font color="#0000FF">req_body_end</font> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+
+    <i><font color="#9A1900">%% Start/end of the sending of the response.</font></i>
+    <i><font color="#9A1900">%% Begins when we send the headers and ends on the final</font></i>
+    <i><font color="#9A1900">%% packet of the response body. If everything is sent at</font></i>
+    <i><font color="#9A1900">%% once these values are identical.</font></i>
+    <font color="#0000FF">resp_start</font> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+    <font color="#0000FF">resp_end</font> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+
+    <i><font color="#9A1900">%% For early errors all we get is the time we received it.</font></i>
+    <font color="#0000FF">early_error_time</font> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+
+    <i><font color="#9A1900">%% Start/end of spawned processes. This is where most of</font></i>
+    <i><font color="#9A1900">%% the user code lies, excluding stream handlers. On a</font></i>
+    <i><font color="#9A1900">%% default Cowboy configuration there should be only one</font></i>
+    <i><font color="#9A1900">%% process: the request process.</font></i>
+    <font color="#0000FF">procs</font> <font color="#990000">=&gt;</font> <font color="#009900">ProcMetrics</font>,
+
+    <i><font color="#9A1900">%% Informational responses sent before the final response.</font></i>
+    <font color="#0000FF">informational</font> <font color="#990000">=&gt;</font> [<font color="#009900">InformationalMetrics</font>],
+
+    <i><font color="#9A1900">%% Length of the request and response bodies. This does</font></i>
+    <i><font color="#9A1900">%% not include the framing.</font></i>
+    <font color="#0000FF">req_body_length</font> <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#0000FF">resp_body_length</font> <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
+
+    <i><font color="#9A1900">%% Additional metadata set by the user.</font></i>
+    <font color="#0000FF">user_data</font> <font color="#990000">=&gt;</font> <b><font color="#000000">map</font></b>()
+}
+
+<font color="#009900">InformationalMetrics</font> <font color="#990000">::</font> #{
+    <i><font color="#9A1900">%% Informational response status.</font></i>
+    <font color="#FF6600">status</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy:http_status</font></b>(),
+
+    <i><font color="#9A1900">%% Headers sent with the informational response.</font></i>
+    <font color="#FF6600">headers</font> <font color="#990000">:=</font> <b><font color="#000000">cowboy:http_headers</font></b>(),
+
+    <i><font color="#9A1900">%% Time when the informational response was sent.</font></i>
+    <font color="#FF6600">time</font> <font color="#990000">:=</font> <b><font color="#000080">integer</font></b>()
+}
+
+<font color="#009900">ProcMetrics</font> <font color="#990000">::</font> #{<b><font color="#000080">pid</font></b>() <font color="#990000">=&gt;</font> #{
+    <i><font color="#9A1900">%% Time at which the process spawned.</font></i>
+    <font color="#FF6600">spawn</font> <font color="#990000">:=</font> <b><font color="#000080">integer</font></b>(),
+
+    <i><font color="#9A1900">%% Time at which the process exited.</font></i>
+    <b><font color="#000080">exit</font></b> <font color="#990000">=&gt;</font> <b><font color="#000080">integer</font></b>(),
+
+    <i><font color="#9A1900">%% Reason for the process exit.</font></i>
+    <font color="#0000FF">reason</font> <font color="#990000">=&gt;</font> <b><font color="#000000">any</font></b>()
+}}</tt></pre>
+</div></div>
+<p>Metrics given to the callback function.</p>
+<p>Depending on the life of the stream the metrics may include more or less information.</p>
+<p>The <code>set_options</code> command can be used to add additional metadata in the <code>user_data</code> metric. This can be used for example to add the handler module which was selected by the router. The option to be set is <code>metrics_user_data</code>. It takes a map which will be merged in the existing <code>user_data</code> map.</p>
+<h2 id="_options">Options</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">metrics_callback</font> <font color="#990000">=&gt;</font> <b><font color="#0000FF">fun</font></b>((<b><font color="#000000">metrics</font></b>()) <font color="#990000">-&gt;</font> <b><font color="#000000">any</font></b>()),
+    <font color="#0000FF">metrics_req_filter</font> <font color="#990000">=&gt;</font> <b><font color="#0000FF">fun</font></b>((<b><font color="#000000">cowboy_req:req</font></b>()) <font color="#990000">-&gt;</font> <b><font color="#000000">map</font></b>()),
+    <font color="#0000FF">metrics_resp_headers_filter</font> <font color="#990000">=&gt;</font> <b><font color="#0000FF">fun</font></b>((<b><font color="#000000">cowboy:http_headers</font></b>()) <font color="#990000">-&gt;</font> <b><font color="#000000">cowboy:http_headers</font></b>())
+}</tt></pre>
+</div></div>
+<p>Configuration for the metrics stream handler.</p>
+<dl><dt>metrics_callback - mandatory</dt>
+<dd><p>The function that will be called upon completion of the stream. It only takes a single argument, the <code>metrics()</code>.</p>
+</dd>
+<dt>metrics_req_filter</dt>
+<dd><p>A function applied to the Req to compact it and only keep required information. By default no filtering is done.</p>
+</dd>
+<dt>metrics_resp_headers_filter</dt>
+<dd><p>A function applied to the response headers to filter them and only keep required information. By default no filtering is done.</p>
+</dd>
+</dl>
+<h2 id="_events">Events</h2>
+<p>The metrics stream handler does not produce any event.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.7</strong>: Module introduced.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">cowboy(7)</a>, <a href="../cowboy_stream">cowboy_stream(3)</a>, <a href="../cowboy_compress_h">cowboy_compress_h(3)</a>, <a href="../cowboy_stream_h">cowboy_stream_h(3)</a>, <a href="../cowboy_tracer_h">cowboy_tracer_h(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.10
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.10/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.10/manual">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/manual">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/manual">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/manual">2.5</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

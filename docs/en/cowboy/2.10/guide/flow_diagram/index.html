@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Flow diagram</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Flow diagram</span></h1>
+
+<p>Cowboy is a lightweight HTTP server with support for HTTP/1.1, HTTP/2 and Websocket.</p>
+<p>It is built on top of Ranch. Please see the Ranch guide for more information about how the network connections are handled.</p>
+<h2 id="_overview">Overview</h2>
+<img src="../http_req_resp.png" alt="HTTP request/response flowchart"/><p>As you can see on the diagram, the client begins by connecting to the server. This step is handled by a Ranch acceptor, which is a process dedicated to accepting new connections.</p>
+<p>After Ranch accepts a new connection, whether it is an HTTP/1.1 or HTTP/2 connection, Cowboy starts receiving requests and handling them.</p>
+<p>In HTTP/1.1 all requests come sequentially. In HTTP/2 the requests may arrive and be processed concurrently.</p>
+<p>When a request comes in, Cowboy creates a stream, which is a set of request/response and all the events associated with them. The protocol code in Cowboy defers the handling of these streams to stream handler modules. When you configure Cowboy you may define one or more module that will receive all events associated with a stream, including the request, response, bodies, Erlang messages and more.</p>
+<p>By default, Cowboy comes configured with a stream handler called <code>cowboy_stream_h</code>. This stream handler will create a new process for every request coming in, and then communicate with this process to read the body or send a response back. The request process executes middlewares. By default, the request process executes the router and then the handlers. Like stream handlers, middlewares may also be customized.</p>
+<p>A response may be sent at almost any point in this diagram. If the response must be sent before the stream is initialized (because an error occurred early, for example) then stream handlers receive a special event indicating this error.</p>
+<h2 id="_protocol_specific_headers">Protocol-specific headers</h2>
+<p>Cowboy takes care of protocol-specific headers and prevents you from sending them manually. For HTTP/1.1 this includes the <code>transfer-encoding</code> and <code>connection</code> headers. For HTTP/2 this includes the colon headers like <code>:status</code>.</p>
+<p>Cowboy will also remove protocol-specific headers from requests before passing them to stream handlers. Cowboy tries to hide the implementation details of all protocols as well as possible.</p>
+<h2 id="_number_of_processes_per_connection">Number of processes per connection</h2>
+<p>By default, Cowboy will use one process per connection, plus one process per set of request/response (called a stream, internally).</p>
+<p>The reason it creates a new process for every request is due to the requirements of HTTP/2 where requests are executed concurrently and independently from the connection. The frames from the different requests end up interleaved on the single TCP connection.</p>
+<p>The request processes are never reused. There is therefore no need to perform any cleanup after the response has been sent. The process will terminate and Erlang/OTP will reclaim all memory at once.</p>
+<p>Cowboy ultimately does not require more than one process per connection. It is possible to interact with the connection directly from a stream handler, a low level interface to Cowboy. They are executed from within the connection process, and can handle the incoming requests and send responses. This is however not recommended in normal circumstances, as a stream handler taking too long to execute could have a negative impact on concurrent requests or the state of the connection itself.</p>
+<h2 id="_date_header">Date header</h2>
+<p>Because querying for the current date and time can be expensive, Cowboy generates one <em>Date</em> header value every second, shares it to all other processes, which then simply copy it in the response. This allows compliance with HTTP/1.1 with no actual performance loss.</p>
+<h2 id="_binaries">Binaries</h2>
+<p>Cowboy makes extensive use of binaries.</p>
+<p>Binaries are more efficient than lists for representing strings because they take less memory space. Processing performance can vary depending on the operation. Binaries are known for generally getting a great boost if the code is compiled natively. Please see the HiPE documentation for more details.</p>
+<p>Binaries may end up being shared between processes. This can lead to some large memory usage when one process keeps the binary data around forever without freeing it. If you see some weird memory usage in your application, this might be the cause.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.10/guide/getting_started/">
+					Getting started
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.10/guide/listeners/">
+					Listeners
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.10
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.10/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.5/guide">2.5</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
