@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: The modern Web</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>The modern Web</span></h1>
+
+<p>Cowboy is a server for the modern Web. This chapter explains what it means and details all the standards involved.</p>
+<p>Cowboy supports all the standards listed in this document.</p>
+<h2 id="_http_2">HTTP/2</h2>
+<p>HTTP/2 is the most efficient protocol for consuming Web services. It enables clients to keep a connection open for long periods of time; to send requests concurrently; to reduce the size of requests through HTTP headers compression; and more. The protocol is binary, greatly reducing the resources needed to parse it.</p>
+<p>HTTP/2 also enables the server to push messages to the client. This can be used for various purposes, including the sending of related resources before the client requests them, in an effort to reduce latency. This can also be used to enable bidirectional communication.</p>
+<p>Cowboy provides transparent support for HTTP/2. Clients that know it can use it; others fall back to HTTP/1.1 automatically.</p>
+<p>HTTP/2 is compatible with the HTTP/1.1 semantics.</p>
+<p>HTTP/2 is defined by RFC 7540 and RFC 7541.</p>
+<h2 id="_http_1_1">HTTP/1.1</h2>
+<p>HTTP/1.1 is the previous version of the HTTP protocol. The protocol itself is text-based and suffers from numerous issues and limitations. In particular it is not possible to execute requests concurrently (though pipelining is sometimes possible), and it&apos;s also sometimes difficult to detect that a client disconnected.</p>
+<p>HTTP/1.1 does provide very good semantics for interacting with Web services. It defines the standard methods, headers and status codes used by HTTP/1.1 and HTTP/2 clients and servers.</p>
+<p>HTTP/1.1 also defines compatibility with an older version of the protocol, HTTP/1.0, which was never really standardized across implementations.</p>
+<p>The core of HTTP/1.1 is defined by RFC 7230, RFC 7231, RFC 7232, RFC 7233, RFC 7234 and RFC 7235. Numerous RFCs and other specifications exist defining additional HTTP methods, status codes, headers or semantics.</p>
+<h2 id="_websocket">Websocket</h2>
+<p><a href="../ws_protocol">Websocket</a> is a protocol built on top of HTTP/1.1 that provides a two-ways communication channel between the client and the server. Communication is asynchronous and can occur concurrently.</p>
+<p>It consists of a Javascript object allowing setting up a Websocket connection to the server, and a binary based protocol for sending data to the server or the client.</p>
+<p>Websocket connections can transfer either UTF-8 encoded text data or binary data. The protocol also includes support for implementing a ping/pong mechanism, allowing the server and the client to have more confidence that the connection is still alive.</p>
+<p>A Websocket connection can be used to transfer any kind of data, small or big, text or binary. Because of this Websocket is sometimes used for communication between systems.</p>
+<p>Websocket messages have no semantics on their own. Websocket is closer to TCP in that aspect, and requires you to design and implement your own protocol on top of it; or adapt an existing protocol to Websocket.</p>
+<p>Cowboy provides an interface known as <a href="../ws_handlers">Websocket handlers</a> that gives complete control over a Websocket connection.</p>
+<p>The Websocket protocol is defined by RFC 6455.</p>
+<h2 id="_long_lived_requests">Long-lived requests</h2>
+<p>Cowboy provides an interface that can be used to support long-polling or to stream large amounts of data reliably, including using Server-Sent Events.</p>
+<p>Long-polling is a mechanism in which the client performs a request which may not be immediately answered by the server. It allows clients to request resources that may not currently exist, but are expected to be created soon, and which will be returned as soon as they are.</p>
+<p>Long-polling is essentially a hack, but it is widely used to overcome limitations on older clients and servers.</p>
+<p>Server-Sent Events is a small protocol defined as a media type, <code>text/event-stream</code>, along with a new HTTP header, <code>Last-Event-ID</code>. It is defined in the EventSource W3C specification.</p>
+<p>Cowboy provides an interface known as <a href="../loop_handlers">loop handlers</a> that facilitates the implementation of long-polling or stream mechanisms. It works regardless of the underlying protocol.</p>
+<h2 id="_rest">REST</h2>
+<p><a href="../rest_principles">REST, or REpresentational State Transfer</a>, is a style of architecture for loosely connected distributed systems. It can easily be implemented on top of HTTP.</p>
+<p>REST is essentially a set of constraints to be followed. Many of these constraints are purely architectural and solved by simply using HTTP. Some constraints must be explicitly followed by the developer.</p>
+<p>Cowboy provides an interface known as <a href="../rest_handlers">REST handlers</a> that simplifies the implementation of a REST API on top of the HTTP protocol.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.11/guide/erlang_web/">
+					Erlang and the Web
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.11
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.11/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.11/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.11/guide">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

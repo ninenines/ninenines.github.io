@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_compress_h(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_compress_h(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_compress_h - Compress stream handler</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>cowboy_compress_h</code> compresses response bodies automatically when the client supports it. It will not try to compress responses that already have a content encoding or that have an etag header defined.</p>
+<p>Normal responses will only be compressed when their size is lower than the configured threshold. Streamed responses are always compressed, including when the sendfile command is used. Because the file must be read in memory to be compressed, this module is <strong>not</strong> suitable for automatically compressing large files.</p>
+<h2 id="_options">Options</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">::</font> #{
+    <font color="#0000FF">compress_buffering</font> <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#0000FF">compress_threshold</font> <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>()
+}</tt></pre>
+</div></div>
+<p>Configuration for the compress stream handler.</p>
+<p>The default value is given next to the option name:</p>
+<dl><dt>compress_buffering (false)</dt>
+<dd><p>Whether the output will be buffered. By default no buffering is done to provide maximum compatibility at the cost of a lower compression rate.</p>
+<p>This option can be updated at any time using the <code>set_options</code> stream handler command.</p>
+</dd>
+<dt>compress_threshold (300)</dt>
+<dd><p>How large the response body must be to be compressed when the response isn&apos;t streamed.</p>
+<p>This option can be updated at any time using the <code>set_options</code> stream handler command.</p>
+</dd>
+</dl>
+<h2 id="_events">Events</h2>
+<p>The compress stream handler does not produce any event.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.11</strong>: Compression is now disabled when the etag header is in the response headers.
+</li>
+<li><strong>2.11</strong>: The vary: accept-encoding header is now always set when this handler is enabled.
+</li>
+<li><strong>2.6</strong>: The options <code>compress_buffering</code> and <code>compress_threshold</code> were added.
+</li>
+<li><strong>2.0</strong>: Module introduced.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">cowboy(7)</a>, <a href="../cowboy_stream">cowboy_stream(3)</a>, <a href="../cowboy_decompress_h">cowboy_decompress_h(3)</a>, <a href="../cowboy_metrics_h">cowboy_metrics_h(3)</a>, <a href="../cowboy_stream_h">cowboy_stream_h(3)</a>, <a href="../cowboy_tracer_h">cowboy_tracer_h(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.11
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.11/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.11/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.11/manual">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/manual">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/manual">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/manual">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
