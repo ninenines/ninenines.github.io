@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Gun 1.3 to 2.0</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Gun 1.3 to 2.0</span></h1>
+
+<p>Gun 2.0 includes state of the art tunnel support. With Gun 2.0 it is possible to make requests or data go through any number of proxy endpoints using any combination of TCP or TLS transports and HTTP/1.1, HTTP/2 or SOCKS5 protocols. All combinations of the scenario Proxy1 -&gt; Proxy2 -&gt; Origin are tested and known to work.</p>
+<p>Gun 2.0 adds many more features such as Websocket over HTTP/2, a built-in cookie store, graceful shutdown, flow control for data messages, event handlers and more.</p>
+<p>Gun 2.0 also introduces an experimental pool module that automatically maintains connections and routes requests to the right process, in a similar way as browsers do.</p>
+<p>Gun 2.0 greatly improves the HTTP/2 performance when it comes to receiving large response bodies; and when receiving response bodies from many separate requests concurrently.</p>
+<p>Gun now shares much of its HTTP/2 code with Cowboy, including the HTTP/2 state machine. Numerous issues were fixed as a result because the Cowboy implementation was much more advanced.</p>
+<p>The Gun connection process is now implemented using <code>gen_statem</code>.</p>
+<p>Gun 2.0 requires Erlang/OTP 22.0 or greater.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>Cookie store support has been added. The <code>cookie_store</code> option allows configuring the cookie store backend. The <code>gun_cookies</code> module provides functions to help implementing such a backend. Gun comes with the backend <code>gun_cookies_list</code> which provides a per-connection, non-persistent cookie store. The cookie store engine implements the entire RFC6265bis draft algorithms except the parts about non-HTTP cookies as no such interface is provided; and the parts about SameSite as Gun has no concept of &quot;browsing context&quot;.
+</li>
+<li>Graceful shutdown has been implemented. Graceful shutdown can be initiated on the client side by calling the new function <code>gun:shutdown/1</code> or when the owner process goes away; or on the peer side via the connection: close HTTP/1.1 header, the HTTP/2 GOAWAY frame or the Websocket close frame. Gun will try to complete existing streams when possible; other streams get canceled immediately. The <code>closing_timeout</code> option controls how long we are willing to wait at most before closing the connection.
+</li>
+<li>Gun will better detect connection failures by checking the return value from sending data to the socket. This applies to all supported protocols. In addition, Gun now enables <code>send_timeout_close</code> with a <code>send_timeout</code> value defaulting to 15s.
+</li>
+<li>Flow control has been added. It allows limiting the number of data/Websocket messages Gun sends to the calling process. Gun will stop reading from the socket or stop updating the protocol&apos;s flow control window when applicable as well, to apply some backpressure to the remote endpoint(s). It is disabled by default and can be applied on a per-request basis if necessary.
+</li>
+<li>An event handler interface has been added providing access to many internal Gun events. This can be used for a variety of purposes including logging, tracing or otherwise instrumenting a Gun connection.
+</li>
+<li>In order to get separate events when connecting, the domain lookup, connection and TLS handshakes are now performed separately by Gun. As a result, there exists three separate timeout options for each of the steps, and the transport options had to be split into <code>tcp_opts</code> and <code>tls_opts</code>.
+</li>
+<li>Gun now supports connecting through SOCKS proxies, including secure SOCKS proxies. Both unauthenticated and username/password authentication are supported.
+</li>
+<li>Gun can connect through any number of HTTP, HTTPS, SOCKS or secure SOCKS proxies, including SOCKS proxies located after HTTP(S) proxies. The ultimate endpoint may be using any protocol, including plain TCP, TLS, HTTP/1.1 or HTTP/2.
+</li>
+<li>When specifying which protocols to use, options can now be provided specific to those protocols. It is now possible to have separate HTTP options for an HTTP proxy and the origin HTTP server, for example. See the new <code>gun:protocols()</code> type for details.
+</li>
+<li>Gun can now be used to send and receive raw data, as if it was just a normal socket. This can be useful when needing to connect through a number of HTTP/Socks proxies, allowing the use of Gun&apos;s great proxying capabilities (including TLS over TLS) for any sort of protocols. This can also be useful when performing HTTP/1.1 Upgrade to custom protocols.
+</li>
+<li>Headers can now be provided as a map.
+</li>
+<li>Header names may now be provided as binary, string or atom.
+</li>
+<li>Gun now automatically lowercases provided header names.
+</li>
+<li>Many HTTP/2 options have been added, allowing great control over how Gun and the remote endpoint are using the HTTP/2 connection. They can be used to improve performance or lower the memory usage, for example.
+</li>
+<li>A new <code>keepalive_tolerance</code> option for HTTP/2 enables closing the connection automatically when ping acks are not received in a timely manner. It nicely complements the <code>keepalive</code> option that makes Gun send pings.
+</li>
+<li>Gun now supports Websocket subprotocol negotiation and the feature is fully documented and tested. This can be used to create handlers that will implement a protocol from within the Gun process itself. The negotiation is enabled by setting the <code>protocols</code> setting. The <code>default_protocol</code> and <code>user_opts</code> settings are also useful.
+</li>
+<li>It is now possible to send many Websocket frames in a single <code>gun:ws_send/3</code> call.
+</li>
+<li>Gun may now send Websocket ping frames automatically at intervals determined by the <code>keepalive</code> option. It is disabled by default.
+</li>
+<li>A new <code>silence_pings</code> option can be set to <code>false</code> to receive all ping and pong frames when using Websocket. They are typically not needed and therefore silent by default.
+</li>
+<li>The <code>reply_to</code> option has been added to <code>gun:ws_upgrade/4</code>. The option applies to both the response and subsequent Websocket frames.
+</li>
+<li>The <code>reply_to</code> option is also propagated to messages following a CONNECT request when the protocol requested is not HTTP.
+</li>
+<li>A new option <code>retry_fun</code> can be used to implement different backoff strategies when reconnecting.
+</li>
+<li>A new option <code>supervise</code> can be used to start a Gun connection without using Gun&apos;s supervisor. It defaults to <code>true</code>.
+</li>
+<li>Many improvements have been done to postpone or reject requests and other operations while in the wrong state (for example during state transitions when switching protocols or connecting to proxies).
+</li>
+<li>Update Cowlib to 2.12.0.
+</li>
+</ul>
+<h2 id="_experimental_features_added">Experimental features added</h2>
+<ul><li>The <code>gun_pool</code> module was introduced. Its interface is very similar to the <code>gun</code> module, but as it is an experimental feature, it has not been documented yet. The intent is to obtain feedback and document it in an upcoming minor release. Pools are created for each authority (host/port) and scope (user-defined value) pairs and are resolved accordingly using the information provided in the request and request options. Connections may concurrently handle multiple requests/responses from as many different processes as required.
+</li>
+</ul>
+<h2 id="_features_removed">Features removed</h2>
+<ul><li>Gun used to reject operations by processes that were not the owner of the connection. This behavior has been removed. In general the caller of a request or other operation will receive the relevant messages unless the <code>reply_to</code> option is used.
+</li>
+<li>The <code>connect_destination()</code> option <code>protocol</code> has been removed. It was previously deprecated in favor of <code>protocols</code>.
+</li>
+<li>The <code>keepalive</code> timeout is now disabled by default for HTTP/1.1 and HTTP/2. To be perfectly clear, this is unrelated to the HTTP/1.1 keep-alive mechanism.
+</li>
+</ul>
+<h2 id="_functions_added">Functions added</h2>
+<ul><li>The function <code>gun:set_owner/2</code> has been added. It allows changing the owner of a connection process. Only the current owner can do this operation.
+</li>
+<li>The function <code>gun:shutdown/1</code> has been added. It initiates the graceful shutdown of the connection, followed by the termination of the Gun process.
+</li>
+<li>The function <code>gun:stream_info/2</code> has been added. It provides information about a specific HTTP stream.
+</li>
+</ul>
+<h2 id="_functions_modified">Functions modified</h2>
+<ul><li>The function <code>gun:info/1</code> now returns the owner of the connection as well as the cookie store.
+</li>
+<li>The functions <code>gun:await/2,3,4</code>, <code>gun:await_body/2,3,4</code> and <code>gun:await_up/1,2,3</code> now distinguish the error types. They can be a timeout, a connection error, a stream error or a down error (when the Gun process exited while waiting).
+</li>
+<li>The functions <code>gun:await/2,3,4</code> will now receive upgrades, tunnel up and Websocket messages and return them.
+</li>
+<li>Requests may now include the <code>tunnel</code> option to send the request on a specific tunnel.
+</li>
+<li>The functions <code>gun:request/4,5,6</code> have been replaced with <code>gun:headers/4,5</code> and <code>gun:request/5,6</code>. This provides a cleaner separation between requests that are followed by a body and those that aren&apos;t.
+</li>
+<li>The function <code>gun:ws_send/2</code> has been replaced with the function <code>gun:ws_send/3</code>. The stream reference for the corresponding Websocket upgrade request must now be given.
+</li>
+</ul>
+<h2 id="_messages_added">Messages added</h2>
+<ul><li>The <code>gun_tunnel_up</code> message has been added.
+</li>
+</ul>
+<h2 id="_messages_modified">Messages modified</h2>
+<ul><li>The <code>gun_down</code> message no longer has its final element documented as <code>UnprocessedStreams</code>. It never worked and was always an empty list.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li><strong>POTENTIAL SECURITY VULNERABILITY</strong>: Fix transfer-encoding precedence over content-length in responses. This bug may contribute to a response smuggling security vulnerability when Gun is used inside a proxy.
+</li>
+<li>Gun will now better detect connection closes in some cases.
+</li>
+<li>Gun will no longer send duplicate connection-wide <code>gun_error</code> messages to the same process.
+</li>
+<li>Gun no longer crashes when trying to upgrade to Websocket over a connection restricted to HTTP/1.0.
+</li>
+<li>The default value for the preferred protocols when using CONNECT over TLS has been corrected. It was mistakenly not enabling HTTP/2.
+</li>
+<li>Protocol options provided for a tunnel destination were sometimes ignored. This should no longer be the case.
+</li>
+<li>Gun will no longer send an empty HTTP/2 DATA frame when there is no request body. It was not necessary.
+</li>
+<li>Gun will no longer error out when the owner process exits. The error reason will now be a <code>shutdown</code> tuple instead.
+</li>
+<li>The host header was set incorrectly during Websocket upgrades when the host was configured with an IP address, resulting in a crash. This has been corrected.
+</li>
+<li>A completed stream could be found in the <code>gun_down</code> message when the response contained a connection: close header. This is no longer the case.
+</li>
+<li>Hostnames can now be provided as atom as stated by the documentation.
+</li>
+<li>Gun will no longer attempt to send empty data chunks. When using HTTP/1.1 chunked transfer-encoding this caused the request body to end, even when <code>nofin</code> was given.
+</li>
+<li>Gun now always retries connecting immediately when the connection goes down.
+</li>
+<li>The default port number for the HTTP and HTTPS schemes is no longer sent in the host header.
+</li>
+<li>An invalid stream reference was sent on failed Websocket upgrade responses. This has been corrected.
+</li>
+<li>HTTP/2 connection preface errors are now properly detected and propagated in the <code>gun_down</code> message to the connection owner as well as the exit reason of the Gun process.
+</li>
+<li>HTTP/2 connection preface errors now provide a different human readable error when the data received looks like an HTTP/1.x response.
+</li>
+<li>HTTP/2 connection errors were missing the human readable reason in the <code>gun_error</code> message. This has been corrected.
+</li>
+<li>Fix the host and :authority (pseudo-)headers when connecting to an IPv6 address given as a tuple. They were lacking the surrounding brackets.
+</li>
+<li>Fix a crash in gun:info/1 when the socket was closed before we call Transport:sockname/1.
+</li>
+<li>Fix flushing by stream reference. When the <code>gun_inform</code> message was flushed the function would switch to flushing all messages from the pid instead of only messages from the given stream.
+</li>
+<li>Allow setting a custom SNI value.
+</li>
+<li>Fix double sending of last chunk in HTTP/1.1 when Gun is asked to send empty data before closing the stream.
+</li>
+<li>Gun will now properly ignore parameters when the media type is text/event-stream.
+</li>
+<li>Avoid noisy crashes in the TLS over TLS code.
+</li>
+<li>Gun will now include the StreamRef of Websocket streams when sending <code>gun_down</code> messages.
+</li>
+<li>Gun will no longer reject HTTP proxies that use HTTP/1.0 for the version in their response.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/gun/2.1/guide/migrating_from_2.0/">
+					Migrating from Gun 2.0 to 2.1
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/gun/2.1/guide/migrating_from_1.2/">
+					Migrating from Gun 1.2 to 1.3
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	2.1
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/2.1/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/2.1/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/gun/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/gun/1.3/guide">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/guide">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/guide">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/guide">1.0</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

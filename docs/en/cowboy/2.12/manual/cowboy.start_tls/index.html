@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy:start_tls(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy:start_tls(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy:start_tls - Listen for connections using TLS</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">start_tls</font></b>(<font color="#009900">Name</font>          <font color="#990000">::</font> <b><font color="#000000">ranch:ref</font></b>(),
+          <font color="#009900">TransportOpts</font> <font color="#990000">::</font> <b><font color="#000000">ranch_ssl:opts</font></b>(),
+          <font color="#009900">ProtocolOpts</font>  <font color="#990000">::</font> <b><font color="#000000">opts</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">ListenerPid</font> <font color="#990000">::</font> <b><font color="#000080">pid</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>Start listening for connections over a secure TLS channel.</p>
+<p>Both HTTP/1.1 and HTTP/2 are supported on this listener. The ALPN TLS extension must be used to initiate an HTTP/2 connection.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Name</dt>
+<dd><p>The listener name is used to refer to this listener in future calls, for example when stopping it or when updating the routes defined.</p>
+<p>It can be any Erlang term. An atom is generally good enough, for example <code>api</code>, <code>my_app_clear</code> or <code>my_app_tls</code>.</p>
+</dd>
+<dt>TransportOpts</dt>
+<dd><p>The transport options are where the TCP options, including the listener&apos;s port number, are defined. They also contain the TLS options, like the server&apos;s certificate. Transport options are provided as a list of keys and values, for example <code>[{port, 8443}, {certfile, &quot;path/to/cert.pem&quot;}]</code>.</p>
+<p>The available options are documented in the <a href="../ranch_ssl">ranch_ssl(3)</a> manual.</p>
+</dd>
+<dt>ProtocolOpts</dt>
+<dd><p>The protocol options are in a map containing all the options for the different protocols that may be involved when connecting to the listener, including HTTP/1.1 and HTTP/2.</p>
+<p>The HTTP/1.1 options are documented in the <a href="../cowboy_http">cowboy_http(3)</a> manual; and the HTTP/2 options in <a href="../cowboy_http2">cowboy_http2(3)</a>. Stream handlers such as <a href="../cowboy_stream_h">cowboy_stream_h(3)</a> (which is enabled by default) may also define options.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>An ok tuple is returned on success. It contains the pid of the top-level supervisor for the listener.</p>
+<p>An error tuple is returned on error. The error reason may be any Erlang term.</p>
+<p>A common error is <code>eaddrinuse</code>. It indicates that the port configured for Cowboy is already in use.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: HTTP/2 support added.
+</li>
+<li><strong>2.0</strong>: Function introduced. Replaces <code>cowboy:start_https/4</code>.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Start a listener</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Dispatch</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_router:compile</font></b>([
+    {<font color="#FF6600">'_'</font>, [
+        {<font color="#FF0000">"/"</font>, <font color="#FF6600">toppage_h</font>, []}
+    ]}
+]),
+
+{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy:start_tls</font></b>(<font color="#FF6600">example</font>, [
+    {<font color="#FF6600">port</font>, <font color="#993399">8443</font>},
+    {<font color="#FF6600">certfile</font>, <font color="#FF0000">"path/to/cert.pem"</font>}
+], #{
+    <font color="#0000FF">env</font> <font color="#990000">=&gt;</font> #{<font color="#0000FF">dispatch</font> <font color="#990000">=&gt;</font> <font color="#009900">Dispatch</font>}
+})<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Start a listener on a random port</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Name</font> <font color="#990000">=</font> <font color="#FF6600">example</font>,
+
+{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy:start_tls</font></b>(<font color="#009900">Name</font>, [
+    {<font color="#FF6600">certfile</font>, <font color="#FF0000">"path/to/cert.pem"</font>}
+], #{
+    <font color="#0000FF">env</font> <font color="#990000">=&gt;</font> #{<font color="#0000FF">dispatch</font> <font color="#990000">=&gt;</font> <font color="#009900">Dispatch</font>}
+}),
+
+<font color="#009900">Port</font> <font color="#990000">=</font> <b><font color="#000000">ranch:get_port</font></b>(<font color="#009900">Name</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../cowboy">cowboy(3)</a>, <a href="../cowboy.start_clear">cowboy:start_clear(3)</a>, <a href="../cowboy.stop_listener">cowboy:stop_listener(3)</a>, <a href="../ranch">ranch(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.12
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.12/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.12/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.12/manual">2.12</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.11/manual">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/manual">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/manual">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/manual">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

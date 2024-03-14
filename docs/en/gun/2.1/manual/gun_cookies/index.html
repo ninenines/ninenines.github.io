@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: gun_cookies(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>gun_cookies(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>gun_cookies - Cookie store engine</p>
+<h2 id="_description">Description</h2>
+<p>The <code>gun_cookies</code> module implements a cookie store engine. It will be used by Gun when a cookie store is configured. It also defines the interface and provides functions used to implement cookie store backends.</p>
+<h2 id="_callbacks">Callbacks</h2>
+<p>Cookie store backends implement the following interface. Functions are organized by theme: initialization, querying, storing and garbage collecting:</p>
+<h3 id="_init">init</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">Opts</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()) <font color="#990000">-&gt;</font> <b><font color="#000000">gun_cookies:store</font></b>()</tt></pre>
+</div></div>
+<p>Initialize the cookie store.</p>
+<h3 id="_query">query</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">query</font></b>(<font color="#009900">State</font>, <font color="#009900">URI</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, [<font color="#009900">Cookie</font>], <font color="#009900">State</font>}
+
+<font color="#009900">URI</font>    <font color="#990000">::</font> <b><font color="#000000">uri_string:uri_map</font></b>()
+<font color="#009900">Cookie</font> <font color="#990000">::</font> <b><font color="#000000">gun_cookies:cookie</font></b>()
+<font color="#009900">State</font>  <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>Query the store for the cookies for the given URI.</p>
+<h3 id="_set_cookie_secure_match">set_cookie_secure_match</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">set_cookie_secure_match</font></b>(<font color="#009900">State</font>, <font color="#009900">Match</font>) <font color="#990000">-&gt;</font> <font color="#FF6600">match</font> | <font color="#FF6600">nomatch</font>
+
+<font color="#009900">State</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()
+<font color="#009900">Match</font> <font color="#990000">::</font> #{
+    <font color="#FF6600">name</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+<i><font color="#9A1900">%	secure_only := true,</font></i>
+    <font color="#FF6600">domain</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">path</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>()
+}</tt></pre>
+</div></div>
+<p>Perform a secure match against cookies already in the store. This is part of the heuristics that the cookie store engine applies to decide whether the cookie must be stored.</p>
+<p>The <code>secure_only</code> attribute is implied, it is not actually passed in the argument.</p>
+<h3 id="_set_cookie_get_exact_match">set_cookie_get_exact_match</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">set_cookie_get_exact_match</font></b>(<font color="#009900">State</font>, <font color="#009900">Match</font>)
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <b><font color="#000000">gun_cookies:cookie</font></b>(), <font color="#009900">State</font>} | <font color="#FF6600">error</font>
+
+<font color="#009900">State</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()
+<font color="#009900">Match</font> <font color="#990000">::</font> #{
+	<font color="#FF6600">name</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+	<font color="#FF6600">domain</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+	<font color="#FF6600">host_only</font> <font color="#990000">:=</font> <b><font color="#000000">boolean</font></b>(),
+	<font color="#FF6600">path</font> <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>()
+}</tt></pre>
+</div></div>
+<p>Perform an exact match against cookies already in the store. This is part of the heuristics that the cookie store engine applies to decide whether the cookie must be stored.</p>
+<p>When a cookie is found, it must be returned so that it gets updated. When nothing is found a new cookie will be stored.</p>
+<h3 id="_store">store</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">store</font></b>(<font color="#009900">State</font>, <b><font color="#000000">gun_cookies:cookie</font></b>())
+	<font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">State</font>} | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}
+
+<font color="#009900">State</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>Unconditionally store the cookie into the cookie store.</p>
+<h3 id="_gc">gc</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">gc</font></b>(<font color="#009900">State</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">State</font>}
+
+<font color="#009900">State</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>Remove all cookies from the cookie store that are expired.</p>
+<p>Other cookies may be removed as well, at the discretion of the cookie store. For example excess cookies may be removed to reduce the memory footprint.</p>
+<h3 id="_session_gc">session_gc</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">session_gc</font></b>(<font color="#009900">State</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">State</font>}
+
+<font color="#009900">State</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>Remove all cookies from the cookie store that have the <code>persistent</code> flag set to <code>false</code>.</p>
+<h2 id="_exports">Exports</h2>
+<ul><li><a href="../gun_cookies.domain_match">gun_cookies:domain_match(3)</a> - Cookie domain match
+</li>
+<li><a href="../gun_cookies.path_match">gun_cookies:path_match(3)</a> - Cookie path match
+</li>
+</ul>
+<h2 id="_types">Types</h2>
+<h3 id="_cookie">cookie()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">cookie</font></b>() <font color="#990000">::</font> #{
+    <font color="#FF6600">name</font>             <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">value</font>            <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">domain</font>           <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">path</font>             <font color="#990000">:=</font> <b><font color="#000080">binary</font></b>(),
+    <font color="#FF6600">creation_time</font>    <font color="#990000">:=</font> <b><font color="#000000">calendar:datetime</font></b>(),
+    <font color="#FF6600">last_access_time</font> <font color="#990000">:=</font> <b><font color="#000000">calendar:datetime</font></b>(),
+    <font color="#FF6600">expiry_time</font>      <font color="#990000">:=</font> <b><font color="#000000">calendar:datetime</font></b>() | <font color="#FF6600">infinity</font>,
+    <font color="#FF6600">persistent</font>       <font color="#990000">:=</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#FF6600">host_only</font>        <font color="#990000">:=</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#FF6600">secure_only</font>      <font color="#990000">:=</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#FF6600">http_only</font>        <font color="#990000">:=</font> <b><font color="#000000">boolean</font></b>(),
+    <font color="#FF6600">same_site</font>        <font color="#990000">:=</font> <font color="#FF6600">strict</font> | <font color="#FF6600">lax</font> | <font color="#FF6600">none</font>
+}</tt></pre>
+</div></div>
+<p>A cookie.</p>
+<p>This contains the cookie name, value, attributes and flags. This is the representation that the cookie store engine and Gun expects. Cookies do not have to be kept in this format in the cookie store backend.</p>
+<h3 id="_store">store()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">store</font></b>() <font color="#990000">::</font> {<b><font color="#000000">module</font></b>(), <font color="#009900">StoreState</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>The cookie store.</p>
+<p>This is a tuple containing the cookie store backend module and its current state.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: Module introduced.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">gun(7)</a>, <a href="../gun_cookies_list">gun_cookies_list(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	2.1
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/2.1/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/2.1/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/gun/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/gun/1.3/manual">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/manual">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/manual">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/manual">1.0</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

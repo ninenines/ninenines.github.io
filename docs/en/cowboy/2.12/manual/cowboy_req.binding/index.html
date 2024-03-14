@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_req:binding(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_req:binding(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_req:binding - Access a value bound from the route</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">binding</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>)          <font color="#990000">-&gt;</font> <b><font color="#000000">binding</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>, <font color="#000080">undefined</font>)
+<b><font color="#000000">binding</font></b>(<font color="#009900">Name</font>, <font color="#009900">Req</font>, <font color="#009900">Default</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">any</font></b>() | <font color="#009900">Default</font>
+
+<font color="#009900">Name</font>    <font color="#990000">::</font> <b><font color="#000080">atom</font></b>()
+<font color="#009900">Req</font>     <font color="#990000">::</font> <b><font color="#000000">cowboy_req:req</font></b>()
+<font color="#009900">Default</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>Return the value for the given binding.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Name</dt>
+<dd><p>Desired binding name as an atom.</p>
+</dd>
+<dt>Req</dt>
+<dd><p>The Req object.</p>
+</dd>
+<dt>Default</dt>
+<dd><p>Default value returned when the binding is missing.</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>By default the value is a case sensitive binary string, however constraints may change the type of this value (for example automatically converting numbers to integer).</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.0</strong>: Only the value is returned, it is no longer wrapped in a tuple.
+</li>
+<li><strong>1.0</strong>: Function introduced.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Get the username from the path</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><i><font color="#9A1900">%% Route is "/users/:user"</font></i>
+<font color="#009900">Username</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:binding</font></b>(<font color="#FF6600">user</font>, <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Get the branch name, with a default</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><i><font color="#9A1900">%% Route is "/log[/:branch]"</font></i>
+<font color="#009900">Branch</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:binding</font></b>(<font color="#FF6600">branch</font>, <font color="#009900">Req</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"master"</font><font color="#990000">&gt;&gt;</font>)</tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../cowboy_req">cowboy_req(3)</a>, <a href="../cowboy_req.bindings">cowboy_req:bindings(3)</a>, <a href="../cowboy_req.host_info">cowboy_req:host_info(3)</a>, <a href="../cowboy_req.path_info">cowboy_req:path_info(3)</a>, <a href="../cowboy_router">cowboy_router(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.12
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.12/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.12/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.12/manual">2.12</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.11/manual">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/manual">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/manual">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/manual">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
