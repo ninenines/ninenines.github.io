@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
 
-    <title>Nine Nines: Gun 2.0 pre-release 2</title>
+    <title>Nine Nines: Performance improvements in Cowboy 2.13</title>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=7" rel="stylesheet">
@@ -61,24 +61,36 @@
 
 <article class="blog_item">
 <header>
-	<h1 class="lined-header"><span>Gun 2.0 pre-release 2</span></h1>
+	<h1 class="lined-header"><span>Performance improvements in Cowboy 2.13</span></h1>
 	<p class="date">
-		<span class="year">2020</span>
-		<span class="day-month">25 Mar</span>
+		<span class="year">2025</span>
+		<span class="day-month">13 Feb</span>
 	</p>
 </header>
 
-<p>Gun <code>2.0.0-pre.2</code> has been released!</p>
-<p>The second pre-release version of Gun 2.0 has been released! Gun 2.0 adds a ton of features along with a small number of breaking changes.</p>
-<p>The main highlight of this pre-release is the support for a pluggable cookie store mechanism. Gun 2.0 comes with a cookie store engine that can automatically process cookies and store them to and retrieve them from a pluggable backend.</p>
-<p>Gun 2.0 comes with the <code>gun_cookies_list</code> backend which can be enabled via the new <code>cookie_store</code> option. This backend will keep cookies in-memory on a per-connection basis and without any persistence built-in. It should however be easy to create a backend on top of this one to add persistence or share the cookie store backend between multiple connections should that be necessary.</p>
-<p>The cookie store engine implements the RFC6265bis draft that will become a proper RFC in the nearby future and includes all the most recent improvements to cookies that modern browsers have implemented. Gun is not a browser however so some features were skipped (at least for now): there is no support for setting cookies from the Erlang side; and there is no SameSite checks because Gun does not have a concept of a &quot;browsing context&quot;.</p>
-<p>Please consult the <a href="/articles/gun-2.0.0-pre.1/">announcement for the first pre-release</a> for information about other Gun 2.0 features.</p>
-<p>Gun 2.0 currently requires Erlang/OTP 22 or above and is tested and supported on Linux, FreeBSD, macOS and Windows.</p>
-<p>A complete list of changes can be found in the migration guide: <a href="https://ninenines.eu/docs/en/gun/2.0/guide/migrating_from_1.3/">Migrating from Gun 1.3 to 2.0</a>.</p>
-<p>I will have more free time available for consulting or for paid open source development starting from next week. If you are interested, drop me an email at <a href="mailto:contact@ninenines.eu">contact@ninenines.eu</a>. A feature that may be useful for some of you could be for example an implementation for the &quot;Happy Eyeballs&quot; mechanism (RFC 8305) as this would allow faster connections to servers on dual IPv4 and IPv6 environments.</p>
-<p>You can donate to this project via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to pay for additional servers for testing.</p>
-<p>As usual, feedback is appreciated, and issues or questions should be sent via Github tickets. Thanks!</p>
+<p>Cowboy <code>2.13.0</code> is close to being released. Much of the work done on this release focused on performance, and in particular the performance of the Websocket protocol.</p>
+<p>The Websocket protocol requires clients to mask the data they send, originally to avoid issues with proxies. This requirement is still present for Websocket over HTTP/2 nevertheless. This means that the server has to unmask the data, which has a notable impact on performance. Cowboy 2.13 will attempt to unmask 16 bytes at a time instead of 4 previously, leading to a rouhgly 10% faster processing of Websocket frames.</p>
+<p>Similarly, the Websocket protocol requires validating that the data in text frames is valid UTF-8. This part of the Websocket code was always highly optimised, but changes in the VM made the optimisations less impactful. The validation code was therefore rewritten, inspired by the validation code in Erlang/OTP&apos;s new <code>json</code> module (itself inspired by the validation in Cowboy!) and Cowboy 2.13 is now 10% to 15% faster processing Websocket text frames.</p>
+<p>Cowboy must keep track of the data coming in to detect whether the client is still around, or gone. It does so via a timeout that is reset when data is received. Since it may receive a lot of data, there may be a lot of timer resets, impacting performance. Cowboy 2.13 will instead run a timer periodically with a timeout that is a tenth of <code>idle_timeout</code>, and count how many times in a row that timeout was triggered without receiving data. This greatly reduces the number of times we set or reset the timer and makes some Websocket scenarios 10% faster.</p>
+<p>These timer improvements were also brought to HTTP/2.</p>
+<p>Cowboy by default will not configure transport options, because they are highly dependent on environment, so anyone looking to get the best performance out of Cowboy has to figure out the best values. One of these values is the <code>buffer</code> option, which represents the size of the socket&apos;s buffer on OTP&apos;s side. Its default is very low (1460 bytes) and so performance is highly degraded in some scenarios, such as reading large request bodies, or large Websocket frames. During experiments it was found that there is no best default value, even in a single environment. Indeed the performance was highly dependent on the size of the data we were receiving for each packet. Cowboy 2.13 therefore comes with a new <code>dynamic_buffer</code> mechanism that keeps track of the data received and updates the <code>buffer</code> size dynamically accordingly. The performance gains of this new approach are enormous as you will see at the end of this article, and have a positive impact on all protocols in most scenarios. The technical details can be found in commit <a href="https://github.com/ninenines/cowboy/commit/49be0f57cf5ce66178dc24b9c08c835888d1ce0e">49be0f57cf5ce66178dc24b9c08c835888d1ce0e</a>.</p>
+<p>Finally, HTTP/1.1 and HTTP/2 connection processes can now be set to <code>hibernate</code> automatically, which can have a positive impact on performance in some scenarios (such as receiving large HTTP/1.1 request bodies) even if most scenarios will see a small drop in performance. Cowboy 2.13 will not <code>hibernate</code> by default, but it felt important to mention in this article: if your service deals with GB-sized request bodies, it may help.</p>
+<p>Cumulatively, the optimisations improve the performance of Cowboy 2.13, compared to Cowboy 2.12, in these terms:</p>
+<p>A single HTTP request uploading a 10GB file is handled 11x faster over HTTP, 8x faster over HTTPS and 7.5 faster over HTTP/2.</p>
+<p>Ten thousand sequential HTTP requests each uploading a 1MB file is handled 23x faster over HTTP, 6x faster over HTTPS and 5x faster over HTTP/2.</p>
+<p>The same benchmark over 10 concurrent connections is 7x faster over HTTP, 1.7x faster over HTTPS and 3.5x faster over HTTP/2.</p>
+<p>Performance of &quot;hello world&quot; type of benchmarks, where the response is received before issuing a new request, sees little impact from the changes in Cowboy 2.13.</p>
+<p>Performance of HTTP/2 over TCP connections, which is typically not used in production, is dramatically improved depending on the HTTP/2 options used. Performance improvements of up to 57x faster processing of 10GB request bodies have been observed. I suspect there might be an underlying issue in Erlang/OTP that leads to performance issues that only HTTP/2 over TCP could see in Cowboy 2.12, and have opened a ticket.</p>
+<p>Websocket performance improvements vary depending on the type of data: binary frames, text frames containing ASCII, text frames containing mixed ASCII/UTF-8 and text frames containing mostly UTF-8. They also vary depending on the underlying protocol (HTTP/1.1 or HTTP/2). Again, comparing Cowboy 2.13 to Cowboy 2.12:</p>
+<p>Binary text frames are processed 5x faster in both Websocket over HTTP/1.1 and Websocket over HTTP/2.</p>
+<p>ASCII text frames are processed 4x to 6x faster in Websocket over HTTP/1.1, depending on the scenario, and 4x faster in Websocket over HTTP/2.</p>
+<p>Mixed text frames are processed 3x to 4.5x faster in Websocket over HTTP/1.1, depending on the scenario, and 3x faster in Websocket over HTTP/2.</p>
+<p>Mostly UTF-8 text frames are processed 3x faster in Websocket over HTTP/1.1, depending on the scenario, and 2.5x faster in Websocket over HTTP/2.</p>
+<p>When deflate compression is enabled, the performance is roughly the same between Cowboy 2.12 and Cowboy 2.13.</p>
+<p>Most of the performance improvements are due to the new <code>dynamic_buffer</code> option. Users that already set a custom <code>buffer</code> value will not see as much improvement in this release, since they already gained much from tweaking <code>buffer</code>. Do note that the <code>dynamic_buffer</code> option will not be enabled by default if <code>buffer</code> is configured.</p>
+<p>Still, all other improvements should be beneficial to all users, particularly the Websocket improvements. I hope that you are looking forward to these changes! I will now be preparing the Cowboy 2.13 release.</p>
+<p>You can donate to this project via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>.</p>
+<p>As usual, feedback is appreciated, and issues or questions should be sent via Github tickets or discussions. We also have a new Discord server. <a href="https://discord.gg/x25nNq2fFE">Join Erlang OSS Discord now!</a></p>
 
 
 </article>

@@ -1,0 +1,144 @@
++++
+date = "2025-02-13T07:00:00+01:00"
+title = "Performance improvements in Cowboy 2.13"
+
++++
+
+Cowboy `2.13.0` is close to being released. Much of the
+work done on this release focused on performance, and in
+particular the performance of the Websocket protocol.
+
+The Websocket protocol requires clients to mask the data
+they send, originally to avoid issues with proxies. This
+requirement is still present for Websocket over HTTP/2
+nevertheless. This means that the server has to unmask
+the data, which has a notable impact on performance.
+Cowboy 2.13 will attempt to unmask 16 bytes at a time
+instead of 4 previously, leading to a rouhgly 10%
+faster processing of Websocket frames.
+
+Similarly, the Websocket protocol requires validating
+that the data in text frames is valid UTF-8. This part
+of the Websocket code was always highly optimised, but
+changes in the VM made the optimisations less impactful.
+The validation code was therefore rewritten, inspired
+by the validation code in Erlang/OTP's new `json` module
+(itself inspired by the validation in Cowboy!) and
+Cowboy 2.13 is now 10% to 15% faster processing Websocket
+text frames.
+
+Cowboy must keep track of the data coming in to detect
+whether the client is still around, or gone. It does so
+via a timeout that is reset when data is received. Since
+it may receive a lot of data, there may be a lot of
+timer resets, impacting performance. Cowboy 2.13 will
+instead run a timer periodically with a timeout that is
+a tenth of `idle_timeout`, and count how many times in
+a row that timeout was triggered without receiving data.
+This greatly reduces the number of times we set or reset
+the timer and makes some Websocket scenarios 10% faster.
+
+These timer improvements were also brought to HTTP/2.
+
+Cowboy by default will not configure transport options,
+because they are highly dependent on environment, so
+anyone looking to get the best performance out of Cowboy
+has to figure out the best values. One of these values
+is the `buffer` option, which represents the size of
+the socket's buffer on OTP's side. Its default is very
+low (1460 bytes) and so performance is highly degraded
+in some scenarios, such as reading large request bodies,
+or large Websocket frames. During experiments it was
+found that there is no best default value, even in a
+single environment. Indeed the performance was highly
+dependent on the size of the data we were receiving
+for each packet. Cowboy 2.13 therefore comes with a
+new `dynamic_buffer` mechanism that keeps track of the
+data received and updates the `buffer` size dynamically
+accordingly. The performance gains of this new approach
+are enormous as you will see at the end of this article,
+and have a positive impact on all protocols in most scenarios.
+The technical details can be found in commit https://github.com/ninenines/cowboy/commit/49be0f57cf5ce66178dc24b9c08c835888d1ce0e[49be0f57cf5ce66178dc24b9c08c835888d1ce0e].
+
+Finally, HTTP/1.1 and HTTP/2 connection processes can
+now be set to `hibernate` automatically, which can
+have a positive impact on performance in some scenarios
+(such as receiving large HTTP/1.1 request bodies) even
+if most scenarios will see a small drop in performance.
+Cowboy 2.13 will not `hibernate` by default, but it
+felt important to mention in this article: if your
+service deals with GB-sized request bodies, it may help.
+
+Cumulatively, the optimisations improve the performance
+of Cowboy 2.13, compared to Cowboy 2.12, in these terms:
+
+A single HTTP request uploading a 10GB file is handled
+11x faster over HTTP, 8x faster over HTTPS and 7.5 faster
+over HTTP/2.
+
+Ten thousand sequential HTTP requests each uploading a 1MB
+file is handled 23x faster over HTTP, 6x faster over HTTPS
+and 5x faster over HTTP/2.
+
+The same benchmark over 10 concurrent connections is
+7x faster over HTTP, 1.7x faster over HTTPS and 3.5x
+faster over HTTP/2.
+
+Performance of "hello world" type of benchmarks, where
+the response is received before issuing a new request,
+sees little impact from the changes in Cowboy 2.13.
+
+Performance of HTTP/2 over TCP connections, which is
+typically not used in production, is dramatically
+improved depending on the HTTP/2 options used.
+Performance improvements of up to 57x faster processing
+of 10GB request bodies have been observed. I suspect
+there might be an underlying issue in Erlang/OTP that
+leads to performance issues that only HTTP/2 over TCP
+could see in Cowboy 2.12, and have opened a ticket.
+
+Websocket performance improvements vary depending on the
+type of data: binary frames, text frames containing ASCII,
+text frames containing mixed ASCII/UTF-8 and text frames
+containing mostly UTF-8. They also vary depending on the
+underlying protocol (HTTP/1.1 or HTTP/2). Again, comparing
+Cowboy 2.13 to Cowboy 2.12:
+
+Binary text frames are processed 5x faster in both
+Websocket over HTTP/1.1 and Websocket over HTTP/2.
+
+ASCII text frames are processed 4x to 6x faster in
+Websocket over HTTP/1.1, depending on the scenario,
+and 4x faster in Websocket over HTTP/2.
+
+Mixed text frames are processed 3x to 4.5x faster in
+Websocket over HTTP/1.1, depending on the scenario,
+and 3x faster in Websocket over HTTP/2.
+
+Mostly UTF-8 text frames are processed 3x faster in
+Websocket over HTTP/1.1, depending on the scenario,
+and 2.5x faster in Websocket over HTTP/2.
+
+When deflate compression is enabled, the performance
+is roughly the same between Cowboy 2.12 and Cowboy 2.13.
+
+Most of the performance improvements are due to the
+new `dynamic_buffer` option. Users that already set
+a custom `buffer` value will not see as much improvement
+in this release, since they already gained much from
+tweaking `buffer`. Do note that the `dynamic_buffer`
+option will not be enabled by default if `buffer` is
+configured.
+
+Still, all other improvements should be beneficial
+to all users, particularly the Websocket improvements.
+I hope that you are looking forward to these changes!
+I will now be preparing the Cowboy 2.13 release.
+
+You can donate to this project via
+https://github.com/sponsors/essen[GitHub Sponsors].
+
+As usual, feedback is appreciated, and issues or
+questions should be sent via Github tickets or
+discussions. We also have a new Discord server.
+https://discord.gg/x25nNq2fFE[Join Erlang OSS Discord now!]
