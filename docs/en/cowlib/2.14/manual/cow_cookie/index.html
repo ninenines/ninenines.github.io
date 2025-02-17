@@ -88,7 +88,7 @@ http://www.gnu.org/software/src-highlite -->
     <font color="#0000FF">path</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),
     <font color="#0000FF">secure</font> <font color="#990000">=&gt;</font> <font color="#000080">true</font>,
     <font color="#0000FF">http_only</font> <font color="#990000">=&gt;</font> <font color="#000080">true</font>,
-    <font color="#0000FF">same_site</font> <font color="#990000">=&gt;</font> <font color="#FF6600">strict</font> | <font color="#FF6600">lax</font>
+    <font color="#0000FF">same_site</font> <font color="#990000">=&gt;</font> <font color="#FF6600">default</font> | <font color="#FF6600">none</font> | <font color="#FF6600">strict</font> | <font color="#FF6600">lax</font>
 }</tt></pre>
 </div></div>
 <p>Cookie attributes parsed from the set-cookie header. The attributes must be passed as-is to a cookie store engine for processing, along with the cookie name and value. More information about the attributes can be found in <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>.</p>
@@ -102,7 +102,7 @@ http://www.gnu.org/software/src-highlite -->
     <font color="#0000FF">http_only</font> <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>(),
     <font color="#0000FF">max_age</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">non_neg_integer</font></b>(),
     <font color="#0000FF">path</font>      <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(),
-    <font color="#0000FF">same_site</font> <font color="#990000">=&gt;</font> <font color="#FF6600">lax</font> | <font color="#FF6600">strict</font>,
+    <font color="#0000FF">same_site</font> <font color="#990000">=&gt;</font> <font color="#FF6600">default</font> | <font color="#FF6600">none</font> | <font color="#FF6600">strict</font> | <font color="#FF6600">lax</font>,
     <font color="#0000FF">secure</font>    <font color="#990000">=&gt;</font> <b><font color="#000000">boolean</font></b>()
 }</tt></pre>
 </div></div>
@@ -121,14 +121,19 @@ http://www.gnu.org/software/src-highlite -->
 <dd><p>Path to which the cookie will be sent. By default it will be sent to the current &quot;directory&quot; of the effective request URI.</p>
 </dd>
 <dt>same_site</dt>
-<dd><p>Whether the cookie should be sent along with cross-site requests. This header is currently non-standard but is in the process of being standardized. Please refer to the <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03#section-4.1.2.7">RFC 6265 (bis) draft</a> for details.</p>
+<dd><p>Whether the cookie should be sent along with cross-site requests. This attribute is currently non-standard but is in the process of being standardized. Please refer to the <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03#section-4.1.2.7">RFC 6265 (bis) draft</a> for details.</p>
+<p>The default value for this attribute may vary depending on user agent and configuration. Browsers are known to be more strict over TCP compared to TLS.</p>
 </dd>
 <dt>secure</dt>
 <dd><p>Whether the cookie should be sent only on secure channels (for example TLS). Note that this does not guarantee the integrity of the cookie, only its confidentiality during transfer. By default there are no restrictions.</p>
 </dd>
 </dl>
 <h2 id="_changelog">Changelog</h2>
-<ul><li><strong>2.9</strong>: The <code>cookie_attrs</code> type was added.
+<ul><li><strong>2.12</strong>: The <code>same_site</code> attribute and option may now be set to <code>default</code>.
+</li>
+<li><strong>2.10</strong>: The <code>same_site</code> attribute and option may now be set to <code>none</code>.
+</li>
+<li><strong>2.9</strong>: The <code>cookie_attrs</code> type was added.
 </li>
 <li><strong>1.0</strong>: Module introduced.
 </li>
@@ -148,7 +153,7 @@ http://www.gnu.org/software/src-highlite -->
 
 <h3>
 	Cowlib
-	2.9
+	2.14
 	Function Reference
 	
 </h3>
@@ -156,7 +161,7 @@ http://www.gnu.org/software/src-highlite -->
 <ul>
 	
 	
-		<li><a href="/docs/en/cowlib/2.9/manual">Function Reference</a></li>
+		<li><a href="/docs/en/cowlib/2.14/manual">Function Reference</a></li>
 	
 	
 </ul>
