@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: ranch_transport(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch_transport(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>ranch_transport - Transport modules</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>ranch_transport</code> defines the interface used by Ranch transports.</p>
+<h2 id="_callbacks">Callbacks</h2>
+<p>Ranch transports implement the following interface:</p>
+<h3 id="_accept">accept</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">accept</font></b>(<font color="#009900">LSocket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">Timeout</font> <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">error</font>, <font color="#FF6600">closed</font> | <font color="#FF6600">timeout</font> | <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Use the listening socket returned by <code>listen/1</code> to accept a new connection. The timeout is specified in milliseconds.</p>
+<h3 id="_close">close</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">close</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()) <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font></tt></pre>
+</div></div>
+<p>Close the socket.</p>
+<h3 id="_controlling_process">controlling_process</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">controlling_process</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">Pid</font> <font color="#990000">::</font> <b><font color="#000080">pid</font></b>())
+    <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font> | {<font color="#FF6600">error</font>, <font color="#FF6600">closed</font> | <font color="#FF6600">not_owner</font> | <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Assign a new controlling process to the socket. The controlling process is the process that is linked to and receives messages from the socket.</p>
+<h3 id="_format_error">format_error</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">format_error</font></b>(<font color="#009900">Reason</font> <font color="#990000">::</font> <b><font color="#000000">term</font></b>())
+    <font color="#990000">-&gt;</font> <font color="#009900">ReasonString</font> <font color="#990000">::</font> <b><font color="#000000">string</font></b>()</tt></pre>
+</div></div>
+<p>Format a listen error into a human-readable diagnostic string.</p>
+<p>This callback is optional, but implementing it is highly recommended. It will become mandatory in Ranch 3.0.</p>
+<h3 id="_getopts">getopts</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">getopts</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">SockOpts</font> <font color="#990000">::</font> [<b><font color="#000080">atom</font></b>()])
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <b><font color="#000000">any</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Get one or more options for the socket.</p>
+<h3 id="_getstat">getstat</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">getstat</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">SockStatValues</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Get all statistics for the socket.</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">getstat</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">SockStats</font> <font color="#990000">::</font> [<b><font color="#000080">atom</font></b>()])
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">SockStatValues</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Get one or more statistic options for the socket.</p>
+<h3 id="_handshake">handshake</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">handshake</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+          <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">Info</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}
+
+<b><font color="#000000">handshake</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+          <font color="#009900">SockOpts</font> <font color="#990000">::</font> <b><font color="#000000">opts</font></b>(),
+          <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">Info</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>Perform the transport-level handshake.</p>
+<p>This function will be called by connection processes before performing any socket operation. It allows transports that require extra initialization to perform their task and return a socket that is ready to use.</p>
+<p>If the handshake is completed by this call, the function will return <code>{ok, Socket}</code>. However, some transports (notably, <code>ranch_ssl</code> if <code>{handshake, hello}</code> is specified in the socket options) may pause the handshake at a certain point and return <code>{ok, Socket, Info}</code> instead, in order to allow for additional decisions to be made before resuming the handshake with <code>handshake_continue/3</code> or cancelling it with <code>handshake_cancel/1</code>.</p>
+<p>This function may also be used to upgrade a connection from a transport to another depending on the capabilities of the transports. For example a <code>ranch_tcp</code> socket may be upgraded to a <code>ranch_ssl</code> one using this function.</p>
+<h3 id="_handshake_continue">handshake_continue</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">handshake_continue</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+                   <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}
+
+<b><font color="#000000">handshake_continue</font></b>(<font color="#009900">Socket0</font>  <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+                   <font color="#009900">SockOpts</font> <font color="#990000">::</font> <b><font color="#000000">opts</font></b>(),
+                   <font color="#009900">Timeout</font>  <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()}
+     | {<font color="#FF6600">error</font>, <b><font color="#000000">any</font></b>()}</tt></pre>
+</div></div>
+<p>Resume the paused transport-level handshake and return a socket that is ready to use.</p>
+<p>This function will be called by connection processes to resume a paused handshake.</p>
+<h3 id="_handshake_cancel">handshake_cancel</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">handshake_cancel</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()) <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font></tt></pre>
+</div></div>
+<p>Cancel the paused transport-level handshake.</p>
+<h3 id="_listen">listen</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">listen</font></b>(<font color="#009900">TransportOpts</font> <font color="#990000">::</font> <b><font color="#000000">ranch:transport_opts</font></b>(<b><font color="#000000">any</font></b>()))
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">LSocket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Create a socket that listens on the port given in the socket options.</p>
+<p>The port may not be specified or may be set to 0, which means a random available port number will be chosen.</p>
+<h3 id="_messages">messages</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">messages</font></b>()
+    <font color="#990000">-&gt;</font> {<font color="#009900">OK</font>      <font color="#990000">::</font> <b><font color="#000080">atom</font></b>(),
+        <font color="#009900">Closed</font>  <font color="#990000">::</font> <b><font color="#000080">atom</font></b>(),
+        <font color="#009900">Error</font>   <font color="#990000">::</font> <b><font color="#000080">atom</font></b>(),
+        <font color="#009900">Passive</font> <font color="#990000">::</font> <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Return the tuple keys for the messages sent by the socket.</p>
+<h3 id="_name">name</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000080">name</font></b>() <font color="#990000">-&gt;</font> <font color="#009900">Name</font> <font color="#990000">::</font> <b><font color="#000080">atom</font></b>()</tt></pre>
+</div></div>
+<p>Return the name of the transport.</p>
+<h3 id="_peername">peername</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">peername</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, {<b><font color="#000000">inet:ip_address</font></b>(), <b><font color="#000000">inet:port_number</font></b>()}}
+     | {<font color="#FF6600">local</font>, <b><font color="#000080">binary</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Return the address and port number for the other end of the connection.</p>
+<p>For UNIX Domain sockets the return value will be <code>{local, PeerSocket}</code>, with <code>PeerSocket</code> typically an empty binary.</p>
+<h3 id="_recv">recv</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+     <font color="#009900">Length</font> <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>(),
+     <font color="#009900">Timeout</font> <font color="#990000">::</font> <b><font color="#000000">timeout</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">Packet</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>()}
+     | {<font color="#FF6600">error</font>, <font color="#FF6600">closed</font> | <font color="#FF6600">timeout</font> | <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Receive a packet from the socket in passive mode.</p>
+<p>Attempting to receive data from a socket that is in active mode will return an error.</p>
+<p>A length of 0 will return the data available on the socket as soon as possible, regardless of length.</p>
+<p>While it is possible to use the timeout value <code>infinity</code>, it is highly discouraged as it could cause your process to get stuck waiting for data that will never come. This may happen when a socket becomes half-open due to a crash of the remote endpoint. Wi-Fi going down is another common culprit.</p>
+<h3 id="_secure">secure</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">secure</font></b>() <font color="#990000">-&gt;</font> <b><font color="#000000">boolean</font></b>()</tt></pre>
+</div></div>
+<p>Return whether the transport can be used for secure connections.</p>
+<h3 id="_send">send</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">Packet</font> <font color="#990000">::</font> <b><font color="#000000">iodata</font></b>())
+    <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font> | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Send a packet on the socket.</p>
+<h3 id="_sendfile">sendfile</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">File</font>)
+    <font color="#990000">-&gt;</font> <b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">File</font>, <font color="#993399">0</font>, <font color="#993399">0</font>, [])
+
+<b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">File</font>, <font color="#009900">Offset</font>, <font color="#009900">Bytes</font>)
+    <font color="#990000">-&gt;</font> <b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font>, <font color="#009900">File</font>, <font color="#009900">Offset</font>, <font color="#009900">Bytes</font>, [])
+
+<b><font color="#000000">sendfile</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+         <font color="#009900">File</font>   <font color="#990000">::</font> <b><font color="#000000">file:name_all</font></b>() | <b><font color="#000000">file:fd</font></b>(),
+         <font color="#009900">Offset</font> <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>(),
+         <font color="#009900">Bytes</font>  <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>(),
+         <font color="#009900">Opts</font>   <font color="#990000">::</font> <b><font color="#000000">sendfile_opts</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, <font color="#009900">SentBytes</font> <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()} | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Send a file on the socket.</p>
+<p>The file may be sent full or in parts, and may be specified by its filename or by an already open file descriptor.</p>
+<p>Transports that manipulate TCP directly may use the <code>file:sendfile/2,4,5</code> function, which calls the <code>sendfile</code> syscall where applicable (on Linux, for example). Other transports can use the <code>sendfile/6</code> function exported from this module.</p>
+<h3 id="_setopts">setopts</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">setopts</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(), <font color="#009900">SockOpts</font> <font color="#990000">::</font> <b><font color="#000000">any</font></b>())
+    <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font> | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Set one or more options for the socket.</p>
+<h3 id="_shutdown">shutdown</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#000080">shutdown</font>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>(),
+         <font color="#009900">How</font>    <font color="#990000">::</font> <font color="#FF6600">read</font> | <font color="#FF6600">write</font> | <font color="#FF6600">read_write</font>)
+    <font color="#990000">-&gt;</font> <font color="#FF6600">ok</font> | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}</tt></pre>
+</div></div>
+<p>Close the socket for reading and/or writing.</p>
+<h3 id="_sockname">sockname</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">sockname</font></b>(<font color="#009900">Socket</font> <font color="#990000">::</font> <b><font color="#000000">socket</font></b>())
+    <font color="#990000">-&gt;</font> {<font color="#FF6600">ok</font>, {<b><font color="#000000">inet:ip_address</font></b>(), <b><font color="#000000">inet:port_number</font></b>()}}
+     | {<font color="#FF6600">error</font>, <b><font color="#000080">atom</font></b>()}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Return the address and port number for the local end of the connection.</p>
+<p>For UNIX Domain sockets the return value will be <code>{local, SocketFile}</code>.</p>
+<h2 id="_exports">Exports</h2>
+<p>The following function can be used when implementing transport modules:</p>
+<ul><li><a href="../ranch_transport.sendfile">ranch_transport:sendfile(3)</a> - Send a file on the socket
+</li>
+</ul>
+<h2 id="_types">Types</h2>
+<h3 id="_sendfile_opts">sendfile_opts()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">sendfile_opts</font></b>() <font color="#990000">::</font> [{<font color="#FF6600">chunk_size</font>, <b><font color="#000000">non_neg_integer</font></b>()}]</tt></pre>
+</div></div>
+<p>Options accepted by the sendfile function and callbacks:</p>
+<dl><dt>chunk_size (8191)</dt>
+<dd><p>The chunk size, in bytes.</p>
+</dd>
+</dl>
+<h3 id="_socket">socket()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">socket</font></b>() <font color="#990000">::</font> <b><font color="#000000">any</font></b>()</tt></pre>
+</div></div>
+<p>The socket.</p>
+<p>The exact type will vary depending on the transport module.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.2</strong>: The callback <code>format_error/1</code> was added.
+</li>
+<li><strong>2.0</strong>: The callback <code>listen/1</code> has changed to accept a map of transport options instead of socket options.
+</li>
+<li><strong>2.0</strong>: The callback <code>messages/0</code> return value was updated to include the passive message for <code>{active, N}</code>.
+</li>
+<li><strong>1.6</strong>: The <code>socket()</code> type was added for documentation purposes.
+</li>
+<li><strong>1.6</strong>: The type of the sendfile filename was extended.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">ranch(7)</a>, <a href="../ranch_tcp">ranch_tcp(3)</a>, <a href="../ranch_ssl">ranch_ssl(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	2.2
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/2.2/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/2.2/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/ranch/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/ranch/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/ranch/1.8/manual">1.8</a></li>
+	
+		<li><a href="/docs/en/ranch/1.7/manual">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/manual">1.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

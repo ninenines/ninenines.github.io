@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Internals</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Internals</span></h1>
+
+<p>This chapter may not apply to embedded Ranch as embedding allows you to use an architecture specific to your application, which may or may not be compatible with the description of the Ranch application.</p>
+<p>Note that for everything related to efficiency and performance, you should perform the benchmarks yourself to get the numbers that matter to you. Generic benchmarks found on the web may or may not be of use to you, you can never know until you benchmark your own system.</p>
+<p>A third party dive into the internals of Ranch is available should you be interested: <a href="https://baozi.technology/ranch-under-the-hood/">Ranch: what&apos;s under the hood?</a> We make no claims with regard to its freshness or accuracy but this is a nice document to read along this section.</p>
+<h2 id="_architecture">Architecture</h2>
+<p>Ranch is an OTP application.</p>
+<p>Like all OTP applications, Ranch has a top supervisor. It is responsible for supervising the <code>ranch_server</code> process and all the listeners that will be started.</p>
+<p>The <code>ranch_server</code> gen_server is a central process keeping track of the listeners and their acceptors. It does so through the use of a public ets table called <code>ranch_server</code>. The table is owned by the top supervisor to improve fault tolerance. This way if the <code>ranch_server</code> gen_server fails, it doesn&apos;t lose any information and the restarted process can continue as if nothing happened.</p>
+<p>Ranch uses a custom supervisor for managing connections. This supervisor keeps track of the number of connections and handles connection limits directly. While it is heavily optimized to perform the task of creating connection processes for accepted connections, it is still following the OTP principles and the usual <code>sys</code> and <code>supervisor</code> calls will work on it as expected.</p>
+<p>Listeners are grouped into the <code>ranch_listener_sup</code> supervisor and consist of three kinds of processes: the listener gen_server, the acceptor processes and the connection processes, both grouped under their own supervisor. All of these processes are registered to the <code>ranch_server</code> gen_server with varying amount of information.</p>
+<p>All socket operations, including listening for connections, go through transport handlers. Accepted connections are given to the protocol handler. Transport handlers are simple callback modules for performing operations on sockets. Protocol handlers start a new process, which receives socket ownership, with no requirements on how the code should be written inside that new process.</p>
+<h2 id="_number_of_acceptors">Number of acceptors</h2>
+<p>The second argument to <code>ranch:start_listener/5</code> is the number of processes that will be accepting connections. Care should be taken when choosing this number.</p>
+<p>First of all, it should not be confused with the maximum number of connections. Acceptor processes are only used for accepting and have nothing else in common with connection processes. Therefore there is nothing to be gained from setting this number too high, in fact it can slow everything else down.</p>
+<p>Second, this number should be high enough to allow Ranch to accept connections concurrently. But the number of cores available doesn&apos;t seem to be the only factor for choosing this number, as we can observe faster accepts if we have more acceptors than cores. It might be entirely dependent on the protocol, however.</p>
+<p>Our observations suggest that using 100 acceptors on modern hardware is a good solution, as it&apos;s big enough to always have acceptors ready and it&apos;s low enough that it doesn&apos;t have a negative impact on the system&apos;s performances.</p>
+<h2 id="_platform_specific_tcp_features">Platform-specific TCP features</h2>
+<p>Some socket options are platform-specific and not supported by <code>inet</code>. They can be of interest because they generally are related to optimizations provided by the underlying OS. They can still be enabled thanks to the <code>raw</code> option, for which we will see an example.</p>
+<p>One of these features is <code>TCP_DEFER_ACCEPT</code> on Linux. It is a simplified accept mechanism which will wait for application data to come in before handing out the connection to the Erlang process.</p>
+<p>This is especially useful if you expect many connections to be mostly idle, perhaps part of a connection pool. They can be handled by the kernel directly until they send any real data, instead of allocating resources to idle connections.</p>
+<p>To enable this mechanism, the following option can be used.</p>
+<div class="listingblock"><div class="title">Using raw transport options</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">raw</font>, <font color="#993399">6</font>, <font color="#993399">9</font>, <font color="#990000">&lt;&lt;</font> <b><font color="#000000">30:32</font></b><font color="#990000">/</font><font color="#FF6600">native</font> <font color="#990000">&gt;&gt;</font>}</tt></pre>
+</div></div>
+<p>It means go on layer 6, turn on option 9 with the given integer parameter.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/ranch/2.2/guide/connection_draining/">
+					Connection draining
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/ranch/2.2/guide/migrating_from_2.1/">
+					Migrating from Ranch 2.1 to Ranch 2.2
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	2.2
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/2.2/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/2.2/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/ranch/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/ranch/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/ranch/1.8/guide">1.8</a></li>
+	
+		<li><a href="/docs/en/ranch/1.7/guide">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/guide">1.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

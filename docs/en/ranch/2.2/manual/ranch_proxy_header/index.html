@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: ranch_proxy_header(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch_proxy_header(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>ranch_proxy_header - PROXY protocol</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>ranch_proxy_header</code> provides functions for parsing and building the PROXY protocol header.</p>
+<h2 id="_exports">Exports</h2>
+<ul><li><a href="../ranch_proxy_header.parse">ranch_proxy_header:parse(3)</a> - Parse a PROXY protocol header
+</li>
+<li><a href="../ranch_proxy_header.header">ranch_proxy_header:header(3)</a> - Build a PROXY protocol header
+</li>
+<li><a href="../ranch_proxy_header.to_connection_info">ranch_proxy_header:to_connection_info(3)</a> - Convert proxy_info() to ssl:connection_info()
+</li>
+</ul>
+<h2 id="_types">Types</h2>
+<h3 id="_proxy_info">proxy_info()</h3>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">proxy_info</font></b>() <font color="#990000">=</font> #{
+    <i><font color="#9A1900">%% Mandatory part.</font></i>
+    <font color="#FF6600">version</font> <font color="#990000">:=</font> <font color="#993399">1</font> | <font color="#993399">2</font>,
+    <font color="#FF6600">command</font> <font color="#990000">:=</font> <font color="#FF6600">local</font> | <font color="#FF6600">proxy</font>,
+    <font color="#0000FF">transport_family</font>   <font color="#990000">=&gt;</font> <font color="#000080">undefined</font> | <font color="#FF6600">ipv4</font> | <font color="#FF6600">ipv6</font> | <font color="#FF6600">unix</font>,
+    <font color="#0000FF">transport_protocol</font> <font color="#990000">=&gt;</font> <font color="#000080">undefined</font> | <font color="#FF6600">stream</font> | <font color="#FF6600">dgram</font>,
+
+    <i><font color="#9A1900">%% Addresses.</font></i>
+    <font color="#0000FF">src_address</font>  <font color="#990000">=&gt;</font> <b><font color="#000000">inet:ip_address</font></b>() | <b><font color="#000080">binary</font></b>(),
+    <font color="#0000FF">src_port</font>     <font color="#990000">=&gt;</font> <b><font color="#000000">inet:port_number</font></b>(),
+    <font color="#0000FF">dest_address</font> <font color="#990000">=&gt;</font> <b><font color="#000000">inet:ip_address</font></b>() | <b><font color="#000080">binary</font></b>(),
+    <font color="#0000FF">dest_port</font>    <font color="#990000">=&gt;</font> <b><font color="#000000">inet:port_number</font></b>(),
+
+    <i><font color="#9A1900">%% Extra TLV-encoded data.</font></i>
+    <font color="#0000FF">alpn</font>      <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% US-ASCII.</font></i>
+    <font color="#0000FF">authority</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% UTF-8.</font></i>
+    <font color="#0000FF">unique_id</font> <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% Opaque byte sequence of up to 128 bytes.</font></i>
+    <font color="#0000FF">netns</font>     <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% US-ASCII.</font></i>
+    <font color="#0000FF">ssl</font>       <font color="#990000">=&gt;</font> #{
+        <font color="#FF6600">client</font>   <font color="#990000">:=</font> [<font color="#FF6600">ssl</font> | <font color="#FF6600">cert_conn</font> | <font color="#FF6600">cert_sess</font>],
+        <font color="#FF6600">verified</font> <font color="#990000">:=</font> <b><font color="#000000">boolean</font></b>(),
+        <font color="#0000FF">version</font>  <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% US-ASCII.</font></i>
+        <font color="#0000FF">cipher</font>   <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% US-ASCII.</font></i>
+        <font color="#0000FF">sig_alg</font>  <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% US-ASCII.</font></i>
+        <font color="#0000FF">key_alg</font>  <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>(), <i><font color="#9A1900">%% US-ASCII.</font></i>
+        <font color="#0000FF">cn</font>       <font color="#990000">=&gt;</font> <b><font color="#000080">binary</font></b>()  <i><font color="#9A1900">%% UTF-8.</font></i>
+    },
+
+    <i><font color="#9A1900">%% Unknown TLVs can't be parsed so the raw data is given.</font></i>
+    <font color="#0000FF">raw_tlvs</font> <font color="#990000">=&gt;</font> [{<font color="#993399">0</font><font color="#990000">..</font><font color="#993399">255</font>, <b><font color="#000080">binary</font></b>()}]
+}<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The PROXY protocol information.</p>
+<p>The following fields may be found, although most of them are optional:</p>
+<dl><dt>version</dt>
+<dd><p>The PROXY protocol version used.</p>
+</dd>
+<dt>command</dt>
+<dd><p><code>proxy</code> is used for proxied connections. <code>local</code> for non-proxied connections. Those do not have any additional information.</p>
+</dd>
+<dt>transport_family</dt>
+<dd><p>The transport family of the original connection.</p>
+</dd>
+<dt>transport_protocol</dt>
+<dd><p>The transport protocol of the original connection.</p>
+</dd>
+<dt>src_address</dt>
+<dd><p>The source address of the original connection. This is the original address of the client.</p>
+</dd>
+<dt>src_port</dt>
+<dd><p>The source port of the original connection. This is the port the client opened on its end for the connection. It is not defined for UNIX domain sockets.</p>
+</dd>
+<dt>dest_address</dt>
+<dd><p>The destination address of the original connection.</p>
+</dd>
+<dt>dest_port</dt>
+<dd><p>The destination port of the original connection. It is not defined for UNIX domain sockets.</p>
+</dd>
+<dt>alpn</dt>
+<dd><p>The upper layer protocol in use over the connection. This is typically negotiated via the ALPN extension for TLS.</p>
+</dd>
+<dt>authority</dt>
+<dd><p>The host name serving as authority for the connection. This is typically passed using the SNI extension for TLS.</p>
+</dd>
+<dt>unique_id</dt>
+<dd><p>An opaque byte sequence of up to 128 bytes generated by the upstream proxy that uniquely identifies the connection.</p>
+</dd>
+<dt>netns</dt>
+<dd><p>The namespace&apos;s name for the original connection.</p>
+</dd>
+<dt>ssl</dt>
+<dd><p>Various information pertaining to the original SSL/TLS connection.</p>
+<dl><dt>client</dt>
+<dd><p>A list containing a number of flags. <code>ssl</code> indicates that the client connected over SSL/TLS. <code>cert_conn</code> indicates that the client provided a certificate over the original connection. <code>cert_sess</code> indicates that the client provided a certificate at least once over the TLS session this connection belongs to.</p>
+</dd>
+<dt>verified</dt>
+<dd><p>Whether the client presented a certificate and it was successfully verified.</p>
+</dd>
+<dt>version</dt>
+<dd><p>The US-ASCII string containing the SSL/TLS version used for the original connection.</p>
+</dd>
+<dt>cipher</dt>
+<dd><p>The US-ASCII string name of the cipher used.</p>
+</dd>
+<dt>sig_alg</dt>
+<dd><p>The US-ASCII string name of the algorithm used to sign the certificate provided by the client.</p>
+</dd>
+<dt>key_alg</dt>
+<dd><p>The US-ASCII string name of the algorithm used to generate the key of the certificate provided by the client.</p>
+</dd>
+<dt>cn</dt>
+<dd><p>The UTF-8 string representation of the Common Name field of the client certificate&apos;s Distinguished Name.</p>
+</dd>
+</dl>
+</dd>
+<dt>raw_tlvs</dt>
+<dd><p>The non-standard TLVs that Ranch was not able to parse.</p>
+</dd>
+</dl>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.2</strong>: The <code>unique_id</code> TLV was added.
+</li>
+<li><strong>1.7</strong>: Module introduced.
+</li>
+</ul>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">ranch(7)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Ranch
+	2.2
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/ranch/2.2/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/ranch/2.2/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/ranch/2.2/manual">2.2</a></li>
+	
+		<li><a href="/docs/en/ranch/2.1/manual">2.1</a></li>
+	
+		<li><a href="/docs/en/ranch/2.0/manual">2.0</a></li>
+	
+		<li><a href="/docs/en/ranch/1.8/manual">1.8</a></li>
+	
+		<li><a href="/docs/en/ranch/1.7/manual">1.7</a></li>
+	
+		<li><a href="/docs/en/ranch/1.6/manual">1.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
