@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Cowboy 2.8 to 2.9</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.8 to 2.9</span></h1>
+
+<p>Cowboy 2.9 implements graceful shutdown of connection processes for both HTTP/1.1 and HTTP/2 connections.</p>
+<p>Cowboy 2.9 is the first release to support the much awaited Erlang/OTP 24 out of the box. While users that were using Ranch 2.0 already were ready for OTP 24, the Ranch version used by Cowboy out of the box was not compatible and had to be updated.</p>
+<p>Cowboy 2.9 also contains a small number of tweaks and bug fixes.</p>
+<p>Cowboy 2.9 requires Erlang/OTP 22.0 or greater.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>Cowboy will now gracefully shutdown HTTP/1.1 and HTTP/2 connections when the supervisor asks the connection process to exit, or when <code>sys:terminate/2,3</code> is used. Two new configuration options were added for HTTP/2 to determine the timeouts for the graceful shutdown steps.
+</li>
+<li>REST handler <code>AcceptCallback</code> can now return <code>{created, URI}</code> or <code>{see_other, URI}</code> to determine what response status code should be sent (typically to differentiate between a new resource and an update). The return value <code>{true, URI}</code> is now deprecated.
+</li>
+<li>Update Ranch to 1.8.0.
+</li>
+<li>Update Cowlib to 2.11.0.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>Fix concurrent body streaming getting stuck with HTTP/2. The alarm could get into blocking state indefinitely when two or more request processes were streaming bodies.
+</li>
+<li>Fix HTTP/2 rate limiting using the wrong default values in some cases.
+</li>
+<li>Don&apos;t produce an error report when the request process exited normally (<code>normal</code> or <code>shutdown</code> exit reasons).
+</li>
+<li>Fix <code>cowboy_tracer_h</code> to support trace messages without timestamps.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/migrating_from_2.9/">
+					Migrating from Cowboy 2.9 to 2.10
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/migrating_from_2.7/">
+					Migrating from Cowboy 2.7 to 2.8
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.13
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">2.13</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.12/guide">2.12</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.11/guide">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

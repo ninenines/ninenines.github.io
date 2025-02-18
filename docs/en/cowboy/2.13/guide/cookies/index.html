@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Using cookies</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Using cookies</span></h1>
+
+<p>Cookies are a mechanism allowing applications to maintain state on top of the stateless HTTP protocol.</p>
+<p>Cookies are a name/value store where the names and values are stored in plain text. They expire either after a delay or when the browser closes. They can be configured on a specific domain name or path, and restricted to secure resources (sent or downloaded over HTTPS), or restricted to the server (disallowing access from client-side scripts).</p>
+<p>Cookie names are de facto case sensitive.</p>
+<p>Cookies are stored client-side and sent with every subsequent request that matches the domain and path for which they were stored, until they expire. This can create a non-negligible cost.</p>
+<p>Cookies should not be considered secure. They are stored on the user&apos;s computer in plain text, and can be read by any program. They can also be read by proxies when using clear connections. Always validate the value before using it, and never store any sensitive information inside it.</p>
+<p>Cookies set by the server are only available in requests following the client reception of the response containing them.</p>
+<p>Cookies may be sent repeatedly. This is often useful to update the expiration time and avoid losing a cookie.</p>
+<h2 id="_setting_cookies">Setting cookies</h2>
+<p>By default cookies are defined for the duration of the session:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">SessionID</font> <font color="#990000">=</font> <b><font color="#000000">generate_session_id</font></b>(),
+<font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_cookie</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"sessionid"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">SessionID</font>, <font color="#009900">Req0</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>They can also be set for a duration in seconds:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">SessionID</font> <font color="#990000">=</font> <b><font color="#000000">generate_session_id</font></b>(),
+<font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_cookie</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"sessionid"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">SessionID</font>, <font color="#009900">Req0</font>,
+    #{<font color="#0000FF">max_age</font> <font color="#990000">=&gt;</font> <font color="#993399">3600</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>To delete cookies, set <code>max_age</code> to 0:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">SessionID</font> <font color="#990000">=</font> <b><font color="#000000">generate_session_id</font></b>(),
+<font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_cookie</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"sessionid"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">SessionID</font>, <font color="#009900">Req0</font>,
+    #{<font color="#0000FF">max_age</font> <font color="#990000">=&gt;</font> <font color="#993399">0</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>To restrict cookies to a specific domain and path, the options of the same name can be used:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_cookie</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"inaccount"</font><font color="#990000">&gt;&gt;</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"1"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">Req0</font>,
+    #{<font color="#0000FF">domain</font> <font color="#990000">=&gt;</font> <font color="#FF0000">"my.example.org"</font>, <font color="#0000FF">path</font> <font color="#990000">=&gt;</font> <font color="#FF0000">"/account"</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Cookies will be sent with requests to this domain and all its subdomains, and to resources on this path or deeper in the path hierarchy.</p>
+<p>To restrict cookies to secure channels (typically resources available over HTTPS):</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">SessionID</font> <font color="#990000">=</font> <b><font color="#000000">generate_session_id</font></b>(),
+<font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_cookie</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"sessionid"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">SessionID</font>, <font color="#009900">Req0</font>,
+    #{<font color="#0000FF">secure</font> <font color="#990000">=&gt;</font> <font color="#000080">true</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>To prevent client-side scripts from accessing a cookie:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">SessionID</font> <font color="#990000">=</font> <b><font color="#000000">generate_session_id</font></b>(),
+<font color="#009900">Req</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:set_resp_cookie</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"sessionid"</font><font color="#990000">&gt;&gt;</font>, <font color="#009900">SessionID</font>, <font color="#009900">Req0</font>,
+    #{<font color="#0000FF">http_only</font> <font color="#990000">=&gt;</font> <font color="#000080">true</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Cookies may also be set client-side, for example using Javascript.</p>
+<h2 id="_reading_cookies">Reading cookies</h2>
+<p>The client only ever sends back the cookie name and value. All other options that can be set are never sent back.</p>
+<p>Cowboy provides two functions for reading cookies. Both involve parsing the cookie header(s) and so should not be called repeatedly.</p>
+<p>You can get all cookies as a key/value list:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">Cookies</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:parse_cookies</font></b>(<font color="#009900">Req</font>),
+{<font color="#990000">_</font>, <font color="#009900">Lang</font>} <font color="#990000">=</font> <b><font color="#000000">lists:keyfind</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"lang"</font><font color="#990000">&gt;&gt;</font>, <font color="#993399">1</font>, <font color="#009900">Cookies</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Or you can perform a match against cookies and retrieve only the ones you need, while at the same time doing any required post processing using <a href="../constraints">constraints</a>. This function returns a map:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<font color="#FF6600">id</font> <font color="#990000">:=</font> <font color="#009900">ID</font>, <font color="#FF6600">lang</font> <font color="#990000">:=</font> <font color="#009900">Lang</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:match_cookies</font></b>([<font color="#FF6600">id</font>, <font color="#FF6600">lang</font>], <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You can use constraints to validate the values while matching them. The following snippet will crash if the <code>id</code> cookie is not an integer number or if the <code>lang</code> cookie is empty. Additionally the <code>id</code> cookie value will be converted to an integer term:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><font color="#009900">CookiesMap</font> <font color="#990000">=</font> <b><font color="#000000">cowboy_req:match_cookies</font></b>([{<font color="#FF6600">id</font>, <font color="#FF6600">int</font>}, {<font color="#FF6600">lang</font>, <font color="#FF6600">nonempty</font>}], <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>Note that if two cookies share the same name, then the map value will be a list of the two cookie values.</p>
+<p>A default value can be provided. The default will be used if the <code>lang</code> cookie is not found. It will not be used if the cookie is found but has an empty value:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>#{<font color="#FF6600">lang</font> <font color="#990000">:=</font> <font color="#009900">Lang</font>} <font color="#990000">=</font> <b><font color="#000000">cowboy_req:match_cookies</font></b>([{<font color="#FF6600">lang</font>, [], <font color="#990000">&lt;&lt;</font><font color="#FF0000">"en-US"</font><font color="#990000">&gt;&gt;</font>}], <font color="#009900">Req</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>If no default is provided and the value is missing, an exception is thrown.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/resp/">
+					Sending a response
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/multipart/">
+					Multipart requests
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.13
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">2.13</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.12/guide">2.12</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.11/guide">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

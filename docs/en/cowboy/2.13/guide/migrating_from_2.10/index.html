@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Cowboy 2.10 to 2.11</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.10 to 2.11</span></h1>
+
+<p>Cowboy 2.11 contains a variety of new features and bug fixes. Nearly all previously experimental features are now marked as stable, including Websocket over HTTP/2. Included is a fix for an HTTP/2 protocol CVE.</p>
+<p>Cowboy 2.11 requires Erlang/OTP 24.0 or greater.</p>
+<p>Cowboy is now using GitHub Actions for CI. The main reason for the move is to reduce costs by no longer having to self-host CI runners. The downside is that GitHub runners are less reliable and timing dependent tests are now more likely to fail.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>A new HTTP/2 option <code>max_cancel_stream_rate</code> has been added to control the rate of stream cancellation the server will accept. By default Cowboy will accept 500 cancelled streams every 10 seconds.
+</li>
+<li>A new stream handler <code>cowboy_decompress_h</code> has been added. It allows automatically decompressing incoming gzipped request bodies. It includes options to protect against zip bombs.
+</li>
+<li>Websocket over HTTP/2 is no longer considered experimental. Note that the <code>enable_connect_protocol</code> option must be set to <code>true</code> in order to use Websocket over HTTP/2 for the time being.
+</li>
+<li>Automatic mode for reading request bodies has been documented. In automatic mode, Cowboy waits indefinitely for data and sends a <code>request_body</code> message when data comes in. It mirrors <code>{active, once}</code> socket modes. This is ideal for loop handlers and is also used internally for HTTP/2 Websocket.
+</li>
+<li>Ranged requests support is no longer considered experimental. It was added in 2.6 to both <code>cowboy_static</code> and <code>cowboy_rest</code>. Ranged responses can be produced either automatically (for the <code>bytes</code> unit) or manually. REST flowcharts have been updated with the new callbacks and steps related to handling ranged requests.
+</li>
+<li>A new HTTP/1.1 and HTTP/2 option <code>reset_idle_timeout_on_send</code> has been added. When enabled, the <code>idle_timeout</code> will be reset every time Cowboy sends data to the socket.
+</li>
+<li>Loop handlers may now return a timeout value in the place of <code>hibernate</code>. Timeouts behave the same as in <code>gen_server</code>.
+</li>
+<li>The <code>generate_etag</code> callback of REST handlers now accepts <code>undefined</code> as a return value to allow conditionally generating etags.
+</li>
+<li>The <code>cowboy_compress_h</code> options <code>compress_threshold</code> and <code>compress_buffering</code> are no longer considered experimental. They were de facto stable since 2.6 as they already were documented.
+</li>
+<li>Functions <code>cowboy:get_env/2,3</code> have been added.
+</li>
+<li>Better error messages have been added when trying to send a 204 or 304 response with a body; when attempting to send two responses to a single request; when trying to push a response after the final response; when trying to send a <code>set-cookie</code> header without using <code>cowboy_req:set_resp_cookie/3,4</code>.
+</li>
+</ul>
+<h2 id="_features_removed">Features removed</h2>
+<ul><li>Cowboy will no longer include the NPN extension when starting a TLS listener. This extension has long been deprecated and replaced with the ALPN extension. Cowboy will continue using the ALPN extension for protocol negotiation.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>A fix was made to address the HTTP/2 CVE CVE-2023-44487 via the new HTTP/2 option <code>max_cancel_stream_rate</code>.
+</li>
+<li>HTTP/1.1 requests that contain both a content-length and a transfer-encoding header will now be rejected to avoid security risks. Previous behavior was to ignore the content-length header as recommended by the HTTP RFC.
+</li>
+<li>HTTP/1.1 connections would sometimes use the wrong timeout value to determine whether the connection should be closed. This resulted in connections staying up longer than intended. This should no longer be the case.
+</li>
+<li>Cowboy now reacts to socket errors immediately for HTTP/1.1 and HTTP/2 when possible. Cowboy will notice when connections have been closed properly earlier than before. This also means that the socket option <code>send_timeout_close</code> will work as expected.
+</li>
+<li>Shutting down HTTP/1.1 pipelined requests could lead to the current request being terminated before the response has been sent. This has been addressed.
+</li>
+<li>When using HTTP/1.1 an invalid Connection header will now be rejected with a 400 status code instead of crashing.
+</li>
+<li>The documentation now recommends increasing the HTTP/2 option <code>max_frame_size_received</code>. Cowboy currently uses the protocol default but will increase its default in a future release. Until then users are recommended to set the option to ensure larger requests are accepted and processed with acceptable performance.
+</li>
+<li>Cowboy could sometimes send HTTP/2 WINDOW_UPDATE frames twice in a row. Now they should be consolidated.
+</li>
+<li>Cowboy would sometimes send HTTP/2 WINDOW_UPDATE frames for streams that have stopped internally. This should no longer be the case.
+</li>
+<li>The <code>cowboy_compress_h</code> stream handler will no longer attempt to compress responses that have an <code>etag</code> header to avoid caching issues.
+</li>
+<li>The <code>cowboy_compress_h</code> will now always add <code>accept-encoding</code> to the <code>vary</code> header as it indicates that responses may be compressed.
+</li>
+<li>Cowboy will now remove the <code>trap_exit</code> process flag when HTTP/1.1 connections upgrade to Websocket.
+</li>
+<li>Exit gracefully instead of crashing when the socket gets closed when reading the PROXY header.
+</li>
+<li>Missing <code>cowboy_stream</code> manual pages have been added.
+</li>
+<li>A number of fixes were made to documentation and examples.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/migrating_from_2.11/">
+					Migrating from Cowboy 2.11 to 2.12
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/migrating_from_2.9/">
+					Migrating from Cowboy 2.9 to 2.10
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.13
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">2.13</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.12/guide">2.12</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.11/guide">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

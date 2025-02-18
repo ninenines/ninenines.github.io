@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Cowboy 2.7 to 2.8</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Cowboy 2.7 to 2.8</span></h1>
+
+<p>Cowboy 2.8 contains many optimizations for all protocols. HTTP/1.1 has received the largest improvements and Cowboy will now be able to handle noticeably more requests. Thanks to the folks at Stressgrid for helping identify that the performance was lower than it should have been and for benchmarking my many changes and experiments.</p>
+<p>Cowboy 2.8 also contains a small number of tweaks and bug fixes. Cowboy 2.8 is the first Cowboy release, ever, to be consistently green on all tested platforms. This is mostly due to the reworking of some test cases, but a few bugs were discovered and fixed in the process.</p>
+<p>Cowboy 2.8 requires Erlang/OTP 22.0 or greater. It may also work out of the box with Erlang/OTP 21.3 but this was not tested and is not supported.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>Cowboy will now use <code>active,N</code> instead of <code>active,once</code> to receive data from the socket. This greatly improves the performance and allows Cowboy to process more requests, especially for HTTP/1.1. The <code>active_n</code> protocol option can be configured to change the <code>active,N</code> value. The default is 100 for all protocols.
+</li>
+<li>Add a <code>linger_timeout</code> option for HTTP/2. The default is 1000, or one second. This helps ensure that the final GOAWAY frame will be properly received by clients.
+</li>
+<li>The function <code>cowboy_req:parse_header/2,3</code> will now parse the headers <code>access-control-request-headers</code>, <code>access-control-request-method</code>, <code>content-encoding</code>, <code>content-language</code>, <code>max-forwards</code>, <code>origin</code>, <code>proxy-authorization</code> and <code>trailer</code>.
+</li>
+<li>A Performance chapter has been added to the guide. More content will be added in future releases.
+</li>
+<li>Update Cowlib to 2.9.1.
+</li>
+</ul>
+<h2 id="_experimental_features_added">Experimental features added</h2>
+<ul><li>A <code>protocols</code> protocol option allows configuring which protocol will be used for clear listeners. Setting it to <code>[http2]</code> will disable HTTP/1.1 entirely. This feature will be extended in a future release.
+</li>
+</ul>
+<h2 id="_features_modified">Features modified</h2>
+<ul><li>The default value for HTTP/1.1&apos;s <code>max_keepalive</code> option has been increased. It now allows 1000 requests before gracefully closing the connection.
+</li>
+<li>The default value for HTTP/2&apos;s <code>max_received_frame_rate</code> option has been increased. It now allows 10000 frames every 10 seconds.
+</li>
+<li>Cowboy will now accept whitespace in cookie names. This is in line with the recommended parsing algorithm for the upcoming cookie RFC update, and corresponds to what browsers are doing.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>The number of Transport:send/2 calls has been optimized for HTTP/2. Reducing the number of calls has a noticeable impact on the number of requests that can be processed.
+</li>
+<li>Trying to use <code>cowboy_req:reply/4</code> with a status code of 204 or 304 and a non-empty response body will now result in a crash. Using <code>cowboy_req:stream_reply/2,3</code> with 204 or 304 and then attempting to send a body will also result in a crash. These status codes disallow response bodies and trying to send one will break HTTP/1.1 framing.
+</li>
+<li>A crash has been fixed related to HTTP/1.1 pipelining. The bug was most likely introduced in Cowboy 2.6 when flow control was added for HTTP/1.1 request bodies.
+</li>
+<li>The HTTP/1.1 protocol code could get stuck because of flow control. This has been corrected.
+</li>
+<li>A crash has been fixed for HTTP/1.1. It occurred when a flow control update was requested (such as reading the request body) after the body was fully read.
+</li>
+<li>The timeout was incorrectly reset sometimes when a stream (a pair of request/response) terminated. This has been corrected.
+</li>
+<li>Handling of hibernation for Websocket has been improved. Websocket over HTTP/2 now supports hibernating. Stray messages no longer cancel hibernation.
+</li>
+<li>The <code>cowboy_compress_h</code> stream handler will now ignore malformed accept-encoding headers instead of crashing.
+</li>
+<li>The manual pages for <code>cowboy:start_clear(3)</code> and <code>cowboy:start_tls(3)</code> now mentions that some protocol options may be documented in the releevant stream handler.
+</li>
+<li>The manual page for <code>cowboy_req:parse_header(3)</code> was corrected. When an unsupported header is given the function crashes, it does not return an <code>undefined</code> tuple.
+</li>
+<li>The routing algorithm description in the user guide has been improved.
+</li>
+<li>The test suites are now consistently green on all tested platforms. Most of the test failures were caused by flaky tests. Avoiding the use of timeouts fixed most of them. A small number of tests had to be reworked.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/migrating_from_2.8/">
+					Migrating from Cowboy 2.8 to 2.9
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.13/guide/migrating_from_2.6/">
+					Migrating from Cowboy 2.6 to 2.7
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.13
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">2.13</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.12/guide">2.12</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.11/guide">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/guide">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/guide">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/guide">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/guide">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/guide">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

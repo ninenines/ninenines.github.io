@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: cowboy_static(3)</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>cowboy_static(3)</span></h1>
+
+<h2 id="_name">Name</h2>
+<p>cowboy_static - Static file handler</p>
+<h2 id="_description">Description</h2>
+<p>The module <code>cowboy_static</code> implements file serving capabilities using the REST semantics provided by <code>cowboy_rest</code>.</p>
+<p>The static file handler is a pre-written handler coming with Cowboy. To serve files, use it in your routes.</p>
+<h2 id="_options">Options</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">opts</font></b>() <font color="#990000">::</font> {<font color="#FF6600">priv_file</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">priv_file</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
+        | {<font color="#FF6600">file</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">file</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
+        | {<font color="#FF6600">priv_dir</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">priv_dir</font>, <font color="#009900">App</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
+        | {<font color="#FF6600">dir</font>, <font color="#009900">Path</font>}
+        | {<font color="#FF6600">dir</font>, <font color="#009900">Path</font>, <font color="#009900">Extra</font>}
+
+<font color="#009900">App</font>        <font color="#990000">::</font> <b><font color="#000080">atom</font></b>()
+<font color="#009900">Path</font>       <font color="#990000">::</font> <b><font color="#000080">binary</font></b>() | <b><font color="#000000">string</font></b>()
+<font color="#009900">Extra</font>      <font color="#990000">::</font> [<font color="#009900">Charset</font> | <font color="#009900">Etag</font> | <font color="#009900">Mimetypes</font>]
+
+<font color="#009900">Charset</font>    <font color="#990000">::</font> {<font color="#FF6600">charset</font>, <b><font color="#000000">module</font></b>(), <b><font color="#000080">function</font></b>()}
+            | {<font color="#FF6600">charset</font>, <b><font color="#000080">binary</font></b>()}
+
+<font color="#009900">Etag</font>       <font color="#990000">::</font> {<font color="#FF6600">etag</font>, <b><font color="#000000">module</font></b>(), <b><font color="#000080">function</font></b>()}
+            | {<font color="#FF6600">etag</font>, <font color="#000080">false</font>}
+
+<font color="#009900">Mimetypes</font>  <font color="#990000">::</font> {<font color="#FF6600">mimetypes</font>, <b><font color="#000000">module</font></b>(), <b><font color="#000080">function</font></b>()}
+            | {<font color="#FF6600">mimetypes</font>, <b><font color="#000080">binary</font></b>() | <font color="#009900">ParsedMime</font>}
+
+<font color="#009900">ParsedMime</font> <font color="#990000">::</font> {<font color="#009900">Type</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">SubType</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Params</font>}
+<font color="#009900">Params</font>     <font color="#990000">::</font> [{<font color="#009900">Key</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()}]</tt></pre>
+</div></div>
+<p>Static handler configuration.</p>
+<dl><dt>priv_file</dt>
+<dd><p>Send a file.</p>
+<p>The path is relative to the given application&apos;s private directory.</p>
+</dd>
+<dt>file</dt>
+<dd><p>Send a file.</p>
+<p>The path is either absolute or relative to the Erlang node&apos;s current directory.</p>
+</dd>
+<dt>priv_dir</dt>
+<dd><p>Recursively serve files from a directory.</p>
+<p>The path is relative to the given application&apos;s private directory.</p>
+</dd>
+<dt>dir</dt>
+<dd><p>Recursively serve files from a directory.</p>
+<p>The path is either absolute or relative to the Erlang node&apos;s current directory.</p>
+</dd>
+</dl>
+<p>The extra options allow you to define how the etag should be calculated and how the MIME type of files should be detected.</p>
+<p>By default the static handler will not send a charset with the response. You can provide a specific charset that will be used for all files using the text media type, or provide a module and function that will be called when needed:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">detect_charset</font></b>(<font color="#009900">Path</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()) <font color="#990000">-&gt;</font> <font color="#009900">Charset</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()</tt></pre>
+</div></div>
+<p>A charset must always be returned even if it doesn&apos;t make sense considering the media type of the file. A good default is <code>&lt;&lt;&quot;utf-8&quot;&gt;&gt;</code>.</p>
+<p>By default the static handler will generate an etag based on the size and modification time of the file. You may disable the etag entirely with <code>{etag, false}</code> or provide a module and function that will be called when needed:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">generate_etag</font></b>(<font color="#009900">Path</font>, <font color="#009900">Size</font>, <font color="#009900">Mtime</font>) <font color="#990000">-&gt;</font> {<font color="#FF6600">strong</font> | <font color="#FF6600">weak</font>, <b><font color="#000080">binary</font></b>()}
+
+<font color="#009900">Path</font>  <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()
+<font color="#009900">Size</font>  <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>()
+<font color="#009900">Mtime</font> <font color="#990000">::</font> <b><font color="#000000">file:date_time</font></b>()</tt></pre>
+</div></div>
+<p>By default the static handler will detect Web-related MIME types by looking at the file extension. You can provide a specific MIME type that will always be used, or a module and function that will be called when needed:</p>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">detect_mimetype</font></b>(<font color="#009900">Path</font>) <font color="#990000">-&gt;</font> <font color="#009900">ParsedMime</font>
+
+<font color="#009900">Path</font>       <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()
+<font color="#009900">ParsedMime</font> <font color="#990000">::</font> {<font color="#009900">Type</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">SubType</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Params</font>}
+<font color="#009900">Params</font>     <font color="#990000">::</font> [{<font color="#009900">Key</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>(), <font color="#009900">Value</font> <font color="#990000">::</font> <b><font color="#000080">binary</font></b>()}]</tt></pre>
+</div></div>
+<!-- @todo Case sensitivity of parsed mime content?-->
+<p>Cowboy comes with two such functions; the default function <code>cow_mimetypes:web/1</code>, and a second function generated from the Apache <em>mime.types</em> file, <code>cow_mimetypes:all/1</code>.</p>
+<p>The MIME type function should return <code>{&lt;&lt;&quot;application&quot;&gt;&gt;, &lt;&lt;&quot;octet-stream&quot;&gt;&gt;, []}</code> when it fails to detect a file&apos;s MIME type.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.11</strong>: Support for range requests was added in 2.6 and is now considered stable.
+</li>
+<li><strong>2.6</strong>: The <code>charset</code> extra option was added.
+</li>
+<li><strong>1.0</strong>: Handler introduced.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Custom etag function</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">generate_etag</font></b>(<font color="#009900">Path</font>, <font color="#009900">Size</font>, <font color="#009900">Mtime</font>) <font color="#990000">-&gt;</font>
+    {<font color="#FF6600">strong</font>, <b><font color="#000000">integer_to_binary</font></b>(
+        <b><font color="#000000">erlang:phash2</font></b>({<font color="#009900">Path</font>, <font color="#009900">Size</font>, <font color="#009900">Mtime</font>}, <font color="#993399">16#ffffffff</font>))}<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Custom MIME type function</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">always_octet_stream</font></b>(<font color="#009900">_Path</font>) <font color="#990000">-&gt;</font>
+    <b><font color="#0000FF">case</font></b> <b><font color="#000000">filename:extension</font></b>(<font color="#009900">Path</font>) <b><font color="#0000FF">of</font></b>
+        <font color="#990000">&lt;&lt;</font><font color="#FF0000">".erl"</font><font color="#990000">&gt;&gt;</font> <font color="#990000">-&gt;</font> {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"text"</font><font color="#990000">&gt;&gt;</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"plain"</font><font color="#990000">&gt;&gt;</font>, []};
+        <font color="#990000">_</font> <font color="#990000">-&gt;</font> {<font color="#990000">&lt;&lt;</font><font color="#FF0000">"application"</font><font color="#990000">&gt;&gt;</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"octet-stream"</font><font color="#990000">&gt;&gt;</font>, []}
+    <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="..">cowboy(7)</a>, <a href="../cowboy_router">cowboy_router(3)</a></p>
+
+
+
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.13
+	Function Reference
+	
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.13/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.13/manual">2.13</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.12/manual">2.12</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.11/manual">2.11</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.10/manual">2.10</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.9/manual">2.9</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.8/manual">2.8</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.7/manual">2.7</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.6/manual">2.6</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
