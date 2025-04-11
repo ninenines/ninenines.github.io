@@ -1,0 +1,57 @@
++++
+date = "2025-04-11T07:00:00+01:00"
+title = "Gun 2.2"
+
++++
+
+Gun `2.2.0` has been released!
+
+Gun 2.2 contains many features and fixes, including
+an experimental HTTP/3 implementation.
+
+Gun 2.2 is the first release that includes an
+experimental support for the HTTP/3 protocol.
+Note that unlike Cowboy, Gun 2.2 does not yet
+support Websocket over HTTP/3.
+
+Gun 2.2 now sets the appropriate ssl options to
+perform wildcard certificate matching, which is
+a requirement for HTTP and previously had to be
+configured by users.
+
+Gun 2.2 also enables users to send HTTP/2 pings
+directly, including over tunnels, enabling use
+cases such as measuring the latency with the
+server. These pings are separate from the
+keepalive functionality.
+
+Gun 2.2 also contains various fixes, the most
+significant of which is a better handling of
+TLS 1.3 alerts in mTLS scenarios. TLS 1.3 may
+perform certificate validation after the handshake
+has completed, leading to the alerts often arriving
+asynchronously. When an ssl function call returns
+`{error, closed}` or equivalent, Gun will now check
+whether the closure was a result of a TLS alert,
+and in that case propagate the alert as the error
+reason to the user. This has also been made to work
+over tunnels.
+
+HTTP/2 tunneling has also seen a number of
+improvements.
+
+Gun 2.0 requires Erlang/OTP 24.0 or greater and is tested
+and supported on Linux, macOS and Windows.
+
+A complete
+list of changes can be found in the migration guide:
+https://ninenines.eu/docs/en/gun/2.2/guide/migrating_from_2.1/[Migrating from Gun 2.1 to 2.2].
+
+I will now focus on implementing HTTP/3 WebTransport
+in Cowboy and Gun.
+
+You can donate to this project via
+https://github.com/sponsors/essen[GitHub Sponsors].
+
+As usual, feedback is appreciated, and issues or
+questions should be sent via Github tickets. Thanks!
