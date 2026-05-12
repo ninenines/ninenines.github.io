@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Gun 2.1 to 2.2</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Gun 2.1 to 2.2</span></h1>
+
+<p>Gun 2.2 contains many features and fixes, including an experimental HTTP/3 implementation.</p>
+<p>Gun 2.2 requires Erlang/OTP 24.0 or greater.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>Gun will now do wildcard certificate matching by default, as required by the HTTP protocol, by setting the <code>customize_hostname_check</code> ssl option.
+</li>
+<li>User pings are now supported for HTTP/2. User pings are PING frames sent by the user, with the corresponding PING_ACK resulting in a <code>gun_notify</code> message being sent to the user process. They can be used to measure latency or do other checks.
+</li>
+<li>The <code>reply_to</code> request option has been extended to accept a fun or an MFA that will be called when a reply must be sent to the user process.
+</li>
+<li>The <code>state_name</code>, <code>event_handler</code> and <code>event_handler_state</code> fields were added to <code>gun:info/1</code>.
+</li>
+<li>Update Cowlib to 2.15.0.
+</li>
+</ul>
+<h2 id="_experimental_features_added">Experimental features added</h2>
+<ul><li>Experimental support for HTTP/3 has been added. Websocket over HTTP/3 is not currently implemented. HTTP/3 support is disabled by default; to enable, the environment variable GUN_QUICER must be set at compile-time.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>TLS 1.3 performs certificate validation independently from the handshake, which means that certificate errors can arrive after the handshake has completed. This is in part to support post-handshake authentication. Gun will now replace <code>{error, closed}</code> and similar socket errors with the TLS alert when possible, including for TLS over TLS and TLS over HTTP/2 scenarios.
+</li>
+<li>HTTP/2 tunneling has been improved: WINDOW_UPDATE frames are now properly sent, and flow control is handled. In addition closing the stream is better handled. This impacts both proxying scenarios as well as Websocket over HTTP/2.
+</li>
+<li>HTTP/2 will now properly send a NO_ERROR &quot;error&quot; code when initiating graceful shutdown.
+</li>
+<li>HTTP/2 will now properly track the number of streams currently running and immediately fail when the user tries to open a stream too many compared to what the server allows.
+</li>
+<li>Sometimes stray HTTP/2 timeout messages could be received, producing a log message. This was because they were not cleaned up on disconnect. Now they are.
+</li>
+<li>Socket errors were not properly handled when sending Websocket PONG frames. This has been corrected.
+</li>
+<li>Trying to send a Websocket frame over an HTTP connection (before the Websocket upgrade) will now result in an error sent to the user process.
+</li>
+<li>When connecting to HTTP via a Unix domain socket, Gun will now set the host header to &quot;localhost&quot; by default. Previously an invalid host header was sent.
+</li>
+<li>Data could be lost when switching to the raw protocol. This has been corrected.
+</li>
+<li>Documentation has been updated to describe the <code>notify_settings_changed</code> option; as well as to recommend disabling automatic reconnect when Websocket is used; and to provide context around potential security risks due to HTTP/2 compressed headers.
+</li>
+</ul>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/gun/2.3/guide/migrating_from_2.2/">
+					Migrating from Gun 2.2 to 2.3
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/gun/2.3/guide/migrating_from_2.0/">
+					Migrating from Gun 2.0 to 2.1
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Gun
+	2.3
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/gun/2.3/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/gun/2.3/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/gun/2.3/guide">2.3</a></li>
+	
+		<li><a href="/docs/en/gun/2.2/guide">2.2</a></li>
+	
+		<li><a href="/docs/en/gun/2.1/guide">2.1</a></li>
+	
+		<li><a href="/docs/en/gun/2.0/guide">2.0</a></li>
+	
+		<li><a href="/docs/en/gun/1.3/guide">1.3</a></li>
+	
+		<li><a href="/docs/en/gun/1.2/guide">1.2</a></li>
+	
+		<li><a href="/docs/en/gun/1.1/guide">1.1</a></li>
+	
+		<li><a href="/docs/en/gun/1.0/guide">1.0</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+

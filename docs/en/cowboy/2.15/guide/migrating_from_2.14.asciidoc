@@ -1,0 +1,31 @@
+[appendix]
+== Migrating from Cowboy 2.14 to 2.15
+
+Cowboy 2.15 fixes a number of security vulnerabilities.
+It also has a few new options for HTTP/1.1.
+
+Cowboy 2.15 updates Cowlib to 2.16.1. Both applications
+must be updated as they both contain security fixes.
+
+Cowboy 2.15 requires Erlang/OTP 24.0 or greater.
+
+=== Features added
+
+* The `max_authorization_header_value_length` and
+  `max_cookie_header_value_length` options were added
+  to HTTP/1.1. They allow more fine-grained control
+  over header value lengths.
+
+=== Bugs fixed
+
+* A number of security vulnerabilities have been fixed,
+  including a possible denial of service in the HTTP/1.1
+  parser.
+
+* Update Cowlib to 2.16.1.
+
+* HTTP/2 Websocket did not call `terminate/3` on abrupt
+  socket close (without a close frame being sent first).
+  This is now fixed. Do note however that the Websocket
+  session process must trap exits to call `terminate/3`.
+  This was fixed since Cowboy 2.14.1.
