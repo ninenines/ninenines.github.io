@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Security strategy in the age of AI</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents">
+<div class="container">
+<div class="row">
+<div class="span9 maincol">
+
+<article class="blog_item">
+<header>
+	<h1 class="lined-header"><span>Security strategy in the age of AI</span></h1>
+	<p class="date">
+		<span class="year">2026</span>
+		<span class="day-month">08 Jun</span>
+	</p>
+</header>
+
+<p>AI has come to a point where a good prompt can get the agent to find not only potential flaws in the code, but exact steps to exploit one or more vulnerabilities, eventually combining them together.</p>
+<p>It is a concern but there is no reason to panic, we just have to change how we treat security in software development to address it. This post will explain what I will do when developing my projects, including Cowboy, and also what I will not do.</p>
+<p>I have started receiving AI generated reports of vulnerabilities in private. I am thankful for them, as there were a couple good ones. But there were also reports with hallucinations (non-existent functions or the agent inventing text in RFCs), reports about internal/undocumented functions and reports misunderstanding the security model of the projects.</p>
+<p>This has led me to both set up an AGENTS.md with instructions specifically around analysing the projects to reduce the noise. This also prompted clarifying the security model in Cowboy&apos;s user guide. Unfortunately, while I described that model many times on mailing lists and other venues, it was never formalised. This is now fixed.</p>
+<p>A problem came up when I started fixing the issues described in the reports. The Erlang CNA under the Erlang Foundation published CVEs as soon as I pushed the commits (to run CI). I didn&apos;t describe the vulnerability in the commits so this was a surprise to me. Their rationale is that since you <em>can</em> use AI to scan commit logs to find vulnerabilities, they <em>must</em> publish the CVE. The problem with that is that it costs an attacker money to scan, and zero to access the CVE.</p>
+<p>The expectation is to keep fixes private until release (security by obscurity coming back with a vengeance). The problem with doing that is that attackers can scan repositories anyway, so it doesn&apos;t matter much if the commits with fixes are public or not, in both cases it costs a few dollars for the attacker to find vulnerabilities to exploit. As I will explain later in this post, it is not expensive at all to do so, all that matters is to have a good prompt.</p>
+<p>Publishing CVEs when commits are pushed is also a problem for users. Some users, myself included through RabbitMQ, have cadenced releases and requirements around handling of CVEs. Publishing a CVE early means attackers now have a zero dollar method to finding vulnerabilities they can use against millions of installations, before users even have a release to upgrade to. Not good.</p>
+<p>Another problem I ran into, is that some of those low quality reports made it into CVEs anyway, despite my pushing back. I would just recommend to check the CVEs, see if you are even remotely affected, and if not add them to the ignore list. I won&apos;t fight back bad CVEs.</p>
+<p>Considering this experience, I will continue to happily process reports and fix what must be fixed, but this is not a good long term approach. As I mentioned earlier, an attacker can use AI to scan an open source project for vulnerabilities. That means the project has to both produce releases free of vulnerabilities and provide users the means to avoid vulnerabilities when using the project.</p>
+<p>Producing releases free of vulnerabilities means integrating AI scans during development. This is a work in progress for Cowboy and friends and it will improve over time and eventually become automated in CI. The Cowboy 2.16 release is the first Cowboy release to have some scans for vulnerabilities applied during development. That doesn&apos;t make Cowboy 2.16 vulnerability-free, as this is still a work in progress.</p>
+<p>Providing users the means to avoid vulnerabilities means providing users with AI prompts they can run against their own applications to find any relevant issues in their project. The Cowboy 2.16 release is the first Cowboy release to provide a <a href="https://ninenines.eu/docs/en/cowboy/2.16/guide/security_checklist/">security checklist</a> that users can give to their AI agent to scan vulnerabilities in their own application.</p>
+<p>This security checklist works just as well with cheap models as it does with more expensive ones. Cheap models such as Grok Code Fast can find the same issues as Claude Opus 4.7, the only difference is the cost and the fact that Grok Code Fast stops earlier than Claude Opus 4.7. But you can ask Grok Code Fast to &quot;find more&quot; and you will eventually end up with the same exhaustive list at a fraction of the cost.</p>
+<p>Both cheap and expensive models will hallucinate a little even when using this security checklist, you need to push back when you think the AI agent is wrong to be certain it got it wrong. Typically the agent will correct himself when pushed back.</p>
+<p>An equivalent security checklist will be added to Gun in a future release.</p>
+<p>As usual, feedback is appreciated, and issues or questions should be sent via Github tickets or discussions. We also have a Discord server. <a href="https://discord.gg/x25nNq2fFE">Join Erlang OSS Discord now!</a></p>
+
+
+</article>
+</div>
+
+<div class="span3 sidecol">
+<h3>More articles</h3>
+<ul id="articles-nav" class="extra_margin">
+	
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+		
+	
+		
+			<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+		
+	
+</ul>
+
+<h3>Feedback</h3>
+<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
+if you found any mistake or need clarification on any of the
+articles.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
