@@ -1,5 +1,7 @@
 .PHONY: all clean docs
 
+.NOTPARALLEL:
+
 PROJECTS = $(sort $(notdir $(basename $(wildcard data/projects/*.toml))))
 
 all: $(CURDIR)/deps/asciideck docs
@@ -121,7 +123,7 @@ $(eval VERSIONS := $(subst $(quote),,$(subst $(comma),,$(subst ],,$(subst [,,$(v
 $(eval BRANCHES := $(subst $(comma),,$(subst ],,$(subst [,,$(branches)))))
 $(eval TARGETS := $(shell echo "1 2 3 4 5 6 7 8 9" | cut -d' ' -f 1-$(words $(VERSIONS))))
 
-tmp/$1:
+tmp/$1: | tmp
 	cd tmp && git clone $(repository)
 
 .PHONY: docs-$1 $(foreach t,$(TARGETS),docs-$1-$t)
