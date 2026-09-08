@@ -1,0 +1,50 @@
+[appendix]
+== Migrating from Cowboy 2.15 to 2.16
+
+Cowboy 2.16 fixes a number of security vulnerabilities.
+It also adds a xref:security_checklist[security checklist]
+to automate finding flaws in your own applications via
+an AI agent.
+
+Cowboy 2.16 updates Cowlib to 2.17.0. Both applications
+must be updated as they both contain security fixes.
+
+Cowboy 2.16 requires Erlang/OTP 24.0 or greater.
+
+=== Features added
+
+* Add a xref:security_checklist[security checklist] chapter
+  to the user guide. The security checklist can be given to
+  an AI agent to automate finding flaws in applications
+  built using Cowboy.
+
+* Add `cowboy_constraints:from_fun/1`. It simplifies
+  creating constraints to validate request data when
+  parse or validation functions already exist.
+
+* Add `invalid_response_headers` HTTP/1 option. It
+  is enabled by default and causes responses to be
+  rejected with a 500 internal error response when
+  the user tries to send invalid headers.
+
+* Add `max_headers` HTTP/2 decode option. It is
+  meant to protect against HPACK bomb attacks
+  similar to CVE-2026-49975. Note that Cowboy
+  is not vulnerable to this CVE, stalling has
+  no effect as Cowboy uses a memory efficient
+  representation after parsing. This new option
+  aims to avoid allocating more memory than we'd
+  like during parsing.
+
+* Update Cowlib to 2.17.0.
+
+=== Bugs fixed
+
+* Cowboy's security model is now properly described
+  in the documentation. It was previously only
+  described in external venues.
+
+* The user certificate could appear in logs on stream
+  handler crash. It is now hidden.
+
+* Add missing options to `cowboy_http:opts/0` type.
