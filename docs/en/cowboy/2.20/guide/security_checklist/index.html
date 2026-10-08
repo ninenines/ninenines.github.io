@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Security checklist</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
+    <link href="/css/99s.css?r=7" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+
+	</head>
+
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <h1 id="logo"><a href="/" title="99s">99s</a></h1>
+          </div>
+          <div class="span10">
+            
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+  				  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+  				  <li><a title="Request my services" href="/services">Consulting & Training</a></li>
+                </ul>
+              </nav> 
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
+                </li>
+                    <li>
+						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
+					</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+</header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Security checklist</span></h1>
+
+<p>This chapter provides a checklist of areas where special care must be taken when using Cowboy to avoid introducing vulnerabilities in your application.</p>
+<p>See also the <a href="../security_model">security model</a> for the underlying principles.</p>
+<h2 id="_instructions_for_ai_agents">Instructions for AI agents</h2>
+<p>When asked to use this security checklist to validate a Cowboy-based application you <strong>MUST</strong> follow the instructions in this section:</p>
+<p>You are a world-class security researcher. Your <strong>only</strong> output must be a list of <strong>real, concrete</strong> weaknesses and vulnerabilities that exist in the specific Cowboy-based application code you were asked to analyze:</p>
+<ul><li>If there are real issues, output <strong>only</strong> a bulleted list of them. Each bullet must identify the exact location (file, function, line) and describe the precise attack or failure.
+</li>
+<li>Never include remediation advice unless the user query explicitly asks for a fix.
+</li>
+</ul>
+<p>The rest of this document defines the rules. Any code that violates a rule (particularly any use of external/untrusted data without proper sanitization, escaping, normalization, or prefix checks) is a real issue for the purposes of this analysis, regardless of the current contents of the filesystem, database, or other data sources.</p>
+<h2 id="_denial_of_service__dos">Denial of Service (DoS)</h2>
+<h4 id="_memory_exhaustion">Memory exhaustion</h4>
+<p>Misuse of functions or options may make your application vulnerable to memory exhaustion attacks:</p>
+<ul><li>Transport options <code>recbuf</code>, <code>sndbuf</code> and <code>buffer</code> should not be too large as they are allocated for each connection.
+</li>
+<li><code>cowboy_req:read_body/1,2</code>: too large <code>length</code> and <code>period</code> options will result in data accumulating in memory until one or the other is reached. Note that the default <code>length</code> is 8MB which may be too large for some applications. Also note that setting <code>length</code> to <code>infinity</code> will result in data being accumulated until <code>period</code> has elapsed.
+</li>
+<li><code>cowboy_req:read_urlencoded_body/1,2</code> and <code>cowboy_req:read_and_match_urlencoded_body/2,3</code>: same as <code>cowboy_req:read_body/1,2</code> with the notable difference that the default <code>length</code> is 64KB.
+</li>
+<li><code>cowboy_req:read_part/1,2</code>: same as <code>cowboy_req:read_body/1,2</code> with the notable difference that the default length is 64KB.
+</li>
+<li><code>cowboy_req:read_part_body/1,2</code>: same as <code>cowboy_req:read_body/1,2</code>.
+</li>
+<li>The <code>cowboy_req:cast/2</code> function should be used with extreme care as it can issue any command, including commands to read the request body, and completely bypasses safety mechanisms.
+</li>
+<li>Many <code>cowboy_http</code> options may be unsafe if the value configured is too large: <code>active_n</code>, <code>dynamic_buffer</code>, <code>initial_stream_flow_size</code>, <code>max_authority_length</code>, <code>max_authorization_header_value_length</code>, <code>max_cookie_header_value_length</code>, <code>max_empty_lines</code>, <code>max_header_name_length</code>, <code>max_header_value_length</code>, <code>max_headers</code>, <code>max_method_length</code> and <code>max_request_line_length</code>.
+</li>
+<li>Many <code>cowboy_http2</code> options may be unsafe if the value configured is too large: <code>active_n</code>, <code>connection_window_margin_size</code>, <code>connection_window_update_threshold</code>, <code>dynamic_buffer</code>, <code>initial_connection_window_size</code>, <code>initial_stream_window_size</code>, <code>max_authority_length</code>, <code>max_concurrent_streams</code>, <code>max_connection_buffer_size</code>, <code>max_connection_window_size</code>, <code>max_decode_table_size</code>, <code>max_encode_table_size</code>, <code>max_fragmented_header_block_size</code>, <code>max_frame_size_received</code>, <code>max_headers</code>, <code>max_stream_buffer_size</code>, <code>max_stream_window_size</code>, <code>stream_window_margin_size</code> and <code>stream_window_update_threshold</code>.
+</li>
+<li>Many <code>cowboy_websocket</code> options may be unsafe if the value configured is too large: <code>active_n</code>, <code>data_delivery_flow</code>, <code>dynamic_buffer</code> and <code>max_frame_size</code>. Note that the <code>max_frame_size</code> option may be changed dynamically via the <code>set_options</code> command.
+</li>
+<li>Websocket and loop handlers may run for a very long time, be mindful of how much memory the handlers may be using. Memory may be present in the state or in the mailbox. Consider setting the <code>max_heap_size</code> process flag for these and hibernating. Also be careful to not accumulate data outside of the process.
+</li>
+<li>The <code>cowboy_compress_h</code> stream handler can be used for automatic compression of response bodies. Note that it is not suitable for large files when paired with the <code>cowboy_static</code> handler or <code>sendfile</code> uses, as it will read the entire file into memory to compress it.
+</li>
+<li>The <code>cowboy_decompress_h</code> stream handler can be used for automatic decompression of request bodies. Its option <code>decompress_ratio_limit</code> may be unsafe if the value configured is too large.
+</li>
+<li>Custom stream handlers or middlewares must be especially careful not to accumulate too much data. Stream handlers must also use the <code>stop</code> command as soon as processing is done to terminate the stream and free up memory. Child processes must terminate in a timely manner.
+</li>
+</ul>
+<h4 id="_cpu_exhaustion">CPU exhaustion</h4>
+<p>Expensive parsing, repeated operations, high frame rates or unbounded computation in user code may starve CPU capacity, slowing down or preventing legitimate work:</p>
+<ul><li>The <code>cowboy_http2</code> options <code>max_cancel_stream_rate</code>, <code>max_received_frame_rate</code> and <code>max_reset_stream_rate</code> are meant to protect against HTTP/2 protocol CPU exhaustion attacks, but the defaults may still be too high for some applications. Consider lowering them.
+</li>
+<li>The <code>cowboy_websocket</code> option <code>validate_utf8</code> may be set to <code>false</code> to avoid potentially expensive UTF-8 validation. It is enabled by default.
+</li>
+<li>Use of <code>cowboy_compress_h</code> and <code>cowboy_decompress_h</code>, as well as the <code>compress</code> Websocket option set to <code>true</code>, implies non-negligible CPU use, especially for compression.
+</li>
+<li>Constraints (<code>cowboy_constraints</code>) applied to routing or to <code>cowboy_req:match_*</code> functions should not be too expensive as they may run on every request. Validation failure should result in an immediate return.
+</li>
+<li>Custom stream handlers, middlewares or the user&apos;s own handlers should not perform heavy computation unless required. Be especially mindful of code that may run on every request (such as the <code>cowboy_rest</code> callbacks <code>is_authorized/2</code> and <code>resource_exists</code>).
+</li>
+<li>The <code>cowboy_req:parse_*</code> functions should only be called once per request. The result should be kept in the state if needed.
+</li>
+</ul>
+<h4 id="_connection_exhaustion">Connection exhaustion</h4>
+<p>Slow, idle or hanging connections without proper timeouts or limits may make your application unreachable:</p>
+<ul><li>Transport options <code>max_connections</code> defaults to 1024 (excluding HTTP/1.1 Websocket connections). The default may be too small for some applications.
+</li>
+<li>Transport options <code>linger</code>, <code>nodelay</code> and <code>send_timeout_close</code> should not be overridden. Option <code>send_timeout</code> may be unsafe if the value configured is too large. Note that the default <code>send_timeout</code> is <code>30000</code> which may be too large for some applications.
+</li>
+<li>Many <code>cowboy_http</code> options may be unsafe if the value configured is too large: <code>idle_timeout</code>, <code>inactivity_timeout</code>, <code>linger_timeout</code>, <code>max_keepalive</code> (also see <code>http10_keepalive</code>), <code>max_skip_body_length</code>, <code>request_timeout</code> and <code>shutdown_timeout</code>. Note that the <code>idle_timeout</code> option may be changed dynamically via the <code>set_options</code> command. Also note that the default for <code>max_keepalive</code> is <code>1000</code> which may be too large for some applications.
+</li>
+<li>Many <code>cowboy_http2</code> options may be unsafe if the value configured is too large: <code>goaway_complete_timeout</code>, <code>goaway_initial_timeout</code>, <code>idle_timeout</code>, <code>inactivity_timeout</code>, <code>linger_timeout</code>, <code>preface_timeout</code>, <code>settings_timeout</code> and <code>shutdown_timeout</code>.
+</li>
+<li>The <code>reset_idle_timeout_on_send</code> option from <code>cowboy_http</code> and <code>cowboy_http2</code> may be unsafe if configured to <code>true</code> as it may lead to connections staying longer in TCP half-closed state than intended, especially when sends are small.
+</li>
+<li>One <code>cowboy_websocket</code> option may be unsafe if the value configured is too large: <code>idle_timeout</code>. Note that the <code>idle_timeout</code> option may be changed dynamically via the <code>set_options</code> command.
+</li>
+<li>Websocket and loop handlers may run for a very long time, keeping the connection open. HTTP/1.1 Websocket connections by default do not count toward the <code>max_connections</code> limit, but HTTP/2 Websocket and loop handlers do. Make sure to have a high enough <code>max_connections</code> count, terminate Websocket and loop handlers in a timely manner, and only provide Websocket and loop handlers to trusted clients.
+</li>
+<li>Custom stream handlers must terminate in a timely manner. When a non-negligible amount of work must be done on termination, spawn a new process then terminate.
+</li>
+</ul>
+<h4 id="_file_descriptor_exhaustion">File descriptor exhaustion</h4>
+<p>Ensure that the file descriptor limit is large enough for your application. Limits are managed via <code>sysctl</code> and <code>ulimit</code> on Linux. Set the limit to at least twice the amount of expected file descriptors used at peak traffic: consider <code>max_connections</code>, the number of HTTP/1.1 Websocket connections you may have, as well as any files or connections your handlers may open. Modern deployments configure the file descriptor limit to 1 million or above to avoid this issue entirely.</p>
+<h2 id="_injection_attacks">Injection attacks</h2>
+<p>All request data, including parsed values, <strong>MUST</strong> be considered both untrusted and unsafe, and must be validated, sanitized or escaped before use.</p>
+<p>While Cowboy rejects NUL bytes in some of the request data, NUL bytes may still be found in unexpected places such as the query string and urlencoded bodies (where NUL bytes can legitimately be encoded as <code>%00</code>) or in request bodies in general. Request data <strong>MUST NOT</strong> be considered to be free of NUL bytes.</p>
+<p>Unsanitized or invalid data provided in responses is unsafe. Response data must be valid RFC-conformant components for status, header names, header values (with values appropriate for the header name) as well as trailer headers, multipart headers and any other media type used in the response body:</p>
+<ul><li>The HTTP/1.1 and HTTP/2 options <code>invalid_response_headers</code> provide only limited protection for the HTTP/1.1 and HTTP/2 protocols. They are enabled by default and <strong>SHOULD NOT</strong> be disabled. Applications <strong>MUST</strong> still follow the recommendations in this section.
+</li>
+<li>Response status <strong>MUST</strong> be a literal value, especially when providing a binary for the status line. Calls to <code>cowboy_req:inform/2,3</code>, <code>cowboy_req:reply/2,3,4</code> and <code>cowboy_req:stream_reply/2,3</code> may be affected.
+</li>
+<li>Response header names <strong>MUST</strong> be a literal value. Response header names <strong>SHOULD</strong> be all lowercase for HTTP/1.1 and <strong>MUST</strong> be all lowercase for HTTP/2. Calls to <code>cowboy_req:inform/3</code>, <code>cowboy_req:reply/3,4</code>, <code>cowboy_req:set_resp_header/3</code>, <code>cowboy_req:set_resp_headers/2</code> and <code>cowboy_req:stream_reply/3</code> may be affected. This also applies to trailer headers via <code>cowboy_req:stream_trailers/2</code> and push headers via <code>cowboy_req:push/3,4</code>.
+</li>
+<li>Response header values <strong>MUST</strong> be valid RFC-conformant values corresponding to their header name. Using external data (from the request, files, databases or any other sources) without first validating that the data is correct is always unsafe. Calls to <code>cowboy_req:inform/3</code>, <code>cowboy_req:reply/3,4</code>, <code>cowboy_req:set_resp_header/3</code>, <code>cowboy_req:set_resp_headers/2</code> and <code>cowboy_req:stream_reply/3</code> may be affected. This also applies to trailer headers via <code>cowboy_req:stream_trailers/2</code> and push headers via <code>cowboy_req:push/3,4</code>.
+</li>
+<li>Response bodies <strong>MUST NOT</strong> include unvalidated or unescaped external data. The exact method of producing safe response bodies varies depending on the media type of the body and on the application. Calls to <code>cowboy_req:reply/4</code>, <code>cowboy_req:set_resp_body/2</code> and <code>cowboy_req:stream_body/3</code> may be affected.
+</li>
+<li>Cookies set through <code>cowboy_req:set_resp_cookie/3,4</code> <strong>MUST</strong> have valid RFC-conformant name and value, as well as <code>domain</code> and <code>path</code> fields when they are present. All cookie options <strong>MUST</strong> be literals except for the cookie value. Cowboy does not set <code>secure</code>, <code>http_only</code> or <code>same_site</code> by default; session and other sensitive cookies <strong>SHOULD</strong> enable them explicitly.
+</li>
+<li>The path provided when pushing resources <strong>MUST</strong> be a valid application resource path. It is strongly recommended to only use literal values. Calls to <code>cowboy_req:push/3,4</code> may be affected.
+</li>
+<li>When the response body is of type <code>text/event-stream</code> and <code>cowboy_req:stream_events/3</code> is used to send events: event data <strong>MUST</strong> be valid values according to the HTML standard (server-sent events section).
+</li>
+<li>REST handler callbacks that return tuples that contain status code, response headers or response body <strong>MUST</strong> follow the same recommendations outlined for function calls in this section.
+</li>
+<li>Custom stream handlers that return commands that contain status code, response headers or response body <strong>MUST</strong> follow the same recommendations outlined for function calls. This also applies when using <code>cowboy_req:cast/2</code> to issue commands.
+</li>
+</ul>
+<h2 id="_path_traversal">Path traversal</h2>
+<p>Untrusted paths can escape the configured root directory and access arbitrary files on the filesystem:</p>
+<ul><li>Request paths and file system paths are two completely separate concepts. Users <strong>MUST NOT</strong> use the request path or components of the path including bindings to access local files without proper sanitization.
+</li>
+<li>Paths constructed fully or partly from request data <strong>MUST</strong> be normalized and <strong>MUST</strong> be prefix-checked against the intended root before performing any file operation.
+</li>
+<li>When using <code>cowboy_static</code>, the configuration <strong>MUST</strong> come from literal values or a trusted source. The handler only applies sanitization and prefix checks for the <code>dir</code> and <code>priv_dir</code> options; the <code>file</code> and <code>priv_file</code> options use the configured path directly.
+</li>
+<li>When using <code>cowboy_static</code>, do not create symlinks in directories configured with <code>dir</code> or <code>priv_dir</code> options using information from untrusted sources as the static handler will follow them.
+</li>
+<li>The path given in <code>sendfile</code> tuples when sending response bodies <strong>MUST</strong> be normalized and prefix-checked. Calls to <code>cowboy_req:reply/4</code>, <code>cowboy_req:set_resp_body/2</code> and <code>cowboy_req:stream_body/3</code> with a <code>sendfile</code> tuple for the body may be affected. A <code>sendfile</code> tuple returned from <code>cowboy_rest</code> callback <code>ProvideCallback</code> may be affected as well.
+</li>
+<li>Multipart form filenames obtained via <code>cowboy_req:read_part/1,2</code> (and the corresponding values from <code>read_part_body</code>) <strong>MUST</strong> be treated as untrusted. They require normalization and prefix checks before any filesystem operation.
+</li>
+<li>The <code>Path</code> argument (and related fields from <code>push_opts</code>) given to <code>cowboy_req:push/3,4</code> <strong>MUST</strong> be a valid application resource path when it may be derived from request data. It is strongly recommended to only use literal values.
+</li>
+</ul>
+<h2 id="_cryptographic_and_tls_considerations">Cryptographic and TLS considerations</h2>
+<p>Applications <strong>MUST</strong> follow general TLS and cryptographic hardening best practices. This section only covers areas where Cowboy provides limited or no automatic protection:</p>
+<ul><li>In mTLS scenarios: TLS client certificates obtained from the <code>Req</code> object or by calling <code>cowboy_req:cert/1</code> <strong>MUST</strong> be validated before they can be used, including against a configured CA certificate chain.
+</li>
+<li>HTTP Strict Transport Security (HSTS) <strong>SHOULD</strong> be enabled for TLS listeners by setting the <code>strict-transport-security</code> response header. This mitigates downgrade attacks. This header is not sent by default.
+</li>
+</ul>
+<h2 id="_spoofing">Spoofing</h2>
+<p>The PROXY protocol, configured via the <code>proxy_header</code> option, <strong>MUST</strong> only be enabled for listeners reachable exclusively via trusted proxies or load balancers.</p>
+<h2 id="_cross_site_and_browser_concerns">Cross-site and browser concerns</h2>
+<p>Cowboy does not implement browser-specific protections automatically; applications that serve browsers <strong>MUST</strong> apply them where relevant:</p>
+<ul><li>State-changing requests authenticated with cookies (or other ambient browser credentials) <strong>MUST</strong> implement CSRF protection. <code>same_site</code> cookie options alone are not sufficient.
+</li>
+<li>Framing controls (<code>x-frame-options</code> or CSP <code>frame-ancestors</code>) <strong>SHOULD</strong> be set on HTML responses to mitigate clickjacking.
+</li>
+<li>Websocket upgrades do not validate the <code>origin</code> header. Handlers that authenticate via cookies (or other ambient browser credentials) <strong>MUST</strong> check <code>origin</code> in <code>init/2</code> before upgrading, or only expose Websocket to non-browser clients.
+</li>
+</ul>
+<h2 id="_information_disclosure">Information disclosure</h2>
+<p>Sensitive information mistakenly disclosed to clients or third parties may be used by attackers to craft more effective or targeted attacks:</p>
+<ul><li>Error responses do not include a response body by default. Custom error responses <strong>MUST NOT</strong> include sensitive information such as stack traces, file paths or any other internal details.
+</li>
+<li>The <code>server: Cowboy</code> response header is sent with all responses by default. You may set a custom <code>server</code> header to override it.
+</li>
+</ul>
+<h2 id="_experimental_features">Experimental features</h2>
+<p>All features marked as experimental are considered unsafe for production use. You <strong>MUST NOT</strong> deploy experimental feature to production without a full understanding of the code and the risks involved.</p>
+<p>The same applies to undocumented features.</p>
+
+
+
+
+	
+		
+		
+		
+		
+		
+
+		<nav style="margin:1em 0">
+			
+				<a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.20/guide/performance/">
+					Performance
+				</a>
+			
+
+			
+				<a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.20/guide/migrating_from_2.19/">
+					Migrating from Cowboy 2.19 to 2.20
+				</a>
+			
+		</nav>
+	
+
+
+
+</div>
+
+<div class="span3 sidecol">
+
+
+<h3>
+	Cowboy
+	2.20
+	
+	User Guide
+</h3>
+
+<ul>
+	
+		<li><a href="/docs/en/cowboy/2.20/guide">User Guide</a></li>
+	
+	
+		<li><a href="/docs/en/cowboy/2.20/manual">Function Reference</a></li>
+	
+	
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+	
+	
+	
+		<li><a href="/docs/en/cowboy/2.20/guide">2.20</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.19/guide">2.19</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.18/guide">2.18</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.17/guide">2.17</a></li>
+	
+		<li><a href="/docs/en/cowboy/2.16/guide">2.16</a></li>
+	
+</ul>
+
+<h3 id="_like_my_work__donate">Like my work? Donate!</h3>
+<p>Donate to Loïc Hoguin because his work on Cowboy, Ranch, Gun and Erlang.mk is fantastic:</p>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="essen@ninenines.eu">
+<input type="hidden" name="lc" value="FR">
+<input type="hidden" name="item_name" value="Loic Hoguin">
+<input type="hidden" name="item_number" value="99s">
+<input type="hidden" name="currency_code" value="EUR">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1">
+</form><p>Recurring payment options are also available via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. These funds are used to cover the recurring expenses like food, dedicated servers or domain names.</p>
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+      <footer>
+        <div class="container">
+          <div class="row">
+            <div class="span6">
+              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+              <nav>
+                <ul>
+                  <li><a href="mailto:contact@ninenines.eu" title="Contact us">Contact us</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="span6 credits">
+               <p><img src="/img/footer_logo.png"></p>
+               <p>Copyright &copy; Loïc Hoguin 2012-2018</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    
+    <script src="/js/custom.js"></script>
+  </body>
+</html>
+
+
