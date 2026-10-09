@@ -1,4 +1,4 @@
-.PHONY: all clean docs
+.PHONY: all clean docs wrap-doc
 
 .NOTPARALLEL:
 
@@ -137,3 +137,29 @@ docs:: docs-$1
 endef
 
 $(eval $(foreach p,$(filter-out erlang.mk,$(PROJECTS)),$(call docs-target,$p)))
+
+# Rebuild one published doc page into tmp/ from its body and the shell
+# templates. Does not write under docs/ and does not run Hugo.
+wrap-doc:
+	mkdir -p $(CURDIR)/tmp
+	rm -f $(CURDIR)/tmp/getting_started.html
+	cat $(CURDIR)/templates/head.html \
+		| sed -e 's/{{TITLE}}/Getting started/g' \
+			-e 's/{{ACTIVE_ARTICLES}}//' \
+			-e 's/{{ACTIVE_TALKS}}//' \
+			-e 's/{{ACTIVE_DOCS}}/ class="active"/' \
+			-e 's/{{ACTIVE_SERVICES}}//' \
+		>> $(CURDIR)/tmp/getting_started.html
+	cat $(CURDIR)/../docs/en/cowboy/2.20/guide/getting_started/index.html \
+		| sed -n '/<h1 class="lined-header">/,/<nav style="margin:1em 0">/ { /<h1 class="lined-header">/d; /<nav style="margin:1em 0">/d; p; }' \
+		>> $(CURDIR)/tmp/getting_started.html
+	cat $(CURDIR)/templates/foot.html \
+		| sed -e 's|{{PREV_HREF}}|https://ninenines.eu/docs/en/cowboy/2.20/guide/introduction/|' \
+			-e 's/{{PREV_TITLE}}/Introduction/' \
+			-e 's|{{NEXT_HREF}}|https://ninenines.eu/docs/en/cowboy/2.20/guide/flow_diagram/|' \
+			-e 's/{{NEXT_TITLE}}/Flow diagram/' \
+			-e 's/{{PROJECT_PATH}}/cowboy/g' \
+			-e 's/{{PROJECT}}/Cowboy/' \
+			-e 's/{{VERSION}}/2.20/g' \
+			-e 's/{{DOCTYPE}}/User Guide/' \
+		>> $(CURDIR)/tmp/getting_started.html
