@@ -1,4 +1,4 @@
-.PHONY: all clean docs wrap-doc
+.PHONY: all clean docs wrap-doc docs-html-cowlib serve
 
 .NOTPARALLEL:
 
@@ -9,6 +9,9 @@ all: $(CURDIR)/deps/asciideck docs
 
 server: $(CURDIR)/deps/asciideck
 	PATH=$(CURDIR)/deps/asciideck/scripts:$(PATH) hugo server --theme=ninenines
+
+serve:
+	$(MAKE) -C $(CURDIR)/server serve
 
 $(CURDIR)/deps/asciideck:
 	mkdir -p $(CURDIR)/deps
@@ -154,12 +157,61 @@ wrap-doc:
 		| sed -n '/<h1 class="lined-header">/,/<nav style="margin:1em 0">/ { /<h1 class="lined-header">/d; /<nav style="margin:1em 0">/d; p; }' \
 		>> $(CURDIR)/tmp/getting_started.html
 	cat $(CURDIR)/templates/foot.html \
-		| sed -e 's|{{PREV_HREF}}|https://ninenines.eu/docs/en/cowboy/2.20/guide/introduction/|' \
-			-e 's/{{PREV_TITLE}}/Introduction/' \
-			-e 's|{{NEXT_HREF}}|https://ninenines.eu/docs/en/cowboy/2.20/guide/flow_diagram/|' \
-			-e 's/{{NEXT_TITLE}}/Flow diagram/' \
-			-e 's/{{PROJECT_PATH}}/cowboy/g' \
+		| sed -e 's|{{PREV_NEXT}}|<nav style="margin:1em 0">\n    <a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.20/guide/introduction/">Introduction</a>\n    <a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.20/guide/flow_diagram/">Flow diagram</a>\n</nav>|' \
+			-e 's|{{DOC_LINKS}}|    <li><a href="/docs/en/cowboy/2.20/guide">User Guide</a></li>\n    <li><a href="/docs/en/cowboy/2.20/manual">Function Reference</a></li>|' \
+			-e 's|{{VERSION_LINKS}}|    <li><a href="/docs/en/cowboy/2.20/guide">2.20</a></li>\n    <li><a href="/docs/en/cowboy/2.19/guide">2.19</a></li>\n    <li><a href="/docs/en/cowboy/2.18/guide">2.18</a></li>\n    <li><a href="/docs/en/cowboy/2.17/guide">2.17</a></li>\n    <li><a href="/docs/en/cowboy/2.16/guide">2.16</a></li>|' \
 			-e 's/{{PROJECT}}/Cowboy/' \
 			-e 's/{{VERSION}}/2.20/g' \
 			-e 's/{{DOCTYPE}}/User Guide/' \
 		>> $(CURDIR)/tmp/getting_started.html
+
+# Build Cowlib 2.21 manual pages with asciideck and the shell templates.
+docs-html-cowlib: $(CURDIR)/deps/asciideck
+	mkdir -p $(CURDIR)/tmp
+	if [ ! -d $(CURDIR)/tmp/cowlib/.git ]; then \
+		git clone https://github.com/ninenines/cowlib $(CURDIR)/tmp/cowlib; \
+	fi
+	cd $(CURDIR)/tmp/cowlib && git checkout 2.21.0 && git reset --hard 2.21.0
+	set -e -o pipefail; \
+	dest=$(CURDIR)/../docs/en/cowlib/2.21/manual; \
+	rm -rf $$dest; \
+	mkdir -p $$dest; \
+	wrap() { \
+		title="$$1"; body="$$2"; out="$$3"; \
+		mkdir -p "$$(dirname "$$out")"; \
+		rm -f "$$out"; \
+		cat $(CURDIR)/templates/head.html \
+			| sed -e "s|{{TITLE}}|$$title|g" \
+				-e 's/{{ACTIVE_ARTICLES}}//' \
+				-e 's/{{ACTIVE_TALKS}}//' \
+				-e 's/{{ACTIVE_DOCS}}/ class="active"/' \
+				-e 's/{{ACTIVE_SERVICES}}//' \
+			>> "$$out"; \
+		cat "$$body" >> "$$out"; \
+		cat $(CURDIR)/templates/foot.html \
+			| sed -e 's|{{PREV_NEXT}}||' \
+				-e 's|{{DOC_LINKS}}|    <li><a href="/docs/en/cowlib/2.21/manual">Function Reference</a></li>|' \
+				-e 's|{{VERSION_LINKS}}|    <li><a href="/docs/en/cowlib/2.21/manual">2.21</a></li>\n    <li><a href="/docs/en/cowlib/2.20/manual">2.20</a></li>\n    <li><a href="/docs/en/cowlib/2.19/manual">2.19</a></li>\n    <li><a href="/docs/en/cowlib/2.18/manual">2.18</a></li>\n    <li><a href="/docs/en/cowlib/2.17/manual">2.17</a></li>|' \
+				-e 's/{{PROJECT}}/Cowlib/' \
+				-e 's/{{VERSION}}/2.21/g' \
+				-e 's/{{DOCTYPE}}/Function Reference/' \
+			>> "$$out"; \
+	}; \
+	sed '1,/^$$/d' $(CURDIR)/tmp/cowlib/doc/src/manual/cowlib_app.asciidoc \
+		| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/g' \
+		| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+		| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
+		| $(CURDIR)/deps/asciideck/scripts/asciidoc --no-header-footer --safe - \
+		> $(CURDIR)/tmp/cowlib-index.html; \
+	wrap "Cowlib Function Reference" $(CURDIR)/tmp/cowlib-index.html $$dest/index.html; \
+	for f in $(CURDIR)/tmp/cowlib/doc/src/manual/*.asciidoc; do \
+		base=$$(basename "$$f" .asciidoc); \
+		title=$$(sed -n '1,/^= .*/ s/^= //p' "$$f"); \
+		sed '1,/^$$/d' "$$f" \
+			| sed 's/link:man:cowlib(7)/link:../g' \
+			| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+			| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
+			| $(CURDIR)/deps/asciideck/scripts/asciidoc --no-header-footer --safe - \
+			> $(CURDIR)/tmp/cowlib-page.html; \
+		wrap "$$title" $(CURDIR)/tmp/cowlib-page.html $$dest/$$base/index.html; \
+	done
