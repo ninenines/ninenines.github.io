@@ -139,7 +139,9 @@ docs:: docs-$1
 
 endef
 
-$(eval $(foreach p,$(filter-out erlang.mk,$(PROJECTS)),$(call docs-target,$p)))
+$(eval $(foreach p,$(filter-out erlang.mk cowlib,$(PROJECTS)),$(call docs-target,$p)))
+
+docs:: docs-html-cowlib
 
 # Rebuild one published doc page into tmp/ from its body and the shell
 # templates. Does not write under docs/ and does not run Hugo.
@@ -165,22 +167,36 @@ wrap-doc:
 			-e 's/{{DOCTYPE}}/User Guide/' \
 		>> $(CURDIR)/tmp/getting_started.html
 
-# Build Cowlib 2.21 manual pages with asciideck and the shell templates.
+# Cowlib manual data. Hugo still reads data/projects/cowlib.toml for the
+# other projects; this target does not.
+COWLIB_REPOSITORY = https://github.com/ninenines/cowlib
+COWLIB_TITLE = Cowlib
+COWLIB_VERSIONS = 2.21 2.20 2.19 2.18 2.17
+COWLIB_BRANCHES = 2.21.0 2.20.0 2.19.0 2.18.0 2.17.1
+
+# Build every Cowlib manual with asciideck and the shell.
+# Cowlib is not part of the Hugo docs rules, so Hugo will not overwrite these.
 docs-html-cowlib: $(CURDIR)/deps/asciideck
 	mkdir -p $(CURDIR)/tmp
 	if [ ! -d $(CURDIR)/tmp/cowlib/.git ]; then \
-		git clone https://github.com/ninenines/cowlib $(CURDIR)/tmp/cowlib; \
+		git clone $(COWLIB_REPOSITORY) $(CURDIR)/tmp/cowlib; \
 	fi
-	cd $(CURDIR)/tmp/cowlib && git checkout 2.21.0 && git reset --hard 2.21.0
 	set -e -o pipefail; \
-	dest=$(CURDIR)/../docs/en/cowlib/2.21/manual; \
-	rm -rf $$dest; \
-	mkdir -p $$dest; \
+	versions="$(COWLIB_VERSIONS)"; \
+	branches="$(COWLIB_BRANCHES)"; \
+	links=$(CURDIR)/tmp/cowlib-version-links.html; \
+	head=$(CURDIR)/templates/head.html; \
+	foot=$(CURDIR)/templates/foot.html; \
+	asciidoc=$(CURDIR)/deps/asciideck/scripts/asciidoc; \
+	: > $$links; \
+	for version in $$versions; do \
+		printf '    <li><a href="/docs/en/cowlib/%s/manual">%s</a></li>\n' "$$version" "$$version" >> $$links; \
+	done; \
 	wrap() { \
-		title="$$1"; body="$$2"; out="$$3"; \
+		title="$$1"; body="$$2"; out="$$3"; ver="$$4"; \
 		mkdir -p "$$(dirname "$$out")"; \
 		rm -f "$$out"; \
-		cat $(CURDIR)/templates/head.html \
+		cat $$head \
 			| sed -e "s|{{TITLE}}|$$title|g" \
 				-e 's/{{ACTIVE_ARTICLES}}//' \
 				-e 's/{{ACTIVE_TALKS}}//' \
@@ -188,30 +204,47 @@ docs-html-cowlib: $(CURDIR)/deps/asciideck
 				-e 's/{{ACTIVE_SERVICES}}//' \
 			>> "$$out"; \
 		cat "$$body" >> "$$out"; \
-		cat $(CURDIR)/templates/foot.html \
-			| sed -e 's|{{PREV_NEXT}}||' \
-				-e 's|{{DOC_LINKS}}|    <li><a href="/docs/en/cowlib/2.21/manual">Function Reference</a></li>|' \
-				-e 's|{{VERSION_LINKS}}|    <li><a href="/docs/en/cowlib/2.21/manual">2.21</a></li>\n    <li><a href="/docs/en/cowlib/2.20/manual">2.20</a></li>\n    <li><a href="/docs/en/cowlib/2.19/manual">2.19</a></li>\n    <li><a href="/docs/en/cowlib/2.18/manual">2.18</a></li>\n    <li><a href="/docs/en/cowlib/2.17/manual">2.17</a></li>|' \
-				-e 's/{{PROJECT}}/Cowlib/' \
-				-e 's/{{VERSION}}/2.21/g' \
-				-e 's/{{DOCTYPE}}/Function Reference/' \
+		{ \
+			sed -n '1,/{{VERSION_LINKS}}/p' $$foot | sed '$$d'; \
+			cat $$links; \
+			sed -n '/{{VERSION_LINKS}}/,$$p' $$foot | sed '1d'; \
+		} | sed -e 's|{{PREV_NEXT}}||' \
+			-e 's|{{DOC_LINKS}}|    <li><a href="/docs/en/cowlib/'"$$ver"'/manual">Function Reference</a></li>|' \
+			-e 's/{{PROJECT}}/$(COWLIB_TITLE)/' \
+			-e 's/{{VERSION}}/'"$$ver"'/g' \
+			-e 's/{{DOCTYPE}}/Function Reference/' \
 			>> "$$out"; \
 	}; \
-	sed '1,/^$$/d' $(CURDIR)/tmp/cowlib/doc/src/manual/cowlib_app.asciidoc \
-		| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/g' \
-		| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
-		| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
-		| $(CURDIR)/deps/asciideck/scripts/asciidoc --no-header-footer --safe - \
-		> $(CURDIR)/tmp/cowlib-index.html; \
-	wrap "Cowlib Function Reference" $(CURDIR)/tmp/cowlib-index.html $$dest/index.html; \
-	for f in $(CURDIR)/tmp/cowlib/doc/src/manual/*.asciidoc; do \
-		base=$$(basename "$$f" .asciidoc); \
-		title=$$(sed -n '1,/^= .*/ s/^= //p' "$$f"); \
-		sed '1,/^$$/d' "$$f" \
-			| sed 's/link:man:cowlib(7)/link:../g' \
+	i=1; \
+	for version in $$versions; do \
+		branch=$$(echo $$branches | cut -d' ' -f $$i); \
+		i=$$((i + 1)); \
+		git -C $(CURDIR)/tmp/cowlib checkout -f $$branch; \
+		git -C $(CURDIR)/tmp/cowlib reset --hard $$branch; \
+		stage=$(CURDIR)/tmp/html/cowlib/$$version/manual; \
+		rm -rf $(CURDIR)/tmp/html/cowlib/$$version; \
+		mkdir -p $$stage; \
+		sed '1,/^$$/d' $(CURDIR)/tmp/cowlib/doc/src/manual/cowlib_app.asciidoc \
+			| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/g' \
 			| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
-			| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
-			| $(CURDIR)/deps/asciideck/scripts/asciidoc --no-header-footer --safe - \
-			> $(CURDIR)/tmp/cowlib-page.html; \
-		wrap "$$title" $(CURDIR)/tmp/cowlib-page.html $$dest/$$base/index.html; \
-	done
+			| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
+			| $$asciidoc --no-header-footer --safe - \
+			> $(CURDIR)/tmp/cowlib-index.html; \
+		wrap "$(COWLIB_TITLE) Function Reference" $(CURDIR)/tmp/cowlib-index.html $$stage/index.html $$version; \
+		for f in $(CURDIR)/tmp/cowlib/doc/src/manual/*.asciidoc; do \
+			base=$$(basename "$$f" .asciidoc); \
+			title=$$(sed -n '1,/^= .*/ s/^= //p' "$$f"); \
+			sed '1,/^$$/d' "$$f" \
+				| sed 's/link:man:cowlib(7)/link:../g' \
+				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
+				| $$asciidoc --no-header-footer --safe - \
+				> $(CURDIR)/tmp/cowlib-page.html; \
+			wrap "$$title" $(CURDIR)/tmp/cowlib-page.html $$stage/$$base/index.html $$version; \
+		done; \
+		dest=$(CURDIR)/../docs/en/cowlib/$$version/manual; \
+		rm -rf $$dest; \
+		mkdir -p $$(dirname $$dest); \
+		mv $$stage $$dest; \
+	done; \
+	rm -rf $(CURDIR)/content/docs/en/cowlib
