@@ -134,10 +134,10 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 		rm -rf $$$$stage; \
 		mkdir -p $$$$stage; \
 		sed '1,/^$$$$/d' $(CURDIR)/tmp/manual/$1/doc/src/manual/$1_app.asciidoc \
-			| sed -e "s|link:man:cowboy(7)|$$$${man7_cowboy:-link:cowboy_app}|g" \
-				-e "s|link:man:cowlib(7)|$$$${man7_cowlib:-link:cowlib_app}|g" \
-				-e "s|link:man:gun(7)|$$$${man7_gun:-link:gun_app}|g" \
-				-e "s|link:man:ranch(7)|$$$${man7_ranch:-link:ranch_app}|g" \
+			| sed -e "s|link:man:cowboy(7)|$$$${man7_cowboy:-link:.}|g" \
+				-e "s|link:man:cowlib(7)|$$$${man7_cowlib:-link:.}|g" \
+				-e "s|link:man:gun(7)|$$$${man7_gun:-link:.}|g" \
+				-e "s|link:man:ranch(7)|$$$${man7_ranch:-link:.}|g" \
 			| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
 			| sed $$$$man3sed \
 			| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
@@ -147,6 +147,7 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 		wrap "$2 Function Reference" $(CURDIR)/tmp/$1-index.html $$$$stage/index.html $$$$version; \
 		for f in $(CURDIR)/tmp/manual/$1/doc/src/manual/*.asciidoc; do \
 			base=$$$$(basename "$$$$f" .asciidoc); \
+			if [ "$$$$base" = $1_app ]; then continue; fi; \
 			title=$$$$(sed -n '1,/^= .*/ s/^= //p' "$$$$f"); \
 			sed '1,/^$$$$/d' "$$$$f" \
 				| sed -e "s|link:man:cowboy(7)|$$$${man7_cowboy:-link:..}|g" \
