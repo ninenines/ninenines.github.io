@@ -1,7 +1,5 @@
 .PHONY: all docs serve
 
-.NOTPARALLEL:
-
 all: docs
 
 serve:
@@ -23,9 +21,9 @@ define docs-html-manual-target
 
 docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 	set -e -o pipefail; \
-	mkdir -p $(CURDIR)/tmp; \
-	if [ ! -d $(CURDIR)/tmp/$1/.git ]; then \
-		git clone $3 $(CURDIR)/tmp/$1; \
+	mkdir -p $(CURDIR)/tmp/manual; \
+	if [ ! -d $(CURDIR)/tmp/manual/$1/.git ]; then \
+		git clone $3 $(CURDIR)/tmp/manual/$1; \
 	fi; \
 	versions="$4"; \
 	branches="$5"; \
@@ -70,19 +68,19 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 	for version in $$$$versions; do \
 		branch=$$$$(echo $$$$branches | cut -d' ' -f $$$$i); \
 		i=$$$$((i + 1)); \
-		git -C $(CURDIR)/tmp/$1 checkout -f $$$$branch; \
-		git -C $(CURDIR)/tmp/$1 reset --hard $$$$branch; \
+		git -C $(CURDIR)/tmp/manual/$1 checkout -f $$$$branch; \
+		git -C $(CURDIR)/tmp/manual/$1 reset --hard $$$$branch; \
 		stage=$(CURDIR)/tmp/html/$1/$$$$version/manual; \
-		rm -rf $(CURDIR)/tmp/html/$1/$$$$version; \
+		rm -rf $$$$stage; \
 		mkdir -p $$$$stage; \
-		sed '1,/^$$$$/d' $(CURDIR)/tmp/$1/doc/src/manual/$1_app.asciidoc \
+		sed '1,/^$$$$/d' $(CURDIR)/tmp/manual/$1/doc/src/manual/$1_app.asciidoc \
 			| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/g' \
 			| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
 			| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
 			| $$$$asciidoc --no-header-footer --safe - \
 			> $(CURDIR)/tmp/$1-index.html; \
 		wrap "$2 Function Reference" $(CURDIR)/tmp/$1-index.html $$$$stage/index.html $$$$version; \
-		for f in $(CURDIR)/tmp/$1/doc/src/manual/*.asciidoc; do \
+		for f in $(CURDIR)/tmp/manual/$1/doc/src/manual/*.asciidoc; do \
 			base=$$$$(basename "$$$$f" .asciidoc); \
 			title=$$$$(sed -n '1,/^= .*/ s/^= //p' "$$$$f"); \
 			sed '1,/^$$$$/d' "$$$$f" \
@@ -99,7 +97,7 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 		mv $$$$stage $$$$dest; \
 	done
 
-docs:: docs-html-manual-$1
+docs-html-targets += docs-html-manual-$1
 
 endef
 
@@ -112,9 +110,9 @@ define docs-html-guide-target
 
 docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 	set -e -o pipefail; \
-	mkdir -p $(CURDIR)/tmp; \
-	if [ ! -d $(CURDIR)/tmp/$1/.git ]; then \
-		git clone $3 $(CURDIR)/tmp/$1; \
+	mkdir -p $(CURDIR)/tmp/guide; \
+	if [ ! -d $(CURDIR)/tmp/guide/$1/.git ]; then \
+		git clone $3 $(CURDIR)/tmp/guide/$1; \
 	fi; \
 	versions="$4"; \
 	branches="$5"; \
@@ -157,16 +155,16 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 	for version in $$$$versions; do \
 		branch=$$$$(echo $$$$branches | cut -d' ' -f $$$$i); \
 		i=$$$$((i + 1)); \
-		git -C $(CURDIR)/tmp/$1 checkout -f $$$$branch; \
-		git -C $(CURDIR)/tmp/$1 reset --hard $$$$branch; \
-		book=$(CURDIR)/tmp/$1/doc/src/guide/book.asciidoc; \
+		git -C $(CURDIR)/tmp/guide/$1 checkout -f $$$$branch; \
+		git -C $(CURDIR)/tmp/guide/$1 reset --hard $$$$branch; \
+		book=$(CURDIR)/tmp/guide/$1/doc/src/guide/book.asciidoc; \
 		if [ ! -f $$$$book ]; then \
 			continue; \
 		fi; \
 		grep '^include::' $$$$book | sed 's/include::\([a-z0-9_.]*\)\.asciidoc.*/\1/' > $$$$names; \
 		: > $$$$titles; \
 		while read -r name; do \
-			title=$$$$(sed -n '1,/^== .*/ s/^== //p' $(CURDIR)/tmp/$1/doc/src/guide/$$$$name.asciidoc); \
+			title=$$$$(sed -n '1,/^== .*/ s/^== //p' $(CURDIR)/tmp/guide/$1/doc/src/guide/$$$$name.asciidoc); \
 			printf '%s\n' "$$$$title" >> $$$$titles; \
 		done < $$$$names; \
 		stage=$(CURDIR)/tmp/html/$1/$$$$version/guide; \
@@ -180,7 +178,7 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 			| $$$$asciidoc --no-header-footer --safe - \
 			> $(CURDIR)/tmp/$1-guide-index.html; \
 		wrap "$$$$book_title" $(CURDIR)/tmp/$1-guide-index.html $$$$stage/index.html $$$$version ""; \
-		for f in $(CURDIR)/tmp/$1/doc/src/guide/*.asciidoc; do \
+		for f in $(CURDIR)/tmp/guide/$1/doc/src/guide/*.asciidoc; do \
 			base=$$$$(basename "$$$$f" .asciidoc); \
 			if [ "$$$$base" = book ]; then continue; fi; \
 			title=$$$$(sed -n '1,/^== .*/ s/^== //p' "$$$$f"); \
@@ -219,7 +217,7 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 			fi; \
 			wrap "$$$$title" $(CURDIR)/tmp/$1-guide-page.html $$$$stage/$$$$base/index.html $$$$version "$$$$nav"; \
 		done; \
-		for a in $(CURDIR)/tmp/$1/doc/src/guide/*; do \
+		for a in $(CURDIR)/tmp/guide/$1/doc/src/guide/*; do \
 			if [ ! -f "$$$$a" ]; then continue; fi; \
 			if [ "$$$$(basename "$$$$a")" = book.asciidoc ]; then continue; fi; \
 			cp "$$$$a" $$$$stage/; \
@@ -230,7 +228,7 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 		mv $$$$stage $$$$dest; \
 	done
 
-docs:: docs-html-guide-$1
+docs-html-targets += docs-html-guide-$1
 
 endef
 
@@ -245,3 +243,5 @@ $(eval $(call docs-html-project,cowboy,Cowboy,https://github.com/ninenines/cowbo
 $(eval $(call docs-html-project,cowlib,Cowlib,https://github.com/ninenines/cowlib,2.21 2.20 2.19 2.18 2.17,2.21.0 2.20.0 2.19.0 2.18.0 2.17.1,))
 $(eval $(call docs-html-project,gun,Gun,https://github.com/ninenines/gun,2.7 2.6 2.5 2.4 2.3,2.7.0 2.6.0 2.5.0 2.4.0 2.3.0,true))
 $(eval $(call docs-html-project,ranch,Ranch,https://github.com/ninenines/ranch,2.3 2.2 2.1 2.0 1.8 1.7 1.6,2.3.0 2.2.1 fa6c24a65e0e1482ce52dd1f0e08a39ad85b6c82 2.0.0 1.8.1 1.7.1 1.6.2,true))
+
+docs: $(docs-html-targets)
