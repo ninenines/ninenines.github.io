@@ -1,423 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
-
     <title>Nine Nines: Performance improvements in Cowboy 2.13</title>
-
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=7" rel="stylesheet">
-
     <link rel="shortcut icon" href="/img/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
     <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
-
-	</head>
-
-
-<body class="">
-  <header id="page-head">
-    <div id="topbar" class="container">
+  </head>
+  <body class="">
+    <header id="page-head">
+      <div id="topbar" class="container">
         <div class="row">
           <div class="span2">
             <h1 id="logo"><a href="/" title="99s">99s</a></h1>
           </div>
           <div class="span10">
-            
             <div id="side-header">
               <nav>
                 <ul>
                   <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
-  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
-  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li><a title="Read the docs" href="/docs">Documentation</a></li>
                 </ul>
-              </nav> 
+              </nav>
               <ul id="social">
-                <li>
-                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
-                </li>
-                    <li>
-						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
-					</li>
+                <li><a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a></li>
+                <li><a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a></li>
               </ul>
             </div>
           </div>
         </div>
-    </div>
-
-
-</header>
-
-<div id="contents">
-<div class="container">
-<div class="row">
-<div class="span9 maincol">
-
-<article class="blog_item">
-<header>
-	<h1 class="lined-header"><span>Performance improvements in Cowboy 2.13</span></h1>
-	<p class="date">
-		<span class="year">2025</span>
-		<span class="day-month">13 Feb</span>
-	</p>
-</header>
-
-<p>Cowboy <code>2.13.0</code> is close to being released. Much of the work done on this release focused on performance, and in particular the performance of the Websocket protocol.</p>
-<p>The Websocket protocol requires clients to mask the data they send, originally to avoid issues with proxies. This requirement is still present for Websocket over HTTP/2 nevertheless. This means that the server has to unmask the data, which has a notable impact on performance. Cowboy 2.13 will attempt to unmask 16 bytes at a time instead of 4 previously, leading to a rouhgly 10% faster processing of Websocket frames.</p>
-<p>Similarly, the Websocket protocol requires validating that the data in text frames is valid UTF-8. This part of the Websocket code was always highly optimised, but changes in the VM made the optimisations less impactful. The validation code was therefore rewritten, inspired by the validation code in Erlang/OTP&apos;s new <code>json</code> module (itself inspired by the validation in Cowboy!) and Cowboy 2.13 is now 10% to 15% faster processing Websocket text frames.</p>
-<p>Cowboy must keep track of the data coming in to detect whether the client is still around, or gone. It does so via a timeout that is reset when data is received. Since it may receive a lot of data, there may be a lot of timer resets, impacting performance. Cowboy 2.13 will instead run a timer periodically with a timeout that is a tenth of <code>idle_timeout</code>, and count how many times in a row that timeout was triggered without receiving data. This greatly reduces the number of times we set or reset the timer and makes some Websocket scenarios 10% faster.</p>
-<p>These timer improvements were also brought to HTTP/2.</p>
-<p>Cowboy by default will not configure transport options, because they are highly dependent on environment, so anyone looking to get the best performance out of Cowboy has to figure out the best values. One of these values is the <code>buffer</code> option, which represents the size of the socket&apos;s buffer on OTP&apos;s side. Its default is very low (1460 bytes) and so performance is highly degraded in some scenarios, such as reading large request bodies, or large Websocket frames. During experiments it was found that there is no best default value, even in a single environment. Indeed the performance was highly dependent on the size of the data we were receiving for each packet. Cowboy 2.13 therefore comes with a new <code>dynamic_buffer</code> mechanism that keeps track of the data received and updates the <code>buffer</code> size dynamically accordingly. The performance gains of this new approach are enormous as you will see at the end of this article, and have a positive impact on all protocols in most scenarios. The technical details can be found in commit <a href="https://github.com/ninenines/cowboy/commit/49be0f57cf5ce66178dc24b9c08c835888d1ce0e">49be0f57cf5ce66178dc24b9c08c835888d1ce0e</a>.</p>
-<p>Finally, HTTP/1.1 and HTTP/2 connection processes can now be set to <code>hibernate</code> automatically, which can have a positive impact on performance in some scenarios (such as receiving large HTTP/1.1 request bodies) even if most scenarios will see a small drop in performance. Cowboy 2.13 will not <code>hibernate</code> by default, but it felt important to mention in this article: if your service deals with GB-sized request bodies, it may help.</p>
-<p>Cumulatively, the optimisations improve the performance of Cowboy 2.13, compared to Cowboy 2.12, in these terms:</p>
-<p>A single HTTP request uploading a 10GB file is handled 11x faster over HTTP, 8x faster over HTTPS and 7.5 faster over HTTP/2.</p>
-<p>Ten thousand sequential HTTP requests each uploading a 1MB file is handled 23x faster over HTTP, 6x faster over HTTPS and 5x faster over HTTP/2.</p>
-<p>The same benchmark over 10 concurrent connections is 7x faster over HTTP, 1.7x faster over HTTPS and 3.5x faster over HTTP/2.</p>
-<p>Performance of &quot;hello world&quot; type of benchmarks, where the response is received before issuing a new request, sees little impact from the changes in Cowboy 2.13.</p>
-<p>Performance of HTTP/2 over TCP connections, which is typically not used in production, is dramatically improved depending on the HTTP/2 options used. Performance improvements of up to 57x faster processing of 10GB request bodies have been observed. I suspect there might be an underlying issue in Erlang/OTP that leads to performance issues that only HTTP/2 over TCP could see in Cowboy 2.12, and have opened a ticket.</p>
-<p>Websocket performance improvements vary depending on the type of data: binary frames, text frames containing ASCII, text frames containing mixed ASCII/UTF-8 and text frames containing mostly UTF-8. They also vary depending on the underlying protocol (HTTP/1.1 or HTTP/2). Again, comparing Cowboy 2.13 to Cowboy 2.12:</p>
-<p>Binary text frames are processed 5x faster in both Websocket over HTTP/1.1 and Websocket over HTTP/2.</p>
-<p>ASCII text frames are processed 4x to 6x faster in Websocket over HTTP/1.1, depending on the scenario, and 4x faster in Websocket over HTTP/2.</p>
-<p>Mixed text frames are processed 3x to 4.5x faster in Websocket over HTTP/1.1, depending on the scenario, and 3x faster in Websocket over HTTP/2.</p>
-<p>Mostly UTF-8 text frames are processed 3x faster in Websocket over HTTP/1.1, depending on the scenario, and 2.5x faster in Websocket over HTTP/2.</p>
-<p>When deflate compression is enabled, the performance is roughly the same between Cowboy 2.12 and Cowboy 2.13.</p>
-<p>Most of the performance improvements are due to the new <code>dynamic_buffer</code> option. Users that already set a custom <code>buffer</code> value will not see as much improvement in this release, since they already gained much from tweaking <code>buffer</code>. Do note that the <code>dynamic_buffer</code> option will not be enabled by default if <code>buffer</code> is configured.</p>
-<p>Still, all other improvements should be beneficial to all users, particularly the Websocket improvements. I hope that you are looking forward to these changes! I will now be preparing the Cowboy 2.13 release.</p>
-<p>You can donate to this project via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>.</p>
-<p>As usual, feedback is appreciated, and issues or questions should be sent via Github tickets or discussions. We also have a new Discord server. <a href="https://discord.gg/x25nNq2fFE">Join Erlang OSS Discord now!</a></p>
-
-
-</article>
-</div>
-
-<div class="span3 sidecol">
-<h3>More articles</h3>
-<ul id="articles-nav" class="extra_margin">
-	
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
-		
-	
-</ul>
-
-<h3>Feedback</h3>
-<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
-if you found any mistake or need clarification on any of the
-articles.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-      <footer>
-        <div class="container">
-          <div class="row">
-            <div class="span6">
-              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
-              <nav>
-                <ul>
-                  <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
-                </ul>
-              </nav>
-            </div>
-            <div class="span6 credits">
-               <p><img src="/img/footer_logo.png"></p>
-               <p>Copyright &copy; Loïc Hoguin</p>
-            </div>
+      </div>
+    </header>
+    <div id="contents">
+      <div class="container">
+        <div class="row">
+          <div class="span9 maincol">
+            <article class="blog_item">
+              <header>
+                <h1 class="lined-header"><span>Performance improvements in Cowboy 2.13</span></h1>
+                <p class="date"><span class="year">2025</span> <span class="day-month">13 Feb</span></p>
+              </header>
+              <p>Cowboy <code>2.13.0</code> is close to being released. Much of the work done on this release focused on performance, and in particular the performance of the Websocket protocol.</p>
+              <p>The Websocket protocol requires clients to mask the data they send, originally to avoid issues with proxies. This requirement is still present for Websocket over HTTP/2 nevertheless. This means that the server has to unmask the data, which has a notable impact on performance. Cowboy 2.13 will attempt to unmask 16 bytes at a time instead of 4 previously, leading to a rouhgly 10% faster processing of Websocket frames.</p>
+              <p>Similarly, the Websocket protocol requires validating that the data in text frames is valid UTF-8. This part of the Websocket code was always highly optimised, but changes in the VM made the optimisations less impactful. The validation code was therefore rewritten, inspired by the validation code in Erlang/OTP&apos;s new <code>json</code> module (itself inspired by the validation in Cowboy!) and Cowboy 2.13 is now 10% to 15% faster processing Websocket text frames.</p>
+              <p>Cowboy must keep track of the data coming in to detect whether the client is still around, or gone. It does so via a timeout that is reset when data is received. Since it may receive a lot of data, there may be a lot of timer resets, impacting performance. Cowboy 2.13 will instead run a timer periodically with a timeout that is a tenth of <code>idle_timeout</code>, and count how many times in a row that timeout was triggered without receiving data. This greatly reduces the number of times we set or reset the timer and makes some Websocket scenarios 10% faster.</p>
+              <p>These timer improvements were also brought to HTTP/2.</p>
+              <p>Cowboy by default will not configure transport options, because they are highly dependent on environment, so anyone looking to get the best performance out of Cowboy has to figure out the best values. One of these values is the <code>buffer</code> option, which represents the size of the socket&apos;s buffer on OTP&apos;s side. Its default is very low (1460 bytes) and so performance is highly degraded in some scenarios, such as reading large request bodies, or large Websocket frames. During experiments it was found that there is no best default value, even in a single environment. Indeed the performance was highly dependent on the size of the data we were receiving for each packet. Cowboy 2.13 therefore comes with a new <code>dynamic_buffer</code> mechanism that keeps track of the data received and updates the <code>buffer</code> size dynamically accordingly. The performance gains of this new approach are enormous as you will see at the end of this article, and have a positive impact on all protocols in most scenarios. The technical details can be found in commit <a href="https://github.com/ninenines/cowboy/commit/49be0f57cf5ce66178dc24b9c08c835888d1ce0e">49be0f57cf5ce66178dc24b9c08c835888d1ce0e</a>.</p>
+              <p>Finally, HTTP/1.1 and HTTP/2 connection processes can now be set to <code>hibernate</code> automatically, which can have a positive impact on performance in some scenarios (such as receiving large HTTP/1.1 request bodies) even if most scenarios will see a small drop in performance. Cowboy 2.13 will not <code>hibernate</code> by default, but it felt important to mention in this article: if your service deals with GB-sized request bodies, it may help.</p>
+              <p>Cumulatively, the optimisations improve the performance of Cowboy 2.13, compared to Cowboy 2.12, in these terms:</p>
+              <p>A single HTTP request uploading a 10GB file is handled 11x faster over HTTP, 8x faster over HTTPS and 7.5 faster over HTTP/2.</p>
+              <p>Ten thousand sequential HTTP requests each uploading a 1MB file is handled 23x faster over HTTP, 6x faster over HTTPS and 5x faster over HTTP/2.</p>
+              <p>The same benchmark over 10 concurrent connections is 7x faster over HTTP, 1.7x faster over HTTPS and 3.5x faster over HTTP/2.</p>
+              <p>Performance of &quot;hello world&quot; type of benchmarks, where the response is received before issuing a new request, sees little impact from the changes in Cowboy 2.13.</p>
+              <p>Performance of HTTP/2 over TCP connections, which is typically not used in production, is dramatically improved depending on the HTTP/2 options used. Performance improvements of up to 57x faster processing of 10GB request bodies have been observed. I suspect there might be an underlying issue in Erlang/OTP that leads to performance issues that only HTTP/2 over TCP could see in Cowboy 2.12, and have opened a ticket.</p>
+              <p>Websocket performance improvements vary depending on the type of data: binary frames, text frames containing ASCII, text frames containing mixed ASCII/UTF-8 and text frames containing mostly UTF-8. They also vary depending on the underlying protocol (HTTP/1.1 or HTTP/2). Again, comparing Cowboy 2.13 to Cowboy 2.12:</p>
+              <p>Binary text frames are processed 5x faster in both Websocket over HTTP/1.1 and Websocket over HTTP/2.</p>
+              <p>ASCII text frames are processed 4x to 6x faster in Websocket over HTTP/1.1, depending on the scenario, and 4x faster in Websocket over HTTP/2.</p>
+              <p>Mixed text frames are processed 3x to 4.5x faster in Websocket over HTTP/1.1, depending on the scenario, and 3x faster in Websocket over HTTP/2.</p>
+              <p>Mostly UTF-8 text frames are processed 3x faster in Websocket over HTTP/1.1, depending on the scenario, and 2.5x faster in Websocket over HTTP/2.</p>
+              <p>When deflate compression is enabled, the performance is roughly the same between Cowboy 2.12 and Cowboy 2.13.</p>
+              <p>Most of the performance improvements are due to the new <code>dynamic_buffer</code> option. Users that already set a custom <code>buffer</code> value will not see as much improvement in this release, since they already gained much from tweaking <code>buffer</code>. Do note that the <code>dynamic_buffer</code> option will not be enabled by default if <code>buffer</code> is configured.</p>
+              <p>Still, all other improvements should be beneficial to all users, particularly the Websocket improvements. I hope that you are looking forward to these changes! I will now be preparing the Cowboy 2.13 release.</p>
+              <p>You can donate to this project via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>.</p>
+              <p>As usual, feedback is appreciated, and issues or questions should be sent via Github tickets or discussions. We also have a new Discord server. <a href="https://discord.gg/x25nNq2fFE">Join Erlang OSS Discord now!</a></p>
+            </article>
+          </div>
+          <div class="span3 sidecol">
+            <h3>More articles</h3>
+            <ul id="articles-nav" class="extra_margin">
+              <li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
+              <li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
+              <li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
+              <li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
+              <li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
+              <li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+              <li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+              <li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+              <li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+              <li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+              <li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+              <li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+            </ul>
+            <h3>Feedback</h3>
+            <p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a> if you found any mistake or need clarification on any of the articles.</p>
           </div>
         </div>
-      </footer>
-
-    
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="span6">
+            <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+            <nav>
+              <ul>
+                <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li>
+                <li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="span6 credits">
+            <p><img src="/img/footer_logo.png"></p>
+            <p>Copyright &copy; Loïc Hoguin</p>
+          </div>
+        </div>
+      </div>
+    </footer>
     <script src="/js/custom.js"></script>
   </body>
 </html>
-

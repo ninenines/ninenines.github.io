@@ -1,485 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
-
     <title>Nine Nines: Xerl: atomic expressions</title>
-
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=7" rel="stylesheet">
-
     <link rel="shortcut icon" href="/img/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
     <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
-
-	</head>
-
-
-<body class="">
-  <header id="page-head">
-    <div id="topbar" class="container">
+  </head>
+  <body class="">
+    <header id="page-head">
+      <div id="topbar" class="container">
         <div class="row">
           <div class="span2">
             <h1 id="logo"><a href="/" title="99s">99s</a></h1>
           </div>
           <div class="span10">
-            
             <div id="side-header">
               <nav>
                 <ul>
                   <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
-  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
-  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li><a title="Read the docs" href="/docs">Documentation</a></li>
                 </ul>
-              </nav> 
+              </nav>
               <ul id="social">
-                <li>
-                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
-                </li>
-                    <li>
-						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
-					</li>
+                <li><a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a></li>
+                <li><a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a></li>
               </ul>
             </div>
           </div>
         </div>
-    </div>
-
-
-</header>
-
-<div id="contents">
-<div class="container">
-<div class="row">
-<div class="span9 maincol">
-
-<article class="blog_item">
-<header>
-	<h1 class="lined-header"><span>Xerl: atomic expressions</span></h1>
-	<p class="date">
-		<span class="year">2013</span>
-		<span class="day-month">18 Feb</span>
-	</p>
-</header>
-
-<p>We will be adding atomic integer expressions to our language. These look as follow in Erlang:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+      </div>
+    </header>
+    <div id="contents">
+      <div class="container">
+        <div class="row">
+          <div class="span9 maincol">
+            <article class="blog_item">
+              <header>
+                <h1 class="lined-header"><span>Xerl: atomic expressions</span></h1>
+                <p class="date"><span class="year">2013</span> <span class="day-month">18 Feb</span></p>
+              </header>
+              <p>We will be adding atomic integer expressions to our language. These look as follow in Erlang:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><font color="#993399">42</font><font color="#990000">.</font></tt></pre>
-</div></div>
-<p>And the result of this expression is of course 42.</p>
-<p>We will be running this expression at compile time, since we don&apos;t have the means to run code at runtime yet. This will of course result in no module being compiled, but that&apos;s OK, it will allow us to discuss a few important things we&apos;ll have to plan for later on.</p>
-<p>First, we must of course accept integers in the tokenizer.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt><font color="#993399">42</font><font color="#990000">.</font></tt></pre>
+                </div>
+              </div>
+              <p>And the result of this expression is of course 42.</p>
+              <p>We will be running this expression at compile time, since we don&apos;t have the means to run code at runtime yet. This will of course result in no module being compiled, but that&apos;s OK, it will allow us to discuss a few important things we&apos;ll have to plan for later on.</p>
+              <p>First, we must of course accept integers in the tokenizer.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<font color="#009900">D</font>}<font color="#990000">+</font> <font color="#990000">:</font> {<font color="#FF6600">token</font>, {<b><font color="#000080">integer</font></b>, <font color="#009900">TokenLine</font>, <b><font color="#000080">list_to_integer</font></b>(<font color="#009900">TokenChars</font>)}}<font color="#990000">.</font></tt></pre>
-</div></div>
-<p>We must then accept atomic integer expressions in the parser. This is a simple change. The integer token is terminal so we need to add it to the list of terminals, and then we only need to add it as a possible expression.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt>{<font color="#009900">D</font>}<font color="#990000">+</font> <font color="#990000">:</font> {<font color="#FF6600">token</font>, {<b><font color="#000080">integer</font></b>, <font color="#009900">TokenLine</font>, <b><font color="#000080">list_to_integer</font></b>(<font color="#009900">TokenChars</font>)}}<font color="#990000">.</font></tt></pre>
+                </div>
+              </div>
+              <p>We must then accept atomic integer expressions in the parser. This is a simple change. The integer token is terminal so we need to add it to the list of terminals, and then we only need to add it as a possible expression.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><font color="#FF6600">expr</font> <font color="#990000">-&gt;</font> <font color="#FF6600">integer</font> <font color="#990000">:</font> <font color="#FF6600">'$1'</font><font color="#990000">.</font></tt></pre>
-</div></div>
-<p>A file containing only the number 42 (with no terminating dot) will give the following result when parsing it. This is incidentally the same result as when tokenizing.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt><font color="#FF6600">expr</font> <font color="#990000">-&gt;</font> <font color="#FF6600">integer</font> <font color="#990000">:</font> <font color="#FF6600">'$1'</font><font color="#990000">.</font></tt></pre>
+                </div>
+              </div>
+              <p>A file containing only the number 42 (with no terminating dot) will give the following result when parsing it. This is incidentally the same result as when tokenizing.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>[{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">42</font>}]</tt></pre>
-</div></div>
-<p>We must then evaluate it. We&apos;re going to interpret it for now. Since the result of this expression is not stored in a variable, we are going to simply print it on the screen and discard it.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt>[{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">42</font>}]</tt></pre>
+                </div>
+              </div>
+              <p>We must then evaluate it. We&apos;re going to interpret it for now. Since the result of this expression is not stored in a variable, we are going to simply print it on the screen and discard it.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">execute</font></b>(<font color="#009900">Filename</font>, [{<b><font color="#000080">integer</font></b>, <font color="#990000">_</font>, <font color="#009900">Int</font>}|<font color="#009900">Tail</font>], <font color="#009900">Modules</font>) <font color="#990000">-&gt;</font>
+                  <pre><tt><b><font color="#000000">execute</font></b>(<font color="#009900">Filename</font>, [{<b><font color="#000080">integer</font></b>, <font color="#990000">_</font>, <font color="#009900">Int</font>}|<font color="#009900">Tail</font>], <font color="#009900">Modules</font>) <font color="#990000">-&gt;</font>
     <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"integer ~p~n"</font>, [<font color="#009900">Int</font>]),
     <b><font color="#000000">execute</font></b>(<font color="#009900">Filename</font>, <font color="#009900">Tail</font>, <font color="#009900">Modules</font>)<font color="#990000">.</font></tt></pre>
-</div></div>
-<p>You might think by now that what we&apos;ve done so far this time is useless. It brings up many interesting questions though.</p>
-<ul><li>What happens if a file contains two integers?
-</li>
-<li>Can we live without expression separators?
-</li>
-<li>Do we need an interpreter for the compile step?
-</li>
-</ul>
-<p>This is what happens when we create a file that contains two integers on two separate lines:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>You might think by now that what we&apos;ve done so far this time is useless. It brings up many interesting questions though.</p>
+              <ul>
+                <li>What happens if a file contains two integers?</li>
+                <li>Can we live without expression separators?</li>
+                <li>Do we need an interpreter for the compile step?</li>
+              </ul>
+              <p>This is what happens when we create a file that contains two integers on two separate lines:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>[{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">42</font>},{<b><font color="#000080">integer</font></b>,<font color="#993399">2</font>,<font color="#993399">43</font>}]</tt></pre>
-</div></div>
-<p>And on the same lines:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt>[{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">42</font>},{<b><font color="#000080">integer</font></b>,<font color="#993399">2</font>,<font color="#993399">43</font>}]</tt></pre>
+                </div>
+              </div>
+              <p>And on the same lines:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>[{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">42</font>},{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">43</font>}]</tt></pre>
-</div></div>
-<p>Does this mean we do not need separators between expressions? Not quite. The <code>+</code> and <code>-</code> operators are an example of why we can&apos;t have nice things. They are ambiguous. They have two different meanings: make an atomic integer positive or negative, or perform an addition or a substraction between two integers. Without a separator you won&apos;t be able to know if the following snippet is one or two expressions:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt>[{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">42</font>},{<b><font color="#000080">integer</font></b>,<font color="#993399">1</font>,<font color="#993399">43</font>}]</tt></pre>
+                </div>
+              </div>
+              <p>Does this mean we do not need separators between expressions? Not quite. The <code>+</code> and <code>-</code> operators are an example of why we can&apos;t have nice things. They are ambiguous. They have two different meanings: make an atomic integer positive or negative, or perform an addition or a substraction between two integers. Without a separator you won&apos;t be able to know if the following snippet is one or two expressions:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><font color="#993399">42</font> <font color="#990000">-</font> <font color="#993399">12</font></tt></pre>
-</div></div>
-<p>Can we use the line ending as an expression separator then? Some languages make whitespace important, often the line separator becomes the expression separator. I do not think this is the best idea, it can lead to errors. For example the following snippet would be two expressions:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt><font color="#993399">42</font> <font color="#990000">-</font> <font color="#993399">12</font></tt></pre>
+                </div>
+              </div>
+              <p>Can we use the line ending as an expression separator then? Some languages make whitespace important, often the line separator becomes the expression separator. I do not think this is the best idea, it can lead to errors. For example the following snippet would be two expressions:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><font color="#009900">Var</font> <font color="#990000">=</font> <b><font color="#000000">some_module:some_function</font></b>() <font color="#990000">+</font> <b><font color="#000000">some_module:other_function</font></b>()
+                  <pre><tt><font color="#009900">Var</font> <font color="#990000">=</font> <b><font color="#000000">some_module:some_function</font></b>() <font color="#990000">+</font> <b><font color="#000000">some_module:other_function</font></b>()
     <font color="#990000">+</font> <b><font color="#000000">another_module:another_function</font></b>()</tt></pre>
-</div></div>
-<p>It is not obvious what would happen unless you are a veteran of the language, and so we will not go down that road. We will use an expression separator just like in Erlang: the comma. We will however allow a trailing comma to make copy pasting code easier, even if this means some old academics guy will go nuts about it later on. This trailing comma will be optional and simply discarded by the parser when encountered. We will implement this next.</p>
-<p>The question as to how we will handle running expressions remains. We have two choices here: we can write an interpreter, or we can compile the code and run it. Writing an interpreter would require us to do twice the work, and we are lazy, so we will not do that.</p>
-<p>You might already know that Erlang does not use the same code for compiling and for evaluating commands in the shell. The main reason for this is that in Erlang everything isn&apos;t an expression. Indeed, the compiler compiles forms which contain expressions, but you can&apos;t have forms in the shell.</p>
-<p>How are we going to compile the code that isn&apos;t part of a module then? What do we need to run at compile-time, anyway? The body of the file itself, of course. The body of module declarations. That&apos;s about it.</p>
-<p>For the file itself, we can simply compile it as a big function that will be executed. Then, everytime we encounter a module declaration, we will run the compiler on its body, making its body essentially a big function that will be executed. The same mechanism will be applied when we encounter a module declaration at runtime.</p>
-<p>At runtime there&apos;s nothing else for us to do, the result of this operation will load all the compiled modules. At compile time we will also want to save them to a file. We&apos;ll see later how we can do that.</p>
-<ul><li><a href="https://github.com/extend/xerl/blob/0.3/">View the source</a>
-</li>
-</ul>
-
-
-</article>
-</div>
-
-<div class="span3 sidecol">
-<h3>More articles</h3>
-<ul id="articles-nav" class="extra_margin">
-	
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
-		
-	
-</ul>
-
-<h3>Feedback</h3>
-<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
-if you found any mistake or need clarification on any of the
-articles.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-      <footer>
-        <div class="container">
-          <div class="row">
-            <div class="span6">
-              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
-              <nav>
-                <ul>
-                  <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
-                </ul>
-              </nav>
-            </div>
-            <div class="span6 credits">
-               <p><img src="/img/footer_logo.png"></p>
-               <p>Copyright &copy; Loïc Hoguin</p>
-            </div>
+                </div>
+              </div>
+              <p>It is not obvious what would happen unless you are a veteran of the language, and so we will not go down that road. We will use an expression separator just like in Erlang: the comma. We will however allow a trailing comma to make copy pasting code easier, even if this means some old academics guy will go nuts about it later on. This trailing comma will be optional and simply discarded by the parser when encountered. We will implement this next.</p>
+              <p>The question as to how we will handle running expressions remains. We have two choices here: we can write an interpreter, or we can compile the code and run it. Writing an interpreter would require us to do twice the work, and we are lazy, so we will not do that.</p>
+              <p>You might already know that Erlang does not use the same code for compiling and for evaluating commands in the shell. The main reason for this is that in Erlang everything isn&apos;t an expression. Indeed, the compiler compiles forms which contain expressions, but you can&apos;t have forms in the shell.</p>
+              <p>How are we going to compile the code that isn&apos;t part of a module then? What do we need to run at compile-time, anyway? The body of the file itself, of course. The body of module declarations. That&apos;s about it.</p>
+              <p>For the file itself, we can simply compile it as a big function that will be executed. Then, everytime we encounter a module declaration, we will run the compiler on its body, making its body essentially a big function that will be executed. The same mechanism will be applied when we encounter a module declaration at runtime.</p>
+              <p>At runtime there&apos;s nothing else for us to do, the result of this operation will load all the compiled modules. At compile time we will also want to save them to a file. We&apos;ll see later how we can do that.</p>
+              <ul>
+                <li><a href="https://github.com/extend/xerl/blob/0.3/">View the source</a></li>
+              </ul>
+            </article>
+          </div>
+          <div class="span3 sidecol">
+            <h3>More articles</h3>
+            <ul id="articles-nav" class="extra_margin">
+              <li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
+              <li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
+              <li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
+              <li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
+              <li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
+              <li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+              <li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+              <li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+              <li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+              <li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+              <li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+              <li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+            </ul>
+            <h3>Feedback</h3>
+            <p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a> if you found any mistake or need clarification on any of the articles.</p>
           </div>
         </div>
-      </footer>
-
-    
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="span6">
+            <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+            <nav>
+              <ul>
+                <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li>
+                <li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="span6 credits">
+            <p><img src="/img/footer_logo.png"></p>
+            <p>Copyright &copy; Loïc Hoguin</p>
+          </div>
+        </div>
+      </div>
+    </footer>
     <script src="/js/custom.js"></script>
   </body>
 </html>
-

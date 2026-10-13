@@ -1,81 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
-
     <title>Nine Nines: Validating UTF-8 binaries with Erlang</title>
-
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=7" rel="stylesheet">
-
     <link rel="shortcut icon" href="/img/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
     <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
-
-	</head>
-
-
-<body class="">
-  <header id="page-head">
-    <div id="topbar" class="container">
+  </head>
+  <body class="">
+    <header id="page-head">
+      <div id="topbar" class="container">
         <div class="row">
           <div class="span2">
             <h1 id="logo"><a href="/" title="99s">99s</a></h1>
           </div>
           <div class="span10">
-            
             <div id="side-header">
               <nav>
                 <ul>
                   <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
-  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
-  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li><a title="Read the docs" href="/docs">Documentation</a></li>
                 </ul>
-              </nav> 
+              </nav>
               <ul id="social">
-                <li>
-                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
-                </li>
-                    <li>
-						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
-					</li>
+                <li><a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a></li>
+                <li><a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a></li>
               </ul>
             </div>
           </div>
         </div>
-    </div>
-
-
-</header>
-
-<div id="contents">
-<div class="container">
-<div class="row">
-<div class="span9 maincol">
-
-<article class="blog_item">
-<header>
-	<h1 class="lined-header"><span>Validating UTF-8 binaries with Erlang</span></h1>
-	<p class="date">
-		<span class="year">2015</span>
-		<span class="day-month">06 Mar</span>
-	</p>
-</header>
-
-<p>Yesterday I pushed Websocket permessage-deflate to Cowboy master. I also pushed <a href="https://github.com/ninenines/cowlib/commit/7e4983b70ddf8cedb967e36fba6a600731bdad5d">a
-change in the way the code validates UTF-8 data</a> (required for text and close frames as per the spec).</p>
-<p>When looking into why the permessage-deflate tests in autobahntestsuite were taking such a long time, I found that autobahn is using an adaptation of the algorithm named <a href="http://bjoern.hoehrmann.de/utf-8/decoder/dfa/">Flexible
-and Economical UTF-8 Decoder</a>. This is the C99 implementation:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+      </div>
+    </header>
+    <div id="contents">
+      <div class="container">
+        <div class="row">
+          <div class="span9 maincol">
+            <article class="blog_item">
+              <header>
+                <h1 class="lined-header"><span>Validating UTF-8 binaries with Erlang</span></h1>
+                <p class="date"><span class="year">2015</span> <span class="day-month">06 Mar</span></p>
+              </header>
+              <p>Yesterday I pushed Websocket permessage-deflate to Cowboy master. I also pushed <a href="https://github.com/ninenines/cowlib/commit/7e4983b70ddf8cedb967e36fba6a600731bdad5d">a change in the way the code validates UTF-8 data</a> (required for text and close frames as per the spec).</p>
+              <p>When looking into why the permessage-deflate tests in autobahntestsuite were taking such a long time, I found that autobahn is using an adaptation of the algorithm named <a href="http://bjoern.hoehrmann.de/utf-8/decoder/dfa/">Flexible and Economical UTF-8 Decoder</a>. This is the C99 implementation:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><i><font color="#9A1900">// Copyright (c) 2008-2009 Bjoern Hoehrmann &lt;bjoern@hoehrmann.de&gt;</font></i>
+                  <pre><tt><i><font color="#9A1900">// Copyright (c) 2008-2009 Bjoern Hoehrmann &lt;bjoern@hoehrmann.de&gt;</font></i>
 <i><font color="#9A1900">// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.</font></i>
 
 <b><font color="#000080">#define</font></b> UTF8_ACCEPT <font color="#993399">0</font>
@@ -109,13 +89,16 @@ uint32_t inline
   <font color="#990000">*</font>state <font color="#990000">=</font> utf8d<font color="#990000">[</font><font color="#993399">256</font> <font color="#990000">+</font> <font color="#990000">*</font>state<font color="#990000">*</font><font color="#993399">16</font> <font color="#990000">+</font> type<font color="#990000">];</font>
   <b><font color="#0000FF">return</font></b> <font color="#990000">*</font>state<font color="#990000">;</font>
 <font color="#FF0000">}</font></tt></pre>
-</div></div>
-<p>And this is the Erlang implementation I came up with:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>And this is the Erlang implementation I came up with:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><i><font color="#9A1900">%% This function returns 0 on success, 1 on error, and 2..8 on incomplete data.</font></i>
+                  <pre><tt><i><font color="#9A1900">%% This function returns 0 on success, 1 on error, and 2..8 on incomplete data.</font></i>
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;&gt;&gt;</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font>;
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">128</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">2</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&gt;=</font> <font color="#993399">128</font>, <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">144</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
@@ -142,42 +125,51 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">=:=</font> <font color="#993399">241</font>; <font color="#009900">C</font> <font color="#990000">=:=</font> <font color="#993399">242</font>; <font color="#009900">C</font> <font color="#990000">=:=</font> <font color="#993399">243</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">7</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">244</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">8</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">_</font>, <font color="#990000">_</font>) <font color="#990000">-&gt;</font> <font color="#993399">1</font><font color="#990000">.</font></tt></pre>
-</div></div>
-<p>Does it look similar to you? So how did we get there?</p>
-<p>I started with a naive implementation of the original. First, we don&apos;t need the codepoint calculated and extracted for our validation function. We just want to know the data is valid, so we only need to calculate the next state. Then, the only thing we needed to be careful about was that tuples are 1-based, and that we need to stop processing the binary when we get the state 1 or when the binary is empty.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>Does it look similar to you? So how did we get there?</p>
+              <p>I started with a naive implementation of the original. First, we don&apos;t need the codepoint calculated and extracted for our validation function. We just want to know the data is valid, so we only need to calculate the next state. Then, the only thing we needed to be careful about was that tuples are 1-based, and that we need to stop processing the binary when we get the state 1 or when the binary is empty.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;&gt;&gt;</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font>;
+                  <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;&gt;&gt;</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font>;
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">_</font>, <font color="#993399">1</font>) <font color="#990000">-&gt;</font> <font color="#993399">1</font>;
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
 	<b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <b><font color="#000080">element</font></b>(<font color="#993399">257</font> <font color="#990000">+</font> <font color="#009900">State</font> <font color="#990000">*</font> <font color="#993399">16</font> <font color="#990000">+</font> <b><font color="#000080">element</font></b>(<font color="#993399">1</font> <font color="#990000">+</font> <font color="#009900">C</font>, <b><font color="#000080">?UTF8D</font></b>), <b><font color="#000080">?UTF8D</font></b>))<font color="#990000">.</font></tt></pre>
-</div></div>
-<p>The macro <code>?UTF8D</code> is the tuple equivalent of the C array in the original code.</p>
-<p>Compared to our previous algorithm, this performed about the same. In some situations a little faster, in some a little slower. In other words, not good enough. But because this new algorithm allows us to avoid a binary concatenation this warranted looking further.</p>
-<p>It was time to step into crazy land.</p>
-<p>Erlang is very good at pattern matching, even more so than doing some arithmetic coupled by fetching elements from a tuple. So I decided I was going to write all possible clauses for all combinations of <code>C</code> and <code>State</code>. And by write I mean generate.</p>
-<p>So I opened my Erlang shell, defined the variable <code>D</code> to be the tuple <code>?UTF8D</code> with its 400 elements, and then ran the following expression (after a bit of trial and error):</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>The macro <code>?UTF8D</code> is the tuple equivalent of the C array in the original code.</p>
+              <p>Compared to our previous algorithm, this performed about the same. In some situations a little faster, in some a little slower. In other words, not good enough. But because this new algorithm allows us to avoid a binary concatenation this warranted looking further.</p>
+              <p>It was time to step into crazy land.</p>
+              <p>Erlang is very good at pattern matching, even more so than doing some arithmetic coupled by fetching elements from a tuple. So I decided I was going to write all possible clauses for all combinations of <code>C</code> and <code>State</code>. And by write I mean generate.</p>
+              <p>So I opened my Erlang shell, defined the variable <code>D</code> to be the tuple <code>?UTF8D</code> with its 400 elements, and then ran the following expression (after a bit of trial and error):</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><font color="#993399">16</font><font color="#990000">&gt;</font> <b><font color="#000000">file:write_file</font></b>(<font color="#FF0000">"out.txt"</font>,
+                  <pre><tt><font color="#993399">16</font><font color="#990000">&gt;</font> <b><font color="#000000">file:write_file</font></b>(<font color="#FF0000">"out.txt"</font>,
 	[<b><font color="#000000">io_lib:format</font></b>(<font color="#FF0000">"validate_utf8(&lt;&lt; ~p, Rest/bits &gt;&gt;, ~p) -&gt; ~p;~n"</font>,
 		[<font color="#009900">C</font>, <font color="#009900">S</font>, <b><font color="#000080">element</font></b>(<font color="#993399">257</font> <font color="#990000">+</font> <font color="#009900">S</font> <font color="#990000">*</font> <font color="#993399">16</font> <font color="#990000">+</font> <b><font color="#000080">element</font></b>(<font color="#993399">1</font> <font color="#990000">+</font> <font color="#009900">C</font>, <font color="#009900">D</font>), <font color="#009900">D</font>)])
 			|| <font color="#009900">C</font> <font color="#990000">&lt;-</font> <b><font color="#000000">lists:seq</font></b>(<font color="#993399">0</font>,<font color="#993399">255</font>), <font color="#009900">S</font> <font color="#990000">&lt;-</font> <b><font color="#000000">lists:seq</font></b>(<font color="#993399">0</font>,<font color="#993399">8</font>)])<font color="#990000">.</font>
 <font color="#FF6600">ok</font></tt></pre>
-</div></div>
-<p>The result is a 2304 lines long file, containing 2304 clauses. People who pay attention to what I say on Twitter will remember I said something around 3000 clauses, but that was just me not using the right number of states in my estimate.</p>
-<p>There was a little more work to be done on this generated code that I did using regular expressions. We need to recurse when the resulting state is not 1. We also need to stop when the binary is empty, making it the 2305th clause.</p>
-<p>Still, 2305 is a lot. But hey, the code did work, and faster than the previous implementation too! But hey, perhaps I could find a way to reduce its size.</p>
-<p>Removing all the clauses that return 1 and putting a catch-all clause at the end instead reduced the number to about 500, and showed that many clauses were similar:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>The result is a 2304 lines long file, containing 2304 clauses. People who pay attention to what I say on Twitter will remember I said something around 3000 clauses, but that was just me not using the right number of states in my estimate.</p>
+              <p>There was a little more work to be done on this generated code that I did using regular expressions. We need to recurse when the resulting state is not 1. We also need to stop when the binary is empty, making it the 2305th clause.</p>
+              <p>Still, 2305 is a lot. But hey, the code did work, and faster than the previous implementation too! But hey, perhaps I could find a way to reduce its size.</p>
+              <p>Removing all the clauses that return 1 and putting a catch-all clause at the end instead reduced the number to about 500, and showed that many clauses were similar:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">0</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
+                  <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">0</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">1</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">2</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">3</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
@@ -185,13 +177,16 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">5</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">6</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">7</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);</tt></pre>
-</div></div>
-<p>But also:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>But also:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">2</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
+                  <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">2</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">3</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">2</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">5</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">2</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">6</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">3</font>);
@@ -201,15 +196,18 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">158</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">5</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">2</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">158</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">6</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">3</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">158</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">7</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">3</font>);</tt></pre>
-</div></div>
-<p>Patterns, my favorites!</p>
-<p>A little more time was spent to edit the 500 or so clauses into smaller equivalents, testing that performance was not impacted, and comitting the result.</p>
-<p>The patterns above can be found here in the resulting function:</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>Patterns, my favorites!</p>
+              <p>A little more time was spent to edit the 500 or so clauses into smaller equivalents, testing that performance was not impacted, and comitting the result.</p>
+              <p>The patterns above can be found here in the resulting function:</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">128</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
+                  <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">128</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <font color="#990000">...</font>
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">2</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&gt;=</font> <font color="#993399">144</font>, <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">160</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">3</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&gt;=</font> <font color="#993399">144</font>, <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">160</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">2</font>);
@@ -217,336 +215,111 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">6</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&gt;=</font> <font color="#993399">144</font>, <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">160</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">3</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">7</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&gt;=</font> <font color="#993399">144</font>, <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">160</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">3</font>);
 <font color="#990000">...</font></tt></pre>
-</div></div>
-<p>I hope you enjoyed this post.</p>
-
-
-</article>
-</div>
-
-<div class="span3 sidecol">
-<h3>More articles</h3>
-<ul id="articles-nav" class="extra_margin">
-	
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
-		
-	
-</ul>
-
-<h3>Feedback</h3>
-<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
-if you found any mistake or need clarification on any of the
-articles.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-      <footer>
-        <div class="container">
-          <div class="row">
-            <div class="span6">
-              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
-              <nav>
-                <ul>
-                  <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
-                </ul>
-              </nav>
-            </div>
-            <div class="span6 credits">
-               <p><img src="/img/footer_logo.png"></p>
-               <p>Copyright &copy; Loïc Hoguin</p>
-            </div>
+                </div>
+              </div>
+              <p>I hope you enjoyed this post.</p>
+            </article>
+          </div>
+          <div class="span3 sidecol">
+            <h3>More articles</h3>
+            <ul id="articles-nav" class="extra_margin">
+              <li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
+              <li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
+              <li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
+              <li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
+              <li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
+              <li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+              <li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+              <li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+              <li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+              <li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+              <li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+              <li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+            </ul>
+            <h3>Feedback</h3>
+            <p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a> if you found any mistake or need clarification on any of the articles.</p>
           </div>
         </div>
-      </footer>
-
-    
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="span6">
+            <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+            <nav>
+              <ul>
+                <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li>
+                <li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="span6 credits">
+            <p><img src="/img/footer_logo.png"></p>
+            <p>Copyright &copy; Loïc Hoguin</p>
+          </div>
+        </div>
+      </div>
+    </footer>
     <script src="/js/custom.js"></script>
   </body>
 </html>
-

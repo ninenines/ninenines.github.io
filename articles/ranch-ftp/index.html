@@ -1,109 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
-
     <title>Nine Nines: Build an FTP Server with Ranch in 30 Minutes</title>
-
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=7" rel="stylesheet">
-
     <link rel="shortcut icon" href="/img/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
     <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
-
-	</head>
-
-
-<body class="">
-  <header id="page-head">
-    <div id="topbar" class="container">
+  </head>
+  <body class="">
+    <header id="page-head">
+      <div id="topbar" class="container">
         <div class="row">
           <div class="span2">
             <h1 id="logo"><a href="/" title="99s">99s</a></h1>
           </div>
           <div class="span10">
-            
             <div id="side-header">
               <nav>
                 <ul>
                   <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
-  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
-  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li><a title="Read the docs" href="/docs">Documentation</a></li>
                 </ul>
-              </nav> 
+              </nav>
               <ul id="social">
-                <li>
-                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
-                </li>
-                    <li>
-						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
-					</li>
+                <li><a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a></li>
+                <li><a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a></li>
               </ul>
             </div>
           </div>
         </div>
-    </div>
-
-
-</header>
-
-<div id="contents">
-<div class="container">
-<div class="row">
-<div class="span9 maincol">
-
-<article class="blog_item">
-<header>
-	<h1 class="lined-header"><span>Build an FTP Server with Ranch in 30 Minutes</span></h1>
-	<p class="date">
-		<span class="year">2012</span>
-		<span class="day-month">14 Nov</span>
-	</p>
-</header>
-
-<p>Last week I was speaking at the <a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">London Erlang Factory Lite</a> where I presented a live demonstration of building an FTP server using <a href="http://ninenines.eu/docs/en/ranch/HEAD/README">Ranch</a>. As there was no slide, you should use this article as a reference instead.</p>
-<p>The goal of this article is to showcase how to use Ranch for writing a network protocol implementation, how Ranch gets out of the way to let you write the code that matters, and the common techniques used when writing servers.</p>
-<p>Let&apos;s start by creating an empty project. Create a new directory and then open a terminal into that directory. The first step is to add Ranch as a dependency. Create the <code>rebar.config</code> file and add the following 3 lines.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+      </div>
+    </header>
+    <div id="contents">
+      <div class="container">
+        <div class="row">
+          <div class="span9 maincol">
+            <article class="blog_item">
+              <header>
+                <h1 class="lined-header"><span>Build an FTP Server with Ranch in 30 Minutes</span></h1>
+                <p class="date"><span class="year">2012</span> <span class="day-month">14 Nov</span></p>
+              </header>
+              <p>Last week I was speaking at the <a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">London Erlang Factory Lite</a> where I presented a live demonstration of building an FTP server using <a href="http://ninenines.eu/docs/en/ranch/HEAD/README">Ranch</a>. As there was no slide, you should use this article as a reference instead.</p>
+              <p>The goal of this article is to showcase how to use Ranch for writing a network protocol implementation, how Ranch gets out of the way to let you write the code that matters, and the common techniques used when writing servers.</p>
+              <p>Let&apos;s start by creating an empty project. Create a new directory and then open a terminal into that directory. The first step is to add Ranch as a dependency. Create the <code>rebar.config</code> file and add the following 3 lines.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{<font color="#FF6600">deps</font>, [
+                  <pre><tt>{<font color="#FF6600">deps</font>, [
     {<font color="#FF6600">ranch</font>, <font color="#FF0000">".*"</font>, {<font color="#FF6600">git</font>, <font color="#FF0000">"git://github.com/extend/ranch.git"</font>, <font color="#FF0000">"master"</font>}}
 ]}<font color="#990000">.</font></tt></pre>
-</div></div>
-<p>This makes your application depend on the last Ranch version available on the <em>master</em> branch. This is fine for development, however when you start pushing your application to production you will want to revisit this file to hardcode the exact version you are using, to make sure you run the same version of dependencies in production.</p>
-<p>You can now fetch the dependencies.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>This makes your application depend on the last Ranch version available on the <em>master</em> branch. This is fine for development, however when you start pushing your application to production you will want to revisit this file to hardcode the exact version you are using, to make sure you run the same version of dependencies in production.</p>
+              <p>You can now fetch the dependencies.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ rebar get-deps
+                  <pre><tt>$ rebar get-deps
 <font color="#990000">==&gt;</font> ranch_ftp <font color="#990000">(</font>get-deps<font color="#990000">)</font>
 Pulling ranch from {git<font color="#990000">,</font><font color="#FF0000">"git://github.com/extend/ranch.git"</font><font color="#990000">,</font><font color="#FF0000">"master"</font>}
 Cloning into <font color="#FF0000">'ranch'</font><font color="#990000">...</font>
 <font color="#990000">==&gt;</font> ranch <font color="#990000">(</font>get-deps<font color="#990000">)</font></tt></pre>
-</div></div>
-<p>This will create a <em>deps/</em> folder containing Ranch.</p>
-<p>We don&apos;t actually need anything else to write the protocol code. We could make an application for it, but this isn&apos;t the purpose of this article so let&apos;s just move on to writing the protocol itself. Create the file <em>ranch_ftp_protocol.erl</em> and open it in your favorite editor.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>This will create a <em>deps/</em> folder containing Ranch.</p>
+              <p>We don&apos;t actually need anything else to write the protocol code. We could make an application for it, but this isn&apos;t the purpose of this article so let&apos;s just move on to writing the protocol itself. Create the file <em>ranch_ftp_protocol.erl</em> and open it in your favorite editor.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ vim ranch_ftp_protocol<font color="#990000">.</font>erl</tt></pre>
-</div></div>
-<p>Let&apos;s start with a blank protocol module.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt>$ vim ranch_ftp_protocol<font color="#990000">.</font>erl</tt></pre>
+                </div>
+              </div>
+              <p>Let&apos;s start with a blank protocol module.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000080">-module</font></b>(<font color="#FF6600">ranch_ftp_protocol</font>)<font color="#990000">.</font>
+                  <pre><tt><b><font color="#000080">-module</font></b>(<font color="#FF6600">ranch_ftp_protocol</font>)<font color="#990000">.</font>
 <b><font color="#000080">-export</font></b>([<b><font color="#000000">start_link</font></b><font color="#990000">/</font><font color="#993399">4</font>, <b><font color="#000000">init</font></b><font color="#990000">/</font><font color="#993399">3</font>])<font color="#990000">.</font>
 
 <b><font color="#000000">start_link</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Opts</font>) <font color="#990000">-&gt;</font>
@@ -113,55 +104,70 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
     <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"Got a connection!~n"</font>),
     <font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
-</div></div>
-<p>When Ranch receives a connection, it will call the <code>start_link/4</code> function with the listener&apos;s pid, socket, transport module to be used, and the options we define when starting the listener. We don&apos;t need options for the purpose of this article, so we don&apos;t pass them to the process we are creating.</p>
-<p>Let&apos;s open a shell and start a Ranch listener to begin accepting connections. We only need to call one function. You should probably open it in another terminal and keep it open for convenience. If you quit the shell you will have to repeat the commands to proceed.</p>
-<p>Also note that you need to type <code>c(ranch_ftp_protocol).</code> to recompile and reload the code for the protocol. You do not need to restart any process however.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>When Ranch receives a connection, it will call the <code>start_link/4</code> function with the listener&apos;s pid, socket, transport module to be used, and the options we define when starting the listener. We don&apos;t need options for the purpose of this article, so we don&apos;t pass them to the process we are creating.</p>
+              <p>Let&apos;s open a shell and start a Ranch listener to begin accepting connections. We only need to call one function. You should probably open it in another terminal and keep it open for convenience. If you quit the shell you will have to repeat the commands to proceed.</p>
+              <p>Also note that you need to type <code>c(ranch_ftp_protocol).</code> to recompile and reload the code for the protocol. You do not need to restart any process however.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ erl -pa ebin deps<font color="#990000">/*</font>/ebin
+                  <pre><tt>$ erl -pa ebin deps<font color="#990000">/*</font>/ebin
 Erlang R15B02 <font color="#990000">(</font>erts-<font color="#993399">5.9</font><font color="#990000">.</font><font color="#993399">2</font><font color="#990000">)</font> <font color="#990000">[</font><b><font color="#0000FF">source</font></b><font color="#990000">]</font> <font color="#990000">[</font><font color="#993399">64</font>-bit<font color="#990000">]</font> <font color="#990000">[</font>smp<font color="#990000">:</font><font color="#993399">4</font><font color="#990000">:</font><font color="#993399">4</font><font color="#990000">]</font> <font color="#990000">[</font>async-threads<font color="#990000">:</font><font color="#993399">0</font><font color="#990000">]</font> <font color="#990000">[</font>hipe<font color="#990000">]</font> <font color="#990000">[</font>kernel-poll<font color="#990000">:</font><b><font color="#0000FF">false</font></b><font color="#990000">]</font>
 
 Eshell V5<font color="#990000">.</font><font color="#993399">9.2</font>  <font color="#990000">(</font>abort with <font color="#990000">^</font>G<font color="#990000">)</font></tt></pre>
-</div></div>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><font color="#993399">1</font><font color="#990000">&gt;</font> <b><font color="#000000">application:start</font></b>(<font color="#FF6600">ranch</font>)<font color="#990000">.</font>
+                  <pre><tt><font color="#993399">1</font><font color="#990000">&gt;</font> <b><font color="#000000">application:start</font></b>(<font color="#FF6600">ranch</font>)<font color="#990000">.</font>
 <font color="#FF6600">ok</font>
 <font color="#993399">2</font><font color="#990000">&gt;</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">my_ftp</font>, <font color="#993399">10</font>,
        <font color="#FF6600">ranch_tcp</font>, [{<font color="#FF6600">port</font>, <font color="#993399">2121</font>}],
        <font color="#FF6600">ranch_ftp_protocol</font>, [])<font color="#990000">.</font>
 {<font color="#FF6600">ok</font>,<font color="#990000">&lt;</font><font color="#993399">0.40</font><font color="#990000">.</font><font color="#993399">0</font><font color="#990000">&gt;</font>}</tt></pre>
-</div></div>
-<p>This starts a listener named <code>my_ftp</code> that runs your very own <code>ranch_ftp_protocol</code> over TCP, listening on port <code>2121</code>. The last argument is the options given to the protocol that we ignored earlier.</p>
-<p>To try your code, you can use the following command. It should be able to connect, the server will print a message in the console, and then the client will print an error.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>This starts a listener named <code>my_ftp</code> that runs your very own <code>ranch_ftp_protocol</code> over TCP, listening on port <code>2121</code>. The last argument is the options given to the protocol that we ignored earlier.</p>
+              <p>To try your code, you can use the following command. It should be able to connect, the server will print a message in the console, and then the client will print an error.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>$ ftp localhost <font color="#993399">2121</font></tt></pre>
-</div></div>
-<p>Let&apos;s move on to actually writing the protocol.</p>
-<p>Once you have created the new process and returned the pid, Ranch will give ownership of the socket to you. This requires a synchronization step though.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                  <pre><tt>$ ftp localhost <font color="#993399">2121</font></tt></pre>
+                </div>
+              </div>
+              <p>Let&apos;s move on to actually writing the protocol.</p>
+              <p>Once you have created the new process and returned the pid, Ranch will give ownership of the socket to you. This requires a synchronization step though.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
+                  <pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
     <font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:accept_ack</font></b>(<font color="#009900">ListenerPid</font>),
     <font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
-</div></div>
-<p>Now that you acknowledged the new connection, you can use it safely.</p>
-<p>When an FTP server accepts a connection, it starts by sending a welcome message which can be one or more lines starting with the code <code>200</code>. Then the server will wait for the client to authenticate the user, and if the authentication went successfully, which it will always do for the purpose of this article, it will reply with a <code>230</code> code.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>Now that you acknowledged the new connection, you can use it safely.</p>
+              <p>When an FTP server accepts a connection, it starts by sending a welcome message which can be one or more lines starting with the code <code>200</code>. Then the server will wait for the client to authenticate the user, and if the authentication went successfully, which it will always do for the purpose of this article, it will reply with a <code>230</code> code.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
+                  <pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
     <font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:accept_ack</font></b>(<font color="#009900">ListenerPid</font>),
     <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"200 My cool FTP server welcomes you!\r\n"</font><font color="#990000">&gt;&gt;</font>),
     {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">=</font> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>),
@@ -171,15 +177,18 @@ http://www.gnu.org/software/src-highlite -->
     <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"User authenticated! ~p~n"</font>, [<font color="#009900">Rest</font>]),
     <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"230 Auth OK\r\n"</font><font color="#990000">&gt;&gt;</font>),
     <font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
-</div></div>
-<p>As you can see we don&apos;t need complex parsing code. We can simply match on the binary in the argument!</p>
-<p>Next we need to loop receiving data commands and optionally execute them, if we want our server to become useful.</p>
-<p>We will replace the <code>ok.</code> line with the call to the following function. The new function is recursive, each call receiving data from the socket and sending a response. For now we will send an error response for all commands the client sends.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>As you can see we don&apos;t need complex parsing code. We can simply match on the binary in the argument!</p>
+              <p>Next we need to loop receiving data commands and optionally execute them, if we want our server to become useful.</p>
+              <p>We will replace the <code>ok.</code> line with the call to the following function. The new function is recursive, each call receiving data from the socket and sending a response. For now we will send an error response for all commands the client sends.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
+                  <pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
     <b><font color="#0000FF">case</font></b> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>) <b><font color="#0000FF">of</font></b>
         {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>
             <b><font color="#000000">handle</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Data</font>),
@@ -191,14 +200,17 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#000000">handle</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Data</font>) <font color="#990000">-&gt;</font>
     <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"Command received ~p~n"</font>, [<font color="#009900">Data</font>]),
     <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"500 Bad command\r\n"</font><font color="#990000">&gt;&gt;</font>)<font color="#990000">.</font></tt></pre>
-</div></div>
-<p>With this we are almost ready to start implementing commands. But with code like this we might have errors if the client doesn&apos;t send just one command per packet, or if the packets arrive too fast, or if a command is split over multiple packets.</p>
-<p>To solve this, we need to use a buffer. Each time we receive data, we will append to the buffer, and then check if we have received a command fully before running it. The code could look similar to the following.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+                </div>
+              </div>
+              <p>With this we are almost ready to start implementing commands. But with code like this we might have errors if the client doesn&apos;t send just one command per packet, or if the packets arrive too fast, or if a command is split over multiple packets.</p>
+              <p>To solve this, we need to use a buffer. Each time we receive data, we will append to the buffer, and then check if we have received a command fully before running it. The code could look similar to the following.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Buffer</font>) <font color="#990000">-&gt;</font>
+                  <pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Buffer</font>) <font color="#990000">-&gt;</font>
     <b><font color="#0000FF">case</font></b> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>) <b><font color="#0000FF">of</font></b>
         {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>
 			<font color="#009900">Buffer2</font> <font color="#990000">=</font> <font color="#990000">&lt;&lt;</font> <font color="#009900">Buffer</font><font color="#990000">/</font><b><font color="#000080">binary</font></b>, <font color="#009900">Data</font><font color="#990000">/</font><b><font color="#000080">binary</font></b> <font color="#990000">&gt;&gt;</font>,
@@ -208,341 +220,116 @@ http://www.gnu.org/software/src-highlite -->
         {<font color="#FF6600">error</font>, <font color="#990000">_</font>} <font color="#990000">-&gt;</font>
             <b><font color="#000000">io:format</font></b>(<font color="#FF0000">"The client disconnected~n"</font>)
     <b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
-</div></div>
-<p>The implementation of <code>split/1</code> is left as an exercice to the reader. You will also probably want to handle the <code>QUIT</code> command, which must stop any processing and close the connection.</p>
-<p>The attentive reader will also take note that in the case of text- based protocols where commands are separated by line breaks, you can set an option using <code>Transport:setopts/2</code> and have all the buffering done for you for free by Erlang itself.</p>
-<p>As you can surely notice by now, Ranch allows us to build network applications by getting out of our way entirely past the initial setup. It lets you use the power of binary pattern matching to write text and binary protocol implementations in just a few lines of code.</p>
-<ul><li><a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">Watch the talk</a>
-</li>
-</ul>
-
-
-</article>
-</div>
-
-<div class="span3 sidecol">
-<h3>More articles</h3>
-<ul id="articles-nav" class="extra_margin">
-	
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
-		
-	
-</ul>
-
-<h3>Feedback</h3>
-<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
-if you found any mistake or need clarification on any of the
-articles.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-      <footer>
-        <div class="container">
-          <div class="row">
-            <div class="span6">
-              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
-              <nav>
-                <ul>
-                  <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
-                </ul>
-              </nav>
-            </div>
-            <div class="span6 credits">
-               <p><img src="/img/footer_logo.png"></p>
-               <p>Copyright &copy; Loïc Hoguin</p>
-            </div>
+                </div>
+              </div>
+              <p>The implementation of <code>split/1</code> is left as an exercice to the reader. You will also probably want to handle the <code>QUIT</code> command, which must stop any processing and close the connection.</p>
+              <p>The attentive reader will also take note that in the case of text- based protocols where commands are separated by line breaks, you can set an option using <code>Transport:setopts/2</code> and have all the buffering done for you for free by Erlang itself.</p>
+              <p>As you can surely notice by now, Ranch allows us to build network applications by getting out of our way entirely past the initial setup. It lets you use the power of binary pattern matching to write text and binary protocol implementations in just a few lines of code.</p>
+              <ul>
+                <li><a href="http://www.erlang-factory.com/conference/London2012/speakers/LoicHoguin">Watch the talk</a></li>
+              </ul>
+            </article>
+          </div>
+          <div class="span3 sidecol">
+            <h3>More articles</h3>
+            <ul id="articles-nav" class="extra_margin">
+              <li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
+              <li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
+              <li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
+              <li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
+              <li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
+              <li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+              <li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+              <li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+              <li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+              <li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+              <li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+              <li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+            </ul>
+            <h3>Feedback</h3>
+            <p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a> if you found any mistake or need clarification on any of the articles.</p>
           </div>
         </div>
-      </footer>
-
-    
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="span6">
+            <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+            <nav>
+              <ul>
+                <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li>
+                <li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="span6 credits">
+            <p><img src="/img/footer_logo.png"></p>
+            <p>Copyright &copy; Loïc Hoguin</p>
+          </div>
+        </div>
+      </div>
+    </footer>
     <script src="/js/custom.js"></script>
   </body>
 </html>
-

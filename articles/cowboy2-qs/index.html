@@ -1,103 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
-
     <title>Nine Nines: Cowboy 2.0 and query strings</title>
-
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic' rel='stylesheet' type='text/css'>
     <link href="/css/99s.css?r=7" rel="stylesheet">
-
     <link rel="shortcut icon" href="/img/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
     <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
-
-	</head>
-
-
-<body class="">
-  <header id="page-head">
-    <div id="topbar" class="container">
+  </head>
+  <body class="">
+    <header id="page-head">
+      <div id="topbar" class="container">
         <div class="row">
           <div class="span2">
             <h1 id="logo"><a href="/" title="99s">99s</a></h1>
           </div>
           <div class="span10">
-            
             <div id="side-header">
               <nav>
                 <ul>
                   <li class="active"><a title="Hear my thoughts" href="/articles">Articles</a></li>
-  				  <li><a title="Watch my talks" href="/talks">Talks</a></li>
-  				  <li><a title="Read the docs" href="/docs">Documentation</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li><a title="Read the docs" href="/docs">Documentation</a></li>
                 </ul>
-              </nav> 
+              </nav>
               <ul id="social">
-                <li>
-                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a>
-                </li>
-                    <li>
-						<a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a>
-					</li>
+                <li><a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" data-hover="/img/ico_github_alt.png" alt="Github"></a></li>
+                <li><a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" data-hover="/img/ico_mail_alt.png"></a></li>
               </ul>
             </div>
           </div>
         </div>
-    </div>
-
-
-</header>
-
-<div id="contents">
-<div class="container">
-<div class="row">
-<div class="span9 maincol">
-
-<article class="blog_item">
-<header>
-	<h1 class="lined-header"><span>Cowboy 2.0 and query strings</span></h1>
-	<p class="date">
-		<span class="year">2014</span>
-		<span class="day-month">20 Aug</span>
-	</p>
-</header>
-
-<p>Now that Cowboy 1.0 is out, I can spend some of my time thinking about Cowboy 2.0 that will be released soon after Erlang/OTP 18.0. This entry discusses the proposed changes to query string handling in Cowboy.</p>
-<p>Cowboy 2.0 will respond to user wishes by simplifying the interface of the <code>cowboy_req</code> module. Users want two things: less juggling with the Req variable, and more maps. Maps is the only dynamic key/value data structure in Erlang that we can match directly to extract values, allowing users to greatly simplify their code as they don&apos;t need to call functions to do everything anymore.</p>
-<p>Query strings are a good candidate for maps. It&apos;s a list of key/values, so it&apos;s pretty obvious we can win a lot by using maps. However query strings have one difference with maps: they can have duplicate keys.</p>
-<p>How are we expected to handle duplicate keys? There&apos;s no standard behavior. It&apos;s up to applications. And looking at what is done in the wild, there&apos;s no de facto standard either. While some ignore duplicate keys (keeping the first or the last they find), others require duplicate keys to end with <code>[]</code> to automatically put the values in a list, or even worse, languages like PHP even allow you to do things like <code>key[something][other]</code> and create a deep structure for it. Finally some allow any key to have duplicates and just gives you lists of key/values.</p>
-<p>Cowboy so far had functions to retrieve query string values one value at a time, and if there were duplicates it would return the first it finds. It also has a function returning the entire list with all duplicates, allowing you to filter it to get all of them, and another function that returns the raw query string.</p>
-<p>What are duplicates used for? Not that many things actually.</p>
-<p>One use of duplicate keys is with HTML forms. It is common practice to give all related checkboxes the same name so you get a list of what&apos;s been checked. When nothing is checked, nothing is sent at all, the key is not in the list.</p>
-<p>Another use of duplicate keys is when generating forms. A good example of that would be a form that allows uploading any number of files. When you add a file, client-side code adds another field to the form. Repeat up to a certain limit.</p>
-<p>And that&apos;s about it. Of note is that HTML radio elements share the same name too, but only one key/value is sent, so they are not relevant here.</p>
-<p>Normally this would be the part where I tell you how we solve this elegantly. But I had doubts. Why? Because there&apos;s no good solutions to solving only this particular problem.</p>
-<p>I then stopped thinking about duplicate keys for a minute and started to think about the larger problem.</p>
-<p>Query strings are input data. They take a particular form, and may be sent as part of the URI or as part of the request body. We have other kinds of input data. We have headers and cookies and the request body in various forms. We also have path segments in URIs.</p>
-<p>What do you do with input data? Well you use it to do something. But there is one thing that you almost always do (and if you don&apos;t, you really should): you validate it and you map it into Erlang terms.</p>
-<p>Cowboy left the user take care of validation and conversion into Erlang terms so far. Rather, it left the user take care of it everywhere except one place. Guess where? That&apos;s right, bindings.</p>
-<p>If you define routes with bindings then you have the option to provide constraints. Constraints can be used to do two things: validate the data and convert it in a more appropriate term. For example if you use the <code>int</code> constraint, Cowboy will make sure the binding is an integer, and will replace the value with the integer representation so that you can use it directly. In this particular case it not only routes the URI, but also validates and converts the bindings directly.</p>
-<p>This is very relevant in the case of our duplicate keys, because if we have a list with duplicates of a key, chances are we want to convert that into a list of Erlang terms, and also make sure that all the elements in this list are expected.</p>
-<p>The answer to this particular problem is simple. We need a function that will parse the query string and apply constraints. But this is not all, there is one other problem to be solved.</p>
-<p>The other problem is that for the user some keys are mandatory and some are optional. Optional keys include the ones that correspond to HTML checkboxes: if the key for one or more checkbox is missing from the query string, we still want to have an empty list in our map so we can easily match. Matching maps is great, but not so much when values might be missing, so we have to normalize this data a little.</p>
-<p>This problem is solved by allowing a default value. If the key is missing and a default exists, set it. If no default exists, then the key was mandatory and we want to crash.</p>
-<p>I therefore make a proposal for changing the query string interface to three functions.</p>
-<p>The first function already exists, it is <code>cowboy_req:qs(Req)</code> and it returns only the query string binary. No more Req returned.</p>
-<p>The second function is a renaming of <code>cowboy_req:qs_vals(Req)</code> to something more explicit: <code>cowboy_req:parse_qs(Req)</code>. The new name implies that a parsing operation is done. It was implicit and cached before. It will be explicit and not cached anymore now. Again, no more Req returned.</p>
-<p>The third function is the one I mentioned above. I think the interface <code>cowboy_req:match_qs(Req, Fields)</code> is most appropriate. It returns a normalized map that is the same regardless of optional fields being provided with the request, allowing for easy matching. It crashes if something went wrong. Still no Req returned.</p>
-<p>I feel that this three function interface provides everything one would need to comfortably write applications. You can get low level and get the query string directly; you can get a list of key/value binaries without any additional processing and do it on your own; or you can get a processed map that contains Erlang terms ready to be used.</p>
-<p>I strongly believe that by democratizing the constraints to more than just bindings, but also to query string, cookies and other key/values in Cowboy, we can allow the developer to quickly and easily go from HTTP request to Erlang function calls. The constraints are reusable functions that can serve as guards against unwanted data, providing convenience in the process.</p>
-<p>Your handlers will not look like an endless series of calls to get and convert the input data, they will instead be just one call at the beginning followed by the actual application logic, thanks to constraints and maps.</p>
-<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+      </div>
+    </header>
+    <div id="contents">
+      <div class="container">
+        <div class="row">
+          <div class="span9 maincol">
+            <article class="blog_item">
+              <header>
+                <h1 class="lined-header"><span>Cowboy 2.0 and query strings</span></h1>
+                <p class="date"><span class="year">2014</span> <span class="day-month">20 Aug</span></p>
+              </header>
+              <p>Now that Cowboy 1.0 is out, I can spend some of my time thinking about Cowboy 2.0 that will be released soon after Erlang/OTP 18.0. This entry discusses the proposed changes to query string handling in Cowboy.</p>
+              <p>Cowboy 2.0 will respond to user wishes by simplifying the interface of the <code>cowboy_req</code> module. Users want two things: less juggling with the Req variable, and more maps. Maps is the only dynamic key/value data structure in Erlang that we can match directly to extract values, allowing users to greatly simplify their code as they don&apos;t need to call functions to do everything anymore.</p>
+              <p>Query strings are a good candidate for maps. It&apos;s a list of key/values, so it&apos;s pretty obvious we can win a lot by using maps. However query strings have one difference with maps: they can have duplicate keys.</p>
+              <p>How are we expected to handle duplicate keys? There&apos;s no standard behavior. It&apos;s up to applications. And looking at what is done in the wild, there&apos;s no de facto standard either. While some ignore duplicate keys (keeping the first or the last they find), others require duplicate keys to end with <code>[]</code> to automatically put the values in a list, or even worse, languages like PHP even allow you to do things like <code>key[something][other]</code> and create a deep structure for it. Finally some allow any key to have duplicates and just gives you lists of key/values.</p>
+              <p>Cowboy so far had functions to retrieve query string values one value at a time, and if there were duplicates it would return the first it finds. It also has a function returning the entire list with all duplicates, allowing you to filter it to get all of them, and another function that returns the raw query string.</p>
+              <p>What are duplicates used for? Not that many things actually.</p>
+              <p>One use of duplicate keys is with HTML forms. It is common practice to give all related checkboxes the same name so you get a list of what&apos;s been checked. When nothing is checked, nothing is sent at all, the key is not in the list.</p>
+              <p>Another use of duplicate keys is when generating forms. A good example of that would be a form that allows uploading any number of files. When you add a file, client-side code adds another field to the form. Repeat up to a certain limit.</p>
+              <p>And that&apos;s about it. Of note is that HTML radio elements share the same name too, but only one key/value is sent, so they are not relevant here.</p>
+              <p>Normally this would be the part where I tell you how we solve this elegantly. But I had doubts. Why? Because there&apos;s no good solutions to solving only this particular problem.</p>
+              <p>I then stopped thinking about duplicate keys for a minute and started to think about the larger problem.</p>
+              <p>Query strings are input data. They take a particular form, and may be sent as part of the URI or as part of the request body. We have other kinds of input data. We have headers and cookies and the request body in various forms. We also have path segments in URIs.</p>
+              <p>What do you do with input data? Well you use it to do something. But there is one thing that you almost always do (and if you don&apos;t, you really should): you validate it and you map it into Erlang terms.</p>
+              <p>Cowboy left the user take care of validation and conversion into Erlang terms so far. Rather, it left the user take care of it everywhere except one place. Guess where? That&apos;s right, bindings.</p>
+              <p>If you define routes with bindings then you have the option to provide constraints. Constraints can be used to do two things: validate the data and convert it in a more appropriate term. For example if you use the <code>int</code> constraint, Cowboy will make sure the binding is an integer, and will replace the value with the integer representation so that you can use it directly. In this particular case it not only routes the URI, but also validates and converts the bindings directly.</p>
+              <p>This is very relevant in the case of our duplicate keys, because if we have a list with duplicates of a key, chances are we want to convert that into a list of Erlang terms, and also make sure that all the elements in this list are expected.</p>
+              <p>The answer to this particular problem is simple. We need a function that will parse the query string and apply constraints. But this is not all, there is one other problem to be solved.</p>
+              <p>The other problem is that for the user some keys are mandatory and some are optional. Optional keys include the ones that correspond to HTML checkboxes: if the key for one or more checkbox is missing from the query string, we still want to have an empty list in our map so we can easily match. Matching maps is great, but not so much when values might be missing, so we have to normalize this data a little.</p>
+              <p>This problem is solved by allowing a default value. If the key is missing and a default exists, set it. If no default exists, then the key was mandatory and we want to crash.</p>
+              <p>I therefore make a proposal for changing the query string interface to three functions.</p>
+              <p>The first function already exists, it is <code>cowboy_req:qs(Req)</code> and it returns only the query string binary. No more Req returned.</p>
+              <p>The second function is a renaming of <code>cowboy_req:qs_vals(Req)</code> to something more explicit: <code>cowboy_req:parse_qs(Req)</code>. The new name implies that a parsing operation is done. It was implicit and cached before. It will be explicit and not cached anymore now. Again, no more Req returned.</p>
+              <p>The third function is the one I mentioned above. I think the interface <code>cowboy_req:match_qs(Req, Fields)</code> is most appropriate. It returns a normalized map that is the same regardless of optional fields being provided with the request, allowing for easy matching. It crashes if something went wrong. Still no Req returned.</p>
+              <p>I feel that this three function interface provides everything one would need to comfortably write applications. You can get low level and get the query string directly; you can get a list of key/value binaries without any additional processing and do it on your own; or you can get a processed map that contains Erlang terms ready to be used.</p>
+              <p>I strongly believe that by democratizing the constraints to more than just bindings, but also to query string, cookies and other key/values in Cowboy, we can allow the developer to quickly and easily go from HTTP request to Erlang function calls. The constraints are reusable functions that can serve as guards against unwanted data, providing convenience in the process.</p>
+              <p>Your handlers will not look like an endless series of calls to get and convert the input data, they will instead be just one call at the beginning followed by the actual application logic, thanks to constraints and maps.</p>
+              <div class="listingblock">
+                <div class="content">
+                  <!-- Generator: GNU source-highlight 3.1.9
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#000000">handle</font></b>(<font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
+                  <pre><tt><b><font color="#000000">handle</font></b>(<font color="#009900">Req</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
     #{<font color="#FF6600">name</font><font color="#990000">:=</font><font color="#009900">Name</font>, <font color="#FF6600">email</font><font color="#990000">:=</font><font color="#009900">Email</font>, <font color="#FF6600">choices</font><font color="#990000">:=</font><font color="#009900">ChoicesList</font>, <font color="#FF6600">remember_me</font><font color="#990000">:=</font><font color="#009900">RememberMe</font>} <font color="#990000">=</font>
         <b><font color="#000000">cowboy_req:match_qs</font></b>(<font color="#009900">Req</font>, [
             <b><font color="#000080">name</font></b>, {<font color="#FF6600">email</font>, <font color="#FF6600">email</font>},
@@ -110,340 +92,115 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#000000">check_choices</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"blue"</font><font color="#990000">&gt;&gt;</font>) <font color="#990000">-&gt;</font> {<font color="#000080">true</font>, <font color="#FF6600">blue</font>};
 <b><font color="#000000">check_choices</font></b>(<font color="#990000">&lt;&lt;</font><font color="#FF0000">"red"</font><font color="#990000">&gt;&gt;</font>) <font color="#990000">-&gt;</font> {<font color="#000080">true</font>, <font color="#FF6600">red</font>};
 <b><font color="#000000">check_choices</font></b>(<font color="#990000">_</font>) <font color="#990000">-&gt;</font> <font color="#000080">false</font>;</tt></pre>
-</div></div>
-<p>(Don&apos;t look too closely at the structure yet.)</p>
-<p>As you can see in the above snippet, it becomes really easy to go from query string to values. You can also use the map directly as it is guaranteed to only contain the keys you specified, any extra key is not returned.</p>
-<p>This would I believe be a huge step up as we can now focus on writing applications instead of translating HTTP calls. Cowboy can now take care of it.</p>
-<p>And to conclude, this also solves our duplicate keys dilemma, as they now automatically become a list of binaries, and this list is then checked against constraints that will fail if they were not expecting a list. And in the example above, it even converts the values to atoms for easier manipulation.</p>
-<p>As usual, feedback is more than welcome, and I apologize for the rocky structure of this post as it contains all the thoughts that went into this rather than just the conclusion.</p>
-
-
-</article>
-</div>
-
-<div class="span3 sidecol">
-<h3>More articles</h3>
-<ul id="articles-nav" class="extra_margin">
-	
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
-		
-	
-		
-			<li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
-		
-	
-</ul>
-
-<h3>Feedback</h3>
-<p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a>
-if you found any mistake or need clarification on any of the
-articles.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-      <footer>
-        <div class="container">
-          <div class="row">
-            <div class="span6">
-              <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
-              <nav>
-                <ul>
-                  <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
-                </ul>
-              </nav>
-            </div>
-            <div class="span6 credits">
-               <p><img src="/img/footer_logo.png"></p>
-               <p>Copyright &copy; Loïc Hoguin</p>
-            </div>
+                </div>
+              </div>
+              <p>(Don&apos;t look too closely at the structure yet.)</p>
+              <p>As you can see in the above snippet, it becomes really easy to go from query string to values. You can also use the map directly as it is guaranteed to only contain the keys you specified, any extra key is not returned.</p>
+              <p>This would I believe be a huge step up as we can now focus on writing applications instead of translating HTTP calls. Cowboy can now take care of it.</p>
+              <p>And to conclude, this also solves our duplicate keys dilemma, as they now automatically become a list of binaries, and this list is then checked against constraints that will fail if they were not expecting a list. And in the example above, it even converts the values to atoms for easier manipulation.</p>
+              <p>As usual, feedback is more than welcome, and I apologize for the rocky structure of this post as it contains all the thoughts that went into this rather than just the conclusion.</p>
+            </article>
+          </div>
+          <div class="span3 sidecol">
+            <h3>More articles</h3>
+            <ul id="articles-nav" class="extra_margin">
+              <li><a href="https://ninenines.eu/articles/cowboy-2.20.0/">Cowboy 2.20, Cowlib 2.21, Gun 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.19.0/">Cowboy 2.19, Cowlib 2.20, Gun 2.6, Ranch 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.18.0/">Cowboy 2.18, Cowlib 2.19, Gun 2.5, Ranch 2.2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.17.0/">Cowboy 2.17, Cowlib 2.18</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.16.0/">Cowboy 2.16, Gun 2.4, Cowlib 2.17</a></li>
+              <li><a href="https://ninenines.eu/articles/security-strategy/">Security strategy in the age of AI</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.15.0/">Cowboy 2.15, Gun 2.3, Cowlib 2.16.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.14.0/">Cowboy 2.14</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.2.0/">Gun 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0/">Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.2.0/">Ranch 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.13.0-performance/">Performance improvements in Cowboy 2.13</a></li>
+              <li><a href="https://ninenines.eu/articles/discord-server/">Erlang OSS Discord server</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.12.0/">Cowboy 2.12</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.11.0/">Cowboy 2.11</a></li>
+              <li><a href="https://ninenines.eu/articles/otp-26/">Erlang/OTP 26</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0/">Gun 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.1.0/">Ranch 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.9.0/">Cowboy 2.9</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-rc.1/">Gun 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0/">Ranch 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.8.0/">Cowboy 2.8</a></li>
+              <li><a href="https://ninenines.eu/articles/the-gateway-trilogy/">The Gateway Trilogy</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.2/">Gun 2.0 pre-release 2</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2019/">Merry Christmas 2019: New Beginnings</a></li>
+              <li><a href="https://ninenines.eu/articles/github-sponsors/">GitHub Sponsors</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.7.0/">Cowboy 2.7</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-2.0.0-pre.1/">Gun 2.0 pre-release 1</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-meetup-10-septembre-2019/">Erlang meetup: 10 septembre 2019</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-2.0.0-rc.1/">Ranch 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/joe_the_rubber_duck/">Joe Armstrong the rubber duck</a></li>
+              <li><a href="https://ninenines.eu/articles/merry-christmas-2018/">Merry Christmas 2018: A Recap</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.6.0/">Cowboy 2.6</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.7.0/">Ranch 1.7</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.5.0/">Cowboy 2.5</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.3.0/">Gun 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.2.0/">Gun 1.2</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.6.0/">Ranch 1.6</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0/">Gun 1.0</a></li>
+              <li><a href="https://ninenines.eu/articles/asciideck/">Asciideck: Asciidoc for Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/gun-1.0.0-rc.1/">Gun 1.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.4.0/">Cowboy 2.4</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.3.0/">Cowboy 2.3</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.2.0/">Cowboy 2.2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.1.0/">Cowboy 2.1</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0/">Cowboy 2.0</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.2/">Cowboy 2.0 release candidate 2</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-rc.1/">Cowboy 2.0 release candidate 1</a></li>
+              <li><a href="https://ninenines.eu/articles/the-elephant-in-the-room/">The elephant in the room</a></li>
+              <li><a href="https://ninenines.eu/articles/dont-let-it-crash/">Don&#39;t let it crash</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy-2.0.0-pre.4/">Cowboy 2.0 pre-release 4</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-1.3/">Ranch 1.3</a></li>
+              <li><a href="https://ninenines.eu/articles/ml-archives/">Mailing list archived</a></li>
+              <li><a href="https://ninenines.eu/articles/website-update/">Website update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook-september-2015-update/">The Erlanger Playbook September 2015 Update</a></li>
+              <li><a href="https://ninenines.eu/articles/erlanger-playbook/">The Erlanger Playbook</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-validate-utf8/">Validating UTF-8 binaries with Erlang</a></li>
+              <li><a href="https://ninenines.eu/articles/on-open-source/">On open source</a></li>
+              <li><a href="https://ninenines.eu/articles/the-story-so-far/">The story so far</a></li>
+              <li><a href="https://ninenines.eu/articles/cowboy2-qs/">Cowboy 2.0 and query strings</a></li>
+              <li><a href="https://ninenines.eu/articles/january-2014-status/">January 2014 status</a></li>
+              <li><a href="https://ninenines.eu/articles/farwest-funded/">Farwest got funded!</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang.mk-and-relx/">Build Erlang releases with Erlang.mk and Relx</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.5-intermediate-module/">Xerl: intermediate module</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.4-expression-separator/">Xerl: expression separator</a></li>
+              <li><a href="https://ninenines.eu/articles/erlang-scalability/">Erlang Scalability</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.3-atomic-expressions/">Xerl: atomic expressions</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.2-two-modules/">Xerl: two modules</a></li>
+              <li><a href="https://ninenines.eu/articles/xerl-0.1-empty-modules/">Xerl: empty modules</a></li>
+              <li><a href="https://ninenines.eu/articles/ranch-ftp/">Build an FTP Server with Ranch in 30 Minutes</a></li>
+              <li><a href="https://ninenines.eu/articles/tictactoe/">Erlang Tic Tac Toe</a></li>
+            </ul>
+            <h3>Feedback</h3>
+            <p>Feel free to <a href="mailto:contact@ninenines.eu">email us</a> if you found any mistake or need clarification on any of the articles.</p>
           </div>
         </div>
-      </footer>
-
-    
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="span6">
+            <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+            <nav>
+              <ul>
+                <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li>
+                <li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="span6 credits">
+            <p><img src="/img/footer_logo.png"></p>
+            <p>Copyright &copy; Loïc Hoguin</p>
+          </div>
+        </div>
+      </div>
+    </footer>
     <script src="/js/custom.js"></script>
   </body>
 </html>
-
