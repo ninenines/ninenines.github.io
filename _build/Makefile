@@ -12,6 +12,56 @@ $(CURDIR)/tmp/asciideck:
 	fi
 	$(MAKE) -C $(CURDIR)/tmp/asciideck
 
+# Cross-project man links, shared by the manual and guide recipes.
+# $1 is the project being built. The shell function reads version and mf.
+define docs-man-links
+	man7_url() { \
+		proj="$$$$1"; name="$$$$2"; cur="$$$$3"; makefile="$$$$4"; \
+		ref=$$$$(sed -n "s/^dep_$$$${name} = git [^ ]* //p" "$$$$makefile" | head -n 1); \
+		ver=; \
+		case $$$$ref in *.*.*) ver=$$$${ref%.*} ;; esac; \
+		case $$$$name in \
+			cowboy) published="2.20 2.19 2.18" ;; \
+			cowlib) published="2.21 2.20 2.19" ;; \
+			gun) published="2.7 2.6 2.5" ;; \
+			ranch) published="2.3 2.2 1.8" ;; \
+			*) published= ;; \
+		esac; \
+		case " $$$$published " in \
+			*" $$$$ver "*) ;; \
+			*) ver= ;; \
+		esac; \
+		if [ -z "$$$$ver" ]; then \
+			case "$$$$proj:$$$$name:$$$$cur" in \
+				cowlib:cowboy:2.21) ver=2.20 ;; \
+				cowlib:cowboy:2.20) ver=2.19 ;; \
+				cowlib:cowboy:2.19) ver=2.18 ;; \
+				cowlib:gun:2.21) ver=2.7 ;; \
+				cowlib:gun:2.20) ver=2.6 ;; \
+				cowlib:gun:2.19) ver=2.5 ;; \
+				*) ver=$$$${published%% *} ;; \
+			esac; \
+		fi; \
+		printf '/docs/en/%s/%s/manual/' "$$$$name" "$$$$ver"; \
+	}; \
+	man_links() { \
+		man7_cowboy=; man7_cowlib=; man7_gun=; man7_ranch=; \
+		man3sed=; \
+		for name in cowboy cowlib gun ranch; do \
+			if [ "$$$$name" = $1 ]; then continue; fi; \
+			url=$$$$(man7_url $1 "$$$$name" "$$$$version" "$$$$mf"); \
+			eval "man7_$$$$name=link:$$$$url"; \
+			case $$$$name in \
+				cowlib) prefixes="cowlib cow_" ;; \
+				*) prefixes=$$$$name ;; \
+			esac; \
+			for pre in $$$$prefixes; do \
+				man3sed="$$$$man3sed -e s|link:man:\($$$${pre}[a-z0-9_.]*\)[1-9()]*|link:$$$$url\1|g"; \
+			done; \
+		done; \
+	}
+endef
+
 # Manual HTML. Arguments are name, title, repository, versions, branches,
 # and has_guide (true or empty).
 # $1 name, $2 title, $3 repository, $4 versions, $5 branches, $6 has_guide
@@ -64,18 +114,25 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 			-e 's/{{DOCTYPE}}/Function Reference/' \
 			>> "$$$$out"; \
 	}; \
+	$(call docs-man-links,$1); \
 	i=1; \
 	for version in $$$$versions; do \
 		branch=$$$$(echo $$$$branches | cut -d' ' -f $$$$i); \
 		i=$$$$((i + 1)); \
 		git -C $(CURDIR)/tmp/manual/$1 checkout -f $$$$branch; \
 		git -C $(CURDIR)/tmp/manual/$1 reset --hard $$$$branch; \
+		mf=$(CURDIR)/tmp/manual/$1/Makefile; \
+		man_links; \
 		stage=$(CURDIR)/tmp/html/$1/$$$$version/manual; \
 		rm -rf $$$$stage; \
 		mkdir -p $$$$stage; \
 		sed '1,/^$$$$/d' $(CURDIR)/tmp/manual/$1/doc/src/manual/$1_app.asciidoc \
-			| sed 's/link:man:\([a-z0-9_]*\)(7)/link:\1_app/g' \
+			| sed -e "s|link:man:cowboy(7)|$$$${man7_cowboy:-link:cowboy_app}|g" \
+				-e "s|link:man:cowlib(7)|$$$${man7_cowlib:-link:cowlib_app}|g" \
+				-e "s|link:man:gun(7)|$$$${man7_gun:-link:gun_app}|g" \
+				-e "s|link:man:ranch(7)|$$$${man7_ranch:-link:ranch_app}|g" \
 			| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+			| sed $$$$man3sed \
 			| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
 			| $$$$asciidoc --no-header-footer --safe - \
 			> $(CURDIR)/tmp/$1-index.html; \
@@ -84,8 +141,12 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 			base=$$$$(basename "$$$$f" .asciidoc); \
 			title=$$$$(sed -n '1,/^= .*/ s/^= //p' "$$$$f"); \
 			sed '1,/^$$$$/d' "$$$$f" \
-				| sed 's/link:man:$1(7)/link:../g' \
+				| sed -e "s|link:man:cowboy(7)|$$$${man7_cowboy:-link:..}|g" \
+					-e "s|link:man:cowlib(7)|$$$${man7_cowlib:-link:..}|g" \
+					-e "s|link:man:gun(7)|$$$${man7_gun:-link:..}|g" \
+					-e "s|link:man:ranch(7)|$$$${man7_ranch:-link:..}|g" \
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+				| sed $$$$man3sed \
 				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
 				| $$$$asciidoc --no-header-footer --safe - \
 				> $(CURDIR)/tmp/$1-page.html; \
@@ -151,12 +212,15 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 			-e 's/{{DOCTYPE}}/User Guide/' \
 			>> "$$$$out"; \
 	}; \
+	$(call docs-man-links,$1); \
 	i=1; \
 	for version in $$$$versions; do \
 		branch=$$$$(echo $$$$branches | cut -d' ' -f $$$$i); \
 		i=$$$$((i + 1)); \
 		git -C $(CURDIR)/tmp/guide/$1 checkout -f $$$$branch; \
 		git -C $(CURDIR)/tmp/guide/$1 reset --hard $$$$branch; \
+		mf=$(CURDIR)/tmp/guide/$1/Makefile; \
+		man_links; \
 		book=$(CURDIR)/tmp/guide/$1/doc/src/guide/book.asciidoc; \
 		if [ ! -f $$$$book ]; then \
 			continue; \
@@ -186,8 +250,12 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 				| sed 's/^=== /== /' \
 				| sed 's/xref:/link:..\//g' \
 				| sed 's/image::/image::..\//g' \
-				| sed 's/link:man:$1[(]7[)]/link:\/docs\/en\/$1\/'"$$$$version"'\/manual\/$1_app/g' \
+				| sed -e "s|link:man:cowboy(7)|$$$${man7_cowboy:-link:/docs/en/cowboy/$$$$version/manual/}|g" \
+					-e "s|link:man:cowlib(7)|$$$${man7_cowlib:-link:/docs/en/cowlib/$$$$version/manual/}|g" \
+					-e "s|link:man:gun(7)|$$$${man7_gun:-link:/docs/en/gun/$$$$version/manual/}|g" \
+					-e "s|link:man:ranch(7)|$$$${man7_ranch:-link:/docs/en/ranch/$$$$version/manual/}|g" \
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
+				| sed $$$$man3sed \
 				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\/docs\/en\/$1\/'"$$$$version"'\/manual\/\1/g' \
 				| $$$$asciidoc --no-header-footer --safe - \
 				> $(CURDIR)/tmp/$1-guide-page.html; \
