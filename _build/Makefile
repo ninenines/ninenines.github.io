@@ -219,7 +219,9 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 		done; \
 		for a in $(CURDIR)/tmp/guide/$1/doc/src/guide/*; do \
 			if [ ! -f "$$$$a" ]; then continue; fi; \
-			if [ "$$$$(basename "$$$$a")" = book.asciidoc ]; then continue; fi; \
+			case "$$$$a" in \
+				*.asciidoc|*.sty) continue ;; \
+			esac; \
 			cp "$$$$a" $$$$stage/; \
 		done; \
 		dest=$(CURDIR)/../docs/en/$1/$$$$version/guide; \
