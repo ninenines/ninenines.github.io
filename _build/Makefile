@@ -239,9 +239,9 @@ $(call docs-html-manual-target,$1,$2,$3,$4,$5,$6)
 $(if $(filter true,$6),$(call docs-html-guide-target,$1,$2,$3,$4,$5))
 endef
 
-$(eval $(call docs-html-project,cowboy,Cowboy,https://github.com/ninenines/cowboy,2.20 2.19 2.18 2.17 2.16,2.20.0 2.19.0 2.18.0 702edc6d756952851dad63018f80dbbc7ac8c08c 2.16.0,true))
-$(eval $(call docs-html-project,cowlib,Cowlib,https://github.com/ninenines/cowlib,2.21 2.20 2.19 2.18 2.17,2.21.0 2.20.0 2.19.0 2.18.0 2.17.1,))
-$(eval $(call docs-html-project,gun,Gun,https://github.com/ninenines/gun,2.7 2.6 2.5 2.4 2.3,2.7.0 2.6.0 2.5.0 2.4.0 2.3.0,true))
-$(eval $(call docs-html-project,ranch,Ranch,https://github.com/ninenines/ranch,2.3 2.2 2.1 2.0 1.8 1.7 1.6,2.3.0 2.2.1 fa6c24a65e0e1482ce52dd1f0e08a39ad85b6c82 2.0.0 1.8.1 1.7.1 1.6.2,true))
+$(eval $(call docs-html-project,cowboy,Cowboy,https://github.com/ninenines/cowboy,2.20 2.19 2.18,2.20.0 2.19.0 2.18.0,true))
+$(eval $(call docs-html-project,cowlib,Cowlib,https://github.com/ninenines/cowlib,2.21 2.20 2.19,2.21.0 2.20.0 2.19.0,))
+$(eval $(call docs-html-project,gun,Gun,https://github.com/ninenines/gun,2.7 2.6 2.5,2.7.0 2.6.0 2.5.0,true))
+$(eval $(call docs-html-project,ranch,Ranch,https://github.com/ninenines/ranch,2.3 2.2 1.8,2.3.0 2.2.1 1.8.1,true))
 
 docs: $(docs-html-targets)
