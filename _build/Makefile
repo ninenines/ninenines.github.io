@@ -27,7 +27,7 @@ wrap-doc:
 		| sed -n '/<h1 class="lined-header">/,/<nav style="margin:1em 0">/ { /<h1 class="lined-header">/d; /<nav style="margin:1em 0">/d; p; }' \
 		>> $(CURDIR)/tmp/getting_started.html
 	cat $(CURDIR)/templates/foot.html \
-		| sed -e 's|{{PREV_NEXT}}|<nav style="margin:1em 0">\n    <a style="float:left" href="https://ninenines.eu/docs/en/cowboy/2.20/guide/introduction/">Introduction</a>\n    <a style="float:right" href="https://ninenines.eu/docs/en/cowboy/2.20/guide/flow_diagram/">Flow diagram</a>\n</nav>|' \
+		| sed -e 's|{{PREV_NEXT}}|<nav style="margin:1em 0">\n    <a style="float:left" href="/docs/en/cowboy/2.20/guide/introduction/">Introduction</a>\n    <a style="float:right" href="/docs/en/cowboy/2.20/guide/flow_diagram/">Flow diagram</a>\n</nav>|' \
 			-e 's|{{DOC_LINKS}}|    <li><a href="/docs/en/cowboy/2.20/guide">User Guide</a></li>\n    <li><a href="/docs/en/cowboy/2.20/manual">Function Reference</a></li>|' \
 			-e 's|{{VERSION_LINKS}}|    <li><a href="/docs/en/cowboy/2.20/guide">2.20</a></li>\n    <li><a href="/docs/en/cowboy/2.19/guide">2.19</a></li>\n    <li><a href="/docs/en/cowboy/2.18/guide">2.18</a></li>\n    <li><a href="/docs/en/cowboy/2.17/guide">2.17</a></li>\n    <li><a href="/docs/en/cowboy/2.16/guide">2.16</a></li>|' \
 			-e 's/{{PROJECT}}/Cowboy/' \
@@ -230,10 +230,10 @@ docs-html-guide-$1: $(CURDIR)/deps/asciideck
 				{ \
 					echo '<nav style="margin:1em 0">'; \
 					if [ -n "$$$$prev_name" ]; then \
-						printf '    <a style="float:left" href="https://ninenines.eu/docs/en/$1/%s/guide/%s/">%s</a>\n' "$$$$version" "$$$$prev_name" "$$$$prev_title"; \
+						printf '    <a style="float:left" href="/docs/en/$1/%s/guide/%s/">%s</a>\n' "$$$$version" "$$$$prev_name" "$$$$prev_title"; \
 					fi; \
 					if [ -n "$$$$next_name" ]; then \
-						printf '    <a style="float:right" href="https://ninenines.eu/docs/en/$1/%s/guide/%s/">%s</a>\n' "$$$$version" "$$$$next_name" "$$$$next_title"; \
+						printf '    <a style="float:right" href="/docs/en/$1/%s/guide/%s/">%s</a>\n' "$$$$version" "$$$$next_name" "$$$$next_title"; \
 					fi; \
 					echo '</nav>'; \
 				} > "$$$$nav"; \
