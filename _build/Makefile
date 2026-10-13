@@ -22,7 +22,6 @@ wrap-doc:
 			-e 's/{{ACTIVE_ARTICLES}}//' \
 			-e 's/{{ACTIVE_TALKS}}//' \
 			-e 's/{{ACTIVE_DOCS}}/ class="active"/' \
-			-e 's/{{ACTIVE_SERVICES}}//' \
 		>> $(CURDIR)/tmp/getting_started.html
 	cat $(CURDIR)/../docs/en/cowboy/2.20/guide/getting_started/index.html \
 		| sed -n '/<h1 class="lined-header">/,/<nav style="margin:1em 0">/ { /<h1 class="lined-header">/d; /<nav style="margin:1em 0">/d; p; }' \
@@ -68,7 +67,6 @@ docs-html-$1: $(CURDIR)/deps/asciideck
 				-e 's/{{ACTIVE_ARTICLES}}//' \
 				-e 's/{{ACTIVE_TALKS}}//' \
 				-e 's/{{ACTIVE_DOCS}}/ class="active"/' \
-				-e 's/{{ACTIVE_SERVICES}}//' \
 			>> "$$$$out"; \
 		cat "$$$$body" >> "$$$$out"; \
 		if [ "$6" = true ]; then \
@@ -160,7 +158,6 @@ docs-html-guide-$1: $(CURDIR)/deps/asciideck
 				-e 's/{{ACTIVE_ARTICLES}}//' \
 				-e 's/{{ACTIVE_TALKS}}//' \
 				-e 's/{{ACTIVE_DOCS}}/ class="active"/' \
-				-e 's/{{ACTIVE_SERVICES}}//' \
 			>> "$$$$out"; \
 		cat "$$$$body" >> "$$$$out"; \
 		printf '    <li><a href="/docs/en/$1/%s/guide">User Guide</a></li>\n' "$$$$ver" > $(CURDIR)/tmp/$1-guide-doc-links.html; \
