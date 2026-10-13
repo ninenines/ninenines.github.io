@@ -1,4 +1,4 @@
-.PHONY: all docs wrap-doc serve
+.PHONY: all docs serve
 
 .NOTPARALLEL:
 
@@ -13,29 +13,6 @@ $(CURDIR)/tmp/asciideck:
 		git clone https://github.com/ninenines/asciideck $(CURDIR)/tmp/asciideck; \
 	fi
 	$(MAKE) -C $(CURDIR)/tmp/asciideck
-
-# Rebuild one published doc page into tmp/ from its body and the shell
-# templates. Does not write under docs/.
-wrap-doc:
-	mkdir -p $(CURDIR)/tmp
-	rm -f $(CURDIR)/tmp/getting_started.html
-	cat $(CURDIR)/templates/head.html \
-		| sed -e 's/{{TITLE}}/Getting started/g' \
-			-e 's/{{ACTIVE_ARTICLES}}//' \
-			-e 's/{{ACTIVE_TALKS}}//' \
-			-e 's/{{ACTIVE_DOCS}}/ class="active"/' \
-		>> $(CURDIR)/tmp/getting_started.html
-	cat $(CURDIR)/../docs/en/cowboy/2.20/guide/getting_started/index.html \
-		| sed -n '/<h1 class="lined-header">/,/<nav style="margin:1em 0">/ { /<h1 class="lined-header">/d; /<nav style="margin:1em 0">/d; p; }' \
-		>> $(CURDIR)/tmp/getting_started.html
-	cat $(CURDIR)/templates/foot.html \
-		| sed -e 's|{{PREV_NEXT}}|<nav style="margin:1em 0">\n    <a style="float:left" href="/docs/en/cowboy/2.20/guide/introduction/">Introduction</a>\n    <a style="float:right" href="/docs/en/cowboy/2.20/guide/flow_diagram/">Flow diagram</a>\n</nav>|' \
-			-e 's|{{DOC_LINKS}}|    <li><a href="/docs/en/cowboy/2.20/guide">User Guide</a></li>\n    <li><a href="/docs/en/cowboy/2.20/manual">Function Reference</a></li>|' \
-			-e 's|{{VERSION_LINKS}}|    <li><a href="/docs/en/cowboy/2.20/guide">2.20</a></li>\n    <li><a href="/docs/en/cowboy/2.19/guide">2.19</a></li>\n    <li><a href="/docs/en/cowboy/2.18/guide">2.18</a></li>\n    <li><a href="/docs/en/cowboy/2.17/guide">2.17</a></li>\n    <li><a href="/docs/en/cowboy/2.16/guide">2.16</a></li>|' \
-			-e 's/{{PROJECT}}/Cowboy/' \
-			-e 's/{{VERSION}}/2.20/g' \
-			-e 's/{{DOCTYPE}}/User Guide/' \
-		>> $(CURDIR)/tmp/getting_started.html
 
 # Manual HTML. Arguments are name, title, repository, versions, branches,
 # and has_guide (true or empty).
