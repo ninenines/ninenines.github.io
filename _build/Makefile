@@ -59,6 +59,13 @@ define docs-man-links
 				man3sed="$$$$man3sed -e s|link:man:\($$$${pre}[a-z0-9_.]*\)[1-9()]*|link:$$$$url\1|g"; \
 			done; \
 		done; \
+	}; \
+	otp_links() { \
+		sed -E \
+			-e 's#(^|[^A-Za-z0-9_])ssl\(7\)#\1link:https://www.erlang.org/doc/apps/ssl/ssl_app.html[ssl(7)]#g' \
+			-e 's#(^|[^A-Za-z0-9_])ssl\(3\)#\1link:https://www.erlang.org/doc/apps/ssl/ssl.html[ssl(3)]#g' \
+			-e 's#(^|[^A-Za-z0-9_])gen_tcp\(3\)#\1link:https://www.erlang.org/doc/apps/kernel/gen_tcp.html[gen_tcp(3)]#g' \
+			-e 's#(^|[^A-Za-z0-9_])inet\(3\)#\1link:https://www.erlang.org/doc/apps/kernel/inet.html[inet(3)]#g'; \
 	}
 endef
 
@@ -134,6 +141,7 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 			| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
 			| sed $$$$man3sed \
 			| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\1/g' \
+			| otp_links \
 			| $$$$asciidoc --no-header-footer --safe - \
 			> $(CURDIR)/tmp/$1-index.html; \
 		wrap "$2 Function Reference" $(CURDIR)/tmp/$1-index.html $$$$stage/index.html $$$$version; \
@@ -148,6 +156,7 @@ docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
 				| sed $$$$man3sed \
 				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:..\/\1/g' \
+				| otp_links \
 				| $$$$asciidoc --no-header-footer --safe - \
 				> $(CURDIR)/tmp/$1-page.html; \
 			wrap "$$$$title" $(CURDIR)/tmp/$1-page.html $$$$stage/$$$$base/index.html $$$$version; \
@@ -257,6 +266,7 @@ docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 				| sed 's/\(link:man:[a-z0-9_]*\):/\1./g' \
 				| sed $$$$man3sed \
 				| sed 's/link:man:\([a-z0-9_.]*\)[1-9()]*/link:\/docs\/en\/$1\/'"$$$$version"'\/manual\/\1/g' \
+				| otp_links \
 				| $$$$asciidoc --no-header-footer --safe - \
 				> $(CURDIR)/tmp/$1-guide-page.html; \
 			nav=""; \
