@@ -7,10 +7,12 @@ all: docs
 serve:
 	$(MAKE) -C $(CURDIR)/server serve
 
-$(CURDIR)/deps/asciideck:
-	mkdir -p $(CURDIR)/deps
-	git clone git@github.com:ninenines/asciideck.git $(CURDIR)/deps/asciideck
-	$(MAKE) -C $(CURDIR)/deps/asciideck
+$(CURDIR)/tmp/asciideck:
+	mkdir -p $(CURDIR)/tmp
+	if [ ! -d $(CURDIR)/tmp/asciideck/.git ]; then \
+		git clone https://github.com/ninenines/asciideck $(CURDIR)/tmp/asciideck; \
+	fi
+	$(MAKE) -C $(CURDIR)/tmp/asciideck
 
 # Rebuild one published doc page into tmp/ from its body and the shell
 # templates. Does not write under docs/.
@@ -40,9 +42,9 @@ wrap-doc:
 # $1 name, $2 title, $3 repository, $4 versions, $5 branches, $6 has_guide
 define docs-html-manual-target
 
-.PHONY: docs-html-$1
+.PHONY: docs-html-manual-$1
 
-docs-html-$1: $(CURDIR)/deps/asciideck
+docs-html-manual-$1: $(CURDIR)/tmp/asciideck
 	set -e -o pipefail; \
 	mkdir -p $(CURDIR)/tmp; \
 	if [ ! -d $(CURDIR)/tmp/$1/.git ]; then \
@@ -53,7 +55,7 @@ docs-html-$1: $(CURDIR)/deps/asciideck
 	links=$(CURDIR)/tmp/$1-version-links.html; \
 	head=$(CURDIR)/templates/head.html; \
 	foot=$(CURDIR)/templates/foot.html; \
-	asciidoc=$(CURDIR)/deps/asciideck/scripts/asciidoc; \
+	asciidoc=$(CURDIR)/tmp/asciideck/scripts/asciidoc; \
 	: > $$$$links; \
 	for version in $$$$versions; do \
 		printf '    <li><a href="/docs/en/$1/%s/manual">%s</a></li>\n' "$$$$version" "$$$$version" >> $$$$links; \
@@ -120,7 +122,7 @@ docs-html-$1: $(CURDIR)/deps/asciideck
 		mv $$$$stage $$$$dest; \
 	done
 
-docs:: docs-html-$1
+docs:: docs-html-manual-$1
 
 endef
 
@@ -131,7 +133,7 @@ define docs-html-guide-target
 
 .PHONY: docs-html-guide-$1
 
-docs-html-guide-$1: $(CURDIR)/deps/asciideck
+docs-html-guide-$1: $(CURDIR)/tmp/asciideck
 	set -e -o pipefail; \
 	mkdir -p $(CURDIR)/tmp; \
 	if [ ! -d $(CURDIR)/tmp/$1/.git ]; then \
@@ -142,7 +144,7 @@ docs-html-guide-$1: $(CURDIR)/deps/asciideck
 	links=$(CURDIR)/tmp/$1-guide-version-links.html; \
 	head=$(CURDIR)/templates/head.html; \
 	foot=$(CURDIR)/templates/foot.html; \
-	asciidoc=$(CURDIR)/deps/asciideck/scripts/asciidoc; \
+	asciidoc=$(CURDIR)/tmp/asciideck/scripts/asciidoc; \
 	names=$(CURDIR)/tmp/$1-guide-names; \
 	titles=$(CURDIR)/tmp/$1-guide-titles; \
 	: > $$$$links; \
