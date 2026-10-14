@@ -34,7 +34,7 @@ var docs_nav = function() {
 
 	var docs = document.querySelectorAll('#docs h2');
 	if (docs.length == 0) {
-		nav.parentNode.removeChild(el);
+		nav.parentNode.removeChild(nav);
 	} else {
 		var navul = document.createElement('ul');
 		Array.prototype.forEach.call(docs, function(el) {
