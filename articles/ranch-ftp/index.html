@@ -52,10 +52,6 @@
               <p>Let&apos;s start by creating an empty project. Create a new directory and then open a terminal into that directory. The first step is to add Ranch as a dependency. Create the <code>rebar.config</code> file and add the following 3 lines.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>{<font color="#FF6600">deps</font>, [
     {<font color="#FF6600">ranch</font>, <font color="#FF0000">".*"</font>, {<font color="#FF6600">git</font>, <font color="#FF0000">"git://github.com/extend/ranch.git"</font>, <font color="#FF0000">"master"</font>}}
 ]}<font color="#990000">.</font></tt></pre>
@@ -65,10 +61,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>You can now fetch the dependencies.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>$ rebar get-deps
 <font color="#990000">==&gt;</font> ranch_ftp <font color="#990000">(</font>get-deps<font color="#990000">)</font>
 Pulling ranch from {git<font color="#990000">,</font><font color="#FF0000">"git://github.com/extend/ranch.git"</font><font color="#990000">,</font><font color="#FF0000">"master"</font>}
@@ -80,20 +72,12 @@ Cloning into <font color="#FF0000">'ranch'</font><font color="#990000">...</font
               <p>We don&apos;t actually need anything else to write the protocol code. We could make an application for it, but this isn&apos;t the purpose of this article so let&apos;s just move on to writing the protocol itself. Create the file <em>ranch_ftp_protocol.erl</em> and open it in your favorite editor.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>$ vim ranch_ftp_protocol<font color="#990000">.</font>erl</tt></pre>
                 </div>
               </div>
               <p>Let&apos;s start with a blank protocol module.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000080">-module</font></b>(<font color="#FF6600">ranch_ftp_protocol</font>)<font color="#990000">.</font>
 <b><font color="#000080">-export</font></b>([<b><font color="#000000">start_link</font></b><font color="#990000">/</font><font color="#993399">4</font>, <b><font color="#000000">init</font></b><font color="#990000">/</font><font color="#993399">3</font>])<font color="#990000">.</font>
 
@@ -111,10 +95,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>Also note that you need to type <code>c(ranch_ftp_protocol).</code> to recompile and reload the code for the protocol. You do not need to restart any process however.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>$ erl -pa ebin deps<font color="#990000">/*</font>/ebin
 Erlang R15B02 <font color="#990000">(</font>erts-<font color="#993399">5.9</font><font color="#990000">.</font><font color="#993399">2</font><font color="#990000">)</font> <font color="#990000">[</font><b><font color="#0000FF">source</font></b><font color="#990000">]</font> <font color="#990000">[</font><font color="#993399">64</font>-bit<font color="#990000">]</font> <font color="#990000">[</font>smp<font color="#990000">:</font><font color="#993399">4</font><font color="#990000">:</font><font color="#993399">4</font><font color="#990000">]</font> <font color="#990000">[</font>async-threads<font color="#990000">:</font><font color="#993399">0</font><font color="#990000">]</font> <font color="#990000">[</font>hipe<font color="#990000">]</font> <font color="#990000">[</font>kernel-poll<font color="#990000">:</font><b><font color="#0000FF">false</font></b><font color="#990000">]</font>
 
@@ -123,10 +103,6 @@ Eshell V5<font color="#990000">.</font><font color="#993399">9.2</font>  <font c
               </div>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><font color="#993399">1</font><font color="#990000">&gt;</font> <b><font color="#000000">application:start</font></b>(<font color="#FF6600">ranch</font>)<font color="#990000">.</font>
 <font color="#FF6600">ok</font>
 <font color="#993399">2</font><font color="#990000">&gt;</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">my_ftp</font>, <font color="#993399">10</font>,
@@ -139,10 +115,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>To try your code, you can use the following command. It should be able to connect, the server will print a message in the console, and then the client will print an error.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>$ ftp localhost <font color="#993399">2121</font></tt></pre>
                 </div>
               </div>
@@ -150,10 +122,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>Once you have created the new process and returned the pid, Ranch will give ownership of the socket to you. This requires a synchronization step though.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
     <font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:accept_ack</font></b>(<font color="#009900">ListenerPid</font>),
     <font color="#FF6600">ok</font><font color="#990000">.</font></tt></pre>
@@ -163,10 +131,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>When an FTP server accepts a connection, it starts by sending a welcome message which can be one or more lines starting with the code <code>200</code>. Then the server will wait for the client to authenticate the user, and if the authentication went successfully, which it will always do for the purpose of this article, it will reply with a <code>230</code> code.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">init</font></b>(<font color="#009900">ListenerPid</font>, <font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
     <font color="#0000FF">ok</font> <font color="#990000">=</font> <b><font color="#000000">ranch:accept_ack</font></b>(<font color="#009900">ListenerPid</font>),
     <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">send</font></b>(<font color="#009900">Socket</font>, <font color="#990000">&lt;&lt;</font><font color="#FF0000">"200 My cool FTP server welcomes you!\r\n"</font><font color="#990000">&gt;&gt;</font>),
@@ -184,10 +148,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>We will replace the <code>ok.</code> line with the call to the following function. The new function is recursive, each call receiving data from the socket and sending a response. For now we will send an error response for all commands the client sends.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>) <font color="#990000">-&gt;</font>
     <b><font color="#0000FF">case</font></b> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>) <b><font color="#0000FF">of</font></b>
         {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>
@@ -206,10 +166,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>To solve this, we need to use a buffer. Each time we receive data, we will append to the buffer, and then check if we have received a command fully before running it. The code could look similar to the following.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">loop</font></b>(<font color="#009900">Socket</font>, <font color="#009900">Transport</font>, <font color="#009900">Buffer</font>) <font color="#990000">-&gt;</font>
     <b><font color="#0000FF">case</font></b> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">recv</font></b>(<font color="#009900">Socket</font>, <font color="#993399">0</font>, <font color="#993399">30000</font>) <b><font color="#0000FF">of</font></b>
         {<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">-&gt;</font>

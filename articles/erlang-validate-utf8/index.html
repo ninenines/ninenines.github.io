@@ -51,10 +51,6 @@
               <p>When looking into why the permessage-deflate tests in autobahntestsuite were taking such a long time, I found that autobahn is using an adaptation of the algorithm named <a href="https://bjoern.hoehrmann.de/utf-8/decoder/dfa/">Flexible and Economical UTF-8 Decoder</a>. This is the C99 implementation:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><i><font color="#9A1900">// Copyright (c) 2008-2009 Bjoern Hoehrmann &lt;bjoern@hoehrmann.de&gt;</font></i>
 <i><font color="#9A1900">// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.</font></i>
 
@@ -94,10 +90,6 @@ uint32_t inline
               <p>And this is the Erlang implementation I came up with:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><i><font color="#9A1900">%% This function returns 0 on success, 1 on error, and 2..8 on incomplete data.</font></i>
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;&gt;&gt;</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font>;
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">128</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
@@ -131,10 +123,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>I started with a naive implementation of the original. First, we don&apos;t need the codepoint calculated and extracted for our validation function. We just want to know the data is valid, so we only need to calculate the next state. Then, the only thing we needed to be careful about was that tuples are 1-based, and that we need to stop processing the binary when we get the state 1 or when the binary is empty.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;&gt;&gt;</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font> <font color="#009900">State</font>;
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">_</font>, <font color="#993399">1</font>) <font color="#990000">-&gt;</font> <font color="#993399">1</font>;
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#009900">State</font>) <font color="#990000">-&gt;</font>
@@ -148,10 +136,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>So I opened my Erlang shell, defined the variable <code>D</code> to be the tuple <code>?UTF8D</code> with its 400 elements, and then ran the following expression (after a bit of trial and error):</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><font color="#993399">16</font><font color="#990000">&gt;</font> <b><font color="#000000">file:write_file</font></b>(<font color="#FF0000">"out.txt"</font>,
 	[<b><font color="#000000">io_lib:format</font></b>(<font color="#FF0000">"validate_utf8(&lt;&lt; ~p, Rest/bits &gt;&gt;, ~p) -&gt; ~p;~n"</font>,
 		[<font color="#009900">C</font>, <font color="#009900">S</font>, <b><font color="#000080">element</font></b>(<font color="#993399">257</font> <font color="#990000">+</font> <font color="#009900">S</font> <font color="#990000">*</font> <font color="#993399">16</font> <font color="#990000">+</font> <b><font color="#000080">element</font></b>(<font color="#993399">1</font> <font color="#990000">+</font> <font color="#009900">C</font>, <font color="#009900">D</font>), <font color="#009900">D</font>)])
@@ -165,10 +149,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>Removing all the clauses that return 1 and putting a catch-all clause at the end instead reduced the number to about 500, and showed that many clauses were similar:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">0</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">1</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">2</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
@@ -182,10 +162,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>But also:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">2</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">3</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">2</font>);
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#993399">157</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">5</font>) <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">2</font>);
@@ -203,10 +179,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>The patterns above can be found here in the resulting function:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">0</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">128</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);
 <font color="#990000">...</font>
 <b><font color="#000000">validate_utf8</font></b>(<font color="#990000">&lt;&lt;</font> <font color="#009900">C</font>, <font color="#009900">Rest</font><font color="#990000">/</font><font color="#FF6600">bits</font> <font color="#990000">&gt;&gt;</font>, <font color="#993399">2</font>) <b><font color="#0000FF">when</font></b> <font color="#009900">C</font> <font color="#990000">&gt;=</font> <font color="#993399">144</font>, <font color="#009900">C</font> <font color="#990000">&lt;</font> <font color="#993399">160</font> <font color="#990000">-&gt;</font> <b><font color="#000000">validate_utf8</font></b>(<font color="#009900">Rest</font>, <font color="#993399">0</font>);

@@ -54,10 +54,6 @@
               <p>Today we will only focus on compiling the following code:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><font color="#FF6600">mod</font> <font color="#FF6600">my_module</font>
 <b><font color="#0000FF">begin</font></b>
 <b><font color="#0000FF">end</font></b></tt></pre>
@@ -69,10 +65,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>Rules consist of a regular expression followed by Erlang code. The latter must return a token representation or the atom <code>skip_token</code>.</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>{<font color="#009900">L</font>}{<font color="#009900">A</font>}<font color="#990000">*</font> <font color="#990000">:</font>
     <font color="#009900">Atom</font> <font color="#990000">=</font> <b><font color="#000080">list_to_atom</font></b>(<font color="#009900">TokenChars</font>),
     {<font color="#FF6600">token</font>, <b><font color="#0000FF">case</font></b> <b><font color="#000000">reserved_word</font></b>(<font color="#009900">Atom</font>) <b><font color="#0000FF">of</font></b>
@@ -87,10 +79,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>We obtain the following result from the lexer:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>[{<font color="#FF6600">mod</font>,<font color="#993399">1</font>},{<b><font color="#000080">atom</font></b>,<font color="#993399">1</font>,<font color="#FF6600">my_module</font>},{<font color="#FF6600">'begin'</font>,<font color="#993399">2</font>},{<font color="#FF6600">'end'</font>,<font color="#993399">3</font>}]</tt></pre>
                 </div>
               </div>
@@ -98,10 +86,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>To compile our module, we need a few things. First, everything is an expression. We thus need list of expressions and individual expressions. We will support a single expression for now, the <code>mod</code> expression which defines a module. And that&apos;s it! We end up with the following grammar:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><font color="#FF6600">exprs</font> <font color="#990000">-&gt;</font> <font color="#FF6600">expr</font> <font color="#990000">:</font> [<font color="#FF6600">'$1'</font>]<font color="#990000">.</font>
 <font color="#FF6600">exprs</font> <font color="#990000">-&gt;</font> <font color="#FF6600">expr</font> <font color="#FF6600">exprs</font> <font color="#990000">:</font> [<font color="#FF6600">'$1'</font> | <font color="#FF6600">'$2'</font>]<font color="#990000">.</font>
 
@@ -115,10 +99,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>We obtain the following result from the parser:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt>[{<font color="#FF6600">mod</font>,<font color="#993399">1</font>,{<b><font color="#000080">atom</font></b>,<font color="#993399">1</font>,<font color="#FF6600">my_module</font>},[]}]</tt></pre>
                 </div>
               </div>
@@ -130,10 +110,6 @@ http://www.gnu.org/software/src-highlite -->
               <p>We obtain the following pretty-printed Core Erlang generated code:</p>
               <div class="listingblock">
                 <div class="content">
-                  <!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
                   <pre><tt><font color="#FF6600">module</font> <font color="#FF6600">'my_module'</font> [<font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">0</font>,
                        <font color="#FF6600">'module_info'</font><font color="#990000">/</font><font color="#993399">1</font>]
     <font color="#FF6600">attributes</font> []
