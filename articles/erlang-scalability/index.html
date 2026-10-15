@@ -53,7 +53,7 @@
               <p>A common case for using NIFs is JSON processing. The problem is that JSON is a highly inefficient data structure (similar in inefficiency to XML, although perhaps not as bad). If you can avoid using JSON, you probably should. MessagePack can replace it in many situations.</p>
               <p>Long-running NIFs will take over a scheduler and prevent Erlang from efficiently handling many processes.</p>
               <p>Short-running NIFs will still confuse the scheduler if they take more than a few microseconds to run.</p>
-              <p>Threaded NIFs, or the use of the <code>enif_consume_timeslice</code> might help allievate this problem, but they&apos;re not a silver bullet.</p>
+              <p>Threaded NIFs, or the use of the <code>enif_consume_timeslice</code> might help alleviate this problem, but they&apos;re not a silver bullet.</p>
               <p>And as you already know, a crashing NIF will take down your VM, destroying any claims you may have at being scalable.</p>
               <p>Never use a NIF because &quot;C is fast&quot;. This is only true in single-threaded programs.</p>
               <h2 id="_bifs">BIFs</h2>
@@ -73,7 +73,7 @@
               <p>Prefer list comprehensions over <code>lists:map/2</code>. The compiler will be able to optimize your code greatly, for example not creating the result if you don&apos;t need it. As time goes on, more optimizations will be added to the compiler and you will automatically benefit from them.</p>
               <h2 id="_gen_server_is_no_silver_bullet">gen_server is no silver bullet</h2>
               <p>It&apos;s a bad idea to use <code>gen_server</code> for everything. For two reasons.</p>
-              <p>There is an overhead everytime the <code>gen_server</code> receives a call, a cast or a simple message. It can be a problem if your <code>gen_server</code> is in a critical code path where speed is all that matters. Do not hesitate to create other kinds of processes where it makes sense. And depending on the kind of process, you might want to consider making them special processes, which would essentially behave the same as a <code>gen_server</code>.</p>
+              <p>There is an overhead every time the <code>gen_server</code> receives a call, a cast or a simple message. It can be a problem if your <code>gen_server</code> is in a critical code path where speed is all that matters. Do not hesitate to create other kinds of processes where it makes sense. And depending on the kind of process, you might want to consider making them special processes, which would essentially behave the same as a <code>gen_server</code>.</p>
               <p>A common mistake is to have a unique <code>gen_server</code> to handle queries from many processes. This generally becomes the biggest bottleneck you&apos;ll want to fix. You should try to avoid relying on a single process, using a pool if you can.</p>
               <h2 id="_supervisor_and_monitoring">Supervisor and monitoring</h2>
               <p>A <code>supervisor</code> is also a <code>gen_server</code>, so the previous points also apply to them.</p>
