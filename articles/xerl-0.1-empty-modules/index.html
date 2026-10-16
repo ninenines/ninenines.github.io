@@ -47,9 +47,9 @@
                 <p class="date"><span class="year">2013</span> <span class="day-month">30 Jan</span></p>
               </header>
               <p>Let&apos;s build a programming language. I call it Xerl: eXtended ERLang. It&apos;ll be an occasion for us to learn a few things, especially me.</p>
-              <p>Unlike in Erlang, in this language, everything is an expression. This means that modules and functions are expression, and indeed that you can have more than one module per file.</p>
-              <p>We are just starting, so let&apos;s no go ahead of ourselves here. We&apos;ll begin with writing the code allowing us to compile an empty module.</p>
-              <p>We will compile to Core Erlang: this is one of the many intermediate step your Erlang code compiles to before it becomes BEAM machine code. Core Erlang is a very neat language for machine generated code, and we will learn many things about it.</p>
+              <p>Unlike in Erlang, in this language, everything is an expression. This means that modules and functions are expressions, and indeed that you can have more than one module per file.</p>
+              <p>We are just starting, so let&apos;s not go ahead of ourselves here. We&apos;ll begin with writing the code allowing us to compile an empty module.</p>
+              <p>We will compile to Core Erlang: this is one of the many intermediate steps your Erlang code compiles to before it becomes BEAM machine code. Core Erlang is a very neat language for machine generated code, and we will learn many things about it.</p>
               <p>Today we will only focus on compiling the following code:</p>
               <div class="listingblock">
                 <div class="content">
@@ -60,7 +60,7 @@
               </div>
               <p>Compilation will be done in a few steps. First, the source file will be transformed in a tree of tokens by the lexer. Then, the parser will use that tree of tokens and convert it to the AST, bringing semantical meaning to our representation. Finally, the code generator will transform this AST to Core Erlang AST, which will then be compiled.</p>
               <p>We will use <em>leex</em> for the lexer. This lexer uses .xrl files which are then compiled to .erl files that you can then compile to BEAM. The file is divided in three parts: definitions, rules and Erlang code. Definitions and Erlang code are obvious; rules are what concerns us.</p>
-              <p>We only need two things: atoms and whitespaces. Atoms are a lowercase letter followed by any letter, number, _ or @. Whitespace is either a space, an horizontal tab, \r or \n. There exists other kinds of whitespaces but we simply do not allow them in the Xerl language.</p>
+              <p>We only need two things: atoms and whitespaces. Atoms are a lowercase letter followed by any letter, number, _ or @. Whitespace is either a space, a horizontal tab, \r or \n. There exists other kinds of whitespaces but we simply do not allow them in the Xerl language.</p>
               <p>Rules consist of a regular expression followed by Erlang code. The latter must return a token representation or the atom <code>skip_token</code>.</p>
               <div class="listingblock">
                 <div class="content">
@@ -105,7 +105,7 @@
               <p>Code generation generally is comprised of several steps. We will discuss these in more details later on. For now, we will focus on the minimal needed for successful compilation.</p>
               <p>We can use the <code>cerl</code> module to generate Core Erlang AST. We will simply be using functions, which allows us to avoid learning and keeping up to date with the internal representation.</p>
               <p>There&apos;s one important thing to do when generating Core Erlang AST for a module: create the <code>module_info/{0,1}</code> functions. Indeed, these are added to Erlang before it becomes Core Erlang, and so we need to replicate this ourselves. Do not be concerned however, as this only takes a few lines of extra code.</p>
-              <p>As you can see by <a href="https://github.com/extend/xerl/blob/0.1/src/xerl_codegen.erl">looking at the complete file</a>, the code generator echoes the grammar we defined in the parser, and simply applies the appropriate Core Erlang functions for each expressions.</p>
+              <p>As you can see by <a href="https://github.com/extend/xerl/blob/0.1/src/xerl_codegen.erl">looking at the complete file</a>, the code generator echoes the grammar we defined in the parser, and simply applies the appropriate Core Erlang functions for each expression.</p>
               <p>We obtain the following pretty-printed Core Erlang generated code:</p>
               <div class="listingblock">
                 <div class="content">
@@ -124,7 +124,7 @@
                 </div>
               </div>
               <p>For convenience I added all the steps in a <code>xerl:compile/1</code> function that you can use against your own .xerl files.</p>
-              <p>That&apos;s it for today! We will go into more details over each steps in the next few articles.</p>
+              <p>That&apos;s it for today! We will go into more details over each step in the next few articles.</p>
               <ul>
                 <li><a href="https://github.com/extend/xerl/blob/0.1/">View the source</a></li>
               </ul>
