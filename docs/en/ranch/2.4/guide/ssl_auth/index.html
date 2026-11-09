@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: SSL client authentication</title>
+
+    <link href="/css/99s.css?r=15" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+</head>
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <div id="logo"><a href="/" title="99s">99s</a></div>
+          </div>
+          <div class="span10">
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+                </ul>
+              </nav>
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" alt="Github"></a>
+                </li>
+                <li>
+                  <a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" alt="Email"></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+  </header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>SSL client authentication</span></h1>
+<h2 id="_purpose">Purpose</h2>
+<p>SSL client authentication is a mechanism allowing applications to identify certificates. This allows your application to make sure that the client is an authorized certificate, but makes no claim about whether the user can be trusted. This can be combined with a password based authentication to attain greater security.</p>
+<p>The server only needs to retain the certificate serial number and the certificate issuer to authenticate the certificate. Together, they can be used to uniquely identify a certificate.</p>
+<p>As Ranch allows the same protocol code to be used for both SSL and non-SSL transports, you need to make sure you are in an SSL context before attempting to perform an SSL client authentication. This can be done by checking the return value of <code>Transport:name/0</code>.</p>
+<h2 id="_obtaining_client_certificates">Obtaining client certificates</h2>
+<p>You can obtain client certificates from various sources. You can generate them yourself, or you can use a service like CAcert.org which allows you to generate client and server certificates for free.</p>
+<p>Following are the steps you need to take to create a CAcert.org account, generate a certificate and install it in your favorite browser.</p>
+<ul><li>Open <a href="https://www.cacert.org">https://www.cacert.org</a> in your favorite browser
+</li>
+<li>Root Certificate: install the Class 1 and Class 3 certificates
+</li>
+<li>Join (Register an account)
+</li>
+<li>Verify your account (check your email inbox!)
+</li>
+<li>Log in
+</li>
+<li>Client Certificates: New
+</li>
+<li>Create the private key and the certificate request locally, then submit the request
+</li>
+<li>Install the certificate in your browser
+</li>
+</ul>
+<p>You can optionally save the certificate for later use, for example to extract the <code>IssuerID</code> information as will be detailed later on.</p>
+<h2 id="_transport_configuration">Transport configuration</h2>
+<p>The SSL transport does not request a client certificate by default. <code>{verify, verify_peer}</code> requests one and rejects a certificate that does not chain to <code>cacertfile</code>.</p>
+<div class="listingblock"><div class="title">Configure a listener for SSL authentication</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>{<font color="#FF6600">ok</font>, <font color="#990000">_</font>} <font color="#990000">=</font> <b><font color="#000000">ranch:start_listener</font></b>(<font color="#FF6600">my_ssl</font>,
+	<font color="#FF6600">ranch_ssl</font>, #{<font color="#0000FF">socket_opts</font> <font color="#990000">=&gt;</font> [
+		{<font color="#FF6600">port</font>, <font color="#009900">SSLPort</font>},
+		{<font color="#FF6600">certfile</font>, <font color="#009900">PathToCertfile</font>},
+		{<font color="#FF6600">cacertfile</font>, <font color="#009900">PathToCACertfile</font>},
+		{<font color="#FF6600">verify</font>, <font color="#FF6600">verify_peer</font>},
+		{<font color="#FF6600">fail_if_no_peer_cert</font>, <font color="#000080">false</font>}
+	]},
+	<font color="#FF6600">my_protocol</font>, []
+)<font color="#990000">.</font></tt></pre>
+</div></div>
+<p>In this example we set the required <code>port</code> and <code>certfile</code>, but also the <code>cacertfile</code> containing the CAcert.org root certificate, and the option to request the client certificate.</p>
+<p><code>{fail_if_no_peer_cert, false}</code>, as in the example, lets the handshake complete when the client sends no certificate. <code>Transport:peercert/1</code> returns <code>{error, no_peercert}</code>. This allows you to use SSL for more than just authenticated clients.</p>
+<h2 id="_authentication">Authentication</h2>
+<p>To authenticate users, you must first save the certificate information required. If you have your users&apos; certificate files, you can simply load the certificate and retrieve the information directly.</p>
+<div class="listingblock"><div class="title">Retrieve the issuer ID from a certificate</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">certfile_to_issuer_id</font></b>(<font color="#009900">Filename</font>) <font color="#990000">-&gt;</font>
+	{<font color="#FF6600">ok</font>, <font color="#009900">Data</font>} <font color="#990000">=</font> <b><font color="#000000">file:read_file</font></b>(<font color="#009900">Filename</font>),
+	[{<font color="#FF6600">'Certificate'</font>, <font color="#009900">Cert</font>, <font color="#FF6600">not_encrypted</font>}] <font color="#990000">=</font> <b><font color="#000000">public_key:pem_decode</font></b>(<font color="#009900">Data</font>),
+	{<font color="#FF6600">ok</font>, <font color="#009900">IssuerID</font>} <font color="#990000">=</font> <b><font color="#000000">public_key:pkix_issuer_id</font></b>(<font color="#009900">Cert</font>, <b><font color="#000080">self</font></b>),
+	<font color="#009900">IssuerID</font><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>The <code>IssuerID</code> variable contains both the certificate serial number and the certificate issuer stored in a tuple, so this value alone can be used to uniquely identify the user certificate. You can save this value in a database, a configuration file or any other place where an Erlang term can be stored and retrieved.</p>
+<p>To retrieve the <code>IssuerID</code> from a running connection, you need to first retrieve the client certificate and then extract this information from it. Call <code>Transport:peercert/1</code>. Once you have the certificate, you can again use <code>public_key:pkix_issuer_id/2</code> to extract the <code>IssuerID</code> value.</p>
+<p>The following function returns the <code>IssuerID</code> or <code>false</code> if no client certificate was found. This snippet is intended to be used from your protocol code.</p>
+<div class="listingblock"><div class="title">Retrieve the issuer ID from the certificate for the current connection</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">socket_to_issuer_id</font></b>(<font color="#009900">Transport</font>, <font color="#009900">Socket</font>) <font color="#990000">-&gt;</font>
+	<b><font color="#0000FF">case</font></b> <font color="#009900">Transport</font><font color="#990000">:</font><b><font color="#000000">peercert</font></b>(<font color="#009900">Socket</font>) <b><font color="#0000FF">of</font></b>
+		{<font color="#FF6600">error</font>, <font color="#FF6600">no_peercert</font>} <font color="#990000">-&gt;</font>
+			<font color="#000080">false</font>;
+		{<font color="#FF6600">ok</font>, <font color="#009900">Cert</font>} <font color="#990000">-&gt;</font>
+			{<font color="#FF6600">ok</font>, <font color="#009900">IssuerID</font>} <font color="#990000">=</font> <b><font color="#000000">public_key:pkix_issuer_id</font></b>(<font color="#009900">Cert</font>, <b><font color="#000080">self</font></b>),
+			<font color="#009900">IssuerID</font>
+	<b><font color="#0000FF">end</font></b><font color="#990000">.</font></tt></pre>
+</div></div>
+<p>You then only need to match the <code>IssuerID</code> value to authenticate the user.</p>
+
+<nav style="margin:1em 0">
+    <a style="float:left" href="/docs/en/ranch/2.4/guide/parsers/">Writing parsers</a>
+    <a style="float:right" href="/docs/en/ranch/2.4/guide/connection_draining/">Connection draining</a>
+</nav>
+
+</div>
+
+<div class="span3 sidecol">
+<h3>Ranch 2.4 User Guide</h3>
+<ul>
+    <li><a href="/docs/en/ranch/2.4/guide">User Guide</a></li>
+    <li><a href="/docs/en/ranch/2.4/manual">Function Reference</a></li>
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+    <li><a href="/docs/en/ranch/2.4/guide">2.4</a></li>
+    <li><a href="/docs/en/ranch/2.3/guide">2.3</a></li>
+    <li><a href="/docs/en/ranch/1.8/guide">1.8</a></li>
+</ul>
+
+<h3 id="_like_my_work__donate">Sponsor me!</h3>
+<p>Support my work on Cowboy, Ranch, Gun and Erlang.mk via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. The funds cover domain names and development tools.</p>
+</div>
+</div>
+</div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="span6">
+        <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+        <nav>
+          <ul>
+            <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="span6 credits">
+        <p><img src="/img/footer_logo.png"></p>
+        <p>Copyright &copy; Loïc Hoguin</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/custom.js"></script>
+</body>
+</html>

@@ -21,10 +21,10 @@ define docs-man-links
 		ver=; \
 		case $$$$ref in *.*.*) ver=$$$${ref%.*} ;; esac; \
 		case $$$$name in \
-			cowboy) published="2.20 2.19 2.18" ;; \
-			cowlib) published="2.21 2.20 2.19" ;; \
-			gun) published="2.7 2.6 2.5" ;; \
-			ranch) published="2.3 2.2 1.8" ;; \
+			cowboy) published="2.21 2.20 2.19" ;; \
+			cowlib) published="2.22 2.21 2.20" ;; \
+			gun) published="2.8 2.7 2.6" ;; \
+			ranch) published="2.4 2.3 1.8" ;; \
 			*) published= ;; \
 		esac; \
 		case " $$$$published " in \
@@ -33,12 +33,12 @@ define docs-man-links
 		esac; \
 		if [ -z "$$$$ver" ]; then \
 			case "$$$$proj:$$$$name:$$$$cur" in \
+				cowlib:cowboy:2.22) ver=2.21 ;; \
 				cowlib:cowboy:2.21) ver=2.20 ;; \
 				cowlib:cowboy:2.20) ver=2.19 ;; \
-				cowlib:cowboy:2.19) ver=2.18 ;; \
+				cowlib:gun:2.22) ver=2.8 ;; \
 				cowlib:gun:2.21) ver=2.7 ;; \
 				cowlib:gun:2.20) ver=2.6 ;; \
-				cowlib:gun:2.19) ver=2.5 ;; \
 				*) ver=$$$${published%% *} ;; \
 			esac; \
 		fi; \
@@ -320,9 +320,9 @@ $(call docs-html-manual-target,$1,$2,$3,$4,$5,$6)
 $(if $(filter true,$6),$(call docs-html-guide-target,$1,$2,$3,$4,$5))
 endef
 
-$(eval $(call docs-html-project,cowboy,Cowboy,https://github.com/ninenines/cowboy,2.20 2.19 2.18,2.20.0 2.19.0 2.18.0,true))
-$(eval $(call docs-html-project,cowlib,Cowlib,https://github.com/ninenines/cowlib,2.21 2.20 2.19,2.21.0 2.20.0 2.19.0,))
-$(eval $(call docs-html-project,gun,Gun,https://github.com/ninenines/gun,2.7 2.6 2.5,2.7.0 2.6.0 2.5.0,true))
-$(eval $(call docs-html-project,ranch,Ranch,https://github.com/ninenines/ranch,2.3 2.2 1.8,2.3.0 2.2.1 1.8.1,true))
+$(eval $(call docs-html-project,cowboy,Cowboy,https://github.com/ninenines/cowboy,2.21 2.20 2.19,2.21.0 2.20.0 2.19.0,true))
+$(eval $(call docs-html-project,cowlib,Cowlib,https://github.com/ninenines/cowlib,2.22 2.21 2.20,2.22.0 2.21.0 2.20.0,))
+$(eval $(call docs-html-project,gun,Gun,https://github.com/ninenines/gun,2.8 2.7 2.6,2.8.0 2.7.0 2.6.0,true))
+$(eval $(call docs-html-project,ranch,Ranch,https://github.com/ninenines/ranch,2.4 2.3 1.8,2.4.0 2.3.0 1.8.1,true))
 
 docs: $(docs-html-targets)

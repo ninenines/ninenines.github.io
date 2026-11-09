@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: Migrating from Ranch 2.3 to 2.4</title>
+
+    <link href="/css/99s.css?r=15" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+</head>
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <div id="logo"><a href="/" title="99s">99s</a></div>
+          </div>
+          <div class="span10">
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+                </ul>
+              </nav>
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" alt="Github"></a>
+                </li>
+                <li>
+                  <a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" alt="Email"></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+  </header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>Migrating from Ranch 2.3 to 2.4</span></h1>
+<p>Ranch 2.4 adds PROXY protocol controls and acceptor diagnostics, and fixes connection accounting, local socket cleanup, and PROXY header parsing.</p>
+<p>Ranch 2.4 is tested with Erlang/OTP 27.0 onward.</p>
+<h2 id="_features_added">Features added</h2>
+<ul><li>The <code>trusted_proxies</code> transport option limits which immediate peers may send a PROXY protocol header. Each entry is <code>{inet:ip4_address(), 0..32}</code> or <code>{inet:ip6_address(), 0..128}</code>. When the option is absent, any immediate peer may send a header. An empty list rejects every peer.
+</li>
+<li><code>ranch:remove_connection/2</code> drops the given pid when the process is under a <code>supervisor</code>.
+</li>
+<li>Optional transport callbacks <code>peercert/1</code> and <code>negotiated_protocol/1</code> were added. <code>ranch_ssl</code> implements them.
+</li>
+<li>PROXY protocol version 2 parses and builds the SSL TLV subtypes <code>group</code>, <code>sig_scheme</code>, and <code>client_cert</code>. <code>client_cert</code> carries the client certificate in ASN.1 DER form.
+</li>
+<li><code>ranch:trace_acceptors/1,2</code> samples the <code>{error, Reason}</code> values from <code>Transport:accept/2</code>.
+</li>
+</ul>
+<h2 id="_bugs_fixed">Bugs fixed</h2>
+<ul><li>Potential incompatibility: Before listening, and again from <code>ranch:stop_listener/1</code>, Ranch deletes a <code>{local, Path}</code> file only when it is a socket or FIFO. A regular file, directory, symlink, or device is left in place and must not already exist.
+</li>
+<li>Potential incompatibility: <code>ranch:child_spec/5</code> raises <code>{badarg, {bad_option, Key}}</code> when a transport option is invalid.
+</li>
+<li>Potential incompatibility: A PROXY protocol version 1 line longer than 107 bytes is rejected before it is decoded. This includes a TCP6 line whose addresses would otherwise parse.
+</li>
+<li>PROXY protocol version 2 reading and parsing was strenghtened.
+</li>
+<li><code>ranch:set_transport_options/2</code> left the stored <code>max_connections</code> limit unchanged. <code>ranch:get_max_connections/1</code> and a restarted connection supervisor now see the new value.
+</li>
+<li>A release upgrade now fails when an acceptor does not stop or restart using the Ranch-provided appup files.
+</li>
+</ul>
+
+<nav style="margin:1em 0">
+    <a style="float:left" href="/docs/en/ranch/2.4/guide/internals/">Internals</a>
+    <a style="float:right" href="/docs/en/ranch/2.4/guide/migrating_from_2.2/">Migrating from Ranch 2.2 to Ranch 2.3</a>
+</nav>
+
+</div>
+
+<div class="span3 sidecol">
+<h3>Ranch 2.4 User Guide</h3>
+<ul>
+    <li><a href="/docs/en/ranch/2.4/guide">User Guide</a></li>
+    <li><a href="/docs/en/ranch/2.4/manual">Function Reference</a></li>
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+    <li><a href="/docs/en/ranch/2.4/guide">2.4</a></li>
+    <li><a href="/docs/en/ranch/2.3/guide">2.3</a></li>
+    <li><a href="/docs/en/ranch/1.8/guide">1.8</a></li>
+</ul>
+
+<h3 id="_like_my_work__donate">Sponsor me!</h3>
+<p>Support my work on Cowboy, Ranch, Gun and Erlang.mk via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. The funds cover domain names and development tools.</p>
+</div>
+</div>
+</div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="span6">
+        <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+        <nav>
+          <ul>
+            <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="span6 credits">
+        <p><img src="/img/footer_logo.png"></p>
+        <p>Copyright &copy; Loïc Hoguin</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/custom.js"></script>
+</body>
+</html>

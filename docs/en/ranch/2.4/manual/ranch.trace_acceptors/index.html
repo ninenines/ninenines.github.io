@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Loïc Hoguin based on a design from (Soft10) Pol Cámara">
+
+    <title>Nine Nines: ranch:trace_acceptors(3)</title>
+
+    <link href="/css/99s.css?r=15" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/ico/apple-touch-icon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/ico/apple-touch-icon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="/img/ico/apple-touch-icon-57.png">
+</head>
+
+<body class="">
+  <header id="page-head">
+    <div id="topbar" class="container">
+        <div class="row">
+          <div class="span2">
+            <div id="logo"><a href="/" title="99s">99s</a></div>
+          </div>
+          <div class="span10">
+            <div id="side-header">
+              <nav>
+                <ul>
+                  <li><a title="Hear my thoughts" href="/articles">Articles</a></li>
+                  <li><a title="Watch my talks" href="/talks">Talks</a></li>
+                  <li class="active"><a title="Read the docs" href="/docs">Documentation</a></li>
+                </ul>
+              </nav>
+              <ul id="social">
+                <li>
+                  <a href="https://github.com/ninenines" title="Check my Github repositories"><img src="/img/ico_github.png" alt="Github"></a>
+                </li>
+                <li>
+                  <a title="Contact me" href="mailto:contact@ninenines.eu"><img src="/img/ico_mail.png" alt="Email"></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+  </header>
+
+<div id="contents" class="two_col">
+<div class="container">
+<div class="row">
+<div id="docs" class="span9 maincol">
+
+<h1 class="lined-header"><span>ranch:trace_acceptors(3)</span></h1>
+<h2 id="_name">Name</h2>
+<p>ranch:trace_acceptors - Sample accept error reasons</p>
+<h2 id="_description">Description</h2>
+<div class="listingblock"><div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">trace_acceptors</font></b>(<font color="#009900">Ref</font>)
+    <font color="#990000">-&gt;</font> <font color="#009900">Sample</font>
+
+<b><font color="#000000">trace_acceptors</font></b>(<font color="#009900">Ref</font>, <font color="#009900">Opts</font>)
+    <font color="#990000">-&gt;</font> <font color="#009900">Sample</font>
+
+<font color="#009900">Opts</font> <font color="#990000">::</font> #{
+    <font color="#0000FF">limit</font>   <font color="#990000">=&gt;</font> <b><font color="#000000">pos_integer</font></b>(),
+    <font color="#0000FF">timeout</font> <font color="#990000">=&gt;</font> <font color="#993399">0</font><font color="#990000">..</font><font color="#993399">4294967295</font>
+}
+
+<font color="#009900">Sample</font> <font color="#990000">::</font> #{
+    <font color="#FF6600">elapsed</font> <font color="#990000">:=</font> <font color="#009900">Microseconds</font> <font color="#990000">::</font> <b><font color="#000000">non_neg_integer</font></b>(),
+    <font color="#FF6600">errors</font>  <font color="#990000">:=</font> [{<font color="#009900">AcceptorPid</font> <font color="#990000">::</font> <b><font color="#000080">pid</font></b>(), <font color="#009900">Reason</font> <font color="#990000">::</font> <b><font color="#000000">term</font></b>()}]
+}</tt></pre>
+</div></div>
+<p>Sample the error reasons returned by <code>Transport:accept/2</code>.</p>
+<p>This function traces the acceptors for a short time and returns the raw <code>{error, Reason}</code> values, so a stuck listener can be identified from the shell.</p>
+<h2 id="_arguments">Arguments</h2>
+<dl><dt>Ref</dt>
+<dd><p>The listener name.</p>
+</dd>
+<dt>Opts</dt>
+<dd><p>A map of options. <code>limit</code> is the number of <code>{error, Reason}</code> results to collect (default 5). <code>timeout</code> is how long to trace, in milliseconds (default 1000).</p>
+</dd>
+</dl>
+<h2 id="_return_value">Return value</h2>
+<p>A map with the following keys:</p>
+<dl><dt>elapsed</dt>
+<dd><p>Time spent collecting, in microseconds, from the monotonic clock. A sample that ran reports at least 1. <code>0</code> means no acceptor was running. A few errors with a very small <code>elapsed</code> means the acceptor is returning immediately.</p>
+</dd>
+<dt>errors</dt>
+<dd><p><code>{AcceptorPid, Reason}</code> tuples, in the order the transport returned them. <code>Reason</code> is the raw second element of <code>{error, Reason}</code>. It may be an atom such as <code>econnaborted</code>, <code>einval</code> or <code>system_limit</code>, or a tuple such as <code>{create_accept_socket, emfile}</code>.</p>
+</dd>
+</dl>
+<p>An empty list with <code>elapsed</code> of 0 means no acceptor was running. The listener may be suspended. An empty list with a non-zero <code>elapsed</code> means the deadline expired with no accept error. The listener may be idle, or its acceptors may be waiting because <code>max_connections</code> was reached.</p>
+<h2 id="_changelog">Changelog</h2>
+<ul><li><strong>2.4</strong>: Function introduced.
+</li>
+</ul>
+<h2 id="_examples">Examples</h2>
+<div class="listingblock"><div class="title">Collect up to 5 accept errors</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:trace_acceptors</font></b>(<font color="#FF6600">example</font>)<font color="#990000">.</font></tt></pre>
+</div></div>
+<div class="listingblock"><div class="title">Collect 20 errors over 5 seconds</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000000">ranch:trace_acceptors</font></b>(<font color="#FF6600">example</font>, #{<font color="#0000FF">limit</font> <font color="#990000">=&gt;</font> <font color="#993399">20</font>, <font color="#0000FF">timeout</font> <font color="#990000">=&gt;</font> <font color="#993399">5000</font>})<font color="#990000">.</font></tt></pre>
+</div></div>
+<h2 id="_see_also">See also</h2>
+<p><a href="../ranch.info">ranch:info(3)</a>, <a href="../ranch.procs">ranch:procs(3)</a>, <a href="../ranch">ranch(3)</a></p>
+
+
+
+</div>
+
+<div class="span3 sidecol">
+<h3>Ranch 2.4 Function Reference</h3>
+<ul>
+    <li><a href="/docs/en/ranch/2.4/guide">User Guide</a></li>
+    <li><a href="/docs/en/ranch/2.4/manual">Function Reference</a></li>
+</ul>
+
+<h4 id="docs-nav">Navigation</h4>
+
+<h4>Version select</h4>
+<ul>
+    <li><a href="/docs/en/ranch/2.4/manual">2.4</a></li>
+    <li><a href="/docs/en/ranch/2.3/manual">2.3</a></li>
+    <li><a href="/docs/en/ranch/1.8/manual">1.8</a></li>
+</ul>
+
+<h3 id="_like_my_work__donate">Sponsor me!</h3>
+<p>Support my work on Cowboy, Ranch, Gun and Erlang.mk via <a href="https://github.com/sponsors/essen">GitHub Sponsors</a>. The funds cover domain names and development tools.</p>
+</div>
+</div>
+</div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="span6">
+        <p id="scroll-top"><a href="#">↑ Scroll to top</a></p>
+        <nav>
+          <ul>
+            <li><a href="mailto:contact@ninenines.eu" title="Contact me">Contact me</a></li><li><a href="https://github.com/ninenines/ninenines.github.io" title="Github repository">Contribute to this site</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="span6 credits">
+        <p><img src="/img/footer_logo.png"></p>
+        <p>Copyright &copy; Loïc Hoguin</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/custom.js"></script>
+</body>
+</html>
